@@ -2,6 +2,21 @@
 
 **Target time:** 16–18 hours
 
+
+<!-- AUTO_SPRINT_STATUS_START -->
+## Sprint Status
+
+| Metric | Status |
+|---|---:|
+| Sprint | Week 1 |
+| State | Not Started |
+| Completion | 0% |
+| Hours | 0 / 18 |
+| Completed Tasks | 0 |
+| Remaining Tasks | 0 |
+<!-- AUTO_SPRINT_STATUS_END -->
+
+
 ## Success Criteria
 - Significant progress through Google Course 5
 - DataCamp Introduction to SQL complete
@@ -162,3 +177,12 @@ Update `PROGRESS.md`.
 - [ ] Project README update
 - [ ] Three meaningful commits
 - [ ] Sprint retrospective
+
+## Daily Log
+
+Add one row after each study session.
+
+<!-- DAILY_LOG_START -->
+| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+|---|---:|---|---|---:|---|
+<!-- DAILY_LOG_END -->

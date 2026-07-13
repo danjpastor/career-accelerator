@@ -9,6 +9,22 @@ A 90-day, version-controlled career transition system documenting my move from V
 - Portfolio projects: 0 / 3 complete
 - Applications: 0
 
+
+<!-- AUTO_PROGRESS_START -->
+## Current Progress
+
+| Metric | Progress |
+|---|---:|
+| Current Sprint | Week 1 |
+| Week Completion | 0% |
+| Hours Completed | 0 / 18 |
+| Google Certificate | Course 5 of 9 |
+| SQL Problems | 0 / 100 |
+| Portfolio Projects | 0 / 3 |
+| Current Project | VFX Production Intelligence Dashboard |
+<!-- AUTO_PROGRESS_END -->
+
+
 ## Four Tracks
 1. Google Data Analytics Certificate
 2. DataCamp

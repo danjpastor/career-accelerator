@@ -8,6 +8,20 @@
 | Portfolio projects completed | 0 | 3 |
 | Applications submitted | 0 | 100+ |
 
+
+<!-- AUTO_SUMMARY_START -->
+## Automated Summary
+
+| Metric | Current |
+|---|---:|
+| Current week | 1 / 12 |
+| Week completion | 0% |
+| Hours this week | 0 / 18 |
+| Google course | 5 / 9 |
+| SQL problems | 0 / 100 |
+| Completed projects | 0 / 3 |
+<!-- AUTO_SUMMARY_END -->
+
 ## Weekly Log
 
 ### Week 1
