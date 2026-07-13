@@ -1,0 +1,11 @@
+# Power BI Notes
+- Power Query
+- Relationships
+- Star schemas
+- Measures vs calculated columns
+- DAX
+- Time intelligence
+- KPI design
+- Drill-through
+- Storytelling
+- Accessibility
