@@ -13,7 +13,7 @@
 | Completion | 0% |
 | Hours | 0 / 18 |
 | Completed Tasks | 0 |
-| Remaining Tasks | 0 |
+| Remaining Tasks | 16 |
 <!-- AUTO_SPRINT_STATUS_END -->
 
 
