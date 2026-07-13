@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+- Removed GitHub Actions dependency
+- Simplified progress automation to a local PowerShell workflow
+- Improved local updater validation and error messages
+- Rewrote automation and contribution instructions
+- Added local automation guidance to the main README
 
 ## 0.2.0
 - Added YAML-based progress metadata

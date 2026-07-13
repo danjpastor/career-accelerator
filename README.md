@@ -44,3 +44,15 @@ A 90-day, version-controlled career transition system documenting my move from V
 
 ## Guiding Principle
 Learn → Apply → Document → Present
+
+## Progress Automation
+
+Progress is updated locally with:
+
+```powershell
+.\update-progress.ps1
+```
+
+The updater recalculates weekly completion, study hours, SQL totals, and portfolio progress before changes are committed to GitHub.
+
+See [AUTOMATION.md](AUTOMATION.md) for the full workflow.
