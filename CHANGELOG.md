@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.0.0
+- Rebuilt the tracker as a desktop application
+- Added a consolidated progress dashboard
+- Added current-priority display
+- Added study-session logging and recent-session history
+- Added learning progress controls
+- Added portfolio milestone management
+- Added SQL practice file creation
+- Added weekly review workflow
+- Added Git status, commit, and push controls
+- Added a Windows launcher and desktop shortcut creator
+
+## 0.5.0
+- Added a Windows desktop GUI tracker
+- Added checklist editing through checkboxes
+- Added guided daily study logging
+- Added metadata editing
+- Added DataLemur solution-file creation
+- Added retrospective note entry
+- Added automatic dashboard refresh
+- Added a double-click Windows launcher
+
+## 0.4.0
+- Added an interactive local progress tracker
+- Added checklist task toggling
+- Added guided daily-log entry
+- Added DataLemur solution file creation
+- Added guided metadata updates
+- Added retrospective note entry
+- Added automatic dashboard refresh after updates
+
 ## 0.3.0
 - Removed GitHub Actions dependency
 - Simplified progress automation to a local PowerShell workflow

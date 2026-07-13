@@ -1,5 +1,17 @@
 # Data Analytics Career Accelerator
 
+## Desktop Application
+
+Launch the Career Accelerator app by double-clicking:
+
+```text
+Career Accelerator.bat
+```
+
+The application handles sprint tasks, study sessions, learning progress, portfolio milestones, SQL practice, weekly reviews, and Git commits from one interface.
+
+See [DESKTOP_APP_GUIDE.md](DESKTOP_APP_GUIDE.md).
+
 A 90-day, version-controlled career transition system documenting my move from VFX compositing supervision into data analytics.
 
 ## Current Status
@@ -44,6 +56,32 @@ A 90-day, version-controlled career transition system documenting my move from V
 
 ## Guiding Principle
 Learn → Apply → Document → Present
+
+
+
+## Desktop Tracker
+
+Double-click:
+
+```text
+launch-tracker.bat
+```
+
+The GUI lets you update sprint tasks, study logs, metadata, SQL practice files, and retrospective notes without editing Markdown by hand.
+
+See [GUI_TRACKER_GUIDE.md](GUI_TRACKER_GUIDE.md).
+
+## Interactive Tracker
+
+Run the local tracker:
+
+```powershell
+.\track-progress.ps1
+```
+
+It can check off sprint tasks, add study logs, create DataLemur solution files, update metadata, and refresh progress dashboards.
+
+See [TRACKER_GUIDE.md](TRACKER_GUIDE.md).
 
 ## Progress Automation
 

@@ -1,41 +1,28 @@
 # Quick Start
 
-## Begin a Study Session
+## Open the App
 
-Open the current sprint:
+Double-click:
 
 ```text
-weeks/week-01/README.md
+Career Accelerator.bat
 ```
 
-Complete the assigned tasks.
+## Daily Routine
 
-## Log Progress
+1. Review Dashboard.
+2. Review Today's Tasks.
+3. Complete your learning work.
+4. Use Study Session to log progress.
+5. Check off completed tasks.
+6. Use the Git tab to commit and push.
 
-- Change completed tasks from `[ ]` to `[x]`
-- Add one row to the daily log
-- Save completed SQL practice files in `resources/sql/datalemur/`
+## Weekly Routine
 
-## Update Dashboards
+On Sunday:
+1. Complete Weekly Review.
+2. Confirm project tasks.
+3. Update Google course/module if needed.
+4. Commit the completed sprint.
 
-Run:
-
-```powershell
-.\update-progress.ps1
-```
-
-## Commit Progress
-
-```powershell
-git add .
-git commit -m "progress: update current sprint"
-git push
-```
-
-## End the Week
-
-1. Complete the sprint retrospective.
-2. Update `PROGRESS.md` with wins and blockers.
-3. Change `program.current_week` in `progress-data.yml`.
-4. Run the updater.
-5. Commit and push.
+See [DESKTOP_APP_GUIDE.md](DESKTOP_APP_GUIDE.md) for details.
