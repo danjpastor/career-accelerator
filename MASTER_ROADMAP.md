@@ -1,57 +1,25 @@
-# 90-Day Master Roadmap
+# Career Accelerator — 90-Day Roadmap
 
-## Starting Point
-- 10+ years of VFX compositing experience
-- 5+ years of compositing supervision
-- Python scripting experience through the Nuke Python API
-- Existing Git and GitHub experience
-- Starting Course 5 of 9 in the Google Data Analytics Certificate
+This roadmap assumes the learner is beginning the Google Data Analytics
+Professional Certificate at **Course 1** with no prior certificate progress.
 
-## Time Commitment
-15–20 hours per week.
+## Month 1 — Foundations and Reliable Data
 
-## Week 1 — Build Momentum
-Continue Google Course 5, complete DataCamp Introduction to SQL, begin Intermediate SQL, solve six DataLemur problems, and define the VFX project charter and data model.
+- Weeks 1–2: Google Courses 1–2, SQL fundamentals, business questions
+- Weeks 3–4: Google Courses 3–4, data preparation, cleaning, and schema design
 
-## Week 2 — Working With Data
-Finish Course 5, begin Course 6, finish Intermediate SQL, begin Joining Data in SQL, practice joins and CASE, generate the VFX dataset, and create the SQL schema.
+## Month 2 — Analysis and Storytelling
 
-## Week 3 — Analytical SQL
-Continue Course 6, finish Joining Data in SQL, begin Data Manipulation in SQL, practice CTEs and window functions, and complete the main VFX SQL analysis.
+- Weeks 5–6: Google Course 5, analytical SQL, and Project 1 analysis
+- Weeks 7–8: Google Courses 6–7, Power BI, Python/pandas, and recommendations
 
-## Week 4 — First Dashboard
-Finish or substantially progress through Course 6, begin Power BI, and build the first VFX dashboard prototype.
+## Month 3 — Portfolio and Job Launch
 
-## Week 5 — Dashboard Development
-Begin Course 7, continue Power BI, and build executive and workload views for Project 1.
+- Week 9: Google Course 8 and publish Project 1
+- Week 10: Google Course 9, begin Project 2, and strengthen career evidence
+- Week 11: Complete Project 2, prepare Project 3, and practice interviews
+- Week 12: Polish the portfolio and begin targeted applications
 
-## Week 6 — Publish Project 1
-Continue Course 7, improve DAX and storytelling, and publish the VFX Production Intelligence Dashboard.
-
-## Week 7 — Begin Retail Analytics
-Begin Course 8, start Python and Pandas, and define the Retail Operations project.
-
-## Week 8 — Retail Analysis
-Continue Course 8, learn data cleaning and EDA, and build the Retail SQL analysis and dashboard prototype.
-
-## Week 9 — Publish Retail Project
-Finish or substantially progress through Course 8, study statistics, and publish Project 2.
-
-## Week 10 — Begin Movie Analytics
-Begin Course 9 or capstone work, begin Project 3, and start resume and LinkedIn refinement.
-
-## Week 11 — Complete Portfolio
-Complete the Google capstone, finish Project 3, and prepare project walkthroughs and interview stories.
-
-## Week 12 — Launch Job Search
-Polish all three projects, finalize resume, LinkedIn, and GitHub, and begin targeted applications and interview practice.
-
-## Day 90 Deliverables
-- Google Data Analytics Professional Certificate
-- Three consulting-style portfolio projects
-- 100+ SQL practice problems
-- Power BI experience
-- Python analytics experience
-- ATS-ready resume
-- Optimized LinkedIn
-- Active job search
+The application supports learners who are already ahead. Updating the current
+Google course automatically recognizes earlier course-specific roadmap tasks as
+completed without resetting SQL, portfolio, or study progress.

@@ -1,7 +1,11 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Career Accelerator v8.2.2
+title Career Accelerator v9.1.1
+
+if not exist "Career Accelerator.lnk" (
+    cscript //nologo "create-desktop-shortcut.vbs" /LocalOnly >nul 2>nul
+)
 
 where python >nul 2>nul
 if errorlevel 1 (

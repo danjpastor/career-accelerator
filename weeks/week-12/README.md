@@ -1,48 +1,60 @@
-# Week 12 Sprint — Launch the Job Search
+# Week 12 Sprint — Launch the Search
 
-## Objective
-Polish the portfolio, finalize career materials, and begin targeted applications.
+**Target time:** 15–20 hours
 
-## Monday
-- Review prior sprint
-- Confirm weekly priorities
-- Google coursework
+<!-- AUTO_SPRINT_STATUS_START -->
+## Sprint Status
 
-## Tuesday
-- DataCamp
-- DataLemur
-- Document solutions
+| Metric | Status |
+|---|---:|
+| Sprint | Week 12 |
+| State | Not Started |
+| Completion | 0% |
+| Hours | 0 / 18 |
+| Completed Tasks | 0 |
+| Remaining Tasks | 12 |
+<!-- AUTO_SPRINT_STATUS_END -->
 
-## Wednesday
-- Google coursework
-- Portfolio development
+## Weekly Outcomes
 
-## Thursday
-- DataCamp
-- DataLemur
-- Concept review
+### Google Certificate
+Review certificate notes and close remaining gaps
 
-## Friday
-- Portfolio analysis or documentation
+### Analytics Skills
+Mixed interview review and explanation practice
 
-## Saturday
-- Deep-work portfolio session
-- GitHub commits
+### Portfolio
+Polish all evidence and begin a consistent application cadence
 
-## Sunday
-- Sprint retrospective
-- Update `PROGRESS.md`
-- Adjust the next sprint
+## Recommended Rhythm
 
-## Deliverables
-- [ ] Google milestone
-- [ ] DataCamp milestone
-- [ ] SQL practice milestone
-- [ ] Portfolio milestone
-- [ ] Documentation updated
-- [ ] Progress tracker updated
-- [ ] Retrospective completed
+- **Learning:** Four focused sessions across the week
+- **SQL:** Two or three practice sessions with written explanations
+- **Portfolio:** Two evidence-producing work blocks
+- **Review:** One weekly retrospective and next-week setup
 
+## Checklist
+- [ ] Review notes from Google Courses 1–9
+- [ ] Complete a mixed timed SQL review
+- [ ] Practice explaining joins and window functions
+- [ ] Polish Project 1 and Project 2 repositories
+- [ ] Advance or outline Project 3
+- [ ] Finalize the data-analyst résumé
+- [ ] Finalize the LinkedIn profile
+- [ ] Prepare five STAR stories
+- [ ] Create a reusable application tracking workflow
+- [ ] Submit the first targeted applications
+- [ ] Schedule follow-up dates
+- [ ] Complete the 90-day retrospective
+
+## Daily Log
+
+Add one row after each study session.
+
+<!-- DAILY_LOG_START -->
+| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+|---|---:|---|---|---:|---|
+<!-- DAILY_LOG_END -->
 
 ## Database-Managed Checklist
 

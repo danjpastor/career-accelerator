@@ -2,12 +2,16 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from PySide6.QtCore import Qt, QRectF, QPointF, Signal
+from PySide6.QtCore import (
+    QEasingCurve, Property, QPropertyAnimation, QSequentialAnimationGroup,
+    Qt, QRectF, QPointF, Signal
+)
 from PySide6.QtGui import (
     QColor, QFont, QPainter, QPainterPath, QPen, QBrush, QLinearGradient
 )
 from PySide6.QtWidgets import (
-    QCheckBox, QFrame, QLabel, QHBoxLayout, QSizePolicy, QVBoxLayout, QWidget
+    QCheckBox, QFrame, QLabel, QHBoxLayout, QPushButton, QSizePolicy,
+    QVBoxLayout, QWidget
 )
 
 from career_app.theme import COLORS
@@ -47,8 +51,13 @@ class Ring(QWidget):
         self.value = 0
         self.subtitle = ""
         self.extra = ""
-        self.setMinimumSize(190, 122)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.setMinimumWidth(172)
+        self.setMinimumHeight(94)
+        self.setMaximumHeight(98)
+        self.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
 
     def set_value(self, value, subtitle="", extra=""):
         self.value = max(0, min(100, float(value)))
@@ -60,15 +69,25 @@ class Ring(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        ring_rect = QRectF(10, 13, 86, 86)
+        ring_rect = QRectF(8, 8, 76, 76)
 
         painter.setPen(
-            QPen(QColor(COLORS["border"]), 9.5, Qt.SolidLine, Qt.RoundCap)
+            QPen(
+                QColor(COLORS["border"]),
+                8.5,
+                Qt.SolidLine,
+                Qt.RoundCap,
+            )
         )
         painter.drawArc(ring_rect, 90 * 16, -360 * 16)
 
         painter.setPen(
-            QPen(self.color, 9.5, Qt.SolidLine, Qt.RoundCap)
+            QPen(
+                self.color,
+                8.5,
+                Qt.SolidLine,
+                Qt.RoundCap,
+            )
         )
         painter.drawArc(
             ring_rect,
@@ -77,32 +96,37 @@ class Ring(QWidget):
         )
 
         painter.setPen(QColor(COLORS["text"]))
-        painter.setFont(QFont("Segoe UI", 13, QFont.Bold))
+        painter.setFont(QFont("Segoe UI", 12, QFont.Bold))
         painter.drawText(
             ring_rect,
             Qt.AlignCenter,
             f"{self.value:.0f}%",
         )
 
-        text_left = 110
-        text_width = max(100, self.width() - text_left - 8)
+        text_left = 96
+        text_width = max(
+            88,
+            self.width() - text_left - 6,
+        )
 
-        painter.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        painter.setFont(
+            QFont("Segoe UI", 9, QFont.Bold)
+        )
         painter.drawText(
-            QRectF(text_left, 20, text_width, 22),
+            QRectF(text_left, 10, text_width, 20),
             Qt.AlignLeft | Qt.AlignVCenter,
             self.title,
         )
 
         painter.setPen(QColor(COLORS["muted"]))
-        painter.setFont(QFont("Segoe UI", 9))
+        painter.setFont(QFont("Segoe UI", 8.5))
         painter.drawText(
-            QRectF(text_left, 49, text_width, 22),
+            QRectF(text_left, 38, text_width, 19),
             Qt.AlignLeft | Qt.AlignVCenter,
             self.subtitle,
         )
         painter.drawText(
-            QRectF(text_left, 76, text_width, 22),
+            QRectF(text_left, 64, text_width, 19),
             Qt.AlignLeft | Qt.AlignVCenter,
             self.extra,
         )
@@ -151,51 +175,127 @@ class CircularTimer(QWidget):
     def __init__(self):
         super().__init__()
         self.text = "00:00:00"
-        self.caption = "Ready to focus?"
-        self.progress = 0.18
-        self.setMinimumSize(210, 210)
-        self.setMaximumHeight(222)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.caption = "Ready to focus • 0 / 60 min"
+        self.progress = 0.0
+        self._content_scale = 1.0
+        self._pulse_group = None
+        self.setFixedSize(138, 138)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+    def set_display(self, text, caption, progress):
+        self.text = text
+        self.caption = caption
+        self.progress = max(0.0, min(1.0, float(progress)))
+        self.update()
 
     def set_text(self, text):
         self.text = text
         self.update()
 
+    def set_caption(self, caption):
+        self.caption = caption
+        self.update()
+
+    def set_progress(self, progress):
+        self.progress = max(0.0, min(1.0, float(progress)))
+        self.update()
+
+    def _get_content_scale(self):
+        return self._content_scale
+
+    def _set_content_scale(self, value):
+        self._content_scale = float(value)
+        self.update()
+
+    contentScale = Property(
+        float,
+        _get_content_scale,
+        _set_content_scale,
+    )
+
+    def pulse(self):
+        if self._pulse_group is not None:
+            self._pulse_group.stop()
+            self._pulse_group.deleteLater()
+
+        group = QSequentialAnimationGroup(self)
+
+        grow = QPropertyAnimation(self, b"contentScale", group)
+        grow.setDuration(95)
+        grow.setStartValue(self._content_scale)
+        grow.setEndValue(1.15)
+        grow.setEasingCurve(QEasingCurve.OutCubic)
+
+        shrink = QPropertyAnimation(self, b"contentScale", group)
+        shrink.setDuration(90)
+        shrink.setStartValue(1.15)
+        shrink.setEndValue(0.94)
+        shrink.setEasingCurve(QEasingCurve.InOutCubic)
+
+        settle = QPropertyAnimation(self, b"contentScale", group)
+        settle.setDuration(125)
+        settle.setStartValue(0.94)
+        settle.setEndValue(1.0)
+        settle.setEasingCurve(QEasingCurve.OutBack)
+
+        group.addAnimation(grow)
+        group.addAnimation(shrink)
+        group.addAnimation(settle)
+        self._pulse_group = group
+        group.start()
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        size = min(self.width(), self.height()) - 24
-        x = (self.width() - size) / 2
-        y = 4
-        rect = QRectF(x, y, size, size)
+        rect = QRectF(8, 4, 122, 122)
+        progress_color = QColor(
+            COLORS["green"]
+            if self.progress >= 1.0
+            else COLORS["purple"]
+        )
 
         painter.setPen(
-            QPen(QColor("#493777"), 13, Qt.SolidLine, Qt.RoundCap)
+            QPen(
+                QColor("#493777"),
+                10,
+                Qt.SolidLine,
+                Qt.RoundCap,
+            )
         )
         painter.drawArc(rect, 90 * 16, -360 * 16)
 
-        painter.setPen(
-            QPen(QColor(COLORS["purple"]), 13, Qt.SolidLine, Qt.RoundCap)
-        )
-        painter.drawArc(
-            rect,
-            90 * 16,
-            int(-360 * 16 * self.progress),
-        )
+        if self.progress > 0:
+            painter.setPen(
+                QPen(
+                    progress_color,
+                    10,
+                    Qt.SolidLine,
+                    Qt.RoundCap,
+                )
+            )
+            painter.drawArc(
+                rect,
+                90 * 16,
+                int(-360 * 16 * self.progress),
+            )
 
         painter.setPen(QColor(COLORS["text"]))
-        painter.setFont(QFont("Segoe UI", 20, QFont.Medium))
+        time_font = QFont("Segoe UI", 16, QFont.Medium)
+        time_font.setPointSizeF(16 * self._content_scale)
+        painter.setFont(time_font)
         painter.drawText(
-            rect.adjusted(0, -10, 0, 0),
+            rect.adjusted(0, -7, 0, 0),
             Qt.AlignCenter,
             self.text,
         )
 
         painter.setPen(QColor(COLORS["muted"]))
-        painter.setFont(QFont("Segoe UI", 9))
+        caption_font = QFont("Segoe UI", 8)
+        caption_font.setPointSizeF(8 * self._content_scale)
+        painter.setFont(caption_font)
         painter.drawText(
-            rect.adjusted(0, 48, 0, 0),
+            rect.adjusted(-8, 33, 8, 0),
             Qt.AlignCenter,
             self.caption,
         )
@@ -208,10 +308,10 @@ class AreaChart(QWidget):
         self._points = []
         self._hover_index = None
         self.setMouseTracking(True)
-        self.setMinimumHeight(235)
+        self.setMinimumHeight(175)
 
     def set_values(self, values):
-        self.values = values[-14:]
+        self.values = list(values)
         self._hover_index = None
         self.update()
 
@@ -403,7 +503,7 @@ class BadgeCard(QFrame):
     def __init__(self, icon, title, description, accent):
         super().__init__()
         self.setObjectName("SoftPanel")
-        self.setMinimumHeight(160)
+        self.setMinimumHeight(142)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setStyleSheet(
             f"QFrame#SoftPanel{{"
@@ -480,10 +580,9 @@ class SectionHeader(QWidget):
 
         self.action_button = None
         if action_text:
-            self.action_button = QLabel(action_text)
-            self.action_button.setStyleSheet(
-                f"color:{COLORS['blue']};font-weight:700;"
-            )
+            self.action_button = QPushButton(action_text)
+            self.action_button.setObjectName("Link")
+            self.action_button.setCursor(Qt.PointingHandCursor)
             layout.addWidget(self.action_button)
 
 
@@ -577,71 +676,145 @@ class TaskRow(QWidget):
         source,
         checked=False,
         status_text="",
+        category_text="",
+        category_color=None,
         on_toggle=None,
     ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setMinimumHeight(39)
+        self.setMaximumHeight(41)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 8, 0, 8)
-        layout.setSpacing(10)
+        layout.setContentsMargins(0, 3, 0, 3)
+        layout.setSpacing(9)
 
         self.checkbox = VisibleCheckBox(checked=checked)
         if on_toggle is not None:
             self.checkbox.stateChanged.connect(on_toggle)
-        layout.addWidget(self.checkbox, 0, Qt.AlignTop)
+        layout.addWidget(
+            self.checkbox,
+            0,
+            Qt.AlignVCenter,
+        )
 
         text = QVBoxLayout()
-        text.setSpacing(2)
+        text.setContentsMargins(0, 0, 0, 0)
+        text.setSpacing(1)
 
-        title_label = QLabel(title)
-        title_label.setWordWrap(True)
+        self.title_label = QLabel(title)
+        title_label = self.title_label
+        title_label.setWordWrap(False)
         title_label.setStyleSheet(
             "font-weight:600;background:transparent;border:none;"
         )
+        title_label.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        title_label.setMinimumHeight(17)
+        title_label.setMaximumHeight(18)
+        title_label.setToolTip(title)
         text.addWidget(title_label)
 
-        source_label = QLabel(source)
-        source_label.setObjectName("Muted")
+        self.source_label = QLabel(source)
+        source_label = self.source_label
+        source_label.setObjectName("TaskSource")
         source_label.setStyleSheet("font-size:8.7pt;")
+        source_label.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        source_label.setMinimumHeight(15)
+        source_label.setMaximumHeight(16)
+        source_label.setToolTip(source)
         text.addWidget(source_label)
 
         layout.addLayout(text, 1)
 
-        if status_text:
-            status = QLabel(status_text)
-            status.setStyleSheet(
-                f"color:{COLORS['green']};font-weight:700;"
+        metadata_text = status_text or category_text
+        if metadata_text:
+            self.metadata_label = QLabel(
+                metadata_text
             )
-            layout.addWidget(status)
+            metadata = self.metadata_label
+            metadata.setObjectName("TaskCategory")
+            metadata.setFixedWidth(78)
+            metadata.setAlignment(
+                Qt.AlignRight | Qt.AlignVCenter
+            )
+            metadata.setToolTip(metadata_text)
+
+            if status_text:
+                metadata.setStyleSheet(
+                    f"color:{COLORS['green']};"
+                    "font-size:8.7pt;font-weight:700;"
+                    "background:transparent;border:none;"
+                )
+            else:
+                accent = (
+                    category_color
+                    or COLORS["muted"]
+                )
+                metadata.setStyleSheet(
+                    f"color:{accent};"
+                    "font-size:8.7pt;font-weight:700;"
+                    "background:transparent;border:none;"
+                )
+
+            layout.addWidget(
+                metadata,
+                0,
+                Qt.AlignRight | Qt.AlignVCenter,
+            )
 
 
 class FocusRow(QWidget):
     def __init__(self, emoji, title, detail, duration, accent):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setMinimumHeight(38)
+        self.setMaximumHeight(40)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 8, 0, 8)
-        layout.setSpacing(10)
+        layout.setContentsMargins(0, 3, 0, 3)
+        layout.setSpacing(9)
 
         icon = QLabel(emoji)
-        icon.setStyleSheet("font-size:19pt;")
-        icon.setFixedWidth(36)
-        layout.addWidget(icon)
+        icon.setStyleSheet("font-size:18pt;")
+        icon.setFixedWidth(34)
+        icon.setAlignment(Qt.AlignCenter)
+        layout.addWidget(icon, 0, Qt.AlignVCenter)
 
         text = QVBoxLayout()
-        text.setSpacing(2)
+        text.setContentsMargins(0, 0, 0, 0)
+        text.setSpacing(1)
 
         title_label = QLabel(title)
         title_label.setStyleSheet(
             f"font-weight:700;color:{accent};"
         )
+        title_label.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        title_label.setMinimumHeight(17)
+        title_label.setMaximumHeight(18)
+        title_label.setToolTip(title)
         text.addWidget(title_label)
 
         detail_label = QLabel(detail)
         detail_label.setObjectName("Muted")
-        detail_label.setWordWrap(True)
+        detail_label.setWordWrap(False)
+        detail_label.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        detail_label.setMinimumHeight(16)
+        detail_label.setMaximumHeight(17)
+        detail_label.setToolTip(detail)
         text.addWidget(detail_label)
 
         layout.addLayout(text, 1)
@@ -649,6 +822,10 @@ class FocusRow(QWidget):
         duration_label = QLabel(duration)
         duration_label.setObjectName("Muted")
         duration_label.setStyleSheet("font-weight:700;")
+        duration_label.setFixedWidth(42)
+        duration_label.setAlignment(
+            Qt.AlignRight | Qt.AlignVCenter
+        )
         layout.addWidget(duration_label)
 
 
@@ -695,7 +872,7 @@ class FooterMetricBox(QFrame):
     def __init__(self, emoji, label, value=""):
         super().__init__()
         self.setObjectName("SoftPanel")
-        self.setMinimumHeight(58)
+        self.setMinimumHeight(50)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(12, 9, 12, 9)
@@ -741,10 +918,16 @@ class MiniSparkline(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        if not self.values:
-            values = [0.2, 0.35, 0.25, 0.5, 0.45, 0.7, 0.55]
-        else:
-            values = self.values
+        values = self.values
+
+        if not values:
+            painter.setPen(QColor(COLORS["muted"]))
+            painter.drawText(
+                self.rect(),
+                Qt.AlignCenter,
+                "No data",
+            )
+            return
 
         minimum = min(values)
         maximum = max(values)

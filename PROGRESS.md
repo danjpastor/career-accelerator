@@ -1,69 +1,15 @@
-# Progress Tracker
+# Progress
 
-| Metric | Current | Target |
-|---|---:|---:|
-| Weeks completed | 0 | 12 |
-| Google courses completed | 4 | 9 |
-| SQL problems solved | 0 | 100+ |
-| Portfolio projects completed | 0 | 3 |
-| Applications submitted | 0 | 100+ |
+Progress is managed by the Career Accelerator application and its local SQLite
+database.
 
+The starter roadmap begins at:
 
-<!-- AUTO_SUMMARY_START -->
-## Automated Summary
+- Week 1 of 12
+- Google Course 1, Module 1
+- Portfolio Project 1
+- 0 logged study hours
+- 0 completed SQL problems
+- 0 applications
 
-| Metric | Current |
-|---|---:|
-| Current week | 1 / 12 |
-| Week completion | 0% |
-| Hours this week | 0 / 18 |
-| Google course | 5 / 9 |
-| SQL problems | 0 / 100 |
-| Completed projects | 0 / 3 |
-<!-- AUTO_SUMMARY_END -->
-
-## Weekly Log
-
-### Week 1
-- Status: Not started
-- Hours:
-- Google progress:
-- DataCamp progress:
-- DataLemur completed:
-- Portfolio milestone:
-- Wins:
-- Blockers:
-- Week 2 adjustments:
-
-### Week 2
-- Status: Not started
-
-### Week 3
-- Status: Not started
-
-### Week 4
-- Status: Not started
-
-### Week 5
-- Status: Not started
-
-### Week 6
-- Status: Not started
-
-### Week 7
-- Status: Not started
-
-### Week 8
-- Status: Not started
-
-### Week 9
-- Status: Not started
-
-### Week 10
-- Status: Not started
-
-### Week 11
-- Status: Not started
-
-### Week 12
-- Status: Not started
+Use **Settings → Reset Progress** to return the application to this state.

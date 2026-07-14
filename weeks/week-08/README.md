@@ -1,48 +1,60 @@
-# Week 8 Sprint — Retail Analysis
+# Week 8 Sprint — Act on Insights
 
-## Objective
-Clean, analyze, and visualize the retail dataset.
+**Target time:** 15–20 hours
 
-## Monday
-- Review prior sprint
-- Confirm weekly priorities
-- Google coursework
+<!-- AUTO_SPRINT_STATUS_START -->
+## Sprint Status
 
-## Tuesday
-- DataCamp
-- DataLemur
-- Document solutions
+| Metric | Status |
+|---|---:|
+| Sprint | Week 8 |
+| State | Not Started |
+| Completion | 0% |
+| Hours | 0 / 18 |
+| Completed Tasks | 0 |
+| Remaining Tasks | 12 |
+<!-- AUTO_SPRINT_STATUS_END -->
 
-## Wednesday
-- Google coursework
-- Portfolio development
+## Weekly Outcomes
 
-## Thursday
-- DataCamp
-- DataLemur
-- Concept review
+### Google Certificate
+Finish Google Course 6 and begin Course 7
 
-## Friday
-- Portfolio analysis or documentation
+### Analytics Skills
+Mixed review plus analytics-focused Python and pandas
 
-## Saturday
-- Deep-work portfolio session
-- GitHub commits
+### Portfolio
+Refine the dashboard and write actionable recommendations
 
-## Sunday
-- Sprint retrospective
-- Update `PROGRESS.md`
-- Adjust the next sprint
+## Recommended Rhythm
 
-## Deliverables
-- [ ] Google milestone
-- [ ] DataCamp milestone
-- [ ] SQL practice milestone
-- [ ] Portfolio milestone
-- [ ] Documentation updated
-- [ ] Progress tracker updated
-- [ ] Retrospective completed
+- **Learning:** Four focused sessions across the week
+- **SQL:** Two or three practice sessions with written explanations
+- **Portfolio:** Two evidence-producing work blocks
+- **Review:** One weekly retrospective and next-week setup
 
+## Checklist
+- [ ] [Google Course 6] Finish the remaining course modules
+- [ ] [Google Course 7] Begin the first module
+- [ ] Complete a Python and pandas fundamentals lesson
+- [ ] Load and inspect a dataset with pandas
+- [ ] Solve Odd and Even Measurements
+- [ ] Refine dashboard layout and visual hierarchy
+- [ ] Add a recommendations section
+- [ ] Connect each recommendation to evidence
+- [ ] Write the executive narrative
+- [ ] Review the project with a stakeholder mindset
+- [ ] Commit dashboard and narrative improvements
+- [ ] Complete the Week 8 retrospective
+
+## Daily Log
+
+Add one row after each study session.
+
+<!-- DAILY_LOG_START -->
+| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+|---|---:|---|---|---:|---|
+<!-- DAILY_LOG_END -->
 
 ## Database-Managed Checklist
 

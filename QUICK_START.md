@@ -1,39 +1,18 @@
 # Quick Start
 
-## Start the Application
+1. Run `Career Accelerator.bat`.
+2. Use the Dashboard to view Today’s Focus and Next Tasks.
+3. Update your current Google course and module on the Learning page.
+4. Log study time through Study Session.
+5. Complete roadmap, SQL, and portfolio milestones as you work.
+6. Use Weekly Review to evaluate progress.
+7. Create backups regularly from Settings.
 
-Double-click:
+## Starting From Scratch
 
-```text
-Career Accelerator.bat
-```
+The roadmap assumes Google Course 1, Module 1. To prepare a copy for another
+learner, open **Settings → Reset Progress** and complete all three confirmations.
 
-The first launch may take a moment while the local Python environment
-and dependencies are prepared.
-
-## Daily Workflow
-
-1. Review the Dashboard and Today's Focus.
-2. Open Adaptive Planner when your available time or energy changes.
-3. Start the Study Session timer.
-4. Complete and check off Next Tasks.
-5. Log learning, SQL, and portfolio progress.
-6. Review Mission Control and job-readiness recommendations.
-
-## Weekly Workflow
-
-1. Complete the Weekly Summary.
-2. Review study hours, completed tasks, and SQL progress.
-3. Update portfolio milestones and learning progress.
-4. Publish the progress snapshot.
-5. Review, commit, and push the changes from Publish & Git.
-
-## Local Data
-
-Application progress is stored in:
-
-```text
-data/career_accelerator.db
-```
-
-Use `Ctrl+S` or Settings to create a backup.
+Reset Progress creates a safety backup, clears all tracked progress, sets the
+start date to the reset date, and rebuilds the starter roadmap. Application
+preferences and existing backup files are preserved.

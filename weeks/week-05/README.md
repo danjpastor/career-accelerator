@@ -1,48 +1,60 @@
-# Week 5 Sprint — Dashboard Development
+# Week 5 Sprint — Analyze With Confidence
 
-## Objective
-Build executive and operational views for Project 1.
+**Target time:** 15–20 hours
 
-## Monday
-- Review prior sprint
-- Confirm weekly priorities
-- Google coursework
+<!-- AUTO_SPRINT_STATUS_START -->
+## Sprint Status
 
-## Tuesday
-- DataCamp
-- DataLemur
-- Document solutions
+| Metric | Status |
+|---|---:|
+| Sprint | Week 5 |
+| State | Not Started |
+| Completion | 0% |
+| Hours | 0 / 18 |
+| Completed Tasks | 0 |
+| Remaining Tasks | 12 |
+<!-- AUTO_SPRINT_STATUS_END -->
 
-## Wednesday
-- Google coursework
-- Portfolio development
+## Weekly Outcomes
 
-## Thursday
-- DataCamp
-- DataLemur
-- Concept review
+### Google Certificate
+Finish Google Course 4 and begin Course 5
 
-## Friday
-- Portfolio analysis or documentation
+### Analytics Skills
+Aggregations, CASE expressions, and KPI calculations
 
-## Saturday
-- Deep-work portfolio session
-- GitHub commits
+### Portfolio
+Create the SQL schema and begin the core analysis
 
-## Sunday
-- Sprint retrospective
-- Update `PROGRESS.md`
-- Adjust the next sprint
+## Recommended Rhythm
 
-## Deliverables
-- [ ] Google milestone
-- [ ] DataCamp milestone
-- [ ] SQL practice milestone
-- [ ] Portfolio milestone
-- [ ] Documentation updated
-- [ ] Progress tracker updated
-- [ ] Retrospective completed
+- **Learning:** Four focused sessions across the week
+- **SQL:** Two or three practice sessions with written explanations
+- **Portfolio:** Two evidence-producing work blocks
+- **Review:** One weekly retrospective and next-week setup
 
+## Checklist
+- [ ] [Google Course 4] Finish the remaining course modules
+- [ ] [Google Course 5] Begin the first module
+- [ ] Practice business-metric calculations in SQL
+- [ ] Practice CASE expressions and grouped summaries
+- [ ] Solve Signup Activation Rate
+- [ ] Create the Project 1 SQL schema
+- [ ] Load or connect the analysis dataset
+- [ ] Write the first five analytical queries
+- [ ] Validate query results against source totals
+- [ ] Document early findings and open questions
+- [ ] Commit the schema and first analysis queries
+- [ ] Complete the Week 5 retrospective
+
+## Daily Log
+
+Add one row after each study session.
+
+<!-- DAILY_LOG_START -->
+| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+|---|---:|---|---|---:|---|
+<!-- DAILY_LOG_END -->
 
 ## Database-Managed Checklist
 

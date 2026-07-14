@@ -80,6 +80,19 @@ def stylesheet():
     }}
     QPushButton:hover {{
         background: {c['panel_hover']};
+        border: 1px solid {c['purple_soft']};
+        color: white;
+    }}
+    QPushButton:pressed {{
+        background: #0d1728;
+        border: 1px solid {c['purple']};
+        padding-top: 11px;
+        padding-bottom: 7px;
+    }}
+    QPushButton:disabled {{
+        background: #0d1625;
+        border: 1px solid #1b293d;
+        color: #66758c;
     }}
     QPushButton#Primary {{
         background: {c['purple']};
@@ -90,6 +103,13 @@ def stylesheet():
     }}
     QPushButton#Primary:hover {{
         background: #9d75f7;
+        border: 1px solid #c4b0ff;
+    }}
+    QPushButton#Primary:pressed {{
+        background: #7444e8;
+        border: 1px solid #d0c0ff;
+        padding-top: 13px;
+        padding-bottom: 9px;
     }}
     QPushButton#Nav {{
         text-align: left;
@@ -100,14 +120,27 @@ def stylesheet():
         border-radius: 9px;
     }}
     QPushButton#Nav:hover {{
-        background: #14233b;
+        background: #1a2d4b;
         color: white;
+        border-left: 3px solid {c['purple_soft']};
+    }}
+    QPushButton#Nav:pressed {{
+        background: #101d32;
+        color: white;
+        border-left: 3px solid {c['purple']};
+        padding-top: 15px;
+        padding-bottom: 11px;
     }}
     QPushButton#Nav:checked {{
         background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
                     stop:0 #563c9f, stop:1 #47307f);
         color: white;
         border-left: 3px solid #a98bff;
+    }}
+    QPushButton#Nav:checked:hover {{
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 #6549b4, stop:1 #52378f);
+        border-left: 3px solid #c4b0ff;
     }}
     QLineEdit, QTextEdit, QComboBox, QListWidget, QTableWidget, QSpinBox {{
         background: {c['panel_alt']};
@@ -177,13 +210,56 @@ def stylesheet():
         font-weight: 600;
         padding: 9px 12px;
     }}
+    QPushButton#Secondary:hover {{
+        background: #1b2d4b;
+        border: 1px solid {c['purple_soft']};
+        color: white;
+    }}
+    QPushButton#Secondary:pressed {{
+        background: #0d1728;
+        border: 1px solid {c['purple']};
+        padding-top: 11px;
+        padding-bottom: 7px;
+    }}
     QPushButton#Link {{
         background: transparent;
-        border: none;
+        border: 1px solid transparent;
         color: {c['blue']};
         font-weight: 700;
         padding: 5px;
     }}
+    QPushButton#Link:hover {{
+        background: #14233b;
+        border: 1px solid {c['border']};
+        color: #86b1ff;
+    }}
+    QPushButton#Link:pressed {{
+        background: #0d1728;
+        border: 1px solid {c['purple_soft']};
+        color: white;
+        padding-top: 7px;
+        padding-bottom: 3px;
+    }}
+
+    QPushButton#Danger {{
+        background: #7f1d2d;
+        border: 1px solid #c74257;
+        color: white;
+        font-weight: 700;
+        padding: 10px 13px;
+    }}
+    QPushButton#Danger:hover {{
+        background: #a4293e;
+        border: 1px solid #ff7187;
+        color: white;
+    }}
+    QPushButton#Danger:pressed {{
+        background: #5f1421;
+        border: 1px solid #ff7187;
+        padding-top: 12px;
+        padding-bottom: 8px;
+    }}
+
     QFrame#SidebarCard QLabel#Tiny {{
         color: {c['muted']};
         font-weight: 700;

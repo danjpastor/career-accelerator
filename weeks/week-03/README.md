@@ -1,48 +1,60 @@
-# Week 3 Sprint — Analytical SQL
+# Week 3 Sprint — Prepare Reliable Data
 
-## Objective
-Continue Course 6, practice CTEs and window functions, and complete the VFX SQL analysis.
+**Target time:** 15–20 hours
 
-## Monday
-- Review prior sprint
-- Confirm weekly priorities
-- Google coursework
+<!-- AUTO_SPRINT_STATUS_START -->
+## Sprint Status
 
-## Tuesday
-- DataCamp
-- DataLemur
-- Document solutions
+| Metric | Status |
+|---|---:|
+| Sprint | Week 3 |
+| State | Not Started |
+| Completion | 0% |
+| Hours | 0 / 18 |
+| Completed Tasks | 0 |
+| Remaining Tasks | 12 |
+<!-- AUTO_SPRINT_STATUS_END -->
 
-## Wednesday
-- Google coursework
-- Portfolio development
+## Weekly Outcomes
 
-## Thursday
-- DataCamp
-- DataLemur
-- Concept review
+### Google Certificate
+Finish Google Course 2 and begin Course 3
 
-## Friday
-- Portfolio analysis or documentation
+### Analytics Skills
+Data exploration, spreadsheet analysis, and duplicate checks
 
-## Saturday
-- Deep-work portfolio session
-- GitHub commits
+### Portfolio
+Acquire or generate the dataset and start the data dictionary
 
-## Sunday
-- Sprint retrospective
-- Update `PROGRESS.md`
-- Adjust the next sprint
+## Recommended Rhythm
 
-## Deliverables
-- [ ] Google milestone
-- [ ] DataCamp milestone
-- [ ] SQL practice milestone
-- [ ] Portfolio milestone
-- [ ] Documentation updated
-- [ ] Progress tracker updated
-- [ ] Retrospective completed
+- **Learning:** Four focused sessions across the week
+- **SQL:** Two or three practice sessions with written explanations
+- **Portfolio:** Two evidence-producing work blocks
+- **Review:** One weekly retrospective and next-week setup
 
+## Checklist
+- [ ] [Google Course 2] Finish the remaining course modules
+- [ ] [Google Course 3] Begin the first module
+- [ ] Practice spreadsheet sorting, filtering, and formulas
+- [ ] Solve Duplicate Job Listings
+- [ ] Solve Teams Power Users
+- [ ] Select or generate the Project 1 dataset
+- [ ] Document dataset provenance and limitations
+- [ ] Create the first data dictionary draft
+- [ ] Identify missing, duplicate, and inconsistent values
+- [ ] Define project scope and exclusions
+- [ ] Commit the dataset and dictionary structure
+- [ ] Complete the Week 3 retrospective
+
+## Daily Log
+
+Add one row after each study session.
+
+<!-- DAILY_LOG_START -->
+| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+|---|---:|---|---|---:|---|
+<!-- DAILY_LOG_END -->
 
 ## Database-Managed Checklist
 

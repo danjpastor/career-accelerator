@@ -1,48 +1,60 @@
-# Week 11 Sprint — Complete the Portfolio
+# Week 11 Sprint — Portfolio Depth
 
-## Objective
-Finish Project 3 and prepare project walkthroughs.
+**Target time:** 15–20 hours
 
-## Monday
-- Review prior sprint
-- Confirm weekly priorities
-- Google coursework
+<!-- AUTO_SPRINT_STATUS_START -->
+## Sprint Status
 
-## Tuesday
-- DataCamp
-- DataLemur
-- Document solutions
+| Metric | Status |
+|---|---:|
+| Sprint | Week 11 |
+| State | Not Started |
+| Completion | 0% |
+| Hours | 0 / 18 |
+| Completed Tasks | 0 |
+| Remaining Tasks | 12 |
+<!-- AUTO_SPRINT_STATUS_END -->
 
-## Wednesday
-- Google coursework
-- Portfolio development
+## Weekly Outcomes
 
-## Thursday
-- DataCamp
-- DataLemur
-- Concept review
+### Google Certificate
+Complete Google Course 9 and the certificate
 
-## Friday
-- Portfolio analysis or documentation
+### Analytics Skills
+Interview SQL, query review, and time-limited practice
 
-## Saturday
-- Deep-work portfolio session
-- GitHub commits
+### Portfolio
+Complete Project 2 and prepare Project 3
 
-## Sunday
-- Sprint retrospective
-- Update `PROGRESS.md`
-- Adjust the next sprint
+## Recommended Rhythm
 
-## Deliverables
-- [ ] Google milestone
-- [ ] DataCamp milestone
-- [ ] SQL practice milestone
-- [ ] Portfolio milestone
-- [ ] Documentation updated
-- [ ] Progress tracker updated
-- [ ] Retrospective completed
+- **Learning:** Four focused sessions across the week
+- **SQL:** Two or three practice sessions with written explanations
+- **Portfolio:** Two evidence-producing work blocks
+- **Review:** One weekly retrospective and next-week setup
 
+## Checklist
+- [ ] [Google Course 9] Complete the remaining course modules
+- [ ] [Google Course 9] Record certificate completion
+- [ ] Solve Second Day Confirmation
+- [ ] Complete one timed SQL practice set
+- [ ] Complete the Project 2 analysis
+- [ ] Build and document the Project 2 dashboard
+- [ ] Publish Project 2 to GitHub
+- [ ] Draft a Project 2 résumé bullet
+- [ ] Choose the Project 3 problem or dataset
+- [ ] Practice two project interview answers
+- [ ] Review the portfolio for missing evidence
+- [ ] Complete the Week 11 retrospective
+
+## Daily Log
+
+Add one row after each study session.
+
+<!-- DAILY_LOG_START -->
+| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+|---|---:|---|---|---:|---|
+<!-- DAILY_LOG_END -->
 
 ## Database-Managed Checklist
 

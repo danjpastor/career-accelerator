@@ -1,48 +1,60 @@
-# Week 2 Sprint — Working With Data
+# Week 2 Sprint — Ask Better Questions
 
-## Objective
-Finish Course 5, begin Course 6, strengthen joins and CASE, and generate the VFX dataset.
+**Target time:** 15–20 hours
 
-## Monday
-- Review prior sprint
-- Confirm weekly priorities
-- Google coursework
+<!-- AUTO_SPRINT_STATUS_START -->
+## Sprint Status
 
-## Tuesday
-- DataCamp
-- DataLemur
-- Document solutions
+| Metric | Status |
+|---|---:|
+| Sprint | Week 2 |
+| State | Not Started |
+| Completion | 0% |
+| Hours | 0 / 18 |
+| Completed Tasks | 0 |
+| Remaining Tasks | 12 |
+<!-- AUTO_SPRINT_STATUS_END -->
 
-## Wednesday
-- Google coursework
-- Portfolio development
+## Weekly Outcomes
 
-## Thursday
-- DataCamp
-- DataLemur
-- Concept review
+### Google Certificate
+Finish Google Course 1 and begin Course 2
 
-## Friday
-- Portfolio analysis or documentation
+### Analytics Skills
+Filtering, aggregation, GROUP BY, and HAVING
 
-## Saturday
-- Deep-work portfolio session
-- GitHub commits
+### Portfolio
+Draft the Project 1 charter and stakeholder questions
 
-## Sunday
-- Sprint retrospective
-- Update `PROGRESS.md`
-- Adjust the next sprint
+## Recommended Rhythm
 
-## Deliverables
-- [ ] Google milestone
-- [ ] DataCamp milestone
-- [ ] SQL practice milestone
-- [ ] Portfolio milestone
-- [ ] Documentation updated
-- [ ] Progress tracker updated
-- [ ] Retrospective completed
+- **Learning:** Four focused sessions across the week
+- **SQL:** Two or three practice sessions with written explanations
+- **Portfolio:** Two evidence-producing work blocks
+- **Review:** One weekly retrospective and next-week setup
 
+## Checklist
+- [ ] [Google Course 1] Finish the remaining course modules
+- [ ] [Google Course 2] Begin the first module
+- [ ] Document SMART business questions
+- [ ] Practice COUNT, SUM, AVG, GROUP BY, and HAVING
+- [ ] Solve Page With No Likes
+- [ ] Solve Laptop vs. Mobile Viewership
+- [ ] Draft the Project 1 business problem
+- [ ] Identify stakeholders and decision makers
+- [ ] Define project objectives and success measures
+- [ ] Draft five initial KPIs
+- [ ] Commit the project charter draft
+- [ ] Complete the Week 2 retrospective
+
+## Daily Log
+
+Add one row after each study session.
+
+<!-- DAILY_LOG_START -->
+| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+|---|---:|---|---|---:|---|
+<!-- DAILY_LOG_END -->
 
 ## Database-Managed Checklist
 

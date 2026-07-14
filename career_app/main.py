@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import random
 import re
 import sqlite3
 import subprocess
@@ -8,24 +9,28 @@ import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtCore import (
+    QEasingCurve, QEvent, QObject, QPropertyAnimation, Qt, QTimer, Signal
+)
+from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QComboBox, QDialog, QFormLayout,
-    QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget,
-    QMainWindow, QMessageBox, QPushButton, QProgressBar, QScrollArea, QSpinBox,
-    QStackedWidget, QTableWidget, QTableWidgetItem, QTabWidget, QTextEdit,
-    QVBoxLayout, QWidget
+    QInputDialog,
+    QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout, QLabel, QLayout,
+    QLineEdit, QListWidget, QMainWindow, QMessageBox, QPushButton, QProgressBar,
+    QScrollArea, QSizePolicy, QSpinBox, QStackedWidget, QTableWidget,
+    QTableWidgetItem, QTabWidget, QTextEdit, QVBoxLayout, QWidget
 )
 
 from career_app import __version__
 from career_app.database import (
-    connect, ensure_default_state, save_setting, setting, state, update_state
+    connect, ensure_default_state, factory_reset, save_setting, setting, state, update_state
 )
 from career_app.data.roadmap import (
-    PROJECT_DIRS, PROJECT_NAMES, PROJECT_STAGES, SQL_COMPANION, WEEKLY_GUIDANCE
+    DATACAMP_TRACK, PROJECT_DIRS, PROJECT_NAMES, PROJECT_STAGES,
+    SQL_COMPANION, WEEKLY_GUIDANCE
 )
-from career_app.services import analytics, coach, planner
+from career_app.services import analytics, coach, planner, tracks
 from career_app.services.backup import create_backup
 from career_app.services.migration import migrate
 from career_app.services.publisher import publish
@@ -52,23 +57,205 @@ NAV = [
     ("⚙️ Settings", 10),
 ]
 
+
+
+
+
+class ButtonFeedbackFilter(QObject):
+    """Adds tactile press/release animation to every QPushButton."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._animations = {}
+
+    def _effect(self, button):
+        effect = button.graphicsEffect()
+        if not isinstance(effect, QGraphicsOpacityEffect):
+            effect = QGraphicsOpacityEffect(button)
+            effect.setOpacity(1.0)
+            button.setGraphicsEffect(effect)
+        return effect
+
+    def _animate(self, button, target, duration):
+        if not button.isEnabled():
+            return
+
+        effect = self._effect(button)
+        key = id(button)
+
+        previous = self._animations.pop(key, None)
+        if previous is not None:
+            previous.stop()
+            previous.deleteLater()
+
+        animation = QPropertyAnimation(
+            effect,
+            b"opacity",
+            self,
+        )
+        animation.setDuration(duration)
+        animation.setStartValue(effect.opacity())
+        animation.setEndValue(target)
+        animation.setEasingCurve(QEasingCurve.OutCubic)
+
+        def cleanup():
+            current = self._animations.get(key)
+            if current is animation:
+                self._animations.pop(key, None)
+
+        animation.finished.connect(cleanup)
+        self._animations[key] = animation
+        animation.start()
+
+    def eventFilter(self, watched, event):
+        if isinstance(watched, QPushButton):
+            if not watched.property("button_feedback_ready"):
+                watched.setProperty(
+                    "button_feedback_ready",
+                    True,
+                )
+                watched.setCursor(Qt.PointingHandCursor)
+
+            event_type = event.type()
+
+            if event_type == QEvent.MouseButtonPress:
+                if event.button() == Qt.LeftButton:
+                    self._animate(
+                        watched,
+                        0.72,
+                        55,
+                    )
+
+            elif event_type == QEvent.MouseButtonRelease:
+                self._animate(
+                    watched,
+                    1.0,
+                    115,
+                )
+
+            elif event_type == QEvent.KeyPress:
+                if event.key() in (
+                    Qt.Key_Space,
+                    Qt.Key_Return,
+                    Qt.Key_Enter,
+                ):
+                    self._animate(
+                        watched,
+                        0.72,
+                        55,
+                    )
+
+            elif event_type == QEvent.KeyRelease:
+                if event.key() in (
+                    Qt.Key_Space,
+                    Qt.Key_Return,
+                    Qt.Key_Enter,
+                ):
+                    self._animate(
+                        watched,
+                        1.0,
+                        115,
+                    )
+
+            elif event_type in (
+                QEvent.Leave,
+                QEvent.FocusOut,
+                QEvent.Hide,
+            ):
+                effect = watched.graphicsEffect()
+                if (
+                    isinstance(
+                        effect,
+                        QGraphicsOpacityEffect,
+                    )
+                    and effect.opacity() < 0.999
+                ):
+                    self._animate(
+                        watched,
+                        1.0,
+                        90,
+                    )
+
+            elif event_type == QEvent.EnabledChange:
+                effect = watched.graphicsEffect()
+                if isinstance(
+                    effect,
+                    QGraphicsOpacityEffect,
+                ):
+                    effect.setOpacity(
+                        1.0 if watched.isEnabled() else 0.62
+                    )
+
+        return super().eventFilter(watched, event)
+
+
+class ResponsiveDashboardContent(QWidget):
+    widthChanged = Signal(int)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.widthChanged.emit(event.size().width())
+
+
 class CareerAccelerator(QMainWindow):
+    DASHBOARD_WIDE_BREAKPOINT = 1150
+    DASHBOARD_MEDIUM_BREAKPOINT = 700
+    MINIMUM_WINDOW_WIDTH = 1500
+    MINIMUM_WINDOW_HEIGHT = 1020
+
     def __init__(self):
         super().__init__()
         self.conn = connect()
-        ensure_default_state(self.conn, "2026-07-13")
+        ensure_default_state(self.conn, date.today().isoformat())
         self.migration_result = migrate(self.conn, ROOT)
         planner.seed(self.conn)
         self.state = state(self.conn)
+        planner.sync_google_course_progress(
+            self.conn,
+            self.state["google_course"],
+        )
+        tracks.sync_all(
+            self.conn,
+            self.state,
+        )
+        self.state = state(self.conn)
 
         self.elapsed_seconds = 0
+        self.timer_state = "ready"
+        self.growth_days = 14
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick_timer)
 
         self.setWindowTitle(f"Career Accelerator v{__version__}")
-        self.resize(1536, 960)
-        self.setMinimumSize(1180, 760)
+
+        self.app_icon_path = (
+            ROOT / "assets" / "career_accelerator.ico"
+        )
+        if self.app_icon_path.exists():
+            app_icon = QIcon(str(self.app_icon_path))
+            self.setWindowIcon(app_icon)
+            QApplication.instance().setWindowIcon(app_icon)
+
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                    "DanielPastor.CareerAccelerator"
+                )
+            except Exception:
+                pass
+
+        self.resize(1536, 1020)
+        self.setMinimumSize(
+            self.MINIMUM_WINDOW_WIDTH,
+            self.MINIMUM_WINDOW_HEIGHT,
+        )
         self.setStyleSheet(stylesheet())
+
+        self.button_feedback = ButtonFeedbackFilter(self)
+        QApplication.instance().installEventFilter(
+            self.button_feedback
+        )
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -98,12 +285,36 @@ class CareerAccelerator(QMainWindow):
             self.stack.addWidget(builder())
 
         self.setup_shortcuts()
+        self.update_timer_visuals()
         self.refresh_all()
+
+        track_health = tracks.health_report(
+            self.conn,
+            self.state,
+        )
+        if (
+            not track_health["healthy"]
+            and hasattr(
+                self,
+                "settings_status",
+            )
+        ):
+            self.settings_status.setText(
+                "Track engine repaired with warnings: "
+                + "; ".join(
+                    track_health["issues"]
+                )
+            )
         self.update_time_based_header()
 
         self.greeting_timer = QTimer(self)
         self.greeting_timer.timeout.connect(self.update_time_based_header)
         self.greeting_timer.start(60_000)
+
+        self.update_motivational_text()
+        self.motivation_timer = QTimer(self)
+        self.motivation_timer.timeout.connect(self.update_motivational_text)
+        self.motivation_timer.start(15 * 60_000)
 
         autosave_ms = int(setting(self.conn, "autosave_minutes", "5")) * 60 * 1000
         self.autosave_timer = QTimer(self)
@@ -148,10 +359,13 @@ class CareerAccelerator(QMainWindow):
 
         nav_items = [
             ("🏠 Dashboard", 0),
+            ("🚀 Adaptive Planner", 1),
             ("📚 Learning", 2),
             ("📁 Portfolio Workspace", 3),
             ("💻 SQL Companion", 4),
             ("⏱️ Study Session", 5),
+            ("🎯 Job Readiness", 6),
+            ("💼 Applications", 7),
             ("📝 Weekly Summary", 8),
             ("🚀 Publish & Git", 9),
             ("⚙️ Settings", 10),
@@ -257,10 +471,13 @@ class CareerAccelerator(QMainWindow):
             button.setChecked(False)
         label_map = {
             0: "Dashboard",
+            1: "Adaptive Planner",
             2: "Learning",
             3: "Portfolio Workspace",
             4: "SQL Companion",
             5: "Study Session",
+            6: "Job Readiness",
+            7: "Applications",
             8: "Weekly Summary",
             9: "Publish & Git",
             10: "Settings",
@@ -309,11 +526,24 @@ class CareerAccelerator(QMainWindow):
     # ---------- Dashboard ----------
     def dashboard_page(self):
         page = QWidget()
-        root = QVBoxLayout(page)
-        root.setContentsMargins(28, 20, 28, 16)
-        root.setSpacing(12)
+        page.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
 
-        header = QHBoxLayout()
+        root = QVBoxLayout(page)
+        root.setContentsMargins(24, 16, 24, 14)
+        root.setSpacing(10)
+        root.setSizeConstraint(QLayout.SetDefaultConstraint)
+
+        self.dashboard_content = page
+        self.dashboard_root_layout = root
+        self.dashboard_layout_mode = None
+
+        # ---------- Header ----------
+        self.dashboard_header_section = QWidget()
+        header = QHBoxLayout(self.dashboard_header_section)
+        header.setContentsMargins(0, 0, 0, 0)
         header.setSpacing(12)
 
         left_header = QVBoxLayout()
@@ -323,10 +553,12 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_hero.setObjectName("Hero")
         left_header.addWidget(self.dashboard_hero)
 
-        quote = QLabel("“Discipline today, opportunity tomorrow.”")
-        quote.setObjectName("Muted")
-        quote.setStyleSheet("font-style:italic;color:#b6bfd0;")
-        left_header.addWidget(quote)
+        self.dashboard_quote = QLabel("")
+        self.dashboard_quote.setObjectName("Muted")
+        self.dashboard_quote.setStyleSheet(
+            "font-style:italic;color:#b6bfd0;"
+        )
+        left_header.addWidget(self.dashboard_quote)
 
         header.addLayout(left_header)
         header.addStretch()
@@ -336,7 +568,9 @@ class CareerAccelerator(QMainWindow):
 
         self.dashboard_program_meta = QLabel("")
         self.dashboard_program_meta.setAlignment(Qt.AlignRight)
-        self.dashboard_program_meta.setStyleSheet("font-weight:600;")
+        self.dashboard_program_meta.setStyleSheet(
+            "font-weight:600;"
+        )
         right_header.addWidget(self.dashboard_program_meta)
 
         self.dashboard_date = QLabel("")
@@ -345,10 +579,15 @@ class CareerAccelerator(QMainWindow):
         right_header.addWidget(self.dashboard_date)
 
         header.addLayout(right_header)
-        root.addLayout(header)
 
-        metrics = QHBoxLayout()
-        metrics.setSpacing(10)
+        # ---------- Progress metrics ----------
+        self.dashboard_metrics_section = QWidget()
+        self.dashboard_metrics_grid = QGridLayout(
+            self.dashboard_metrics_section
+        )
+        self.dashboard_metrics_grid.setContentsMargins(0, 0, 0, 0)
+        self.dashboard_metrics_grid.setHorizontalSpacing(10)
+        self.dashboard_metrics_grid.setVerticalSpacing(10)
 
         self.rings = [
             Ring("Sprint Progress", COLORS["purple"]),
@@ -357,38 +596,53 @@ class CareerAccelerator(QMainWindow):
             Ring("Portfolio Progress", COLORS["orange"]),
             Ring("Weekly Goal", COLORS["gold"]),
         ]
+        self.dashboard_metric_cards = []
 
         for ring in self.rings:
             card = Card()
-            card.setMinimumHeight(138)
-            card.setMaximumHeight(148)
-            card.layout.setContentsMargins(10, 8, 10, 8)
-            card.layout.addWidget(ring)
-            metrics.addWidget(card)
+            card.setMinimumHeight(116)
+            card.setMaximumHeight(120)
+            card.layout.setContentsMargins(8, 7, 8, 7)
+            card.layout.setSpacing(0)
+            card.layout.addWidget(
+                ring,
+                0,
+                Qt.AlignVCenter,
+            )
+            self.dashboard_metric_cards.append(card)
 
-        root.addLayout(metrics)
+        # ---------- Priority section ----------
+        self.dashboard_primary_section = QWidget()
+        self.dashboard_primary_grid = QGridLayout(
+            self.dashboard_primary_section
+        )
+        self.dashboard_primary_grid.setContentsMargins(0, 0, 0, 0)
+        self.dashboard_primary_grid.setHorizontalSpacing(10)
+        self.dashboard_primary_grid.setVerticalSpacing(10)
 
-        # Reference uses a 3-column grid:
-        # Focus 32%, Tasks 32%, Study Session 36%.
-        middle = QGridLayout()
-        middle.setHorizontalSpacing(10)
-        middle.setVerticalSpacing(10)
-
-        focus_card = Card()
-        focus_card.layout.setContentsMargins(14, 13, 14, 12)
-        focus_card.layout.addWidget(
+        self.dashboard_focus_card = Card()
+        self.dashboard_focus_card.setMinimumHeight(286)
+        self.dashboard_focus_card.layout.setContentsMargins(
+            14,
+            13,
+            14,
+            12,
+        )
+        self.dashboard_focus_card.layout.setSpacing(6)
+        self.dashboard_focus_card.layout.addWidget(
             SectionHeader(
                 "🎯",
                 "Today's Focus",
-                "Recommended plan for today",
+                "Priority-driven plan grounded in this week's roadmap",
             )
         )
 
         self.focus_layout = QVBoxLayout()
         self.focus_layout.setSpacing(0)
-        focus_card.layout.addLayout(self.focus_layout)
-
-        focus_card.layout.addWidget(Divider())
+        self.dashboard_focus_card.layout.addLayout(
+            self.focus_layout
+        )
+        self.dashboard_focus_card.layout.addWidget(Divider())
 
         focus_footer = QHBoxLayout()
         focus_footer.setSpacing(10)
@@ -406,10 +660,17 @@ class CareerAccelerator(QMainWindow):
 
         focus_footer.addWidget(self.focus_total_time, 1)
         focus_footer.addWidget(self.focus_task_count, 1)
-        focus_card.layout.addLayout(focus_footer)
+        self.dashboard_focus_card.layout.addLayout(focus_footer)
 
-        tasks_card = Card()
-        tasks_card.layout.setContentsMargins(14, 13, 14, 12)
+        self.dashboard_tasks_card = Card()
+        self.dashboard_tasks_card.setMinimumHeight(286)
+        self.dashboard_tasks_card.layout.setContentsMargins(
+            14,
+            13,
+            14,
+            12,
+        )
+        self.dashboard_tasks_card.layout.setSpacing(6)
 
         task_header = SectionHeader(
             "📋",
@@ -417,86 +678,177 @@ class CareerAccelerator(QMainWindow):
             "Up next from your sprint",
             "View All",
         )
-        tasks_card.layout.addWidget(task_header)
+        task_header.action_button.clicked.connect(
+            lambda: self.navigate(1)
+        )
+        self.dashboard_tasks_card.layout.addWidget(task_header)
 
         self.dashboard_tasks_layout = QVBoxLayout()
         self.dashboard_tasks_layout.setSpacing(0)
-        tasks_card.layout.addLayout(self.dashboard_tasks_layout)
-        tasks_card.layout.addStretch()
+        self.dashboard_tasks_card.layout.addLayout(
+            self.dashboard_tasks_layout
+        )
+        self.dashboard_tasks_card.layout.addStretch()
 
-        timer_card = Card()
-        timer_card.layout.setContentsMargins(14, 13, 14, 12)
-        timer_card.layout.setSpacing(7)
-        timer_card.layout.addWidget(
+        self.dashboard_timer_card = Card()
+        self.dashboard_timer_card.setMinimumHeight(286)
+        self.dashboard_timer_card.layout.setContentsMargins(
+            14,
+            13,
+            14,
+            12,
+        )
+        self.dashboard_timer_card.layout.setSpacing(6)
+        self.dashboard_timer_card.layout.addWidget(
             SectionHeader("⏱️", "Study Session")
         )
 
+        timer_stage = QWidget()
+        timer_stage.setFixedHeight(144)
+        timer_stage.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground,
+            True,
+        )
+        timer_stage_layout = QVBoxLayout(timer_stage)
+        timer_stage_layout.setContentsMargins(0, 0, 0, 0)
+        timer_stage_layout.setSpacing(0)
+        timer_stage_layout.setAlignment(
+            Qt.AlignTop | Qt.AlignHCenter
+        )
+
         self.circular_timer = CircularTimer()
-        timer_card.layout.addWidget(
+        timer_stage_layout.addWidget(
             self.circular_timer,
             0,
             Qt.AlignTop | Qt.AlignHCenter,
         )
+        self.dashboard_timer_card.layout.addWidget(timer_stage)
 
-        start = QPushButton("▶  Start Study Session")
-        start.setObjectName("Primary")
-        start.clicked.connect(lambda: self.timer.start(1000))
-        timer_card.layout.addWidget(start)
+        self.dashboard_start_button = QPushButton(
+            "▶  Start Study Session"
+        )
+        self.dashboard_start_button.setObjectName("Primary")
+        self.dashboard_start_button.clicked.connect(
+            self.start_study_timer
+        )
+        self.dashboard_timer_card.layout.addWidget(
+            self.dashboard_start_button
+        )
 
         timer_controls = QHBoxLayout()
-        timer_controls.setSpacing(8)
+        timer_controls.setSpacing(7)
 
-        pause = QPushButton("⏸️  Pause")
+        pause = QPushButton("⏸️ Pause")
         pause.setObjectName("Secondary")
-        pause.clicked.connect(self.timer.stop)
+        pause.clicked.connect(self.pause_study_timer)
 
-        log = QPushButton("📝  Log Session")
+        reset = QPushButton("🔄 Reset")
+        reset.setObjectName("Secondary")
+        reset.clicked.connect(self.confirm_reset_timer)
+
+        log = QPushButton("📝 Log")
         log.setObjectName("Secondary")
         log.clicked.connect(self.transfer_timer)
 
         timer_controls.addWidget(pause, 1)
+        timer_controls.addWidget(reset, 1)
         timer_controls.addWidget(log, 1)
-        timer_card.layout.addLayout(timer_controls)
+        self.dashboard_timer_card.layout.addLayout(timer_controls)
 
-        middle.addWidget(focus_card, 0, 0)
-        middle.addWidget(tasks_card, 0, 1)
-        middle.addWidget(timer_card, 0, 2)
+        # ---------- Analytics section ----------
+        self.dashboard_secondary_section = QWidget()
+        self.dashboard_secondary_grid = QGridLayout(
+            self.dashboard_secondary_section
+        )
+        self.dashboard_secondary_grid.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
+        self.dashboard_secondary_grid.setHorizontalSpacing(10)
+        self.dashboard_secondary_grid.setVerticalSpacing(10)
 
-        middle.setColumnStretch(0, 34)
-        middle.setColumnStretch(1, 33)
-        middle.setColumnStretch(2, 33)
-        root.addLayout(middle, 1)
+        self.dashboard_growth_card = Card()
+        self.dashboard_growth_card.setMinimumHeight(232)
+        self.dashboard_growth_card.layout.setContentsMargins(
+            14,
+            13,
+            14,
+            12,
+        )
 
-        bottom = QHBoxLayout()
-        bottom.setSpacing(10)
-
-        growth_card = Card()
-        growth_card.layout.setContentsMargins(14, 13, 14, 12)
-        growth_card.layout.addWidget(
+        growth_header = QHBoxLayout()
+        growth_header.setSpacing(8)
+        growth_header.addWidget(
             SectionHeader(
                 "📈",
                 "Growth Over Time",
-                "Hours studied per day (last 14 days)",
-                "14 Days ▾",
-            )
+                "Hours studied per day",
+            ),
+            1,
         )
-        self.growth_chart = AreaChart()
-        growth_card.layout.addWidget(self.growth_chart)
 
-        achievement_card = Card()
-        achievement_card.layout.setContentsMargins(14, 13, 14, 12)
-        achievement_card.layout.setSpacing(10)
-        achievement_card.layout.addWidget(
-            SectionHeader("🏅", "Achievements", "", "View All")
+        self.growth_period_combo = QComboBox()
+        self.growth_period_combo.addItems(
+            ["7 Days", "14 Days", "30 Days", "90 Days"]
+        )
+        self.growth_period_combo.setCurrentText("14 Days")
+        self.growth_period_combo.setFixedWidth(104)
+        growth_header.addWidget(
+            self.growth_period_combo,
+            0,
+            Qt.AlignRight | Qt.AlignTop,
+        )
+        self.dashboard_growth_card.layout.addLayout(growth_header)
+
+        self.growth_chart = AreaChart()
+        self.dashboard_growth_card.layout.addWidget(
+            self.growth_chart
+        )
+        self.growth_period_combo.currentTextChanged.connect(
+            self.change_growth_period
+        )
+
+        self.dashboard_achievement_card = Card()
+        self.dashboard_achievement_card.setMinimumHeight(232)
+        self.dashboard_achievement_card.layout.setContentsMargins(
+            14,
+            13,
+            14,
+            12,
+        )
+        self.dashboard_achievement_card.layout.setSpacing(10)
+
+        achievement_header = SectionHeader(
+            "🏅",
+            "Achievements",
+            "",
+            "View All",
+        )
+        achievement_header.action_button.clicked.connect(
+            self.show_all_achievements
+        )
+        self.dashboard_achievement_card.layout.addWidget(
+            achievement_header
         )
 
         self.badge_layout = QHBoxLayout()
         self.badge_layout.setSpacing(8)
         self.badge_layout.setAlignment(Qt.AlignTop)
-        achievement_card.layout.addLayout(self.badge_layout, 1)
+        self.dashboard_achievement_card.layout.addLayout(
+            self.badge_layout,
+            1,
+        )
 
-        summary_card = Card()
-        summary_card.layout.setContentsMargins(14, 13, 14, 12)
+        self.dashboard_summary_card = Card()
+        self.dashboard_summary_card.setMinimumHeight(232)
+        self.dashboard_summary_card.layout.setContentsMargins(
+            14,
+            13,
+            14,
+            12,
+        )
 
         summary_header = QHBoxLayout()
         summary_header.setSpacing(8)
@@ -504,59 +856,545 @@ class CareerAccelerator(QMainWindow):
             SectionHeader("📊", "Weekly Summary"),
             1,
         )
+
         self.summary_sparkline = MiniSparkline()
         summary_header.addWidget(
             self.summary_sparkline,
             0,
             Qt.AlignRight | Qt.AlignTop,
         )
-        summary_card.layout.addLayout(summary_header)
+        self.dashboard_summary_card.layout.addLayout(summary_header)
 
         self.summary_period = QLabel("")
         self.summary_period.setObjectName("Muted")
-        summary_card.layout.addWidget(self.summary_period)
+        self.dashboard_summary_card.layout.addWidget(
+            self.summary_period
+        )
 
         self.summary_rows = QVBoxLayout()
         self.summary_rows.setSpacing(0)
-        summary_card.layout.addLayout(self.summary_rows)
+        self.dashboard_summary_card.layout.addLayout(
+            self.summary_rows
+        )
 
         summary_button = QPushButton("View Full Summary")
         summary_button.setObjectName("Secondary")
         summary_button.clicked.connect(lambda: self.navigate(8))
-        summary_card.layout.addWidget(summary_button)
+        self.dashboard_summary_card.layout.addWidget(
+            summary_button
+        )
 
-        bottom.addWidget(growth_card, 38)
-        bottom.addWidget(achievement_card, 29)
-        bottom.addWidget(summary_card, 33)
-        root.addLayout(bottom, 1)
+        # ---------- Encouragement and Mission Control ----------
+        self.dashboard_footer_section = QWidget()
+        self.dashboard_footer_grid = QGridLayout(
+            self.dashboard_footer_section
+        )
+        self.dashboard_footer_grid.setContentsMargins(0, 0, 0, 0)
+        self.dashboard_footer_grid.setHorizontalSpacing(10)
+        self.dashboard_footer_grid.setVerticalSpacing(10)
 
-        footer_card = Card()
-        footer_card.layout.setContentsMargins(16, 10, 16, 10)
+        self.encouragement_card = Card()
+        self.encouragement_card.setMinimumHeight(150)
+        self.encouragement_card.layout.setContentsMargins(
+            16,
+            12,
+            16,
+            12,
+        )
 
-        footer_row = QHBoxLayout()
-        footer_row.setSpacing(12)
+        encouragement_row = QHBoxLayout()
+        encouragement_row.setContentsMargins(0, 0, 0, 0)
+        encouragement_row.setSpacing(12)
+        encouragement_row.setAlignment(Qt.AlignVCenter)
 
         star = QLabel("⭐")
         star.setStyleSheet("font-size:22pt;")
-        footer_row.addWidget(star)
+        star.setFixedWidth(34)
+        star.setAlignment(Qt.AlignCenter)
+        encouragement_row.addWidget(
+            star,
+            0,
+            Qt.AlignVCenter,
+        )
 
-        footer_text = QVBoxLayout()
-        footer_text.setSpacing(1)
+        encouragement_text_host = QWidget()
+        encouragement_text_host.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground,
+            True,
+        )
+        encouragement_text_host.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        encouragement_text_layout = QVBoxLayout(
+            encouragement_text_host
+        )
+        encouragement_text_layout.setContentsMargins(0, 0, 0, 0)
+        encouragement_text_layout.setSpacing(2)
+        encouragement_text_layout.setAlignment(Qt.AlignVCenter)
 
-        message = QLabel("Small daily improvements lead to big results.")
-        message.setStyleSheet("font-weight:700;")
-        footer_text.addWidget(message)
+        self.footer_message = QLabel("")
+        self.footer_message.setStyleSheet("font-weight:700;")
+        self.footer_message.setWordWrap(False)
+        self.footer_message.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        self.footer_message.setMinimumHeight(19)
+        self.footer_message.setMaximumHeight(20)
+        encouragement_text_layout.addWidget(
+            self.footer_message
+        )
 
-        subtitle = QLabel("You've got this, Dan!")
-        subtitle.setObjectName("Muted")
-        footer_text.addWidget(subtitle)
+        self.footer_subtitle = QLabel("")
+        self.footer_subtitle.setObjectName("Muted")
+        self.footer_subtitle.setWordWrap(False)
+        self.footer_subtitle.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        self.footer_subtitle.setMinimumHeight(18)
+        self.footer_subtitle.setMaximumHeight(19)
+        encouragement_text_layout.addWidget(
+            self.footer_subtitle
+        )
 
-        footer_row.addLayout(footer_text)
-        footer_row.addStretch()
-        footer_card.layout.addLayout(footer_row)
-        root.addWidget(footer_card)
+        encouragement_row.addWidget(
+            encouragement_text_host,
+            1,
+            Qt.AlignVCenter,
+        )
+        self.encouragement_card.layout.addLayout(encouragement_row)
 
+        self.dashboard_mission_card = Card()
+        self.dashboard_mission_card.setMinimumHeight(150)
+        self.dashboard_mission_card.layout.setContentsMargins(
+            14,
+            10,
+            14,
+            10,
+        )
+        self.dashboard_mission_card.layout.setSpacing(4)
+        self.dashboard_mission_card.layout.addWidget(
+            SectionHeader(
+                "🚀",
+                "Mission Control",
+                "Your job-readiness journey at a glance",
+            )
+        )
+
+        mission_score_row = QHBoxLayout()
+        mission_score_row.setSpacing(8)
+
+        mission_score_label = QLabel("Job Readiness")
+        mission_score_label.setStyleSheet("font-weight:700;")
+        mission_score_row.addWidget(mission_score_label)
+        mission_score_row.addStretch()
+
+        self.dashboard_mission_percent = QLabel("0%")
+        self.dashboard_mission_percent.setStyleSheet(
+            f"font-size:13pt;font-weight:700;"
+            f"color:{COLORS['purple']};"
+        )
+        mission_score_row.addWidget(
+            self.dashboard_mission_percent
+        )
+        self.dashboard_mission_card.layout.addLayout(
+            mission_score_row
+        )
+
+        self.dashboard_mission_progress = QProgressBar()
+        self.dashboard_mission_progress.setRange(0, 100)
+        self.dashboard_mission_progress.setTextVisible(False)
+        self.dashboard_mission_card.layout.addWidget(
+            self.dashboard_mission_progress
+        )
+
+        self.dashboard_mission_detail = QLabel("")
+        self.dashboard_mission_detail.setObjectName("Muted")
+        self.dashboard_mission_detail.setWordWrap(True)
+        self.dashboard_mission_detail.setMinimumHeight(18)
+        self.dashboard_mission_detail.setMaximumHeight(36)
+        self.dashboard_mission_card.layout.addWidget(
+            self.dashboard_mission_detail
+        )
+
+        self.dashboard_mission_actions = QGridLayout()
+        self.dashboard_mission_actions.setHorizontalSpacing(8)
+        self.dashboard_mission_actions.setVerticalSpacing(6)
+
+        self.dashboard_highest_impact_button = QPushButton(
+            "▶ Continue Highest-Impact Task"
+        )
+        self.dashboard_highest_impact_button.setObjectName(
+            "Primary"
+        )
+        self.dashboard_highest_impact_button.setMinimumHeight(32)
+        self.dashboard_highest_impact_button.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        self.dashboard_highest_impact_button.clicked.connect(
+            self.continue_highest_impact
+        )
+
+        self.dashboard_view_readiness_button = QPushButton(
+            "View Job Readiness →"
+        )
+        self.dashboard_view_readiness_button.setObjectName(
+            "Secondary"
+        )
+        self.dashboard_view_readiness_button.setMinimumHeight(32)
+        self.dashboard_view_readiness_button.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        self.dashboard_view_readiness_button.clicked.connect(
+            lambda: self.navigate(6)
+        )
+
+        self.dashboard_mission_card.layout.addLayout(
+            self.dashboard_mission_actions
+        )
+
+        # Compact mode moves the two footer cards beside the priority cards.
+        self.dashboard_compact_footer_stack = QWidget()
+        self.dashboard_compact_footer_layout = QVBoxLayout(
+            self.dashboard_compact_footer_stack
+        )
+        self.dashboard_compact_footer_layout.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
+        self.dashboard_compact_footer_layout.setSpacing(10)
+
+        # Initial section order; update_dashboard_layout will reflow it.
+        root.addWidget(self.dashboard_header_section)
+        root.addWidget(self.dashboard_metrics_section)
+        root.addWidget(self.dashboard_primary_section)
+        root.addWidget(self.dashboard_secondary_section)
+        root.addWidget(self.dashboard_footer_section)
+
+        QTimer.singleShot(
+            0,
+            lambda: self.update_dashboard_layout(
+                self.DASHBOARD_WIDE_BREAKPOINT
+            ),
+        )
         return page
+
+    def _take_layout_items(self, layout):
+        while layout.count():
+            layout.takeAt(0)
+
+    def _set_dashboard_section_order(self, widgets):
+        sections = [
+            self.dashboard_header_section,
+            self.dashboard_metrics_section,
+            self.dashboard_primary_section,
+            self.dashboard_secondary_section,
+            self.dashboard_footer_section,
+        ]
+        for section in sections:
+            self.dashboard_root_layout.removeWidget(section)
+
+        for section in widgets:
+            self.dashboard_root_layout.addWidget(section)
+
+    def _layout_mission_actions(self, compact):
+        self._take_layout_items(self.dashboard_mission_actions)
+
+        if compact:
+            self.dashboard_mission_actions.addWidget(
+                self.dashboard_highest_impact_button,
+                0,
+                0,
+                1,
+                2,
+            )
+            self.dashboard_mission_actions.addWidget(
+                self.dashboard_view_readiness_button,
+                1,
+                0,
+                1,
+                2,
+            )
+            self.dashboard_mission_card.setMinimumHeight(205)
+        else:
+            self.dashboard_mission_actions.addWidget(
+                self.dashboard_highest_impact_button,
+                0,
+                0,
+            )
+            self.dashboard_mission_actions.addWidget(
+                self.dashboard_view_readiness_button,
+                0,
+                1,
+            )
+            self.dashboard_mission_actions.setColumnStretch(0, 3)
+            self.dashboard_mission_actions.setColumnStretch(1, 2)
+            self.dashboard_mission_card.setMinimumHeight(150)
+
+    def update_dashboard_layout(self, width):
+        mode = "wide"
+
+        if mode == self.dashboard_layout_mode:
+            return
+        self.dashboard_layout_mode = mode
+
+        self._take_layout_items(self.dashboard_metrics_grid)
+        self._take_layout_items(self.dashboard_primary_grid)
+        self._take_layout_items(self.dashboard_secondary_grid)
+        self._take_layout_items(self.dashboard_footer_grid)
+        self._take_layout_items(
+            self.dashboard_compact_footer_layout
+        )
+
+        if mode == "wide":
+            self.dashboard_footer_section.show()
+            self.dashboard_compact_footer_stack.hide()
+            self._layout_mission_actions(compact=False)
+
+            for column, card in enumerate(
+                self.dashboard_metric_cards
+            ):
+                self.dashboard_metrics_grid.addWidget(
+                    card,
+                    0,
+                    column,
+                )
+                self.dashboard_metrics_grid.setColumnStretch(
+                    column,
+                    1,
+                )
+
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_focus_card,
+                0,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_tasks_card,
+                0,
+                1,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_timer_card,
+                0,
+                2,
+            )
+            self.dashboard_primary_grid.setColumnStretch(0, 34)
+            self.dashboard_primary_grid.setColumnStretch(1, 33)
+            self.dashboard_primary_grid.setColumnStretch(2, 33)
+
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_growth_card,
+                0,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_achievement_card,
+                0,
+                1,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_summary_card,
+                0,
+                2,
+            )
+            self.dashboard_secondary_grid.setColumnStretch(0, 38)
+            self.dashboard_secondary_grid.setColumnStretch(1, 29)
+            self.dashboard_secondary_grid.setColumnStretch(2, 33)
+
+            self.dashboard_footer_grid.addWidget(
+                self.encouragement_card,
+                0,
+                0,
+            )
+            self.dashboard_footer_grid.addWidget(
+                self.dashboard_mission_card,
+                0,
+                1,
+            )
+            self.dashboard_footer_grid.setColumnStretch(0, 1)
+            self.dashboard_footer_grid.setColumnStretch(1, 1)
+
+            self._set_dashboard_section_order(
+                [
+                    self.dashboard_header_section,
+                    self.dashboard_metrics_section,
+                    self.dashboard_primary_section,
+                    self.dashboard_secondary_section,
+                    self.dashboard_footer_section,
+                ]
+            )
+
+        elif mode == "medium":
+            self.dashboard_footer_section.hide()
+            self.dashboard_compact_footer_stack.show()
+            self._layout_mission_actions(compact=True)
+
+            metric_positions = [
+                (0, 0, 1, 2),
+                (0, 2, 1, 2),
+                (0, 4, 1, 2),
+                (1, 0, 1, 3),
+                (1, 3, 1, 3),
+            ]
+            for card, position in zip(
+                self.dashboard_metric_cards,
+                metric_positions,
+            ):
+                self.dashboard_metrics_grid.addWidget(
+                    card,
+                    *position,
+                )
+            for column in range(6):
+                self.dashboard_metrics_grid.setColumnStretch(
+                    column,
+                    1,
+                )
+
+            self.dashboard_compact_footer_layout.addWidget(
+                self.encouragement_card
+            )
+            self.dashboard_compact_footer_layout.addWidget(
+                self.dashboard_mission_card
+            )
+
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_focus_card,
+                0,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_timer_card,
+                0,
+                1,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_tasks_card,
+                1,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_compact_footer_stack,
+                1,
+                1,
+            )
+            self.dashboard_primary_grid.setColumnStretch(0, 1)
+            self.dashboard_primary_grid.setColumnStretch(1, 1)
+
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_growth_card,
+                0,
+                0,
+                1,
+                2,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_achievement_card,
+                1,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_summary_card,
+                1,
+                1,
+            )
+            self.dashboard_secondary_grid.setColumnStretch(0, 1)
+            self.dashboard_secondary_grid.setColumnStretch(1, 1)
+
+            self._set_dashboard_section_order(
+                [
+                    self.dashboard_header_section,
+                    self.dashboard_primary_section,
+                    self.dashboard_metrics_section,
+                    self.dashboard_secondary_section,
+                ]
+            )
+
+        else:
+            self.dashboard_footer_section.hide()
+            self.dashboard_compact_footer_stack.show()
+            self._layout_mission_actions(compact=True)
+
+            metric_positions = [
+                (0, 0, 1, 1),
+                (0, 1, 1, 1),
+                (1, 0, 1, 1),
+                (1, 1, 1, 1),
+                (2, 0, 1, 2),
+            ]
+            for card, position in zip(
+                self.dashboard_metric_cards,
+                metric_positions,
+            ):
+                self.dashboard_metrics_grid.addWidget(
+                    card,
+                    *position,
+                )
+            self.dashboard_metrics_grid.setColumnStretch(0, 1)
+            self.dashboard_metrics_grid.setColumnStretch(1, 1)
+
+            self.dashboard_compact_footer_layout.addWidget(
+                self.encouragement_card
+            )
+            self.dashboard_compact_footer_layout.addWidget(
+                self.dashboard_mission_card
+            )
+
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_focus_card,
+                0,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_tasks_card,
+                1,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_timer_card,
+                2,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_compact_footer_stack,
+                3,
+                0,
+            )
+            self.dashboard_primary_grid.setColumnStretch(0, 1)
+
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_growth_card,
+                0,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_achievement_card,
+                1,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_summary_card,
+                2,
+                0,
+            )
+            self.dashboard_secondary_grid.setColumnStretch(0, 1)
+
+            self._set_dashboard_section_order(
+                [
+                    self.dashboard_header_section,
+                    self.dashboard_primary_section,
+                    self.dashboard_metrics_section,
+                    self.dashboard_secondary_section,
+                ]
+            )
+
+        self.dashboard_content.updateGeometry()
 
     # ---------- Planner ----------
     def planner_page(self):
@@ -772,74 +1610,240 @@ class CareerAccelerator(QMainWindow):
     def study_page(self):
         page, root = self.page(
             "⏱️ Study Session",
-            "Track focus time, notes, productivity, and the work completed.",
+            "Track focused time, capture what you completed, and turn each session into progress evidence.",
         )
-        body = QHBoxLayout()
-        timer_card = Card("Live Timer")
-        self.study_timer = QLabel("00:00:00")
-        self.study_timer.setAlignment(Qt.AlignCenter)
-        self.study_timer.setStyleSheet(
-            f"font-size:36pt;font-weight:700;color:{COLORS['blue']};"
-        )
-        timer_card.layout.addWidget(self.study_timer)
-        timer_buttons = QHBoxLayout()
-        start = QPushButton("Start")
-        start.setObjectName("Primary")
-        start.clicked.connect(lambda: self.timer.start(1000))
-        pause = QPushButton("Pause")
-        pause.clicked.connect(self.timer.stop)
-        reset = QPushButton("Reset")
-        reset.clicked.connect(self.reset_timer)
-        timer_buttons.addWidget(start)
-        timer_buttons.addWidget(pause)
-        timer_buttons.addWidget(reset)
-        timer_card.layout.addLayout(timer_buttons)
-        body.addWidget(timer_card, 1)
 
-        log_card = Card("Log Session")
-        form = QFormLayout()
+        body = QGridLayout()
+        body.setHorizontalSpacing(12)
+        body.setVerticalSpacing(12)
+
+        # Live timer mirrors the Dashboard timer component.
+        timer_card = Card(
+            "⏱️ Live Timer",
+            "The timer is shared with the Dashboard.",
+        )
+        timer_card.setMinimumWidth(350)
+        timer_card.layout.setContentsMargins(18, 16, 18, 16)
+        timer_card.layout.setSpacing(10)
+
+        timer_stage = QWidget()
+        timer_stage.setFixedHeight(174)
+        timer_stage.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground,
+            True,
+        )
+        timer_stage_layout = QVBoxLayout(timer_stage)
+        timer_stage_layout.setContentsMargins(0, 8, 0, 4)
+        timer_stage_layout.setSpacing(0)
+        timer_stage_layout.setAlignment(
+            Qt.AlignCenter,
+        )
+
+        self.study_circular_timer = CircularTimer()
+        timer_stage_layout.addWidget(
+            self.study_circular_timer,
+            0,
+            Qt.AlignCenter,
+        )
+        timer_card.layout.addWidget(timer_stage)
+
+        goal_row = QHBoxLayout()
+        goal_row.setSpacing(10)
+        goal_label = QLabel("Focus goal")
+        goal_label.setObjectName("Muted")
+        goal_row.addWidget(goal_label)
+        goal_row.addStretch()
+
+        self.session_goal_minutes = QSpinBox()
+        self.session_goal_minutes.setRange(5, 240)
+        self.session_goal_minutes.setSingleStep(5)
+        self.session_goal_minutes.setSuffix(" min")
+        self.session_goal_minutes.setValue(
+            int(
+                setting(
+                    self.conn,
+                    "session_goal_minutes",
+                    "60",
+                )
+            )
+        )
+        self.session_goal_minutes.setFixedWidth(110)
+        self.session_goal_minutes.valueChanged.connect(
+            self.change_session_goal
+        )
+        goal_row.addWidget(self.session_goal_minutes)
+        timer_card.layout.addLayout(goal_row)
+
+        self.study_start_button = QPushButton(
+            "▶ Start Study Session"
+        )
+        self.study_start_button.setObjectName("Primary")
+        self.study_start_button.setMinimumHeight(38)
+        self.study_start_button.clicked.connect(
+            self.start_study_timer
+        )
+        timer_card.layout.addWidget(self.study_start_button)
+
+        timer_controls = QHBoxLayout()
+        timer_controls.setSpacing(8)
+
+        self.study_pause_button = QPushButton("⏸️ Pause")
+        self.study_pause_button.setObjectName("Secondary")
+        self.study_pause_button.setMinimumHeight(34)
+        self.study_pause_button.clicked.connect(self.pause_study_timer)
+
+        self.study_reset_button = QPushButton("🔄 Reset")
+        self.study_reset_button.setObjectName("Secondary")
+        self.study_reset_button.setMinimumHeight(34)
+        self.study_reset_button.clicked.connect(
+            self.confirm_reset_timer
+        )
+
+        timer_controls.addWidget(self.study_pause_button, 1)
+        timer_controls.addWidget(self.study_reset_button, 1)
+        timer_card.layout.addLayout(timer_controls)
+
+        self.study_use_time_button = QPushButton(
+            "📝 Use Current Time in Session Log"
+        )
+        self.study_use_time_button.setObjectName("Secondary")
+        self.study_use_time_button.setMinimumHeight(34)
+        self.study_use_time_button.clicked.connect(
+            self.apply_timer_to_session_log
+        )
+        timer_card.layout.addWidget(self.study_use_time_button)
+
+        timer_tip = QLabel(
+            "Pause preserves the current time. Reset asks before discarding unlogged time."
+        )
+        timer_tip.setObjectName("Muted")
+        timer_tip.setWordWrap(True)
+        timer_tip.setAlignment(Qt.AlignCenter)
+        timer_card.layout.addWidget(timer_tip)
+
+        # Compact session form.
+        log_card = Card(
+            "📝 Log Session",
+            "Document enough detail to support streaks, achievements, weekly summaries, and job-readiness evidence.",
+        )
+        log_card.layout.setContentsMargins(18, 16, 18, 16)
+        log_card.layout.setSpacing(10)
+
+        form_grid = QGridLayout()
+        form_grid.setHorizontalSpacing(12)
+        form_grid.setVerticalSpacing(9)
+        form_grid.setColumnStretch(1, 1)
+        form_grid.setColumnStretch(3, 1)
+
         self.session_date = QLineEdit(date.today().isoformat())
         self.session_hours = QLineEdit("1")
-        self.session_google = QLineEdit()
-        self.session_datacamp = QLineEdit()
-        self.session_sql = QSpinBox()
-        self.session_sql.setRange(0, 20)
-        self.session_portfolio = QLineEdit()
         self.session_productivity = QSpinBox()
         self.session_productivity.setRange(1, 10)
         self.session_productivity.setValue(7)
+        self.session_sql = QSpinBox()
+        self.session_sql.setRange(0, 20)
+
+        self.session_google = QLineEdit()
+        self.session_google.setPlaceholderText(
+            "Course, module, or lesson completed"
+        )
+        self.session_datacamp = QLineEdit()
+        self.session_datacamp.setPlaceholderText(
+            "Chapter or exercise completed"
+        )
+        self.session_portfolio = QLineEdit()
+        self.session_portfolio.setPlaceholderText(
+            "Milestone or project work completed"
+        )
         self.session_notes = QTextEdit()
-        form.addRow("Date", self.session_date)
-        form.addRow("Hours", self.session_hours)
-        form.addRow("Google progress", self.session_google)
-        form.addRow("DataCamp progress", self.session_datacamp)
-        form.addRow("SQL problems", self.session_sql)
-        form.addRow("Portfolio progress", self.session_portfolio)
-        form.addRow("Productivity (1–10)", self.session_productivity)
-        form.addRow("Notes", self.session_notes)
-        log_card.layout.addLayout(form)
-        save = QPushButton("Finish Session")
+        self.session_notes.setPlaceholderText(
+            "Key takeaways, blockers, questions, or next steps"
+        )
+        self.session_notes.setMinimumHeight(115)
+        self.session_notes.setMaximumHeight(145)
+
+        form_grid.addWidget(QLabel("Date"), 0, 0)
+        form_grid.addWidget(self.session_date, 0, 1)
+        form_grid.addWidget(QLabel("Hours"), 0, 2)
+        form_grid.addWidget(self.session_hours, 0, 3)
+
+        form_grid.addWidget(QLabel("Productivity"), 1, 0)
+        form_grid.addWidget(self.session_productivity, 1, 1)
+        form_grid.addWidget(QLabel("SQL problems"), 1, 2)
+        form_grid.addWidget(self.session_sql, 1, 3)
+
+        form_grid.addWidget(QLabel("Google progress"), 2, 0)
+        form_grid.addWidget(
+            self.session_google,
+            2,
+            1,
+            1,
+            3,
+        )
+
+        form_grid.addWidget(QLabel("DataCamp progress"), 3, 0)
+        form_grid.addWidget(
+            self.session_datacamp,
+            3,
+            1,
+            1,
+            3,
+        )
+
+        form_grid.addWidget(QLabel("Portfolio progress"), 4, 0)
+        form_grid.addWidget(
+            self.session_portfolio,
+            4,
+            1,
+            1,
+            3,
+        )
+
+        form_grid.addWidget(QLabel("Notes"), 5, 0)
+        form_grid.addWidget(
+            self.session_notes,
+            5,
+            1,
+            1,
+            3,
+        )
+
+        log_card.layout.addLayout(form_grid)
+
+        save = QPushButton("✅ Finish and Log Session")
         save.setObjectName("Primary")
+        save.setMinimumHeight(38)
         save.clicked.connect(self.save_session)
         log_card.layout.addWidget(save)
-        body.addWidget(log_card, 2)
+
+        body.addWidget(timer_card, 0, 0)
+        body.addWidget(log_card, 0, 1)
+        body.setColumnStretch(0, 34)
+        body.setColumnStretch(1, 66)
         root.addLayout(body)
 
-        recent = Card("Recent Sessions")
+        recent = Card(
+            "📚 Recent Sessions",
+            "Your latest logged study activity.",
+        )
         self.session_list = QListWidget()
+        self.session_list.setMinimumHeight(190)
         recent.layout.addWidget(self.session_list)
         root.addWidget(recent, 1)
+
         return page
 
     # ---------- Readiness ----------
     def readiness_page(self):
         page, root = self.page(
             "🎯 Job Readiness",
-            "Connect learning and portfolio evidence directly to employability.",
+            "Connect learning, portfolio work, and professional evidence directly to employability.",
         )
 
         self.readiness_rings = {}
         rings = QHBoxLayout()
+        rings.setSpacing(10)
+
         for title, color in [
             ("Technical Skills", COLORS["blue"]),
             ("Portfolio", COLORS["purple"]),
@@ -849,27 +1853,101 @@ class CareerAccelerator(QMainWindow):
             ("Overall", COLORS["cyan"]),
         ]:
             card = Card()
+            card.setMinimumHeight(138)
+            card.setMaximumHeight(148)
+            card.layout.setContentsMargins(10, 8, 10, 8)
+
             ring = Ring(title, color)
             card.layout.addWidget(ring)
             rings.addWidget(card)
             self.readiness_rings[title] = ring
+
         root.addLayout(rings)
 
-        body = QHBoxLayout()
-        evidence = Card("Demonstrated Evidence")
-        self.evidence_list = QListWidget()
-        evidence.layout.addWidget(self.evidence_list)
-        add_evidence = QPushButton("Add Evidence")
-        add_evidence.clicked.connect(self.add_evidence)
-        evidence.layout.addWidget(add_evidence)
-        body.addWidget(evidence, 1)
+        body = QGridLayout()
+        body.setHorizontalSpacing(10)
+        body.setVerticalSpacing(10)
 
-        gaps = Card("Readiness Coach")
-        self.readiness_coach = QLabel("")
-        self.readiness_coach.setWordWrap(True)
-        self.readiness_coach.setObjectName("Muted")
-        gaps.layout.addWidget(self.readiness_coach)
-        body.addWidget(gaps, 1)
+        evidence_card = Card(
+            "✅ Demonstrated Evidence",
+            "Proof that supports your résumé, portfolio, and interview stories.",
+        )
+        self.evidence_list = QListWidget()
+        self.evidence_list.setMinimumHeight(250)
+        evidence_card.layout.addWidget(self.evidence_list, 1)
+
+        add_evidence = QPushButton("➕ Add Evidence")
+        add_evidence.setObjectName("Primary")
+        add_evidence.clicked.connect(self.add_evidence)
+        evidence_card.layout.addWidget(add_evidence)
+
+        coach_card = Card(
+            "🧭 Readiness Coach",
+            "Prioritized recommendations based on your current progress.",
+        )
+        self.readiness_coach_layout = QVBoxLayout()
+        self.readiness_coach_layout.setSpacing(8)
+        coach_card.layout.addLayout(self.readiness_coach_layout)
+        coach_card.layout.addStretch()
+
+        leverage_card = Card(
+            "🚀 Highest Leverage",
+            "The next action most likely to improve employability.",
+        )
+
+        leverage_score_row = QHBoxLayout()
+        leverage_score_row.addWidget(QLabel("Overall readiness"))
+        leverage_score_row.addStretch()
+
+        self.readiness_overall_value = QLabel("0%")
+        self.readiness_overall_value.setStyleSheet(
+            f"font-size:16pt;font-weight:700;color:{COLORS['purple']};"
+        )
+        leverage_score_row.addWidget(self.readiness_overall_value)
+        leverage_card.layout.addLayout(leverage_score_row)
+
+        self.readiness_overall_progress = QProgressBar()
+        self.readiness_overall_progress.setRange(0, 100)
+        self.readiness_overall_progress.setTextVisible(False)
+        leverage_card.layout.addWidget(self.readiness_overall_progress)
+
+        self.readiness_leverage_title = QLabel("")
+        self.readiness_leverage_title.setStyleSheet(
+            "font-size:12pt;font-weight:700;"
+        )
+        self.readiness_leverage_title.setWordWrap(True)
+        leverage_card.layout.addWidget(self.readiness_leverage_title)
+
+        self.readiness_leverage_detail = QLabel("")
+        self.readiness_leverage_detail.setObjectName("Muted")
+        self.readiness_leverage_detail.setWordWrap(True)
+        leverage_card.layout.addWidget(self.readiness_leverage_detail)
+
+        continue_button = QPushButton("▶ Continue Highest-Impact Task")
+        continue_button.setObjectName("Primary")
+        continue_button.clicked.connect(self.continue_highest_impact)
+        leverage_card.layout.addWidget(continue_button)
+
+        coverage_card = Card(
+            "📊 Evidence Coverage",
+            "Where your documented proof is strongest and where it is still missing.",
+        )
+        self.readiness_coverage_layout = QVBoxLayout()
+        self.readiness_coverage_layout.setSpacing(0)
+        coverage_card.layout.addLayout(self.readiness_coverage_layout)
+        coverage_card.layout.addStretch()
+
+        body.addWidget(evidence_card, 0, 0, 2, 1)
+        body.addWidget(coach_card, 0, 1)
+        body.addWidget(leverage_card, 0, 2)
+        body.addWidget(coverage_card, 1, 1, 1, 2)
+
+        body.setColumnStretch(0, 34)
+        body.setColumnStretch(1, 33)
+        body.setColumnStretch(2, 33)
+        body.setRowStretch(0, 1)
+        body.setRowStretch(1, 1)
+
         root.addLayout(body, 1)
         return page
 
@@ -996,38 +2074,170 @@ class CareerAccelerator(QMainWindow):
     def settings_page(self):
         page, root = self.page(
             "⚙️ Settings",
-            "Control autosave, backups, migration, and local application behavior.",
+            "Manage application behavior, backups, repository access, and optional future integrations.",
         )
-        card = Card("Application Settings")
-        form = QFormLayout()
+
+        settings_grid = QGridLayout()
+        settings_grid.setHorizontalSpacing(12)
+        settings_grid.setVerticalSpacing(12)
+
+        # General behavior.
+        general_card = Card(
+            "⚙️ Application",
+            "Local behavior and automatic backup timing.",
+        )
+        general_card.layout.setContentsMargins(18, 16, 18, 16)
+        general_card.layout.setSpacing(10)
+
+        autosave_row = QHBoxLayout()
+        autosave_row.setSpacing(12)
+        autosave_label = QLabel("Autosave interval")
+        autosave_row.addWidget(autosave_label)
+        autosave_row.addStretch()
+
         self.autosave_minutes = QSpinBox()
         self.autosave_minutes.setRange(1, 60)
-        self.autosave_minutes.setValue(int(setting(self.conn, "autosave_minutes", "5")))
-        form.addRow("Autosave interval (minutes)", self.autosave_minutes)
-        card.layout.addLayout(form)
+        self.autosave_minutes.setSuffix(" min")
+        self.autosave_minutes.setValue(
+            int(
+                setting(
+                    self.conn,
+                    "autosave_minutes",
+                    "5",
+                )
+            )
+        )
+        self.autosave_minutes.setFixedWidth(110)
+        autosave_row.addWidget(self.autosave_minutes)
+        general_card.layout.addLayout(autosave_row)
 
-        save_settings = QPushButton("Save Settings")
+        save_settings = QPushButton("💾 Save Application Settings")
         save_settings.setObjectName("Primary")
         save_settings.clicked.connect(self.save_settings)
-        card.layout.addWidget(save_settings)
+        general_card.layout.addWidget(save_settings)
 
-        backup = QPushButton("Create Database Backup")
+        # Data maintenance.
+        data_card = Card(
+            "🗄️ Data and Recovery",
+            "Create a backup or rebuild task data from repository files.",
+        )
+        data_card.layout.setContentsMargins(18, 16, 18, 16)
+        data_card.layout.setSpacing(9)
+
+        backup = QPushButton("💾 Create Database Backup")
+        backup.setObjectName("Secondary")
         backup.clicked.connect(self.backup_database)
-        card.layout.addWidget(backup)
+        data_card.layout.addWidget(backup)
 
-        restore = QPushButton("Restore Tasks From Repository Files")
+        restore = QPushButton(
+            "🔄 Restore Tasks From Repository Files"
+        )
+        restore.setObjectName("Secondary")
         restore.clicked.connect(self.restore_tasks)
-        card.layout.addWidget(restore)
+        data_card.layout.addWidget(restore)
 
-        open_repo = QPushButton("Open Repository Folder")
+        data_note = QLabel(
+            "Backups exclude the repository and are stored locally in the backups folder."
+        )
+        data_note.setObjectName("Muted")
+        data_note.setWordWrap(True)
+        data_card.layout.addWidget(data_note)
+
+        # Repository paths.
+        repository_card = Card(
+            "📁 Repository and Storage",
+            "Quick access to the local project and working data.",
+        )
+        repository_card.layout.setContentsMargins(
+            18,
+            16,
+            18,
+            16,
+        )
+        repository_card.layout.setSpacing(9)
+
+        open_repo = QPushButton("📂 Open Repository Folder")
+        open_repo.setObjectName("Primary")
         open_repo.clicked.connect(lambda: os.startfile(ROOT))
-        card.layout.addWidget(open_repo)
+        repository_card.layout.addWidget(open_repo)
 
-        self.settings_status = QLabel("")
+        database_location = QLabel(
+            f"Database\n{ROOT / 'data' / 'career_accelerator.db'}"
+        )
+        database_location.setObjectName("Muted")
+        database_location.setWordWrap(True)
+        database_location.setTextInteractionFlags(
+            Qt.TextSelectableByMouse
+        )
+        repository_card.layout.addWidget(database_location)
+
+        backup_location = QLabel(
+            f"Backups\n{ROOT / 'backups'}"
+        )
+        backup_location.setObjectName("Muted")
+        backup_location.setWordWrap(True)
+        backup_location.setTextInteractionFlags(
+            Qt.TextSelectableByMouse
+        )
+        repository_card.layout.addWidget(backup_location)
+
+        reset_card = Card(
+            "⚠️ Reset Progress",
+            "Prepare a clean starter profile for yourself or another learner.",
+        )
+        reset_card.layout.setContentsMargins(18, 16, 18, 16)
+        reset_card.layout.setSpacing(9)
+
+        reset_summary = QLabel(
+            "Reset returns the app to Week 1, Google Course 1, Module 1, "
+            "Portfolio Project 1, and today as the new start date. It clears "
+            "all tracked progress while preserving technical preferences and backups."
+        )
+        reset_summary.setObjectName("Muted")
+        reset_summary.setWordWrap(True)
+        reset_card.layout.addWidget(reset_summary)
+
+        self.reset_progress_button = QPushButton(
+            "🗑️ Reset All Progress"
+        )
+        self.reset_progress_button.setObjectName("Danger")
+        self.reset_progress_button.setMinimumHeight(40)
+        self.reset_progress_button.clicked.connect(
+            self.confirm_factory_reset
+        )
+        reset_card.layout.addWidget(
+            self.reset_progress_button
+        )
+
+        settings_grid.addWidget(general_card, 0, 0)
+        settings_grid.addWidget(data_card, 0, 1)
+        settings_grid.addWidget(repository_card, 1, 0)
+        settings_grid.addWidget(reset_card, 1, 1)
+        settings_grid.setColumnStretch(0, 1)
+        settings_grid.setColumnStretch(1, 1)
+
+        root.addLayout(settings_grid)
+
+        status_card = Card("ℹ️ Status")
+        status_card.layout.setContentsMargins(18, 12, 18, 12)
+
+        status_row = QHBoxLayout()
+        self.settings_status = QLabel(
+            f"Career Accelerator v{__version__} • Local SQLite mode"
+        )
         self.settings_status.setObjectName("Muted")
         self.settings_status.setWordWrap(True)
-        card.layout.addWidget(self.settings_status)
-        root.addWidget(card)
+        status_row.addWidget(self.settings_status, 1)
+
+        shortcuts = QLabel("Ctrl+K Commands  •  Ctrl+S Backup")
+        shortcuts.setObjectName("Muted")
+        shortcuts.setAlignment(Qt.AlignRight)
+        status_row.addWidget(shortcuts)
+
+        status_card.layout.addLayout(status_row)
+        root.addWidget(status_card)
+        root.addStretch()
+
         return page
 
     def update_time_based_header(self):
@@ -1052,9 +2262,697 @@ class CareerAccelerator(QMainWindow):
                 f"📅  {now:%A, %B %d, %Y}"
             )
 
+    def update_motivational_text(self):
+        quotes = [
+            "“Discipline today, opportunity tomorrow.”",
+            "“Consistency turns effort into expertise.”",
+            "“Progress grows from focused repetition.”",
+            "“Clarity comes from doing the work.”",
+            "“Build the evidence, then tell the story.”",
+            "“Small improvements compound into a new career.”",
+            "“Learn deliberately. Apply confidently.”",
+            "“Momentum matters more than perfection.”",
+        ]
+
+        encouragements = [
+            (
+                "Small daily improvements lead to big results.",
+                "You've got this, Dan!",
+            ),
+            (
+                "Every focused session strengthens your analyst toolkit.",
+                "Keep building momentum.",
+            ),
+            (
+                "The portfolio grows one meaningful milestone at a time.",
+                "Make today's work visible.",
+            ),
+            (
+                "Consistency is creating the career change.",
+                "One strong step is enough for today.",
+            ),
+            (
+                "Your VFX experience is becoming analytical evidence.",
+                "Keep connecting your past work to your future role.",
+            ),
+            (
+                "Practice, document, publish, repeat.",
+                "That cycle is building job-ready proof.",
+            ),
+            (
+                "You do not need a perfect day to make real progress.",
+                "Complete the next highest-impact task.",
+            ),
+            (
+                "The work you log today becomes tomorrow's confidence.",
+                "Stay with the plan.",
+            ),
+        ]
+
+        if hasattr(self, "dashboard_quote"):
+            current_quote = self.dashboard_quote.text()
+            quote_choices = [
+                value for value in quotes
+                if value != current_quote
+            ] or quotes
+            self.dashboard_quote.setText(
+                random.choice(quote_choices)
+            )
+
+        if (
+            hasattr(self, "footer_message")
+            and hasattr(self, "footer_subtitle")
+        ):
+            current_pair = (
+                self.footer_message.text(),
+                self.footer_subtitle.text(),
+            )
+            encouragement_choices = [
+                value for value in encouragements
+                if value != current_pair
+            ] or encouragements
+            message, subtitle = random.choice(
+                encouragement_choices
+            )
+            self.footer_message.setText(message)
+            self.footer_subtitle.setText(subtitle)
+
+    def change_growth_period(self, text):
+        try:
+            self.growth_days = int(text.split()[0])
+        except (ValueError, IndexError):
+            self.growth_days = 14
+        self.refresh_growth_chart()
+
+    def refresh_growth_chart(self):
+        if not hasattr(self, "growth_chart"):
+            return
+
+        recent_hours = analytics.daily_hours(
+            self.conn,
+            self.growth_days,
+        )
+        self.growth_chart.set_values(recent_hours)
+
+        if hasattr(self, "summary_sparkline"):
+            self.summary_sparkline.set_values(
+                analytics.weekly_daily_hours(self.conn)
+            )
+
+    def _unlock_achievement(self, key, title, description):
+        existing = self.conn.execute(
+            """SELECT id,title,description
+               FROM achievements
+               WHERE achievement_key=?""",
+            (key,),
+        ).fetchone()
+
+        if existing:
+            if (
+                existing["title"] != title
+                or existing["description"] != description
+            ):
+                self.conn.execute(
+                    """UPDATE achievements
+                       SET title=?, description=?
+                       WHERE achievement_key=?""",
+                    (title, description, key),
+                )
+            return False
+
+        self.conn.execute(
+            """INSERT INTO achievements
+               (achievement_key,title,description)
+               VALUES(?,?,?)""",
+            (key, title, description),
+        )
+        return True
+
+    def roadmap_achievement_details(self, row):
+        category = row["category"] or "General"
+        label = row["label"].strip()
+        week = int(row["week"])
+        order = int(row["sort_order"])
+
+        category_config = {
+            "Learning": {
+                "emoji": "🎓",
+                "prefix": "Learning Milestone",
+                "accent": COLORS["blue"],
+            },
+            "SQL": {
+                "emoji": "💻",
+                "prefix": "SQL Challenge",
+                "accent": COLORS["purple"],
+            },
+            "Portfolio": {
+                "emoji": "📁",
+                "prefix": "Portfolio Milestone",
+                "accent": COLORS["orange"],
+            },
+            "Review": {
+                "emoji": "📝",
+                "prefix": "Weekly Reflection",
+                "accent": COLORS["green"],
+            },
+            "General": {
+                "emoji": "✅",
+                "prefix": "Roadmap Accomplishment",
+                "accent": COLORS["gold"],
+            },
+        }
+
+        config = category_config.get(
+            category,
+            category_config["General"],
+        )
+
+        short_label = label
+        if len(short_label) > 42:
+            short_label = short_label[:39].rstrip() + "…"
+
+        return {
+            "emoji": config["emoji"],
+            "accent": config["accent"],
+            "title": f"{config['prefix']}: {short_label}",
+            "description": (
+                f"Week {week} • Roadmap task {order}\n"
+                f"{label}"
+            ),
+        }
+
+    def achievement_visual(self, achievement_key, title):
+        if achievement_key.startswith("task:"):
+            try:
+                task_id = int(
+                    achievement_key.split(":", 1)[1]
+                )
+            except (TypeError, ValueError):
+                task_id = None
+
+            if task_id is not None:
+                row = self.conn.execute(
+                    """SELECT
+                           s.week,
+                           s.sort_order,
+                           s.label,
+                           m.category
+                       FROM sprint_tasks s
+                       LEFT JOIN task_metadata m
+                         ON m.task_id=s.id
+                       WHERE s.id=?""",
+                    (task_id,),
+                ).fetchone()
+                if row:
+                    details = self.roadmap_achievement_details(
+                        row
+                    )
+                    return (
+                        details["emoji"],
+                        details["accent"],
+                    )
+
+        prefix_styles = [
+            ("project-task:", "📁", COLORS["orange"]),
+            ("sql-problem:", "💻", COLORS["purple"]),
+            ("study-session:", "⏱️", COLORS["cyan"]),
+            ("application:", "💼", COLORS["gold"]),
+            ("milestone:", "🏆", COLORS["green"]),
+        ]
+        for prefix, emoji, accent in prefix_styles:
+            if achievement_key.startswith(prefix):
+                return emoji, accent
+
+        title_styles = {
+            "Portfolio Milestone Complete": (
+                "📁",
+                COLORS["orange"],
+            ),
+            "SQL Problem Solved": (
+                "💻",
+                COLORS["purple"],
+            ),
+            "Study Session Logged": (
+                "⏱️",
+                COLORS["cyan"],
+            ),
+            "Application Tracked": (
+                "💼",
+                COLORS["gold"],
+            ),
+        }
+        return title_styles.get(
+            title,
+            ("🏆", COLORS["purple"]),
+        )
+
+    def sync_achievement_records(self):
+        """Persist rewards for every completed activity and major milestone."""
+        unlocked = []
+
+        def unlock(key, title, description):
+            if self._unlock_achievement(
+                key,
+                title,
+                description,
+            ):
+                unlocked.append(title)
+
+        completed_tasks = self.conn.execute(
+            """SELECT
+                   s.id,
+                   s.week,
+                   s.sort_order,
+                   s.label,
+                   m.category
+               FROM sprint_tasks s
+               LEFT JOIN task_metadata m
+                 ON m.task_id=s.id
+               WHERE s.completed=1
+               ORDER BY s.week,s.sort_order,s.id"""
+        ).fetchall()
+        for row in completed_tasks:
+            details = self.roadmap_achievement_details(
+                row
+            )
+            unlock(
+                f"task:{row['id']}",
+                details["title"],
+                details["description"],
+            )
+
+        completed_project_tasks = self.conn.execute(
+            """SELECT id,label
+               FROM project_tasks
+               WHERE completed=1
+               ORDER BY id"""
+        ).fetchall()
+        for row in completed_project_tasks:
+            unlock(
+                f"project-task:{row['id']}",
+                "Portfolio Milestone Complete",
+                row["label"],
+            )
+
+        sql_rows = self.conn.execute(
+            """SELECT id,title
+               FROM sql_practice
+               ORDER BY id"""
+        ).fetchall()
+        for row in sql_rows:
+            unlock(
+                f"sql-problem:{row['id']}",
+                "SQL Problem Solved",
+                row["title"],
+            )
+
+        session_rows = self.conn.execute(
+            """SELECT id,session_date,hours
+               FROM study_sessions
+               ORDER BY id"""
+        ).fetchall()
+        for row in session_rows:
+            unlock(
+                f"study-session:{row['id']}",
+                "Study Session Logged",
+                f"{row['session_date']} • {float(row['hours']):g}h",
+            )
+
+        application_rows = self.conn.execute(
+            """SELECT id,company,role
+               FROM applications
+               ORDER BY id"""
+        ).fetchall()
+        for row in application_rows:
+            unlock(
+                f"application:{row['id']}",
+                "Application Tracked",
+                f"{row['role']} at {row['company']}",
+            )
+
+        session_count = len(session_rows)
+        task_count = len(completed_tasks)
+        project_count = len(completed_project_tasks)
+        sql_count = len(sql_rows)
+        application_count = len(application_rows)
+        total_hours = sum(
+            float(row["hours"])
+            for row in session_rows
+        )
+        best_streak = analytics.best_streak(self.conn)
+        readiness_data = analytics.readiness(
+            self.conn,
+            self.state,
+        )
+
+        milestones = [
+            (
+                "milestone:first-session",
+                session_count >= 1,
+                "Getting Started",
+                "Log your first study session.",
+            ),
+            (
+                "milestone:five-sessions",
+                session_count >= 5,
+                "Focus Habit",
+                "Log five study sessions.",
+            ),
+            (
+                "milestone:ten-sessions",
+                session_count >= 10,
+                "Consistent Learner",
+                "Log ten study sessions.",
+            ),
+            (
+                "milestone:one-hour",
+                total_hours >= 1,
+                "First Focus Hour",
+                "Log one hour of focused study.",
+            ),
+            (
+                "milestone:ten-hours",
+                total_hours >= 10,
+                "Ten-Hour Builder",
+                "Log ten study hours.",
+            ),
+            (
+                "milestone:twenty-five-hours",
+                total_hours >= 25,
+                "Deep Work",
+                "Log twenty-five study hours.",
+            ),
+            (
+                "milestone:streak-three",
+                best_streak >= 3,
+                "Momentum",
+                "Build a three-day study streak.",
+            ),
+            (
+                "milestone:streak-seven",
+                best_streak >= 7,
+                "Week Warrior",
+                "Build a seven-day study streak.",
+            ),
+            (
+                "milestone:first-task",
+                task_count >= 1,
+                "First Roadmap Win",
+                "Complete your first roadmap task.",
+            ),
+            (
+                "milestone:five-tasks",
+                task_count >= 5,
+                "Task Builder",
+                "Complete five roadmap tasks.",
+            ),
+            (
+                "milestone:ten-tasks",
+                task_count >= 10,
+                "On Track",
+                "Complete ten roadmap tasks.",
+            ),
+            (
+                "milestone:twenty-five-tasks",
+                task_count >= 25,
+                "Roadmap Momentum",
+                "Complete twenty-five roadmap tasks.",
+            ),
+            (
+                "milestone:first-sql",
+                sql_count >= 1,
+                "First Query",
+                "Complete your first SQL problem.",
+            ),
+            (
+                "milestone:five-sql",
+                sql_count >= 5,
+                "SQL Starter",
+                "Complete five SQL problems.",
+            ),
+            (
+                "milestone:ten-sql",
+                sql_count >= 10,
+                "SQL Builder",
+                "Complete ten SQL problems.",
+            ),
+            (
+                "milestone:twenty-five-sql",
+                sql_count >= 25,
+                "SQL Momentum",
+                "Complete twenty-five SQL problems.",
+            ),
+            (
+                "milestone:first-project-task",
+                project_count >= 1,
+                "Project Started",
+                "Complete your first portfolio milestone.",
+            ),
+            (
+                "milestone:five-project-tasks",
+                project_count >= 5,
+                "Project Builder",
+                "Complete five portfolio milestones.",
+            ),
+            (
+                "milestone:ten-project-tasks",
+                project_count >= 10,
+                "Portfolio Momentum",
+                "Complete ten portfolio milestones.",
+            ),
+            (
+                "milestone:first-application",
+                application_count >= 1,
+                "Search Launched",
+                "Track your first job application.",
+            ),
+            (
+                "milestone:five-applications",
+                application_count >= 5,
+                "Application Momentum",
+                "Track five job applications.",
+            ),
+            (
+                "milestone:readiness-25",
+                readiness_data["Overall"] >= 25,
+                "Quarter Ready",
+                "Reach 25% overall job readiness.",
+            ),
+            (
+                "milestone:readiness-50",
+                readiness_data["Overall"] >= 50,
+                "Halfway Ready",
+                "Reach 50% overall job readiness.",
+            ),
+            (
+                "milestone:readiness-75",
+                readiness_data["Overall"] >= 75,
+                "Interview Ready",
+                "Reach 75% overall job readiness.",
+            ),
+        ]
+
+        for key, condition, title, description in milestones:
+            if condition:
+                unlock(key, title, description)
+
+        self.conn.commit()
+        return unlocked
+
+    def achievement_progress(self):
+        session_count = self.conn.execute(
+            "SELECT COUNT(*) FROM study_sessions"
+        ).fetchone()[0]
+        completed_tasks = self.conn.execute(
+            "SELECT COUNT(*) FROM sprint_tasks WHERE completed=1"
+        ).fetchone()[0]
+        sql_count = self.conn.execute(
+            "SELECT COUNT(*) FROM sql_practice"
+        ).fetchone()[0]
+        portfolio_count = self.conn.execute(
+            "SELECT COUNT(*) FROM project_tasks WHERE completed=1"
+        ).fetchone()[0]
+        applications = self.conn.execute(
+            "SELECT COUNT(*) FROM applications"
+        ).fetchone()[0]
+        total_hours = self.conn.execute(
+            "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
+        ).fetchone()[0]
+        best_streak = analytics.best_streak(self.conn)
+        readiness_data = analytics.readiness(
+            self.conn,
+            self.state,
+        )
+
+        milestones = [
+            ("🚀", "Getting Started", "Log your first study session", session_count, 1, COLORS["purple"]),
+            ("⏱️", "Focus Habit", "Log five study sessions", session_count, 5, COLORS["cyan"]),
+            ("🔥", "Momentum", "Build a three-day study streak", best_streak, 3, COLORS["gold"]),
+            ("📅", "Week Warrior", "Build a seven-day study streak", best_streak, 7, COLORS["blue"]),
+            ("✅", "First Roadmap Win", "Complete your first roadmap task", completed_tasks, 1, COLORS["green"]),
+            ("🎯", "On Track", "Complete ten roadmap tasks", completed_tasks, 10, COLORS["green"]),
+            ("💻", "First Query", "Complete your first SQL problem", sql_count, 1, COLORS["purple"]),
+            ("🧠", "SQL Builder", "Complete ten SQL problems", sql_count, 10, COLORS["purple"]),
+            ("📁", "Project Started", "Complete your first portfolio milestone", portfolio_count, 1, COLORS["orange"]),
+            ("🏗️", "Project Builder", "Complete ten portfolio milestones", portfolio_count, 10, COLORS["orange"]),
+            ("💼", "Search Launched", "Track your first application", applications, 1, COLORS["gold"]),
+            ("📨", "Application Momentum", "Track five applications", applications, 5, COLORS["gold"]),
+            ("⌛", "Ten-Hour Builder", "Log ten study hours", total_hours, 10, COLORS["cyan"]),
+            ("🌟", "Deep Work", "Log twenty-five study hours", total_hours, 25, COLORS["purple"]),
+            ("📈", "Quarter Ready", "Reach 25% overall readiness", readiness_data["Overall"], 25, COLORS["blue"]),
+            ("🏆", "Halfway Ready", "Reach 50% overall readiness", readiness_data["Overall"], 50, COLORS["green"]),
+        ]
+
+        return [
+            {
+                "emoji": emoji,
+                "title": title,
+                "description": description,
+                "current": min(float(current), float(target)),
+                "target": target,
+                "accent": accent,
+            }
+            for (
+                emoji,
+                title,
+                description,
+                current,
+                target,
+                accent,
+            ) in milestones
+        ]
+
+    def recent_achievement_records(self, limit=12):
+        return self.conn.execute(
+            """SELECT
+                   achievement_key,
+                   title,
+                   description,
+                   unlocked_at
+               FROM achievements
+               ORDER BY id DESC
+               LIMIT ?""",
+            (limit,),
+        ).fetchall()
+
+    def dashboard_achievement_cards(self):
+        recent = self.recent_achievement_records(limit=3)
+
+        if recent:
+            cards = []
+            for row in recent:
+                emoji, accent = self.achievement_visual(
+                    row["achievement_key"],
+                    row["title"],
+                )
+                cards.append(
+                    (
+                        emoji,
+                        row["title"],
+                        row["description"],
+                        accent,
+                    )
+                )
+            return cards
+
+        cards = []
+        for achievement in self.achievement_progress()[:3]:
+            cards.append(
+                (
+                    achievement["emoji"],
+                    achievement["title"],
+                    (
+                        f"{achievement['description']}\n"
+                        f"{achievement['current']:g} / "
+                        f"{achievement['target']}"
+                    ),
+                    achievement["accent"],
+                )
+            )
+        return cards
+
+    def show_all_achievements(self):
+        dialog = QDialog(self)
+        dialog.setWindowTitle("All Achievements")
+        dialog.setStyleSheet(stylesheet())
+        dialog.resize(650, 560)
+
+        layout = QVBoxLayout(dialog)
+
+        title = QLabel("🏅 Achievements")
+        title.setObjectName("Hero")
+        layout.addWidget(title)
+
+        subtitle = QLabel(
+            "Every completed roadmap task, portfolio milestone, SQL problem, "
+            "study session, and application earns a persistent achievement."
+        )
+        subtitle.setObjectName("Muted")
+        subtitle.setWordWrap(True)
+        layout.addWidget(subtitle)
+
+        unlocked_label = QLabel("Unlocked Rewards")
+        unlocked_label.setObjectName("SectionTitle")
+        layout.addWidget(unlocked_label)
+
+        achievement_list = QListWidget()
+        records = self.recent_achievement_records(limit=200)
+
+        if records:
+            for row in records:
+                emoji, _ = self.achievement_visual(
+                    row["achievement_key"],
+                    row["title"],
+                )
+                achievement_list.addItem(
+                    f"{emoji} {row['title']}\n"
+                    f"    {row['description']}"
+                )
+        else:
+            achievement_list.addItem(
+                "No achievements unlocked yet. Complete the first task or log a study session."
+            )
+
+        layout.addWidget(achievement_list, 1)
+
+        progress_label = QLabel("Milestone Progress")
+        progress_label.setObjectName("SectionTitle")
+        layout.addWidget(progress_label)
+
+        progress_list = QListWidget()
+        for achievement in self.achievement_progress():
+            unlocked = (
+                achievement["current"]
+                >= achievement["target"]
+            )
+            prefix = "✅" if unlocked else "🔒"
+            progress_list.addItem(
+                f"{prefix} {achievement['emoji']} "
+                f"{achievement['title']} — "
+                f"{achievement['current']:g} / "
+                f"{achievement['target']}\n"
+                f"    {achievement['description']}"
+            )
+
+        layout.addWidget(progress_list, 1)
+
+        close_button = QPushButton("Close")
+        close_button.setObjectName("Primary")
+        close_button.clicked.connect(dialog.accept)
+        layout.addWidget(close_button)
+
+        dialog.exec()
+
     # ---------- Refresh ----------
     def refresh_all(self):
         self.state = state(self.conn)
+        tracks.sync_all(
+            self.conn,
+            self.state,
+        )
+        self.state = state(self.conn)
+        newly_unlocked = self.sync_achievement_records()
+
         self.refresh_dashboard()
         self.refresh_planner()
         self.refresh_learning()
@@ -1066,7 +2964,86 @@ class CareerAccelerator(QMainWindow):
         self.refresh_summaries()
         self.refresh_git()
 
+        if newly_unlocked and self.isVisible():
+            extra = (
+                f"  +{len(newly_unlocked) - 1} more"
+                if len(newly_unlocked) > 1
+                else ""
+            )
+            self.statusBar().showMessage(
+                f"🏆 Achievement unlocked: "
+                f"{newly_unlocked[0]}{extra}",
+                7000,
+            )
+
+    def dashboard_task_source(self, row):
+        modular_source = tracks.source_for_task(
+            self.conn,
+            row["id"],
+        )
+        if modular_source:
+            return modular_source
+
+        label = str(row["label"] or "").strip()
+        lower_label = label.lower()
+        category = row["category"] or "General"
+        week = int(
+            row["week"]
+            or self.state["current_week"]
+        )
+
+        if "datacamp" in lower_label:
+            if "sql" in lower_label:
+                return "DataCamp • Introduction to SQL"
+            return "DataCamp"
+
+        current_google_match = re.match(
+            r"Continue Google Course (\d+), "
+            r"Module (\d+)$",
+            label,
+            re.IGNORECASE,
+        )
+        if current_google_match:
+            return (
+                f"Google • Course "
+                f"{current_google_match.group(1)}, "
+                f"Module "
+                f"{current_google_match.group(2)}"
+            )
+
+        google_match = re.search(
+            r"\[Google Course (\d+)\]",
+            label,
+            re.IGNORECASE,
+        )
+        if google_match:
+            return (
+                f"Google • Course "
+                f"{google_match.group(1)}"
+            )
+
+        if category == "Learning":
+            return (
+                f"Google • Course "
+                f"{self.state['google_course']}, "
+                f"Module {self.state['google_module']}"
+            )
+        if category == "SQL":
+            return "SQL Practice"
+        if category == "Portfolio":
+            return (
+                f"Portfolio • Project "
+                f"{self.state['current_project']}"
+            )
+        if category == "Review":
+            return f"Weekly Review • Week {week}"
+        return f"Roadmap • Week {week}"
+
     def refresh_dashboard(self):
+        tracks.sync_all(
+            self.conn,
+            self.state,
+        )
         week = self.state["current_week"]
         guide = WEEKLY_GUIDANCE.get(
             week,
@@ -1103,12 +3080,10 @@ class CareerAccelerator(QMainWindow):
         project_done = sum(int(row["completed"]) for row in project_rows)
         project_total = len(project_rows)
 
-        total_hours = self.conn.execute(
-            "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
-        ).fetchone()[0]
+        week_hours = analytics.weekly_hours(self.conn)
         target_hours = float(self.state["weekly_target_hours"])
         weekly_goal = (
-            min(100, total_hours / target_hours * 100)
+            min(100, week_hours / target_hours * 100)
             if target_hours else 0
         )
 
@@ -1137,7 +3112,7 @@ class CareerAccelerator(QMainWindow):
             ),
             (
                 weekly_goal,
-                f"{total_hours:g}h / {target_hours:g}h",
+                f"{week_hours:g}h / {target_hours:g}h",
                 f"●  {target_hours:g}h Goal",
             ),
         ]
@@ -1150,72 +3125,173 @@ class CareerAccelerator(QMainWindow):
         )
         self.update_time_based_header()
 
+        readiness_data = analytics.readiness(
+            self.conn,
+            self.state,
+        )
+        readiness_messages = coach.recommendations(
+            self.conn,
+            self.state,
+        )
+        self.dashboard_mission_percent.setText(
+            f"{readiness_data['Overall']}%"
+        )
+        self.dashboard_mission_progress.setValue(
+            readiness_data["Overall"]
+        )
+        mission_detail = (
+            readiness_messages[0]
+            if readiness_messages
+            else "Continue the current roadmap priorities."
+        )
+        self.dashboard_mission_detail.setText(
+            mission_detail
+        )
+        self.dashboard_mission_detail.setToolTip(
+            mission_detail
+        )
+
         # Focus rows.
         self.clear_layout(self.focus_layout)
-        focus_items = [
-            (
-                "🎓",
-                "Google Certificate",
-                f"Continue Course {self.state['google_course']} • "
-                f"Complete Module {self.state['google_module']}",
-                "60m",
-                COLORS["blue"],
-            ),
-            (
-                "📘",
-                "DataCamp",
-                guide[2],
-                "45m",
-                COLORS["green"],
-            ),
-            (
-                "💻",
-                "SQL Practice",
-                "Solve 2 problems on DataLemur",
-                "60m",
-                COLORS["purple"],
-            ),
-            (
+
+        intelligent_focus = planner.intelligent_focus_plan(
+            self.conn,
+            week,
+            guide,
+            self.state,
+            max_items=4,
+        )
+
+        focus_styles = {
+            "Learning": ("🎓", "Learning", COLORS["blue"]),
+            "SQL": ("💻", "SQL Practice", COLORS["purple"]),
+            "Portfolio": (
                 "📁",
                 "Portfolio Project",
-                "Define KPIs for the VFX Dashboard",
-                "45m",
                 COLORS["orange"],
             ),
-        ]
-        for index, item in enumerate(focus_items):
-            self.focus_layout.addWidget(FocusRow(*item))
-            if index < len(focus_items) - 1:
+            "Review": (
+                "📝",
+                "Weekly Review",
+                COLORS["green"],
+            ),
+            "General": (
+                "📌",
+                "Roadmap Task",
+                COLORS["gold"],
+            ),
+        }
+
+        estimated_minutes = 0
+
+        for index, item in enumerate(intelligent_focus):
+            emoji, default_title, accent = focus_styles.get(
+                item["category"],
+                focus_styles["General"],
+            )
+
+            if item.get("roadmap_fallback"):
+                title = item.get(
+                    "display_title",
+                    default_title,
+                )
+                detail = item.get(
+                    "detail",
+                    item["label"],
+                )
+            else:
+                lower_label = item["label"].lower()
+                if item["category"] == "Learning":
+                    if any(
+                        token in lower_label
+                        for token in ("google", "course", "module")
+                    ):
+                        title = "Google Certificate"
+                        emoji = "🎓"
+                    elif "datacamp" in lower_label:
+                        title = "DataCamp"
+                        emoji = "📘"
+                    else:
+                        title = "Learning"
+                else:
+                    title = default_title
+
+                adaptive_detail = (
+                    tracks.task_detail(
+                        self.conn,
+                        item["task_id"],
+                    )
+                )
+                if adaptive_detail:
+                    detail = adaptive_detail
+                else:
+                    if item["carryover"]:
+                        prefix = "Missed yesterday"
+                    elif item["status"] == "In Progress":
+                        prefix = "In progress"
+                    else:
+                        prefix = (
+                            f"Priority "
+                            f"{item['priority']}"
+                        )
+
+                    detail = (
+                        f"{prefix} • "
+                        f"{item['label']}"
+                    )
+
+            minutes = int(item["estimated_minutes"])
+            estimated_minutes += minutes
+
+            self.focus_layout.addWidget(
+                FocusRow(
+                    emoji,
+                    title,
+                    detail,
+                    f"{minutes}m",
+                    accent,
+                )
+            )
+
+            if index < len(intelligent_focus) - 1:
                 self.focus_layout.addWidget(Divider())
 
-        estimated_minutes = sum((60, 45, 60, 45))
         self.focus_total_time.set_value(
             f"{estimated_minutes // 60}h "
             f"{estimated_minutes % 60:02d}m"
         )
-        self.focus_task_count.set_value("4")
+        self.focus_task_count.set_value(
+            str(len(intelligent_focus))
+        )
 
         # Next task rows.
         self.clear_layout(self.dashboard_tasks_layout)
         available = planner.available(self.conn, week)
 
-        task_sources = {
-            "Learning": "Google • Module 3",
-            "SQL": "SQL Practice",
-            "Portfolio": "Portfolio Project 1",
-            "Review": "Weekly Review",
-            "General": "Roadmap",
+        task_category_colors = {
+            "Learning": COLORS["blue"],
+            "SQL": COLORS["purple"],
+            "Portfolio": COLORS["orange"],
+            "Review": COLORS["green"],
+            "General": COLORS["muted"],
         }
 
         if available:
             for index, row in enumerate(available[:5]):
                 task_row = TaskRow(
                     title=row["label"],
-                    source=task_sources.get(row["category"], "Roadmap"),
+                    source=self.dashboard_task_source(
+                        row
+                    ),
                     checked=bool(row["completed"]),
                     status_text=(
                         "Completed"
                         if row["completed"] else ""
+                    ),
+                    category_text=row["category"],
+                    category_color=task_category_colors.get(
+                        row["category"],
+                        COLORS["muted"],
                     ),
                     on_toggle=(
                         lambda _, task_id=row["id"]:
@@ -1233,43 +3309,55 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_tasks_layout.addStretch()
 
         # Timer.
-        text = self.study_timer.text() if hasattr(self, "study_timer") else "00:00:00"
-        self.circular_timer.set_text(text)
+        self.update_timer_visuals()
 
         # Growth.
-        recent_hours = analytics.daily_hours(self.conn, 14)
-        self.growth_chart.set_values(recent_hours)
-        self.summary_sparkline.set_values(recent_hours)
+        self.refresh_growth_chart()
 
         # Achievements.
         self.clear_layout(self.badge_layout)
-        badge_data = [
-            ("🚀", "Getting Started", "Log your first study session", COLORS["purple"]),
-            ("📅", "Week Warrior", "Study 7 days in a week", COLORS["blue"]),
-            ("🎯", "On Track", "Complete 10 tasks", COLORS["green"]),
-        ]
-        for icon, title, description, accent in badge_data:
+        for (
+            emoji,
+            title,
+            description,
+            accent,
+        ) in self.dashboard_achievement_cards():
             self.badge_layout.addWidget(
-                BadgeCard(icon, title, description, accent)
+                BadgeCard(
+                    emoji,
+                    title,
+                    description,
+                    accent,
+                )
             )
 
         # Weekly summary.
+        week_start, week_end = analytics.week_bounds()
         self.summary_period.setText(
-            f"Week of {datetime.now():%b %d} – "
-            f"{(datetime.now() + timedelta(days=6)):%b %d}"
+            f"Week of {week_start:%b %d} – {week_end:%b %d}"
         )
         self.clear_layout(self.summary_rows)
 
-        session_count = self.conn.execute(
-            "SELECT COUNT(*) FROM study_sessions"
-        ).fetchone()[0]
+        session_count = analytics.weekly_session_count(
+            self.conn
+        )
+        weekly_sql = analytics.weekly_sql_count(self.conn)
+        focus_score = analytics.weekly_focus_score(self.conn)
 
         summary_items = [
-            ("⏱️", "Study Time", f"{total_hours:g}h"),
+            ("⏱️", "Study Time", f"{week_hours:g}h"),
             ("📅", "Sessions", str(session_count)),
             ("✅", "Tasks Completed", f"{done} / {total}"),
-            ("💾", "SQL Problems", str(sql_count)),
-            ("⭐", "Focus Score", "—"),
+            ("💾", "SQL Problems", str(weekly_sql)),
+            (
+                "⭐",
+                "Focus Score",
+                (
+                    f"{focus_score:g} / 10"
+                    if focus_score is not None
+                    else "—"
+                ),
+            ),
         ]
         for index, (emoji, label, value) in enumerate(summary_items):
             self.summary_rows.addWidget(
@@ -1284,16 +3372,25 @@ class CareerAccelerator(QMainWindow):
                 self.summary_rows.addWidget(Divider())
 
         # Sidebar.
-        streak = analytics.streak(self.conn)
-        self.side_streak_value.setText(str(streak))
-        self.best_streak_label.setText(f"Best Streak: {streak} days")
+        current_streak = analytics.streak(self.conn)
+        best_streak = analytics.best_streak(self.conn)
+        activity = analytics.week_activity(self.conn)
+
+        self.side_streak_value.setText(str(current_streak))
+        self.best_streak_label.setText(
+            f"Best Streak: {best_streak} days"
+        )
         self.streak_week.setText(
-            "●  ●  ●  ●  ●  ●  ●" if streak >= 7
-            else "○  ●  ●  ●  ●  ●  ○" if streak
-            else "○  ○  ○  ○  ○  ○  ○"
+            "  ".join(
+                "●" if active else "○"
+                for active in activity
+            )
+        )
+        self.streak_week.setToolTip(
+            "Monday through Sunday study activity"
         )
 
-        self.side_hours_value.setText(f"{total_hours:g}h")
+        self.side_hours_value.setText(f"{week_hours:g}h")
         self.sidebar_goal.setValue(int(weekly_goal))
         self.sidebar_goal_label.setText(
             f"Goal: {target_hours:g}h"
@@ -1325,33 +3422,136 @@ class CareerAccelerator(QMainWindow):
             )
 
     def refresh_learning(self):
-        week = self.state["current_week"]
-        guide = WEEKLY_GUIDANCE.get(
-            week, ("Keep Moving", "", "", [], "")
+        track_data = tracks.snapshot(
+            self.conn,
+            self.state,
         )
-        sql_count = self.conn.execute("SELECT COUNT(*) FROM sql_practice").fetchone()[0]
+
+        google = track_data["google"]
+        datacamp = track_data["datacamp"]
+        sql = track_data["sql"]
+        portfolio = track_data["portfolio"]
+
+        google_meta = google["metadata"]
+        google_detail = (
+            f"Module {self.state['google_module']} • "
+            f"Today "
+            f"{google_meta.get('today_target', 0)} • "
+            f"Week "
+            f"{google['weekly_completed']} / "
+            f"{google['weekly_target']} • "
+            f"{google_meta.get('pace_status', 'On pace')}"
+        )
+
+        data_course = datacamp["metadata"].get(
+            "course",
+            "Learning path",
+        )
+        data_lesson = datacamp["metadata"].get(
+            "lesson",
+            "Track complete",
+        )
+        datacamp_detail = (
+            f"{data_lesson} • "
+            f"{datacamp['metadata'].get('role', 'Supplemental')} • "
+            f"Week "
+            f"{datacamp['weekly_completed']} / "
+            f"{datacamp['weekly_target']}"
+        )
+
+        sql_count = self.conn.execute(
+            """SELECT COUNT(*)
+               FROM sql_practice
+               WHERE status='Completed'"""
+        ).fetchone()[0]
+        sql_next = sql["metadata"].get(
+            "title",
+            "Track complete",
+        )
+        sql_detail = (
+            f"Next: {sql_next} • "
+            f"{sql['metadata'].get('role', 'Supplemental')} • "
+            f"Week "
+            f"{sql['weekly_completed']} / "
+            f"{sql['weekly_target']}"
+        )
+
         project_rows = self.conn.execute(
-            "SELECT completed FROM project_tasks WHERE project_id=?",
+            """SELECT completed
+               FROM project_tasks
+               WHERE project_id=?""",
             (self.state["current_project"],),
         ).fetchall()
-        project_done = sum(int(row["completed"]) for row in project_rows)
+        project_done = sum(
+            int(row["completed"])
+            for row in project_rows
+        )
+        portfolio_next = portfolio["metadata"].get(
+            "milestone",
+            "Project complete",
+        )
+        if portfolio["status"] == "Locked":
+            portfolio_detail = (
+                portfolio["metadata"].get(
+                    "blocked_reason",
+                    "Waiting for prerequisite skills.",
+                )
+            )
+        else:
+            portfolio_detail = (
+                f"Next: {portfolio_next} • "
+                f"Week "
+                f"{portfolio['weekly_completed']} / "
+                f"{portfolio['weekly_target']}"
+            )
 
         data = {
-            "Google": (f"Course {self.state['google_course']}", guide[1]),
-            "DataCamp": ("Active", guide[2]),
-            "SQL": (f"{sql_count}/{self.state['sql_target']}", ", ".join(guide[3][:2])),
-            "Power BI": ("Planned", "Recommended Week 4"),
-            "Python": ("Planned", "Recommended Week 7"),
-            "Portfolio": (f"{project_done}/{len(project_rows)}", guide[4]),
+            "Google": (
+                f"Course {self.state['google_course']}",
+                google_detail,
+            ),
+            "DataCamp": (
+                data_course,
+                datacamp_detail,
+            ),
+            "SQL": (
+                f"{sql_count}/{self.state['sql_target']}",
+                sql_detail,
+            ),
+            "Power BI": (
+                "Planned",
+                "Unlock through the DataCamp and portfolio tracks.",
+            ),
+            "Python": (
+                "Planned",
+                "Unlock through the DataCamp and portfolio tracks.",
+            ),
+            "Portfolio": (
+                f"{project_done}/{len(project_rows)}",
+                portfolio_detail,
+            ),
         }
-        for key, (value, detail) in data.items():
-            self.learning_cards[key][0].setText(value)
-            self.learning_cards[key][1].setText(detail)
 
-        self.week_input.setValue(self.state["current_week"])
-        self.course_input.setValue(self.state["google_course"])
-        self.module_input.setValue(self.state["google_module"])
-        self.hours_input.setValue(int(self.state["weekly_target_hours"]))
+        for key, (value, detail) in data.items():
+            self.learning_cards[key][0].setText(
+                value
+            )
+            self.learning_cards[key][1].setText(
+                detail
+            )
+
+        self.week_input.setValue(
+            self.state["current_week"]
+        )
+        self.course_input.setValue(
+            self.state["google_course"]
+        )
+        self.module_input.setValue(
+            self.state["google_module"]
+        )
+        self.hours_input.setValue(
+            int(self.state["weekly_target_hours"])
+        )
 
     def refresh_project(self):
         self.project_combo.blockSignals(True)
@@ -1363,19 +3563,49 @@ class CareerAccelerator(QMainWindow):
         self.sql_problem_list.clear()
         completed = {
             row["title"]: row
-            for row in self.conn.execute("SELECT * FROM sql_practice").fetchall()
+            for row in self.conn.execute(
+                "SELECT * FROM sql_practice"
+            ).fetchall()
         }
-        for title, difficulty, topic, concepts, assigned_week, estimate in SQL_COMPANION:
-            if assigned_week == self.state["current_week"] or title in completed:
-                status = "✅" if title in completed else "⬜"
-                mastery = (
-                    f" • Mastery {completed[title]['mastery']}/5"
-                    if title in completed else ""
-                )
-                self.sql_problem_list.addItem(
-                    f"{status} {title} • {difficulty} • {topic} • "
-                    f"{concepts} • {estimate} min{mastery}"
-                )
+        recommended = set(
+            tracks.next_sql_titles(
+                self.conn,
+                self.state,
+                limit=5,
+            )
+        )
+
+        for (
+            title,
+            difficulty,
+            topic,
+            concepts,
+            _assigned_week,
+            estimate,
+        ) in SQL_COMPANION:
+            if (
+                title not in completed
+                and title not in recommended
+            ):
+                continue
+
+            status = (
+                "✅"
+                if title in completed
+                else "⬜"
+            )
+            mastery = (
+                f" • Mastery "
+                f"{completed[title]['mastery']}/5"
+                if title in completed
+                else ""
+            )
+            self.sql_problem_list.addItem(
+                f"{status} {title} • "
+                f"{difficulty} • {topic} • "
+                f"{concepts} • {estimate} min"
+                f"{mastery}"
+            )
 
     def refresh_sessions(self):
         self.session_list.clear()
@@ -1391,27 +3621,138 @@ class CareerAccelerator(QMainWindow):
             )
 
     def refresh_readiness(self):
-        data = analytics.readiness(self.conn, self.state)
+        data = analytics.readiness(
+            self.conn,
+            self.state,
+        )
+
         for key, value in data.items():
-            self.readiness_rings[key].set_value(value, f"{value}%", "")
+            self.readiness_rings[key].set_value(
+                value,
+                f"{value}%",
+                "",
+            )
+
+        evidence = self.conn.execute(
+            """SELECT *
+               FROM evidence
+               ORDER BY skill,source_type"""
+        ).fetchall()
 
         self.evidence_list.clear()
-        evidence = self.conn.execute(
-            "SELECT * FROM evidence ORDER BY skill,source_type"
-        ).fetchall()
         if evidence:
             for row in evidence:
                 self.evidence_list.addItem(
-                    f"✅ {row['skill']} • {row['source_type']} • {row['source_name']}"
+                    f"✅ {row['skill']}\n"
+                    f"    {row['source_type']} • "
+                    f"{row['source_name']}"
                 )
         else:
             self.evidence_list.addItem(
-                "No evidence logged yet. Add portfolio, coursework, or work examples."
+                "No evidence logged yet.\n"
+                "Add portfolio, coursework, SQL practice, "
+                "certifications, or work examples."
             )
 
-        self.readiness_coach.setText(
-            "\n\n".join(coach.recommendations(self.conn, self.state))
+        recommendations = coach.recommendations(
+            self.conn,
+            self.state,
         )
+
+        self.clear_layout(self.readiness_coach_layout)
+        recommendation_icons = [
+            "🎯",
+            "💻",
+            "⏱️",
+            "📊",
+        ]
+
+        for index, recommendation in enumerate(
+            recommendations[:4]
+        ):
+            panel = SoftPanel()
+            panel_layout = QHBoxLayout(panel)
+            panel_layout.setContentsMargins(12, 10, 12, 10)
+            panel_layout.setSpacing(9)
+
+            icon = QLabel(
+                recommendation_icons[
+                    index % len(recommendation_icons)
+                ]
+            )
+            icon.setStyleSheet("font-size:17pt;")
+            panel_layout.addWidget(icon)
+
+            text = QLabel(recommendation)
+            text.setWordWrap(True)
+            text.setObjectName("Muted")
+            panel_layout.addWidget(text, 1)
+
+            self.readiness_coach_layout.addWidget(panel)
+
+        overall = data["Overall"]
+        weakest = min(
+            (
+                key
+                for key in data
+                if key != "Overall"
+            ),
+            key=lambda key: data[key],
+        )
+
+        self.readiness_overall_value.setText(
+            f"{overall}%"
+        )
+        self.readiness_overall_progress.setValue(overall)
+        self.readiness_leverage_title.setText(
+            f"Focus next: {weakest}"
+        )
+        self.readiness_leverage_detail.setText(
+            recommendations[0]
+            if recommendations
+            else "Continue the current highest-priority roadmap task."
+        )
+
+        self.clear_layout(self.readiness_coverage_layout)
+
+        source_counts = {
+            row["source_type"]: row["count"]
+            for row in self.conn.execute(
+                """SELECT source_type,COUNT(*) AS count
+                   FROM evidence
+                   GROUP BY source_type"""
+            ).fetchall()
+        }
+
+        coverage_rows = [
+            ("📁", "Portfolio", source_counts.get("Portfolio", 0)),
+            ("🎓", "Coursework", source_counts.get("Coursework", 0)),
+            ("🎬", "Work Experience", source_counts.get("Work Experience", 0)),
+            ("💻", "SQL Practice", source_counts.get("SQL Practice", 0)),
+            ("📜", "Certification", source_counts.get("Certification", 0)),
+        ]
+
+        for index, (emoji, label, count) in enumerate(
+            coverage_rows
+        ):
+            self.readiness_coverage_layout.addWidget(
+                StatRow(
+                    emoji,
+                    label,
+                    f"{count} evidence item"
+                    f"{'' if count == 1 else 's'}",
+                    (
+                        COLORS["green"]
+                        if count > 0
+                        else COLORS["muted"]
+                    ),
+                )
+            )
+
+            if index < len(coverage_rows) - 1:
+                self.readiness_coverage_layout.addWidget(
+                    Divider()
+                )
 
     def refresh_applications(self):
         self.clear_layout(self.kanban_layout)
@@ -1455,15 +3796,40 @@ class CareerAccelerator(QMainWindow):
 
     # ---------- Actions ----------
     def complete_task(self, task_id):
-        self.conn.execute(
-            "UPDATE sprint_tasks SET completed=1 WHERE id=?", (task_id,)
+        result = tracks.complete_track_task(
+            self.conn,
+            task_id,
+            self.state,
         )
-        self.conn.execute(
-            "UPDATE task_metadata SET status='Completed',deferred_until=NULL WHERE task_id=?",
-            (task_id,),
+
+        if not result["handled"]:
+            self.conn.execute(
+                """UPDATE sprint_tasks
+                   SET completed=1
+                   WHERE id=?""",
+                (task_id,),
+            )
+            self.conn.execute(
+                """UPDATE task_metadata
+                   SET status='Completed',
+                       deferred_until=NULL
+                   WHERE task_id=?""",
+                (task_id,),
+            )
+            self.conn.commit()
+
+        self.state = state(self.conn)
+        tracks.sync_all(
+            self.conn,
+            self.state,
         )
-        self.conn.commit()
         self.refresh_all()
+
+        if result["handled"]:
+            self.statusBar().showMessage(
+                result["message"],
+                4200,
+            )
 
     def build_plan(self):
         rows, remaining = planner.make_plan(
@@ -1603,12 +3969,29 @@ class CareerAccelerator(QMainWindow):
             self.refresh_all()
 
     def save_learning(self):
+        previous_state = self.state
+        tracks.record_google_manual_change(
+            self.conn,
+            previous_state,
+            self.course_input.value(),
+            self.module_input.value(),
+        )
+
         update_state(
             self.conn,
             current_week=self.week_input.value(),
             google_course=self.course_input.value(),
             google_module=self.module_input.value(),
             weekly_target_hours=self.hours_input.value(),
+        )
+        planner.sync_google_course_progress(
+            self.conn,
+            self.course_input.value(),
+        )
+        self.state = state(self.conn)
+        tracks.sync_all(
+            self.conn,
+            self.state,
         )
         self.refresh_all()
 
@@ -1626,14 +4009,59 @@ class CareerAccelerator(QMainWindow):
             (project_id,),
         ).fetchall()
 
+        project_stage_colors = {
+            "Discovery": COLORS["blue"],
+            "Dataset": COLORS["cyan"],
+            "SQL": COLORS["purple"],
+            "Python": COLORS["green"],
+            "Power BI": COLORS["orange"],
+            "GitHub": COLORS["gold"],
+            "README": COLORS["blue"],
+            "Overview": COLORS["muted"],
+            "Tasks": COLORS["muted"],
+        }
+
         for row in rows:
-            target_stage = row["stage"] if row["stage"] in self.project_stage_widgets else "Tasks"
+            target_stage = (
+                row["stage"]
+                if row["stage"]
+                in self.project_stage_widgets
+                else "Tasks"
+            )
             if target_stage not in ("Overview", "Tasks"):
                 target_stage = "Tasks"
-            checkbox = QCheckBox(row["label"])
-            checkbox.setChecked(bool(row["completed"]))
-            self.project_stage_widgets[target_stage].addWidget(checkbox)
-            self.project_task_checks.append((row["id"], checkbox))
+
+            task_row = TaskRow(
+                title=row["label"],
+                source=(
+                    f"Project milestone • "
+                    f"{row['stage']}"
+                ),
+                checked=bool(row["completed"]),
+                status_text=(
+                    "Completed"
+                    if row["completed"]
+                    else ""
+                ),
+                category_text=row["stage"],
+                category_color=project_stage_colors.get(
+                    row["stage"],
+                    COLORS["muted"],
+                ),
+                on_toggle=(
+                    lambda state, task_id=row["id"]:
+                    self.set_project_task_completed(
+                        task_id,
+                        state,
+                    )
+                ),
+            )
+            self.project_stage_widgets[
+                target_stage
+            ].addWidget(task_row)
+            self.project_task_checks.append(
+                (row["id"], task_row.checkbox)
+            )
 
         for stage in ("Overview", "Tasks"):
             self.project_stage_widgets[stage].addStretch()
@@ -1666,14 +4094,92 @@ class CareerAccelerator(QMainWindow):
         )
         self.refresh_all()
 
+    def set_project_task_completed(
+        self,
+        task_id,
+        state_value,
+    ):
+        completed = (
+            int(state_value)
+            == int(Qt.Checked)
+        )
+        self.conn.execute(
+            """UPDATE project_tasks
+               SET completed=?
+               WHERE id=?""",
+            (1 if completed else 0, task_id),
+        )
+        task_row = self.conn.execute(
+            """SELECT label
+               FROM project_tasks
+               WHERE id=?""",
+            (task_id,),
+        ).fetchone()
+
+        tracks.record_portfolio_change(
+            self.conn,
+            project_id=self.state[
+                "current_project"
+            ],
+            project_task_id=task_id,
+            label=(
+                task_row["label"]
+                if task_row
+                else "Portfolio milestone"
+            ),
+            completed=completed,
+        )
+        tracks.sync_all(
+            self.conn,
+            self.state,
+        )
+        self.conn.commit()
+
+        self.statusBar().showMessage(
+            (
+                "Portfolio milestone completed."
+                if completed
+                else "Portfolio milestone reopened."
+            ),
+            2200,
+        )
+
+        QTimer.singleShot(
+            0,
+            self.refresh_after_project_task_change,
+        )
+
+    def refresh_after_project_task_change(self):
+        newly_unlocked = self.sync_achievement_records()
+        self.load_project()
+        self.refresh_dashboard()
+        self.refresh_learning()
+        self.refresh_readiness()
+
+        if newly_unlocked:
+            self.statusBar().showMessage(
+                f"🏆 Achievement unlocked: "
+                f"{newly_unlocked[0]}",
+                5000,
+            )
+
     def save_project_tasks(self):
         for task_id, checkbox in self.project_task_checks:
             self.conn.execute(
-                "UPDATE project_tasks SET completed=? WHERE id=?",
-                (1 if checkbox.isChecked() else 0, task_id),
+                """UPDATE project_tasks
+                   SET completed=?
+                   WHERE id=?""",
+                (
+                    1 if checkbox.isChecked() else 0,
+                    task_id,
+                ),
             )
         self.conn.commit()
-        self.refresh_all()
+        self.refresh_after_project_task_change()
+        self.statusBar().showMessage(
+            "Portfolio milestone states saved.",
+            2200,
+        )
 
     def save_project_note(self, section, widget):
         project_id = int(self.project_combo.currentData())
@@ -1738,6 +4244,15 @@ class CareerAccelerator(QMainWindow):
             ),
         )
         self.conn.commit()
+        tracks.record_sql_completion(
+            self.conn,
+            title,
+        )
+        self.state = state(self.conn)
+        tracks.sync_all(
+            self.conn,
+            self.state,
+        )
         self.refresh_all()
 
     def sql_hint(self):
@@ -1758,25 +4273,144 @@ class CareerAccelerator(QMainWindow):
         if path.exists():
             os.startfile(path)
 
-    def tick_timer(self):
-        self.elapsed_seconds += 1
+    def session_goal_seconds(self):
+        if hasattr(self, "session_goal_minutes"):
+            minutes = self.session_goal_minutes.value()
+        else:
+            minutes = int(
+                setting(
+                    self.conn,
+                    "session_goal_minutes",
+                    "60",
+                )
+            )
+        return max(60, int(minutes) * 60)
+
+    def change_session_goal(self, value):
+        save_setting(
+            self.conn,
+            "session_goal_minutes",
+            str(int(value)),
+        )
+        self.update_timer_visuals(pulse=True)
+
+    def timer_caption(self):
+        goal_minutes = max(
+            1,
+            self.session_goal_seconds() // 60,
+        )
+        studied_minutes = self.elapsed_seconds // 60
+
+        if self.elapsed_seconds >= self.session_goal_seconds():
+            state_text = "Goal reached"
+        elif self.timer_state == "running":
+            state_text = "Focusing"
+        elif self.timer_state == "paused":
+            state_text = "Paused"
+        else:
+            state_text = "Ready to focus"
+
+        return (
+            f"{state_text} • "
+            f"{studied_minutes} / {goal_minutes} min"
+        )
+
+    def update_timer_visuals(self, pulse=False):
         hours, remainder = divmod(self.elapsed_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         text = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-        if hasattr(self, "circular_timer"):
-            self.circular_timer.set_text(text)
-        self.study_timer.setText(text)
+        progress = min(
+            1.0,
+            self.elapsed_seconds
+            / self.session_goal_seconds(),
+        )
+        caption = self.timer_caption()
+
+        for attribute in (
+            "circular_timer",
+            "study_circular_timer",
+        ):
+            timer_widget = getattr(self, attribute, None)
+            if timer_widget is None:
+                continue
+            timer_widget.set_display(
+                text,
+                caption,
+                progress,
+            )
+            if pulse:
+                timer_widget.pulse()
+
+    def start_study_timer(self):
+        self.timer_state = "running"
+        self.timer.start(1000)
+        self.update_timer_visuals(pulse=True)
+        self.statusBar().showMessage(
+            "Study session started.",
+            1800,
+        )
+
+    def pause_study_timer(self):
+        self.timer.stop()
+        if self.elapsed_seconds > 0:
+            self.timer_state = "paused"
+        else:
+            self.timer_state = "ready"
+        self.update_timer_visuals(pulse=True)
+        self.statusBar().showMessage(
+            "Study session paused.",
+            1800,
+        )
+
+    def tick_timer(self):
+        self.elapsed_seconds += 1
+        self.update_timer_visuals()
+
+    def confirm_reset_timer(self):
+        if self.elapsed_seconds <= 0:
+            self.reset_timer()
+            return
+
+        response = QMessageBox.question(
+            self,
+            "Reset Study Session",
+            "Reset the current study timer? The unlogged time will be discarded.",
+            (
+                QMessageBox.StandardButton.Yes
+                | QMessageBox.StandardButton.No
+            ),
+            QMessageBox.StandardButton.No,
+        )
+
+        if response == QMessageBox.StandardButton.Yes:
+            self.reset_timer()
 
     def reset_timer(self):
         self.timer.stop()
         self.elapsed_seconds = 0
-        if hasattr(self, "circular_timer"):
-            self.circular_timer.set_text("00:00:00")
-        self.study_timer.setText("00:00:00")
+        self.timer_state = "ready"
+        self.update_timer_visuals(pulse=True)
+        self.statusBar().showMessage(
+            "Study session reset.",
+            1800,
+        )
+
+    def apply_timer_to_session_log(self):
+        self.pause_study_timer()
+        hours = self.elapsed_seconds / 3600
+        self.session_hours.setText(
+            f"{hours:.2f}"
+        )
+        self.statusBar().showMessage(
+            "Current timer value copied into the session log.",
+            3500,
+        )
 
     def transfer_timer(self):
-        self.timer.stop()
-        self.session_hours.setText(f"{self.elapsed_seconds / 3600:.2f}")
+        self.pause_study_timer()
+        self.session_hours.setText(
+            f"{self.elapsed_seconds / 3600:.2f}"
+        )
         self.navigate(5)
 
     def save_session(self):
@@ -1945,6 +4579,132 @@ class CareerAccelerator(QMainWindow):
         self.autosave_timer.start(max(60000, interval))
         self.settings_status.setText("Settings saved.")
 
+
+    def reset_progress_details(self):
+        return (
+            "This will permanently reset the active Career Accelerator profile.\\n\\n"
+            "The following progress will be cleared:\\n"
+            "• All roadmap and daily-focus completion\\n"
+            "• All portfolio milestones and saved project notes\\n"
+            "• All study sessions, hours, streaks, and productivity scores\\n"
+            "• All completed SQL problems and review dates\\n"
+            "• All achievements and weekly summaries\\n"
+            "• All applications, follow-up dates, and evidence records\\n"
+            "• All retrospective notes and progress dates\\n\\n"
+            "The application will restart at:\\n"
+            "• Week 1 of 12\\n"
+            "• Google Course 1, Module 1\\n"
+            "• Portfolio Project 1\\n"
+            "• 0 study hours and 0 completed tasks\\n"
+            f"• Start date: {date.today().isoformat()}\\n\\n"
+            "A safety database backup will be created first. "
+            "Autosave preferences, focus-goal preferences, and existing backup "
+            "files will be preserved."
+        )
+
+    def confirm_factory_reset(self):
+        first = QMessageBox.warning(
+            self,
+            "Reset All Progress — Confirmation 1 of 3",
+            self.reset_progress_details(),
+            (
+                QMessageBox.StandardButton.Yes
+                | QMessageBox.StandardButton.Cancel
+            ),
+            QMessageBox.StandardButton.Cancel,
+        )
+        if first != QMessageBox.StandardButton.Yes:
+            return
+
+        confirmation_text, accepted = QInputDialog.getText(
+            self,
+            "Reset All Progress — Confirmation 2 of 3",
+            "Type RESET ALL PROGRESS exactly to continue:",
+        )
+        if (
+            not accepted
+            or confirmation_text.strip()
+            != "RESET ALL PROGRESS"
+        ):
+            QMessageBox.information(
+                self,
+                "Reset Cancelled",
+                "The confirmation phrase did not match. No data was changed.",
+            )
+            return
+
+        final = QMessageBox.critical(
+            self,
+            "Reset All Progress — Final Confirmation",
+            (
+                "This is the final confirmation.\\n\\n"
+                "Career Accelerator will create a safety backup and then erase "
+                "all tracked progress listed in the previous warning. The active "
+                "profile will be rebuilt from the Course 1 starter roadmap.\\n\\n"
+                "Proceed with the irreversible reset?"
+            ),
+            (
+                QMessageBox.StandardButton.Reset
+                | QMessageBox.StandardButton.Cancel
+            ),
+            QMessageBox.StandardButton.Cancel,
+        )
+        if final != QMessageBox.StandardButton.Reset:
+            return
+
+        self.perform_factory_reset()
+
+    def perform_factory_reset(self):
+        self.timer.stop()
+        self.conn.commit()
+        backup_path = create_backup(ROOT)
+
+        try:
+            factory_reset(
+                self.conn,
+                date.today().isoformat(),
+            )
+            migrate_result = migrate(
+                self.conn,
+                ROOT,
+            )
+            planner.seed(self.conn)
+            planner.sync_google_course_progress(
+                self.conn,
+                1,
+            )
+            self.state = state(self.conn)
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            self.elapsed_seconds = 0
+            self.timer_state = "ready"
+            self.update_timer_visuals()
+            self.refresh_all()
+            self.navigate(0)
+
+            QMessageBox.information(
+                self,
+                "Progress Reset Complete",
+                (
+                    "Career Accelerator has been reset to a clean starter profile.\\n\\n"
+                    f"Imported {migrate_result['sprint_tasks']} roadmap tasks and "
+                    f"{migrate_result['project_tasks']} portfolio milestones.\\n\\n"
+                    f"Safety backup:\\n{backup_path}"
+                ),
+            )
+        except Exception as error:
+            QMessageBox.critical(
+                self,
+                "Reset Failed",
+                (
+                    "The reset could not be completed. Your safety backup is available at:\\n"
+                    f"{backup_path}\\n\\nError: {error}"
+                ),
+            )
+            raise
+
     def backup_database(self):
         path = create_backup(ROOT)
         self.settings_status.setText(f"Backup created: {path}")
@@ -1987,7 +4747,7 @@ class CareerAccelerator(QMainWindow):
             ("🚀 Build Adaptive Plan", lambda: self.navigate(1)),
             ("📁 Open Portfolio Workspace", lambda: self.navigate(3)),
             ("💻 Open SQL Companion", lambda: self.navigate(4)),
-            ("⏱️ Start Study Timer", lambda: self.timer.start(1000)),
+            ("⏱️ Start Study Timer", self.start_study_timer),
             ("📝 Open Weekly Review", lambda: self.navigate(8)),
             ("🚀 Publish Progress", self.publish_progress),
             ("💾 Create Backup", self.backup_database),

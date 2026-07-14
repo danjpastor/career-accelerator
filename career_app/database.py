@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS program_state (
     current_week INTEGER NOT NULL DEFAULT 1,
     total_weeks INTEGER NOT NULL DEFAULT 12,
     start_date TEXT NOT NULL,
-    google_course INTEGER NOT NULL DEFAULT 5,
+    google_course INTEGER NOT NULL DEFAULT 1,
     google_total_courses INTEGER NOT NULL DEFAULT 9,
     google_module INTEGER NOT NULL DEFAULT 1,
     current_project INTEGER NOT NULL DEFAULT 1,
@@ -40,7 +40,25 @@ CREATE TABLE IF NOT EXISTS task_metadata (
     deferred_until TEXT,
     destination INTEGER NOT NULL DEFAULT 0,
     category TEXT NOT NULL DEFAULT 'General',
+    prerequisite_state TEXT NOT NULL DEFAULT 'Ready',
+    prerequisite_reason TEXT,
     FOREIGN KEY(task_id) REFERENCES sprint_tasks(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS daily_focus (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    focus_date TEXT NOT NULL,
+    week INTEGER NOT NULL,
+    position INTEGER NOT NULL,
+    task_id INTEGER,
+    source_key TEXT NOT NULL,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    estimated_minutes INTEGER NOT NULL DEFAULT 30,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(focus_date, position),
+    FOREIGN KEY(task_id) REFERENCES sprint_tasks(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS project_tasks (
@@ -144,6 +162,51 @@ CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+
+CREATE TABLE IF NOT EXISTS track_state (
+    track_key TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
+    subposition INTEGER NOT NULL DEFAULT 0,
+    weekly_target INTEGER NOT NULL DEFAULT 1,
+    status TEXT NOT NULL DEFAULT 'Active',
+    metadata TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS track_tasks (
+    track_key TEXT PRIMARY KEY,
+    task_id INTEGER NOT NULL UNIQUE,
+    target_key TEXT NOT NULL,
+    source_label TEXT NOT NULL,
+    linked_entity_id INTEGER,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(task_id)
+        REFERENCES sprint_tasks(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS track_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    track_key TEXT NOT NULL,
+    event_key TEXT NOT NULL UNIQUE,
+    event_type TEXT NOT NULL DEFAULT 'Completed',
+    item_label TEXT NOT NULL,
+    completed_date TEXT NOT NULL,
+    metadata TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS skill_state (
+    skill_key TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Locked',
+    source_track TEXT,
+    evidence TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 """
 
 def connect():
@@ -159,6 +222,11 @@ def _ensure_columns(conn):
     additions = {
         "task_metadata": [
             ("category", "TEXT NOT NULL DEFAULT 'General'"),
+            (
+                "prerequisite_state",
+                "TEXT NOT NULL DEFAULT 'Ready'",
+            ),
+            ("prerequisite_reason", "TEXT"),
         ],
         "project_tasks": [
             ("stage", "TEXT NOT NULL DEFAULT 'Overview'"),
@@ -194,7 +262,7 @@ def ensure_default_state(conn, start_date):
                (id,start_date,current_week,total_weeks,google_course,
                 google_total_courses,google_module,current_project,total_projects,
                 weekly_target_hours,sql_target)
-               VALUES (1,?,1,12,5,9,1,1,3,18,100)""",
+               VALUES (1,?,1,12,1,9,1,1,3,18,100)""",
             (start_date,),
         )
         conn.commit()
@@ -228,3 +296,62 @@ def save_setting(conn, key, value):
         (key, str(value)),
     )
     conn.commit()
+
+def factory_reset(conn, start_date):
+    """Clear all user progress and rebuild a clean Course 1 state.
+
+    Application preferences in the settings table and backup files on disk
+    are intentionally preserved.
+    """
+    progress_tables = [
+        "daily_focus",
+        "achievements",
+        "weekly_summaries",
+        "retrospective_notes",
+        "study_sessions",
+        "sql_practice",
+        "applications",
+        "evidence",
+        "project_notes",
+        "task_metadata",
+        "sprint_tasks",
+        "project_tasks",
+        "program_state",
+        "track_tasks",
+        "track_events",
+        "track_state",
+        "skill_state",
+    ]
+
+    with conn:
+        for table in progress_tables:
+            conn.execute(f"DELETE FROM {table}")
+
+        conn.execute(
+            """INSERT INTO program_state
+               (id,start_date,current_week,total_weeks,google_course,
+                google_total_courses,google_module,current_project,total_projects,
+                weekly_target_hours,sql_target)
+               VALUES (1,?,1,12,1,9,1,1,3,18,100)""",
+            (start_date,),
+        )
+
+        sequence_tables = [
+            table
+            for table in progress_tables
+            if table not in {
+                "program_state",
+                "task_metadata",
+            }
+        ]
+        placeholders = ",".join("?" for _ in sequence_tables)
+        conn.execute(
+            f"DELETE FROM sqlite_sequence WHERE name IN ({placeholders})",
+            sequence_tables,
+        )
+        conn.execute(
+            """DELETE FROM settings
+               WHERE key='current_google_task_id'
+                  OR key LIKE 'track_%'"""
+        )
+
