@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.1.1 includes:
+Version 9.1.3 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -172,3 +172,24 @@ work from completed work, unlocks skills only after their source course is
 complete, and records skipped same-course modules accurately.
 
 See `RELEASE_READINESS.md` for covered edge cases and intentional boundaries.
+
+
+## Next Tasks Completion Fix
+
+Dashboard task checkboxes now hide their row immediately and queue the
+completion update until the checkbox mouse event has finished. The refreshed
+task list then shows the next eligible modular task or removes an ordinary
+completed sprint task.
+
+Dynamic dashboard widgets are detached and hidden immediately during refresh
+instead of remaining visible until deferred deletion occurs.
+
+
+## PySide6 Checkbox Compatibility Fix
+
+Version 9.1.3 uses the numeric `.value` property of `Qt.CheckState`
+members. This fixes the `TypeError` raised by PySide6 versions that do not
+permit `int(Qt.Checked)`.
+
+The fix applies to both Dashboard Next Tasks and Portfolio Workspace
+milestone checkboxes.

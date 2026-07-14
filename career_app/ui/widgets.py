@@ -612,7 +612,11 @@ class VisibleCheckBox(QWidget):
         self._checked = not self._checked
         self.update()
         self.stateChanged.emit(
-            int(Qt.Checked if self._checked else Qt.Unchecked)
+            (
+                Qt.Checked.value
+                if self._checked
+                else Qt.Unchecked.value
+            )
         )
 
     def mousePressEvent(self, event):

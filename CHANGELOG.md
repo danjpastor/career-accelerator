@@ -23,6 +23,28 @@ This file is the single maintained changelog for the project.
 
 
 
+
+
+## 9.1.3
+
+- Fixed the PySide6 `CheckState` conversion error
+- Updated `VisibleCheckBox` to emit `Qt.Checked.value` or
+  `Qt.Unchecked.value`
+- Fixed Dashboard Next Tasks checkbox-state comparison
+- Fixed Portfolio Workspace milestone checkbox-state comparison
+- Preserved the v9.1.2 layout, data, progress, and completion behavior
+
+## 9.1.2
+
+- Fixed Next Tasks rows not disappearing reliably after checking them
+- Hid completed rows immediately before database synchronization
+- Queued dashboard completion until the checkbox event finishes
+- Ignored unchecked-state events in the completion handler
+- Disabled the checkbox while completion is processing to prevent double clicks
+- Restored the row and displayed an error if completion fails
+- Detached dynamic widgets immediately during dashboard refresh
+- Preserved the complete existing layout and VFX dataset package
+
 ## 9.1.1
 
 - Made Google certificate work unconditionally first in Today’s Focus

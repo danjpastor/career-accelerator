@@ -518,8 +518,12 @@ class CareerAccelerator(QMainWindow):
     def clear_layout(self, layout):
         while layout.count():
             item = layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            widget = item.widget()
+
+            if widget is not None:
+                widget.hide()
+                widget.setParent(None)
+                widget.deleteLater()
             elif item.layout():
                 self.clear_layout(item.layout())
 
@@ -3293,10 +3297,16 @@ class CareerAccelerator(QMainWindow):
                         row["category"],
                         COLORS["muted"],
                     ),
-                    on_toggle=(
-                        lambda _, task_id=row["id"]:
-                        self.complete_task(task_id)
-                    ),
+                )
+                task_row.checkbox.stateChanged.connect(
+                    lambda state_value,
+                    task_row=task_row,
+                    task_id=row["id"]:
+                    self.queue_dashboard_task_completion(
+                        task_row,
+                        task_id,
+                        state_value,
+                    )
                 )
                 self.dashboard_tasks_layout.addWidget(task_row)
                 if index < min(len(available), 5) - 1:
@@ -3795,6 +3805,49 @@ class CareerAccelerator(QMainWindow):
             self.summary_list.addItem(f"Week {row['week']}: {row['summary']}")
 
     # ---------- Actions ----------
+    def queue_dashboard_task_completion(
+        self,
+        task_row,
+        task_id,
+        state_value,
+    ):
+        """Complete a dashboard task after the checkbox event finishes."""
+        if int(state_value) != Qt.Checked.value:
+            return
+
+        task_row.checkbox.setEnabled(False)
+        task_row.hide()
+
+        QTimer.singleShot(
+            0,
+            lambda: self.finish_dashboard_task_completion(
+                task_row,
+                task_id,
+            ),
+        )
+
+    def finish_dashboard_task_completion(
+        self,
+        task_row,
+        task_id,
+    ):
+        try:
+            self.complete_task(task_id)
+        except Exception as error:
+            task_row.show()
+            task_row.setEnabled(True)
+            task_row.checkbox.setChecked(False)
+            QMessageBox.critical(
+                self,
+                "Task Completion Failed",
+                (
+                    "The task could not be marked complete. "
+                    "Your progress was not intentionally discarded.\n\n"
+                    f"Error: {error}"
+                ),
+            )
+            raise
+
     def complete_task(self, task_id):
         result = tracks.complete_track_task(
             self.conn,
@@ -4101,7 +4154,7 @@ class CareerAccelerator(QMainWindow):
     ):
         completed = (
             int(state_value)
-            == int(Qt.Checked)
+            == Qt.Checked.value
         )
         self.conn.execute(
             """UPDATE project_tasks
