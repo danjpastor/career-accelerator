@@ -1,0 +1,85 @@
+﻿Table,Column,Expected type,Key role,Description,Seeded quality notes
+Raw_Clients,client_id,Text,Primary key,Synthetic client identifier.,"Duplicates, whitespace, and invalid references exist."
+Raw_Clients,client_name,Text,,Client or studio name.,
+Raw_Clients,client_type,Text,,Business category such as feature studio or agency.,
+Raw_Clients,region,Text,,Primary client region.,
+Raw_Clients,contract_tier,Text,,Commercial service tier.,
+Raw_Clients,revision_tendency_index,Decimal,,Synthetic multiplier influencing client revision behavior.,
+Raw_Clients,default_review_sla_hours,Integer,,Expected client review turnaround in hours.,
+Raw_Clients,active_flag,Boolean-like text,,Whether the client relationship is active.,Multiple boolean encodings are intentionally present.
+Raw_Clients,account_manager,Text,,Internal account owner.,
+Raw_Clients,notes,Text,,Free-form account notes.,
+Raw_Projects,project_id,Text,Primary key,Synthetic production/project identifier.,"Duplicates, casing/whitespace, and invalid references exist."
+Raw_Projects,client_id,Text,Foreign key → Raw_Clients.client_id,Client commissioning the work.,"Duplicates, whitespace, and invalid references exist."
+Raw_Projects,project_name,Text,,Internal project title.,
+Raw_Projects,project_type,Text,,"Feature, episodic, commercial, trailer, or game cinematic.",
+Raw_Projects,start_date,Date text,,Production start date from the raw export.,"Mixed formats, blanks, and invalid dates exist."
+Raw_Projects,target_delivery_date,Date text,,Contractual or internal target delivery date.,Mixed formats and date-order problems exist.
+Raw_Projects,actual_delivery_date,Date text,,Actual project delivery date when completed.,Mixed formats and blanks exist.
+Raw_Projects,status,Text,,Current project state.,"Casing, spelling, and workflow-label inconsistencies exist."
+Raw_Projects,priority,Text,,Operational priority.,
+Raw_Projects,planned_shot_count,Integer,,Planned number of shots.,
+Raw_Projects,budget_hours,Decimal,,Approved labor-hour budget.,"Text, blanks, and negative values exist."
+Raw_Projects,producer,Text,,Production owner.,
+Raw_Projects,vfx_supervisor,Text,,Creative/technical supervisor.,
+Raw_Projects,fps,Decimal,,Project frame rate.,
+Raw_Projects,resolution,Text,,Delivery resolution.,
+Raw_Projects,delivery_format,Text,,Primary delivery media format.,
+Raw_Artists,artist_id,Text,Primary key,Synthetic employee identifier.,"Duplicates, casing, blanks, and invalid references exist."
+Raw_Artists,artist_name,Text,,Artist display name.,
+Raw_Artists,department,Text,,Primary VFX department.,"Abbreviations, casing, whitespace, and alternate names exist."
+Raw_Artists,role,Text,,Production role.,
+Raw_Artists,seniority,Text,,"Junior, mid, senior, or lead.",
+Raw_Artists,location,Text,,Office or remote location.,
+Raw_Artists,weekly_capacity_hours,Decimal,,Expected weekly available production hours.,"Text, zero, negative, and extreme values exist."
+Raw_Artists,hourly_cost_usd,Currency/decimal,,Synthetic internal labor cost.,"Currency strings, blanks, and negative values exist."
+Raw_Artists,hire_date,Date text,,Employment start date.,Mostly ISO text; validate parsing.
+Raw_Artists,active_flag,Boolean-like text,,Whether the artist is active.,Multiple boolean encodings are intentionally present.
+Raw_Artists,manager_id,Text,Self-reference → Raw_Artists.artist_id,Department manager or lead.,
+Raw_Artists,email,Text,,Synthetic email address using an example domain.,Missing and duplicate values exist.
+Raw_Shots,shot_id,Text,Primary key,Unique project-sequence-shot identifier.,Duplicate and invalid references exist.
+Raw_Shots,project_id,Text,Foreign key → Raw_Projects.project_id,Owning project.,"Duplicates, casing/whitespace, and invalid references exist."
+Raw_Shots,sequence_code,Text,,Editorial sequence identifier.,
+Raw_Shots,shot_name,Text,,Shot code within a project.,
+Raw_Shots,department,Text,,Department responsible for the current/final task.,"Abbreviations, casing, whitespace, and alternate names exist."
+Raw_Shots,assigned_artist_id,Text,Foreign key → Raw_Artists.artist_id,Primary assigned artist.,
+Raw_Shots,assigned_date,Date text,,Date the shot was assigned.,Mixed formats and blanks exist.
+Raw_Shots,start_date,Date text,,Date production work began.,"Mixed formats, blanks, and invalid dates exist."
+Raw_Shots,deadline,Date text,,Required shot delivery date.,Mixed formats and impossible date order exists.
+Raw_Shots,delivery_date,Date text,,Actual delivery date when delivered.,"Mixed formats, blanks, and impossible date order exists."
+Raw_Shots,first_pass_date,Date text,,First review submission date.,Mixed formats and blanks exist.
+Raw_Shots,final_approval_date,Date text,,Date the final version was approved.,Mixed formats and blanks exist.
+Raw_Shots,status,Text,,Shot workflow status.,"Casing, spelling, and workflow-label inconsistencies exist."
+Raw_Shots,priority,Text,,Shot urgency.,
+Raw_Shots,complexity,Text,,Estimated production complexity.,
+Raw_Shots,estimated_hours,Decimal,,Planned labor hours.,"Text values, blanks, zero, negative, and outliers exist."
+Raw_Shots,actual_hours,Decimal,,Reported actual labor hours.,"Text values, blanks, zero, negative, and outliers exist."
+Raw_Shots,internal_revision_count,Integer,,Internal revision rounds.,
+Raw_Shots,client_revision_count,Integer,,Client-requested revision rounds.,
+Raw_Shots,revision_count_reported,Integer,,Raw total revision count from the tracking export.,May not equal internal + client revisions.
+Raw_Shots,hold_days,Integer,,Days blocked or on hold.,
+Raw_Shots,vendor_dependencies,Text,,External dependency category.,
+Raw_Shots,notes,Text,,Free-form production notes.,
+Raw_Time_Entries,time_entry_id,Text,Primary key,Unique timesheet entry.,
+Raw_Time_Entries,shot_id,Text,Foreign key → Raw_Shots.shot_id,Shot receiving the time.,Duplicate and invalid references exist.
+Raw_Time_Entries,project_id,Text,Foreign key → Raw_Projects.project_id,Project receiving the time.,"Duplicates, casing/whitespace, and invalid references exist."
+Raw_Time_Entries,artist_id,Text,Foreign key → Raw_Artists.artist_id,Artist logging the time.,"Duplicates, casing, blanks, and invalid references exist."
+Raw_Time_Entries,work_date,Date text,,Date of work.,Mixed and invalid formats exist.
+Raw_Time_Entries,hours_logged,Decimal,,Hours recorded for the entry.,"Text values, blanks, zero, negative, and >24-hour entries exist."
+Raw_Time_Entries,task_type,Text,,"Production, fixes, setup, QC, or R&D.",
+Raw_Time_Entries,billable_flag,Boolean-like text,,Whether the time is billable.,Multiple boolean encodings are intentionally present.
+Raw_Time_Entries,overtime_flag,Boolean-like text,,Whether the entry represents overtime.,Multiple boolean encodings are intentionally present.
+Raw_Time_Entries,source_system,Text,,Source application/export.,
+Raw_Time_Entries,comment,Text,,Free-form timesheet comment.,
+Raw_Reviews,review_id,Text,Primary key,Unique review event.,
+Raw_Reviews,shot_id,Text,Foreign key → Raw_Shots.shot_id,Reviewed shot.,Duplicate and invalid references exist.
+Raw_Reviews,project_id,Text,Foreign key → Raw_Projects.project_id,Owning project.,"Duplicates, casing/whitespace, and invalid references exist."
+Raw_Reviews,review_date,Date text,,Date of the review.,"Mixed, blank, and invalid formats exist."
+Raw_Reviews,review_round,Integer,,Sequential review round.,"Text, blanks, and invalid numbers exist."
+Raw_Reviews,review_type,Text,,Internal or client review.,
+Raw_Reviews,feedback_source,Text,,Person/group giving feedback.,
+Raw_Reviews,outcome,Text,,Review result.,
+Raw_Reviews,note_category,Text,,Main feedback category.,
+Raw_Reviews,response_hours,Decimal,,Time until notes were addressed or acknowledged.,"Text, blanks, negative, and extreme values exist."
+Raw_Reviews,reviewer,Text,,Reviewer name.,
+Raw_Reviews,notes,Text,,Free-form review notes.,

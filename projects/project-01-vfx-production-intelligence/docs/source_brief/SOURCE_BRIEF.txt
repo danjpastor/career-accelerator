@@ -1,0 +1,6 @@
+SpectraForge VFX Production Intelligence Synthetic Dataset
+
+All companies, people, projects, and production records are fictional.
+As-of date for overdue analysis: 2026-06-30
+Use the raw CSV files as staging inputs. Preserve them unchanged and build cleaned tables separately.
+The issue manifest reports seeded issue types and counts without revealing the affected row numbers.

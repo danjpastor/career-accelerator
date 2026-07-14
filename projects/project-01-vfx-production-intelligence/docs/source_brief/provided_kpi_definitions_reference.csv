@@ -1,0 +1,11 @@
+﻿KPI,Business meaning,Recommended calculation,Source tables,Cleaning caveat
+On-time delivery rate,Percentage of completed shots delivered on or before the deadline.,Completed shots with delivery_date <= deadline ÷ completed shots,Raw_Shots,Standardize completed statuses and parse dates before calculation.
+Average turnaround time,Average elapsed production days from start to delivery.,Average(delivery_date - start_date) for valid completed shots,Raw_Shots,Exclude invalid or negative date intervals.
+Artist utilization,Share of available weekly capacity used on production work.,SUM(hours_logged) by artist/week ÷ weekly_capacity_hours,Raw_Time_Entries + Raw_Artists,Normalize capacity and remove duplicate/invalid time entries.
+Revision rate,Average revision rounds per delivered shot and percentage exceeding a threshold.,(internal + client revisions) ÷ completed shots,Raw_Shots + Raw_Reviews,Reconcile reported counts with review-event records.
+Estimate accuracy,How closely estimated effort matches actual effort.,1 - ABS(actual_hours - estimated_hours) ÷ estimated_hours,Raw_Shots,"Handle zero, missing, text, and negative hour values."
+Hours variance,Absolute and percentage difference between planned and actual hours.,actual_hours - estimated_hours; variance ÷ estimated_hours,Raw_Shots,Consider time-entry sums as a secondary validation source.
+Shots completed per week,Weekly throughput for production planning.,COUNT completed shots grouped by delivery week,Raw_Shots,Normalize delivered/final/approved statuses.
+Overdue shot count,Open shots whose deadline is before the reporting date.,COUNT open shots where deadline < as-of date,Raw_Shots,Use 2026-06-30 as the initial as-of date.
+Department bottleneck index,"Composite view of delay, utilization, revisions, and work-in-progress.",Department-level normalized delay + utilization + revisions + WIP,Raw_Shots + Raw_Time_Entries + Raw_Artists,Define and document a transparent weighting approach.
+Client revision burden,Revision volume and review response time attributable to each client.,Client review events and response time by client/project,Raw_Clients + Raw_Projects + Raw_Reviews,Resolve project/client foreign-key issues first.

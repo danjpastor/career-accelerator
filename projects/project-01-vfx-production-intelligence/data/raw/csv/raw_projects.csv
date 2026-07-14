@@ -1,0 +1,17 @@
+﻿project_id,client_id,project_name,project_type,start_date,target_delivery_date,actual_delivery_date,status,priority,planned_shot_count,budget_hours,producer,vfx_supervisor,fps,resolution,delivery_format
+PRJ-1001,CL-001,Project Nightfall,Feature Film,2024-01-15,2024-09-20,2024-10-05,Completed,High,78,2582.0,Ari Campbell,K. Foster,25,4K DCI,EXR 16-bit
+PRJ-1003, CL-004 ,Helios Auto Launch,Commercial,2024-04-10,2024-06-15,2024/07/11,Completed,High,42,1410.8,Jon Bell,R. Chen,24,2K Flat,EXR 32-bit
+PRJ-1005,CL-009,Starforge Cinematic,Game Cinematic,2024-08-12,2025-03-15,3/25/2025,Completed,Medium,64,1736.0,Jules Harper,M. Patel,25,4K UHD,EXR 32-bit
+PRJ-1006,CL-005,Lotus Protocol,Feature Film,2024-10-01,2025-08-31,2025-08-26,Completed,Critical,88,1851.3,Leah Morgan,M. Patel,25,2K Flat,DPX 10-bit
+PRJ-1008,CL-007,Frontier Division S2,Episodic,2025-02-01,2025-10-20,2025-10-24,Completed,High,84,2463.5,Nina Brooks,S. Robinson,29.97,4K UHD,EXR 32-bit
+PRJ-1005,CL-009,Starforge Cinematic,Game Cinematic,2024-08-12,2025-03-15,3/25/2025,Completed,Medium,64,1736.0,Jules Harper,M. Patel,25,4K UHD,EXR 32-bit
+PRJ-1004,CL-003,Empire of Ash S3,Episodic,2024-06-01,2025-02-28,23-Mar-2025,Completed,High,86,1919.5,Miles Reed,K. Foster,24,4K DCI,EXR 16-bit
+PRJ-1011,CL-999,The Last Cartographer,Independent Feature,2025-07-01,2026-05-31,,In Delivery,Medium,62,1247.1,Mina Shah,S. Robinson,25,2K Flat,DPX 10-bit
+PRJ-1013,CL-012,Aurora Telecom,Commercial,15-Jan-2026,2026-05-20,,In Delivery,High,44,-250,Mina Shah,T. Nguyen,29.97,4K DCI,ProRes 4444
+PRJ-1015,CL-007,Frontier Division S3,Episodic,2026-03-01,2026-12-15,,Active,High,82,1654.8,Miles Reed,T. Nguyen,24,4K UHD,DPX 10-bit
+PRJ-1010,CL-011,Velocity Zero S1,Streaming Series,2025-05-10,2026-04-30,2026-05-19,Completed,Critical,96,2242.5,Sara Kim,S. Robinson,23.976,2K Flat,EXR 16-bit
+PRJ-1012,CL-002,Neon Harbor S2,Streaming Series,2025-10-01,2026-09-30,,In-Progress,Critical,98,3226.5,Miles Reed,T. Nguyen,29.97,4K UHD,DPX 10-bit
+PRJ-1014,CL-009,Mythic Circuit Reveal,Game Cinematic,2026-02-01,2025-12-01,,Active,High,72,2028.1,Owen Price,K. Foster,29.97,4K DCI,EXR 16-bit
+PRJ-1007,CL-008,Nightfall Teaser Campaign,Trailer,2025-01-05,2025-03-10,2025-03-08,complete,Critical,34,896.6,Ari Campbell,K. Foster,29.97,2K Flat,EXR 16-bit
+PRJ-1009,CL-010,Glass Kingdom,Feature Film,2025-03-15,2026-02-28,2026-02-24,Completed,High,90,,Theo Grant,R. Chen,24,4K DCI,EXR 16-bit
+PRJ-1002,CL-002,Neon Harbor S1,Streaming Series,2024-02-05,2024-11-30,2024-12-05,Completed,Critical,92,"2,551.0 hrs",Nina Brooks,M. Patel,29.97,2K Scope,EXR 32-bit

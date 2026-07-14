@@ -1,0 +1,63 @@
+﻿artist_id,artist_name,department,role,seniority,location,weekly_capacity_hours,hourly_cost_usd,hire_date,active_flag,manager_id,email
+ART-026,Morgan Wright,Animation,Animator,Mid,Remote-US,40,76,2020-04-13,Y,ART-006,morgan.wright@spectraforgevfx.example
+ART-020,Finley King,Compositing,Compositor,Mid,Vancouver,40,61,2024-03-09,Yes,ART-015,finley.king@spectraforgevfx.example
+ART-012,Nico Patel,Roto/Paint,Paint Artist,Senior,Remote-US,40,82,2018-03-03,Active,ART-033,nico.patel@spectraforgevfx.example
+ART-028,Drew Thompson,Roto/Paint,Roto Artist,Mid,Los Angeles,40,73,2021-11-17,Y,ART-030,drew.thompson@spectraforgevfx.example
+ART-024,Nico Allen,compositing,Senior Compositor,Senior,London,40,89,2025-09-30,Y,ART-019,nico.allen@spectraforgevfx.example
+ART-044,Cameron Jackson,Roto/Paint,Roto Artist,Junior,Atlanta,35,39,2018-10-30,Y,ART-030,cameron.jackson@spectraforgevfx.example
+ART-022,Skyler Davis,Assets,Texture Artist,Senior,London,35,91,2022-02-25,Y,ART-047,skyler.davis@spectraforgevfx.example
+ART-007,Alex Anderson,matte painting,Matte Painter,Mid,London,40,68,2022-08-23,Y,,alex.anderson@spectraforgevfx.example
+ART-003,Quinn Kim,FX,FX Lead,Lead,Vancouver,40,133,2022-05-19,Y,ART-058,quinn.kim@spectraforgevfx.example
+ART-031,Maya Robinson,MATCHMOVE,Matchmove Artist,Mid,Vancouver,40,68,2021-04-08,Y,ART-045,maya.robinson@spectraforgevfx.example
+ART-037,Parker Scott,Assets,Modeler,Mid,Remote-US,24,63,2019-01-24,Y,ART-047,parker.scott@spectraforgevfx.example
+ART-047,Parker Garcia,Assets,Texture Artist,Senior,Los Angeles,35,101,2024-04-11,Y,ART-022,parker.garcia@spectraforgevfx.example
+ART-056,Noah Wright,FX,FX Artist,Mid,London,40,72,2023-02-10,Y,ART-048,noah.wright@spectraforgevfx.example
+ART-041,Nico Walker,Animation,Animator,Mid,Vancouver,32,69,2022-10-02,Y,ART-006,nico.walker@spectraforgevfx.example
+ART-052,Liam Young,Lighting,Lighting Artist,Mid,London,40,72,2019-11-18,Y,ART-018,liam.young@spectraforgevfx.example
+ART-019,Alex Scott,Compositing,Senior Compositor,Senior,Atlanta,35,105,2020-12-15,Y,ART-010,alex.scott@spectraforgevfx.example
+ART-030,Morgan Chen,Roto/Paint ,Paint Artist,Senior,Vancouver,24,83,2021-08-18,Y,ART-049,morgan.chen@spectraforgevfx.example
+ART-001,Morgan Jackson,Assets,Modeler,Junior,Vancouver,40,54,2019-01-19,Y,ART-047,morgan.jackson@spectraforgevfx.example
+ART-029,Elena Lewis,Matte Painting,Matte Painter,Mid,Montreal,40,66,2022-08-28,Y,,elena.lewis@spectraforgevfx.example
+ART-013,Riley Allen,FX,Senior FX Artist,Senior,Remote-US,35,105,2024-08-04,Y,ART-058,nico.patel@spectraforgevfx.example
+ART-039,Devon Brown,Compositing,Compositor,Junior,Vancouver,24,50,2025-08-08,Y,ART-035,devon.brown@spectraforgevfx.example
+ART-045,Alex Harris,Matchmove,Matchmove Lead,Lead,Montreal,40,133,2025-05-27,Y,ART-017,alex.harris@spectraforgevfx.example
+ART-043,Skyler Martinez,Lighting,Lighting Artist,Mid,London,40,76,2018-10-11,Y,ART-032,skyler.martinez@spectraforgevfx.example
+ART-035,Hayden Allen,Compositing,Senior Compositor,Senior,Remote-US,40,90,2018-11-20,Y,ART-025,hayden.allen@spectraforgevfx.example
+ART-051,Casey Hall,Matte Painting,Matte Painter,Mid,Remote-US,40,65,2024-03-27,Y,,casey.hall@spectraforgevfx.example
+ART-050,Sofia White,Matchmove,Matchmove Artist,Mid,Vancouver,40,70,2019-01-25,Y,ART-017,sofia.white@spectraforgevfx.example
+ART-033,Casey Garcia,Roto/Paint,Paint Artist,Senior,Remote-EU,80,81,2021-12-28,N,ART-012,casey.garcia@spectraforgevfx.example
+ART-006,Finley Martin,Animation,Senior Animator,Senior,Remote-US,24,85,2021-11-25,Y,,
+ART-038,Cameron Davis,Animation,Animator,Mid,Remote-EU,40,70,2020-05-10,Y,ART-006,cameron.davis@spectraforgevfx.example
+ART-023,Liam Young,Lighting,Senior Lighting Artist,Senior,Vancouver,32,92,2025-10-17,Y,ART-018,liam.young@spectraforgevfx.example
+ART-010,Morgan Patel,Compositing,Senior Compositor,Senior,Los Angeles,35,100,2021-07-25,Y,ART-060,morgan.patel@spectraforgevfx.example
+ART-011,Aisha Walker,FX,FX Lead,Lead,Atlanta,40,113,2018-05-29,Y,ART-013,aisha.walker@spectraforgevfx.example
+ART-009,Liam Moore,Compositing,Compositor,Mid,Montreal,40,61,2020-11-28,Y,ART-010,liam.moore@spectraforgevfx.example
+ART-021,Blake Allen,Roto/Paint,Roto Artist,Junior,Montreal,24,49,2023-06-05,N,ART-030,blake.allen@spectraforgevfx.example
+ART-036,Sofia Hall,Animation,Animator,Mid,Remote-EU,24,63,2020-10-06,Y,ART-006,sofia.hall@spectraforgevfx.example
+ART-053,Sofia Young,FX,Senior FX Artist,Senior,London,40,107,2022-08-17,Y,ART-058,sofia.young@spectraforgevfx.example
+ART-008,Casey Martinez,Compositing,Compositor,Mid,Atlanta,35,,2023-05-01,Y,ART-019,casey.martinez@spectraforgevfx.example
+ART-004,Sofia Moore,Compositing,Senior Compositor,Senior,Vancouver,24,94,2022-04-04,Y,ART-025,sofia.moore@spectraforgevfx.example
+ART-054,Aisha Scott,FX,FX Artist,Mid,London,40,64,2022-06-08,Y,ART-058,aisha.scott@spectraforgevfx.example
+ART-018,Noah Scott,Lighting,Senior Lighting Artist,Senior,Atlanta,40,101,2018-02-11,Y,ART-014,noah.scott@spectraforgevfx.example
+ART-059,Drew Patel,Compositing,Compositor,Mid,Atlanta,40,58,2024-08-12,Y,ART-025,drew.patel@spectraforgevfx.example
+ART-032,Elena Walker,Lighting,Senior Lighting Artist,Senior,Montreal,40 hrs,103,2021-09-26,N,ART-014,elena.walker@spectraforgevfx.example
+ART-027,Mateo Wilson,FX,FX Artist,Mid,Atlanta,40,62,2020-08-02,Y,ART-003,mateo.wilson@spectraforgevfx.example
+ART-049,Cameron Lewis,Roto/Paint,Paint Artist,Senior,Atlanta,40,84,2021-09-27,Y,ART-030,cameron.lewis@spectraforgevfx.example
+ART-014,Nico Harris,Lighting,Senior Lighting Artist,Senior,Vancouver,40,86,2020-10-07,FALSE,ART-023,nico.harris@spectraforgevfx.example
+ART-044,Cameron Jackson,Roto/Paint,Roto Artist,Junior,Atlanta,35,39,2018-10-30,Y,ART-030,cameron.jackson@spectraforgevfx.example
+ART-057,Blake Kim,Matchmove,Matchmove Artist,Mid,Los Angeles,40,62,2018-02-02,Y,ART-017,blake.kim@spectraforgevfx.example
+ART-042,Sam Anderson,FX,FX Artist,Junior,Los Angeles,40,$95,2019-11-12,Y,ART-058,sam.anderson@spectraforgevfx.example
+ART-005,Nico Patel,Assets,Modeler,Mid,London,40,60,2024-08-14,Y,ART-047,nico.patel@spectraforgevfx.example
+ART-048,Casey Wilson,FX,Senior FX Artist,Senior,Los Angeles,32,104,2019-06-27,Y,ART-013,casey.wilson@spectraforgevfx.example
+ART-055,Blake Garcia,Matte Painting,Matte Painter,Mid,Montreal,40,68,2025-08-21,Y,,blake.garcia@spectraforgevfx.example
+ART-040,Noah Wilson,Compositing,Compositor,Junior,Atlanta,-8,49,2022-06-24,Y,ART-060,noah.wilson@spectraforgevfx.example
+ART-053,Sofia Young,FX,Senior FX Artist,Senior,London,40,107,2022-08-17,Y,ART-058,sofia.young@spectraforgevfx.example
+ART-034,Reese Davis,FX,FX Artist,Junior,London,40,50,2021-06-04,Y,ART-003,reese.davis@spectraforgevfx.example
+ART-046,Liam Hall,Compositing,Compositor,Mid,Atlanta,35,72,2022-05-18,Y,ART-024,liam.hall@spectraforgevfx.example
+ART-016,Alex Patel,Assets,Modeler,Junior,Vancouver,24,40,2023-01-20,Y,ART-047,alex.patel@spectraforgevfx.example
+ART-017,Riley Moore,Matchmove,Tracking Artist,Senior,Remote-EU,40,108,2021-10-17,Y,ART-045,riley.moore@spectraforgevfx.example
+ART-058,Avery Allen,FX,Senior FX Artist,Senior,Los Angeles,0,-45,2024-07-02,Y,ART-053,avery.allen@spectraforgevfx.example
+ART-015,Parker Thomas,Compositing,Senior Compositor,Senior,Vancouver,24,88,2021-03-17,Y,ART-010,parker.thomas@spectraforgevfx.example
+ART-002,Hayden Lee,Lighting,Lighting Artist,Mid,Montreal,40,63,2018-01-18,Y,ART-018,hayden.lee@spectraforgevfx.example
+ART-060,Sofia Thompson,Compositing,Senior Compositor,Senior,Montreal,24,105,2022-12-22,Y,ART-004,sofia.thompson@spectraforgevfx.example
+ART-025,Maya Lee,Compositing,Senior Compositor,Senior,Los Angeles,40,110/hr,2024-07-19,Y,ART-024,maya.lee@spectraforgevfx.example
