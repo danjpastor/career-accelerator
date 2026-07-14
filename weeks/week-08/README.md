@@ -42,3 +42,9 @@ Clean, analyze, and visualize the retail dataset.
 - [ ] Documentation updated
 - [ ] Progress tracker updated
 - [ ] Retrospective completed
+
+
+## Database-Managed Checklist
+
+<!-- DB_TASKS_START -->
+<!-- DB_TASKS_END -->

@@ -1,9 +1,0 @@
-app:
-  title: "Career Accelerator"
-  version: "1.0.0"
-  theme: "system"
-
-preferences:
-  default_session_hours: 1.0
-  auto_refresh_dashboards: true
-  confirm_before_git_push: true

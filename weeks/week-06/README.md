@@ -42,3 +42,9 @@ Complete, document, and publish the VFX Production Intelligence Dashboard.
 - [ ] Documentation updated
 - [ ] Progress tracker updated
 - [ ] Retrospective completed
+
+
+## Database-Managed Checklist
+
+<!-- DB_TASKS_START -->
+<!-- DB_TASKS_END -->

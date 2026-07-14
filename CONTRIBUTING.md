@@ -1,40 +1,49 @@
-# Workflow
+# Repository Workflow
 
-## Daily
-
-1. Pull the latest changes.
-2. Complete the day's tasks.
-3. Check off completed sprint items.
-4. Add a row to the current week's daily log.
-5. Save any SQL solution files.
-6. Run the local progress updater.
-7. Review generated changes.
-8. Commit and push.
-
-## Daily Commands
+## Before Working
 
 ```powershell
 git pull
-.\update-progress.ps1
+```
+
+Launch `Career Accelerator.bat` and make routine progress changes
+through the application.
+
+## Before Committing
+
+1. Open **Publish & Git**.
+2. Publish the progress snapshot when relevant.
+3. Review the changed files.
+4. Confirm that no database, backup, virtual-environment, or cache files
+   are staged.
+
+Useful commands:
+
+```powershell
 git status
+git diff
 git add .
-git commit -m "progress: complete week 1 Tuesday tasks"
+git commit -m "progress: update week 1 analytics roadmap"
 git push
 ```
 
-## Commit Examples
+## Commit Prefixes
 
-- `docs: complete week 1 Monday checklist`
-- `sql: add DataLemur aggregation solutions`
-- `project: define VFX KPIs and stakeholders`
-- `progress: complete week 1 sprint review`
+- `app:` desktop-client changes
+- `progress:` sprint and learning progress
+- `sql:` SQL solutions or notes
+- `project:` portfolio project work
+- `career:` resume, LinkedIn, or application materials
+- `docs:` documentation only
+- `fix:` application bug fixes
 
-## Sunday Review
+## Repository Hygiene
 
-Every Sunday:
+Do not commit:
 
-- Complete the weekly retrospective
-- Update qualitative wins and blockers
-- Update `progress-data.yml` if the week changes
-- Run `.\update-progress.ps1`
-- Commit the completed sprint
+- `.venv/`
+- `__pycache__/`
+- `*.pyc`
+- `data/career_accelerator.db`
+- `backups/`
+- credentials, tokens, or private raw datasets

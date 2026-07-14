@@ -1,0 +1,230 @@
+from __future__ import annotations
+from pathlib import Path
+import sqlite3
+
+ROOT = Path(__file__).resolve().parents[1]
+DB_PATH = ROOT / "data" / "career_accelerator.db"
+
+SCHEMA = """
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS program_state (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    current_week INTEGER NOT NULL DEFAULT 1,
+    total_weeks INTEGER NOT NULL DEFAULT 12,
+    start_date TEXT NOT NULL,
+    google_course INTEGER NOT NULL DEFAULT 5,
+    google_total_courses INTEGER NOT NULL DEFAULT 9,
+    google_module INTEGER NOT NULL DEFAULT 1,
+    current_project INTEGER NOT NULL DEFAULT 1,
+    total_projects INTEGER NOT NULL DEFAULT 3,
+    weekly_target_hours REAL NOT NULL DEFAULT 18,
+    sql_target INTEGER NOT NULL DEFAULT 100
+);
+
+CREATE TABLE IF NOT EXISTS sprint_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    week INTEGER NOT NULL,
+    sort_order INTEGER NOT NULL,
+    label TEXT NOT NULL,
+    completed INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(week, sort_order)
+);
+
+CREATE TABLE IF NOT EXISTS task_metadata (
+    task_id INTEGER PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'Not Started',
+    priority INTEGER NOT NULL DEFAULT 2,
+    estimated_minutes INTEGER NOT NULL DEFAULT 30,
+    energy TEXT NOT NULL DEFAULT 'Normal',
+    deferred_until TEXT,
+    destination INTEGER NOT NULL DEFAULT 0,
+    category TEXT NOT NULL DEFAULT 'General',
+    FOREIGN KEY(task_id) REFERENCES sprint_tasks(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS project_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL,
+    sort_order INTEGER NOT NULL,
+    stage TEXT NOT NULL DEFAULT 'Overview',
+    label TEXT NOT NULL,
+    completed INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(project_id, sort_order)
+);
+
+CREATE TABLE IF NOT EXISTS project_notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL,
+    section TEXT NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    UNIQUE(project_id, section)
+);
+
+CREATE TABLE IF NOT EXISTS study_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_date TEXT NOT NULL,
+    hours REAL NOT NULL,
+    google_progress TEXT,
+    datacamp_progress TEXT,
+    sql_problems INTEGER NOT NULL DEFAULT 0,
+    portfolio_progress TEXT,
+    notes TEXT,
+    productivity_score INTEGER,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sql_practice (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    platform TEXT NOT NULL DEFAULT 'DataLemur',
+    title TEXT NOT NULL,
+    difficulty TEXT,
+    topic TEXT,
+    concepts TEXT,
+    status TEXT NOT NULL DEFAULT 'Completed',
+    mastery INTEGER NOT NULL DEFAULT 1,
+    review_date TEXT,
+    completed_date TEXT,
+    solution_path TEXT,
+    notes TEXT,
+    UNIQUE(platform, title)
+);
+
+CREATE TABLE IF NOT EXISTS retrospective_notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    week INTEGER NOT NULL,
+    section TEXT NOT NULL,
+    note TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS achievements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    achievement_key TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    unlocked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS weekly_summaries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    week INTEGER NOT NULL UNIQUE,
+    generated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    hours REAL NOT NULL DEFAULT 0,
+    tasks_completed INTEGER NOT NULL DEFAULT 0,
+    tasks_total INTEGER NOT NULL DEFAULT 0,
+    sql_completed INTEGER NOT NULL DEFAULT 0,
+    summary TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    applied_date TEXT NOT NULL,
+    company TEXT NOT NULL,
+    role TEXT NOT NULL,
+    location TEXT,
+    source TEXT,
+    status TEXT NOT NULL DEFAULT 'Wishlist',
+    follow_up_date TEXT,
+    resume_version TEXT,
+    contact TEXT,
+    notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS evidence (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    skill TEXT NOT NULL,
+    source_type TEXT NOT NULL,
+    source_name TEXT NOT NULL,
+    description TEXT,
+    UNIQUE(skill, source_type, source_name)
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+"""
+
+def connect():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.executescript(SCHEMA)
+    _ensure_columns(conn)
+    conn.commit()
+    return conn
+
+def _ensure_columns(conn):
+    additions = {
+        "task_metadata": [
+            ("category", "TEXT NOT NULL DEFAULT 'General'"),
+        ],
+        "project_tasks": [
+            ("stage", "TEXT NOT NULL DEFAULT 'Overview'"),
+        ],
+        "study_sessions": [
+            ("notes", "TEXT"),
+            ("productivity_score", "INTEGER"),
+        ],
+        "sql_practice": [
+            ("topic", "TEXT"),
+            ("status", "TEXT NOT NULL DEFAULT 'Completed'"),
+            ("mastery", "INTEGER NOT NULL DEFAULT 1"),
+            ("review_date", "TEXT"),
+        ],
+        "applications": [
+            ("resume_version", "TEXT"),
+            ("contact", "TEXT"),
+        ],
+    }
+    for table, columns in additions.items():
+        existing = {
+            row["name"]
+            for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+        }
+        for name, definition in columns:
+            if name not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
+
+def ensure_default_state(conn, start_date):
+    if not conn.execute("SELECT 1 FROM program_state WHERE id=1").fetchone():
+        conn.execute(
+            """INSERT INTO program_state
+               (id,start_date,current_week,total_weeks,google_course,
+                google_total_courses,google_module,current_project,total_projects,
+                weekly_target_hours,sql_target)
+               VALUES (1,?,1,12,5,9,1,1,3,18,100)""",
+            (start_date,),
+        )
+        conn.commit()
+
+def state(conn):
+    return conn.execute("SELECT * FROM program_state WHERE id=1").fetchone()
+
+def update_state(conn, **fields):
+    allowed = {
+        "current_week", "google_course", "google_module",
+        "current_project", "weekly_target_hours",
+    }
+    items = [(key, value) for key, value in fields.items() if key in allowed]
+    if not items:
+        return
+    clause = ", ".join(f"{key}=?" for key, _ in items)
+    conn.execute(
+        f"UPDATE program_state SET {clause} WHERE id=1",
+        [value for _, value in items],
+    )
+    conn.commit()
+
+def setting(conn, key, default=None):
+    row = conn.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+    return row["value"] if row else default
+
+def save_setting(conn, key, value):
+    conn.execute(
+        """INSERT INTO settings(key,value) VALUES(?,?)
+           ON CONFLICT(key) DO UPDATE SET value=excluded.value""",
+        (key, str(value)),
+    )
+    conn.commit()

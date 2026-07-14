@@ -42,3 +42,9 @@ Finish Course 5, begin Course 6, strengthen joins and CASE, and generate the VFX
 - [ ] Documentation updated
 - [ ] Progress tracker updated
 - [ ] Retrospective completed
+
+
+## Database-Managed Checklist
+
+<!-- DB_TASKS_START -->
+<!-- DB_TASKS_END -->

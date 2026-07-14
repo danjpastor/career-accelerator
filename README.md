@@ -1,96 +1,78 @@
-# Data Analytics Career Accelerator
+# Career Accelerator
 
-## Desktop Application
+A local desktop application for managing a 90-day transition into data
+analytics. It combines learning progress, adaptive planning, SQL
+practice, portfolio development, study tracking, weekly reviews,
+job-readiness evidence, applications, and Git publishing.
 
-Launch the Career Accelerator app by double-clicking:
+## Launch
+
+On Windows, double-click:
 
 ```text
 Career Accelerator.bat
 ```
 
-The application handles sprint tasks, study sessions, learning progress, portfolio milestones, SQL practice, weekly reviews, and Git commits from one interface.
+The launcher creates a local `.venv`, installs the requirements, and
+starts the application.
 
-See [DESKTOP_APP_GUIDE.md](DESKTOP_APP_GUIDE.md).
-
-A 90-day, version-controlled career transition system documenting my move from VFX compositing supervision into data analytics.
-
-## Current Status
-- Current sprint: Week 1
-- Google Data Analytics Certificate: Course 5 of 9
-- SQL practice: 0 / 100
-- Portfolio projects: 0 / 3 complete
-- Applications: 0
-
-
-<!-- AUTO_PROGRESS_START -->
-## Current Progress
-
-| Metric | Progress |
-|---|---:|
-| Current Sprint | Week 1 |
-| Week Completion | 0% |
-| Hours Completed | 0 / 18 |
-| Google Certificate | Course 5 of 9 |
-| SQL Problems | 0 / 100 |
-| Portfolio Projects | 0 / 3 |
-| Current Project | VFX Production Intelligence Dashboard |
-<!-- AUTO_PROGRESS_END -->
-
-
-## Four Tracks
-1. Google Data Analytics Certificate
-2. DataCamp
-3. DataLemur SQL practice
-4. Portfolio development
-
-## Portfolio
-1. VFX Production Intelligence Dashboard
-2. Retail Operations Performance Dashboard
-3. Movie Industry Financial Analytics
-
-## Key Files
-- [Master Roadmap](MASTER_ROADMAP.md)
-- [Progress Tracker](PROGRESS.md)
-- [Weekly Sprints](weeks/)
-- [Portfolio Projects](projects/)
-
-## Guiding Principle
-Learn → Apply → Document → Present
-
-
-
-## Desktop Tracker
-
-Double-click:
+To create a Desktop shortcut, run:
 
 ```text
-launch-tracker.bat
+create-desktop-shortcut.vbs
 ```
 
-The GUI lets you update sprint tasks, study logs, metadata, SQL practice files, and retrospective notes without editing Markdown by hand.
+## Current Desktop Client
 
-See [GUI_TRACKER_GUIDE.md](GUI_TRACKER_GUIDE.md).
+Version 8.2.2 includes:
 
-## Interactive Tracker
+- Reference-matched dark purple Dashboard
+- Time-aware greeting that refreshes every minute
+- Adaptive planning by available time and energy
+- Google, DataCamp, SQL, Power BI, Python, and portfolio tracking
+- Portfolio workspace for three analytics projects
+- SQL Companion with mastery and review scheduling
+- Study timer with Start, Pause, and Log Session controls
+- Weekly summaries, achievements, charts, and streak tracking
+- Job-readiness evidence and application CRM
+- Local SQLite persistence, backups, and Git publishing
 
-Run the local tracker:
+## Repository Structure
 
-```powershell
-.\track-progress.ps1
+```text
+career_app/     PySide6 application code
+data/           Local SQLite database location
+projects/       Portfolio project specifications and milestones
+weeks/          Twelve weekly sprint plans and retrospectives
+resources/      SQL, Power BI, Python, interview, and career resources
+career/         Resume and LinkedIn materials
+app.py           Application entry point
 ```
 
-It can check off sprint tasks, add study logs, create DataLemur solution files, update metadata, and refresh progress dashboards.
+## Data
 
-See [TRACKER_GUIDE.md](TRACKER_GUIDE.md).
+Runtime progress is stored locally in:
 
-## Progress Automation
-
-Progress is updated locally with:
-
-```powershell
-.\update-progress.ps1
+```text
+data/career_accelerator.db
 ```
 
-The updater recalculates weekly completion, study hours, SQL totals, and portfolio progress before changes are committed to GitHub.
+The database and backup directory are excluded from Git by default.
+Existing progress is preserved when application files are updated.
 
-See [AUTOMATION.md](AUTOMATION.md) for the full workflow.
+## Keyboard Shortcuts
+
+- `Ctrl+K` — Command palette
+- `Ctrl+S` — Create a local backup
+
+## Core Documents
+
+- [Master Roadmap](MASTER_ROADMAP.md)
+- [Current Progress](PROGRESS.md)
+- [Quick Start](QUICK_START.md)
+- [Contributing Workflow](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
+## Guiding Principle
+
+**Learn → Apply → Document → Present**

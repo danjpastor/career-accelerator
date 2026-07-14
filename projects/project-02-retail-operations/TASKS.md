@@ -35,3 +35,9 @@
 - [ ] Add screenshots
 - [ ] Finalize README
 - [ ] Publish project
+
+
+## Database-Managed Checklist
+
+<!-- DB_PROJECT_TASKS_START -->
+<!-- DB_PROJECT_TASKS_END -->

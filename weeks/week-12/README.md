@@ -42,3 +42,9 @@ Polish the portfolio, finalize career materials, and begin targeted applications
 - [ ] Documentation updated
 - [ ] Progress tracker updated
 - [ ] Retrospective completed
+
+
+## Database-Managed Checklist
+
+<!-- DB_TASKS_START -->
+<!-- DB_TASKS_END -->

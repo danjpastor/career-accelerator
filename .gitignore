@@ -10,3 +10,10 @@ venv/
 credentials.*
 secrets.*
 data/raw/private/
+
+*.pyc
+backups/
+
+data/career_accelerator.db
+data/career_accelerator.db-*
+PROGRESS_SNAPSHOT.md

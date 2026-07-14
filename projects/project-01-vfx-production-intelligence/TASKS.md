@@ -38,3 +38,9 @@
 - [ ] Document assumptions and limitations
 - [ ] Finalize README
 - [ ] Publish release
+
+
+## Database-Managed Checklist
+
+<!-- DB_PROJECT_TASKS_START -->
+<!-- DB_PROJECT_TASKS_END -->

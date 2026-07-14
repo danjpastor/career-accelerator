@@ -1,6 +1,6 @@
 # Quick Start
 
-## Open the App
+## Start the Application
 
 Double-click:
 
@@ -8,21 +8,32 @@ Double-click:
 Career Accelerator.bat
 ```
 
-## Daily Routine
+The first launch may take a moment while the local Python environment
+and dependencies are prepared.
 
-1. Review Dashboard.
-2. Review Today's Tasks.
-3. Complete your learning work.
-4. Use Study Session to log progress.
-5. Check off completed tasks.
-6. Use the Git tab to commit and push.
+## Daily Workflow
 
-## Weekly Routine
+1. Review the Dashboard and Today's Focus.
+2. Open Adaptive Planner when your available time or energy changes.
+3. Start the Study Session timer.
+4. Complete and check off Next Tasks.
+5. Log learning, SQL, and portfolio progress.
+6. Review Mission Control and job-readiness recommendations.
 
-On Sunday:
-1. Complete Weekly Review.
-2. Confirm project tasks.
-3. Update Google course/module if needed.
-4. Commit the completed sprint.
+## Weekly Workflow
 
-See [DESKTOP_APP_GUIDE.md](DESKTOP_APP_GUIDE.md) for details.
+1. Complete the Weekly Summary.
+2. Review study hours, completed tasks, and SQL progress.
+3. Update portfolio milestones and learning progress.
+4. Publish the progress snapshot.
+5. Review, commit, and push the changes from Publish & Git.
+
+## Local Data
+
+Application progress is stored in:
+
+```text
+data/career_accelerator.db
+```
+
+Use `Ctrl+S` or Settings to create a backup.

@@ -13,7 +13,7 @@
 | Completion | 0% |
 | Hours | 0 / 18 |
 | Completed Tasks | 0 |
-| Remaining Tasks | 16 |
+| Remaining Tasks | 0 |
 <!-- AUTO_SPRINT_STATUS_END -->
 
 
@@ -186,3 +186,9 @@ Add one row after each study session.
 | Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
+
+
+## Database-Managed Checklist
+
+<!-- DB_TASKS_START -->
+<!-- DB_TASKS_END -->

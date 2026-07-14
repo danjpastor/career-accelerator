@@ -42,3 +42,9 @@ Start Project 3 and begin career-material refinement.
 - [ ] Documentation updated
 - [ ] Progress tracker updated
 - [ ] Retrospective completed
+
+
+## Database-Managed Checklist
+
+<!-- DB_TASKS_START -->
+<!-- DB_TASKS_END -->
