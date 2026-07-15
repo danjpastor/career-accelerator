@@ -193,7 +193,13 @@ def sync_google_course_progress(conn, current_course):
 
 def available(conn, week):
     today = date.today().isoformat()
-    return conn.execute(
+    week = int(week)
+    previous_week = max(
+        0,
+        week - 1,
+    )
+
+    rows = conn.execute(
         """SELECT
                s.id,
                s.week,
@@ -211,7 +217,7 @@ def available(conn, week):
                m.prerequisite_reason
            FROM sprint_tasks s
            JOIN task_metadata m ON m.task_id=s.id
-           WHERE s.week=?
+           WHERE s.week IN (?,?)
              AND s.completed=0
              AND m.status NOT IN ('Completed','Blocked')
              AND COALESCE(
@@ -229,17 +235,65 @@ def available(conn, week):
                    ON ts.track_key=tt.track_key
                  WHERE tt.task_id=s.id
                    AND ts.status<>'Active'
-             )
-           ORDER BY
-               m.priority,
-               CASE
-                   WHEN m.status='In Progress' THEN 0
-                   ELSE 1
-               END,
-               s.sort_order""",
-        (week, today),
+             )""",
+        (
+            week,
+            previous_week,
+            today,
+        ),
     ).fetchall()
 
+    eligible = []
+    for row in rows:
+        task_week = int(row["week"])
+        current_week_task = (
+            task_week == week
+        )
+        monday_recovery = (
+            _is_monday_recovery_retrospective(
+                label=row["label"],
+                task_week=task_week,
+                current_week=week,
+            )
+        )
+
+        if not (
+            current_week_task
+            or monday_recovery
+        ):
+            continue
+
+        if not _task_allowed_today(
+            label=row["label"],
+            category=(
+                row["category"]
+                or "General"
+            ),
+            task_week=task_week,
+            current_week=week,
+        ):
+            continue
+
+        eligible.append(row)
+
+    return sorted(
+        eligible,
+        key=lambda row: (
+            0
+            if _is_monday_recovery_retrospective(
+                label=row["label"],
+                task_week=row["week"],
+                current_week=week,
+            )
+            else 1,
+            int(row["priority"] or 3),
+            0
+            if row["status"] == "In Progress"
+            else 1,
+            int(row["week"]),
+            int(row["sort_order"]),
+        ),
+    )
 
 def make_plan(conn, week, minutes, energy):
     capacity = ENERGY_RANK.get(energy, 2)
@@ -277,7 +331,12 @@ def defer(conn, task_id, days=1):
     conn.commit()
 
 
-def _task_dict(row, *, carryover=False):
+def _task_dict(
+    row,
+    *,
+    carryover=False,
+    carryover_note=None,
+):
     return {
         "task_id": int(row["id"]),
         "week": int(row["week"]),
@@ -291,12 +350,13 @@ def _task_dict(row, *, carryover=False):
         ),
         "destination": int(row["destination"] or 0),
         "carryover": bool(carryover),
+        "carryover_note": carryover_note,
         "roadmap_fallback": False,
         "source_key": f"task:{row['id']}",
     }
 
 
-def _carryover_tasks(conn, focus_date):
+def _carryover_tasks(conn, focus_date, current_week):
     today = date.today().isoformat()
 
     rows = conn.execute(
@@ -349,8 +409,21 @@ def _carryover_tasks(conn, focus_date):
     ).fetchall()
 
     return [
-        _task_dict(row, carryover=True)
+        _task_dict(
+            row,
+            carryover=True,
+            carryover_note="Missed yesterday",
+        )
         for row in rows
+        if _task_allowed_today(
+            label=row["label"],
+            category=(
+                row["category"]
+                or "General"
+            ),
+            task_week=row["week"],
+            current_week=current_week,
+        )
     ]
 
 
@@ -497,6 +570,65 @@ def _remove_matching_slot(slots, category):
             slots.pop(0)
 
 
+def _is_weekly_retrospective(label):
+    return (
+        "retrospective"
+        in str(label or "").lower()
+    )
+
+
+def _retrospective_allowed_today(
+    *,
+    task_week,
+    current_week,
+):
+    """Recommend this week's review Friday or last week's missed review Monday."""
+    weekday = date.today().weekday()
+    task_week = int(task_week)
+    current_week = int(current_week)
+
+    if weekday == 4:
+        return task_week == current_week
+
+    if weekday == 0 and current_week > 1:
+        return task_week == current_week - 1
+
+    return False
+
+
+def _is_monday_recovery_retrospective(
+    *,
+    label,
+    task_week,
+    current_week,
+):
+    return (
+        date.today().weekday() == 0
+        and _is_weekly_retrospective(label)
+        and int(current_week) > 1
+        and int(task_week)
+        == int(current_week) - 1
+    )
+
+
+def _task_allowed_today(
+    *,
+    label,
+    category,
+    task_week,
+    current_week,
+):
+    # Only retrospective deliverables are calendar-gated. Other Review tasks
+    # remain actionable according to their normal roadmap schedule.
+    if not _is_weekly_retrospective(label):
+        return True
+
+    return _retrospective_allowed_today(
+        task_week=task_week,
+        current_week=current_week,
+    )
+
+
 def _track_accepts_work_today(
     conn,
     track_key,
@@ -590,11 +722,32 @@ def intelligent_focus_plan(
     today = date.today()
     yesterday = (today - timedelta(days=1)).isoformat()
 
-    current = [
-        _task_dict(row)
-        for row in available(conn, week)
-    ]
-    carryover = _carryover_tasks(conn, yesterday)
+    current = []
+    for row in available(conn, week):
+        monday_recovery = (
+            _is_monday_recovery_retrospective(
+                label=row["label"],
+                task_week=row["week"],
+                current_week=week,
+            )
+        )
+        current.append(
+            _task_dict(
+                row,
+                carryover=monday_recovery,
+                carryover_note=(
+                    "Missed Friday"
+                    if monday_recovery
+                    else None
+                ),
+            )
+        )
+
+    carryover = _carryover_tasks(
+        conn,
+        yesterday,
+        week,
+    )
 
     candidates_by_id = {}
 
@@ -622,7 +775,15 @@ def intelligent_focus_plan(
     for item in [
         candidate
         for candidate in candidates
-        if candidate["carryover"]
+        if (
+            candidate["carryover"]
+            and _task_allowed_today(
+                label=candidate["label"],
+                category=candidate["category"],
+                task_week=candidate["week"],
+                current_week=week,
+            )
+        )
     ][:2]:
         selected.append(item)
         used_task_ids.add(item["task_id"])
@@ -640,6 +801,12 @@ def intelligent_focus_plan(
             if (
                 candidate["task_id"] not in used_task_ids
                 and candidate["category"] == category
+                and _task_allowed_today(
+                    label=candidate["label"],
+                    category=candidate["category"],
+                    task_week=candidate["week"],
+                    current_week=week,
+                )
             )
         ]
         if matching:
@@ -655,6 +822,13 @@ def intelligent_focus_plan(
     if len(selected) < max_items:
         for candidate in candidates:
             if candidate["task_id"] in used_task_ids:
+                continue
+            if not _task_allowed_today(
+                label=candidate["label"],
+                category=candidate["category"],
+                task_week=candidate["week"],
+                current_week=week,
+            ):
                 continue
             selected.append(candidate)
             used_task_ids.add(candidate["task_id"])

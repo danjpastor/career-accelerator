@@ -2344,7 +2344,10 @@ def focus_presentation(conn, item):
 
     metadata = []
     if item.get("carryover"):
-        metadata.append("Missed yesterday")
+        metadata.append(
+            item.get("carryover_note")
+            or "Missed yesterday"
+        )
     elif str(
         item.get("status")
         or ""

@@ -32,6 +32,29 @@ This file is the single maintained changelog for the project.
 
 
 
+
+
+## 9.3.5
+
+- Added a Monday recovery window for missed Friday retrospectives
+- Surfaced the previous week's incomplete retrospective in Today’s Focus
+  and Next Tasks on Monday
+- Labeled the recovered item `Missed Friday`
+- Kept retrospectives hidden on Saturday and Sunday
+- Returned missed retrospectives to backlog-only status after Monday
+- Restricted calendar gating to retrospective deliverables rather than all
+  Review-category tasks
+- Preserved adaptive pacing, SQL gating, Study Sessions, and user data
+
+## 9.3.4
+
+- Restricted weekly retrospective recommendations to Fridays
+- Kept retrospective tasks accessible in the backlog on other days
+- Prevented Review tasks from appearing in Today’s Focus before Friday
+- Prevented Review tasks from moving into Next Tasks when earlier work is completed
+- Applied the Friday rule to standard availability, carryover, and overflow selection
+- Preserved adaptive pacing, SQL gating, Study Sessions, and user data
+
 ## 9.3.3
 
 - Made a single SQL problem selection populate the Problem Workspace

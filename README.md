@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.3 includes:
+Version 9.3.5 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -304,3 +304,19 @@ track.
 SQL recommendations now use title-specific concept prerequisites rather
 than broad difficulty or topic labels. Problems remain hidden until every
 required concept has been learned through the verified DataCamp path.
+
+
+## Friday-Only Weekly Retrospectives
+
+Version 9.3.4 keeps weekly retrospective tasks in the backlog throughout the week, but makes them eligible for Today’s Focus and Next Tasks only on Friday. Completing earlier work cannot cause the retrospective to move into a Tuesday, Wednesday, or Thursday recommendation.
+
+
+## Retrospective Recovery Window
+
+Version 9.3.5 recommends the current week's retrospective on Friday. If it
+remains incomplete, the previous week's retrospective returns once on the
+following Monday as `Missed Friday`.
+
+It remains hidden on Saturday and Sunday and returns to backlog-only status
+after Monday. Calendar gating applies only to retrospective deliverables;
+other Review tasks continue on their normal schedule.

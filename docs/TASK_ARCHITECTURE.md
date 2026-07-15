@@ -50,3 +50,16 @@ The daily plan should not use:
 Roadmap templates are now structural fallbacks only. When a real adaptive track
 exists, the fallback reads that track's current assignment rather than supplying
 a separate hard-coded task.
+
+
+## Weekday-specific tasks
+
+Weekly retrospective tasks remain fixed deliverables, but their recommendation window is calendar-aware. They are eligible for Today’s Focus and Next Tasks only on Friday and remain accessible in the backlog on other days.
+
+
+## Retrospective recovery
+
+The current week's retrospective is recommended on Friday. If it is not
+completed, it appears once on the following Monday as `Missed Friday`.
+It is hidden over the weekend and returns to backlog-only status after
+Monday.
