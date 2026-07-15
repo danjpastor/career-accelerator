@@ -1,0 +1,19 @@
+response_id,customer_id,rating_raw,channel_raw,issue_type_raw,resolved_raw,response_minutes_raw,submitted_at_raw
+F001,C001,5, Email ,billing,YES,42,2026-06-01
+F002,C002,4,chat,Technical ,Y,18,2026-06-02
+F003,C003,,PHONE,access,no,N/A,2026-06-03
+F004,C004,3, email,,1,65,2026-06-04
+F005,C005,two,Chat ,billing,0,31,2026-06-05
+F006,C006,1,,TECHNICAL,NO,120,2026-06-06
+F007,C007,5 ,phone,Access ,yes, 9 ,2026-06-07
+F008,C008,N/A,EMAIL,billing,,44,2026-06-08
+F009,C009,4, chat,technical,True,27,2026-06-09
+F010,C010,3,Phone ,access,False,,2026-06-10
+F011,C011,6,Email,billing,Y,51,2026-06-11
+F012,C012,2,CHAT,Technical,N,-4,2026-06-12
+F013,C013,4, phone ,ACCESS,1,33,06/13/2026
+F014,C014,5,email,Billing ,0,twenty,2026-06-14
+F015,C015,,Chat,technical,YES,16,
+F016,C016,3,PHONE,access,NO,88,2026-13-01
+F017,C017, 2 , EMAIL ,billing,true,39,2026-06-17
+F018,C018,4,chat,Technical,false,23,2026-06-18

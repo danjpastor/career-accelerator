@@ -36,7 +36,7 @@ Publish Project 1 as a complete portfolio case study
 ## Checklist
 - [ ] [Google Course 7] Complete the remaining course modules
 - [ ] [Google Course 8] Begin the capstone course
-- [ ] Complete an integrated SQL review session
+- [ ] Complete DuckDB Exercise 08: Analyze a VFX production snapshot
 - [ ] Solve User Shopping Sprees
 - [ ] Finalize the Project 1 dashboard
 - [ ] Finalize the Project 1 README

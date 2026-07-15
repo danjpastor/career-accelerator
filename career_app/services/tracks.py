@@ -5,6 +5,7 @@ import math
 import re
 from datetime import date, timedelta
 
+from career_app.data.duckdb_exercises import exercise_for_label
 from career_app.data.roadmap import (
     DATACAMP_TRACK,
     SQL_COMPANION,
@@ -77,15 +78,43 @@ SKILL_DEFINITIONS = {
     ),
     "sql_fundamentals": (
         "SQL Fundamentals",
-        "DataCamp or completed SQL practice",
+        "DataCamp Introduction to SQL",
+    ),
+    "sql_querying": (
+        "SELECT, filtering, sorting, and limiting",
+        "DataCamp Introduction to SQL",
+    ),
+    "sql_aggregation": (
+        "SQL Aggregation and HAVING",
+        "DataCamp Intermediate SQL: Data Aggregation",
+    ),
+    "sql_date_logic": (
+        "SQL Date Filtering",
+        "DataCamp Intermediate SQL: Data Filtering",
+    ),
+    "sql_case": (
+        "SQL Conditional Operations",
+        "DataCamp Intermediate SQL: Conditional Operations",
     ),
     "sql_joins": (
         "SQL Joins",
-        "DataCamp joins or completed SQL practice",
+        "DataCamp Joining Data in SQL",
+    ),
+    "sql_subqueries": (
+        "SQL Subqueries",
+        "DataCamp Data Manipulation in SQL: Subqueries",
+    ),
+    "sql_ctes": (
+        "Subqueries and Common Table Expressions",
+        "DataCamp Data Manipulation in SQL: CTEs",
+    ),
+    "sql_window_functions": (
+        "SQL Window Functions",
+        "DataCamp Data Manipulation in SQL: Window Functions",
     ),
     "sql_intermediate": (
         "Intermediate SQL",
-        "DataCamp manipulation or advanced SQL practice",
+        "DataCamp Data Manipulation in SQL",
     ),
     "visualization_foundations": (
         "Data Visualization",
@@ -132,15 +161,111 @@ GOOGLE_ALIGNMENT = {
 
 
 SQL_REQUIREMENTS = {
-    "Aggregation": {"analytics_foundations"},
-    "Conditional Logic": {"data_cleaning"},
-    "Joins": {"sql_fundamentals"},
-    "Arithmetic": {"analysis_foundations"},
-    "Window Functions": {"sql_joins"},
-    "Ranking": {"sql_joins"},
-    "Date Logic": {"sql_intermediate"},
-    "Relational Division": {"sql_intermediate"},
+    "Aggregation": {"sql_aggregation"},
+    "Multi-step Aggregation": {
+        "sql_aggregation",
+        "sql_ctes",
+    },
+    "Conditional Logic": {
+        "sql_aggregation",
+        "sql_case",
+    },
+    "Joins": {"sql_joins"},
+    "Arithmetic": {
+        "analysis_foundations",
+        "sql_aggregation",
+    },
+    "Window Functions": {
+        "sql_window_functions",
+    },
+    "Ranking": {
+        "sql_window_functions",
+    },
+    "Date Logic": {
+        "sql_aggregation",
+        "sql_date_logic",
+    },
+    "Relational Division": {
+        "sql_aggregation",
+        "sql_joins",
+    },
 }
+
+
+SQL_PROBLEM_REQUIREMENTS = {
+    "Histogram of Tweets": {
+        "sql_aggregation",
+        "sql_ctes",
+    },
+    "Data Science Skills": {
+        "sql_aggregation",
+    },
+    "Page With No Likes": {
+        "sql_joins",
+    },
+    "Laptop vs. Mobile Viewership": {
+        "sql_aggregation",
+        "sql_case",
+    },
+    "Duplicate Job Listings": {
+        "sql_aggregation",
+    },
+    "Teams Power Users": {
+        "sql_aggregation",
+    },
+    "Pharmacy Analytics Part 1": {
+        "analysis_foundations",
+        "sql_aggregation",
+    },
+    "Signup Activation Rate": {
+        "sql_aggregation",
+        "sql_joins",
+    },
+    "User's Third Transaction": {
+        "sql_window_functions",
+    },
+    "Second Highest Salary": {
+        "sql_window_functions",
+    },
+    "Top Three Salaries": {
+        "sql_joins",
+        "sql_window_functions",
+    },
+    "Tweets' Rolling Averages": {
+        "sql_window_functions",
+    },
+    "Odd and Even Measurements": {
+        "sql_ctes",
+        "sql_window_functions",
+    },
+    "User Shopping Sprees": {
+        "sql_aggregation",
+        "sql_date_logic",
+    },
+    "Supercloud Customer": {
+        "sql_aggregation",
+        "sql_joins",
+    },
+    "Second Day Confirmation": {
+        "sql_date_logic",
+        "sql_joins",
+    },
+}
+
+
+def _sql_requirements(
+    title,
+    topic,
+):
+    return set(
+        SQL_PROBLEM_REQUIREMENTS.get(
+            title,
+            SQL_REQUIREMENTS.get(
+                topic,
+                {"sql_querying"},
+            ),
+        )
+    )
 
 
 PROJECT_EXACT_REQUIREMENTS = {
@@ -236,6 +361,19 @@ def _weekly_completed(conn, track_key):
     ).fetchone()[0]
 
 
+def _daily_completed(conn, track_key):
+    return conn.execute(
+        """SELECT COUNT(*)
+           FROM track_events
+           WHERE track_key=?
+             AND completed_date=?""",
+        (
+            track_key,
+            date.today().isoformat(),
+        ),
+    ).fetchone()[0]
+
+
 def adaptive_targets(state, *, portfolio_ready=True):
     """Allocate the weekly study budget with certificate-first priority."""
     hours = max(
@@ -312,21 +450,50 @@ def _pace_metadata(
     *,
     weekly_target,
     weekly_completed,
+    daily_completed,
     role,
     allocation_percent,
 ):
+    weekly_target = int(weekly_target)
+    weekly_completed = int(weekly_completed)
+    daily_completed = int(daily_completed)
+
     days_left = _days_remaining()
     remaining = max(
         0,
-        int(weekly_target)
-        - int(weekly_completed),
+        weekly_target - weekly_completed,
+    )
+
+    # Base today's quota on progress completed before today. This prevents a
+    # two-item catch-up target from shrinking after the first completion.
+    completed_before_today = max(
+        0,
+        weekly_completed - daily_completed,
+    )
+    remaining_at_start_today = max(
+        0,
+        weekly_target - completed_before_today,
     )
     today_target = (
         math.ceil(
-            remaining / days_left
+            remaining_at_start_today / days_left
         )
-        if remaining
+        if remaining_at_start_today
         else 0
+    )
+    remaining_today = max(
+        0,
+        today_target - daily_completed,
+    )
+
+    weekly_goal_complete = (
+        weekly_target > 0
+        and weekly_completed >= weekly_target
+    )
+    daily_goal_complete = (
+        weekly_target > 0
+        and today_target > 0
+        and daily_completed >= today_target
     )
 
     elapsed_before_today = max(
@@ -334,20 +501,22 @@ def _pace_metadata(
         date.today().weekday(),
     )
     expected_before_today = math.floor(
-        int(weekly_target)
+        weekly_target
         * elapsed_before_today
         / 7
     )
     behind = max(
         0,
         expected_before_today
-        - int(weekly_completed),
+        - completed_before_today,
     )
 
     if weekly_target <= 0:
         pace_status = "Paused for certificate focus"
-    elif remaining <= 0:
+    elif weekly_goal_complete:
         pace_status = "Weekly goal complete"
+    elif daily_goal_complete:
+        pace_status = "Daily goal complete"
     elif behind:
         pace_status = f"Catch up by {behind}"
     else:
@@ -355,14 +524,14 @@ def _pace_metadata(
 
     return {
         "role": role,
-        "weekly_target": int(
-            weekly_target
-        ),
-        "weekly_completed": int(
-            weekly_completed
-        ),
+        "weekly_target": weekly_target,
+        "weekly_completed": weekly_completed,
         "remaining_this_week": remaining,
         "today_target": today_target,
+        "today_completed": daily_completed,
+        "remaining_today": remaining_today,
+        "daily_goal_complete": daily_goal_complete,
+        "weekly_goal_complete": weekly_goal_complete,
         "days_remaining": days_left,
         "allocation_percent": int(
             allocation_percent
@@ -811,12 +980,15 @@ def _datacamp_target(
     if position >= len(DATACAMP_TRACK):
         return None
 
-    course_name, lesson, estimate = (
+    course_name, chapter, estimate = (
         DATACAMP_TRACK[position]
     )
     metadata = {
         "course": course_name,
-        "lesson": lesson,
+        "lesson": chapter,
+        "chapter": chapter,
+        "curriculum_position": position + 1,
+        "estimated_minutes": estimate,
         "total_items": len(
             DATACAMP_TRACK
         ),
@@ -829,7 +1001,8 @@ def _datacamp_target(
     return {
         "target_key": f"item:{position}",
         "label": (
-            f"Continue DataCamp: {lesson}"
+            f"Complete DataCamp: {course_name} — "
+            f"{chapter}"
         ),
         "source_label": (
             f"DataCamp • {course_name}"
@@ -891,17 +1064,39 @@ def _derived_skills(conn, state):
     if course > 9:
         skills.add("career_readiness")
 
-    if data_position >= 3 or sql_count >= 2:
-        skills.add("sql_fundamentals")
-    if data_position >= 7 or sql_count >= 5:
+    # DataCamp positions represent completed official chapters. SQL concepts
+    # unlock only after the chapter that teaches them has been completed.
+    if data_position >= 2:
+        skills.update(
+            {
+                "sql_fundamentals",
+                "sql_querying",
+            }
+        )
+    if data_position >= 3:
+        skills.add("sql_aggregation")
+    if data_position >= 5:
+        skills.add("sql_date_logic")
+    if data_position >= 6:
+        skills.add("sql_case")
+    if data_position >= 8:
         skills.add("sql_joins")
-    if data_position >= 9 or sql_count >= 9:
-        skills.add("sql_intermediate")
     if data_position >= 10:
-        skills.add("power_bi_foundations")
+        skills.add("sql_subqueries")
     if data_position >= 11:
-        skills.add("power_bi")
+        skills.add("sql_ctes")
     if data_position >= 12:
+        skills.update(
+            {
+                "sql_window_functions",
+                "sql_intermediate",
+            }
+        )
+    if data_position >= 16:
+        skills.add("power_bi_foundations")
+    if data_position >= 20:
+        skills.add("power_bi")
+    if data_position >= 28:
         skills.add("python_pandas")
 
     return skills
@@ -1125,9 +1320,9 @@ def _sql_target(
         if title in completed:
             continue
 
-        required = SQL_REQUIREMENTS.get(
+        required = _sql_requirements(
+            title,
             topic,
-            {"analytics_foundations"},
         )
         missing = set(required) - set(
             unlocked
@@ -1412,11 +1607,9 @@ def _sync_sprint_prerequisites(
             item = sql_lookup.get(title)
             if item:
                 required = (
-                    SQL_REQUIREMENTS.get(
+                    _sql_requirements(
+                        title,
                         item[2],
-                        {
-                            "analytics_foundations"
-                        },
                     )
                 )
 
@@ -1661,6 +1854,13 @@ def sync_all(conn, state):
         )
         for track_key in TRACK_ORDER
     }
+    daily = {
+        track_key: _daily_completed(
+            conn,
+            track_key,
+        )
+        for track_key in TRACK_ORDER
+    }
 
     pace = {
         track_key: _pace_metadata(
@@ -1668,6 +1868,9 @@ def sync_all(conn, state):
                 track_key
             ]["weekly_target"],
             weekly_completed=weekly[
+                track_key
+            ],
+            daily_completed=daily[
                 track_key
             ],
             role=TRACK_CONFIG[
@@ -1811,6 +2014,16 @@ def sync_all(conn, state):
             )
             continue
 
+        track_status = "Active"
+        if pace[track_key][
+            "weekly_goal_complete"
+        ]:
+            track_status = "Weekly Complete"
+        elif pace[track_key][
+            "daily_goal_complete"
+        ]:
+            track_status = "Daily Complete"
+
         _upsert_state(
             conn,
             track_key,
@@ -1821,7 +2034,7 @@ def sync_all(conn, state):
             weekly_target=allocations[
                 track_key
             ]["weekly_target"],
-            status="Active",
+            status=track_status,
             metadata=target["metadata"],
         )
         _ensure_task(
@@ -1869,7 +2082,45 @@ def source_for_task(conn, task_id):
     )
 
 
+def _clean_focus_text(value):
+    return str(value or "").strip().rstrip(".").strip()
+
+
+def _course_number_from_alignment(alignment):
+    match = re.search(
+        r"\bCourse\s+(\d+)\b",
+        str(alignment or ""),
+        re.IGNORECASE,
+    )
+    return match.group(1) if match else None
+
+
+def _looks_like_sql_fundamentals(label):
+    lower_label = str(label or "").lower()
+    sql_markers = (
+        "select",
+        " from ",
+        "where",
+        "order by",
+        "group by",
+        "having",
+        "join",
+        "subquery",
+        "cte",
+        "window function",
+        "sql",
+    )
+    return (
+        lower_label.startswith("practice ")
+        and any(
+            marker in f" {lower_label} "
+            for marker in sql_markers
+        )
+    )
+
+
 def task_detail(conn, task_id):
+    """Return action-first pacing text for an adaptive track task."""
     link = task_track(
         conn,
         task_id,
@@ -1887,12 +2138,6 @@ def task_detail(conn, task_id):
     metadata = json.loads(
         state_row["metadata"]
         or "{}"
-    )
-    role = metadata.get(
-        "role",
-        TRACK_CONFIG[
-            link["track_key"]
-        ]["role"],
     )
     completed = int(
         metadata.get(
@@ -1912,25 +2157,211 @@ def task_detail(conn, task_id):
             0,
         )
     )
-    pace_status = metadata.get(
-        "pace_status",
-        "On pace",
-    )
-
-    if link["track_key"] == "google":
-        return (
-            f"{role} • Week {completed}/{target} • "
-            f"Aim for {today} today • {pace_status}"
+    today_completed = int(
+        metadata.get(
+            "today_completed",
+            0,
         )
-
+    )
+    pace_status = _clean_focus_text(
+        metadata.get(
+            "pace_status",
+            "On pace",
+        )
+    )
+    track_key = link["track_key"]
     alignment = metadata.get(
         "alignment",
-        "Aligned supplemental work.",
+        "",
     )
+    aligned_course = _course_number_from_alignment(
+        alignment
+    )
+
+    if track_key == "google":
+        specific_work = (
+            f"Course {metadata.get('course', '?')}, "
+            f"Module {metadata.get('module', '?')}"
+        )
+        context = pace_status
+    elif track_key == "datacamp":
+        data_course = metadata.get(
+            "course",
+            "DataCamp",
+        )
+        data_chapter = metadata.get(
+            "chapter",
+            metadata.get(
+                "lesson",
+                "Continue the current chapter",
+            ),
+        )
+        specific_work = (
+            f"{data_course} — {data_chapter}"
+        )
+        context = (
+            f"Supports Course {aligned_course}"
+            if aligned_course
+            else "Supports certificate progress"
+        )
+    elif track_key == "sql":
+        specific_work = metadata.get(
+            "title",
+            "Complete the current SQL problem",
+        )
+        context = (
+            f"Reinforces Course {aligned_course}"
+            if aligned_course
+            else "Reinforces current SQL skills"
+        )
+    elif track_key == "portfolio":
+        specific_work = metadata.get(
+            "milestone",
+            "Advance the current portfolio milestone",
+        )
+        context = (
+            f"Applies Course {aligned_course}"
+            if aligned_course
+            else "Prerequisite skills ready"
+        )
+    else:
+        task_row = conn.execute(
+            """SELECT label
+               FROM sprint_tasks
+               WHERE id=?""",
+            (task_id,),
+        ).fetchone()
+        specific_work = (
+            task_row["label"]
+            if task_row is not None
+            else "Continue the current task"
+        )
+        context = pace_status
+
     return (
-        f"{role} • Week {completed}/{target} • "
-        f"{alignment}"
+        f"{_clean_focus_text(specific_work)} • "
+        f"Today {today_completed}/{today} • "
+        f"Week {completed}/{target} • "
+        f"{_clean_focus_text(context)}"
     )
+
+
+def focus_presentation(conn, item):
+    """Build one uniform Today’s Focus title and detail."""
+    category = str(
+        item.get("category")
+        or "General"
+    )
+    label = _clean_focus_text(
+        item.get("label")
+    )
+    task_id = item.get("task_id")
+
+    if item.get("roadmap_fallback"):
+        title = item.get(
+            "display_title",
+            {
+                "Learning": "Learning",
+                "SQL": "SQL Practice",
+                "Portfolio": "Portfolio Project",
+                "Review": "Weekly Review",
+                "General": "Roadmap Task",
+            }.get(
+                category,
+                "Roadmap Task",
+            ),
+        )
+        action = _clean_focus_text(
+            item.get(
+                "detail",
+                label,
+            )
+        )
+        return {
+            "style_category": category,
+            "title": title,
+            "detail": (
+                f"{action} • Weekly roadmap"
+            ),
+        }
+
+    link = (
+        task_track(conn, int(task_id))
+        if task_id is not None
+        else None
+    )
+    if link is not None:
+        track_key = link["track_key"]
+        return {
+            "style_category": TRACK_CONFIG[
+                track_key
+            ]["category"],
+            "title": TRACK_CONFIG[
+                track_key
+            ]["display_name"],
+            "detail": task_detail(
+                conn,
+                int(task_id),
+            ),
+        }
+
+    display_category = category
+    duckdb_exercise = exercise_for_label(label)
+    if duckdb_exercise is not None:
+        display_category = "SQL"
+        title = "DuckDB Practice"
+    elif (
+        category == "General"
+        and _looks_like_sql_fundamentals(label)
+    ):
+        display_category = "SQL"
+        title = "SQL Fundamentals"
+    elif category == "Learning":
+        lower_label = label.lower()
+        if "datacamp" in lower_label:
+            title = "DataCamp"
+        elif any(
+            token in lower_label
+            for token in (
+                "google",
+                "course",
+                "module",
+            )
+        ):
+            title = "Google Certificate"
+        else:
+            title = "Learning"
+    else:
+        title = {
+            "SQL": "SQL Practice",
+            "Portfolio": "Portfolio Project",
+            "Review": "Weekly Review",
+            "General": "Roadmap Task",
+        }.get(
+            category,
+            "Roadmap Task",
+        )
+
+    metadata = []
+    if item.get("carryover"):
+        metadata.append("Missed yesterday")
+    elif str(
+        item.get("status")
+        or ""
+    ) == "In Progress":
+        metadata.append("In progress")
+
+    metadata.append(
+        f"Priority {int(item.get('priority') or 3)}"
+    )
+
+    return {
+        "style_category": display_category,
+        "title": title,
+        "detail": " • ".join(
+            [label, *metadata]
+        ),
+    }
 
 
 def skill_snapshot(conn):
@@ -2371,6 +2802,54 @@ def snapshot(conn, state):
     return result
 
 
+def sql_problem_readiness(
+    conn,
+    state,
+    title,
+):
+    item = _sql_item(title)
+    if item is None:
+        return {
+            "ready": False,
+            "required_keys": [],
+            "required_names": [],
+            "missing_keys": [],
+            "missing_names": [
+                "Problem is not in the SQL catalog"
+            ],
+        }
+
+    unlocked = _derived_skills(
+        conn,
+        state,
+    )
+    required = _sql_requirements(
+        title,
+        item[2],
+    )
+    missing = set(required) - set(
+        unlocked
+    )
+
+    return {
+        "ready": not missing,
+        "required_keys": sorted(
+            required
+        ),
+        "required_names": [
+            SKILL_DEFINITIONS[key][0]
+            for key in sorted(required)
+        ],
+        "missing_keys": sorted(
+            missing
+        ),
+        "missing_names": [
+            SKILL_DEFINITIONS[key][0]
+            for key in sorted(missing)
+        ],
+    }
+
+
 def next_sql_titles(
     conn,
     state=None,
@@ -2388,9 +2867,9 @@ def next_sql_titles(
         title = item[0]
         if title in completed:
             continue
-        required = SQL_REQUIREMENTS.get(
+        required = _sql_requirements(
+            title,
             item[2],
-            {"analytics_foundations"},
         )
         if not set(required).issubset(
             unlocked

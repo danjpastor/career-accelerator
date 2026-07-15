@@ -37,8 +37,8 @@ Choose a portfolio problem and define its business context
 - [ ] [Google Course 1] Complete orientation and the first learning module
 - [ ] [Google Course 1] Record key concepts and unfamiliar terminology
 - [ ] Create a realistic weekly study schedule
-- [ ] Complete the DataCamp Introduction to SQL opening chapter
-- [ ] Practice SELECT, FROM, WHERE, ORDER BY, and LIMIT
+- [ ] Complete DataCamp: Introduction to SQL — Chapter 1: Relational Databases
+- [ ] Complete DuckDB Exercise 01: Filter and sort support tickets
 - [ ] Solve Histogram of Tweets
 - [ ] Solve Data Science Skills
 - [ ] Choose the first portfolio project problem

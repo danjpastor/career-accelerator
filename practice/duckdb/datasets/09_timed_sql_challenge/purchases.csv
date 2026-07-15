@@ -1,0 +1,8 @@
+purchase_id,user_id,purchase_date,amount,product
+PU01,U01,2026-06-05,79,Starter
+PU02,U02,2026-06-08,129,Growth
+PU03,U04,2026-06-12,49,Starter
+PU04,U04,2026-06-20,159,Growth
+PU05,U07,2026-06-15,99,Starter
+PU06,U09,2026-06-14,499,Enterprise
+PU07,U10,2026-06-22,129,Growth

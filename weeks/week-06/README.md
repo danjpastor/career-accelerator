@@ -36,14 +36,14 @@ Complete the main SQL analysis and validate the findings
 ## Checklist
 - [ ] [Google Course 5] Complete the remaining modules
 - [ ] [Google Course 5] Finish all required activities and assessments
-- [ ] Practice INNER, LEFT, and multi-table joins
-- [ ] Practice CTEs and subqueries
+- [ ] Complete DuckDB Exercise 06: Join customers, orders, and payments
+- [ ] Complete DuckDB Exercise 07: Analyze order profitability
 - [ ] Solve User's Third Transaction
 - [ ] Solve Second Highest Salary
 - [ ] Complete the main Project 1 SQL query set
 - [ ] Add validation and edge-case queries
 - [ ] Translate query outputs into business findings
-- [ ] Review every query for readability
+- [ ] Complete DuckDB Exercise 12: Refactor an analytics query
 - [ ] Commit the completed SQL analysis
 - [ ] Complete the Week 6 retrospective
 

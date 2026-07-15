@@ -1,0 +1,13 @@
+employee_id,employee_name,department_id,job_level,hire_date,annual_salary,manager_id
+E01,Avery Stone,D01,Manager,2021-02-10,118000,
+E02,Blake Chen,D01,Senior,2022-05-14,94000,E01
+E03,Casey Reed,D01,Junior,2025-01-06,67000,E01
+E04,Drew Patel,D02,Manager,2020-08-20,121000,
+E05,Emery Jones,D02,Senior,2022-11-01,91000,E04
+E06,Finley Brooks,D02,Junior,2025-04-15,64000,E04
+E07,Gray Morgan,D03,Manager,2021-06-22,112000,
+E08,Harper Diaz,D03,Senior,2023-03-11,88000,E07
+E09,Indigo Lane,D03,Junior,2025-07-01,62000,E07
+E10,Jordan Kim,D04,Manager,2019-12-05,116000,
+E11,Kai Wilson,D04,Senior,2022-09-19,90000,E10
+E12,Logan Price,,Contractor,2026-01-10,78000,

@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.1.3 includes:
+Version 9.3.3 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -193,3 +193,114 @@ permit `int(Qt.Checked)`.
 
 The fix applies to both Dashboard Next Tasks and Portfolio Workspace
 milestone checkboxes.
+
+
+## Daily-Paced Next Tasks
+
+Version 9.2.0 makes Next Tasks a daily workload rather than an endless
+sequential queue.
+
+- Completed items disappear immediately.
+- The next sequential item appears only when more work is due for that track
+  today.
+- Daily-complete tracks return tomorrow.
+- Weekly-complete tracks return the following week.
+- Items already below the five-row display limit still move upward
+  immediately.
+- Catch-up quotas remain fixed during the day; a two-item target does not
+  shrink after the first completion.
+- Today's Focus follows the same pacing limits.
+- Track details display `Today completed / target` and weekly progress.
+
+
+## Specific Today’s Focus Labels
+
+Version 9.2.1 replaces generic role text such as `Supplemental` with the
+actual work item assigned to the track.
+
+Examples:
+
+- DataCamp: `Selecting columns and inspecting tables`
+- SQL Practice: `Histogram of Tweets`
+- Google Certificate: `Course 5, Module 1`
+- Portfolio Project: `Create synthetic data specification`
+
+Daily and weekly pacing information remains visible after the specific task
+name.
+
+
+## Uniform Today’s Focus Formatting
+
+Version 9.2.2 applies one shared display rule to every Today’s Focus row:
+
+1. The specific action appears first.
+2. Daily/weekly pacing or priority appears second.
+3. Course alignment is concise.
+4. Duration remains exclusively in the right-hand time column.
+5. The heading reflects the actual work type.
+
+Example rows:
+
+- `Selecting columns and inspecting tables • Today 0/1 • Week 0/2 • Supports Course 5`
+- `Histogram of Tweets • Today 0/1 • Week 0/3 • Reinforces Course 5`
+- `Solve Data Science Skills • Priority 1`
+- `Practice SELECT, FROM, WHERE, ORDER BY, and LIMIT • Priority 3`
+
+General sprint tasks that clearly practice SQL fundamentals are presented as
+`SQL Fundamentals` without changing their stored task records or progress.
+
+
+## Guided DuckDB Exercise Library
+
+Version 9.3.0 replaces broad SQL practice reminders with twelve concrete
+DuckDB assignments under `practice/duckdb/`.
+
+Each assignment supplies a small CSV dataset, business questions, a starter
+SQL file, a submission path, and result checkpoints. Completed solution SQL
+is intentionally not included.
+
+Existing databases are updated by label during normal startup. Completion
+state and other progress are preserved.
+
+
+## Verified DataCamp Curriculum
+
+Version 9.3.1 replaces invented DataCamp lesson summaries with official
+course and chapter names verified on July 14, 2026.
+
+The curriculum catalog is fixed and reviewable. The app remains adaptive:
+it selects the next chapter, calculates daily and weekly pacing, and hides
+or advances the track based on completed work.
+
+Daily roadmap fallbacks now read the current adaptive DataCamp, SQL, and
+portfolio assignments instead of displaying separate hard-coded practice
+text.
+
+
+## Study Session Preservation
+
+Version 9.3.2 prevents task completion from interrupting an active study
+session.
+
+When a task checkbox refreshes the adaptive plan, the app now preserves:
+
+- elapsed timer time
+- running or paused timer state
+- session date and hours
+- productivity score and SQL count
+- Google, DataCamp, and portfolio notes
+- unsaved session notes
+- the selected session goal
+
+Time spent while the task refresh runs is added back to a running timer.
+
+
+## Working SQL Companion
+
+Version 9.3.3 connects the problem list and workspace, creates and opens
+local solution files, saves completions, and advances the adaptive SQL
+track.
+
+SQL recommendations now use title-specific concept prerequisites rather
+than broad difficulty or topic labels. Problems remain hidden until every
+required concept has been learned through the verified DataCamp path.

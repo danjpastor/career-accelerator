@@ -37,7 +37,7 @@ Draft the Project 1 charter and stakeholder questions
 - [ ] [Google Course 1] Finish the remaining course modules
 - [ ] [Google Course 2] Begin the first module
 - [ ] Document SMART business questions
-- [ ] Practice COUNT, SUM, AVG, GROUP BY, and HAVING
+- [ ] Complete DuckDB Exercise 02: Summarize retail orders
 - [ ] Solve Page With No Likes
 - [ ] Solve Laptop vs. Mobile Viewership
 - [ ] Draft the Project 1 business problem

@@ -1,0 +1,15 @@
+order_id,customer_id,order_date,order_total,order_status
+O001,C001,2026-06-01,540,Delivered
+O002,C002,2026-06-02,220,Delivered
+O003,C001,2026-06-04,180,Delivered
+O004,C003,2026-06-05,760,Delivered
+O005,C004,2026-06-07,95,Canceled
+O006,C005,2026-06-08,410,Delivered
+O007,C006,2026-06-10,325,Delivered
+O008,C007,2026-06-12,615,Delivered
+O009,C008,2026-06-14,150,Delivered
+O010,C002,2026-06-16,480,Delivered
+O011,C003,2026-06-18,275,Delivered
+O012,C005,2026-06-20,680,Processing
+O013,C009,2026-06-22,360,Delivered
+O014,C007,2026-06-24,205,Delivered

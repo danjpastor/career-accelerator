@@ -37,7 +37,7 @@ Clean and validate the dataset and draft the analytical schema
 - [ ] [Google Course 3] Finish the remaining course modules
 - [ ] [Google Course 4] Begin the first module
 - [ ] Document a repeatable data-cleaning checklist
-- [ ] Practice NULL handling and CASE-based cleaning
+- [ ] Complete DuckDB Exercise 03: Clean customer feedback
 - [ ] Solve Pharmacy Analytics Part 1
 - [ ] Clean the Project 1 dataset
 - [ ] Record every transformation and quality decision

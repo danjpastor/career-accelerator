@@ -25,6 +25,93 @@ This file is the single maintained changelog for the project.
 
 
 
+
+
+
+
+
+
+
+## 9.3.3
+
+- Made a single SQL problem selection populate the Problem Workspace
+- Preserved selected problem metadata with Qt item data instead of parsing text
+- Automatically selected the current adaptive SQL assignment
+- Made Open My Solution create a starter file before opening it
+- Added reliable VS Code and operating-system editor fallbacks
+- Made Mark Complete save the problem and advance adaptive SQL progress
+- Preserved active Study Sessions during SQL completion refreshes
+- Added granular, chapter-based SQL concept skills
+- Added title-specific prerequisites for every SQL Companion problem
+- Locked Histogram of Tweets until aggregation and CTE concepts are learned
+- Prevented difficulty labels from bypassing required knowledge
+- Preserved user data, layout, DuckDB exercises, and VFX project files
+
+## 9.3.2
+
+- Fixed task completion stopping or clearing an active Study Session
+- Preserved elapsed time and running/paused timer state across task refreshes
+- Preserved every unsaved Study Session form field and notes
+- Accounted for time spent during a running task-completion refresh
+- Restored the task-completion status message
+- Preserved adaptive pacing, curriculum progress, layout, and user data
+
+## 9.3.1
+
+- Replaced invented DataCamp lesson names with verified course chapters
+- Corrected Introduction to SQL to `Relational Databases` and `Querying`
+- Added the current verified SQL, Power BI, Python, and pandas chapter path
+- Included the DataCamp course name in Today’s Focus descriptions
+- Updated skill unlock thresholds for the expanded chapter-based curriculum
+- Replaced hard-coded daily roadmap assignments with adaptive track metadata
+- Added DataCamp curriculum and task-architecture documentation
+- Preserved progress, daily pacing, app layout, DuckDB exercises, and VFX data
+
+## 9.3.0
+
+- Added twelve guided DuckDB exercises with small CSV datasets
+- Added concrete business questions and blank starter SQL files
+- Added result checkpoints without completed solution queries
+- Added PowerShell and Python database setup workflows for VS Code
+- Replaced broad SQL concept reminders with numbered exercise assignments
+- Added an idempotent migration for existing task labels and metadata
+- Added DuckDB Practice headings and exercise source paths in the Dashboard
+- Preserved completion state, database progress, app layout, and VFX data
+- Added exercise submissions as commit-ready portfolio evidence
+
+## 9.2.2
+
+- Unified formatting across all Today’s Focus rows
+- Put the actionable task name before pacing, status, and priority metadata
+- Shortened DataCamp context to `Supports Course N`
+- Shortened SQL context to `Reinforces Course N`
+- Kept durations only in the right-hand time column
+- Presented foundational SQL practice with the `SQL Fundamentals` heading
+- Kept adaptive and ordinary sprint tasks under one shared formatter
+- Preserved layout, progress data, daily pacing, and the VFX dataset
+
+## 9.2.1
+
+- Replaced generic `Supplemental` Today’s Focus details with specific work
+  item names
+- Added the current DataCamp lesson to DataCamp focus rows
+- Added the assigned SQL problem to SQL Practice focus rows
+- Added the current Google course and module to Google focus rows
+- Added the active milestone to Portfolio focus rows
+- Preserved daily/weekly pacing context, layout, progress, and dataset
+
+## 9.2.0
+
+- Added hybrid daily pacing to Dashboard Next Tasks
+- Showed another sequential item only while more work remains due today
+- Suppressed daily-complete tracks until tomorrow
+- Suppressed weekly-complete tracks until the next week
+- Applied pacing limits to Today's Focus and carryover items
+- Kept catch-up quotas stable while tasks are completed
+- Added Today completed/target indicators to track details
+- Added completion messages explaining when the next item returns
+- Preserved the existing layout, progress database, and VFX dataset
+
 ## 9.1.3
 
 - Fixed the PySide6 `CheckState` conversion error

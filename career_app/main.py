@@ -26,11 +26,19 @@ from career_app import __version__
 from career_app.database import (
     connect, ensure_default_state, factory_reset, save_setting, setting, state, update_state
 )
+from career_app.data.duckdb_exercises import exercise_source
 from career_app.data.roadmap import (
     DATACAMP_TRACK, PROJECT_DIRS, PROJECT_NAMES, PROJECT_STAGES,
     SQL_COMPANION, WEEKLY_GUIDANCE
 )
-from career_app.services import analytics, coach, planner, tracks
+from career_app.services import (
+    analytics,
+    coach,
+    planner,
+    session_guard,
+    sql_workspace,
+    tracks,
+)
 from career_app.services.backup import create_backup
 from career_app.services.migration import migrate
 from career_app.services.publisher import publish
@@ -1564,22 +1572,45 @@ class CareerAccelerator(QMainWindow):
     def sql_page(self):
         page, root = self.page(
             "💻 SQL Companion",
-            "Recommended problems, mastery tracking, notes, review scheduling, and solution files.",
+            "Select an eligible problem to load its workspace, track mastery, and manage your local solution file.",
         )
 
         body = QHBoxLayout()
         recommendations = Card("Today's SQL")
         self.sql_problem_list = QListWidget()
-        self.sql_problem_list.itemDoubleClicked.connect(self.prefill_sql)
-        recommendations.layout.addWidget(self.sql_problem_list)
+        self.sql_problem_list.currentItemChanged.connect(
+            self.prefill_sql
+        )
+        recommendations.layout.addWidget(
+            self.sql_problem_list
+        )
         body.addWidget(recommendations, 1)
 
         detail = Card("Problem Workspace")
+        self.sql_workspace_status = QLabel(
+            "Select a problem on the left."
+        )
+        self.sql_workspace_status.setObjectName(
+            "Muted"
+        )
+        self.sql_workspace_status.setWordWrap(True)
+        detail.layout.addWidget(
+            self.sql_workspace_status
+        )
+
         form = QFormLayout()
         self.sql_title = QLineEdit()
         self.sql_difficulty = QLineEdit("Easy")
         self.sql_topic = QLineEdit()
         self.sql_concepts = QLineEdit()
+        for field in (
+            self.sql_title,
+            self.sql_difficulty,
+            self.sql_topic,
+            self.sql_concepts,
+        ):
+            field.setReadOnly(True)
+
         self.sql_mastery = QSpinBox()
         self.sql_mastery.setRange(1, 5)
         self.sql_mastery.setValue(1)
@@ -1595,17 +1626,41 @@ class CareerAccelerator(QMainWindow):
         detail.layout.addLayout(form)
 
         buttons = QHBoxLayout()
-        complete = QPushButton("Mark Complete")
-        complete.setObjectName("Primary")
-        complete.clicked.connect(self.save_sql)
-        hint = QPushButton("Need a Hint")
-        hint.clicked.connect(self.sql_hint)
-        solution = QPushButton("Open My Solution")
-        solution.clicked.connect(self.open_sql_solution)
-        buttons.addWidget(complete)
-        buttons.addWidget(hint)
-        buttons.addWidget(solution)
+        self.sql_complete_button = QPushButton(
+            "Mark Complete"
+        )
+        self.sql_complete_button.setObjectName(
+            "Primary"
+        )
+        self.sql_complete_button.clicked.connect(
+            self.save_sql
+        )
+        self.sql_hint_button = QPushButton(
+            "Need a Hint"
+        )
+        self.sql_hint_button.clicked.connect(
+            self.sql_hint
+        )
+        self.sql_solution_button = QPushButton(
+            "Open My Solution"
+        )
+        self.sql_solution_button.clicked.connect(
+            self.open_sql_solution
+        )
+        buttons.addWidget(
+            self.sql_complete_button
+        )
+        buttons.addWidget(
+            self.sql_hint_button
+        )
+        buttons.addWidget(
+            self.sql_solution_button
+        )
         detail.layout.addLayout(buttons)
+
+        self.sql_selected_title = None
+        self.set_sql_workspace_enabled(False)
+
         body.addWidget(detail, 1)
         root.addLayout(body, 1)
         return page
@@ -2989,6 +3044,10 @@ class CareerAccelerator(QMainWindow):
             return modular_source
 
         label = str(row["label"] or "").strip()
+        duckdb_source = exercise_source(label)
+        if duckdb_source:
+            return duckdb_source
+
         lower_label = label.lower()
         category = row["category"] or "General"
         week = int(
@@ -3187,62 +3246,40 @@ class CareerAccelerator(QMainWindow):
         }
 
         estimated_minutes = 0
+        focus_title_icons = {
+            "Google Certificate": "🎓",
+            "DataCamp": "📘",
+            "Learning": "🎓",
+            "SQL Practice": "💻",
+            "DuckDB Practice": "🦆",
+            "SQL Fundamentals": "💻",
+            "Portfolio Project": "📁",
+            "Weekly Review": "📝",
+            "Roadmap Task": "📌",
+        }
 
         for index, item in enumerate(intelligent_focus):
-            emoji, default_title, accent = focus_styles.get(
-                item["category"],
+            presentation = tracks.focus_presentation(
+                self.conn,
+                item,
+            )
+            style_category = presentation[
+                "style_category"
+            ]
+            (
+                default_emoji,
+                _,
+                accent,
+            ) = focus_styles.get(
+                style_category,
                 focus_styles["General"],
             )
-
-            if item.get("roadmap_fallback"):
-                title = item.get(
-                    "display_title",
-                    default_title,
-                )
-                detail = item.get(
-                    "detail",
-                    item["label"],
-                )
-            else:
-                lower_label = item["label"].lower()
-                if item["category"] == "Learning":
-                    if any(
-                        token in lower_label
-                        for token in ("google", "course", "module")
-                    ):
-                        title = "Google Certificate"
-                        emoji = "🎓"
-                    elif "datacamp" in lower_label:
-                        title = "DataCamp"
-                        emoji = "📘"
-                    else:
-                        title = "Learning"
-                else:
-                    title = default_title
-
-                adaptive_detail = (
-                    tracks.task_detail(
-                        self.conn,
-                        item["task_id"],
-                    )
-                )
-                if adaptive_detail:
-                    detail = adaptive_detail
-                else:
-                    if item["carryover"]:
-                        prefix = "Missed yesterday"
-                    elif item["status"] == "In Progress":
-                        prefix = "In progress"
-                    else:
-                        prefix = (
-                            f"Priority "
-                            f"{item['priority']}"
-                        )
-
-                    detail = (
-                        f"{prefix} • "
-                        f"{item['label']}"
-                    )
+            title = presentation["title"]
+            detail = presentation["detail"]
+            emoji = focus_title_icons.get(
+                title,
+                default_emoji,
+            )
 
             minutes = int(item["estimated_minutes"])
             estimated_minutes += minutes
@@ -3446,6 +3483,7 @@ class CareerAccelerator(QMainWindow):
         google_detail = (
             f"Module {self.state['google_module']} • "
             f"Today "
+            f"{google_meta.get('today_completed', 0)} / "
             f"{google_meta.get('today_target', 0)} • "
             f"Week "
             f"{google['weekly_completed']} / "
@@ -3463,7 +3501,9 @@ class CareerAccelerator(QMainWindow):
         )
         datacamp_detail = (
             f"{data_lesson} • "
-            f"{datacamp['metadata'].get('role', 'Supplemental')} • "
+            f"Today "
+            f"{datacamp['metadata'].get('today_completed', 0)} / "
+            f"{datacamp['metadata'].get('today_target', 0)} • "
             f"Week "
             f"{datacamp['weekly_completed']} / "
             f"{datacamp['weekly_target']}"
@@ -3480,7 +3520,9 @@ class CareerAccelerator(QMainWindow):
         )
         sql_detail = (
             f"Next: {sql_next} • "
-            f"{sql['metadata'].get('role', 'Supplemental')} • "
+            f"Today "
+            f"{sql['metadata'].get('today_completed', 0)} / "
+            f"{sql['metadata'].get('today_target', 0)} • "
             f"Week "
             f"{sql['weekly_completed']} / "
             f"{sql['weekly_target']}"
@@ -3510,6 +3552,9 @@ class CareerAccelerator(QMainWindow):
         else:
             portfolio_detail = (
                 f"Next: {portfolio_next} • "
+                f"Today "
+                f"{portfolio['metadata'].get('today_completed', 0)} / "
+                f"{portfolio['metadata'].get('today_target', 0)} • "
                 f"Week "
                 f"{portfolio['weekly_completed']} / "
                 f"{portfolio['weekly_target']}"
@@ -3570,21 +3615,47 @@ class CareerAccelerator(QMainWindow):
         self.load_project()
 
     def refresh_sql(self):
-        self.sql_problem_list.clear()
-        completed = {
-            row["title"]: row
-            for row in self.conn.execute(
-                "SELECT * FROM sql_practice"
-            ).fetchall()
-        }
-        recommended = set(
-            tracks.next_sql_titles(
-                self.conn,
-                self.state,
-                limit=5,
-            )
+        previous_title = getattr(
+            self,
+            "sql_selected_title",
+            None,
         )
 
+        rows = self.conn.execute(
+            "SELECT * FROM sql_practice"
+        ).fetchall()
+        records = {
+            row["title"]: row
+            for row in rows
+        }
+        completed = {
+            title: row
+            for title, row in records.items()
+            if row["status"] == "Completed"
+        }
+        recommended = tracks.next_sql_titles(
+            self.conn,
+            self.state,
+            limit=5,
+        )
+        recommended_set = set(recommended)
+
+        active_title = None
+        sql_track = tracks.snapshot(
+            self.conn,
+            self.state,
+        ).get("sql", {})
+        active_title = (
+            sql_track.get("metadata", {})
+            .get("title")
+        )
+
+        self.sql_problem_list.blockSignals(
+            True
+        )
+        self.sql_problem_list.clear()
+
+        title_to_row = {}
         for (
             title,
             difficulty,
@@ -3595,7 +3666,7 @@ class CareerAccelerator(QMainWindow):
         ) in SQL_COMPANION:
             if (
                 title not in completed
-                and title not in recommended
+                and title not in recommended_set
             ):
                 continue
 
@@ -3615,6 +3686,74 @@ class CareerAccelerator(QMainWindow):
                 f"{difficulty} • {topic} • "
                 f"{concepts} • {estimate} min"
                 f"{mastery}"
+            )
+            list_item = self.sql_problem_list.item(
+                self.sql_problem_list.count() - 1
+            )
+            list_item.setData(
+                Qt.ItemDataRole.UserRole,
+                title,
+            )
+            readiness = tracks.sql_problem_readiness(
+                self.conn,
+                self.state,
+                title,
+            )
+            list_item.setToolTip(
+                (
+                    "Ready: "
+                    + ", ".join(
+                        readiness["required_names"]
+                    )
+                )
+                if readiness["ready"]
+                else (
+                    "Locked: "
+                    + ", ".join(
+                        readiness["missing_names"]
+                    )
+                )
+            )
+            title_to_row[title] = (
+                self.sql_problem_list.count() - 1
+            )
+
+        selection_title = None
+        for candidate in (
+            previous_title,
+            active_title,
+            *recommended,
+        ):
+            if candidate in title_to_row:
+                selection_title = candidate
+                break
+
+        if (
+            selection_title is None
+            and self.sql_problem_list.count()
+        ):
+            selection_title = (
+                self.sql_problem_list.item(0)
+                .data(
+                    Qt.ItemDataRole.UserRole
+                )
+            )
+
+        self.sql_problem_list.blockSignals(
+            False
+        )
+
+        if selection_title is not None:
+            self.sql_problem_list.setCurrentRow(
+                title_to_row[selection_title]
+            )
+        else:
+            self.clear_sql_workspace(
+                (
+                    "No SQL problem is eligible yet. "
+                    "Complete the required DataCamp chapters "
+                    "to unlock concept-matched practice."
+                )
             )
 
     def refresh_sessions(self):
@@ -3849,39 +3988,90 @@ class CareerAccelerator(QMainWindow):
             raise
 
     def complete_task(self, task_id):
-        result = tracks.complete_track_task(
-            self.conn,
-            task_id,
-            self.state,
+        # Task completion refreshes several pages. Preserve the active timer and
+        # unsaved Study Session form so an unrelated checkbox cannot interrupt
+        # the user's current study session.
+        study_session_snapshot = session_guard.capture(
+            self
         )
 
-        if not result["handled"]:
-            self.conn.execute(
-                """UPDATE sprint_tasks
-                   SET completed=1
-                   WHERE id=?""",
-                (task_id,),
-            )
-            self.conn.execute(
-                """UPDATE task_metadata
-                   SET status='Completed',
-                       deferred_until=NULL
-                   WHERE task_id=?""",
-                (task_id,),
-            )
-            self.conn.commit()
-
-        self.state = state(self.conn)
-        tracks.sync_all(
-            self.conn,
-            self.state,
+        completion_message = (
+            "Task completed."
         )
-        self.refresh_all()
+        try:
+            result = tracks.complete_track_task(
+                self.conn,
+                task_id,
+                self.state,
+            )
+
+            if not result["handled"]:
+                self.conn.execute(
+                    """UPDATE sprint_tasks
+                       SET completed=1
+                       WHERE id=?""",
+                    (task_id,),
+                )
+                self.conn.execute(
+                    """UPDATE task_metadata
+                       SET status='Completed',
+                           deferred_until=NULL
+                       WHERE task_id=?""",
+                    (task_id,),
+                )
+                self.conn.commit()
+
+            self.state = state(self.conn)
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            completion_message = result.get(
+                "message",
+                "Task completed.",
+            )
+            if result["handled"]:
+                track_state = tracks.snapshot(
+                    self.conn,
+                    self.state,
+                )[result["track_key"]]
+                if (
+                    track_state["status"]
+                    == "Weekly Complete"
+                ):
+                    completion_message += (
+                        " Weekly target complete; "
+                        "the next item returns next week."
+                    )
+                elif (
+                    track_state["status"]
+                    == "Daily Complete"
+                ):
+                    completion_message += (
+                        " Daily target complete; "
+                        "the next item returns tomorrow."
+                    )
+                else:
+                    completion_message += (
+                        " Another item is due today."
+                    )
+
+            self.refresh_all()
+        finally:
+            session_guard.restore(
+                self,
+                study_session_snapshot,
+            )
+
+        self.statusBar().showMessage(
+            completion_message,
+            5200,
+        )
 
         if result["handled"]:
             self.statusBar().showMessage(
-                result["message"],
-                4200,
+                completion_message,
+                5200,
             )
 
     def build_plan(self):
@@ -4245,86 +4435,388 @@ class CareerAccelerator(QMainWindow):
         )
         self.conn.commit()
 
-    def prefill_sql(self, item):
-        text = item.text()
-        title = text.split(" • ")[0].replace("✅ ", "").replace("⬜ ", "")
-        match = next((row for row in SQL_COMPANION if row[0] == title), None)
-        if not match:
+    def set_sql_workspace_enabled(
+        self,
+        enabled,
+    ):
+        for widget in (
+            self.sql_mastery,
+            self.sql_review,
+            self.sql_notes,
+            self.sql_complete_button,
+            self.sql_hint_button,
+            self.sql_solution_button,
+        ):
+            widget.setEnabled(bool(enabled))
+
+    def clear_sql_workspace(
+        self,
+        message="Select a problem on the left.",
+    ):
+        self.sql_selected_title = None
+        for field in (
+            self.sql_title,
+            self.sql_difficulty,
+            self.sql_topic,
+            self.sql_concepts,
+            self.sql_review,
+        ):
+            field.clear()
+        self.sql_mastery.setValue(1)
+        self.sql_notes.clear()
+        self.sql_workspace_status.setText(
+            message
+        )
+        self.sql_complete_button.setText(
+            "Mark Complete"
+        )
+        self.set_sql_workspace_enabled(
+            False
+        )
+
+    def prefill_sql(
+        self,
+        item,
+        _previous=None,
+    ):
+        if item is None:
+            self.clear_sql_workspace()
             return
+
+        title = item.data(
+            Qt.ItemDataRole.UserRole
+        )
+        if not title:
+            return
+
+        match = next(
+            (
+                row
+                for row in SQL_COMPANION
+                if row[0] == title
+            ),
+            None,
+        )
+        if not match:
+            self.clear_sql_workspace(
+                "The selected problem is not in the SQL catalog."
+            )
+            return
+
+        record = self.conn.execute(
+            """SELECT *
+               FROM sql_practice
+               WHERE platform='DataLemur'
+                 AND title=?""",
+            (title,),
+        ).fetchone()
+        readiness = tracks.sql_problem_readiness(
+            self.conn,
+            self.state,
+            title,
+        )
+
+        self.sql_selected_title = title
         self.sql_title.setText(match[0])
         self.sql_difficulty.setText(match[1])
         self.sql_topic.setText(match[2])
         self.sql_concepts.setText(match[3])
-        self.sql_review.setText((date.today() + timedelta(days=7)).isoformat())
+        self.sql_mastery.setValue(
+            int(record["mastery"])
+            if record is not None
+            else 1
+        )
+        self.sql_review.setText(
+            (
+                record["review_date"]
+                if record is not None
+                and record["review_date"]
+                else (
+                    date.today()
+                    + timedelta(days=7)
+                ).isoformat()
+            )
+        )
+        self.sql_notes.setPlainText(
+            (
+                record["notes"]
+                if record is not None
+                and record["notes"]
+                else ""
+            )
+        )
+
+        completed = (
+            record is not None
+            and record["status"] == "Completed"
+        )
+        if completed:
+            completed_date = (
+                record["completed_date"]
+                or "previously"
+            )
+            self.sql_workspace_status.setText(
+                f"Completed {completed_date} • "
+                f"Required knowledge: "
+                + ", ".join(
+                    readiness["required_names"]
+                )
+            )
+            self.sql_complete_button.setText(
+                "Update Completion"
+            )
+        elif readiness["ready"]:
+            self.sql_workspace_status.setText(
+                "Ready to solve • Required knowledge: "
+                + ", ".join(
+                    readiness["required_names"]
+                )
+            )
+            self.sql_complete_button.setText(
+                "Mark Complete"
+            )
+        else:
+            self.sql_workspace_status.setText(
+                "Locked • Learn first: "
+                + ", ".join(
+                    readiness["missing_names"]
+                )
+            )
+            self.sql_complete_button.setText(
+                "Locked"
+            )
+
+        self.set_sql_workspace_enabled(
+            completed or readiness["ready"]
+        )
+
+    def ensure_current_sql_solution(self):
+        title = (
+            self.sql_selected_title
+            or self.sql_title.text().strip()
+        )
+        if not title:
+            raise ValueError(
+                "Select a SQL problem first."
+            )
+
+        return sql_workspace.ensure_solution_file(
+            ROOT,
+            title=title,
+            difficulty=self.sql_difficulty.text(),
+            topic=self.sql_topic.text(),
+            concepts=self.sql_concepts.text(),
+        )
 
     def save_sql(self):
-        title = self.sql_title.text().strip()
+        title = (
+            self.sql_selected_title
+            or self.sql_title.text().strip()
+        )
         if not title:
-            return
-        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-        path = ROOT / "resources" / "sql" / "datalemur" / f"{slug}.sql"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        if not path.exists():
-            path.write_text(
-                f"-- Problem: {title}\n"
-                f"-- Difficulty: {self.sql_difficulty.text()}\n"
-                f"-- Topic: {self.sql_topic.text()}\n"
-                f"-- Concepts: {self.sql_concepts.text()}\n\n"
-                "-- My solution:\n",
-                encoding="utf-8",
+            self.statusBar().showMessage(
+                "Select a SQL problem first.",
+                3200,
             )
-        self.conn.execute(
-            """INSERT INTO sql_practice
-               (platform,title,difficulty,topic,concepts,status,mastery,
-                review_date,completed_date,solution_path,notes)
-               VALUES('DataLemur',?,?,?,?,?,?,?,?,?,?)
-               ON CONFLICT(platform,title) DO UPDATE SET
-               difficulty=excluded.difficulty,topic=excluded.topic,
-               concepts=excluded.concepts,status=excluded.status,
-               mastery=excluded.mastery,review_date=excluded.review_date,
-               notes=excluded.notes""",
-            (
-                title,
-                self.sql_difficulty.text(),
-                self.sql_topic.text(),
-                self.sql_concepts.text(),
-                "Completed",
-                self.sql_mastery.value(),
-                self.sql_review.text().strip() or None,
-                date.today().isoformat(),
-                str(path.relative_to(ROOT)).replace("\\", "/"),
-                self.sql_notes.toPlainText(),
-            ),
-        )
-        self.conn.commit()
-        tracks.record_sql_completion(
-            self.conn,
-            title,
-        )
-        self.state = state(self.conn)
-        tracks.sync_all(
+            return
+
+        readiness = tracks.sql_problem_readiness(
             self.conn,
             self.state,
+            title,
         )
-        self.refresh_all()
+        if not readiness["ready"]:
+            QMessageBox.warning(
+                self,
+                "Problem Locked",
+                (
+                    "Complete these concepts before "
+                    "attempting this problem:\n\n"
+                    + "\n".join(
+                        readiness["missing_names"]
+                    )
+                ),
+            )
+            return
+
+        study_session_snapshot = (
+            session_guard.capture(self)
+        )
+        completion_message = (
+            f"SQL completed: {title}"
+        )
+
+        try:
+            path, _created = (
+                self.ensure_current_sql_solution()
+            )
+            relative_path = str(
+                path.relative_to(ROOT)
+            ).replace("\\", "/")
+
+            self.conn.execute(
+                """INSERT INTO sql_practice
+                   (platform,title,difficulty,topic,
+                    concepts,status,mastery,
+                    review_date,completed_date,
+                    solution_path,notes)
+                   VALUES(
+                       'DataLemur',?,?,?,?,?,?,?,?,?,?
+                   )
+                   ON CONFLICT(platform,title)
+                   DO UPDATE SET
+                       difficulty=excluded.difficulty,
+                       topic=excluded.topic,
+                       concepts=excluded.concepts,
+                       status='Completed',
+                       mastery=excluded.mastery,
+                       review_date=excluded.review_date,
+                       completed_date=excluded.completed_date,
+                       solution_path=excluded.solution_path,
+                       notes=excluded.notes""",
+                (
+                    title,
+                    self.sql_difficulty.text(),
+                    self.sql_topic.text(),
+                    self.sql_concepts.text(),
+                    "Completed",
+                    self.sql_mastery.value(),
+                    (
+                        self.sql_review.text().strip()
+                        or None
+                    ),
+                    date.today().isoformat(),
+                    relative_path,
+                    self.sql_notes.toPlainText(),
+                ),
+            )
+            self.conn.commit()
+
+            sql_track = tracks.snapshot(
+                self.conn,
+                self.state,
+            )["sql"]
+            active_title = (
+                sql_track.get("metadata", {})
+                .get("title")
+            )
+            active_task_id = sql_track.get(
+                "task_id"
+            )
+
+            if (
+                active_task_id is not None
+                and active_title == title
+            ):
+                result = tracks.complete_track_task(
+                    self.conn,
+                    int(active_task_id),
+                    self.state,
+                )
+                completion_message = result.get(
+                    "message",
+                    completion_message,
+                )
+            else:
+                tracks.record_sql_completion(
+                    self.conn,
+                    title,
+                )
+
+            self.state = state(self.conn)
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            self.sql_selected_title = None
+            self.refresh_all()
+        finally:
+            session_guard.restore(
+                self,
+                study_session_snapshot,
+            )
+
+        self.statusBar().showMessage(
+            completion_message
+            + " The next eligible problem has been selected.",
+            5200,
+        )
 
     def sql_hint(self):
-        topic = self.sql_topic.text() or "the main SQL concept"
+        title = (
+            self.sql_selected_title
+            or self.sql_title.text().strip()
+        )
+        if not title:
+            self.statusBar().showMessage(
+                "Select a SQL problem first.",
+                3200,
+            )
+            return
+
+        topic = (
+            self.sql_topic.text()
+            or "the main SQL concept"
+        )
+        readiness = tracks.sql_problem_readiness(
+            self.conn,
+            self.state,
+            title,
+        )
+        required = ", ".join(
+            readiness["required_names"]
+        )
         QMessageBox.information(
             self,
             "Hint",
-            f"Break the problem into steps. First identify the required grain, "
-            f"then build the {topic} logic, and finally validate edge cases.",
+            (
+                "Identify the output grain first. "
+                f"Then separate the {topic} logic "
+                "into testable steps and validate "
+                "each intermediate result.\n\n"
+                f"Required knowledge: {required}"
+            ),
         )
 
     def open_sql_solution(self):
-        title = self.sql_title.text().strip()
+        title = (
+            self.sql_selected_title
+            or self.sql_title.text().strip()
+        )
         if not title:
+            self.statusBar().showMessage(
+                "Select a SQL problem first.",
+                3200,
+            )
             return
-        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-        path = ROOT / "resources" / "sql" / "datalemur" / f"{slug}.sql"
-        if path.exists():
-            os.startfile(path)
+
+        try:
+            path, created = (
+                self.ensure_current_sql_solution()
+            )
+            editor_name = (
+                sql_workspace.open_in_editor(
+                    path,
+                    root=ROOT,
+                )
+            )
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Open Solution",
+                str(exc),
+            )
+            return
+
+        action = (
+            "Created and opened"
+            if created
+            else "Opened"
+        )
+        self.statusBar().showMessage(
+            f"{action} {path.name} in {editor_name}.",
+            4200,
+        )
 
     def session_goal_seconds(self):
         if hasattr(self, "session_goal_minutes"):

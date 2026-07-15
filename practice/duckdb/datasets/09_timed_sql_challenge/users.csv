@@ -1,0 +1,11 @@
+user_id,signup_date,acquisition_channel,country
+U01,2026-05-01,Organic,US
+U02,2026-05-03,Paid Search,US
+U03,2026-05-04,Referral,CA
+U04,2026-05-08,Organic,UK
+U05,2026-05-10,Paid Social,US
+U06,2026-05-12,Referral,US
+U07,2026-05-16,Organic,CA
+U08,2026-05-20,Paid Search,UK
+U09,2026-05-23,Paid Social,US
+U10,2026-05-27,Organic,US

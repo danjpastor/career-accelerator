@@ -1,0 +1,1 @@
+select campaign_channel,sum(spend),sum(revenue),sum(revenue)-sum(spend),round(sum(revenue)/nullif(sum(spend),0),4) from ex12_campaign_performance where campaign_date>='2026-06-01' group by campaign_channel having sum(spend)>500 order by 5 desc;

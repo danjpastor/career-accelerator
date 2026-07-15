@@ -1,0 +1,9 @@
+product_id,product_name,category,unit_cost,list_price
+PR01,Studio Headphones,Electronics,72,130
+PR02,Mechanical Keyboard,Electronics,48,95
+PR03,Desk Lamp,Home,18,42
+PR04,Office Chair,Home,110,210
+PR05,Yoga Mat,Fitness,16,38
+PR06,Kettlebell,Fitness,28,60
+PR07,SQL Handbook,Books,12,30
+PR08,Data Storytelling,Books,14,34

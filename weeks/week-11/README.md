@@ -37,7 +37,7 @@ Complete Project 2 and prepare Project 3
 - [ ] [Google Course 9] Complete the remaining course modules
 - [ ] [Google Course 9] Record certificate completion
 - [ ] Solve Second Day Confirmation
-- [ ] Complete one timed SQL practice set
+- [ ] Complete DuckDB Exercise 09: 30-minute product challenge
 - [ ] Complete the Project 2 analysis
 - [ ] Build and document the Project 2 dashboard
 - [ ] Publish Project 2 to GitHub

@@ -36,8 +36,8 @@ Create the SQL schema and begin the core analysis
 ## Checklist
 - [ ] [Google Course 4] Finish the remaining course modules
 - [ ] [Google Course 5] Begin the first module
-- [ ] Practice business-metric calculations in SQL
-- [ ] Practice CASE expressions and grouped summaries
+- [ ] Complete DuckDB Exercise 04: Calculate subscription KPIs
+- [ ] Complete DuckDB Exercise 05: Segment service performance
 - [ ] Solve Signup Activation Rate
 - [ ] Create the Project 1 SQL schema
 - [ ] Load or connect the analysis dataset

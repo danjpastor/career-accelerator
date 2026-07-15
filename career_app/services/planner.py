@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+import json
 import re
+
+from career_app.data.duckdb_exercises import exercise_for_label
 
 
 ENERGY_RANK = {
@@ -29,6 +32,16 @@ FOCUS_SLOT_ORDER = (
 
 
 def infer(label):
+    duckdb_exercise = exercise_for_label(label)
+    if duckdb_exercise is not None:
+        return {
+            "category": "SQL",
+            "minutes": duckdb_exercise["minutes"],
+            "energy": "Normal",
+            "priority": duckdb_exercise["priority"],
+            "destination": 4,
+        }
+
     lower = label.lower()
 
     if any(
@@ -209,6 +222,14 @@ def available(conn, week):
                  m.deferred_until IS NULL
                  OR m.deferred_until<=?
              )
+             AND NOT EXISTS (
+                 SELECT 1
+                 FROM track_tasks tt
+                 JOIN track_state ts
+                   ON ts.track_key=tt.track_key
+                 WHERE tt.task_id=s.id
+                   AND ts.status<>'Active'
+             )
            ORDER BY
                m.priority,
                CASE
@@ -309,6 +330,14 @@ def _carryover_tasks(conn, focus_date):
                  m.deferred_until IS NULL
                  OR m.deferred_until<=?
              )
+             AND NOT EXISTS (
+                 SELECT 1
+                 FROM track_tasks tt
+                 JOIN track_state ts
+                   ON ts.track_key=tt.track_key
+                 WHERE tt.task_id=s.id
+                   AND ts.status<>'Active'
+             )
            ORDER BY
                m.priority,
                CASE
@@ -335,12 +364,61 @@ def _candidate_sort_key(item):
     )
 
 
-def _roadmap_fallbacks(guide, state):
-    sql_items = list(guide[3] or [])
-    sql_detail = (
-        "Practice " + " and ".join(sql_items[:2])
-        if sql_items
-        else "Continue this week's SQL progression"
+def _track_metadata(conn, track_key):
+    row = conn.execute(
+        """SELECT metadata
+           FROM track_state
+           WHERE track_key=?""",
+        (track_key,),
+    ).fetchone()
+    if row is None:
+        return {}
+    try:
+        return json.loads(
+            row["metadata"]
+            or "{}"
+        )
+    except (TypeError, ValueError):
+        return {}
+
+
+def _roadmap_fallbacks(conn, state):
+    datacamp_meta = _track_metadata(
+        conn,
+        "datacamp",
+    )
+    sql_meta = _track_metadata(
+        conn,
+        "sql",
+    )
+    portfolio_meta = _track_metadata(
+        conn,
+        "portfolio",
+    )
+
+    datacamp_course = datacamp_meta.get(
+        "course",
+        "Current DataCamp course",
+    )
+    datacamp_chapter = datacamp_meta.get(
+        "chapter",
+        datacamp_meta.get(
+            "lesson",
+            "next assigned chapter",
+        ),
+    )
+    datacamp_detail = (
+        f"{datacamp_course} — "
+        f"{datacamp_chapter}"
+    )
+
+    sql_detail = sql_meta.get(
+        "title",
+        "Complete the next assigned SQL problem",
+    )
+    portfolio_detail = portfolio_meta.get(
+        "milestone",
+        "Advance the next unlocked portfolio milestone",
     )
 
     return [
@@ -358,22 +436,27 @@ def _roadmap_fallbacks(guide, state):
             "display_title": "Google Certificate",
             "detail": (
                 f"Continue from Course {state['google_course']}, "
-                f"Module {state['google_module']}."
+                f"Module {state['google_module']}"
             ),
         },
         {
             "task_id": None,
-            "label": guide[2],
+            "label": datacamp_detail,
             "category": "Learning",
             "status": "Roadmap",
             "priority": 1,
-            "estimated_minutes": 30,
+            "estimated_minutes": int(
+                datacamp_meta.get(
+                    "estimated_minutes",
+                    45,
+                )
+            ),
             "destination": 2,
             "carryover": False,
             "roadmap_fallback": True,
             "source_key": "roadmap:datacamp",
             "display_title": "DataCamp",
-            "detail": guide[2],
+            "detail": datacamp_detail,
         },
         {
             "task_id": None,
@@ -381,7 +464,7 @@ def _roadmap_fallbacks(guide, state):
             "category": "SQL",
             "status": "Roadmap",
             "priority": 1,
-            "estimated_minutes": 40,
+            "estimated_minutes": 35,
             "destination": 4,
             "carryover": False,
             "roadmap_fallback": True,
@@ -391,7 +474,7 @@ def _roadmap_fallbacks(guide, state):
         },
         {
             "task_id": None,
-            "label": guide[4],
+            "label": portfolio_detail,
             "category": "Portfolio",
             "status": "Roadmap",
             "priority": 2,
@@ -401,7 +484,7 @@ def _roadmap_fallbacks(guide, state):
             "roadmap_fallback": True,
             "source_key": "roadmap:portfolio",
             "display_title": "Portfolio Project",
-            "detail": guide[4],
+            "detail": portfolio_detail,
         },
     ]
 
@@ -413,6 +496,21 @@ def _remove_matching_slot(slots, category):
         if slots:
             slots.pop(0)
 
+
+def _track_accepts_work_today(
+    conn,
+    track_key,
+):
+    row = conn.execute(
+        """SELECT status
+           FROM track_state
+           WHERE track_key=?""",
+        (track_key,),
+    ).fetchone()
+    return (
+        row is None
+        or row["status"] == "Active"
+    )
 
 
 def _focus_track_rank(conn, item):
@@ -566,7 +664,7 @@ def intelligent_focus_plan(
     # The template remains ground truth and supplies any missing
     # categories when the sprint backlog has no suitable real task.
     if len(selected) < max_items:
-        fallbacks = _roadmap_fallbacks(guide, state)
+        fallbacks = _roadmap_fallbacks(conn, state)
         represented = [
             item["category"]
             for item in selected
@@ -586,20 +684,16 @@ def intelligent_focus_plan(
             if represented_count >= required_count:
                 continue
 
-            if slot_category == "Portfolio":
-                portfolio_state = conn.execute(
-                    """SELECT status
-                       FROM track_state
-                       WHERE track_key='portfolio'"""
-                ).fetchone()
-                if (
-                    portfolio_state
-                    and portfolio_state["status"]
-                    == "Locked"
-                ):
-                    continue
-
             fallback = fallbacks[slot_index]
+            fallback_track = str(
+                fallback["source_key"]
+            ).split(":", 1)[-1]
+            if not _track_accepts_work_today(
+                conn,
+                fallback_track,
+            ):
+                continue
+
             selected.append(fallback)
             represented.append(slot_category)
 

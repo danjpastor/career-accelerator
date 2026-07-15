@@ -1,0 +1,17 @@
+shot_id,project_id,department,artist_id,status,complexity,estimated_hours,due_date,completed_date,revision_count
+SH001,P001,Compositing,A01,Final,High,24,2026-06-12,2026-06-11,2
+SH002,P001,FX,A02,Final,High,32,2026-06-14,2026-06-16,4
+SH003,P001,Lighting,A03,Final,Medium,18,2026-06-15,2026-06-15,1
+SH004,P001,Compositing,A04,In Progress,High,28,2026-06-19,,3
+SH005,P002,Animation,A05,Final,Medium,20,2026-06-16,2026-06-17,2
+SH006,P002,Compositing,A01,Final,Low,10,2026-06-18,2026-06-18,0
+SH007,P002,Lighting,A03,In Progress,High,26,2026-06-23,,2
+SH008,P002,FX,A02,On Hold,Medium,16,2026-06-22,,1
+SH009,P003,Animation,A05,Final,High,30,2026-06-20,2026-06-24,5
+SH010,P003,FX,A06,Final,High,36,2026-06-21,2026-06-21,3
+SH011,P003,Compositing,A04,In Progress,Medium,22,2026-06-26,,2
+SH012,P003,Lighting,A03,Not Started,Medium,18,2026-06-27,,0
+SH013,P004,Compositing,A01,Final,Low,8,2026-06-24,2026-06-23,0
+SH014,P004,Animation,A05,In Progress,Medium,20,2026-07-01,,1
+SH015,P004,FX,A06,Not Started,High,34,2026-07-02,,0
+SH016,P004,Lighting,A07,In Progress,Low,12,2026-06-30,,1

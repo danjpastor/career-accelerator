@@ -1,0 +1,122 @@
+[
+  {
+    "exercise": 1,
+    "week": 1,
+    "title": "Filter and sort support tickets",
+    "concepts": "SELECT, FROM, WHERE, ORDER BY, LIMIT",
+    "estimated_minutes": 35,
+    "exercise_path": "practice/duckdb/exercises/01_select_filter_sort_limit/README.md",
+    "starter_path": "practice/duckdb/exercises/01_select_filter_sort_limit/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex01_select_filter_sort_limit.sql"
+  },
+  {
+    "exercise": 2,
+    "week": 2,
+    "title": "Summarize retail orders",
+    "concepts": "COUNT, SUM, AVG, GROUP BY, HAVING",
+    "estimated_minutes": 40,
+    "exercise_path": "practice/duckdb/exercises/02_aggregations_grouping_having/README.md",
+    "starter_path": "practice/duckdb/exercises/02_aggregations_grouping_having/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex02_aggregations_grouping_having.sql"
+  },
+  {
+    "exercise": 3,
+    "week": 4,
+    "title": "Clean customer feedback",
+    "concepts": "NULLIF, TRIM, COALESCE, TRY_CAST, CASE",
+    "estimated_minutes": 45,
+    "exercise_path": "practice/duckdb/exercises/03_nulls_case_cleaning/README.md",
+    "starter_path": "practice/duckdb/exercises/03_nulls_case_cleaning/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex03_nulls_case_cleaning.sql"
+  },
+  {
+    "exercise": 4,
+    "week": 5,
+    "title": "Calculate subscription KPIs",
+    "concepts": "ratios, conditional aggregation, date filters",
+    "estimated_minutes": 45,
+    "exercise_path": "practice/duckdb/exercises/04_business_metrics/README.md",
+    "starter_path": "practice/duckdb/exercises/04_business_metrics/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex04_business_metrics.sql"
+  },
+  {
+    "exercise": 5,
+    "week": 5,
+    "title": "Segment service performance",
+    "concepts": "CASE expressions, SLA logic, grouped summaries",
+    "estimated_minutes": 40,
+    "exercise_path": "practice/duckdb/exercises/05_case_grouped_summaries/README.md",
+    "starter_path": "practice/duckdb/exercises/05_case_grouped_summaries/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex05_case_grouped_summaries.sql"
+  },
+  {
+    "exercise": 6,
+    "week": 6,
+    "title": "Join customers, orders, and payments",
+    "concepts": "INNER JOIN, LEFT JOIN, multi-table joins",
+    "estimated_minutes": 45,
+    "exercise_path": "practice/duckdb/exercises/06_joins/README.md",
+    "starter_path": "practice/duckdb/exercises/06_joins/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex06_joins.sql"
+  },
+  {
+    "exercise": 7,
+    "week": 6,
+    "title": "Analyze order profitability",
+    "concepts": "subqueries, CTEs, multi-step analysis",
+    "estimated_minutes": 50,
+    "exercise_path": "practice/duckdb/exercises/07_ctes_subqueries/README.md",
+    "starter_path": "practice/duckdb/exercises/07_ctes_subqueries/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex07_ctes_subqueries.sql"
+  },
+  {
+    "exercise": 8,
+    "week": 9,
+    "title": "Analyze a VFX production snapshot",
+    "concepts": "filtering, joins, aggregation, CASE, CTEs, ranking",
+    "estimated_minutes": 60,
+    "exercise_path": "practice/duckdb/exercises/08_integrated_vfx_review/README.md",
+    "starter_path": "practice/duckdb/exercises/08_integrated_vfx_review/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex08_integrated_vfx_review.sql"
+  },
+  {
+    "exercise": 9,
+    "week": 11,
+    "title": "Complete a 30-minute product challenge",
+    "concepts": "timed aggregation, joins, CASE, CTEs",
+    "estimated_minutes": 30,
+    "exercise_path": "practice/duckdb/exercises/09_timed_sql_challenge/README.md",
+    "starter_path": "practice/duckdb/exercises/09_timed_sql_challenge/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex09_timed_sql_challenge.sql"
+  },
+  {
+    "exercise": 10,
+    "week": 12,
+    "title": "Complete a mixed workforce assessment",
+    "concepts": "NULLs, joins, aggregation, CTEs, ranking",
+    "estimated_minutes": 45,
+    "exercise_path": "practice/duckdb/exercises/10_mixed_sql_assessment/README.md",
+    "starter_path": "practice/duckdb/exercises/10_mixed_sql_assessment/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex10_mixed_sql_assessment.sql"
+  },
+  {
+    "exercise": 11,
+    "week": 12,
+    "title": "Explain joins and window functions",
+    "concepts": "LEFT JOIN, ROW_NUMBER, DENSE_RANK, rolling averages",
+    "estimated_minutes": 45,
+    "exercise_path": "practice/duckdb/exercises/11_explain_joins_windows/README.md",
+    "starter_path": "practice/duckdb/exercises/11_explain_joins_windows/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex11_explain_joins_windows.sql"
+  },
+  {
+    "exercise": 12,
+    "week": 6,
+    "title": "Refactor an unreadable analytics query",
+    "concepts": "aliases, formatting, comments, CTE refactoring",
+    "estimated_minutes": 30,
+    "exercise_path": "practice/duckdb/exercises/12_query_readability/README.md",
+    "starter_path": "practice/duckdb/exercises/12_query_readability/starter.sql",
+    "submission_path": "practice/duckdb/submissions/ex12_query_readability.sql"
+  }
+]

@@ -35,8 +35,8 @@ Polish all evidence and begin a consistent application cadence
 
 ## Checklist
 - [ ] Review notes from Google Courses 1–9
-- [ ] Complete a mixed timed SQL review
-- [ ] Practice explaining joins and window functions
+- [ ] Complete DuckDB Exercise 10: Mixed workforce assessment
+- [ ] Complete DuckDB Exercise 11: Explain joins and window functions
 - [ ] Polish Project 1 and Project 2 repositories
 - [ ] Advance or outline Project 3
 - [ ] Finalize the data-analyst résumé

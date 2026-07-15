@@ -1,0 +1,21 @@
+ticket_id,customer_id,customer_name,category,priority,status,created_at,resolved_at,resolution_hours,satisfaction_score
+T001,C001,Atlas Dental,Billing,High,Closed,2026-06-01 09:15,2026-06-01 16:45,7.5,5
+T002,C002,BrightMart,Technical,Urgent,Closed,2026-06-02 08:10,2026-06-02 11:40,3.5,4
+T003,C003,Cedar Fitness,Access,Medium,Open,2026-06-03 13:20,,,
+T004,C004,Delta Travel,Billing,Low,Closed,2026-06-04 10:00,2026-06-06 14:00,52.0,2
+T005,C005,Evergreen Media,Technical,High,Pending,2026-06-05 15:45,,,
+T006,C006,Fulton Books,Access,Urgent,Closed,2026-06-07 07:30,2026-06-07 09:00,1.5,5
+T007,C001,Atlas Dental,Technical,Medium,Closed,2026-06-09 11:10,2026-06-10 18:10,31.0,3
+T008,C007,Granite Foods,Billing,High,Open,2026-06-11 12:00,,,
+T009,C008,Harbor Legal,Access,Low,Closed,2026-06-12 09:25,2026-06-12 12:25,3.0,4
+T010,C009,Ion Labs,Technical,Urgent,Open,2026-06-14 20:00,,,
+T011,C010,Juniper Home,Billing,Medium,Closed,2026-06-15 14:15,2026-06-16 08:15,18.0,4
+T012,C003,Cedar Fitness,Technical,High,Closed,2026-06-17 08:50,2026-06-17 19:20,10.5,5
+T013,C004,Delta Travel,Access,Medium,Pending,2026-06-18 16:35,,,
+T014,C006,Fulton Books,Billing,Urgent,Open,2026-06-20 07:05,,,
+T015,C007,Granite Foods,Technical,Low,Closed,2026-06-21 12:40,2026-06-24 10:40,70.0,1
+T016,C008,Harbor Legal,Access,High,Closed,2026-06-23 09:00,2026-06-23 13:00,4.0,5
+T017,C009,Ion Labs,Billing,Medium,Open,2026-06-24 18:30,,,
+T018,C010,Juniper Home,Technical,High,Pending,2026-06-26 10:10,,,
+T019,C002,BrightMart,Access,Urgent,Closed,2026-06-27 06:55,2026-06-27 08:10,1.25,5
+T020,C005,Evergreen Media,Billing,Low,Open,2026-06-29 15:00,,,
