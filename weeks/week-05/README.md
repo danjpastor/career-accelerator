@@ -65,3 +65,8 @@ Add one row after each study session.
 
 - [ ] Complete Applied Lab 12: Write an executive summary and stakeholder memo
 - [ ] Complete Applied Lab 17: Repair misleading KPI calculations
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 23: Evaluate sampling bias and representativeness
+- [ ] Complete Applied Lab 29: Build and interpret a conversion funnel

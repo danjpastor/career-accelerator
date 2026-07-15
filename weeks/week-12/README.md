@@ -60,3 +60,7 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 36: Optimize Power BI performance

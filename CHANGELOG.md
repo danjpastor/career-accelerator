@@ -44,6 +44,38 @@ This file is the single maintained changelog for the project.
 
 
 
+
+## 9.3.16
+
+- Added 15 prerequisite-driven Applied Labs
+- Expanded the Applied Labs library from 21 to 36 exercises
+- Added a seven-lab Statistics branch
+- Added descriptive statistics and distribution analysis
+- Added sampling bias and representativeness
+- Added confidence intervals and margin of error
+- Added hypothesis testing
+- Added A/B-test and practical-significance analysis
+- Added correlation-versus-causation reasoning
+- Added simple linear-regression interpretation
+- Added a four-lab Business Patterns branch
+- Added funnel, cohort retention, churn, and forecast-variance analysis
+- Added a two-lab Data Workflow branch
+- Added local paginated REST API and JSON ingestion
+- Added a raw-to-staging-to-clean-to-analytics pipeline
+- Added a Responsible AI branch and flawed-analysis audit
+- Added optional Power BI performance optimization after the core sequence
+- Added synthetic statistics, business-pattern, API, pipeline, and AI-audit datasets
+- Added instructions, starters, validation guides, and saved submissions
+- Added 18 new tracked analyst skills and evidence routes
+- Spaced new work across Weeks 4–12
+- Expanded adaptive branch priority rules to ten branches
+- Increased Applied Labs allocation from 5% to 8%
+- Added two-lab weekly targets from Week 4 at 15+ study hours
+- Added three-lab targets in Weeks 7–10 at 20+ study hours
+- Preserved the Google Certificate as the primary 67% allocation
+- Added a Statistics learning-progress card
+- Preserved user data, submissions, achievements, and portfolio work
+
 ## 9.3.15
 
 - Added Applied Labs as a dedicated adaptive track

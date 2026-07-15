@@ -1,0 +1,501 @@
+person_id,age_group,access_channel,outcome_score
+P0001,18-29,Phone,7.4
+P0002,45-59,Phone,7.1
+P0003,30-44,Online,8.7
+P0004,30-44,Online,7.3
+P0005,45-59,In Person,6.8
+P0006,30-44,In Person,6.2
+P0007,30-44,Phone,7.9
+P0008,45-59,In Person,7.5
+P0009,30-44,In Person,7.6
+P0010,30-44,Online,8.1
+P0011,18-29,Online,7.5
+P0012,30-44,Online,7.7
+P0013,30-44,Online,8.2
+P0014,60+,Phone,6.6
+P0015,18-29,Phone,8.2
+P0016,60+,Online,5.5
+P0017,30-44,Online,7.2
+P0018,18-29,Online,6.3
+P0019,30-44,Online,7.9
+P0020,30-44,Online,9.3
+P0021,60+,Online,6.1
+P0022,45-59,Online,5.2
+P0023,30-44,In Person,8.1
+P0024,60+,Online,5.2
+P0025,60+,Phone,7.4
+P0026,45-59,Phone,8.1
+P0027,45-59,Phone,8.8
+P0028,30-44,Online,7.3
+P0029,45-59,Online,6.9
+P0030,30-44,Online,7.5
+P0031,18-29,Phone,7.6
+P0032,18-29,Online,8.3
+P0033,45-59,Online,5.9
+P0034,30-44,Online,6.9
+P0035,30-44,Phone,8.4
+P0036,18-29,Online,5.8
+P0037,45-59,Online,6.0
+P0038,60+,Phone,6.4
+P0039,45-59,Online,7.2
+P0040,30-44,Phone,5.7
+P0041,18-29,Online,7.8
+P0042,18-29,Online,7.5
+P0043,18-29,Online,6.6
+P0044,45-59,Online,8.1
+P0045,45-59,Online,5.9
+P0046,60+,In Person,6.1
+P0047,18-29,Phone,8.3
+P0048,60+,Online,7.2
+P0049,18-29,Online,9.8
+P0050,30-44,Phone,5.6
+P0051,30-44,Phone,4.3
+P0052,18-29,Online,6.1
+P0053,45-59,Phone,7.2
+P0054,45-59,Phone,6.6
+P0055,30-44,Phone,3.8
+P0056,18-29,Online,8.9
+P0057,18-29,Phone,7.7
+P0058,30-44,Online,6.6
+P0059,30-44,Phone,6.5
+P0060,18-29,In Person,9.7
+P0061,30-44,Online,7.1
+P0062,30-44,Phone,5.5
+P0063,18-29,Phone,7.9
+P0064,45-59,Online,7.3
+P0065,30-44,Online,6.9
+P0066,30-44,Phone,8.8
+P0067,45-59,Online,6.4
+P0068,45-59,Online,8.1
+P0069,30-44,Phone,6.5
+P0070,30-44,Phone,4.5
+P0071,30-44,In Person,6.4
+P0072,30-44,Phone,4.8
+P0073,30-44,Phone,7.8
+P0074,18-29,Online,8.5
+P0075,30-44,Phone,8.3
+P0076,45-59,In Person,10
+P0077,18-29,Phone,6.8
+P0078,30-44,Online,6.1
+P0079,30-44,Phone,6.4
+P0080,30-44,Online,6.3
+P0081,45-59,Phone,6.0
+P0082,18-29,Online,6.3
+P0083,45-59,Online,9.5
+P0084,45-59,In Person,5.6
+P0085,18-29,Online,7.0
+P0086,30-44,Online,5.5
+P0087,60+,Online,7.2
+P0088,30-44,In Person,6.6
+P0089,30-44,In Person,6.1
+P0090,30-44,Online,8.2
+P0091,45-59,Online,3.8
+P0092,18-29,Phone,6.7
+P0093,30-44,Online,7.0
+P0094,45-59,Online,7.4
+P0095,30-44,In Person,8.0
+P0096,18-29,Phone,6.4
+P0097,30-44,In Person,7.8
+P0098,18-29,Online,8.1
+P0099,30-44,Phone,7.2
+P0100,30-44,Online,8.9
+P0101,45-59,Online,6.4
+P0102,18-29,Online,7.8
+P0103,45-59,Online,3.5
+P0104,60+,In Person,5.0
+P0105,18-29,In Person,7.2
+P0106,45-59,Online,7.0
+P0107,45-59,Online,6.1
+P0108,60+,In Person,4.4
+P0109,45-59,Online,7.3
+P0110,30-44,Phone,9.8
+P0111,45-59,Online,6.5
+P0112,60+,In Person,4.7
+P0113,60+,Online,5.6
+P0114,60+,Phone,4.6
+P0115,45-59,Online,5.9
+P0116,60+,In Person,4.9
+P0117,18-29,Online,8.3
+P0118,18-29,Online,7.4
+P0119,18-29,Phone,5.9
+P0120,60+,Online,5.9
+P0121,30-44,Online,6.6
+P0122,60+,Phone,6.3
+P0123,30-44,Online,7.2
+P0124,30-44,Online,7.9
+P0125,45-59,Online,9.0
+P0126,30-44,Online,5.9
+P0127,45-59,Online,6.1
+P0128,30-44,Online,8.1
+P0129,60+,Online,7.3
+P0130,45-59,Phone,9.5
+P0131,60+,Online,4.3
+P0132,30-44,Online,7.3
+P0133,45-59,Phone,6.0
+P0134,18-29,Online,8.0
+P0135,45-59,Online,8.3
+P0136,30-44,In Person,5.6
+P0137,30-44,Online,4.7
+P0138,30-44,Online,8.4
+P0139,60+,Phone,9.0
+P0140,45-59,Online,3.9
+P0141,60+,Online,7.5
+P0142,45-59,Online,6.1
+P0143,30-44,Phone,5.0
+P0144,45-59,Online,7.5
+P0145,30-44,Online,8.9
+P0146,60+,Phone,5.6
+P0147,45-59,Online,5.0
+P0148,30-44,Online,7.0
+P0149,45-59,Online,8.0
+P0150,18-29,Online,6.8
+P0151,60+,Online,3.8
+P0152,45-59,Online,5.5
+P0153,30-44,Online,4.7
+P0154,60+,Online,6.9
+P0155,45-59,Phone,6.7
+P0156,30-44,In Person,6.8
+P0157,60+,Online,6.7
+P0158,30-44,Phone,5.8
+P0159,60+,Online,5.3
+P0160,30-44,Online,7.4
+P0161,45-59,Online,9.0
+P0162,45-59,Online,5.2
+P0163,18-29,Online,8.1
+P0164,45-59,Online,6.4
+P0165,30-44,Online,8.0
+P0166,45-59,Online,4.9
+P0167,45-59,Phone,6.9
+P0168,30-44,Online,7.6
+P0169,18-29,Online,7.7
+P0170,60+,Phone,6.2
+P0171,30-44,In Person,6.9
+P0172,18-29,Online,8.1
+P0173,60+,Online,6.1
+P0174,60+,Phone,6.1
+P0175,30-44,Phone,5.9
+P0176,30-44,In Person,6.5
+P0177,30-44,Online,8.0
+P0178,18-29,Online,5.1
+P0179,30-44,Phone,8.4
+P0180,45-59,Online,5.7
+P0181,45-59,Online,8.3
+P0182,45-59,Online,7.9
+P0183,45-59,Online,9.1
+P0184,30-44,Online,6.9
+P0185,18-29,Phone,7.5
+P0186,45-59,Phone,6.5
+P0187,18-29,Phone,5.8
+P0188,60+,Phone,8.3
+P0189,60+,Online,5.8
+P0190,45-59,Online,7.3
+P0191,30-44,Online,6.6
+P0192,18-29,Online,9.5
+P0193,45-59,Online,3.5
+P0194,18-29,Phone,6.5
+P0195,18-29,Online,6.9
+P0196,30-44,Online,8.9
+P0197,45-59,Online,6.6
+P0198,45-59,Phone,7.9
+P0199,45-59,Online,6.2
+P0200,30-44,Phone,8.6
+P0201,18-29,Online,7.6
+P0202,60+,Phone,7.2
+P0203,18-29,Phone,6.5
+P0204,60+,Online,7.2
+P0205,45-59,Online,5.3
+P0206,45-59,Online,7.5
+P0207,30-44,Phone,8.5
+P0208,45-59,Phone,6.0
+P0209,60+,Online,4.4
+P0210,18-29,Phone,3.5
+P0211,18-29,Online,6.2
+P0212,30-44,Online,6.5
+P0213,30-44,Online,6.7
+P0214,30-44,Online,8.3
+P0215,60+,Online,9.1
+P0216,45-59,Phone,5.0
+P0217,30-44,In Person,5.9
+P0218,30-44,Online,8.7
+P0219,45-59,Online,7.4
+P0220,18-29,Online,7.3
+P0221,60+,Online,3.5
+P0222,18-29,Online,8.0
+P0223,60+,Online,4.6
+P0224,30-44,In Person,7.6
+P0225,30-44,Phone,8.8
+P0226,18-29,Online,7.7
+P0227,60+,Phone,6.8
+P0228,30-44,Online,6.7
+P0229,30-44,Online,6.9
+P0230,45-59,Online,6.8
+P0231,60+,Phone,5.3
+P0232,45-59,Phone,6.5
+P0233,45-59,Online,4.5
+P0234,30-44,Online,6.9
+P0235,18-29,Online,8.7
+P0236,18-29,Phone,9.8
+P0237,45-59,Online,7.8
+P0238,30-44,Online,4.2
+P0239,30-44,Phone,7.7
+P0240,60+,Online,7.4
+P0241,30-44,In Person,5.9
+P0242,45-59,Online,6.9
+P0243,18-29,Online,9.2
+P0244,60+,Phone,9.1
+P0245,45-59,In Person,4.7
+P0246,30-44,Online,6.5
+P0247,45-59,Online,6.5
+P0248,30-44,Online,4.4
+P0249,45-59,Online,8.5
+P0250,45-59,Online,5.5
+P0251,60+,Online,8.4
+P0252,18-29,Online,8.7
+P0253,30-44,Online,9.5
+P0254,30-44,Online,8.7
+P0255,60+,Online,6.6
+P0256,18-29,Online,9.1
+P0257,45-59,Online,7.5
+P0258,60+,Online,7.5
+P0259,18-29,Online,7.7
+P0260,45-59,Online,5.2
+P0261,45-59,Online,5.9
+P0262,30-44,Phone,6.9
+P0263,30-44,Online,10
+P0264,30-44,Phone,5.2
+P0265,30-44,In Person,4.5
+P0266,45-59,Phone,6.4
+P0267,30-44,Online,3.5
+P0268,18-29,Online,8.7
+P0269,45-59,In Person,5.0
+P0270,45-59,Phone,6.9
+P0271,18-29,Phone,9.8
+P0272,30-44,Online,8.5
+P0273,18-29,Online,5.9
+P0274,30-44,Online,7.3
+P0275,30-44,Online,4.8
+P0276,60+,Online,4.2
+P0277,60+,Online,6.3
+P0278,18-29,Online,4.2
+P0279,18-29,Online,8.9
+P0280,30-44,Phone,4.9
+P0281,60+,Online,6.3
+P0282,45-59,Phone,5.1
+P0283,45-59,Online,5.7
+P0284,30-44,Online,6.2
+P0285,60+,Online,7.2
+P0286,60+,Online,4.5
+P0287,60+,Online,5.6
+P0288,45-59,In Person,6.6
+P0289,18-29,In Person,6.8
+P0290,30-44,In Person,6.4
+P0291,45-59,Online,7.5
+P0292,30-44,Online,6.9
+P0293,18-29,Online,5.9
+P0294,60+,Phone,6.7
+P0295,18-29,Online,9.0
+P0296,30-44,Online,7.2
+P0297,30-44,Phone,8.9
+P0298,60+,Online,5.9
+P0299,30-44,Phone,6.8
+P0300,30-44,Online,7.2
+P0301,45-59,In Person,5.8
+P0302,30-44,Phone,7.0
+P0303,30-44,Online,5.9
+P0304,45-59,Phone,7.2
+P0305,45-59,Online,7.0
+P0306,18-29,Phone,7.7
+P0307,45-59,In Person,6.7
+P0308,18-29,Online,5.6
+P0309,18-29,Phone,8.5
+P0310,18-29,In Person,7.1
+P0311,45-59,Phone,7.3
+P0312,30-44,Online,7.5
+P0313,18-29,Online,6.0
+P0314,18-29,Online,8.1
+P0315,30-44,Phone,7.5
+P0316,45-59,Phone,8.5
+P0317,45-59,Phone,9.5
+P0318,18-29,Phone,7.7
+P0319,18-29,Online,9.6
+P0320,30-44,Phone,7.9
+P0321,30-44,In Person,6.9
+P0322,18-29,Online,6.1
+P0323,30-44,Online,8.5
+P0324,30-44,Online,8.7
+P0325,45-59,Online,5.9
+P0326,60+,Phone,6.6
+P0327,60+,Phone,6.1
+P0328,18-29,Online,7.4
+P0329,45-59,Online,5.9
+P0330,45-59,Online,5.9
+P0331,45-59,Online,7.0
+P0332,60+,In Person,7.3
+P0333,30-44,Online,5.3
+P0334,18-29,Online,6.4
+P0335,18-29,Phone,6.0
+P0336,30-44,Phone,6.3
+P0337,18-29,Phone,10
+P0338,30-44,Online,5.3
+P0339,30-44,Phone,7.9
+P0340,60+,Phone,7.7
+P0341,60+,Online,6.5
+P0342,30-44,Online,5.0
+P0343,45-59,Online,6.4
+P0344,60+,Online,5.4
+P0345,45-59,Online,8.2
+P0346,18-29,Online,8.4
+P0347,18-29,Phone,9.3
+P0348,18-29,Online,6.0
+P0349,18-29,Online,5.6
+P0350,30-44,Online,6.9
+P0351,60+,Online,1
+P0352,60+,Online,8.0
+P0353,30-44,Phone,5.3
+P0354,18-29,Phone,7.1
+P0355,30-44,Online,9.0
+P0356,30-44,Phone,6.6
+P0357,18-29,Phone,9.9
+P0358,60+,Online,7.2
+P0359,30-44,Online,6.8
+P0360,60+,In Person,5.9
+P0361,45-59,Phone,8.3
+P0362,45-59,In Person,6.1
+P0363,30-44,Phone,4.3
+P0364,18-29,Phone,5.6
+P0365,60+,Online,8.7
+P0366,30-44,Online,9.8
+P0367,18-29,Phone,8.0
+P0368,18-29,Phone,9.1
+P0369,60+,Phone,5.6
+P0370,18-29,Phone,6.6
+P0371,45-59,Online,4.5
+P0372,45-59,Online,6.3
+P0373,45-59,Phone,6.1
+P0374,45-59,In Person,6.9
+P0375,30-44,Online,4.0
+P0376,45-59,Online,5.4
+P0377,18-29,Online,4.5
+P0378,45-59,Phone,6.7
+P0379,18-29,Online,6.4
+P0380,45-59,In Person,4.3
+P0381,60+,Online,6.8
+P0382,30-44,Online,6.4
+P0383,30-44,Online,5.5
+P0384,45-59,Online,6.0
+P0385,18-29,Phone,5.5
+P0386,30-44,Online,3.7
+P0387,18-29,In Person,6.7
+P0388,60+,Online,8.8
+P0389,45-59,In Person,7.7
+P0390,45-59,Online,5.6
+P0391,18-29,In Person,4.5
+P0392,60+,Online,7.3
+P0393,45-59,Online,7.8
+P0394,30-44,Online,7.2
+P0395,45-59,Phone,5.2
+P0396,60+,Online,4.3
+P0397,30-44,In Person,6.6
+P0398,30-44,Online,5.7
+P0399,30-44,Online,5.9
+P0400,18-29,Online,7.5
+P0401,45-59,Online,5.3
+P0402,30-44,Phone,9.3
+P0403,30-44,Online,7.0
+P0404,30-44,Phone,8.4
+P0405,30-44,Online,4.8
+P0406,18-29,Phone,8.7
+P0407,18-29,Phone,7.7
+P0408,45-59,Online,5.6
+P0409,30-44,Online,7.7
+P0410,30-44,Phone,5.4
+P0411,45-59,In Person,8.6
+P0412,18-29,Online,9.6
+P0413,18-29,Phone,8.4
+P0414,45-59,In Person,6.3
+P0415,45-59,Phone,6.3
+P0416,18-29,Phone,7.7
+P0417,18-29,Online,6.8
+P0418,30-44,Online,7.7
+P0419,60+,Online,6.6
+P0420,18-29,In Person,8.1
+P0421,45-59,Online,4.4
+P0422,60+,Online,5.3
+P0423,18-29,Online,7.1
+P0424,60+,Online,4.4
+P0425,30-44,Online,3.9
+P0426,30-44,In Person,5.9
+P0427,18-29,In Person,6.0
+P0428,30-44,In Person,5.9
+P0429,30-44,In Person,8.4
+P0430,45-59,Online,8.3
+P0431,30-44,Online,6.9
+P0432,18-29,Online,10
+P0433,18-29,Online,10
+P0434,30-44,Online,6.8
+P0435,30-44,Online,5.5
+P0436,18-29,In Person,8.6
+P0437,30-44,In Person,6.7
+P0438,30-44,Online,4.5
+P0439,45-59,Online,5.6
+P0440,18-29,Online,6.6
+P0441,30-44,Online,6.0
+P0442,30-44,Online,5.3
+P0443,45-59,In Person,6.2
+P0444,30-44,Phone,8.3
+P0445,60+,Phone,3.6
+P0446,45-59,Online,6.5
+P0447,18-29,Phone,4.3
+P0448,45-59,In Person,4.5
+P0449,30-44,Online,7.2
+P0450,45-59,Phone,9.5
+P0451,45-59,Online,8.6
+P0452,60+,Phone,7.4
+P0453,30-44,In Person,6.4
+P0454,60+,Online,6.8
+P0455,30-44,Online,6.6
+P0456,60+,Online,4.6
+P0457,18-29,Online,6.8
+P0458,45-59,Online,9.6
+P0459,30-44,Online,6.5
+P0460,45-59,In Person,6.9
+P0461,60+,Phone,6.6
+P0462,30-44,Online,4.9
+P0463,30-44,Online,8.5
+P0464,18-29,Online,8.8
+P0465,30-44,Online,5.4
+P0466,60+,Phone,7.7
+P0467,30-44,In Person,6.9
+P0468,18-29,Online,8.6
+P0469,45-59,Online,5.7
+P0470,18-29,Phone,5.6
+P0471,30-44,In Person,7.4
+P0472,30-44,Online,8.2
+P0473,30-44,Online,6.1
+P0474,18-29,Phone,7.4
+P0475,60+,Online,3.5
+P0476,30-44,Online,7.2
+P0477,45-59,Online,6.9
+P0478,45-59,Online,7.9
+P0479,45-59,Online,4.8
+P0480,45-59,Online,4.8
+P0481,45-59,Online,6.5
+P0482,45-59,Online,6.7
+P0483,30-44,Online,7.2
+P0484,60+,Online,8.0
+P0485,30-44,In Person,8.6
+P0486,18-29,In Person,9.8
+P0487,30-44,Online,7.8
+P0488,45-59,Phone,7.7
+P0489,45-59,Online,7.3
+P0490,18-29,Online,7.4
+P0491,60+,In Person,5.8
+P0492,18-29,Online,5.2
+P0493,30-44,Phone,6.6
+P0494,18-29,Online,6.8
+P0495,30-44,Online,5.4
+P0496,60+,Online,6.7
+P0497,45-59,Online,7.0
+P0498,30-44,Online,8.5
+P0499,30-44,Online,4.5
+P0500,30-44,Online,4.0

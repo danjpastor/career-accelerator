@@ -65,3 +65,7 @@ Add one row after each study session.
 
 - [ ] Complete Applied Lab 14: Document analytical decisions and limitations
 - [ ] Complete Applied Lab 21: Propose a safer alternative metric
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 35: Audit an AI-generated analysis

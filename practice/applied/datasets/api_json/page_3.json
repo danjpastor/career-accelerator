@@ -1,0 +1,29 @@
+{
+  "status": 200,
+  "data": [
+    {
+      "id": 104,
+      "customer": {
+        "id": "C004",
+        "name": "Pine Services"
+      },
+      "amount": 59.95,
+      "currency": "USD",
+      "tags": []
+    },
+    {
+      "id": 105,
+      "customer": {
+        "id": "C005",
+        "name": "Atlas Foods"
+      },
+      "amount": "145.00",
+      "currency": "USD",
+      "tags": [
+        "schema-drift"
+      ],
+      "discount": 10
+    }
+  ],
+  "next_page": null
+}

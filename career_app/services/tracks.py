@@ -73,56 +73,171 @@ TRACK_ORDER = (
 )
 
 
-APPLIED_BRANCHES = {
-    "Power BI": (1, 2, 3, 4, 5, 6),
-    "Excel": (7,),
-    "pandas": (8, 9, 10, 11),
-    "Communication": (12, 13, 14),
-    "SQL Quality": (15, 16, 17, 18),
-    "Timed Requests": (19, 20, 21),
-}
+APPLIED_BRANCHES = {'Power BI': (1, 2, 3, 4, 5, 6, 36),
+ 'Excel': (7,),
+ 'pandas': (8, 9, 10, 11),
+ 'Communication': (12, 13, 14),
+ 'SQL Quality': (15, 16, 17, 18),
+ 'Timed Requests': (19, 20, 21),
+ 'Statistics': (22, 23, 24, 25, 26, 27, 28),
+ 'Business Patterns': (29, 30, 31, 32),
+ 'Data Workflow': (33, 34),
+ 'Responsible AI': (35,)}
 
 APPLIED_BRANCH_ORDER = tuple(
     APPLIED_BRANCHES
 )
 
-APPLIED_REQUIRED_SKILLS = {
-    2: {"power_query"},
-    3: {"power_query"},
-    4: {"dimensional_modeling"},
-    5: {"dax_measures"},
-    6: {"report_design"},
-    7: {"data_preparation"},
-    11: {"sql_aggregation"},
-    12: {"analysis_foundations"},
-    15: {"sql_querying"},
-    16: {"sql_joins"},
-    17: {
-        "sql_aggregation",
-        "sql_date_logic",
-    },
-    18: {"data_storytelling"},
-    19: {
-        "analyst_communication",
-        "sql_validation",
-    },
-    21: {"analyst_communication"},
-}
+APPLIED_REQUIRED_SKILLS = {2: {'power_query'},
+ 3: {'power_query'},
+ 4: {'dimensional_modeling'},
+ 5: {'dax_measures'},
+ 6: {'report_design'},
+ 7: {'data_preparation'},
+ 11: {'sql_aggregation'},
+ 12: {'analysis_foundations'},
+ 15: {'sql_querying'},
+ 16: {'sql_joins'},
+ 17: {'sql_aggregation', 'sql_date_logic'},
+ 18: {'data_storytelling'},
+ 19: {'sql_validation', 'analyst_communication'},
+ 21: {'analyst_communication'},
+ 22: {'analysis_foundations'},
+ 23: {'descriptive_statistics', 'data_preparation'},
+ 24: {'sampling_bias', 'descriptive_statistics'},
+ 25: {'confidence_intervals'},
+ 26: {'hypothesis_testing', 'analyst_communication'},
+ 27: {'experiment_analysis'},
+ 28: {'causal_reasoning', 'python_pandas'},
+ 29: {'business_framing', 'sql_aggregation'},
+ 30: {'sql_date_logic', 'sql_ctes', 'funnel_analysis'},
+ 31: {'cohort_analysis', 'sql_date_logic', 'sql_joins'},
+ 32: {'analysis_foundations', 'sql_aggregation', 'churn_analysis'},
+ 33: {'python_pandas', 'data_preparation'},
+ 34: {'api_ingestion', 'data_cleaning', 'sql_ctes'},
+ 35: {'diagnostic_reasoning', 'analyst_communication', 'sql_validation'},
+ 36: {'power_bi_governance', 'report_design'}}
 
-APPLIED_WEEK_BRANCH_PRIORITY = {
-    1: ("Excel", "SQL Quality", "Communication"),
-    2: ("Excel", "SQL Quality", "Communication"),
-    3: ("Excel", "SQL Quality", "Communication"),
-    4: ("SQL Quality", "Excel", "Communication"),
-    5: ("SQL Quality", "Communication", "Excel"),
-    6: ("SQL Quality", "Timed Requests", "Communication"),
-    7: ("Power BI", "Communication", "SQL Quality"),
-    8: ("Power BI", "pandas", "Communication"),
-    9: ("Power BI", "Communication", "pandas"),
-    10: ("pandas", "Timed Requests", "Communication"),
-    11: ("Communication", "Timed Requests", "pandas"),
-    12: ("Timed Requests", "Communication", "pandas"),
-}
+APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
+     'Business Patterns',
+     'SQL Quality',
+     'Excel',
+     'Power BI',
+     'pandas',
+     'Communication',
+     'Data Workflow',
+     'Responsible AI',
+     'Timed Requests'),
+ 2: ('Statistics',
+     'Business Patterns',
+     'SQL Quality',
+     'Excel',
+     'Power BI',
+     'pandas',
+     'Communication',
+     'Data Workflow',
+     'Responsible AI',
+     'Timed Requests'),
+ 3: ('Excel',
+     'SQL Quality',
+     'Statistics',
+     'Communication',
+     'Business Patterns',
+     'Power BI',
+     'pandas',
+     'Data Workflow',
+     'Responsible AI',
+     'Timed Requests'),
+ 4: ('Statistics',
+     'SQL Quality',
+     'Excel',
+     'Communication',
+     'Business Patterns',
+     'Power BI',
+     'pandas',
+     'Data Workflow',
+     'Responsible AI',
+     'Timed Requests'),
+ 5: ('Statistics',
+     'Business Patterns',
+     'SQL Quality',
+     'Communication',
+     'Excel',
+     'Power BI',
+     'pandas',
+     'Data Workflow',
+     'Responsible AI',
+     'Timed Requests'),
+ 6: ('Statistics',
+     'SQL Quality',
+     'Business Patterns',
+     'Timed Requests',
+     'Communication',
+     'Excel',
+     'Power BI',
+     'pandas',
+     'Data Workflow',
+     'Responsible AI'),
+ 7: ('Statistics',
+     'Business Patterns',
+     'Power BI',
+     'Communication',
+     'SQL Quality',
+     'Timed Requests',
+     'Excel',
+     'pandas',
+     'Data Workflow',
+     'Responsible AI'),
+ 8: ('Statistics',
+     'Business Patterns',
+     'Power BI',
+     'pandas',
+     'Communication',
+     'SQL Quality',
+     'Timed Requests',
+     'Data Workflow',
+     'Excel',
+     'Responsible AI'),
+ 9: ('Statistics',
+     'Business Patterns',
+     'Data Workflow',
+     'Power BI',
+     'Communication',
+     'pandas',
+     'SQL Quality',
+     'Timed Requests',
+     'Excel',
+     'Responsible AI'),
+ 10: ('Statistics',
+      'Data Workflow',
+      'Business Patterns',
+      'pandas',
+      'Timed Requests',
+      'Communication',
+      'Power BI',
+      'SQL Quality',
+      'Excel',
+      'Responsible AI'),
+ 11: ('Responsible AI',
+      'Data Workflow',
+      'Communication',
+      'Timed Requests',
+      'Statistics',
+      'Business Patterns',
+      'pandas',
+      'Power BI',
+      'SQL Quality',
+      'Excel'),
+ 12: ('Responsible AI',
+      'Data Workflow',
+      'Statistics',
+      'Business Patterns',
+      'Timed Requests',
+      'Communication',
+      'Power BI',
+      'pandas',
+      'SQL Quality',
+      'Excel')}
 
 
 SKILL_DEFINITIONS = {
@@ -225,6 +340,24 @@ SKILL_DEFINITIONS = {
     "sql_validation": ("SQL Validation and Reconciliation", "Complete an approved validation or reconciliation lab"),
     "diagnostic_reasoning": ("Diagnosing Broken Analyses", "Complete a broken-analysis diagnostic lab"),
     "timed_analysis": ("Timed Analytical Problem Solving", "Complete a timed analyst request"),
+    "statistics_foundations": ('Statistics Foundations', 'Complete the descriptive-statistics and sampling labs'),
+    "descriptive_statistics": ('Descriptive Statistics and Distributions', 'Complete Applied Lab 22'),
+    "sampling_bias": ('Sampling and Bias Evaluation', 'Complete Applied Lab 23'),
+    "confidence_intervals": ('Confidence Intervals and Margin of Error', 'Complete Applied Lab 24'),
+    "inferential_statistics": ('Inferential Statistics', 'Complete approved confidence-interval or hypothesis-testing work'),
+    "hypothesis_testing": ('Hypothesis Testing', 'Complete Applied Lab 25'),
+    "experiment_analysis": ('A/B-Test and Experiment Analysis', 'Complete Applied Lab 26'),
+    "causal_reasoning": ('Correlation and Causal Reasoning', 'Complete Applied Lab 27'),
+    "regression_interpretation": ('Linear Regression Interpretation', 'Complete Applied Lab 28'),
+    "funnel_analysis": ('Conversion Funnel Analysis', 'Complete Applied Lab 29'),
+    "cohort_analysis": ('Cohort and Retention Analysis', 'Complete Applied Lab 30'),
+    "churn_analysis": ('Customer and Revenue Churn Analysis', 'Complete Applied Lab 31'),
+    "variance_analysis": ('Forecast and Variance Analysis', 'Complete Applied Lab 32'),
+    "api_ingestion": ('REST API and JSON Ingestion', 'Complete Applied Lab 33'),
+    "data_pipeline": ('Reproducible Analytics Pipeline', 'Complete Applied Lab 34'),
+    "data_lineage": ('Data Lineage and Layered Modeling', 'Complete Applied Lab 34'),
+    "ai_validation": ('Responsible AI-Assisted Analysis Validation', 'Complete Applied Lab 35'),
+    "power_bi_performance": ('Power BI Performance Optimization', 'Complete optional Applied Lab 36'),
 
 }
 
@@ -459,6 +592,24 @@ SKILL_CATEGORY = {
     "sql_validation": "SQL",
     "diagnostic_reasoning": "Analytics",
     "timed_analysis": "Analytics",
+    "statistics_foundations": 'Statistics',
+    "descriptive_statistics": 'Statistics',
+    "sampling_bias": 'Statistics',
+    "confidence_intervals": 'Statistics',
+    "inferential_statistics": 'Statistics',
+    "hypothesis_testing": 'Statistics',
+    "experiment_analysis": 'Statistics',
+    "causal_reasoning": 'Statistics',
+    "regression_interpretation": 'Statistics',
+    "funnel_analysis": 'Business Analysis',
+    "cohort_analysis": 'Business Analysis',
+    "churn_analysis": 'Business Analysis',
+    "variance_analysis": 'Business Analysis',
+    "api_ingestion": 'Data Acquisition',
+    "data_pipeline": 'Data Workflow',
+    "data_lineage": 'Data Workflow',
+    "ai_validation": 'Responsible AI',
+    "power_bi_performance": 'Power BI',
 
 }
 
@@ -600,7 +751,7 @@ def adaptive_targets(
     )
 
     google_minutes = int(
-        hours * 60 * 0.70
+        hours * 60 * 0.67
     )
     google_target = max(
         1,
@@ -636,11 +787,16 @@ def adaptive_targets(
         else 0
     )
     applied_target = (
-        2
+        3
         if (
-            hours >= 18
+            hours >= 20
             and current_week
             in {7, 8, 9, 10}
+        )
+        else 2
+        if (
+            hours >= 15
+            and current_week >= 4
         )
         else 1
         if hours >= 10
@@ -650,7 +806,7 @@ def adaptive_targets(
     return {
         "google": {
             "weekly_target": google_target,
-            "allocation_percent": 70,
+            "allocation_percent": 67,
             "allocation_minutes": google_minutes,
         },
         "datacamp": {
@@ -676,9 +832,9 @@ def adaptive_targets(
         },
         "applied": {
             "weekly_target": applied_target,
-            "allocation_percent": 5,
+            "allocation_percent": 8,
             "allocation_minutes": int(
-                hours * 60 * 0.05
+                hours * 60 * 0.08
             ),
         },
     }
@@ -2179,6 +2335,12 @@ def _applied_target_payload(
             completed
         ),
         "pin": pin,
+        "optional": bool(
+            item.get(
+                "optional",
+                False,
+            )
+        ),
         "carryover": bool(
             carryover
         ),

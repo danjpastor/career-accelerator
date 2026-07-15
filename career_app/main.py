@@ -1511,6 +1511,7 @@ class CareerAccelerator(QMainWindow):
             ("📊 Power BI", "Power BI"),
             ("🐍 Python", "Python"),
             ("📁 Portfolio", "Portfolio"),
+            ("📐 Statistics", "Statistics"),
             ("🧪 Applied Labs", "Applied Labs"),
         ]
         for index, (title, key) in enumerate(learning_tracks):
@@ -1813,12 +1814,21 @@ class CareerAccelerator(QMainWindow):
                 ]
                 else ""
             )
+            optional_text = (
+                " • Optional"
+                if item.get(
+                    "optional",
+                    False,
+                )
+                else ""
+            )
             self.applied_exercise_list.addItem(
                 f"{icon} {number:02d}. "
                 f"{item['category']} • "
                 f"{item['title']} • "
                 f"Week {item['week']} • "
                 f"{item['minutes']} min"
+                f"{optional_text}"
                 f"{saved}"
             )
             index = (
@@ -5313,11 +5323,17 @@ class CareerAccelerator(QMainWindow):
         )
         power_bi_done = len(
             completed_applied
-            & set(range(1, 7))
+            & {
+                1, 2, 3, 4, 5, 6, 36
+            }
         )
         python_done = len(
             completed_applied
             & set(range(8, 12))
+        )
+        statistics_done = len(
+            completed_applied
+            & set(range(22, 29))
         )
 
         applied_meta = applied[
@@ -5356,7 +5372,7 @@ class CareerAccelerator(QMainWindow):
                 sql_detail,
             ),
             "Power BI": (
-                f"{power_bi_done}/6 labs",
+                f"{power_bi_done}/7 labs",
                 (
                     "Complete the branched Power BI lab sequence "
                     "as prerequisites unlock."
@@ -5372,6 +5388,13 @@ class CareerAccelerator(QMainWindow):
             "Portfolio": (
                 f"{project_done}/{len(project_rows)}",
                 portfolio_detail,
+            ),
+            "Statistics": (
+                f"{statistics_done}/7 labs",
+                (
+                    "Progress from descriptive statistics through "
+                    "experiments, causal reasoning, and regression."
+                ),
             ),
             "Applied Labs": (
                 (

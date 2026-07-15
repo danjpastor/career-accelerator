@@ -64,3 +64,8 @@ Add one row after each study session.
 ## Applied Labs
 
 - [ ] Complete Applied Lab 02: Transform data with Power Query
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 25: Perform and interpret a hypothesis test
+- [ ] Complete Applied Lab 30: Calculate monthly cohort retention

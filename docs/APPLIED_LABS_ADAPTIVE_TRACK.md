@@ -1,45 +1,41 @@
 # Applied Labs Adaptive Track
 
-Applied Labs use one secondary adaptive track with six independent
+Applied Labs use one secondary adaptive track with ten independent
 branches:
 
-- Power BI: Labs 01 → 02 → 03 → 04 → 05 → 06
-- Excel: Lab 07
-- pandas: Labs 08 → 09 → 10 → 11
-- Communication: Labs 12 → 13 → 14
-- SQL Quality: Labs 15 → 16 → 17 → 18
-- Timed Requests: Labs 19 → 20 → 21
-
-## Selection
-
-Auto mode chooses the next eligible branch using:
-
-- unfinished in-progress work
-- the current roadmap week
-- prerequisite skills and prior branch labs
-- current Google and DataCamp progress
-- dashboard, validation, and communication evidence
-
-A user can pin one branch from Learning Dashboard → Applied Labs.
-Pinning changes the branch preference but never bypasses prerequisites.
+- Power BI: 01 → 02 → 03 → 04 → 05 → 06 → optional 36
+- Excel: 07
+- pandas: 08 → 09 → 10 → 11
+- Communication: 12 → 13 → 14
+- SQL Quality: 15 → 16 → 17 → 18
+- Timed Requests: 19 → 20 → 21
+- Statistics: 22 → 23 → 24 → 25 → 26 → 27 → 28
+- Business Patterns: 29 → 30 → 31 → 32
+- Data Workflow: 33 → 34
+- Responsible AI: 35
 
 ## Scheduling
 
-- Google Certificate remains the first priority.
-- Applied Labs receive about 5% of the weekly study allocation.
-- The normal target is one lab per week.
-- Weeks 7–10 can target two labs when the weekly study budget is at
-  least 18 hours.
-- Only one Applied Lab can be active or appear in Today’s Focus.
-- An unfinished active lab carries into the next week with its status,
-  estimate, energy, priority, and deferral preserved.
-- Other lab tasks remain managed by the track and do not enter normal
-  scheduling.
+Auto mode considers:
 
-## Completion and undo
+- the current roadmap week
+- unfinished in-progress work
+- prior labs in the selected branch
+- Google, DataCamp, SQL, portfolio, and concept evidence
+- cross-branch prerequisites such as pandas, validation, and communication
 
-Completion updates the roadmap task, applied progress, branch event,
-Skills & Concepts, Demonstrated Evidence, and adaptive position.
+Applied Labs receive about 8% of planned weekly study time while the
+Google Certificate remains the primary allocation at 67%.
 
-Undo must proceed from the latest completed item in the same branch.
-Independent branches do not block one another.
+Weekly targets are:
+
+- one lab at 10–14 study hours
+- two labs from Week 4 onward at 15–19 hours
+- up to three labs during Weeks 7–10 at 20 or more hours
+
+Only one lab is active at a time. Completing it allows the track to
+choose the next eligible branch item until the weekly quota is reached.
+Unfinished work carries into the next week.
+
+A branch may be pinned, but pinning never bypasses prerequisites.
+Undo remains sequential only within the affected branch.

@@ -1,0 +1,25 @@
+{
+  "status": 200,
+  "data": [
+    {
+      "id": 103,
+      "customer": {
+        "id": "C003",
+        "name": "Metro Health"
+      },
+      "amount": 210.0,
+      "currency": "USD"
+    },
+    {
+      "id": 104,
+      "customer": {
+        "id": "C004",
+        "name": "Pine Services"
+      },
+      "amount": 59.95,
+      "currency": "USD",
+      "tags": []
+    }
+  ],
+  "next_page": "page_3.json"
+}

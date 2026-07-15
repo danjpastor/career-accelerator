@@ -1,0 +1,31 @@
+{
+  "status": 200,
+  "data": [
+    {
+      "id": 101,
+      "customer": {
+        "id": "C001",
+        "name": "Northstar"
+      },
+      "amount": 125.5,
+      "currency": "USD",
+      "tags": [
+        "new",
+        "priority"
+      ]
+    },
+    {
+      "id": 102,
+      "customer": {
+        "id": "C002",
+        "name": "Bright Retail"
+      },
+      "amount": 84.0,
+      "currency": "USD",
+      "tags": [
+        "renewal"
+      ]
+    }
+  ],
+  "next_page": "page_2.json"
+}

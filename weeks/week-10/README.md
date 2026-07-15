@@ -66,3 +66,8 @@ Add one row after each study session.
 - [ ] Complete Applied Lab 10: Aggregate and export pandas results
 - [ ] Complete Applied Lab 11: Reproduce SQL results in pandas
 - [ ] Complete Applied Lab 20: Reconcile conflicting finance totals
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 28: Interpret a simple linear regression
+- [ ] Complete Applied Lab 34: Build a raw-to-analytics data workflow

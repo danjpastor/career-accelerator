@@ -65,3 +65,7 @@ Add one row after each study session.
 
 - [ ] Complete Applied Lab 15: Apply the SQL validation checklist
 - [ ] Complete Applied Lab 16: Fix a join that duplicates revenue
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 22: Analyze descriptive statistics and distributions

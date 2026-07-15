@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.15 includes:
+Version 9.3.16 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -436,3 +436,14 @@ Quality, and Timed Requests branches.
 The track remains supplemental, supports automatic or pinned branch
 selection, carries unfinished work across weeks, and places at most one lab
 in Today’s Focus.
+
+
+## Completed Analyst Curriculum
+
+Version 9.3.16 adds 15 prerequisite-driven labs covering statistics and
+experimentation, recurring business-analysis patterns, API and JSON
+ingestion, reproducible analytics workflows, responsible AI validation,
+and optional Power BI performance optimization.
+
+The Applied Labs library now contains 36 labs. New work is spaced across
+Weeks 4–12 and uses the existing branched adaptive scheduler.

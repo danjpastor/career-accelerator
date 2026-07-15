@@ -103,18 +103,31 @@ WEEKLY_GUIDANCE = {
 }
 
 
-APPLIED_LAB_SUMMARY = {
-    3: ["Excel analyst workbook"],
-    4: ["SQL validation checklist", "Broken join diagnosis"],
-    5: ["Executive summary and memo", "KPI repair"],
-    6: ["Misleading story repair", "Timed missed-deadlines request"],
-    7: ["Power BI import/profile", "Power Query transformations"],
-    8: ["Power BI model and DAX", "pandas loading and cleaning"],
-    9: ["Power BI report and deployment", "Dashboard walkthrough"],
-    10: ["pandas outputs and SQL parity", "Finance reconciliation"],
-    11: ["Decision log", "Responsible metric response"],
-}
-
+APPLIED_LAB_SUMMARY = {3: ['Excel analyst workbook'],
+ 4: ['Descriptive statistics and distributions',
+     'SQL validation checklist',
+     'Broken join diagnosis'],
+ 5: ['Sampling and bias', 'Conversion funnel', 'Executive summary and memo', 'KPI repair'],
+ 6: ['Confidence intervals', 'Misleading story repair', 'Timed missed-deadlines request'],
+ 7: ['Hypothesis testing',
+     'Cohort retention',
+     'Power BI import/profile',
+     'Power Query transformations'],
+ 8: ['A/B-test analysis',
+     'Churn analysis',
+     'Power BI model and DAX',
+     'pandas loading and cleaning'],
+ 9: ['Correlation versus causation',
+     'Forecast-versus-actual variance',
+     'API and JSON ingestion',
+     'Power BI report and deployment',
+     'Dashboard walkthrough'],
+ 10: ['Linear regression interpretation',
+      'Raw-to-analytics pipeline',
+      'pandas outputs and SQL parity',
+      'Finance reconciliation'],
+ 11: ['Responsible AI audit', 'Decision log', 'Responsible metric response'],
+ 12: ['Optional Power BI performance optimization']}
 
 DATACAMP_CURRICULUM_VERSION = "2026-07-14"
 

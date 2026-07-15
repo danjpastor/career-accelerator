@@ -65,3 +65,8 @@ Add one row after each study session.
 
 - [ ] Complete Applied Lab 03: Build a Power BI star schema
 - [ ] Complete Applied Lab 04: Build and validate DAX measures
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 26: Analyze an A/B test and practical significance
+- [ ] Complete Applied Lab 31: Analyze customer and revenue churn

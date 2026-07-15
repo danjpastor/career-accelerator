@@ -66,3 +66,9 @@ Add one row after each study session.
 - [ ] Complete Applied Lab 05: Build an executive Power BI report
 - [ ] Complete Applied Lab 06: Plan Power BI publishing and security
 - [ ] Complete Applied Lab 13: Prepare a dashboard walkthrough and Q&A
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 27: Separate correlation from causation
+- [ ] Complete Applied Lab 32: Explain forecast-versus-actual variance
+- [ ] Complete Applied Lab 33: Ingest paginated REST API and JSON data

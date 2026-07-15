@@ -34,7 +34,8 @@
       "Dates and numeric fields use correct data types.",
       "At least three quality observations are supported by evidence."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "2": {
     "week": 7,
@@ -70,7 +71,8 @@
       "The appended total equals both inputs combined.",
       "The unpivoted data reconciles to the wide source."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "3": {
     "week": 8,
@@ -105,7 +107,8 @@
       "Dimension keys are unique.",
       "A project filter affects both facts correctly."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "4": {
     "week": 8,
@@ -141,7 +144,8 @@
       "Rates use safe division.",
       "Totals reconcile to another tool."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "5": {
     "week": 9,
@@ -177,7 +181,8 @@
       "The report fits common laptop resolution.",
       "Titles remain meaningful after filters."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "6": {
     "week": 9,
@@ -213,7 +218,8 @@
       "Security scenarios are testable.",
       "Ownership is explicit."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "7": {
     "week": 3,
@@ -250,7 +256,8 @@
       "No unexplained hard-coded business values.",
       "A new month can be added through documented refresh steps."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "8": {
     "week": 8,
@@ -288,7 +295,8 @@
       "Key uniqueness is checked.",
       "The script reruns without manual edits."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "9": {
     "week": 8,
@@ -326,7 +334,8 @@
       "Unexpected many-to-many merges fail.",
       "Excluded rows are counted and explained."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "10": {
     "week": 10,
@@ -362,7 +371,8 @@
       "Rates use summed numerators and denominators.",
       "Output names are presentation-ready."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "11": {
     "week": 10,
@@ -398,7 +408,8 @@
       "Numeric tolerance is explicit.",
       "Any intentional difference is documented."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "12": {
     "week": 5,
@@ -434,7 +445,8 @@
       "Limitation changes interpretation strength.",
       "The requested decision is explicit."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "13": {
     "week": 9,
@@ -472,7 +484,8 @@
       "It explains decisions, not features.",
       "Answers distinguish fact, inference, and recommendation."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "14": {
     "week": 11,
@@ -508,7 +521,8 @@
       "Limitations are specific.",
       "Open assumptions have owners or actions."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "15": {
     "week": 4,
@@ -545,7 +559,8 @@
       "Reconciliation is independent.",
       "Boundary tests cover both edges."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "16": {
     "week": 4,
@@ -581,7 +596,8 @@
       "Revenue reconciles.",
       "The exact cardinality error is named."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "17": {
     "week": 5,
@@ -617,7 +633,8 @@
       "Date boundaries are tested.",
       "Weighted result reconciles."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "18": {
     "week": 6,
@@ -653,7 +670,8 @@
       "Headline is supported.",
       "Limitations are visible."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "19": {
     "week": 6,
@@ -689,7 +707,8 @@
       "Time window is stated.",
       "Recommendation is proportional to evidence."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "20": {
     "week": 10,
@@ -725,7 +744,8 @@
       "Difference groups are mutually exclusive.",
       "Confirmed and open causes are separated."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
   },
   "21": {
     "week": 11,
@@ -761,6 +781,565 @@
       "Response preserves the business goal.",
       "New metric reduces the identified risk."
     ],
-    "priority": 3
+    "priority": 3,
+    "optional": false
+  },
+  "22": {
+    "week": 4,
+    "category": "Statistics",
+    "slug": "22_descriptive_statistics_distributions",
+    "title": "Describe distributions and identify meaningful outliers",
+    "concepts": "mean, median, variance, standard deviation, percentiles, distribution shape, outliers",
+    "minutes": 50,
+    "priority": 2,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "Normal",
+    "source_type": "Coursework",
+    "evidence_skill": "Descriptive statistics and distribution analysis",
+    "starter_filename": "starter.py",
+    "dataset_slug": "experimentation",
+    "label": "Complete Applied Lab 22: Analyze descriptive statistics and distributions",
+    "aliases": [],
+    "objective": "Summarize a dataset with appropriate descriptive statistics, recognize skewed distributions, and decide when an outlier is an error, an exception, or an important business signal.",
+    "steps": [
+      "Profile numeric fields using count, mean, median, standard deviation, and percentiles.",
+      "Compare mean and median for skewed variables.",
+      "Create distribution summaries for response time, revenue, and satisfaction.",
+      "Identify potential outliers using IQR and a business-rule threshold.",
+      "Explain which summary statistic is safest for each business question."
+    ],
+    "deliverables": [
+      "A runnable analysis script.",
+      "A descriptive-statistics table.",
+      "A short interpretation of skew, spread, and outliers."
+    ],
+    "validation": [
+      "Missing values are excluded or handled explicitly.",
+      "At least one skewed metric is interpreted with the median.",
+      "Outliers are investigated rather than deleted automatically."
+    ],
+    "optional": false
+  },
+  "23": {
+    "week": 5,
+    "category": "Statistics",
+    "slug": "23_sampling_bias_representativeness",
+    "title": "Evaluate sampling bias and representativeness",
+    "concepts": "population, sample, sampling frame, selection bias, nonresponse bias, representativeness",
+    "minutes": 45,
+    "priority": 2,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "Normal",
+    "source_type": "Coursework",
+    "evidence_skill": "Sampling design and bias evaluation",
+    "starter_filename": "submission.md",
+    "dataset_slug": "experimentation",
+    "label": "Complete Applied Lab 23: Evaluate sampling bias and representativeness",
+    "aliases": [],
+    "objective": "Compare a full population with a convenience sample and explain how coverage and nonresponse bias change the conclusion.",
+    "steps": [
+      "Define the target population and available sampling frame.",
+      "Compare demographic and behavioral proportions between population and sample.",
+      "Identify groups that are overrepresented or missing.",
+      "Explain how the bias could affect the reported outcome.",
+      "Recommend a safer collection or weighting strategy."
+    ],
+    "deliverables": [
+      "Population-versus-sample comparison table.",
+      "Bias assessment.",
+      "Recommended sampling improvement."
+    ],
+    "validation": [
+      "Representativeness is evaluated across multiple relevant fields.",
+      "The analysis distinguishes sampling bias from random sampling error.",
+      "The recommendation is practical for the stated collection process."
+    ],
+    "optional": false
+  },
+  "24": {
+    "week": 6,
+    "category": "Statistics",
+    "slug": "24_confidence_intervals_margin_error",
+    "title": "Calculate confidence intervals and margin of error",
+    "concepts": "standard error, confidence level, confidence interval, margin of error, sample size",
+    "minutes": 55,
+    "priority": 2,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "High",
+    "source_type": "Coursework",
+    "evidence_skill": "Confidence interval calculation and interpretation",
+    "starter_filename": "starter.py",
+    "dataset_slug": "experimentation",
+    "label": "Complete Applied Lab 24: Calculate confidence intervals and margin of error",
+    "aliases": [],
+    "objective": "Estimate uncertainty around a sample mean and proportion and communicate what a confidence interval does and does not mean.",
+    "steps": [
+      "Calculate a sample mean, standard deviation, and standard error.",
+      "Build a 95% confidence interval for mean response time.",
+      "Build a confidence interval for a conversion proportion.",
+      "Compare interval width for two sample sizes.",
+      "Write a stakeholder-friendly interpretation without claiming a probability about the fixed parameter."
+    ],
+    "deliverables": [
+      "Runnable calculations.",
+      "Confidence-interval comparison table.",
+      "Plain-language interpretation."
+    ],
+    "validation": [
+      "Standard error uses sample size correctly.",
+      "The interpretation avoids saying 95% of individual values are inside the interval.",
+      "The effect of sample size on precision is explained."
+    ],
+    "optional": false
+  },
+  "25": {
+    "week": 7,
+    "category": "Statistics",
+    "slug": "25_hypothesis_testing_significance",
+    "title": "Perform and interpret a hypothesis test",
+    "concepts": "null hypothesis, alternative hypothesis, test statistic, p-value, significance level, Type I and Type II errors",
+    "minutes": 60,
+    "priority": 2,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "High",
+    "source_type": "Coursework",
+    "evidence_skill": "Hypothesis testing and significance interpretation",
+    "starter_filename": "starter.py",
+    "dataset_slug": "experimentation",
+    "label": "Complete Applied Lab 25: Perform and interpret a hypothesis test",
+    "aliases": [],
+    "objective": "Test a clearly defined difference, interpret the result correctly, and separate insufficient evidence from evidence of no effect.",
+    "steps": [
+      "State the null and alternative hypotheses before calculating.",
+      "Choose a significance level and explain the choice.",
+      "Compare conversion or mean outcome between two groups.",
+      "Calculate or approximate a test statistic and p-value.",
+      "Discuss Type I, Type II, and sample-size risks."
+    ],
+    "deliverables": [
+      "Hypothesis statement and method.",
+      "Test result.",
+      "Decision-oriented interpretation."
+    ],
+    "validation": [
+      "The test matches the metric and comparison.",
+      "Statistical significance is not described as business importance.",
+      "Failure to reject is not described as proof of equality."
+    ],
+    "optional": false
+  },
+  "26": {
+    "week": 8,
+    "category": "Statistics",
+    "slug": "26_ab_test_practical_significance",
+    "title": "Analyze an A/B test for statistical and practical significance",
+    "concepts": "experiment design, random assignment, conversion lift, confidence interval, practical significance, guardrail metrics",
+    "minutes": 65,
+    "priority": 2,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "High",
+    "source_type": "Portfolio",
+    "evidence_skill": "A/B-test analysis and decision recommendation",
+    "starter_filename": "starter.py",
+    "dataset_slug": "experimentation",
+    "label": "Complete Applied Lab 26: Analyze an A/B test and practical significance",
+    "aliases": [],
+    "objective": "Evaluate whether an experiment is statistically credible, commercially meaningful, and safe to roll out.",
+    "steps": [
+      "Check group balance and assignment integrity.",
+      "Calculate conversion, absolute lift, and relative lift.",
+      "Estimate uncertainty around the treatment effect.",
+      "Compare the effect with a predefined minimum practical threshold.",
+      "Review revenue and response-time guardrails before recommending rollout."
+    ],
+    "deliverables": [
+      "Experiment scorecard.",
+      "Statistical and practical significance assessment.",
+      "Rollout, hold, or rerun recommendation."
+    ],
+    "validation": [
+      "Group sizes and baseline characteristics are checked.",
+      "The recommendation includes uncertainty and guardrails.",
+      "A statistically significant but immaterial effect is treated appropriately."
+    ],
+    "optional": false
+  },
+  "27": {
+    "week": 9,
+    "category": "Statistics",
+    "slug": "27_correlation_causation",
+    "title": "Separate correlation from causal evidence",
+    "concepts": "correlation, confounding, reverse causality, omitted variables, causal claim, observational evidence",
+    "minutes": 45,
+    "priority": 2,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "Normal",
+    "source_type": "Coursework",
+    "evidence_skill": "Correlation, confounding, and causal reasoning",
+    "starter_filename": "submission.md",
+    "dataset_slug": "experimentation",
+    "label": "Complete Applied Lab 27: Separate correlation from causation",
+    "aliases": [],
+    "objective": "Review a strong observed relationship, identify plausible confounders, and rewrite an unsupported causal claim.",
+    "steps": [
+      "Measure and describe the observed association.",
+      "List plausible confounders and reverse-causality explanations.",
+      "Identify what the current data can and cannot establish.",
+      "Propose an experiment or quasi-experimental design.",
+      "Rewrite the conclusion using appropriately cautious language."
+    ],
+    "deliverables": [
+      "Association summary.",
+      "Confounder and alternative-explanation list.",
+      "Revised claim and stronger study proposal."
+    ],
+    "validation": [
+      "Correlation is not treated as proof of causation.",
+      "At least one plausible alternative mechanism is considered.",
+      "The proposed design addresses the main confounder."
+    ],
+    "optional": false
+  },
+  "28": {
+    "week": 10,
+    "category": "Statistics",
+    "slug": "28_linear_regression_interpretation",
+    "title": "Fit and interpret a simple linear regression",
+    "concepts": "dependent variable, predictor, slope, intercept, residual, R-squared, extrapolation, coefficient interpretation",
+    "minutes": 60,
+    "priority": 2,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "High",
+    "source_type": "Coursework",
+    "evidence_skill": "Simple regression and coefficient interpretation",
+    "starter_filename": "starter.py",
+    "dataset_slug": "experimentation",
+    "label": "Complete Applied Lab 28: Interpret a simple linear regression",
+    "aliases": [],
+    "objective": "Fit a basic regression, validate its assumptions at an introductory level, and explain the coefficient without making a causal claim.",
+    "steps": [
+      "Define the outcome and predictor in business terms.",
+      "Fit a simple linear model.",
+      "Interpret slope, intercept, and R-squared.",
+      "Inspect residual patterns and influential observations.",
+      "Explain why prediction outside the observed range is risky."
+    ],
+    "deliverables": [
+      "Runnable model.",
+      "Coefficient and fit summary.",
+      "Plain-language interpretation and limitations."
+    ],
+    "validation": [
+      "Units are included in the coefficient interpretation.",
+      "Association is not described as causation.",
+      "Residuals and extrapolation risk are discussed."
+    ],
+    "optional": false
+  },
+  "29": {
+    "week": 5,
+    "category": "Business Analysis",
+    "slug": "29_conversion_funnel",
+    "title": "Build and interpret a conversion funnel",
+    "concepts": "event grain, funnel stages, stage conversion, overall conversion, drop-off, segmentation",
+    "minutes": 50,
+    "priority": 2,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "Normal",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Conversion-funnel analysis",
+    "starter_filename": "starter.sql",
+    "dataset_slug": "business_patterns",
+    "label": "Complete Applied Lab 29: Build and interpret a conversion funnel",
+    "aliases": [],
+    "objective": "Construct a correctly ordered funnel, quantify drop-off, and identify where a business should investigate first.",
+    "steps": [
+      "Define the user and event grain.",
+      "Create mutually consistent funnel-stage eligibility rules.",
+      "Calculate users reaching each stage and stage-to-stage conversion.",
+      "Segment results by acquisition channel.",
+      "Recommend one next diagnostic based on the largest material drop-off."
+    ],
+    "deliverables": [
+      "Funnel SQL.",
+      "Overall and segmented funnel table.",
+      "Business interpretation."
+    ],
+    "validation": [
+      "A user cannot reach an earlier count through duplicate events.",
+      "Stages occur in the required order.",
+      "Stage conversion and overall conversion are labeled separately."
+    ],
+    "optional": false
+  },
+  "30": {
+    "week": 7,
+    "category": "Business Analysis",
+    "slug": "30_cohort_retention",
+    "title": "Calculate cohort retention",
+    "concepts": "cohort month, activity month, period index, retained users, retention rate, incomplete cohorts",
+    "minutes": 60,
+    "priority": 2,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "High",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Cohort and retention analysis",
+    "starter_filename": "starter.sql",
+    "dataset_slug": "business_patterns",
+    "label": "Complete Applied Lab 30: Calculate monthly cohort retention",
+    "aliases": [],
+    "objective": "Build a cohort-retention table that distinguishes customer age from calendar month and handles incomplete recent cohorts.",
+    "steps": [
+      "Assign each user to a first-activity cohort.",
+      "Calculate activity period relative to the cohort month.",
+      "Count retained users and divide by the original cohort size.",
+      "Build a long and pivoted retention table.",
+      "Explain why recent cohorts have fewer observable periods."
+    ],
+    "deliverables": [
+      "Cohort SQL.",
+      "Retention matrix.",
+      "Interpretation of the strongest and weakest cohorts."
+    ],
+    "validation": [
+      "Each user belongs to one cohort.",
+      "Retention never exceeds 100%.",
+      "Incomplete recent cohorts are not mistaken for zero retention."
+    ],
+    "optional": false
+  },
+  "31": {
+    "week": 8,
+    "category": "Business Analysis",
+    "slug": "31_churn_analysis",
+    "title": "Distinguish customer, logo, and revenue churn",
+    "concepts": "churn count, churn rate, beginning population, MRR churn, contraction, expansion, net revenue retention",
+    "minutes": 60,
+    "priority": 2,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "High",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Customer and revenue churn analysis",
+    "starter_filename": "starter.sql",
+    "dataset_slug": "business_patterns",
+    "label": "Complete Applied Lab 31: Analyze customer and revenue churn",
+    "aliases": [],
+    "objective": "Calculate several churn measures with correct denominators and explain why they answer different business questions.",
+    "steps": [
+      "Define the starting customer and recurring-revenue population.",
+      "Calculate churned customers and customer churn rate.",
+      "Calculate gross revenue churn and net revenue retention.",
+      "Separate full cancellations from contraction and expansion.",
+      "Segment churn by plan or acquisition channel."
+    ],
+    "deliverables": [
+      "Churn SQL and metric definitions.",
+      "Customer-versus-revenue churn comparison.",
+      "Actionable interpretation."
+    ],
+    "validation": [
+      "Rates use the beginning-period population.",
+      "Expansion is not subtracted from gross revenue churn.",
+      "The analysis states the measurement period."
+    ],
+    "optional": false
+  },
+  "32": {
+    "week": 9,
+    "category": "Business Analysis",
+    "slug": "32_forecast_actual_variance",
+    "title": "Explain forecast-versus-actual variance",
+    "concepts": "budget, forecast, actual, absolute variance, percentage variance, favorable and unfavorable, contribution analysis",
+    "minutes": 50,
+    "priority": 2,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "Forecast and variance analysis",
+    "starter_filename": "submission.md",
+    "dataset_slug": "business_patterns",
+    "label": "Complete Applied Lab 32: Explain forecast-versus-actual variance",
+    "aliases": [],
+    "objective": "Reconcile planned and actual results, isolate the largest drivers, and communicate whether each variance is favorable or unfavorable.",
+    "steps": [
+      "Define sign conventions for revenue and cost variances.",
+      "Calculate absolute and percentage variance.",
+      "Rank departments or products by contribution to total variance.",
+      "Separate volume, rate, and timing explanations where possible.",
+      "Write an executive variance commentary with an action owner."
+    ],
+    "deliverables": [
+      "Variance table.",
+      "Top-driver analysis.",
+      "Executive commentary."
+    ],
+    "validation": [
+      "Sign conventions are explicit.",
+      "Driver contributions reconcile to total variance.",
+      "Percentage variance handles zero or very small forecasts safely."
+    ],
+    "optional": false
+  },
+  "33": {
+    "week": 9,
+    "category": "Data Acquisition",
+    "slug": "33_rest_api_json_ingestion",
+    "title": "Ingest paginated REST API and JSON data",
+    "concepts": "HTTP status, pagination, JSON parsing, schema drift, retries, missing fields, deduplication, extraction timestamp",
+    "minutes": 65,
+    "priority": 3,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "High",
+    "source_type": "Coursework",
+    "evidence_skill": "REST API and JSON data ingestion",
+    "starter_filename": "starter.py",
+    "dataset_slug": "api_json",
+    "label": "Complete Applied Lab 33: Ingest paginated REST API and JSON data",
+    "aliases": [],
+    "objective": "Build a reproducible ingestion script using local API-response fixtures, including pagination, errors, duplicate records, and missing optional fields.",
+    "steps": [
+      "Read the first response and follow next-page references.",
+      "Handle a simulated rate-limit or server-error response.",
+      "Flatten nested customer and order fields.",
+      "Detect duplicate identifiers and schema changes.",
+      "Add extraction timestamp, source page, and row-count logging."
+    ],
+    "deliverables": [
+      "Runnable ingestion script.",
+      "Flattened CSV output.",
+      "Extraction and validation log."
+    ],
+    "validation": [
+      "Every page is processed exactly once.",
+      "Duplicate IDs are detected explicitly.",
+      "Missing optional fields do not crash the ingestion."
+    ],
+    "optional": false
+  },
+  "34": {
+    "week": 10,
+    "category": "Data Workflow",
+    "slug": "34_raw_staging_analytics_pipeline",
+    "title": "Build a raw-to-analytics data workflow",
+    "concepts": "raw layer, staging views, clean layer, analytical marts, idempotency, validation, lineage",
+    "minutes": 75,
+    "priority": 3,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "High",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Reproducible analytics pipeline and lineage",
+    "starter_filename": "starter.sql",
+    "dataset_slug": "pipeline",
+    "label": "Complete Applied Lab 34: Build a raw-to-analytics data workflow",
+    "aliases": [],
+    "objective": "Transform inconsistent raw extracts into documented staging, clean, and analytical layers that can be rebuilt safely.",
+    "steps": [
+      "Load immutable raw monthly files with source-file metadata.",
+      "Create staging views that standardize names and data types.",
+      "Create clean tables with deduplication and explicit rejection logic.",
+      "Create an analytical mart at a documented grain.",
+      "Add row-count, uniqueness, referential, and reconciliation checks.",
+      "Create a lineage document from source to final metric."
+    ],
+    "deliverables": [
+      "Layered SQL workflow.",
+      "Validation report.",
+      "Data-lineage diagram or table."
+    ],
+    "validation": [
+      "Rerunning the workflow does not duplicate results.",
+      "Rejected records are counted and retained for review.",
+      "Final totals reconcile to accepted raw records."
+    ],
+    "optional": false
+  },
+  "35": {
+    "week": 11,
+    "category": "Responsible AI",
+    "slug": "35_audit_ai_generated_analysis",
+    "title": "Audit an AI-generated analysis",
+    "concepts": "hallucinated fields, duplicated joins, denominator errors, unsupported claims, chart risk, verification trail",
+    "minutes": 60,
+    "priority": 3,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "High",
+    "source_type": "Portfolio",
+    "evidence_skill": "Responsible validation of AI-assisted analytics",
+    "starter_filename": "submission.md",
+    "dataset_slug": "ai_audit",
+    "label": "Complete Applied Lab 35: Audit an AI-generated analysis",
+    "aliases": [],
+    "objective": "Review a plausible AI-generated query, summary, and chart recommendation; identify every unsupported or incorrect element; and produce a verified replacement.",
+    "steps": [
+      "Identify nonexistent or misused fields.",
+      "Diagnose join duplication and denominator errors.",
+      "Check every numerical claim against source data.",
+      "Separate observation, inference, and recommendation.",
+      "Replace the misleading chart recommendation.",
+      "Document a reusable AI-output verification checklist."
+    ],
+    "deliverables": [
+      "Issue log.",
+      "Corrected query and verified results.",
+      "Rewritten summary and chart recommendation."
+    ],
+    "validation": [
+      "Every correction links to a validation check.",
+      "Unsupported causal or universal claims are removed.",
+      "The final analysis can be reproduced without trusting the AI output."
+    ],
+    "optional": false
+  },
+  "36": {
+    "week": 12,
+    "category": "Power BI",
+    "slug": "36_power_bi_performance",
+    "title": "Optimize Power BI model and refresh performance",
+    "concepts": "query folding, model size, cardinality, storage mode, measure versus column, incremental refresh, Performance Analyzer",
+    "minutes": 60,
+    "priority": 4,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "Normal",
+    "source_type": "Coursework",
+    "evidence_skill": "Power BI performance optimization",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 36: Optimize Power BI performance",
+    "aliases": [],
+    "optional": true,
+    "objective": "Review an existing Power BI project for transformation, model, refresh, and report-performance opportunities.",
+    "steps": [
+      "Identify transformations that can preserve query folding.",
+      "Remove unused columns and reduce high-cardinality text where appropriate.",
+      "Review calculated columns versus measures.",
+      "Document Import, DirectQuery, or composite-model tradeoffs.",
+      "Draft an incremental-refresh policy.",
+      "Use or simulate Performance Analyzer findings and prioritize fixes."
+    ],
+    "deliverables": [
+      "Performance review checklist.",
+      "Before-and-after model or refresh observations.",
+      "Prioritized optimization plan."
+    ],
+    "validation": [
+      "Optimizations preserve analytical meaning.",
+      "Performance claims are supported by a measurement or documented expectation.",
+      "The incremental-refresh policy includes date boundaries and retention."
+    ]
   }
 }

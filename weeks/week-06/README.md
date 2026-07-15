@@ -65,3 +65,7 @@ Add one row after each study session.
 
 - [ ] Complete Applied Lab 18: Repair a misleading chart and narrative
 - [ ] Complete Applied Lab 19: Timed analysis of missed deadlines
+
+## Additional Applied Labs
+
+- [ ] Complete Applied Lab 24: Calculate confidence intervals and margin of error
