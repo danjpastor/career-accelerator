@@ -34,6 +34,71 @@ This file is the single maintained changelog for the project.
 
 
 
+
+
+
+
+## 9.3.9
+
+- Fixed restored tasks not displaying their new Sprint Backlog status
+- Fixed restored tasks failing to return to the active schedule
+- Detected completion using task flags, metadata, adaptive events, and SQL records
+- Recovered exact adaptive identity for completed tasks with no active link
+- Removed the hidden second track synchronization inside Dashboard refresh
+- Made non-blocked editor statuses explicitly restore prerequisite readiness
+- Added task schedule eligibility checks after every edit
+- Confirmed `Added back to the active schedule` when the task is eligible
+- Explained why a task is not scheduled when deferred, out of week, or locked
+- Displayed `🔒 Locked` in Sprint Backlog for unmet prerequisites
+- Preserved the exact edited row selection after adaptive task relinking
+- Preserved Study Sessions, SQL gating, undo history, and user data
+
+## 9.3.8
+
+- Fixed the remaining task-editor refreshed-values mismatch
+- Changed task editing to synchronize first and write user values last
+- Resolved edited adaptive tasks by exact track and target identity
+- Handled legacy week and task-label normalization before the final write
+- Prevented the final editor refresh from running a second adaptive sync
+- Added field-by-field diagnostics if a database write ever differs
+- Added a persistent high-contrast Sprint Backlog selection style
+- Kept the selected backlog row highlighted when the list loses focus
+- Preserved the selected task when Sprint Backlog refreshes
+- Added selection guidance and task-detail tooltips
+- Preserved Study Sessions, completion undo, SQL gating, and user data
+
+## 9.3.7
+
+- Fixed Edit Selected Task changes being overwritten after Save
+- Preserved adaptive task status, priority, duration, energy, and deferral
+  while the same assignment remains active
+- Reset adaptive defaults only when the track advances to a new assignment
+- Added database read-back verification after task edits
+- Added a clear saved-values confirmation in the status bar
+- Added task IDs as QListWidget item data instead of relying only on text
+- Added Cancel and Save Changes controls to the editor
+- Automatically assigned tomorrow when Deferred is selected without a date
+- Cleared stale deferred dates when another status is selected
+- Preserved task edits when undoing a completion and re-linking the task
+- Fixed Today’s Focus footer boxes stretching vertically
+- Added a flexible spacer above the compact focus footer
+- Preserved adaptive pacing, Study Sessions, SQL gating, and user data
+
+## 9.3.6
+
+- Added Completion History / Undo to Adaptive Planner
+- Listed completed tasks across every roadmap week
+- Included SQL Companion completions without visible sprint rows
+- Reversed exact task, track-event, SQL, and milestone evidence on undo
+- Protected sequential Google, DataCamp, and portfolio rollback order
+- Preserved SQL solution files, notes, mastery, and review dates
+- Bound SQL completion to the exact `problem:<title>` active task
+- Prevented one SQL problem from completing the next activated problem
+- Repaired false adaptive completions created by the old orphan-task logic
+- Changed detached adaptive tasks from auto-completed to safely blocked
+- Routed Edit Task completion changes through the same safe completion APIs
+- Preserved active Study Sessions, user data, DuckDB work, and VFX files
+
 ## 9.3.5
 
 - Added a Monday recovery window for missed Friday retrospectives

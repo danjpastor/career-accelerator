@@ -63,3 +63,12 @@ The current week's retrospective is recommended on Friday. If it is not
 completed, it appears once on the following Monday as `Missed Friday`.
 It is hidden over the weekend and returns to backlog-only status after
 Monday.
+
+
+## Completion evidence and undo
+
+Completion is represented by both the visible task state and, when
+adaptive, an exact track event. Undo reverses both layers together.
+
+Detached adaptive tasks are never treated as completed without evidence.
+They are blocked until the adaptive scheduler reuses the exact target.

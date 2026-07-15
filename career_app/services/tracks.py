@@ -742,30 +742,58 @@ def _ensure_task(
                 ),
             )
 
-        conn.execute(
-            """UPDATE task_metadata
-               SET status=CASE
-                       WHEN status='Completed'
-                       THEN 'In Progress'
-                       ELSE status
-                   END,
-                   priority=?,
-                   estimated_minutes=?,
-                   energy='Normal',
-                   deferred_until=NULL,
-                   destination=?,
-                   category=?,
-                   prerequisite_state='Ready',
-                   prerequisite_reason=NULL
-               WHERE task_id=?""",
-            (
-                config["priority"],
-                int(estimate),
-                config["destination"],
-                config["category"],
-                task_id,
-            ),
-        )
+        if target_changed:
+            # A genuinely new target receives the track defaults.
+            conn.execute(
+                """UPDATE task_metadata
+                   SET status='In Progress',
+                       priority=?,
+                       estimated_minutes=?,
+                       energy='Normal',
+                       deferred_until=NULL,
+                       destination=?,
+                       category=?,
+                       prerequisite_state='Ready',
+                       prerequisite_reason=NULL
+                   WHERE task_id=?""",
+                (
+                    config["priority"],
+                    int(estimate),
+                    config["destination"],
+                    config["category"],
+                    task_id,
+                ),
+            )
+        else:
+            # Synchronizing the same adaptive assignment must not erase edits
+            # made in Adaptive Planner. Keep status, priority, duration,
+            # energy, and deferral while refreshing system-owned fields.
+            conn.execute(
+                """UPDATE task_metadata
+                   SET status=CASE
+                           WHEN status='Completed'
+                           THEN 'In Progress'
+                           ELSE status
+                       END,
+                       destination=?,
+                       category=?,
+                       prerequisite_state=CASE
+                           WHEN status='Blocked'
+                           THEN prerequisite_state
+                           ELSE 'Ready'
+                       END,
+                       prerequisite_reason=CASE
+                           WHEN status='Blocked'
+                           THEN prerequisite_reason
+                           ELSE NULL
+                       END
+                   WHERE task_id=?""",
+                (
+                    config["destination"],
+                    config["category"],
+                    task_id,
+                ),
+            )
         conn.execute(
             """UPDATE track_tasks
                SET source_label=?,
@@ -1680,7 +1708,49 @@ def repair_track_links(conn):
         ).fetchall()
     }
 
-    # Retire orphaned negative-sort track tasks that are no longer linked.
+    # Earlier versions treated detached negative-sort adaptive tasks as
+    # completed. Restore any such task that has no actual completion evidence.
+    false_completion_rows = conn.execute(
+        """SELECT s.id,s.label
+           FROM sprint_tasks s
+           LEFT JOIN track_tasks tt
+             ON tt.task_id=s.id
+           WHERE s.sort_order<0
+             AND tt.task_id IS NULL
+             AND s.completed=1"""
+    ).fetchall()
+
+    for row in false_completion_rows:
+        if _has_completion_evidence(
+            conn,
+            task_id=int(row["id"]),
+            label=row["label"],
+        ):
+            continue
+
+        conn.execute(
+            """UPDATE sprint_tasks
+               SET completed=0
+               WHERE id=?""",
+            (int(row["id"]),),
+        )
+        conn.execute(
+            """UPDATE task_metadata
+               SET status='Blocked',
+                   prerequisite_state='Blocked',
+                   prerequisite_reason=?
+               WHERE task_id=?""",
+            (
+                (
+                    "Restored because no matching "
+                    "completion record was found."
+                ),
+                int(row["id"]),
+            ),
+        )
+
+    # Detached adaptive tasks remain unfinished and blocked until sync_all()
+    # either reuses them for the exact target or leaves them in the backlog.
     orphan_rows = conn.execute(
         """SELECT s.id
            FROM sprint_tasks s
@@ -1696,16 +1766,13 @@ def repair_track_links(conn):
         if task_id in active_ids:
             continue
         conn.execute(
-            """UPDATE sprint_tasks
-               SET completed=1
-               WHERE id=?""",
-            (task_id,),
-        )
-        conn.execute(
             """UPDATE task_metadata
-               SET status='Completed',
-                   prerequisite_state='Ready',
-                   prerequisite_reason=NULL
+               SET status='Blocked',
+                   prerequisite_state='Blocked',
+                   prerequisite_reason=COALESCE(
+                       prerequisite_reason,
+                       'Adaptive task is not currently eligible.'
+                   )
                WHERE task_id=?""",
             (task_id,),
         )
@@ -2060,6 +2127,613 @@ def sync_all(conn, state):
         unlocked,
     )
     conn.commit()
+
+
+def _sql_title_from_task_label(label):
+    text = str(label or "").strip()
+    prefix = "Solve "
+    if text.startswith(prefix):
+        title = text[len(prefix):].strip()
+        return title if _sql_item(title) else None
+    return None
+
+
+def active_sql_task_for_title(
+    conn,
+    title,
+):
+    """Return the active SQL task only when its exact target key matches."""
+    return conn.execute(
+        """SELECT tt.*,s.label,s.completed
+           FROM track_tasks tt
+           JOIN sprint_tasks s
+             ON s.id=tt.task_id
+           WHERE tt.track_key='sql'
+             AND tt.target_key=?
+             AND s.label=?
+             AND s.completed=0""",
+        (
+            f"problem:{title}",
+            f"Solve {title}",
+        ),
+    ).fetchone()
+
+
+def _event_metadata(row):
+    if row is None:
+        return {}
+    try:
+        return json.loads(
+            row["metadata"]
+            or "{}"
+        )
+    except (TypeError, ValueError):
+        return {}
+
+
+def _completion_event_for_task(
+    conn,
+    *,
+    task_id,
+    label,
+):
+    rows = conn.execute(
+        """SELECT *
+           FROM track_events
+           ORDER BY id DESC"""
+    ).fetchall()
+
+    sql_title = _sql_title_from_task_label(
+        label
+    )
+    sql_event_key = (
+        f"problem:{sql_title}"
+        if sql_title
+        else None
+    )
+
+    for row in rows:
+        metadata = _event_metadata(row)
+        if int(
+            metadata.get(
+                "task_id",
+                -1,
+            )
+        ) == int(task_id):
+            return row
+
+        if (
+            sql_event_key
+            and row["track_key"] == "sql"
+            and row["event_key"]
+            == sql_event_key
+        ):
+            return row
+
+        if row["item_label"] == label:
+            return row
+
+    return None
+
+
+def _has_completion_evidence(
+    conn,
+    *,
+    task_id,
+    label,
+):
+    event = _completion_event_for_task(
+        conn,
+        task_id=task_id,
+        label=label,
+    )
+    if event is not None:
+        return True
+
+    sql_title = _sql_title_from_task_label(
+        label
+    )
+    if sql_title:
+        row = conn.execute(
+            """SELECT 1
+               FROM sql_practice
+               WHERE platform='DataLemur'
+                 AND title=?
+                 AND status='Completed'""",
+            (sql_title,),
+        ).fetchone()
+        return row is not None
+
+    return False
+
+
+def task_has_completion_evidence(
+    conn,
+    task_id,
+):
+    """Return True when any completion layer still marks this task complete."""
+    row = conn.execute(
+        """SELECT
+               s.completed,
+               s.label,
+               m.status
+           FROM sprint_tasks s
+           JOIN task_metadata m
+             ON m.task_id=s.id
+           WHERE s.id=?""",
+        (int(task_id),),
+    ).fetchone()
+    if row is None:
+        return False
+
+    if bool(row["completed"]):
+        return True
+    if row["status"] == "Completed":
+        return True
+
+    return _has_completion_evidence(
+        conn,
+        task_id=int(task_id),
+        label=row["label"],
+    )
+
+
+def completion_history(conn):
+    """Return completed roadmap tasks and SQL-only completions."""
+    history = []
+    seen_sql = set()
+
+    task_rows = conn.execute(
+        """SELECT
+               s.id,
+               s.week,
+               s.sort_order,
+               s.label,
+               m.category,
+               m.status
+           FROM sprint_tasks s
+           JOIN task_metadata m
+             ON m.task_id=s.id
+           WHERE s.completed=1
+              OR m.status='Completed'
+           ORDER BY s.week DESC,
+                    s.sort_order DESC,
+                    s.id DESC"""
+    ).fetchall()
+
+    for row in task_rows:
+        task_id = int(row["id"])
+        label = row["label"]
+        event = _completion_event_for_task(
+            conn,
+            task_id=task_id,
+            label=label,
+        )
+        event_track = (
+            event["track_key"]
+            if event is not None
+            else None
+        )
+        completed_date = (
+            event["completed_date"]
+            if event is not None
+            else None
+        )
+
+        sql_title = _sql_title_from_task_label(
+            label
+        )
+        if sql_title:
+            sql_row = conn.execute(
+                """SELECT completed_date
+                   FROM sql_practice
+                   WHERE platform='DataLemur'
+                     AND title=?
+                     AND status='Completed'""",
+                (sql_title,),
+            ).fetchone()
+            if sql_row is not None:
+                seen_sql.add(sql_title)
+                completed_date = (
+                    completed_date
+                    or sql_row["completed_date"]
+                )
+
+        history.append(
+            {
+                "kind": "task",
+                "task_id": task_id,
+                "week": int(row["week"]),
+                "label": label,
+                "category": (
+                    row["category"]
+                    or "General"
+                ),
+                "track_key": event_track,
+                "completed_date": completed_date,
+                "sql_title": sql_title,
+            }
+        )
+
+    sql_rows = conn.execute(
+        """SELECT title,completed_date
+           FROM sql_practice
+           WHERE platform='DataLemur'
+             AND status='Completed'
+           ORDER BY completed_date DESC,
+                    title"""
+    ).fetchall()
+
+    for row in sql_rows:
+        if row["title"] in seen_sql:
+            continue
+        history.append(
+            {
+                "kind": "sql",
+                "task_id": None,
+                "week": None,
+                "label": (
+                    f"SQL Companion: "
+                    f"{row['title']}"
+                ),
+                "category": "SQL",
+                "track_key": "sql",
+                "completed_date": (
+                    row["completed_date"]
+                ),
+                "sql_title": row["title"],
+            }
+        )
+
+    return sorted(
+        history,
+        key=lambda item: (
+            item.get("completed_date")
+            or "",
+            int(item.get("week") or 0),
+            item["label"],
+        ),
+        reverse=True,
+    )
+
+
+def _latest_track_event_id(
+    conn,
+    track_key,
+):
+    row = conn.execute(
+        """SELECT id
+           FROM track_events
+           WHERE track_key=?
+           ORDER BY id DESC
+           LIMIT 1""",
+        (track_key,),
+    ).fetchone()
+    return (
+        int(row["id"])
+        if row is not None
+        else None
+    )
+
+
+def undo_completion(
+    conn,
+    state,
+    *,
+    task_id=None,
+    sql_title=None,
+):
+    """Undo one exact completion and reverse its adaptive evidence."""
+    task_row = None
+    event = None
+
+    if task_id is not None:
+        task_row = conn.execute(
+            """SELECT
+                   s.id,
+                   s.week,
+                   s.label,
+                   s.completed,
+                   m.status,
+                   m.category
+               FROM sprint_tasks s
+               JOIN task_metadata m
+                 ON m.task_id=s.id
+               WHERE s.id=?""",
+            (int(task_id),),
+        ).fetchone()
+        if task_row is None:
+            raise ValueError(
+                "The selected task no longer exists."
+            )
+
+        event = _completion_event_for_task(
+            conn,
+            task_id=int(task_id),
+            label=task_row["label"],
+        )
+        sql_title = (
+            sql_title
+            or _sql_title_from_task_label(
+                task_row["label"]
+            )
+        )
+
+    if (
+        task_row is None
+        and not sql_title
+    ):
+        raise ValueError(
+            "Select a completed task or SQL problem."
+        )
+
+    track_key = (
+        event["track_key"]
+        if event is not None
+        else (
+            "sql"
+            if sql_title
+            else None
+        )
+    )
+
+    if (
+        event is not None
+        and track_key
+        in {
+            "google",
+            "datacamp",
+            "portfolio",
+        }
+    ):
+        latest_id = _latest_track_event_id(
+            conn,
+            track_key,
+        )
+        if latest_id != int(event["id"]):
+            display_name = TRACK_CONFIG[
+                track_key
+            ]["display_name"]
+            raise ValueError(
+                f"Only the most recent {display_name} "
+                "completion can be undone. Undo later "
+                "items first so the sequence remains valid."
+            )
+
+    if task_row is not None:
+        conn.execute(
+            """UPDATE sprint_tasks
+               SET completed=0
+               WHERE id=?""",
+            (int(task_id),),
+        )
+        conn.execute(
+            """UPDATE task_metadata
+               SET status='Not Started',
+                   deferred_until=NULL,
+                   prerequisite_state='Ready',
+                   prerequisite_reason=NULL
+               WHERE task_id=?""",
+            (int(task_id),),
+        )
+
+    metadata = _event_metadata(event)
+
+    if track_key == "google":
+        course = int(
+            metadata.get(
+                "course",
+                state["google_course"],
+            )
+        )
+        module = int(
+            metadata.get(
+                "module",
+                max(
+                    1,
+                    int(
+                        state[
+                            "google_module"
+                        ]
+                    )
+                    - 1,
+                ),
+            )
+        )
+        conn.execute(
+            """UPDATE program_state
+               SET google_course=?,
+                   google_module=?
+               WHERE id=1""",
+            (
+                course,
+                module,
+            ),
+        )
+
+    elif track_key == "datacamp":
+        position = int(
+            metadata.get(
+                "position",
+                0,
+            )
+        )
+        conn.execute(
+            """UPDATE track_state
+               SET position=?,
+                   subposition=0,
+                   status='Active',
+                   metadata='{}',
+                   updated_at=CURRENT_TIMESTAMP
+               WHERE track_key='datacamp'""",
+            (position,),
+        )
+
+    elif track_key == "portfolio":
+        project_task_id = metadata.get(
+            "project_task_id"
+        )
+        if project_task_id is not None:
+            conn.execute(
+                """UPDATE project_tasks
+                   SET completed=0
+                   WHERE id=?""",
+                (int(project_task_id),),
+            )
+
+    if sql_title:
+        conn.execute(
+            """UPDATE sql_practice
+               SET status='Not Started',
+                   completed_date=NULL
+               WHERE platform='DataLemur'
+                 AND title=?""",
+            (sql_title,),
+        )
+
+    if event is not None:
+        conn.execute(
+            """DELETE FROM track_events
+               WHERE id=?""",
+            (int(event["id"]),),
+        )
+
+    if track_key:
+        conn.execute(
+            """DELETE FROM track_tasks
+               WHERE track_key=?""",
+            (track_key,),
+        )
+
+    conn.commit()
+
+    label = (
+        task_row["label"]
+        if task_row is not None
+        else f"SQL Companion: {sql_title}"
+    )
+    return {
+        "message": (
+            f"Completion restored to unfinished: "
+            f"{label}"
+        ),
+        "track_key": track_key,
+        "task_id": (
+            int(task_id)
+            if task_id is not None
+            else None
+        ),
+        "sql_title": sql_title,
+    }
+
+
+def task_edit_identity(
+    conn,
+    task_id,
+):
+    """Capture stable task identity, including completed adaptive tasks."""
+    row = conn.execute(
+        """SELECT
+               s.id,
+               s.label,
+               tt.track_key,
+               tt.target_key
+           FROM sprint_tasks s
+           LEFT JOIN track_tasks tt
+             ON tt.task_id=s.id
+           WHERE s.id=?""",
+        (int(task_id),),
+    ).fetchone()
+
+    if row is None:
+        return None
+
+    track_key = row["track_key"]
+    target_key = row["target_key"]
+
+    # Completed adaptive tasks normally have no active track_tasks row. Recover
+    # their exact identity from the completion event before undoing it.
+    if not track_key or not target_key:
+        event = _completion_event_for_task(
+            conn,
+            task_id=int(row["id"]),
+            label=row["label"],
+        )
+        if event is not None:
+            track_key = event["track_key"]
+            target_key = event["event_key"]
+
+    # Older SQL rows may have a sql_practice completion but no event metadata.
+    if not track_key or not target_key:
+        sql_title = _sql_title_from_task_label(
+            row["label"]
+        )
+        if sql_title:
+            sql_row = conn.execute(
+                """SELECT 1
+                   FROM sql_practice
+                   WHERE platform='DataLemur'
+                     AND title=?
+                     AND status='Completed'""",
+                (sql_title,),
+            ).fetchone()
+            if sql_row is not None:
+                track_key = "sql"
+                target_key = (
+                    f"problem:{sql_title}"
+                )
+
+    return {
+        "task_id": int(row["id"]),
+        "label": row["label"],
+        "track_key": track_key,
+        "target_key": target_key,
+    }
+
+
+def resolve_task_edit_target(
+    conn,
+    identity,
+):
+    """Resolve the task row representing the same assignment after sync."""
+    if not identity:
+        return None
+
+    track_key = identity.get(
+        "track_key"
+    )
+    target_key = identity.get(
+        "target_key"
+    )
+
+    if track_key and target_key:
+        row = conn.execute(
+            """SELECT task_id
+               FROM track_tasks
+               WHERE track_key=?
+                 AND target_key=?""",
+            (
+                track_key,
+                target_key,
+            ),
+        ).fetchone()
+        if row is not None:
+            return int(row["task_id"])
+
+    original_id = int(
+        identity["task_id"]
+    )
+    exists = conn.execute(
+        """SELECT 1
+           FROM sprint_tasks
+           WHERE id=?""",
+        (original_id,),
+    ).fetchone()
+    return (
+        original_id
+        if exists is not None
+        else None
+    )
 
 
 def task_track(conn, task_id):
@@ -2447,6 +3121,7 @@ def complete_track_task(
             metadata={
                 "course": course,
                 "module": module,
+                "task_id": int(task_id),
             },
         )
         conn.execute(
@@ -2476,6 +3151,7 @@ def complete_track_task(
             label,
             metadata={
                 "position": position,
+                "task_id": int(task_id),
             },
         )
         _upsert_state(
@@ -2548,6 +3224,7 @@ def complete_track_task(
             title,
             metadata={
                 "title": title,
+                "task_id": int(task_id),
             },
         )
         message = (
@@ -2583,6 +3260,7 @@ def complete_track_task(
                     "project_task_id": int(
                         project_task_id
                     ),
+                    "task_id": int(task_id),
                 },
             )
         message = (

@@ -163,6 +163,32 @@ def stylesheet():
         background: {c['panel_alt']};
         border-radius: 6px;
     }}
+    QListWidget#SprintBacklogList::item {{
+        padding: 9px 10px;
+        margin: 2px 0;
+        border: 1px solid transparent;
+        border-left: 4px solid transparent;
+        border-radius: 7px;
+    }}
+    QListWidget#SprintBacklogList::item:hover {{
+        background: {c['panel_hover']};
+        border: 1px solid {c['border']};
+        border-left: 4px solid {c['purple_soft']};
+    }}
+    QListWidget#SprintBacklogList::item:selected,
+    QListWidget#SprintBacklogList::item:selected:active,
+    QListWidget#SprintBacklogList::item:selected:!active {{
+        background: qlineargradient(
+            x1:0,y1:0,x2:1,y2:0,
+            stop:0 {c['purple_dark']},
+            stop:1 #2b2547
+        );
+        color: white;
+        border: 1px solid {c['purple_soft']};
+        border-left: 5px solid #b9a4ff;
+        border-radius: 7px;
+        font-weight: 700;
+    }}
     QCheckBox {{
         spacing: 9px;
         padding: 4px 2px;

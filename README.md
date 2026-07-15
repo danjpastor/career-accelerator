@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.5 includes:
+Version 9.3.9 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -320,3 +320,54 @@ following Monday as `Missed Friday`.
 It remains hidden on Saturday and Sunday and returns to backlog-only status
 after Monday. Calendar gating applies only to retrospective deliverables;
 other Review tasks continue on their normal schedule.
+
+
+## Completion History and Safe Undo
+
+Version 9.3.6 adds **Completion History / Undo** to Adaptive Planner. It
+restores completed items from every week and reverses their matching
+adaptive or SQL completion evidence.
+
+SQL Companion completion now binds to the exact problem target. Completing
+Histogram of Tweets may activate Solve Data Science Skills as the next
+eligible task, but it cannot mark that task complete.
+
+The release also repairs detached adaptive tasks that older versions may
+have incorrectly marked complete without a matching completion record.
+
+
+## Persistent Task Editing
+
+Version 9.3.7 prevents adaptive synchronization from overwriting task edits
+for the currently active assignment. Status, priority, estimated duration,
+energy, and deferral now persist and are verified after saving.
+
+The Total Estimated Time and Tasks boxes in Today’s Focus now remain compact
+when fewer focus rows are displayed.
+
+
+## Authoritative Task Editing
+
+Version 9.3.8 synchronizes an adaptive task first, resolves the exact live
+task row, and only then writes the values selected in the editor. The final
+database values are no longer vulnerable to a legacy label or week
+normalization occurring between Save and verification.
+
+Sprint Backlog selections now use a persistent purple background, bright
+left indicator, border, and bold text. The selected task remains highlighted
+when buttons or dialogs receive focus and after the backlog refreshes.
+
+
+## Status Restoration and Scheduling
+
+Version 9.3.9 detects completion across the task flag, metadata status,
+adaptive event, and SQL completion record. Restoring an older inconsistent
+task now removes every matching completion layer before rebuilding the
+adaptive schedule.
+
+The Dashboard no longer performs a hidden second synchronization after the
+editor's final write.
+
+Sprint Backlog shows the saved status immediately. Tasks that cannot return
+to the schedule because required concepts are still locked display
+`🔒 Locked`, with the reason available in the tooltip and save confirmation.

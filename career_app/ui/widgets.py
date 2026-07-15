@@ -876,7 +876,11 @@ class FooterMetricBox(QFrame):
     def __init__(self, emoji, label, value=""):
         super().__init__()
         self.setObjectName("SoftPanel")
-        self.setMinimumHeight(50)
+        self.setFixedHeight(50)
+        self.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
+        )
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(12, 9, 12, 9)

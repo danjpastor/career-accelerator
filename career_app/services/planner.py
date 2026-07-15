@@ -295,6 +295,143 @@ def available(conn, week):
         ),
     )
 
+def task_schedule_eligibility(
+    conn,
+    task_id,
+    current_week,
+):
+    """Explain whether one task can appear in Next Tasks and Today’s Focus."""
+    row = conn.execute(
+        """SELECT
+               s.id,
+               s.week,
+               s.label,
+               s.completed,
+               m.status,
+               m.deferred_until,
+               m.category,
+               m.prerequisite_state,
+               m.prerequisite_reason,
+               tt.track_key,
+               ts.status AS track_status
+           FROM sprint_tasks s
+           JOIN task_metadata m
+             ON m.task_id=s.id
+           LEFT JOIN track_tasks tt
+             ON tt.task_id=s.id
+           LEFT JOIN track_state ts
+             ON ts.track_key=tt.track_key
+           WHERE s.id=?""",
+        (int(task_id),),
+    ).fetchone()
+
+    if row is None:
+        return {
+            "eligible": False,
+            "reason": "Task no longer exists.",
+        }
+
+    if bool(row["completed"]):
+        return {
+            "eligible": False,
+            "reason": "Task is completed.",
+        }
+
+    if row["status"] in {
+        "Completed",
+        "Blocked",
+    }:
+        return {
+            "eligible": False,
+            "reason": (
+                f"Status is {row['status']}."
+            ),
+        }
+
+    if (
+        row["prerequisite_state"]
+        == "Blocked"
+    ):
+        return {
+            "eligible": False,
+            "reason": (
+                row["prerequisite_reason"]
+                or "Required concepts are still locked."
+            ),
+        }
+
+    if (
+        row["deferred_until"]
+        and row["deferred_until"]
+        > date.today().isoformat()
+    ):
+        return {
+            "eligible": False,
+            "reason": (
+                "Deferred until "
+                f"{row['deferred_until']}."
+            ),
+        }
+
+    task_week = int(row["week"])
+    current_week = int(current_week)
+    current_week_task = (
+        task_week == current_week
+    )
+    monday_recovery = (
+        _is_monday_recovery_retrospective(
+            label=row["label"],
+            task_week=task_week,
+            current_week=current_week,
+        )
+    )
+    if not (
+        current_week_task
+        or monday_recovery
+    ):
+        return {
+            "eligible": False,
+            "reason": (
+                f"Task belongs to Week {task_week}; "
+                f"the active sprint is Week {current_week}."
+            ),
+        }
+
+    if not _task_allowed_today(
+        label=row["label"],
+        category=(
+            row["category"]
+            or "General"
+        ),
+        task_week=task_week,
+        current_week=current_week,
+    ):
+        return {
+            "eligible": False,
+            "reason": (
+                "This task is outside its recommendation window."
+            ),
+        }
+
+    if (
+        row["track_key"]
+        and row["track_status"]
+        != "Active"
+    ):
+        return {
+            "eligible": False,
+            "reason": (
+                "Adaptive track status is "
+                f"{row['track_status']}."
+            ),
+        }
+
+    return {
+        "eligible": True,
+        "reason": "Added back to the active schedule.",
+    }
+
+
 def make_plan(conn, week, minutes, energy):
     capacity = ENERGY_RANK.get(energy, 2)
     eligible = [

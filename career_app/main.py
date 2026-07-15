@@ -654,6 +654,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_focus_card.layout.addLayout(
             self.focus_layout
         )
+        self.dashboard_focus_card.layout.addStretch(1)
         self.dashboard_focus_card.layout.addWidget(Divider())
 
         focus_footer = QHBoxLayout()
@@ -1450,12 +1451,30 @@ class CareerAccelerator(QMainWindow):
         queue.layout.addLayout(queue_buttons)
         body.addWidget(queue, 1)
 
-        backlog = Card("Sprint Backlog")
+        backlog = Card(
+            "Sprint Backlog",
+            (
+                "Click a row to select it. "
+                "The selected task stays highlighted in purple."
+            ),
+        )
         self.backlog_list = QListWidget()
+        self.backlog_list.setObjectName(
+            "SprintBacklogList"
+        )
         backlog.layout.addWidget(self.backlog_list)
         edit = QPushButton("Edit Selected Task")
         edit.clicked.connect(self.edit_task)
         backlog.layout.addWidget(edit)
+
+        history = QPushButton(
+            "Completion History / Undo"
+        )
+        history.clicked.connect(
+            self.open_completion_history
+        )
+        backlog.layout.addWidget(history)
+
         body.addWidget(backlog, 1)
         root.addLayout(body, 1)
         return page
@@ -3003,16 +3022,24 @@ class CareerAccelerator(QMainWindow):
         dialog.exec()
 
     # ---------- Refresh ----------
-    def refresh_all(self):
+    def refresh_all(
+        self,
+        *,
+        sync_tracks=True,
+    ):
         self.state = state(self.conn)
-        tracks.sync_all(
-            self.conn,
-            self.state,
-        )
-        self.state = state(self.conn)
+        if sync_tracks:
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            self.state = state(self.conn)
+
         newly_unlocked = self.sync_achievement_records()
 
-        self.refresh_dashboard()
+        self.refresh_dashboard(
+            sync_tracks=False
+        )
         self.refresh_planner()
         self.refresh_learning()
         self.refresh_project()
@@ -3102,11 +3129,20 @@ class CareerAccelerator(QMainWindow):
             return f"Weekly Review • Week {week}"
         return f"Roadmap • Week {week}"
 
-    def refresh_dashboard(self):
-        tracks.sync_all(
-            self.conn,
-            self.state,
-        )
+    def refresh_dashboard(
+        self,
+        *,
+        sync_tracks=True,
+    ):
+        if sync_tracks:
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            self.state = state(
+                self.conn
+            )
+
         week = self.state["current_week"]
         guide = WEEKLY_GUIDANCE.get(
             week,
@@ -3446,26 +3482,258 @@ class CareerAccelerator(QMainWindow):
             f"{weekly_goal:.0f}%"
         )
 
+    def open_completion_history(self):
+        history_rows = tracks.completion_history(
+            self.conn
+        )
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(
+            "Completion History / Undo"
+        )
+        dialog.setMinimumSize(760, 460)
+        dialog.setStyleSheet(stylesheet())
+
+        layout = QVBoxLayout(dialog)
+        instructions = QLabel(
+            "Select a completed item and choose Undo Completion. "
+            "Adaptive learning tracks are reversed with their saved "
+            "progress evidence; later sequential completions must be "
+            "undone first."
+        )
+        instructions.setWordWrap(True)
+        instructions.setObjectName("Muted")
+        layout.addWidget(instructions)
+
+        history_list = QListWidget()
+        layout.addWidget(history_list, 1)
+
+        for record in history_rows:
+            completed_date = (
+                record.get("completed_date")
+                or "Date unavailable"
+            )
+            week_text = (
+                f"Week {record['week']} • "
+                if record.get("week")
+                is not None
+                else ""
+            )
+            track_text = (
+                f"{record['track_key']} • "
+                if record.get("track_key")
+                else ""
+            )
+            history_list.addItem(
+                f"{completed_date} • "
+                f"{week_text}"
+                f"{record['category']} • "
+                f"{track_text}"
+                f"{record['label']}"
+            )
+            list_item = history_list.item(
+                history_list.count() - 1
+            )
+            list_item.setData(
+                Qt.ItemDataRole.UserRole,
+                record,
+            )
+
+        if not history_rows:
+            history_list.addItem(
+                "No completed tasks were found."
+            )
+
+        buttons = QHBoxLayout()
+        undo_button = QPushButton(
+            "Undo Completion"
+        )
+        undo_button.setObjectName("Primary")
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(
+            dialog.reject
+        )
+        buttons.addWidget(undo_button)
+        buttons.addStretch()
+        buttons.addWidget(close_button)
+        layout.addLayout(buttons)
+
+        def undo_selected():
+            item = history_list.currentItem()
+            if item is None:
+                self.statusBar().showMessage(
+                    "Select a completed item first.",
+                    3200,
+                )
+                return
+
+            record = item.data(
+                Qt.ItemDataRole.UserRole
+            )
+            if not record:
+                return
+
+            confirmation = QMessageBox.question(
+                dialog,
+                "Undo Completion",
+                (
+                    "Restore this item to unfinished?\n\n"
+                    f"{record['label']}\n\n"
+                    "This also reverses its matching adaptive "
+                    "completion event or SQL completion record."
+                ),
+                (
+                    QMessageBox.StandardButton.Yes
+                    | QMessageBox.StandardButton.No
+                ),
+                QMessageBox.StandardButton.No,
+            )
+            if (
+                confirmation
+                != QMessageBox.StandardButton.Yes
+            ):
+                return
+
+            session_snapshot = session_guard.capture(
+                self
+            )
+            try:
+                result = tracks.undo_completion(
+                    self.conn,
+                    self.state,
+                    task_id=record.get("task_id"),
+                    sql_title=record.get(
+                        "sql_title"
+                    ),
+                )
+                self.state = state(self.conn)
+                tracks.sync_all(
+                    self.conn,
+                    self.state,
+                )
+                self.refresh_all()
+            except ValueError as exc:
+                QMessageBox.warning(
+                    dialog,
+                    "Cannot Undo Completion",
+                    str(exc),
+                )
+                return
+            finally:
+                session_guard.restore(
+                    self,
+                    session_snapshot,
+                )
+
+            dialog.accept()
+            self.statusBar().showMessage(
+                result["message"],
+                5200,
+            )
+
+        undo_button.clicked.connect(
+            undo_selected
+        )
+        dialog.exec()
+
     def refresh_planner(self):
         self.build_plan()
         self.refresh_backlog()
 
     def refresh_backlog(self):
+        selected_task_id = (
+            self.backlog_list.property(
+                "pendingSelectedTaskId"
+            )
+            or self.selected_task_id(
+                self.backlog_list
+            )
+        )
+        self.backlog_list.setProperty(
+            "pendingSelectedTaskId",
+            None,
+        )
+        selected_row = None
+
+        self.backlog_list.blockSignals(True)
         self.backlog_list.clear()
+
         rows = self.conn.execute(
-            """SELECT s.id,s.label,m.status,m.priority,m.estimated_minutes,
-                      m.energy,m.deferred_until,m.category
+            """SELECT
+                      s.id,
+                      s.label,
+                      s.completed,
+                      m.status,
+                      m.priority,
+                      m.estimated_minutes,
+                      m.energy,
+                      m.deferred_until,
+                      m.category,
+                      m.prerequisite_state,
+                      m.prerequisite_reason
                FROM sprint_tasks s
-               JOIN task_metadata m ON m.task_id=s.id
-               WHERE s.week=? ORDER BY m.priority,s.sort_order""",
+               JOIN task_metadata m
+                 ON m.task_id=s.id
+               WHERE s.week=?
+               ORDER BY m.priority,s.sort_order""",
             (self.state["current_week"],),
         ).fetchall()
+
         for row in rows:
-            deferred = f" → {row['deferred_until']}" if row["deferred_until"] else ""
+            deferred = (
+                f" → {row['deferred_until']}"
+                if row["deferred_until"]
+                else ""
+            )
+            eligibility_text = ""
+            if (
+                row["prerequisite_state"]
+                == "Blocked"
+            ):
+                eligibility_text = " • 🔒 Locked"
+
             self.backlog_list.addItem(
-                f"#{row['id']} • {row['status']} • P{row['priority']} • "
-                f"{row['estimated_minutes']}m • {row['energy']} • "
-                f"{row['category']} • {row['label']}{deferred}"
+                f"#{row['id']} • {row['status']} • "
+                f"P{row['priority']} • "
+                f"{row['estimated_minutes']}m • "
+                f"{row['energy']} • "
+                f"{row['category']}"
+                f"{eligibility_text} • "
+                f"{row['label']}{deferred}"
+            )
+            row_index = (
+                self.backlog_list.count() - 1
+            )
+            list_item = self.backlog_list.item(
+                row_index
+            )
+            list_item.setData(
+                Qt.ItemDataRole.UserRole,
+                int(row["id"]),
+            )
+            list_item.setToolTip(
+                (
+                    f"Selected task #{row['id']}\n"
+                    f"Status: {row['status']}\n"
+                    f"Priority: {row['priority']}\n"
+                    f"Estimate: {row['estimated_minutes']} minutes\n"
+                    f"Eligibility: {row['prerequisite_state']}\n"
+                    f"{row['prerequisite_reason'] or ''}"
+                )
+            )
+
+            if (
+                selected_task_id is not None
+                and int(row["id"])
+                == int(selected_task_id)
+            ):
+                selected_row = row_index
+
+        self.backlog_list.blockSignals(False)
+
+        if selected_row is not None:
+            self.backlog_list.setCurrentRow(
+                selected_row
             )
 
     def refresh_learning(self):
@@ -4096,8 +4364,25 @@ class CareerAccelerator(QMainWindow):
         item = widget.currentItem()
         if not item:
             return None
-        match = re.search(r"#(\d+)", item.text())
-        return int(match.group(1)) if match else None
+
+        stored_id = item.data(
+            Qt.ItemDataRole.UserRole
+        )
+        if stored_id is not None:
+            try:
+                return int(stored_id)
+            except (TypeError, ValueError):
+                pass
+
+        match = re.search(
+            r"#(\d+)",
+            item.text(),
+        )
+        return (
+            int(match.group(1))
+            if match
+            else None
+        )
 
     def continue_plan(self):
         task_id = self.selected_task_id(self.plan_list)
@@ -4147,14 +4432,38 @@ class CareerAccelerator(QMainWindow):
             self.refresh_all()
 
     def edit_task(self):
-        task_id = self.selected_task_id(self.backlog_list)
+        task_id = self.selected_task_id(
+            self.backlog_list
+        )
         if not task_id:
+            self.statusBar().showMessage(
+                "Select a backlog task first.",
+                3200,
+            )
             return
+
+        identity = tracks.task_edit_identity(
+            self.conn,
+            task_id,
+        )
         row = self.conn.execute(
-            """SELECT s.label,m.* FROM sprint_tasks s
-               JOIN task_metadata m ON m.task_id=s.id WHERE s.id=?""",
+            """SELECT
+                   s.label,
+                   s.completed,
+                   m.*
+               FROM sprint_tasks s
+               JOIN task_metadata m
+                 ON m.task_id=s.id
+               WHERE s.id=?""",
             (task_id,),
         ).fetchone()
+        if row is None or identity is None:
+            QMessageBox.warning(
+                self,
+                "Task Not Found",
+                "The selected task no longer exists.",
+            )
+            return
 
         dialog = QDialog(self)
         dialog.setWindowTitle("Edit Task")
@@ -4162,54 +4471,313 @@ class CareerAccelerator(QMainWindow):
         form = QFormLayout(dialog)
 
         status = QComboBox()
-        status.addItems(["Not Started", "In Progress", "Blocked", "Deferred", "Completed"])
-        status.setCurrentText(row["status"])
+        status.addItems(
+            [
+                "Not Started",
+                "In Progress",
+                "Blocked",
+                "Deferred",
+                "Completed",
+            ]
+        )
+        status.setCurrentText(
+            row["status"]
+            or "Not Started"
+        )
 
         priority = QSpinBox()
         priority.setRange(1, 3)
-        priority.setValue(row["priority"])
+        priority.setValue(
+            int(row["priority"] or 3)
+        )
 
         minutes = QSpinBox()
         minutes.setRange(5, 480)
-        minutes.setValue(row["estimated_minutes"])
+        minutes.setValue(
+            int(
+                row["estimated_minutes"]
+                or 30
+            )
+        )
 
         energy = QComboBox()
-        energy.addItems(["Low", "Normal", "High"])
-        energy.setCurrentText(row["energy"])
+        energy.addItems(
+            ["Low", "Normal", "High"]
+        )
+        energy.setCurrentText(
+            row["energy"]
+            or "Normal"
+        )
 
-        deferred = QLineEdit(row["deferred_until"] or "")
+        deferred = QLineEdit(
+            row["deferred_until"]
+            or ""
+        )
+        deferred.setPlaceholderText(
+            "YYYY-MM-DD"
+        )
 
-        form.addRow("Task", QLabel(row["label"]))
+        task_label = QLabel(row["label"])
+        task_label.setWordWrap(True)
+
+        form.addRow("Task", task_label)
         form.addRow("Status", status)
         form.addRow("Priority", priority)
-        form.addRow("Estimated minutes", minutes)
+        form.addRow(
+            "Estimated minutes",
+            minutes,
+        )
         form.addRow("Energy", energy)
-        form.addRow("Deferred until", deferred)
+        form.addRow(
+            "Deferred until",
+            deferred,
+        )
 
-        save = QPushButton("Save")
+        button_row = QHBoxLayout()
+        cancel = QPushButton("Cancel")
+        cancel.clicked.connect(
+            dialog.reject
+        )
+        save = QPushButton("Save Changes")
         save.setObjectName("Primary")
-        save.clicked.connect(dialog.accept)
-        form.addRow(save)
+        save.clicked.connect(
+            dialog.accept
+        )
+        button_row.addStretch()
+        button_row.addWidget(cancel)
+        button_row.addWidget(save)
+        form.addRow(button_row)
 
-        if dialog.exec() == QDialog.Accepted:
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        previous_status = (
+            row["status"]
+            or "Not Started"
+        )
+        was_completed = (
+            tracks.task_has_completion_evidence(
+                self.conn,
+                task_id,
+            )
+        )
+        selected_status = status.currentText()
+        selected_priority = priority.value()
+        selected_minutes = minutes.value()
+        selected_energy = energy.currentText()
+        selected_deferred = (
+            deferred.text().strip()
+            or None
+        )
+
+        if (
+            selected_status == "Deferred"
+            and selected_deferred is None
+        ):
+            selected_deferred = (
+                date.today()
+                + timedelta(days=1)
+            ).isoformat()
+        elif selected_status != "Deferred":
+            selected_deferred = None
+
+        session_snapshot = session_guard.capture(
+            self
+        )
+        effective_task_id = task_id
+
+        try:
+            if (
+                was_completed
+                and selected_status
+                != "Completed"
+            ):
+                tracks.undo_completion(
+                    self.conn,
+                    self.state,
+                    task_id=task_id,
+                )
+
+            # Normalize adaptive links before the user values are made final.
+            # Older task rows may still have a previous week or legacy label,
+            # which legitimately causes sync_all() to apply target defaults.
+            self.state = state(self.conn)
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            self.state = state(self.conn)
+
+            resolved_task_id = (
+                tracks.resolve_task_edit_target(
+                    self.conn,
+                    identity,
+                )
+            )
+            if resolved_task_id is None:
+                raise RuntimeError(
+                    "The task could not be resolved after "
+                    "the adaptive plan refreshed."
+                )
+            effective_task_id = int(
+                resolved_task_id
+            )
+
+            # The editor is authoritative after synchronization.
             self.conn.execute(
-                """UPDATE task_metadata SET status=?,priority=?,estimated_minutes=?,
-                   energy=?,deferred_until=? WHERE task_id=?""",
+                """UPDATE task_metadata
+                   SET status=?,
+                       priority=?,
+                       estimated_minutes=?,
+                       energy=?,
+                       deferred_until=?,
+                       prerequisite_state=CASE
+                           WHEN ?='Blocked'
+                           THEN 'Blocked'
+                           ELSE 'Ready'
+                       END,
+                       prerequisite_reason=CASE
+                           WHEN ?='Blocked'
+                           THEN 'Manually blocked in Adaptive Planner.'
+                           ELSE NULL
+                       END
+                   WHERE task_id=?""",
                 (
-                    status.currentText(),
-                    priority.value(),
-                    minutes.value(),
-                    energy.currentText(),
-                    deferred.text().strip() or None,
-                    task_id,
+                    selected_status,
+                    selected_priority,
+                    selected_minutes,
+                    selected_energy,
+                    selected_deferred,
+                    selected_status,
+                    selected_status,
+                    effective_task_id,
                 ),
             )
             self.conn.execute(
-                "UPDATE sprint_tasks SET completed=? WHERE id=?",
-                (1 if status.currentText() == "Completed" else 0, task_id),
+                """UPDATE sprint_tasks
+                   SET completed=?
+                   WHERE id=?""",
+                (
+                    1
+                    if selected_status
+                    == "Completed"
+                    else 0,
+                    effective_task_id,
+                ),
             )
             self.conn.commit()
-            self.refresh_all()
+
+            if (
+                not was_completed
+                and selected_status
+                == "Completed"
+            ):
+                self.complete_task(
+                    effective_task_id
+                )
+                return
+
+            saved = self.conn.execute(
+                """SELECT
+                       s.completed,
+                       m.status,
+                       m.priority,
+                       m.estimated_minutes,
+                       m.energy,
+                       m.deferred_until
+                   FROM sprint_tasks s
+                   JOIN task_metadata m
+                     ON m.task_id=s.id
+                   WHERE s.id=?""",
+                (effective_task_id,),
+            ).fetchone()
+            if saved is None:
+                raise RuntimeError(
+                    "The task could not be read back after saving."
+                )
+
+            expected = {
+                "status": selected_status,
+                "priority": selected_priority,
+                "estimated_minutes": selected_minutes,
+                "energy": selected_energy,
+                "deferred_until": selected_deferred,
+            }
+            actual = {
+                "status": saved["status"],
+                "priority": int(
+                    saved["priority"]
+                ),
+                "estimated_minutes": int(
+                    saved["estimated_minutes"]
+                ),
+                "energy": saved["energy"],
+                "deferred_until": (
+                    saved["deferred_until"]
+                ),
+            }
+            if actual != expected:
+                differences = [
+                    (
+                        f"{field}: expected "
+                        f"{expected[field]!r}, "
+                        f"saved {actual[field]!r}"
+                    )
+                    for field in expected
+                    if expected[field]
+                    != actual[field]
+                ]
+                raise RuntimeError(
+                    "The saved values did not match:\n\n"
+                    + "\n".join(differences)
+                )
+
+            schedule_result = (
+                planner.task_schedule_eligibility(
+                    self.conn,
+                    effective_task_id,
+                    self.state[
+                        "current_week"
+                    ],
+                )
+            )
+
+            # Keep the exact edited task selected after rebuilding the backlog.
+            self.backlog_list.setProperty(
+                "pendingSelectedTaskId",
+                effective_task_id,
+            )
+
+            # Refresh widgets from the values just verified without a hidden
+            # second adaptive synchronization.
+            self.refresh_all(
+                sync_tracks=False
+            )
+        except (ValueError, RuntimeError) as exc:
+            QMessageBox.warning(
+                self,
+                "Task Could Not Be Updated",
+                str(exc),
+            )
+            return
+        finally:
+            session_guard.restore(
+                self,
+                session_snapshot,
+            )
+
+        self.statusBar().showMessage(
+            (
+                f"Saved task #{effective_task_id}: "
+                f"{selected_status} • "
+                f"P{selected_priority} • "
+                f"{selected_minutes}m • "
+                f"{selected_energy} • "
+                f"{schedule_result['reason']}"
+            ),
+            6500,
+        )
+
 
     def save_learning(self):
         previous_state = self.state
@@ -4692,25 +5260,19 @@ class CareerAccelerator(QMainWindow):
             )
             self.conn.commit()
 
-            sql_track = tracks.snapshot(
-                self.conn,
-                self.state,
-            )["sql"]
-            active_title = (
-                sql_track.get("metadata", {})
-                .get("title")
-            )
-            active_task_id = sql_track.get(
-                "task_id"
+            active_sql_task = (
+                tracks.active_sql_task_for_title(
+                    self.conn,
+                    title,
+                )
             )
 
-            if (
-                active_task_id is not None
-                and active_title == title
-            ):
+            if active_sql_task is not None:
                 result = tracks.complete_track_task(
                     self.conn,
-                    int(active_task_id),
+                    int(
+                        active_sql_task["task_id"]
+                    ),
                     self.state,
                 )
                 completion_message = result.get(
