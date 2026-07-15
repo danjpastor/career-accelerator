@@ -60,3 +60,8 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 03: Build a Power BI star schema
+- [ ] Complete Applied Lab 04: Build and validate DAX measures

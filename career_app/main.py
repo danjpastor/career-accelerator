@@ -26,15 +26,26 @@ from career_app import __version__
 from career_app.database import (
     connect, ensure_default_state, factory_reset, save_setting, setting, state, update_state
 )
-from career_app.data.duckdb_exercises import exercise_source
+from career_app.data.applied_exercises import (
+    APPLIED_EXERCISES,
+    CATEGORY_ORDER,
+    exercise_source as applied_exercise_source,
+)
+from career_app.data.duckdb_exercises import (
+    DUCKDB_EXERCISES,
+    exercise_source,
+)
 from career_app.data.roadmap import (
     DATACAMP_TRACK, PROJECT_DIRS, PROJECT_NAMES, PROJECT_STAGES,
     SQL_COMPANION, WEEKLY_GUIDANCE
 )
 from career_app.services import (
+    achievements,
     analytics,
+    applied_workspace,
     coach,
     planner,
+    duckdb_workspace,
     session_guard,
     sql_workspace,
     tracks,
@@ -1483,44 +1494,47 @@ class CareerAccelerator(QMainWindow):
     def learning_page(self):
         page, root = self.page(
             "📚 Learning Dashboard",
-            "Duolingo-style progress across every skill track in the roadmap.",
+            "Track structured learning and complete guided labs that produce employer-ready evidence.",
         )
+        self.learning_tabs = QTabWidget()
+
+        overview = QWidget()
+        overview_root = QVBoxLayout(overview)
+        overview_root.setContentsMargins(0, 8, 0, 0)
+        overview_root.setSpacing(12)
         self.learning_cards = {}
         grid = QGridLayout()
-        tracks = [
+        learning_tracks = [
             ("🎓 Google Certificate", "Google"),
             ("📘 DataCamp", "DataCamp"),
             ("💻 SQL Practice", "SQL"),
             ("📊 Power BI", "Power BI"),
             ("🐍 Python", "Python"),
             ("📁 Portfolio", "Portfolio"),
+            ("🧪 Applied Labs", "Applied Labs"),
         ]
-        for index, (title, key) in enumerate(tracks):
+        for index, (title, key) in enumerate(learning_tracks):
             card = Card(title)
             value = QLabel("—")
             value.setStyleSheet("font-size:20pt;font-weight:700;")
             detail = QLabel("")
             detail.setObjectName("Muted")
             detail.setWordWrap(True)
-            continue_button = QPushButton("Continue →")
+            button = QPushButton("Continue →")
             card.layout.addWidget(value)
             card.layout.addWidget(detail)
             card.layout.addStretch()
-            card.layout.addWidget(continue_button)
+            card.layout.addWidget(button)
             grid.addWidget(card, index // 3, index % 3)
             self.learning_cards[key] = (value, detail)
-        root.addLayout(grid)
+        overview_root.addLayout(grid)
 
         progress = Card("Update Learning Progress")
         form = QFormLayout()
-        self.week_input = QSpinBox()
-        self.week_input.setRange(1, 12)
-        self.course_input = QSpinBox()
-        self.course_input.setRange(1, 9)
-        self.module_input = QSpinBox()
-        self.module_input.setRange(1, 20)
-        self.hours_input = QSpinBox()
-        self.hours_input.setRange(1, 40)
+        self.week_input = QSpinBox(); self.week_input.setRange(1, 12)
+        self.course_input = QSpinBox(); self.course_input.setRange(1, 9)
+        self.module_input = QSpinBox(); self.module_input.setRange(1, 20)
+        self.hours_input = QSpinBox(); self.hours_input.setRange(1, 40)
         form.addRow("Current week", self.week_input)
         form.addRow("Google course", self.course_input)
         form.addRow("Google module", self.module_input)
@@ -1530,8 +1544,647 @@ class CareerAccelerator(QMainWindow):
         save.setObjectName("Primary")
         save.clicked.connect(self.save_learning)
         progress.layout.addWidget(save)
-        root.addWidget(progress)
+        overview_root.addWidget(progress)
+        overview_root.addStretch(1)
+
+        labs = QWidget()
+        labs_layout = QHBoxLayout(labs)
+        labs_layout.setContentsMargins(0, 8, 0, 0)
+        labs_layout.setSpacing(10)
+
+        library = Card(
+            "Applied Lab Library",
+            "Power BI, Excel, pandas, communication, validation, diagnostic, and timed exercises.",
+        )
+        self.applied_track_summary = QLabel(
+            ""
+        )
+        self.applied_track_summary.setObjectName(
+            "Muted"
+        )
+        self.applied_track_summary.setWordWrap(
+            True
+        )
+        library.layout.addWidget(
+            self.applied_track_summary
+        )
+
+        pin_row = QHBoxLayout()
+        pin_row.addWidget(
+            QLabel("Adaptive branch")
+        )
+        self.applied_branch_pin = QComboBox()
+        self.applied_branch_pin.addItems(
+            [
+                "Auto",
+                *tracks.APPLIED_BRANCH_ORDER,
+            ]
+        )
+        self.applied_branch_pin.currentTextChanged.connect(
+            self.save_applied_branch_pin
+        )
+        pin_row.addWidget(
+            self.applied_branch_pin,
+            1,
+        )
+        library.layout.addLayout(
+            pin_row
+        )
+
+        filter_row = QHBoxLayout()
+        filter_row.addWidget(QLabel("Category"))
+        self.applied_category_filter = QComboBox()
+        self.applied_category_filter.addItems(["All", *CATEGORY_ORDER])
+        self.applied_category_filter.currentTextChanged.connect(self.refresh_applied_exercises)
+        filter_row.addWidget(self.applied_category_filter, 1)
+        library.layout.addLayout(filter_row)
+        self.applied_exercise_list = QListWidget()
+        self.applied_exercise_list.currentItemChanged.connect(self.prefill_applied_exercise)
+        library.layout.addWidget(self.applied_exercise_list, 1)
+        labs_layout.addWidget(library, 1)
+
+        detail = Card("Applied Lab Workspace")
+        self.applied_workspace_status = QLabel("Select a lab on the left.")
+        self.applied_workspace_status.setObjectName("Muted")
+        self.applied_workspace_status.setWordWrap(True)
+        detail.layout.addWidget(self.applied_workspace_status)
+        detail_form = QFormLayout()
+        self.applied_title = QLineEdit(); self.applied_title.setReadOnly(True)
+        self.applied_category = QLineEdit(); self.applied_category.setReadOnly(True)
+        self.applied_week = QLineEdit(); self.applied_week.setReadOnly(True)
+        self.applied_concepts = QLineEdit(); self.applied_concepts.setReadOnly(True)
+        self.applied_estimate = QLineEdit(); self.applied_estimate.setReadOnly(True)
+        self.applied_submission_path = QLineEdit(); self.applied_submission_path.setReadOnly(True)
+        self.applied_status = QComboBox(); self.applied_status.addItems(list(applied_workspace.VALID_STATUSES))
+        self.applied_notes = QTextEdit()
+        self.applied_notes.setPlaceholderText("Record assumptions, validation results, artifact paths, and interview notes.")
+        detail_form.addRow("Lab", self.applied_title)
+        detail_form.addRow("Category", self.applied_category)
+        detail_form.addRow("Roadmap week", self.applied_week)
+        detail_form.addRow("Concepts", self.applied_concepts)
+        detail_form.addRow("Estimate", self.applied_estimate)
+        detail_form.addRow("Status", self.applied_status)
+        detail_form.addRow("Submission", self.applied_submission_path)
+        detail_form.addRow("Notes", self.applied_notes)
+        detail.layout.addLayout(detail_form)
+
+        refs = QHBoxLayout()
+        self.applied_instructions_button = QPushButton("Open Instructions")
+        self.applied_instructions_button.clicked.connect(lambda: self.open_applied_reference("instructions"))
+        self.applied_starter_button = QPushButton("Open Starter")
+        self.applied_starter_button.clicked.connect(lambda: self.open_applied_reference("starter"))
+        self.applied_validation_button = QPushButton("Open Validation")
+        self.applied_validation_button.clicked.connect(lambda: self.open_applied_reference("validation"))
+        self.applied_datasets_button = QPushButton("Open Dataset Folder")
+        self.applied_datasets_button.clicked.connect(self.open_applied_datasets)
+        for button in (self.applied_instructions_button,self.applied_starter_button,self.applied_validation_button,self.applied_datasets_button):
+            refs.addWidget(button)
+        detail.layout.addLayout(refs)
+
+        actions = QHBoxLayout()
+        self.applied_submission_button = QPushButton("Create / Open Submission")
+        self.applied_submission_button.setObjectName("Primary")
+        self.applied_submission_button.clicked.connect(self.open_applied_submission)
+        self.applied_save_button = QPushButton("Save Lab Progress")
+        self.applied_save_button.clicked.connect(self.save_applied_progress)
+        actions.addWidget(self.applied_submission_button)
+        actions.addWidget(self.applied_save_button)
+        detail.layout.addLayout(actions)
+        self.applied_selected_number = None
+        self.set_applied_workspace_enabled(False)
+        labs_layout.addWidget(detail, 1)
+
+        self.learning_tabs.addTab(overview, "Learning Overview")
+        self.learning_tabs.addTab(labs, "Applied Labs")
+        root.addWidget(self.learning_tabs, 1)
         return page
+
+    def set_applied_workspace_enabled(self, enabled):
+        for widget in (
+            self.applied_status,self.applied_notes,self.applied_instructions_button,
+            self.applied_starter_button,self.applied_validation_button,
+            self.applied_datasets_button,self.applied_submission_button,
+            self.applied_save_button,
+        ):
+            widget.setEnabled(enabled)
+
+    def save_applied_branch_pin(
+        self,
+        branch,
+    ):
+        if branch not in {
+            "Auto",
+            *tracks.APPLIED_BRANCH_ORDER,
+        }:
+            branch = "Auto"
+
+        save_setting(
+            self.conn,
+            "applied_branch_pin",
+            branch,
+        )
+        self.state = state(
+            self.conn
+        )
+        tracks.sync_all(
+            self.conn,
+            self.state,
+        )
+        self.refresh_all(
+            sync_tracks=False
+        )
+        self.statusBar().showMessage(
+            (
+                "Applied Labs branch set to "
+                f"{branch}."
+            ),
+            4200,
+        )
+
+    def refresh_applied_exercises(
+        self,
+        _filter_text=None,
+    ):
+        previous = getattr(
+            self,
+            "applied_selected_number",
+            None,
+        )
+        category = (
+            self.applied_category_filter.currentText()
+        )
+
+        current_pin = (
+            tracks.applied_branch_pin(
+                self.conn
+            )
+        )
+        self.applied_branch_pin.blockSignals(
+            True
+        )
+        self.applied_branch_pin.setCurrentText(
+            current_pin
+        )
+        self.applied_branch_pin.blockSignals(
+            False
+        )
+
+        track = tracks.snapshot(
+            self.conn,
+            self.state,
+        )["applied"]
+        metadata = track["metadata"]
+        next_title = metadata.get(
+            "title",
+            "No eligible lab yet",
+        )
+        branch = metadata.get(
+            "branch",
+            current_pin
+            if current_pin != "Auto"
+            else "Auto",
+        )
+        self.applied_track_summary.setText(
+            (
+                f"Adaptive track: "
+                f"{track['status']} • "
+                f"Branch: {branch} • "
+                f"Next: {next_title} • "
+                f"Week "
+                f"{track['weekly_completed']} / "
+                f"{track['weekly_target']}. "
+                "Only the selected lab enters the active schedule."
+            )
+        )
+
+        active_number = metadata.get(
+            "lab_number"
+        )
+        self.applied_exercise_list.blockSignals(
+            True
+        )
+        self.applied_exercise_list.clear()
+        rows = {}
+
+        for number, item in sorted(
+            APPLIED_EXERCISES.items()
+        ):
+            if (
+                category != "All"
+                and item["category"]
+                != category
+            ):
+                continue
+
+            record = applied_workspace.progress(
+                self.conn,
+                ROOT,
+                number,
+            )
+            readiness = (
+                tracks.applied_lab_readiness(
+                    self.conn,
+                    self.state,
+                    number,
+                )
+            )
+
+            if record["status"] == "Completed":
+                icon = "✅"
+            elif (
+                active_number is not None
+                and int(active_number)
+                == int(number)
+                and track["status"]
+                == "Active"
+            ):
+                icon = "▶"
+            elif not readiness["ready"]:
+                icon = "🔒"
+            elif record["status"] == "In Progress":
+                icon = "🟡"
+            else:
+                icon = "⬜"
+
+            saved = (
+                " • 💾 Submission"
+                if record[
+                    "submission_exists"
+                ]
+                else ""
+            )
+            self.applied_exercise_list.addItem(
+                f"{icon} {number:02d}. "
+                f"{item['category']} • "
+                f"{item['title']} • "
+                f"Week {item['week']} • "
+                f"{item['minutes']} min"
+                f"{saved}"
+            )
+            index = (
+                self.applied_exercise_list.count()
+                - 1
+            )
+            list_item = (
+                self.applied_exercise_list.item(
+                    index
+                )
+            )
+            list_item.setData(
+                Qt.ItemDataRole.UserRole,
+                int(number),
+            )
+
+            eligibility = (
+                "Ready"
+                if readiness["ready"]
+                else (
+                    "Locked: "
+                    + "; ".join(
+                        readiness["missing"]
+                    )
+                )
+            )
+            list_item.setToolTip(
+                (
+                    f"Branch: "
+                    f"{readiness['branch']}\n"
+                    f"Concepts: "
+                    f"{item['concepts']}\n"
+                    f"Status: "
+                    f"{record['status']}\n"
+                    f"Adaptive eligibility: "
+                    f"{eligibility}\n"
+                    f"Submission: "
+                    f"{record['submission_path'] or 'Not created'}"
+                )
+            )
+            rows[number] = index
+
+        self.applied_exercise_list.blockSignals(
+            False
+        )
+
+        if not rows:
+            self.applied_exercise_list.addItem(
+                "No labs match this category."
+            )
+            self.applied_selected_number = None
+            self.set_applied_workspace_enabled(
+                False
+            )
+            return
+
+        selected = (
+            previous
+            if previous in rows
+            else (
+                int(active_number)
+                if (
+                    active_number is not None
+                    and int(active_number)
+                    in rows
+                )
+                else next(iter(rows))
+            )
+        )
+        self.applied_exercise_list.setCurrentRow(
+            rows[selected]
+        )
+
+    def prefill_applied_exercise(self, item, _previous=None):
+        if item is None:
+            self.applied_selected_number = None
+            self.set_applied_workspace_enabled(False)
+            return
+        number = item.data(Qt.ItemDataRole.UserRole)
+        if number is None:
+            return
+        number = int(number)
+        lab = APPLIED_EXERCISES[number]
+        record = applied_workspace.progress(
+            self.conn,
+            ROOT,
+            number,
+        )
+        readiness = (
+            tracks.applied_lab_readiness(
+                self.conn,
+                self.state,
+                number,
+            )
+        )
+        self.applied_selected_number = number
+        self.applied_title.setText(f"{number:02d}. {lab['title']}")
+        self.applied_category.setText(lab["category"])
+        self.applied_week.setText(f"Week {lab['week']}")
+        self.applied_concepts.setText(lab["concepts"])
+        self.applied_estimate.setText(f"{lab['minutes']} minutes")
+        self.applied_status.setCurrentText(record["status"])
+        self.applied_submission_path.setText(record["submission_path"] or "Not created")
+        self.applied_notes.setPlainText(record["notes"])
+        if record["status"] == "Completed":
+            message = (
+                "Completed. This lab contributes to "
+                "Skills & Concepts and Demonstrated Evidence."
+            )
+        elif not readiness["ready"]:
+            message = (
+                "Locked for adaptive scheduling • "
+                + "; ".join(
+                    readiness["missing"]
+                )
+                + ". You may review the materials now, "
+                  "but complete the prerequisites first."
+            )
+        elif record["submission_exists"]:
+            message = (
+                "Submission saved locally. Continue editing, "
+                "validate the deliverables, and save progress."
+            )
+        else:
+            message = (
+                "Ready for adaptive scheduling. Read the instructions "
+                "and validation guide, then create a saved submission."
+            )
+        if record["submission_exists"] and not record["submission_changed"]:
+            message += " The submission still matches the starter."
+        self.applied_workspace_status.setText(message)
+        self.set_applied_workspace_enabled(True)
+
+    def open_applied_reference(self, kind):
+        number = self.applied_selected_number
+        if number is None:
+            self.statusBar().showMessage("Select an applied lab first.", 3200)
+            return
+        path = applied_workspace.paths(ROOT, number).get(kind)
+        try:
+            editor = sql_workspace.open_in_editor(path, root=ROOT)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Lab File", str(exc))
+            return
+        self.statusBar().showMessage(f"Opened {path.name} in {editor}.", 4200)
+
+    def open_applied_datasets(self):
+        number = self.applied_selected_number
+        if number is None:
+            self.statusBar().showMessage("Select an applied lab first.", 3200)
+            return
+        path = applied_workspace.paths(ROOT, number)["datasets"]
+        try:
+            app_name = applied_workspace.open_folder(path)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Dataset Folder", str(exc))
+            return
+        self.statusBar().showMessage(f"Opened the dataset folder in {app_name}.", 4200)
+
+    def open_applied_submission(self):
+        number = self.applied_selected_number
+        if number is None:
+            self.statusBar().showMessage("Select an applied lab first.", 3200)
+            return
+        try:
+            path, created = applied_workspace.ensure_submission(ROOT, number)
+            record = applied_workspace.progress(self.conn, ROOT, number)
+            status = "In Progress" if record["status"] == "Not Started" else record["status"]
+            applied_workspace.save_progress(
+                self.conn, ROOT, number, status=status,
+                notes=self.applied_notes.toPlainText(),
+            )
+            editor = sql_workspace.open_in_editor(path, root=ROOT)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Submission", str(exc))
+            return
+        self.applied_status.setCurrentText(status)
+        self.applied_submission_path.setText(str(path.relative_to(ROOT)).replace("\\", "/"))
+        self.refresh_applied_exercises()
+        self.statusBar().showMessage(
+            f"{'Created and opened' if created else 'Opened'} {path.name} in {editor}.", 5200
+        )
+
+    def save_applied_progress(self):
+        number = self.applied_selected_number
+        if number is None:
+            self.statusBar().showMessage(
+                "Select an applied lab first.",
+                3200,
+            )
+            return
+
+        status = (
+            self.applied_status.currentText()
+        )
+        readiness = (
+            tracks.applied_lab_readiness(
+                self.conn,
+                self.state,
+                number,
+            )
+        )
+
+        if (
+            status == "Completed"
+            and not readiness["ready"]
+        ):
+            QMessageBox.warning(
+                self,
+                "Prerequisites Not Complete",
+                (
+                    "Complete the following first:\n\n"
+                    + "\n".join(
+                        f"• {reason}"
+                        for reason in readiness[
+                            "missing"
+                        ]
+                    )
+                ),
+            )
+            return
+
+        submission = (
+            applied_workspace.submission_path(
+                ROOT,
+                number,
+            )
+        )
+        if (
+            status == "Completed"
+            and not submission.exists()
+        ):
+            QMessageBox.warning(
+                self,
+                "Submission Required",
+                (
+                    "Create a saved submission before "
+                    "marking the lab complete."
+                ),
+            )
+            return
+
+        if (
+            status == "Completed"
+            and not applied_workspace.submission_has_changes(
+                ROOT,
+                number,
+            )
+        ):
+            answer = QMessageBox.question(
+                self,
+                "Submission Matches Starter",
+                (
+                    "The saved submission still matches the starter. "
+                    "Mark the lab complete anyway?"
+                ),
+                (
+                    QMessageBox.StandardButton.Yes
+                    | QMessageBox.StandardButton.No
+                ),
+                QMessageBox.StandardButton.No,
+            )
+            if (
+                answer
+                != QMessageBox.StandardButton.Yes
+            ):
+                return
+
+        session_snapshot = (
+            session_guard.capture(self)
+        )
+        completion_message = None
+        try:
+            record = (
+                applied_workspace.save_progress(
+                    self.conn,
+                    ROOT,
+                    number,
+                    status=status,
+                    notes=(
+                        self.applied_notes.toPlainText()
+                    ),
+                )
+            )
+
+            task_id = (
+                record["task_ids"][0]
+                if record["task_ids"]
+                else None
+            )
+            active = (
+                tracks.active_applied_task_for_number(
+                    self.conn,
+                    number,
+                )
+            )
+
+            if (
+                status == "Completed"
+                and active is not None
+            ):
+                result = (
+                    tracks.complete_track_task(
+                        self.conn,
+                        int(
+                            active["task_id"]
+                        ),
+                        self.state,
+                    )
+                )
+                completion_message = (
+                    result.get(
+                        "message"
+                    )
+                )
+            else:
+                tracks.record_applied_change(
+                    self.conn,
+                    number=number,
+                    completed=(
+                        status
+                        == "Completed"
+                    ),
+                    task_id=task_id,
+                )
+
+            self.state = state(
+                self.conn
+            )
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            self.refresh_all(
+                sync_tracks=False
+            )
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Save Applied Lab",
+                str(exc),
+            )
+            return
+        finally:
+            session_guard.restore(
+                self,
+                session_snapshot,
+            )
+
+        message = (
+            completion_message
+            or (
+                f"Applied Lab "
+                f"{number:02d} saved as "
+                f"{record['status']}."
+            )
+        )
+        if status == "Completed":
+            message += (
+                " Added to Demonstrated Evidence."
+            )
+        self.statusBar().showMessage(
+            message,
+            6000,
+        )
+
 
     # ---------- Portfolio ----------
     def portfolio_page(self):
@@ -1591,11 +2244,30 @@ class CareerAccelerator(QMainWindow):
     def sql_page(self):
         page, root = self.page(
             "💻 SQL Companion",
-            "Select an eligible problem to load its workspace, track mastery, and manage your local solution file.",
+            (
+                "Practice interview problems or complete guided DuckDB "
+                "exercises with saved local submissions."
+            ),
         )
 
-        body = QHBoxLayout()
-        recommendations = Card("Today's SQL")
+        self.sql_tabs = QTabWidget()
+
+        # DataLemur problem workspace.
+        problem_tab = QWidget()
+        problem_layout = QHBoxLayout(
+            problem_tab
+        )
+        problem_layout.setContentsMargins(
+            0,
+            8,
+            0,
+            0,
+        )
+        problem_layout.setSpacing(10)
+
+        recommendations = Card(
+            "Today's SQL"
+        )
         self.sql_problem_list = QListWidget()
         self.sql_problem_list.currentItemChanged.connect(
             self.prefill_sql
@@ -1603,7 +2275,10 @@ class CareerAccelerator(QMainWindow):
         recommendations.layout.addWidget(
             self.sql_problem_list
         )
-        body.addWidget(recommendations, 1)
+        problem_layout.addWidget(
+            recommendations,
+            1,
+        )
 
         detail = Card("Problem Workspace")
         self.sql_workspace_status = QLabel(
@@ -1612,14 +2287,18 @@ class CareerAccelerator(QMainWindow):
         self.sql_workspace_status.setObjectName(
             "Muted"
         )
-        self.sql_workspace_status.setWordWrap(True)
+        self.sql_workspace_status.setWordWrap(
+            True
+        )
         detail.layout.addWidget(
             self.sql_workspace_status
         )
 
         form = QFormLayout()
         self.sql_title = QLineEdit()
-        self.sql_difficulty = QLineEdit("Easy")
+        self.sql_difficulty = QLineEdit(
+            "Easy"
+        )
         self.sql_topic = QLineEdit()
         self.sql_concepts = QLineEdit()
         for field in (
@@ -1635,13 +2314,34 @@ class CareerAccelerator(QMainWindow):
         self.sql_mastery.setValue(1)
         self.sql_review = QLineEdit()
         self.sql_notes = QTextEdit()
-        form.addRow("Problem title", self.sql_title)
-        form.addRow("Difficulty", self.sql_difficulty)
-        form.addRow("Topic", self.sql_topic)
-        form.addRow("Concepts", self.sql_concepts)
-        form.addRow("Mastery (1–5)", self.sql_mastery)
-        form.addRow("Review date", self.sql_review)
-        form.addRow("Notes", self.sql_notes)
+        form.addRow(
+            "Problem title",
+            self.sql_title,
+        )
+        form.addRow(
+            "Difficulty",
+            self.sql_difficulty,
+        )
+        form.addRow(
+            "Topic",
+            self.sql_topic,
+        )
+        form.addRow(
+            "Concepts",
+            self.sql_concepts,
+        )
+        form.addRow(
+            "Mastery (1–5)",
+            self.sql_mastery,
+        )
+        form.addRow(
+            "Review date",
+            self.sql_review,
+        )
+        form.addRow(
+            "Notes",
+            self.sql_notes,
+        )
         detail.layout.addLayout(form)
 
         buttons = QHBoxLayout()
@@ -1679,10 +2379,643 @@ class CareerAccelerator(QMainWindow):
 
         self.sql_selected_title = None
         self.set_sql_workspace_enabled(False)
+        problem_layout.addWidget(detail, 1)
 
-        body.addWidget(detail, 1)
-        root.addLayout(body, 1)
+        # Guided DuckDB exercise workspace.
+        exercise_tab = QWidget()
+        exercise_layout = QHBoxLayout(
+            exercise_tab
+        )
+        exercise_layout.setContentsMargins(
+            0,
+            8,
+            0,
+            0,
+        )
+        exercise_layout.setSpacing(10)
+
+        exercise_library = Card(
+            "DuckDB Exercise Library",
+            (
+                "Select an exercise to open its instructions, datasets, "
+                "starter SQL, validation guide, and saved submission."
+            ),
+        )
+        self.duckdb_exercise_list = (
+            QListWidget()
+        )
+        self.duckdb_exercise_list.currentItemChanged.connect(
+            self.prefill_duckdb_exercise
+        )
+        exercise_library.layout.addWidget(
+            self.duckdb_exercise_list
+        )
+        exercise_layout.addWidget(
+            exercise_library,
+            1,
+        )
+
+        exercise_detail = Card(
+            "Exercise Workspace"
+        )
+        self.duckdb_workspace_status = QLabel(
+            "Select an exercise on the left."
+        )
+        self.duckdb_workspace_status.setObjectName(
+            "Muted"
+        )
+        self.duckdb_workspace_status.setWordWrap(
+            True
+        )
+        exercise_detail.layout.addWidget(
+            self.duckdb_workspace_status
+        )
+
+        exercise_form = QFormLayout()
+        self.duckdb_title = QLineEdit()
+        self.duckdb_week = QLineEdit()
+        self.duckdb_concepts = QLineEdit()
+        self.duckdb_estimate = QLineEdit()
+        self.duckdb_submission_path = (
+            QLineEdit()
+        )
+        for field in (
+            self.duckdb_title,
+            self.duckdb_week,
+            self.duckdb_concepts,
+            self.duckdb_estimate,
+            self.duckdb_submission_path,
+        ):
+            field.setReadOnly(True)
+
+        self.duckdb_status = QComboBox()
+        self.duckdb_status.addItems(
+            list(
+                duckdb_workspace.VALID_STATUSES
+            )
+        )
+        self.duckdb_notes = QTextEdit()
+        self.duckdb_notes.setPlaceholderText(
+            (
+                "Record assumptions, checks, mistakes corrected, "
+                "or what you learned."
+            )
+        )
+
+        exercise_form.addRow(
+            "Exercise",
+            self.duckdb_title,
+        )
+        exercise_form.addRow(
+            "Roadmap week",
+            self.duckdb_week,
+        )
+        exercise_form.addRow(
+            "Concepts",
+            self.duckdb_concepts,
+        )
+        exercise_form.addRow(
+            "Estimate",
+            self.duckdb_estimate,
+        )
+        exercise_form.addRow(
+            "Status",
+            self.duckdb_status,
+        )
+        exercise_form.addRow(
+            "Submission",
+            self.duckdb_submission_path,
+        )
+        exercise_form.addRow(
+            "Notes",
+            self.duckdb_notes,
+        )
+        exercise_detail.layout.addLayout(
+            exercise_form
+        )
+
+        reference_buttons = QHBoxLayout()
+        self.duckdb_instructions_button = (
+            QPushButton("Open Instructions")
+        )
+        self.duckdb_instructions_button.clicked.connect(
+            lambda: self.open_duckdb_reference(
+                "instructions"
+            )
+        )
+        self.duckdb_starter_button = QPushButton(
+            "Open Starter SQL"
+        )
+        self.duckdb_starter_button.clicked.connect(
+            lambda: self.open_duckdb_reference(
+                "starter"
+            )
+        )
+        self.duckdb_validation_button = (
+            QPushButton("Open Validation")
+        )
+        self.duckdb_validation_button.clicked.connect(
+            lambda: self.open_duckdb_reference(
+                "validation"
+            )
+        )
+        self.duckdb_datasets_button = QPushButton(
+            "Open Dataset Folder"
+        )
+        self.duckdb_datasets_button.clicked.connect(
+            self.open_duckdb_datasets
+        )
+        for button in (
+            self.duckdb_instructions_button,
+            self.duckdb_starter_button,
+            self.duckdb_validation_button,
+            self.duckdb_datasets_button,
+        ):
+            reference_buttons.addWidget(button)
+        exercise_detail.layout.addLayout(
+            reference_buttons
+        )
+
+        submission_buttons = QHBoxLayout()
+        self.duckdb_submission_button = (
+            QPushButton(
+                "Create / Open Submission"
+            )
+        )
+        self.duckdb_submission_button.setObjectName(
+            "Primary"
+        )
+        self.duckdb_submission_button.clicked.connect(
+            self.open_duckdb_submission
+        )
+        self.duckdb_save_button = QPushButton(
+            "Save Exercise Progress"
+        )
+        self.duckdb_save_button.clicked.connect(
+            self.save_duckdb_progress
+        )
+        submission_buttons.addWidget(
+            self.duckdb_submission_button
+        )
+        submission_buttons.addWidget(
+            self.duckdb_save_button
+        )
+        exercise_detail.layout.addLayout(
+            submission_buttons
+        )
+
+        self.duckdb_selected_number = None
+        self.set_duckdb_workspace_enabled(
+            False
+        )
+        exercise_layout.addWidget(
+            exercise_detail,
+            1,
+        )
+
+        self.sql_tabs.addTab(
+            problem_tab,
+            "Interview Problems",
+        )
+        self.sql_tabs.addTab(
+            exercise_tab,
+            "DuckDB Exercises",
+        )
+        root.addWidget(
+            self.sql_tabs,
+            1,
+        )
         return page
+
+    def set_duckdb_workspace_enabled(
+        self,
+        enabled,
+    ):
+        for widget in (
+            self.duckdb_status,
+            self.duckdb_notes,
+            self.duckdb_instructions_button,
+            self.duckdb_starter_button,
+            self.duckdb_validation_button,
+            self.duckdb_datasets_button,
+            self.duckdb_submission_button,
+            self.duckdb_save_button,
+        ):
+            widget.setEnabled(enabled)
+
+    def refresh_duckdb_exercises(self):
+        previous_number = getattr(
+            self,
+            "duckdb_selected_number",
+            None,
+        )
+
+        self.duckdb_exercise_list.blockSignals(
+            True
+        )
+        self.duckdb_exercise_list.clear()
+
+        number_to_row = {}
+        for number, item in sorted(
+            DUCKDB_EXERCISES.items()
+        ):
+            record = duckdb_workspace.progress(
+                self.conn,
+                ROOT,
+                number,
+            )
+            status_icon = {
+                "Completed": "✅",
+                "In Progress": "🟡",
+                "Not Started": "⬜",
+            }.get(
+                record["status"],
+                "⬜",
+            )
+            submission_icon = (
+                " • 💾 Submission"
+                if record["submission_exists"]
+                else ""
+            )
+            self.duckdb_exercise_list.addItem(
+                f"{status_icon} "
+                f"{number:02d}. {item['title']} • "
+                f"{item['minutes']} min • "
+                f"{item['concepts']}"
+                f"{submission_icon}"
+            )
+            row_index = (
+                self.duckdb_exercise_list.count()
+                - 1
+            )
+            list_item = (
+                self.duckdb_exercise_list.item(
+                    row_index
+                )
+            )
+            list_item.setData(
+                Qt.ItemDataRole.UserRole,
+                int(number),
+            )
+            list_item.setToolTip(
+                (
+                    f"Roadmap week: {item['week']}\n"
+                    f"Status: {record['status']}\n"
+                    f"Concepts: {item['concepts']}\n"
+                    f"Submission: "
+                    f"{record['submission_path'] or 'Not created'}"
+                )
+            )
+            number_to_row[
+                number
+            ] = row_index
+
+        selected_number = (
+            previous_number
+            if previous_number
+            in number_to_row
+            else 1
+        )
+
+        self.duckdb_exercise_list.blockSignals(
+            False
+        )
+        if selected_number in number_to_row:
+            self.duckdb_exercise_list.setCurrentRow(
+                number_to_row[
+                    selected_number
+                ]
+            )
+
+    def prefill_duckdb_exercise(
+        self,
+        item,
+        _previous=None,
+    ):
+        if item is None:
+            self.duckdb_selected_number = None
+            self.set_duckdb_workspace_enabled(
+                False
+            )
+            return
+
+        number = item.data(
+            Qt.ItemDataRole.UserRole
+        )
+        if number is None:
+            return
+
+        number = int(number)
+        exercise = DUCKDB_EXERCISES[
+            number
+        ]
+        record = duckdb_workspace.progress(
+            self.conn,
+            ROOT,
+            number,
+        )
+
+        self.duckdb_selected_number = number
+        self.duckdb_title.setText(
+            f"{number:02d}. {exercise['title']}"
+        )
+        self.duckdb_week.setText(
+            f"Week {exercise['week']}"
+        )
+        self.duckdb_concepts.setText(
+            exercise["concepts"]
+        )
+        self.duckdb_estimate.setText(
+            f"{exercise['minutes']} minutes"
+        )
+        self.duckdb_status.setCurrentText(
+            record["status"]
+        )
+        self.duckdb_submission_path.setText(
+            record["submission_path"]
+            or "Not created"
+        )
+        self.duckdb_notes.setPlainText(
+            record["notes"]
+        )
+
+        if record["status"] == "Completed":
+            detail = (
+                f"Completed "
+                f"{record['completed_date'] or 'previously'}"
+            )
+        elif record["submission_exists"]:
+            detail = (
+                "Submission saved locally. "
+                "Use Create / Open Submission to continue editing."
+            )
+        else:
+            detail = (
+                "Start with the instructions, then create a submission "
+                "copy before writing your solution."
+            )
+
+        if (
+            record["submission_exists"]
+            and not record[
+                "submission_changed"
+            ]
+        ):
+            detail += (
+                " The saved submission still matches the starter file."
+            )
+
+        self.duckdb_workspace_status.setText(
+            detail
+        )
+        self.set_duckdb_workspace_enabled(
+            True
+        )
+
+    def open_duckdb_reference(
+        self,
+        kind,
+    ):
+        number = self.duckdb_selected_number
+        if number is None:
+            self.statusBar().showMessage(
+                "Select a DuckDB exercise first.",
+                3200,
+            )
+            return
+
+        path = duckdb_workspace.paths(
+            ROOT,
+            number,
+        ).get(kind)
+        if path is None:
+            return
+
+        try:
+            editor_name = (
+                sql_workspace.open_in_editor(
+                    path,
+                    root=ROOT,
+                )
+            )
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Open Exercise File",
+                str(exc),
+            )
+            return
+
+        self.statusBar().showMessage(
+            f"Opened {path.name} in {editor_name}.",
+            4200,
+        )
+
+    def open_duckdb_datasets(self):
+        number = self.duckdb_selected_number
+        if number is None:
+            self.statusBar().showMessage(
+                "Select a DuckDB exercise first.",
+                3200,
+            )
+            return
+
+        path = duckdb_workspace.paths(
+            ROOT,
+            number,
+        )["datasets"]
+        try:
+            app_name = (
+                duckdb_workspace.open_folder(
+                    path
+                )
+            )
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Open Dataset Folder",
+                str(exc),
+            )
+            return
+
+        self.statusBar().showMessage(
+            f"Opened the dataset folder in {app_name}.",
+            4200,
+        )
+
+    def open_duckdb_submission(self):
+        number = self.duckdb_selected_number
+        if number is None:
+            self.statusBar().showMessage(
+                "Select a DuckDB exercise first.",
+                3200,
+            )
+            return
+
+        try:
+            path, created = (
+                duckdb_workspace.ensure_submission(
+                    ROOT,
+                    number,
+                )
+            )
+            current = duckdb_workspace.progress(
+                self.conn,
+                ROOT,
+                number,
+            )
+            status = current["status"]
+            if status == "Not Started":
+                status = "In Progress"
+
+            duckdb_workspace.save_progress(
+                self.conn,
+                ROOT,
+                number,
+                status=status,
+                notes=self.duckdb_notes.toPlainText(),
+            )
+            editor_name = (
+                sql_workspace.open_in_editor(
+                    path,
+                    root=ROOT,
+                )
+            )
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Open Submission",
+                str(exc),
+            )
+            return
+
+        self.duckdb_status.setCurrentText(
+            status
+        )
+        self.duckdb_submission_path.setText(
+            str(
+                path.relative_to(ROOT)
+            ).replace(
+                "\\",
+                "/",
+            )
+        )
+        self.refresh_duckdb_exercises()
+
+        action = (
+            "Created and opened"
+            if created
+            else "Opened"
+        )
+        self.statusBar().showMessage(
+            f"{action} {path.name} in {editor_name}.",
+            5200,
+        )
+
+    def save_duckdb_progress(self):
+        number = self.duckdb_selected_number
+        if number is None:
+            self.statusBar().showMessage(
+                "Select a DuckDB exercise first.",
+                3200,
+            )
+            return
+
+        status = self.duckdb_status.currentText()
+        submission = (
+            duckdb_workspace.submission_path(
+                ROOT,
+                number,
+            )
+        )
+
+        if (
+            status == "Completed"
+            and not submission.exists()
+        ):
+            QMessageBox.warning(
+                self,
+                "Submission Required",
+                (
+                    "Create a saved submission before marking the "
+                    "exercise complete."
+                ),
+            )
+            return
+
+        if (
+            status == "Completed"
+            and not duckdb_workspace.submission_has_changes(
+                ROOT,
+                number,
+            )
+        ):
+            confirmation = QMessageBox.question(
+                self,
+                "Submission Matches Starter",
+                (
+                    "The saved submission still matches the starter file. "
+                    "Mark the exercise complete anyway?"
+                ),
+                (
+                    QMessageBox.StandardButton.Yes
+                    | QMessageBox.StandardButton.No
+                ),
+                QMessageBox.StandardButton.No,
+            )
+            if (
+                confirmation
+                != QMessageBox.StandardButton.Yes
+            ):
+                return
+
+        session_snapshot = (
+            session_guard.capture(self)
+        )
+        try:
+            record = (
+                duckdb_workspace.save_progress(
+                    self.conn,
+                    ROOT,
+                    number,
+                    status=status,
+                    notes=self.duckdb_notes.toPlainText(),
+                )
+            )
+            self.state = state(self.conn)
+            tracks.sync_all(
+                self.conn,
+                self.state,
+            )
+            self.refresh_all(
+                sync_tracks=False
+            )
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Save Exercise",
+                str(exc),
+            )
+            return
+        finally:
+            session_guard.restore(
+                self,
+                session_snapshot,
+            )
+
+        message = (
+            f"DuckDB Exercise {number:02d} saved as "
+            f"{record['status']}."
+        )
+        if status == "Completed":
+            message += (
+                " Added to Demonstrated Evidence."
+            )
+        self.statusBar().showMessage(
+            message,
+            6000,
+        )
+
 
     # ---------- Study ----------
     def study_page(self):
@@ -1918,6 +3251,35 @@ class CareerAccelerator(QMainWindow):
             "Connect learning, portfolio work, and professional evidence directly to employability.",
         )
 
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(
+            QFrame.Shape.NoFrame
+        )
+        scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        scroll.setStyleSheet(
+            "QScrollArea { background: transparent; border: none; }"
+        )
+
+        content = QWidget()
+        content.setObjectName(
+            "ReadinessScrollContent"
+        )
+        content_layout = QVBoxLayout(
+            content
+        )
+        content_layout.setContentsMargins(
+            0,
+            0,
+            8,
+            8,
+        )
+        content_layout.setSpacing(12)
+        scroll.setWidget(content)
+        root.addWidget(scroll, 1)
+
         self.readiness_rings = {}
         rings = QHBoxLayout()
         rings.setSpacing(10)
@@ -1940,7 +3302,7 @@ class CareerAccelerator(QMainWindow):
             rings.addWidget(card)
             self.readiness_rings[title] = ring
 
-        root.addLayout(rings)
+        content_layout.addLayout(rings)
 
         body = QGridLayout()
         body.setHorizontalSpacing(10)
@@ -1950,19 +3312,59 @@ class CareerAccelerator(QMainWindow):
             "✅ Demonstrated Evidence",
             "Proof that supports your résumé, portfolio, and interview stories.",
         )
+        evidence_card.setMinimumHeight(560)
+        evidence_help = QLabel(
+            (
+                "Add proof you could show or explain to an employer: "
+                "a completed query, dashboard, course deliverable, "
+                "work example, certification, or portfolio artifact."
+            )
+        )
+        evidence_help.setObjectName("Muted")
+        evidence_help.setWordWrap(True)
+        evidence_card.layout.addWidget(
+            evidence_help
+        )
+
         self.evidence_list = QListWidget()
         self.evidence_list.setMinimumHeight(250)
-        evidence_card.layout.addWidget(self.evidence_list, 1)
+        self.evidence_list.itemDoubleClicked.connect(
+            self.view_selected_evidence
+        )
+        evidence_card.layout.addWidget(
+            self.evidence_list,
+            1,
+        )
 
-        add_evidence = QPushButton("➕ Add Evidence")
+        evidence_buttons = QHBoxLayout()
+        add_evidence = QPushButton(
+            "➕ Add Evidence"
+        )
         add_evidence.setObjectName("Primary")
-        add_evidence.clicked.connect(self.add_evidence)
-        evidence_card.layout.addWidget(add_evidence)
+        add_evidence.clicked.connect(
+            self.add_evidence
+        )
+        view_evidence = QPushButton(
+            "View Selected"
+        )
+        view_evidence.clicked.connect(
+            self.view_selected_evidence
+        )
+        evidence_buttons.addWidget(
+            add_evidence
+        )
+        evidence_buttons.addWidget(
+            view_evidence
+        )
+        evidence_card.layout.addLayout(
+            evidence_buttons
+        )
 
         coach_card = Card(
             "🧭 Readiness Coach",
             "Prioritized recommendations based on your current progress.",
         )
+        coach_card.setMinimumHeight(300)
         self.readiness_coach_layout = QVBoxLayout()
         self.readiness_coach_layout.setSpacing(8)
         coach_card.layout.addLayout(self.readiness_coach_layout)
@@ -1972,6 +3374,7 @@ class CareerAccelerator(QMainWindow):
             "🚀 Highest Leverage",
             "The next action most likely to improve employability.",
         )
+        leverage_card.setMinimumHeight(300)
 
         leverage_score_row = QHBoxLayout()
         leverage_score_row.addWidget(QLabel("Overall readiness"))
@@ -2001,8 +3404,15 @@ class CareerAccelerator(QMainWindow):
         self.readiness_leverage_detail.setWordWrap(True)
         leverage_card.layout.addWidget(self.readiness_leverage_detail)
 
+        leverage_card.layout.addStretch(1)
+
         continue_button = QPushButton("▶ Continue Highest-Impact Task")
         continue_button.setObjectName("Primary")
+        continue_button.setMinimumHeight(38)
+        continue_button.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
+        )
         continue_button.clicked.connect(self.continue_highest_impact)
         leverage_card.layout.addWidget(continue_button)
 
@@ -2010,6 +3420,7 @@ class CareerAccelerator(QMainWindow):
             "📊 Evidence Coverage",
             "Where your documented proof is strongest and where it is still missing.",
         )
+        coverage_card.setMinimumHeight(250)
         self.readiness_coverage_layout = QVBoxLayout()
         self.readiness_coverage_layout.setSpacing(0)
         coverage_card.layout.addLayout(self.readiness_coverage_layout)
@@ -2023,10 +3434,47 @@ class CareerAccelerator(QMainWindow):
         body.setColumnStretch(0, 34)
         body.setColumnStretch(1, 33)
         body.setColumnStretch(2, 33)
-        body.setRowStretch(0, 1)
-        body.setRowStretch(1, 1)
+        body.setRowMinimumHeight(0, 300)
+        body.setRowMinimumHeight(1, 250)
+        body.setRowStretch(0, 0)
+        body.setRowStretch(1, 0)
 
-        root.addLayout(body, 1)
+        content_layout.addLayout(body)
+
+        skills_card = Card(
+            "🧠 Skills & Concepts",
+            (
+                "A live inventory of what you have learned, what you are "
+                "currently studying, and what remains to unlock."
+            ),
+        )
+        self.skills_summary_label = QLabel("")
+        self.skills_summary_label.setObjectName("Muted")
+        self.skills_summary_label.setWordWrap(True)
+        skills_card.layout.addWidget(self.skills_summary_label)
+
+        self.skills_tabs = QTabWidget()
+        self.skills_learned_list = QListWidget()
+        self.skills_progress_list = QListWidget()
+        self.skills_locked_list = QListWidget()
+
+        for skill_list in (
+            self.skills_learned_list,
+            self.skills_progress_list,
+            self.skills_locked_list,
+        ):
+            skill_list.setWordWrap(True)
+            skill_list.setSpacing(4)
+            skill_list.setMinimumHeight(220)
+
+        self.skills_tabs.addTab(self.skills_learned_list, "Learned")
+        self.skills_tabs.addTab(self.skills_progress_list, "In Progress")
+        self.skills_tabs.addTab(self.skills_locked_list, "Locked")
+        skills_card.layout.addWidget(self.skills_tabs)
+        skills_card.setMinimumHeight(340)
+        content_layout.addWidget(skills_card)
+        content_layout.addStretch(1)
+
         return page
 
     # ---------- Applications ----------
@@ -2587,8 +4035,10 @@ class CareerAccelerator(QMainWindow):
     def sync_achievement_records(self):
         """Persist rewards for every completed activity and major milestone."""
         unlocked = []
+        valid_keys = set()
 
         def unlock(key, title, description):
+            valid_keys.add(key)
             if self._unlock_achievement(
                 key,
                 title,
@@ -2632,11 +4082,11 @@ class CareerAccelerator(QMainWindow):
                 row["label"],
             )
 
-        sql_rows = self.conn.execute(
-            """SELECT id,title
-               FROM sql_practice
-               ORDER BY id"""
-        ).fetchall()
+        sql_rows = (
+            achievements.completed_sql_rows(
+                self.conn
+            )
+        )
         for row in sql_rows:
             unlock(
                 f"sql-problem:{row['id']}",
@@ -2834,6 +4284,12 @@ class CareerAccelerator(QMainWindow):
             if condition:
                 unlock(key, title, description)
 
+        removed = achievements.reconcile(
+            self.conn,
+            valid_keys,
+        )
+        self.last_removed_achievements = removed
+
         self.conn.commit()
         return unlocked
 
@@ -2844,9 +4300,11 @@ class CareerAccelerator(QMainWindow):
         completed_tasks = self.conn.execute(
             "SELECT COUNT(*) FROM sprint_tasks WHERE completed=1"
         ).fetchone()[0]
-        sql_count = self.conn.execute(
-            "SELECT COUNT(*) FROM sql_practice"
-        ).fetchone()[0]
+        sql_count = (
+            achievements.completed_sql_count(
+                self.conn
+            )
+        )
         portfolio_count = self.conn.execute(
             "SELECT COUNT(*) FROM project_tasks WHERE completed=1"
         ).fetchone()[0]
@@ -2962,8 +4420,11 @@ class CareerAccelerator(QMainWindow):
         layout.addWidget(title)
 
         subtitle = QLabel(
-            "Every completed roadmap task, portfolio milestone, SQL problem, "
-            "study session, and application earns a persistent achievement."
+            (
+                "Achievements reflect currently verified progress. "
+                "Undoing or deleting the qualifying activity removes its "
+                "related achievement and recalculates milestone badges."
+            )
         )
         subtitle.setObjectName("Muted")
         subtitle.setWordWrap(True)
@@ -3071,6 +4532,10 @@ class CareerAccelerator(QMainWindow):
             return modular_source
 
         label = str(row["label"] or "").strip()
+        applied_source = applied_exercise_source(label)
+        if applied_source:
+            return applied_source
+
         duckdb_source = exercise_source(label)
         if duckdb_source:
             return duckdb_source
@@ -3168,9 +4633,11 @@ class CareerAccelerator(QMainWindow):
         done = sum(int(row["completed"]) for row in tasks)
         total = len(tasks)
 
-        sql_count = self.conn.execute(
-            "SELECT COUNT(*) FROM sql_practice"
-        ).fetchone()[0]
+        sql_count = (
+            achievements.completed_sql_count(
+                self.conn
+            )
+        )
 
         project_rows = self.conn.execute(
             "SELECT completed FROM project_tasks WHERE project_id=?",
@@ -3675,6 +5142,16 @@ class CareerAccelerator(QMainWindow):
                JOIN task_metadata m
                  ON m.task_id=s.id
                WHERE s.week=?
+                 AND (
+                     s.label NOT LIKE
+                         'Complete Applied Lab %'
+                     OR s.completed=1
+                     OR s.id IN (
+                         SELECT task_id
+                         FROM track_tasks
+                         WHERE track_key='applied'
+                     )
+                 )
                ORDER BY m.priority,s.sort_order""",
             (self.state["current_week"],),
         ).fetchall()
@@ -3746,6 +5223,7 @@ class CareerAccelerator(QMainWindow):
         datacamp = track_data["datacamp"]
         sql = track_data["sql"]
         portfolio = track_data["portfolio"]
+        applied = track_data["applied"]
 
         google_meta = google["metadata"]
         google_detail = (
@@ -3828,6 +5306,42 @@ class CareerAccelerator(QMainWindow):
                 f"{portfolio['weekly_target']}"
             )
 
+        completed_applied = set(
+            tracks.completed_applied_numbers(
+                self.conn
+            )
+        )
+        power_bi_done = len(
+            completed_applied
+            & set(range(1, 7))
+        )
+        python_done = len(
+            completed_applied
+            & set(range(8, 12))
+        )
+
+        applied_meta = applied[
+            "metadata"
+        ]
+        applied_next = applied_meta.get(
+            "title",
+            "No eligible lab yet",
+        )
+        applied_branch = applied_meta.get(
+            "branch",
+            "Auto",
+        )
+        applied_detail = (
+            f"Next: {applied_next} • "
+            f"Branch {applied_branch} • "
+            f"Today "
+            f"{applied_meta.get('today_completed', 0)} / "
+            f"{applied_meta.get('today_target', 0)} • "
+            f"Week "
+            f"{applied['weekly_completed']} / "
+            f"{applied['weekly_target']}"
+        )
+
         data = {
             "Google": (
                 f"Course {self.state['google_course']}",
@@ -3842,16 +5356,29 @@ class CareerAccelerator(QMainWindow):
                 sql_detail,
             ),
             "Power BI": (
-                "Planned",
-                "Unlock through the DataCamp and portfolio tracks.",
+                f"{power_bi_done}/6 labs",
+                (
+                    "Complete the branched Power BI lab sequence "
+                    "as prerequisites unlock."
+                ),
             ),
             "Python": (
-                "Planned",
-                "Unlock through the DataCamp and portfolio tracks.",
+                f"{python_done}/4 labs",
+                (
+                    "Complete the compact pandas bridge after "
+                    "Python instruction begins."
+                ),
             ),
             "Portfolio": (
                 f"{project_done}/{len(project_rows)}",
                 portfolio_detail,
+            ),
+            "Applied Labs": (
+                (
+                    f"{applied_meta.get('completed_items', 0)}"
+                    f"/{len(APPLIED_EXERCISES)}"
+                ),
+                applied_detail,
             ),
         }
 
@@ -3875,6 +5402,7 @@ class CareerAccelerator(QMainWindow):
         self.hours_input.setValue(
             int(self.state["weekly_target_hours"])
         )
+        self.refresh_applied_exercises()
 
     def refresh_project(self):
         self.project_combo.blockSignals(True)
@@ -3935,13 +5463,19 @@ class CareerAccelerator(QMainWindow):
             if (
                 title not in completed
                 and title not in recommended_set
+                and title != active_title
             ):
                 continue
 
+            readiness = tracks.sql_problem_readiness(
+                self.conn,
+                self.state,
+                title,
+            )
             status = (
                 "✅"
                 if title in completed
-                else "⬜"
+                else ("⬜" if readiness["ready"] else "🔒")
             )
             mastery = (
                 f" • Mastery "
@@ -3962,26 +5496,30 @@ class CareerAccelerator(QMainWindow):
                 Qt.ItemDataRole.UserRole,
                 title,
             )
-            readiness = tracks.sql_problem_readiness(
-                self.conn,
-                self.state,
-                title,
-            )
-            list_item.setToolTip(
-                (
-                    "Ready: "
-                    + ", ".join(
-                        readiness["required_names"]
+            if readiness["ready"]:
+                evidence_lines = []
+                for skill_key in readiness["required_keys"]:
+                    skill_name = tracks.SKILL_DEFINITIONS[skill_key][0]
+                    sources = readiness["evidence"].get(skill_key, [])
+                    evidence_lines.append(
+                        f"{skill_name}: "
+                        + ("; ".join(sources) if sources else "evidence recorded")
                     )
-                )
-                if readiness["ready"]
-                else (
-                    "Locked: "
-                    + ", ".join(
-                        readiness["missing_names"]
+                tooltip = "Ready — approved evidence:\n" + "\n".join(evidence_lines)
+            else:
+                missing_lines = []
+                for skill_key in readiness["missing_keys"]:
+                    skill_name = tracks.SKILL_DEFINITIONS[skill_key][0]
+                    accepted = readiness["accepted_evidence"].get(
+                        skill_key,
+                        "Complete approved learning or practice.",
                     )
+                    missing_lines.append(f"{skill_name}: {accepted}")
+                tooltip = (
+                    "Locked — approved evidence needed:\n"
+                    + "\n".join(missing_lines)
                 )
-            )
+            list_item.setToolTip(tooltip)
             title_to_row[title] = (
                 self.sql_problem_list.count() - 1
             )
@@ -4019,10 +5557,12 @@ class CareerAccelerator(QMainWindow):
             self.clear_sql_workspace(
                 (
                     "No SQL problem is eligible yet. "
-                    "Complete the required DataCamp chapters "
-                    "to unlock concept-matched practice."
+                    "Complete an approved learning chapter, "
+                    "DuckDB exercise, or concept-matched SQL problem."
                 )
             )
+        self.refresh_duckdb_exercises()
+
 
     def refresh_sessions(self):
         self.session_list.clear()
@@ -4064,6 +5604,20 @@ class CareerAccelerator(QMainWindow):
                     f"    {row['source_type']} • "
                     f"{row['source_name']}"
                 )
+                evidence_item = (
+                    self.evidence_list.item(
+                        self.evidence_list.count()
+                        - 1
+                    )
+                )
+                evidence_item.setData(
+                    Qt.ItemDataRole.UserRole,
+                    int(row["id"]),
+                )
+                evidence_item.setToolTip(
+                    row["description"]
+                    or "No description recorded."
+                )
         else:
             self.evidence_list.addItem(
                 "No evidence logged yet.\n"
@@ -4075,6 +5629,17 @@ class CareerAccelerator(QMainWindow):
             self.conn,
             self.state,
         )
+        if not recommendations:
+            recommendations = [
+                (
+                    "Continue the highest-priority task in Today’s Focus, "
+                    "then document one piece of evidence from the work."
+                ),
+                (
+                    "Keep building SQL and portfolio evidence so each learned "
+                    "concept has a concrete example."
+                ),
+            ]
 
         self.clear_layout(self.readiness_coach_layout)
         recommendation_icons = [
@@ -4088,6 +5653,11 @@ class CareerAccelerator(QMainWindow):
             recommendations[:4]
         ):
             panel = SoftPanel()
+            panel.setMinimumHeight(62)
+            panel.setSizePolicy(
+                QSizePolicy.Policy.Expanding,
+                QSizePolicy.Policy.Minimum,
+            )
             panel_layout = QHBoxLayout(panel)
             panel_layout.setContentsMargins(12, 10, 12, 10)
             panel_layout.setSpacing(9)
@@ -4152,24 +5722,84 @@ class CareerAccelerator(QMainWindow):
         for index, (emoji, label, count) in enumerate(
             coverage_rows
         ):
+            coverage_row = StatRow(
+                emoji,
+                label,
+                f"{count} evidence item"
+                f"{'' if count == 1 else 's'}",
+                (
+                    COLORS["green"]
+                    if count > 0
+                    else COLORS["muted"]
+                ),
+            )
+            coverage_row.setMinimumHeight(40)
+            coverage_row.setSizePolicy(
+                QSizePolicy.Policy.Expanding,
+                QSizePolicy.Policy.Fixed,
+            )
             self.readiness_coverage_layout.addWidget(
-                StatRow(
-                    emoji,
-                    label,
-                    f"{count} evidence item"
-                    f"{'' if count == 1 else 's'}",
-                    (
-                        COLORS["green"]
-                        if count > 0
-                        else COLORS["muted"]
-                    ),
-                )
+                coverage_row
             )
 
             if index < len(coverage_rows) - 1:
+                divider = Divider()
+                divider.setMinimumHeight(1)
+                divider.setMaximumHeight(1)
                 self.readiness_coverage_layout.addWidget(
-                    Divider()
+                    divider
                 )
+
+        inventory = tracks.skill_inventory(
+            self.conn,
+            self.state,
+        )
+        learned = [item for item in inventory if item["status"] == "Learned"]
+        progress = [item for item in inventory if item["status"] == "In Progress"]
+        locked = [item for item in inventory if item["status"] == "Locked"]
+
+        self.skills_summary_label.setText(
+            f"{len(learned)} learned • "
+            f"{len(progress)} in progress • "
+            f"{len(locked)} locked • "
+            "Updated automatically from Google, DataCamp, DuckDB, and SQL Companion."
+        )
+        self.skills_tabs.setTabText(0, f"Learned ({len(learned)})")
+        self.skills_tabs.setTabText(1, f"In Progress ({len(progress)})")
+        self.skills_tabs.setTabText(2, f"Locked ({len(locked)})")
+
+        self.skills_learned_list.clear()
+        self.skills_progress_list.clear()
+        self.skills_locked_list.clear()
+
+        for item in learned:
+            self.skills_learned_list.addItem(
+                f"✅ {item['display_name']}\n"
+                f"    {item['category']} • Evidence: "
+                f"{'; '.join(item['evidence'])}"
+            )
+        for item in progress:
+            self.skills_progress_list.addItem(
+                f"🟡 {item['display_name']}\n"
+                f"    {item['category']} • Working through: "
+                f"{'; '.join(item['in_progress'])}"
+            )
+        for item in locked:
+            self.skills_locked_list.addItem(
+                f"🔒 {item['display_name']}\n"
+                f"    {item['category']} • Unlock with: "
+                f"{item['accepted_evidence']}"
+            )
+
+        if not learned:
+            self.skills_learned_list.addItem("No concepts are marked learned yet.")
+        if not progress:
+            self.skills_progress_list.addItem(
+                "No concepts are currently marked in progress."
+            )
+        if not locked:
+            self.skills_locked_list.addItem("All tracked concepts are unlocked.")
+
 
     def refresh_applications(self):
         self.clear_layout(self.kanban_layout)
@@ -5134,25 +6764,35 @@ class CareerAccelerator(QMainWindow):
                 "Update Completion"
             )
         elif readiness["ready"]:
+            evidence_summary = []
+            for skill_key in readiness["required_keys"]:
+                sources = readiness["evidence"].get(skill_key, [])
+                if sources:
+                    evidence_summary.append(sources[0])
             self.sql_workspace_status.setText(
-                "Ready to solve • Required knowledge: "
-                + ", ".join(
-                    readiness["required_names"]
+                "Ready to solve • Evidence: "
+                + (
+                    "; ".join(evidence_summary)
+                    if evidence_summary
+                    else "approved concept evidence"
                 )
             )
-            self.sql_complete_button.setText(
-                "Mark Complete"
-            )
+            self.sql_complete_button.setText("Mark Complete")
         else:
+            missing_options = [
+                readiness["accepted_evidence"].get(
+                    skill_key,
+                    "approved learning or practice",
+                )
+                for skill_key in readiness["missing_keys"]
+            ]
             self.sql_workspace_status.setText(
                 "Locked • Learn first: "
-                + ", ".join(
-                    readiness["missing_names"]
-                )
+                + ", ".join(readiness["missing_names"])
+                + " • Accepted evidence: "
+                + " | ".join(missing_options)
             )
-            self.sql_complete_button.setText(
-                "Locked"
-            )
+            self.sql_complete_button.setText("Locked")
 
         self.set_sql_workspace_enabled(
             completed or readiness["ready"]
@@ -5548,36 +7188,222 @@ class CareerAccelerator(QMainWindow):
 
     def add_evidence(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle("Add Evidence")
-        dialog.setStyleSheet(stylesheet())
+        dialog.setWindowTitle(
+            "Add Demonstrated Evidence"
+        )
+        dialog.setMinimumSize(
+            620,
+            440,
+        )
+        dialog.setStyleSheet(
+            stylesheet()
+        )
         form = QFormLayout(dialog)
+
+        guidance = QLabel(
+            (
+                "Record something you can point to as proof. "
+                "Name the skill, identify the artifact or experience, "
+                "and describe what you personally did."
+            )
+        )
+        guidance.setWordWrap(True)
+        guidance.setObjectName("Muted")
+        form.addRow(guidance)
+
         skill = QLineEdit()
+        skill.setPlaceholderText(
+            "Example: SQL aggregation and HAVING"
+        )
+
         source_type = QComboBox()
-        source_type.addItems(["Portfolio", "Coursework", "Work Experience", "SQL Practice", "Certification"])
+        source_type.addItems(
+            [
+                "Portfolio",
+                "Coursework",
+                "Work Experience",
+                "SQL Practice",
+                "Certification",
+            ]
+        )
+
         source_name = QLineEdit()
+        source_name.setPlaceholderText(
+            (
+                "Example: DuckDB Exercise 02 — "
+                "Summarize retail orders"
+            )
+        )
+
         description = QTextEdit()
+        description.setPlaceholderText(
+            (
+                "Example: Wrote grouped revenue and order-count queries, "
+                "used HAVING to filter groups, and validated totals against "
+                "the source CSV."
+            )
+        )
+
         form.addRow("Skill", skill)
-        form.addRow("Source type", source_type)
-        form.addRow("Source name", source_name)
-        form.addRow("Description", description)
-        save = QPushButton("Save")
+        form.addRow(
+            "Source type",
+            source_type,
+        )
+        form.addRow(
+            "Source name",
+            source_name,
+        )
+        form.addRow(
+            "What this proves",
+            description,
+        )
+
+        buttons = QHBoxLayout()
+        cancel = QPushButton("Cancel")
+        cancel.clicked.connect(
+            dialog.reject
+        )
+        save = QPushButton("Save Evidence")
         save.setObjectName("Primary")
-        save.clicked.connect(dialog.accept)
-        form.addRow(save)
-        if dialog.exec() == QDialog.Accepted:
-            self.conn.execute(
-                """INSERT OR IGNORE INTO evidence
-                   (skill,source_type,source_name,description)
-                   VALUES(?,?,?,?)""",
+        save.clicked.connect(
+            dialog.accept
+        )
+        buttons.addStretch()
+        buttons.addWidget(cancel)
+        buttons.addWidget(save)
+        form.addRow(buttons)
+
+        if (
+            dialog.exec()
+            != QDialog.Accepted
+        ):
+            return
+
+        skill_text = skill.text().strip()
+        source_text = (
+            source_name.text().strip()
+        )
+        description_text = (
+            description.toPlainText().strip()
+        )
+
+        if not skill_text or not source_text:
+            QMessageBox.warning(
+                self,
+                "Evidence Needs More Detail",
                 (
-                    skill.text(),
-                    source_type.currentText(),
-                    source_name.text(),
-                    description.toPlainText(),
+                    "Enter both the skill demonstrated and the "
+                    "specific source or artifact."
                 ),
             )
-            self.conn.commit()
-            self.refresh_readiness()
+            return
+
+        self.conn.execute(
+            """INSERT INTO evidence
+               (
+                   skill,
+                   source_type,
+                   source_name,
+                   description
+               )
+               VALUES(?,?,?,?)
+               ON CONFLICT(
+                   skill,
+                   source_type,
+                   source_name
+               )
+               DO UPDATE SET
+                   description=excluded.description""",
+            (
+                skill_text,
+                source_type.currentText(),
+                source_text,
+                description_text,
+            ),
+        )
+        self.conn.commit()
+        self.refresh_readiness()
+        self.statusBar().showMessage(
+            f"Evidence saved: {skill_text}",
+            4200,
+        )
+
+    def view_selected_evidence(
+        self,
+        _item=None,
+    ):
+        item = self.evidence_list.currentItem()
+        if item is None:
+            self.statusBar().showMessage(
+                "Select an evidence item first.",
+                3200,
+            )
+            return
+
+        evidence_id = item.data(
+            Qt.ItemDataRole.UserRole
+        )
+        if evidence_id is None:
+            return
+
+        row = self.conn.execute(
+            """SELECT *
+               FROM evidence
+               WHERE id=?""",
+            (int(evidence_id),),
+        ).fetchone()
+        if row is None:
+            return
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(
+            "Demonstrated Evidence"
+        )
+        dialog.setMinimumSize(
+            620,
+            380,
+        )
+        dialog.setStyleSheet(
+            stylesheet()
+        )
+        form = QFormLayout(dialog)
+
+        skill_value = QLabel(row["skill"])
+        skill_value.setWordWrap(True)
+        source_value = QLabel(
+            (
+                f"{row['source_type']} • "
+                f"{row['source_name']}"
+            )
+        )
+        source_value.setWordWrap(True)
+        description_value = QTextEdit()
+        description_value.setReadOnly(True)
+        description_value.setPlainText(
+            row["description"]
+            or "No description recorded."
+        )
+
+        form.addRow(
+            "Skill",
+            skill_value,
+        )
+        form.addRow(
+            "Source",
+            source_value,
+        )
+        form.addRow(
+            "Evidence details",
+            description_value,
+        )
+
+        close = QPushButton("Close")
+        close.clicked.connect(
+            dialog.accept
+        )
+        form.addRow(close)
+        dialog.exec()
+
 
     def add_application(self):
         if not self.app_company.text().strip() or not self.app_role.text().strip():
@@ -5613,13 +7439,15 @@ class CareerAccelerator(QMainWindow):
         hours = self.conn.execute(
             "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
         ).fetchone()[0]
-        sql_count = self.conn.execute(
-            "SELECT COUNT(*) FROM sql_practice"
-        ).fetchone()[0]
+        sql_count = (
+            achievements.completed_sql_count(
+                self.conn
+            )
+        )
 
         summary = (
             f"Week {week}: {done}/{total} sprint tasks completed, "
-            f"{hours:g} study hours, and {sql_count} SQL problems logged. "
+            f"{hours:g} study hours, and {sql_count} SQL problems completed. "
             f"Win: {self.review_win.toPlainText() or 'Not recorded.'} "
             f"Blocker: {self.review_blocker.toPlainText() or 'None recorded.'} "
             f"SQL review: {self.review_sql.toPlainText() or 'Continue current progression.'} "

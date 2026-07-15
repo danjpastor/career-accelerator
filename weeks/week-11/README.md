@@ -60,3 +60,8 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 14: Document analytical decisions and limitations
+- [ ] Complete Applied Lab 21: Propose a safer alternative metric

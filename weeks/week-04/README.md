@@ -60,3 +60,8 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 15: Apply the SQL validation checklist
+- [ ] Complete Applied Lab 16: Fix a join that duplicates revenue

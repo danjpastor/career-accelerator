@@ -145,7 +145,9 @@ def weekly_daily_hours(conn, reference=None):
 
 def readiness(conn, state):
     sql_count = conn.execute(
-        "SELECT COUNT(*) FROM sql_practice"
+        """SELECT COUNT(*)
+           FROM sql_practice
+           WHERE status='Completed'"""
     ).fetchone()[0]
     hours = conn.execute(
         "SELECT COALESCE(SUM(hours),0) FROM study_sessions"

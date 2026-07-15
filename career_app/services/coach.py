@@ -2,7 +2,11 @@ from career_app.services.analytics import readiness
 
 def recommendations(conn, state):
     result = readiness(conn, state)
-    sql_count = conn.execute("SELECT COUNT(*) FROM sql_practice").fetchone()[0]
+    sql_count = conn.execute(
+        """SELECT COUNT(*)
+           FROM sql_practice
+           WHERE status='Completed'"""
+    ).fetchone()[0]
     hours = conn.execute("SELECT COALESCE(SUM(hours),0) FROM study_sessions").fetchone()[0]
     project_rows = conn.execute(
         "SELECT completed FROM project_tasks WHERE project_id=?",

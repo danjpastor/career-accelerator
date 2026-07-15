@@ -60,3 +60,9 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 10: Aggregate and export pandas results
+- [ ] Complete Applied Lab 11: Reproduce SQL results in pandas
+- [ ] Complete Applied Lab 20: Reconcile conflicting finance totals

@@ -1,0 +1,7 @@
+shot_id,project_id,department,status,complexity,bid_hours,actual_hours,due_date,final_date
+S001,PRJ01,Compositing,Final,High,80,92,2026-02-20,2026-02-22
+S002,PRJ01,Compositing,In Progress,Medium,45,32,2026-03-20,
+S003,PRJ01,FX,Final,High,120,118,2026-03-01,2026-02-28
+S004,PRJ02,Compositing,In Progress,High,90,75,2026-04-15,
+S005,PRJ02,Lighting,Pending Review,Medium,55,61,2026-04-05,
+S006,PRJ03,Compositing,Final,Low,25,21,2026-01-20,2026-01-19

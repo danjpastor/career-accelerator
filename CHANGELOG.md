@@ -38,6 +38,123 @@ This file is the single maintained changelog for the project.
 
 
 
+
+
+
+
+
+
+## 9.3.15
+
+- Added Applied Labs as a dedicated adaptive track
+- Added six independent prerequisite-driven branches
+- Added Power BI, Excel, pandas, Communication, SQL Quality, and Timed
+  Requests branch sequences
+- Added Auto branch selection based on roadmap week and current evidence
+- Added manual branch pinning without bypassing prerequisites
+- Limited the active schedule to one Applied Lab at a time
+- Reserved at most one Today’s Focus slot for Applied Labs
+- Prevented Applied Labs from replacing the Google Certificate priority
+- Added one weekly lab target and optional two-lab targets in Weeks 7–10
+  for study budgets of at least 18 hours
+- Carried unfinished labs across week boundaries
+- Preserved task status, estimates, energy, priority, and deferral during
+  carryover
+- Blocked nonselected lab tasks from normal scheduling
+- Hid nonselected managed labs from Sprint Backlog
+- Added active-track, next-lab, branch, and pacing details to Learning
+- Added readiness and lock reasons to every Applied Lab
+- Routed workspace completion through adaptive events and weekly pacing
+- Added branch-aware undo that only restricts later work in the same branch
+- Preserved submissions, evidence, achievements, Study Sessions, and user data
+
+## 9.3.14
+
+- Added an Applied Labs tab to Learning Dashboard
+- Added 21 guided exercises across Weeks 3–11
+- Added six Power BI labs from import through deployment planning
+- Added an end-to-end Excel analyst workbook challenge
+- Added four compact pandas bridge labs
+- Added executive summary, walkthrough, and decision-log exercises
+- Added a reusable SQL validation checklist
+- Added three broken-analysis diagnostic exercises
+- Added three timed analyst requests
+- Excluded BigQuery exercises as requested
+- Added instructions, starters, validation guides, and datasets
+- Added saved submissions under practice/applied/submissions
+- Added category filtering and full lab workspaces
+- Added Not Started, In Progress, and Completed tracking
+- Added automatic roadmap tasks without overwriting existing progress
+- Migrated compatible existing Power BI, pandas, and stakeholder tasks
+- Added applied-lab concept evidence to Skills & Concepts
+- Added completed labs automatically to Demonstrated Evidence
+- Added Completion History rollback for applied-lab progress and evidence
+- Preserved certificate-first pacing, Study Sessions, and user data
+
+## 9.3.13
+
+- Removed stale achievements when their qualifying completion is undone
+- Reconciled task, project, SQL, session, application, and milestone badges
+  against current verified evidence
+- Removed the Data Science Skills task achievement after restoring the task
+  to Not Started or In Progress
+- Removed SQL Problem Solved when the SQL record is no longer Completed
+- Recalculated First Query, SQL Starter, SQL Builder, and SQL Momentum
+- Preserved unrelated achievements whose evidence still exists
+- Counted only Completed SQL records in achievement progress
+- Counted only Completed SQL records in Dashboard SQL Progress
+- Counted only Completed SQL records in Job Readiness
+- Counted only Completed SQL records in Readiness Coach
+- Counted only Completed SQL records in weekly summary generation
+- Updated achievement guidance to explain reversible progress badges
+- Preserved SQL files, notes, mastery, Study Sessions, and user data
+
+## 9.3.12
+
+- Added Interview Problems and DuckDB Exercises tabs to SQL Companion
+- Added a browsable 12-exercise DuckDB library
+- Added instruction, starter SQL, validation, and dataset-folder buttons
+- Added Create / Open Submission with saved copies under submissions
+- Added Not Started, In Progress, and Completed exercise tracking
+- Added exercise notes and stored submission paths
+- Warned when a completed submission still matches its starter
+- Updated matching sprint tasks from the exercise workspace
+- Accepted Exercise-tab completions as SQL concept evidence
+- Added completed exercises automatically to Demonstrated Evidence
+- Reversed exercise progress and auto-evidence through Completion History
+- Added Demonstrated Evidence instructions and examples
+- Added validation for required evidence fields
+- Added View Selected and double-click evidence details
+- Preserved Study Sessions, task editing, user data, and project work
+
+## 9.3.11
+
+- Made Job Readiness content vertically scrollable
+- Kept the Job Readiness heading outside the scrolling content
+- Prevented Skills & Concepts from compressing the upper card grid
+- Added minimum heights to all four upper readiness cards
+- Added fallback guidance when Readiness Coach has no recommendations
+- Prevented Readiness Coach recommendation panels from collapsing
+- Gave every Evidence Coverage row a fixed usable height
+- Kept coverage dividers to a single pixel
+- Gave Continue Highest-Impact Task a fixed usable height
+- Preserved concept evidence, task editing, Study Sessions, and user data
+
+## 9.3.10
+
+- Replaced DataCamp-only SQL unlocks with concept evidence
+- Accepted completed Google Course 5 for SQL fundamentals and aggregation
+- Accepted completed DuckDB exercises for the concepts they cover
+- Accepted completed SQL problems only for their required concepts
+- Prevented basic evidence from unlocking joins, CTEs, or windows
+- Allowed Data Science Skills to unlock from any approved aggregation source
+- Kept Histogram of Tweets locked until aggregation and CTE evidence exist
+- Added Skills & Concepts to Job Readiness
+- Added Learned, In Progress, and Locked concept tabs
+- Displayed exact evidence and approved unlock routes
+- Included the next locked SQL problem in SQL Companion
+- Preserved task editing, Study Sessions, user data, and project files
+
 ## 9.3.9
 
 - Fixed restored tasks not displaying their new Sprint Backlog status

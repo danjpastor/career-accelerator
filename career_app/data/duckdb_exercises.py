@@ -131,16 +131,22 @@ EXERCISE_PATTERN = re.compile(
 )
 
 
-def exercise_for_label(label):
+def exercise_number_for_label(label):
     text = str(label or "").strip()
     match = EXERCISE_PATTERN.match(text)
     if match:
-        return DUCKDB_EXERCISES.get(int(match.group(1)))
+        number = int(match.group(1))
+        return number if number in DUCKDB_EXERCISES else None
 
-    for exercise in DUCKDB_EXERCISES.values():
-        if text == exercise["old_label"]:
-            return exercise
+    for number, exercise in DUCKDB_EXERCISES.items():
+        if text in {exercise["old_label"], exercise["label"]}:
+            return number
     return None
+
+
+def exercise_for_label(label):
+    number = exercise_number_for_label(label)
+    return DUCKDB_EXERCISES.get(number) if number is not None else None
 
 
 def exercise_source(label):

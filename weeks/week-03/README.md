@@ -60,3 +60,7 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 07: Build an Excel analyst workbook

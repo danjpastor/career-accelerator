@@ -4,6 +4,9 @@ from datetime import date, timedelta
 import json
 import re
 
+from career_app.data.applied_exercises import (
+    exercise_for_label as applied_exercise_for_label,
+)
 from career_app.data.duckdb_exercises import exercise_for_label
 
 
@@ -32,6 +35,16 @@ FOCUS_SLOT_ORDER = (
 
 
 def infer(label):
+    applied_exercise = applied_exercise_for_label(label)
+    if applied_exercise is not None:
+        return {
+            "category": applied_exercise["task_category"],
+            "minutes": applied_exercise["minutes"],
+            "energy": applied_exercise["energy"],
+            "priority": applied_exercise["priority"],
+            "destination": applied_exercise["destination"],
+        }
+
     duckdb_exercise = exercise_for_label(label)
     if duckdb_exercise is not None:
         return {
@@ -797,6 +810,7 @@ def _focus_track_rank(conn, item):
                 "datacamp": 1,
                 "sql": 2,
                 "portfolio": 3,
+                "applied": 4,
             }.get(link["track_key"], 8)
 
     source_key = str(
@@ -1007,6 +1021,122 @@ def intelligent_focus_plan(
 
             selected.append(fallback)
             represented.append(slot_category)
+
+    # The Applied Labs track may reserve one slot when it is actively
+    # due. It replaces the matching lower-priority core category when
+    # possible, never the Google Certificate assignment.
+    applied_candidate = None
+    for candidate in candidates:
+        link = conn.execute(
+            """SELECT track_key
+               FROM track_tasks
+               WHERE task_id=?""",
+            (
+                candidate[
+                    "task_id"
+                ],
+            ),
+        ).fetchone()
+        if (
+            link is not None
+            and link["track_key"]
+            == "applied"
+        ):
+            applied_candidate = candidate
+            break
+
+    if (
+        applied_candidate is not None
+        and applied_candidate[
+            "task_id"
+        ] not in used_task_ids
+    ):
+        if len(selected) < max_items:
+            selected.append(
+                applied_candidate
+            )
+            used_task_ids.add(
+                applied_candidate[
+                    "task_id"
+                ]
+            )
+        else:
+            replaceable = []
+            for index, item in enumerate(
+                selected
+            ):
+                item_link = (
+                    conn.execute(
+                        """SELECT track_key
+                           FROM track_tasks
+                           WHERE task_id=?""",
+                        (
+                            item.get(
+                                "task_id"
+                            ),
+                        ),
+                    ).fetchone()
+                    if item.get(
+                        "task_id"
+                    )
+                    is not None
+                    else None
+                )
+                item_track = (
+                    item_link[
+                        "track_key"
+                    ]
+                    if item_link
+                    is not None
+                    else None
+                )
+                if item_track == "google":
+                    continue
+                if item.get(
+                    "carryover"
+                ):
+                    continue
+                same_category = (
+                    item[
+                        "category"
+                    ]
+                    == applied_candidate[
+                        "category"
+                    ]
+                )
+                replaceable.append(
+                    (
+                        0
+                        if same_category
+                        else 1,
+                        -_focus_track_rank(
+                            conn,
+                            item,
+                        ),
+                        index,
+                    )
+                )
+
+            if replaceable:
+                _, _, replace_index = min(
+                    replaceable
+                )
+                removed = selected[
+                    replace_index
+                ]
+                used_task_ids.discard(
+                    removed.get(
+                        "task_id"
+                    )
+                )
+                selected[
+                    replace_index
+                ] = applied_candidate
+                used_task_ids.add(
+                    applied_candidate[
+                        "task_id"
+                    ]
+                )
 
     selected = _order_focus_items(
         conn,

@@ -60,3 +60,9 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 05: Build an executive Power BI report
+- [ ] Complete Applied Lab 06: Plan Power BI publishing and security
+- [ ] Complete Applied Lab 13: Prepare a dashboard walkthrough and Q&A

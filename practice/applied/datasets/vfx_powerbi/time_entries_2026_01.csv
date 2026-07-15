@@ -1,0 +1,4 @@
+entry_id,entry_date,artist_id,shot_id,hours,activity
+TE001,2026-01-10,A01,S001,8,Compositing
+TE002,2026-01-11,A01,S001,7.5,Compositing
+TE003,2026-01-12,A02,S003,9,FX

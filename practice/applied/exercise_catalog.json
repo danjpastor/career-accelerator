@@ -1,0 +1,766 @@
+{
+  "1": {
+    "week": 7,
+    "category": "Power BI",
+    "slug": "01_power_bi_import_profile",
+    "title": "Import and profile operational data in Power BI",
+    "concepts": "Power Query import, data types, column profiling, source documentation",
+    "minutes": 45,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "Normal",
+    "source_type": "Coursework",
+    "evidence_skill": "Power BI data preparation and profiling",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 01: Import and profile data in Power BI",
+    "aliases": [
+      "Learn Power BI data loading and relationships"
+    ],
+    "objective": "Load operational exports, inspect their grain and quality, and document what must be corrected before modeling.",
+    "steps": [
+      "Import the supplied projects, shots, and time-entry files.",
+      "Assign data types and use Power Query profiling views.",
+      "Document missing values, duplicates, suspicious ranges, and source grain.",
+      "Rename queries and fields for stakeholder readability."
+    ],
+    "deliverables": [
+      "Power BI file or screenshots of the imported queries.",
+      "Profiling table with issue, impact, and proposed fix.",
+      "Source and refresh assumptions note."
+    ],
+    "validation": [
+      "Every table has a stated grain and candidate key.",
+      "Dates and numeric fields use correct data types.",
+      "At least three quality observations are supported by evidence."
+    ],
+    "priority": 3
+  },
+  "2": {
+    "week": 7,
+    "category": "Power BI",
+    "slug": "02_power_query_transformations",
+    "title": "Clean, merge, append, pivot, and unpivot with Power Query",
+    "concepts": "Power Query cleaning, merge, append, pivot, unpivot",
+    "minutes": 60,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "Normal",
+    "source_type": "Coursework",
+    "evidence_skill": "Power Query transformation workflow",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 02: Transform data with Power Query",
+    "aliases": [],
+    "objective": "Create a repeatable transformation flow that converts raw exports into analysis-ready tables.",
+    "steps": [
+      "Trim and standardize text and replace invalid blanks with nulls.",
+      "Merge shots to projects and verify join cardinality.",
+      "Append the monthly time-entry files.",
+      "Unpivot the wide stage-target table.",
+      "Name and document every transformation step."
+    ],
+    "deliverables": [
+      "Transformation-flow screenshots or notes.",
+      "Before-and-after row counts.",
+      "Explanation of why the long target table is easier to analyze."
+    ],
+    "validation": [
+      "The merge does not duplicate shot grain.",
+      "The appended total equals both inputs combined.",
+      "The unpivoted data reconciles to the wide source."
+    ],
+    "priority": 3
+  },
+  "3": {
+    "week": 8,
+    "category": "Power BI",
+    "slug": "03_power_bi_star_schema",
+    "title": "Build a star schema and date table",
+    "concepts": "fact and dimension tables, relationships, date table, filter direction",
+    "minutes": 60,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "High",
+    "source_type": "Coursework",
+    "evidence_skill": "Dimensional modeling in Power BI",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 03: Build a Power BI star schema",
+    "aliases": [],
+    "objective": "Model the cleaned data at a clear grain using facts and dimensions.",
+    "steps": [
+      "Define the grain of shot and time-entry facts.",
+      "Create project, artist, department, status, and date dimensions.",
+      "Build one-to-many single-direction relationships.",
+      "Mark the date table and hide technical fields."
+    ],
+    "deliverables": [
+      "Model-view screenshot.",
+      "Relationship inventory.",
+      "Grain statement for each fact."
+    ],
+    "validation": [
+      "No accidental many-to-many relationships.",
+      "Dimension keys are unique.",
+      "A project filter affects both facts correctly."
+    ],
+    "priority": 3
+  },
+  "4": {
+    "week": 8,
+    "category": "Power BI",
+    "slug": "04_power_bi_dax_measures",
+    "title": "Create reusable DAX measures",
+    "concepts": "CALCULATE, DIVIDE, conditional logic, variance, time comparison",
+    "minutes": 60,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "High",
+    "source_type": "Coursework",
+    "evidence_skill": "DAX measure development and validation",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 04: Build and validate DAX measures",
+    "aliases": [],
+    "objective": "Create a reusable measure layer and independently validate its results.",
+    "steps": [
+      "Create total hours, shot count, completion rate, and average-hours measures.",
+      "Use DIVIDE and CALCULATE appropriately.",
+      "Create budget and schedule variance measures.",
+      "Add a prior-period comparison.",
+      "Document formulas and business meaning."
+    ],
+    "deliverables": [
+      "Measure dictionary.",
+      "Validation table comparing measures to source totals.",
+      "Note on one filter-context issue."
+    ],
+    "validation": [
+      "Measures respond correctly to filters.",
+      "Rates use safe division.",
+      "Totals reconcile to another tool."
+    ],
+    "priority": 3
+  },
+  "5": {
+    "week": 9,
+    "category": "Power BI",
+    "slug": "05_power_bi_executive_report",
+    "title": "Build an executive report with guided interactions",
+    "concepts": "visual hierarchy, slicers, drill-through, tooltips, accessibility",
+    "minutes": 75,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "High",
+    "source_type": "Portfolio",
+    "evidence_skill": "Power BI report design and data storytelling",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 05: Build an executive Power BI report",
+    "aliases": [],
+    "objective": "Turn the model into a concise report that supports a named management decision.",
+    "steps": [
+      "Define the audience, decision, and three questions.",
+      "Build an overview page with clear visual hierarchy.",
+      "Add useful slicers, drill-through, and a tooltip page.",
+      "Check titles, units, contrast, alt text, and layout.",
+      "Remove visuals that do not support a question."
+    ],
+    "deliverables": [
+      "Overview and detail pages.",
+      "Portfolio-ready screenshots.",
+      "Decision supported by each page."
+    ],
+    "validation": [
+      "Every visual answers a named question.",
+      "The report fits common laptop resolution.",
+      "Titles remain meaningful after filters."
+    ],
+    "priority": 3
+  },
+  "6": {
+    "week": 9,
+    "category": "Power BI",
+    "slug": "06_power_bi_publish_refresh_security",
+    "title": "Document publishing, refresh, and row-level security",
+    "concepts": "Power BI Service, refresh planning, ownership, row-level security",
+    "minutes": 45,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "Power BI deployment and governance planning",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 06: Plan Power BI publishing and security",
+    "aliases": [],
+    "objective": "Document how a real report would be published, refreshed, owned, and secured.",
+    "steps": [
+      "Define workspace and audience strategy.",
+      "Define refresh frequency and failure handling.",
+      "Draft an RLS rule and test matrix.",
+      "Assign report owner, backup owner, and data steward.",
+      "Create a release checklist."
+    ],
+    "deliverables": [
+      "Deployment and refresh plan.",
+      "RLS role definition and tests.",
+      "Release checklist."
+    ],
+    "validation": [
+      "Refresh timing matches decision cadence.",
+      "Security scenarios are testable.",
+      "Ownership is explicit."
+    ],
+    "priority": 3
+  },
+  "7": {
+    "week": 3,
+    "category": "Excel",
+    "slug": "07_excel_analyst_workbook",
+    "title": "Build an end-to-end Excel analyst workbook",
+    "concepts": "tables, validation, XLOOKUP, SUMIFS, PivotTables, Power Query, controls",
+    "minutes": 90,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "High",
+    "source_type": "Portfolio",
+    "evidence_skill": "Excel analysis, controls, and management reporting",
+    "starter_filename": "submission.md",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 07: Build an Excel analyst workbook",
+    "aliases": [],
+    "objective": "Build a controlled workbook that cleans data, calculates reliable metrics, and presents a management summary.",
+    "steps": [
+      "Load CSV files into named tables.",
+      "Add data validation and controlled inputs.",
+      "Use Power Query to clean and combine sources.",
+      "Use XLOOKUP, SUMIFS, and explicit error handling.",
+      "Build PivotTables, PivotCharts, slicers, and a one-page summary.",
+      "Create a controls and assumptions sheet."
+    ],
+    "deliverables": [
+      "Finished .xlsx workbook.",
+      "Management-summary screenshot.",
+      "Controls and assumptions sheet."
+    ],
+    "validation": [
+      "Totals reconcile to raw files.",
+      "No unexplained hard-coded business values.",
+      "A new month can be added through documented refresh steps."
+    ],
+    "priority": 3
+  },
+  "8": {
+    "week": 8,
+    "category": "Python",
+    "slug": "08_pandas_load_profile",
+    "title": "Load and profile data with pandas",
+    "concepts": "read_csv, dtypes, shape, missing values, duplicates, statistics",
+    "minutes": 45,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "Normal",
+    "source_type": "Coursework",
+    "evidence_skill": "pandas data loading and profiling",
+    "starter_filename": "starter.py",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 08: Load and profile data with pandas",
+    "aliases": [
+      "Complete a Python and pandas fundamentals lesson"
+    ],
+    "objective": "Use a reproducible script to inspect data before cleaning.",
+    "steps": [
+      "Load orders and customers.",
+      "Print shape, columns, dtypes, and samples.",
+      "Measure nulls, duplicates, and unexpected categories.",
+      "Calculate descriptive statistics.",
+      "Export a compact profile."
+    ],
+    "deliverables": [
+      "Runnable Python submission.",
+      "Generated profile.",
+      "Three quality findings."
+    ],
+    "validation": [
+      "Relative paths are used.",
+      "Key uniqueness is checked.",
+      "The script reruns without manual edits."
+    ],
+    "priority": 3
+  },
+  "9": {
+    "week": 8,
+    "category": "Python",
+    "slug": "09_pandas_clean_merge",
+    "title": "Clean and merge operational tables with pandas",
+    "concepts": "string cleaning, dates, missing values, merge validation, duplicate control",
+    "minutes": 55,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "pandas cleaning and merge validation",
+    "starter_filename": "starter.py",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 09: Clean and merge data with pandas",
+    "aliases": [
+      "Load and inspect a dataset with pandas"
+    ],
+    "objective": "Create a clean analysis table while protecting its intended grain.",
+    "steps": [
+      "Standardize text and dates.",
+      "Handle missing identifiers explicitly.",
+      "Merge orders, customers, products, and returns with validation.",
+      "Create a row-count reconciliation table.",
+      "Export clean detail data."
+    ],
+    "deliverables": [
+      "Cleaning script.",
+      "Clean output CSV.",
+      "Reconciliation report."
+    ],
+    "validation": [
+      "One row per intended order line.",
+      "Unexpected many-to-many merges fail.",
+      "Excluded rows are counted and explained."
+    ],
+    "priority": 3
+  },
+  "10": {
+    "week": 10,
+    "category": "Python",
+    "slug": "10_pandas_aggregate_export",
+    "title": "Aggregate and export analysis results with pandas",
+    "concepts": "groupby, agg, pivot_table, calculated fields, export",
+    "minutes": 50,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "pandas aggregation and analytical outputs",
+    "starter_filename": "starter.py",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 10: Aggregate and export pandas results",
+    "aliases": [],
+    "objective": "Produce reusable summary tables for revenue, returns, service levels, and segments.",
+    "steps": [
+      "Create grouped revenue and order summaries.",
+      "Calculate return rate from explicit numerator and denominator.",
+      "Build a monthly pivot table.",
+      "Add a ranked or threshold field.",
+      "Export detail and summaries."
+    ],
+    "deliverables": [
+      "Aggregation script.",
+      "Two summary files.",
+      "KPI-definition note."
+    ],
+    "validation": [
+      "Summaries reconcile to clean detail.",
+      "Rates use summed numerators and denominators.",
+      "Output names are presentation-ready."
+    ],
+    "priority": 3
+  },
+  "11": {
+    "week": 10,
+    "category": "Python",
+    "slug": "11_pandas_sql_parity",
+    "title": "Reproduce a SQL analysis in pandas",
+    "concepts": "SQL-to-pandas translation, joins, groupby, parity testing",
+    "minutes": 50,
+    "task_category": "Learning",
+    "destination": 2,
+    "energy": "High",
+    "source_type": "Coursework",
+    "evidence_skill": "Cross-tool analytical validation",
+    "starter_filename": "starter.py",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 11: Reproduce SQL results in pandas",
+    "aliases": [],
+    "objective": "Translate a completed SQL analysis into pandas and prove both results match.",
+    "steps": [
+      "Choose a completed DuckDB analysis.",
+      "Implement the same logic in pandas.",
+      "Normalize sort order, types, and rounding.",
+      "Compare keys, rows, and numeric differences programmatically.",
+      "Explain syntax and workflow differences."
+    ],
+    "deliverables": [
+      "pandas implementation.",
+      "Matching SQL reference.",
+      "Automated parity check."
+    ],
+    "validation": [
+      "More than row count is compared.",
+      "Numeric tolerance is explicit.",
+      "Any intentional difference is documented."
+    ],
+    "priority": 3
+  },
+  "12": {
+    "week": 5,
+    "category": "Communication",
+    "slug": "12_executive_summary_memo",
+    "title": "Write an executive summary and stakeholder memo",
+    "concepts": "problem, finding, impact, recommendation, limitation, audience adaptation",
+    "minutes": 45,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "Executive communication for analytics",
+    "starter_filename": "submission.md",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 12: Write an executive summary and stakeholder memo",
+    "aliases": [],
+    "objective": "Translate analysis into a decision-oriented message for a nontechnical manager.",
+    "steps": [
+      "Write five sentences: problem, finding, impact, recommendation, limitation.",
+      "Expand them into a one-page memo.",
+      "Use one visual only if it improves the decision.",
+      "Remove unnecessary technical details.",
+      "End with a requested action."
+    ],
+    "deliverables": [
+      "Five-sentence summary.",
+      "One-page memo.",
+      "Note on omitted technical detail."
+    ],
+    "validation": [
+      "Recommendation follows from evidence.",
+      "Limitation changes interpretation strength.",
+      "The requested decision is explicit."
+    ],
+    "priority": 3
+  },
+  "13": {
+    "week": 9,
+    "category": "Communication",
+    "slug": "13_walkthrough_stakeholder_qa",
+    "title": "Prepare a dashboard walkthrough and stakeholder Q&A",
+    "concepts": "five-minute walkthrough, narrative order, likely questions, evidence-based answers",
+    "minutes": 45,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "Dashboard presentation and stakeholder communication",
+    "starter_filename": "submission.md",
+    "dataset_slug": "vfx_powerbi",
+    "label": "Complete Applied Lab 13: Prepare a dashboard walkthrough and Q&A",
+    "aliases": [
+      "Review the project with a stakeholder mindset"
+    ],
+    "objective": "Explain a dashboard in five minutes and prepare for likely manager questions.",
+    "steps": [
+      "Write a five-minute audience-problem-evidence-action-limitations outline.",
+      "Choose the three visuals to show first.",
+      "Draft three likely stakeholder questions.",
+      "Prepare concise evidence-based answers.",
+      "Rehearse and revise."
+    ],
+    "deliverables": [
+      "Timed walkthrough outline.",
+      "Three questions and answers.",
+      "Self-review."
+    ],
+    "validation": [
+      "Walkthrough stays within five minutes.",
+      "It explains decisions, not features.",
+      "Answers distinguish fact, inference, and recommendation."
+    ],
+    "priority": 3
+  },
+  "14": {
+    "week": 11,
+    "category": "Communication",
+    "slug": "14_decision_log_limitations",
+    "title": "Create a decision log and limitations register",
+    "concepts": "metric definitions, exclusions, thresholds, assumptions, limitations",
+    "minutes": 40,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Low",
+    "source_type": "Portfolio",
+    "evidence_skill": "Analytical documentation and decision transparency",
+    "starter_filename": "submission.md",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 14: Document analytical decisions and limitations",
+    "aliases": [],
+    "objective": "Make analytical choices reviewable and transparent.",
+    "steps": [
+      "List metric and modeling decisions.",
+      "Document excluded records.",
+      "Record thresholds and their source.",
+      "Create a limitations register.",
+      "Assign follow-up actions to unresolved assumptions."
+    ],
+    "deliverables": [
+      "Decision log.",
+      "Limitations register.",
+      "Most consequential assumption."
+    ],
+    "validation": [
+      "Every KPI has a definition and rationale.",
+      "Limitations are specific.",
+      "Open assumptions have owners or actions."
+    ],
+    "priority": 3
+  },
+  "15": {
+    "week": 4,
+    "category": "SQL Validation",
+    "slug": "15_sql_validation_checklist",
+    "title": "Build and apply a SQL validation checklist",
+    "concepts": "row counts, uniqueness, nulls, referential integrity, duplicates, reconciliation, boundaries",
+    "minutes": 45,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "Normal",
+    "source_type": "SQL Practice",
+    "evidence_skill": "SQL validation and quality assurance",
+    "starter_filename": "starter.sql",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 15: Apply the SQL validation checklist",
+    "aliases": [],
+    "objective": "Create reusable checks that must pass before results are trusted.",
+    "steps": [
+      "Check source and output row counts.",
+      "Test expected-grain uniqueness.",
+      "Measure nulls in required fields.",
+      "Test referential integrity.",
+      "Detect duplicates and reconcile totals.",
+      "Test date boundaries and explain the result."
+    ],
+    "deliverables": [
+      "Reusable validation SQL.",
+      "Pass/fail checklist.",
+      "One failed check and correction."
+    ],
+    "validation": [
+      "Checks return interpretable evidence.",
+      "Reconciliation is independent.",
+      "Boundary tests cover both edges."
+    ],
+    "priority": 3
+  },
+  "16": {
+    "week": 4,
+    "category": "Broken Analysis",
+    "slug": "16_broken_join_duplicate_revenue",
+    "title": "Diagnose duplicated revenue from a broken join",
+    "concepts": "join cardinality, grain, duplicate amplification, reconciliation",
+    "minutes": 40,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "High",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Diagnosing join and grain errors",
+    "starter_filename": "starter.sql",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 16: Fix a join that duplicates revenue",
+    "aliases": [],
+    "objective": "Find why a plausible query overstates revenue and correct it without hiding duplicates.",
+    "steps": [
+      "Run the broken query.",
+      "State input and output grain.",
+      "Measure row multiplication.",
+      "Identify the cardinality error.",
+      "Rewrite and reconcile the result."
+    ],
+    "deliverables": [
+      "Corrected SQL.",
+      "Before-and-after reconciliation.",
+      "Root-cause explanation."
+    ],
+    "validation": [
+      "DISTINCT is not used as an unexplained patch.",
+      "Revenue reconciles.",
+      "The exact cardinality error is named."
+    ],
+    "priority": 3
+  },
+  "17": {
+    "week": 5,
+    "category": "Broken Analysis",
+    "slug": "17_broken_denominator_date_grain",
+    "title": "Fix denominator, date-filter, and grain errors",
+    "concepts": "KPI denominator, inclusive dates, weighted rates, analysis grain",
+    "minutes": 50,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "High",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Diagnosing metric-definition errors",
+    "starter_filename": "starter.sql",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 17: Repair misleading KPI calculations",
+    "aliases": [],
+    "objective": "Repair a wrong denominator, incomplete date filter, and average-of-averages error.",
+    "steps": [
+      "Define the KPI in words.",
+      "Identify numerator and denominator populations.",
+      "Correct the date boundary.",
+      "Replace average-of-averages with a weighted result.",
+      "Compare business interpretation before and after."
+    ],
+    "deliverables": [
+      "Corrected SQL and definitions.",
+      "Broken-vs-corrected table.",
+      "Largest decision impact."
+    ],
+    "validation": [
+      "Denominator matches stated population.",
+      "Date boundaries are tested.",
+      "Weighted result reconciles."
+    ],
+    "priority": 3
+  },
+  "18": {
+    "week": 6,
+    "category": "Broken Analysis",
+    "slug": "18_broken_visual_story",
+    "title": "Repair a misleading analytical story",
+    "concepts": "chart scale, cherry-picking, average of averages, annotation, uncertainty",
+    "minutes": 45,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "Detecting misleading visual and narrative choices",
+    "starter_filename": "submission.md",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 18: Repair a misleading chart and narrative",
+    "aliases": [],
+    "objective": "Identify how a chart and narrative exaggerate a change and rebuild them with context.",
+    "steps": [
+      "List misleading visual and statistical choices.",
+      "Recalculate selectively summarized metrics.",
+      "Choose an appropriate scale and period.",
+      "Rewrite the headline.",
+      "Add a meaningful limitation or annotation."
+    ],
+    "deliverables": [
+      "Corrected chart or redesign.",
+      "Corrected headline and paragraph.",
+      "List of misleading choices."
+    ],
+    "validation": [
+      "Material context is preserved.",
+      "Headline is supported.",
+      "Limitations are visible."
+    ],
+    "priority": 3
+  },
+  "19": {
+    "week": 6,
+    "category": "Timed Analysis",
+    "slug": "19_timed_missed_deadlines",
+    "title": "Answer a missed-deadlines request in 30 minutes",
+    "concepts": "rapid scoping, SQL analysis, validation, concise recommendation",
+    "minutes": 30,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "High",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Timed analytical problem solving",
+    "starter_filename": "submission.md",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 19: Timed analysis of missed deadlines",
+    "aliases": [],
+    "objective": "Answer a manager who needs the top causes of missed deadlines within 30 minutes.",
+    "steps": [
+      "Write one clarifying question.",
+      "Define missed deadline and grain.",
+      "Find the top three causes and contribution.",
+      "Run two checks.",
+      "Write a three-sentence conclusion and action."
+    ],
+    "deliverables": [
+      "Method or SQL.",
+      "Validation results.",
+      "Manager-ready response."
+    ],
+    "validation": [
+      "Count and rate are distinguished.",
+      "Time window is stated.",
+      "Recommendation is proportional to evidence."
+    ],
+    "priority": 3
+  },
+  "20": {
+    "week": 10,
+    "category": "Timed Analysis",
+    "slug": "20_timed_finance_reconciliation",
+    "title": "Reconcile a finance total discrepancy",
+    "concepts": "reconciliation, scope differences, exclusions, grain, audit trail",
+    "minutes": 40,
+    "task_category": "SQL",
+    "destination": 4,
+    "energy": "High",
+    "source_type": "SQL Practice",
+    "evidence_skill": "Analytical reconciliation and issue communication",
+    "starter_filename": "submission.md",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 20: Reconcile conflicting finance totals",
+    "aliases": [],
+    "objective": "Explain why a dashboard differs from a finance report and produce an auditable bridge.",
+    "steps": [
+      "Compare scope, dates, grain, filters, and currency.",
+      "Build a bridge between totals.",
+      "Identify each difference group.",
+      "Determine what requires correction.",
+      "Write a neutral stakeholder update."
+    ],
+    "deliverables": [
+      "Reconciliation bridge.",
+      "Corrected logic or explanation.",
+      "Stakeholder update."
+    ],
+    "validation": [
+      "Bridge sums exactly.",
+      "Difference groups are mutually exclusive.",
+      "Confirmed and open causes are separated."
+    ],
+    "priority": 3
+  },
+  "21": {
+    "week": 11,
+    "category": "Timed Analysis",
+    "slug": "21_timed_safer_metric",
+    "title": "Respond to a request for a misleading metric",
+    "concepts": "metric risk, stakeholder clarification, safer alternative, ethical communication",
+    "minutes": 35,
+    "task_category": "Portfolio",
+    "destination": 3,
+    "energy": "Normal",
+    "source_type": "Portfolio",
+    "evidence_skill": "Stakeholder challenge and responsible metric design",
+    "starter_filename": "submission.md",
+    "dataset_slug": "operations",
+    "label": "Complete Applied Lab 21: Propose a safer alternative metric",
+    "aliases": [],
+    "objective": "Handle a metric request that could encourage the wrong behavior or misrepresent performance.",
+    "steps": [
+      "Restate the requested metric and decision.",
+      "Identify gaming or interpretation risk.",
+      "Ask one clarifying question.",
+      "Propose a safer metric or balanced set.",
+      "Draft a respectful response."
+    ],
+    "deliverables": [
+      "Risk assessment.",
+      "Revised metric definition.",
+      "Stakeholder response."
+    ],
+    "validation": [
+      "Alternative is measurable.",
+      "Response preserves the business goal.",
+      "New metric reduces the identified risk."
+    ],
+    "priority": 3
+  }
+}

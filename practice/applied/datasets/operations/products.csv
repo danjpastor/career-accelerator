@@ -1,0 +1,5 @@
+product_id,product_name,category,unit_cost,unit_price
+P100,Workflow Basic,Software,18,45
+P200,Workflow Pro,Software,35,90
+P300,Onboarding,Services,120,250
+P400,Support Plus,Services,40,110

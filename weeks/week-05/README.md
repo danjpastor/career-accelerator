@@ -60,3 +60,8 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 12: Write an executive summary and stakeholder memo
+- [ ] Complete Applied Lab 17: Repair misleading KPI calculations

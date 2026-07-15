@@ -1,0 +1,5 @@
+return_id,order_id,return_date,return_quantity,reason
+R001,O1002,2026-01-20,1,Setup issue
+R002,O1006,2026-02-20,1,Wrong tier
+R003,O1007,2026-03-02,2,Duplicate order
+R004,O1007,2026-03-03,1,Duplicate order

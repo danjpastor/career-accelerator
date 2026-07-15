@@ -108,6 +108,24 @@ CREATE TABLE IF NOT EXISTS sql_practice (
     UNIQUE(platform, title)
 );
 
+CREATE TABLE IF NOT EXISTS applied_exercise_progress (
+    exercise_number INTEGER PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'Not Started',
+    submission_path TEXT,
+    notes TEXT,
+    completed_date TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS duckdb_exercise_progress (
+    exercise_number INTEGER PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'Not Started',
+    submission_path TEXT,
+    notes TEXT,
+    completed_date TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS retrospective_notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     week INTEGER NOT NULL,

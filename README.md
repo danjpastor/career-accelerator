@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.9 includes:
+Version 9.3.15 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -371,3 +371,68 @@ editor's final write.
 Sprint Backlog shows the saved status immediately. Tasks that cannot return
 to the schedule because required concepts are still locked display
 `🔒 Locked`, with the reason available in the tooltip and save confirmation.
+
+
+## Concept Evidence and Skills Inventory
+
+Version 9.3.10 accepts SQL evidence from DataCamp, completed Google Course 5,
+guided DuckDB exercises, and concept-matched SQL problems.
+
+Job Readiness now shows Learned, In Progress, and Locked concepts with the
+evidence behind every status.
+
+
+## Job Readiness Layout Repair
+
+Version 9.3.11 makes the Job Readiness content scrollable so the new
+Skills & Concepts section cannot compress the upper readiness cards.
+
+Readiness Coach always displays guidance. Evidence Coverage rows and the
+Continue Highest-Impact Task button retain usable heights instead of
+rendering blank or cut off.
+
+
+## DuckDB Exercise Workspace
+
+Version 9.3.12 adds a DuckDB Exercises tab to SQL Companion. It opens the
+exercise instructions, starter SQL, validation guide, datasets, and a saved
+submission copy.
+
+Exercise completion updates matching sprint tasks, contributes concept
+evidence, and creates a Demonstrated Evidence entry.
+
+Demonstrated Evidence now includes instructions, examples, validation, full
+detail viewing, and clearer descriptions of what each artifact proves.
+
+
+## Achievement Reconciliation
+
+Version 9.3.13 treats achievements as derived from currently verified
+progress. Restoring a task or SQL problem to unfinished removes its
+task-specific achievement and recalculates threshold achievements such as
+First Query and SQL Starter.
+
+SQL readiness, dashboard progress, coaching, and weekly summaries now count
+only records whose status is Completed.
+
+
+## Applied Analytics Lab Library
+
+Version 9.3.14 adds 21 guided labs covering Power BI, Excel, pandas,
+communication, SQL validation, broken-analysis diagnosis, and timed analyst
+requests. BigQuery is not included.
+
+Open Learning Dashboard → Applied Labs to open resources, create saved
+submissions, track progress, unlock concepts, and generate Demonstrated
+Evidence.
+
+
+## Branched Applied Labs Track
+
+Version 9.3.15 adds a prerequisite-driven Applied Labs track. It chooses one
+next eligible lab across the Power BI, Excel, pandas, Communication, SQL
+Quality, and Timed Requests branches.
+
+The track remains supplemental, supports automatic or pinned branch
+selection, carries unfinished work across weeks, and places at most one lab
+in Today’s Focus.

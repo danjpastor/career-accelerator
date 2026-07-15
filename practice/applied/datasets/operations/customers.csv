@@ -1,0 +1,7 @@
+customer_id,customer_name,region,segment,signup_date
+C001,Northstar Studio,East,Enterprise,2025-01-15
+C002,Bright Retail,South,SMB,2025-02-11
+C003,Metro Health,West,Enterprise,2025-03-03
+C004,Pine Services,East,SMB,2025-03-19
+C005,Atlas Foods,North,Mid-Market,2025-04-02
+C006,Cedar Media,west ,Mid-Market,2025-04-21

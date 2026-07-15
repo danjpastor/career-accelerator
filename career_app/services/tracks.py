@@ -5,7 +5,16 @@ import math
 import re
 from datetime import date, timedelta
 
-from career_app.data.duckdb_exercises import exercise_for_label
+from career_app.data.applied_exercises import (
+    APPLIED_EXERCISES,
+    APPLIED_SKILL_EVIDENCE,
+    exercise_number_for_label as applied_exercise_number_for_label,
+)
+from career_app.data.duckdb_exercises import (
+    DUCKDB_EXERCISES,
+    exercise_for_label,
+    exercise_number_for_label,
+)
 from career_app.data.roadmap import (
     DATACAMP_TRACK,
     SQL_COMPANION,
@@ -45,6 +54,14 @@ TRACK_CONFIG = {
         "sort_band": -100000,
         "role": "Application",
     },
+    "applied": {
+        "display_name": "Applied Labs",
+        "category": "Learning",
+        "destination": 2,
+        "priority": 3,
+        "sort_band": -50000,
+        "role": "Supplemental",
+    },
 }
 
 TRACK_ORDER = (
@@ -52,7 +69,60 @@ TRACK_ORDER = (
     "datacamp",
     "sql",
     "portfolio",
+    "applied",
 )
+
+
+APPLIED_BRANCHES = {
+    "Power BI": (1, 2, 3, 4, 5, 6),
+    "Excel": (7,),
+    "pandas": (8, 9, 10, 11),
+    "Communication": (12, 13, 14),
+    "SQL Quality": (15, 16, 17, 18),
+    "Timed Requests": (19, 20, 21),
+}
+
+APPLIED_BRANCH_ORDER = tuple(
+    APPLIED_BRANCHES
+)
+
+APPLIED_REQUIRED_SKILLS = {
+    2: {"power_query"},
+    3: {"power_query"},
+    4: {"dimensional_modeling"},
+    5: {"dax_measures"},
+    6: {"report_design"},
+    7: {"data_preparation"},
+    11: {"sql_aggregation"},
+    12: {"analysis_foundations"},
+    15: {"sql_querying"},
+    16: {"sql_joins"},
+    17: {
+        "sql_aggregation",
+        "sql_date_logic",
+    },
+    18: {"data_storytelling"},
+    19: {
+        "analyst_communication",
+        "sql_validation",
+    },
+    21: {"analyst_communication"},
+}
+
+APPLIED_WEEK_BRANCH_PRIORITY = {
+    1: ("Excel", "SQL Quality", "Communication"),
+    2: ("Excel", "SQL Quality", "Communication"),
+    3: ("Excel", "SQL Quality", "Communication"),
+    4: ("SQL Quality", "Excel", "Communication"),
+    5: ("SQL Quality", "Communication", "Excel"),
+    6: ("SQL Quality", "Timed Requests", "Communication"),
+    7: ("Power BI", "Communication", "SQL Quality"),
+    8: ("Power BI", "pandas", "Communication"),
+    9: ("Power BI", "Communication", "pandas"),
+    10: ("pandas", "Timed Requests", "Communication"),
+    11: ("Communication", "Timed Requests", "pandas"),
+    12: ("Timed Requests", "Communication", "pandas"),
+}
 
 
 SKILL_DEFINITIONS = {
@@ -78,43 +148,43 @@ SKILL_DEFINITIONS = {
     ),
     "sql_fundamentals": (
         "SQL Fundamentals",
-        "DataCamp Introduction to SQL",
+        "Approved SQL learning or practice evidence",
     ),
     "sql_querying": (
         "SELECT, filtering, sorting, and limiting",
-        "DataCamp Introduction to SQL",
+        "Approved SQL learning or practice evidence",
     ),
     "sql_aggregation": (
         "SQL Aggregation and HAVING",
-        "DataCamp Intermediate SQL: Data Aggregation",
+        "Approved aggregation evidence",
     ),
     "sql_date_logic": (
         "SQL Date Filtering",
-        "DataCamp Intermediate SQL: Data Filtering",
+        "Approved SQL date-logic evidence",
     ),
     "sql_case": (
         "SQL Conditional Operations",
-        "DataCamp Intermediate SQL: Conditional Operations",
+        "Approved CASE-expression evidence",
     ),
     "sql_joins": (
         "SQL Joins",
-        "DataCamp Joining Data in SQL",
+        "Approved join evidence",
     ),
     "sql_subqueries": (
         "SQL Subqueries",
-        "DataCamp Data Manipulation in SQL: Subqueries",
+        "Approved subquery evidence",
     ),
     "sql_ctes": (
         "Subqueries and Common Table Expressions",
-        "DataCamp Data Manipulation in SQL: CTEs",
+        "Approved CTE evidence",
     ),
     "sql_window_functions": (
         "SQL Window Functions",
-        "DataCamp Data Manipulation in SQL: Window Functions",
+        "Approved window-function evidence",
     ),
     "sql_intermediate": (
         "Intermediate SQL",
-        "DataCamp Data Manipulation in SQL",
+        "Approved advanced SQL evidence",
     ),
     "visualization_foundations": (
         "Data Visualization",
@@ -144,6 +214,18 @@ SKILL_DEFINITIONS = {
         "Career Readiness",
         "Google career course",
     ),
+    "excel_analytics": ("Excel Analysis and Controls", "Complete the Excel analyst workbook lab"),
+    "power_query": ("Power Query Data Preparation", "Complete an approved Power Query lab"),
+    "dimensional_modeling": ("Dimensional Modeling", "Complete the Power BI star-schema lab"),
+    "dax_measures": ("DAX Measure Development", "Complete the DAX measures lab"),
+    "report_design": ("Dashboard and Report Design", "Complete the executive report lab"),
+    "power_bi_governance": ("Power BI Deployment and Governance", "Complete the publishing and security lab"),
+    "analyst_communication": ("Analyst Communication", "Complete an executive-summary, walkthrough, or stakeholder-response lab"),
+    "analysis_governance": ("Analytical Decisions and Limitations", "Complete a decision-log or responsible-metric lab"),
+    "sql_validation": ("SQL Validation and Reconciliation", "Complete an approved validation or reconciliation lab"),
+    "diagnostic_reasoning": ("Diagnosing Broken Analyses", "Complete a broken-analysis diagnostic lab"),
+    "timed_analysis": ("Timed Analytical Problem Solving", "Complete a timed analyst request"),
+
 }
 
 
@@ -250,6 +332,134 @@ SQL_PROBLEM_REQUIREMENTS = {
         "sql_date_logic",
         "sql_joins",
     },
+}
+
+
+
+SQL_SKILL_ACCEPTED_EVIDENCE = {
+    "sql_fundamentals": (
+        "DataCamp Introduction to SQL, completed Google Course 5, "
+        "DuckDB Exercise 01, or completed SQL practice"
+    ),
+    "sql_querying": (
+        "DataCamp Introduction to SQL, completed Google Course 5, "
+        "DuckDB Exercise 01, or completed querying practice"
+    ),
+    "sql_aggregation": (
+        "DataCamp Intermediate SQL: Data Aggregation, completed Google Course 5, "
+        "DuckDB Exercise 02/04/05, or a completed aggregation problem"
+    ),
+    "sql_date_logic": (
+        "DataCamp Intermediate SQL: Data Filtering, DuckDB Exercise 04, "
+        "or a completed date-logic problem"
+    ),
+    "sql_case": (
+        "DataCamp Intermediate SQL: Conditional Operations, DuckDB Exercise "
+        "03/04/05, or a completed CASE problem"
+    ),
+    "sql_joins": (
+        "DataCamp Joining Data in SQL, DuckDB Exercise 06, "
+        "or a completed join problem"
+    ),
+    "sql_subqueries": (
+        "DataCamp Data Manipulation in SQL: Subqueries, DuckDB Exercise 07, "
+        "or completed subquery practice"
+    ),
+    "sql_ctes": (
+        "DataCamp Data Manipulation in SQL: CTEs, DuckDB Exercise "
+        "07/08/09/10/12, or a completed CTE problem"
+    ),
+    "sql_window_functions": (
+        "DataCamp Data Manipulation in SQL: Window Functions, DuckDB Exercise "
+        "08/10/11, or a completed window-function problem"
+    ),
+    "sql_intermediate": (
+        "Completed subquery, CTE, or window-function learning and practice"
+    ),
+}
+
+DUCKDB_SKILL_EVIDENCE = {
+    1: {"sql_fundamentals", "sql_querying"},
+    2: {"sql_aggregation"},
+    3: {"sql_case"},
+    4: {"sql_aggregation", "sql_date_logic", "sql_case"},
+    5: {"sql_aggregation", "sql_case"},
+    6: {"sql_joins"},
+    7: {"sql_subqueries", "sql_ctes", "sql_intermediate"},
+    8: {
+        "sql_aggregation", "sql_case", "sql_joins", "sql_ctes",
+        "sql_window_functions", "sql_intermediate"
+    },
+    9: {
+        "sql_aggregation", "sql_case", "sql_joins", "sql_ctes",
+        "sql_intermediate"
+    },
+    10: {
+        "sql_aggregation", "sql_joins", "sql_ctes",
+        "sql_window_functions", "sql_intermediate"
+    },
+    11: {"sql_joins", "sql_window_functions", "sql_intermediate"},
+    12: {"sql_ctes", "sql_intermediate"},
+}
+
+DATACAMP_SKILL_THRESHOLDS = {
+    "sql_fundamentals": 2,
+    "sql_querying": 2,
+    "sql_aggregation": 3,
+    "sql_date_logic": 5,
+    "sql_case": 6,
+    "sql_joins": 8,
+    "sql_subqueries": 10,
+    "sql_ctes": 11,
+    "sql_window_functions": 12,
+    "sql_intermediate": 12,
+    "power_bi_foundations": 16,
+    "power_bi": 20,
+    "python_pandas": 28,
+}
+
+SQL_SKILL_HIERARCHY = {
+    "sql_aggregation": {"sql_fundamentals", "sql_querying"},
+    "sql_date_logic": {"sql_fundamentals", "sql_querying"},
+    "sql_case": {"sql_fundamentals", "sql_querying"},
+    "sql_joins": {"sql_fundamentals", "sql_querying"},
+    "sql_subqueries": {
+        "sql_fundamentals", "sql_querying", "sql_intermediate"
+    },
+    "sql_ctes": {
+        "sql_fundamentals", "sql_querying",
+        "sql_subqueries", "sql_intermediate"
+    },
+    "sql_window_functions": {
+        "sql_fundamentals", "sql_querying", "sql_intermediate"
+    },
+}
+
+SKILL_CATEGORY = {
+    "analytics_foundations": "Analytics",
+    "business_framing": "Analytics",
+    "data_preparation": "Data Management",
+    "data_cleaning": "Data Management",
+    "analysis_foundations": "Analytics",
+    "visualization_foundations": "Visualization",
+    "data_storytelling": "Visualization",
+    "power_bi_foundations": "Power BI",
+    "power_bi": "Power BI",
+    "python_pandas": "Python",
+    "portfolio_delivery": "Portfolio",
+    "career_readiness": "Career",
+    "excel_analytics": "Excel",
+    "power_query": "Power BI",
+    "dimensional_modeling": "Power BI",
+    "dax_measures": "Power BI",
+    "report_design": "Power BI",
+    "power_bi_governance": "Power BI",
+    "analyst_communication": "Communication",
+    "analysis_governance": "Communication",
+    "sql_validation": "SQL",
+    "diagnostic_reasoning": "Analytics",
+    "timed_analysis": "Analytics",
+
 }
 
 
@@ -374,14 +584,24 @@ def _daily_completed(conn, track_key):
     ).fetchone()[0]
 
 
-def adaptive_targets(state, *, portfolio_ready=True):
+def adaptive_targets(
+    state,
+    *,
+    portfolio_ready=True,
+):
     """Allocate the weekly study budget with certificate-first priority."""
     hours = max(
         1.0,
         float(state["weekly_target_hours"]),
     )
+    current_week = max(
+        1,
+        int(state["current_week"]),
+    )
 
-    google_minutes = int(hours * 60 * 0.70)
+    google_minutes = int(
+        hours * 60 * 0.70
+    )
     google_target = max(
         1,
         min(
@@ -415,6 +635,17 @@ def adaptive_targets(state, *, portfolio_ready=True):
         if portfolio_ready and hours >= 10
         else 0
     )
+    applied_target = (
+        2
+        if (
+            hours >= 18
+            and current_week
+            in {7, 8, 9, 10}
+        )
+        else 1
+        if hours >= 10
+        else 0
+    )
 
     return {
         "google": {
@@ -424,23 +655,30 @@ def adaptive_targets(state, *, portfolio_ready=True):
         },
         "datacamp": {
             "weekly_target": datacamp_target,
-            "allocation_percent": 12,
-            "allocation_minutes": int(
-                hours * 60 * 0.12
-            ),
-        },
-        "sql": {
-            "weekly_target": sql_target,
             "allocation_percent": 10,
             "allocation_minutes": int(
                 hours * 60 * 0.10
             ),
         },
-        "portfolio": {
-            "weekly_target": portfolio_target,
+        "sql": {
+            "weekly_target": sql_target,
             "allocation_percent": 8,
             "allocation_minutes": int(
                 hours * 60 * 0.08
+            ),
+        },
+        "portfolio": {
+            "weekly_target": portfolio_target,
+            "allocation_percent": 7,
+            "allocation_minutes": int(
+                hours * 60 * 0.07
+            ),
+        },
+        "applied": {
+            "weekly_target": applied_target,
+            "allocation_percent": 5,
+            "allocation_minutes": int(
+                hours * 60 * 0.05
             ),
         },
     }
@@ -703,8 +941,35 @@ def _ensure_task(
     source_label,
     estimate,
     linked_entity_id=None,
+    priority=None,
+    energy=None,
+    destination=None,
+    category=None,
 ):
-    config = TRACK_CONFIG[track_key]
+    config = TRACK_CONFIG[
+        track_key
+    ]
+    effective_priority = (
+        config["priority"]
+        if priority is None
+        else int(priority)
+    )
+    effective_energy = (
+        "Normal"
+        if energy is None
+        else str(energy)
+    )
+    effective_destination = (
+        config["destination"]
+        if destination is None
+        else int(destination)
+    )
+    effective_category = (
+        config["category"]
+        if category is None
+        else str(category)
+    )
+
     active = _active_link(
         conn,
         track_key,
@@ -715,14 +980,16 @@ def _ensure_task(
         and active["target_key"]
         == target_key
     ):
-        task_id = active["task_id"]
-        target_changed = (
+        task_id = int(
+            active["task_id"]
+        )
+        row_changed = (
             int(active["week"])
             != int(week)
             or active["label"] != label
         )
 
-        if target_changed:
+        if row_changed:
             conn.execute(
                 """UPDATE sprint_tasks
                    SET week=?,
@@ -742,58 +1009,35 @@ def _ensure_task(
                 ),
             )
 
-        if target_changed:
-            # A genuinely new target receives the track defaults.
-            conn.execute(
-                """UPDATE task_metadata
-                   SET status='In Progress',
-                       priority=?,
-                       estimated_minutes=?,
-                       energy='Normal',
-                       deferred_until=NULL,
-                       destination=?,
-                       category=?,
-                       prerequisite_state='Ready',
-                       prerequisite_reason=NULL
-                   WHERE task_id=?""",
-                (
-                    config["priority"],
-                    int(estimate),
-                    config["destination"],
-                    config["category"],
-                    task_id,
-                ),
-            )
-        else:
-            # Synchronizing the same adaptive assignment must not erase edits
-            # made in Adaptive Planner. Keep status, priority, duration,
-            # energy, and deferral while refreshing system-owned fields.
-            conn.execute(
-                """UPDATE task_metadata
-                   SET status=CASE
-                           WHEN status='Completed'
-                           THEN 'In Progress'
-                           ELSE status
-                       END,
-                       destination=?,
-                       category=?,
-                       prerequisite_state=CASE
-                           WHEN status='Blocked'
-                           THEN prerequisite_state
-                           ELSE 'Ready'
-                       END,
-                       prerequisite_reason=CASE
-                           WHEN status='Blocked'
-                           THEN prerequisite_reason
-                           ELSE NULL
-                       END
-                   WHERE task_id=?""",
-                (
-                    config["destination"],
-                    config["category"],
-                    task_id,
-                ),
-            )
+        # A target with the same target_key is the same assignment even when
+        # it carries into a new week. Preserve user status, duration, energy,
+        # priority, and deferral while refreshing system-owned fields.
+        conn.execute(
+            """UPDATE task_metadata
+               SET status=CASE
+                       WHEN status='Completed'
+                       THEN 'In Progress'
+                       ELSE status
+                   END,
+                   destination=?,
+                   category=?,
+                   prerequisite_state=CASE
+                       WHEN status='Blocked'
+                       THEN prerequisite_state
+                       ELSE 'Ready'
+                   END,
+                   prerequisite_reason=CASE
+                       WHEN status='Blocked'
+                       THEN prerequisite_reason
+                       ELSE NULL
+                   END
+               WHERE task_id=?""",
+            (
+                effective_destination,
+                effective_category,
+                task_id,
+            ),
+        )
         conn.execute(
             """UPDATE track_tasks
                SET source_label=?,
@@ -838,8 +1082,11 @@ def _ensure_task(
                 label,
             ),
         )
-        task_id = cursor.lastrowid
+        task_id = int(
+            cursor.lastrowid
+        )
     else:
+        task_id = int(task_id)
         conn.execute(
             """UPDATE sprint_tasks
                SET week=?,
@@ -857,9 +1104,13 @@ def _ensure_task(
 
     conn.execute(
         """INSERT INTO task_metadata
-           (task_id,status,priority,estimated_minutes,
-            energy,destination,category,
-            prerequisite_state,prerequisite_reason)
+           (
+               task_id,status,priority,
+               estimated_minutes,energy,
+               destination,category,
+               prerequisite_state,
+               prerequisite_reason
+           )
            VALUES(?,?,?,?,?,?,?,?,?)
            ON CONFLICT(task_id)
            DO UPDATE SET
@@ -875,11 +1126,11 @@ def _ensure_task(
         (
             task_id,
             "In Progress",
-            config["priority"],
+            effective_priority,
             int(estimate),
-            "Normal",
-            config["destination"],
-            config["category"],
+            effective_energy,
+            effective_destination,
+            effective_category,
             "Ready",
             None,
         ),
@@ -887,8 +1138,11 @@ def _ensure_task(
 
     conn.execute(
         """INSERT INTO track_tasks
-           (track_key,task_id,target_key,source_label,
-            linked_entity_id,updated_at)
+           (
+               track_key,task_id,target_key,
+               source_label,linked_entity_id,
+               updated_at
+           )
            VALUES(?,?,?,?,?,CURRENT_TIMESTAMP)
            ON CONFLICT(track_key)
            DO UPDATE SET
@@ -1053,121 +1307,191 @@ def _completed_sql(conn):
     }
 
 
-def _derived_skills(conn, state):
-    course = int(
-        state["google_course"]
-    )
-    datacamp = _state_row(
-        conn,
-        "datacamp",
-    )
-    data_position = (
-        int(datacamp["position"])
-        if datacamp else 0
-    )
-    sql_count = len(_completed_sql(conn))
+def _append_evidence(evidence, skill_key, source):
+    bucket = evidence.setdefault(skill_key, [])
+    if source not in bucket:
+        bucket.append(source)
 
-    skills = set()
 
-    # Current course means prior courses are complete.
-    if course > 1:
-        skills.add("analytics_foundations")
-    if course > 2:
-        skills.add("business_framing")
-    if course > 3:
-        skills.add("data_preparation")
-    if course > 4:
-        skills.add("data_cleaning")
+def _completed_duckdb_exercises(conn):
+    numbers = set()
+
+    rows = conn.execute(
+        """SELECT s.label
+           FROM sprint_tasks s
+           JOIN task_metadata m
+             ON m.task_id=s.id
+           WHERE s.completed=1
+              OR m.status='Completed'"""
+    ).fetchall()
+    for row in rows:
+        number = exercise_number_for_label(
+            row["label"]
+        )
+        if number is not None:
+            numbers.add(number)
+
+    progress_rows = conn.execute(
+        """SELECT exercise_number
+           FROM duckdb_exercise_progress
+           WHERE status='Completed'"""
+    ).fetchall()
+    numbers.update(
+        int(row["exercise_number"])
+        for row in progress_rows
+    )
+
+    return numbers
+
+
+def _completed_applied_exercises(conn):
+    numbers = set()
+    rows = conn.execute(
+        """SELECT s.label FROM sprint_tasks s JOIN task_metadata m ON m.task_id=s.id
+           WHERE s.completed=1 OR m.status='Completed'"""
+    ).fetchall()
+    for row in rows:
+        number = applied_exercise_number_for_label(row["label"])
+        if number is not None:
+            numbers.add(number)
+    progress_rows = conn.execute(
+        "SELECT exercise_number FROM applied_exercise_progress WHERE status='Completed'"
+    ).fetchall()
+    numbers.update(int(row["exercise_number"]) for row in progress_rows)
+    return numbers
+
+
+def completed_applied_numbers(conn):
+    """Return all labs completed through either tasks or the lab workspace."""
+    return sorted(
+        _completed_applied_exercises(
+            conn
+        )
+    )
+
+
+def _skill_evidence(conn, state):
+    course = int(state["google_course"])
+    datacamp = _state_row(conn, "datacamp")
+    data_position = int(datacamp["position"]) if datacamp else 0
+    evidence = {}
+
+    google_thresholds = {
+        "analytics_foundations": 1,
+        "business_framing": 2,
+        "data_preparation": 3,
+        "data_cleaning": 4,
+        "analysis_foundations": 5,
+        "visualization_foundations": 6,
+        "data_storytelling": 6,
+        "portfolio_delivery": 8,
+        "career_readiness": 9,
+    }
+    for skill_key, completed_course in google_thresholds.items():
+        if course > completed_course:
+            _append_evidence(
+                evidence,
+                skill_key,
+                f"Completed Google Course {completed_course}",
+            )
+
     if course > 5:
-        skills.add("analysis_foundations")
-    if course > 6:
-        skills.update(
-            {
-                "visualization_foundations",
-                "data_storytelling",
-            }
+        source = "Completed Google Course 5 analysis and SQL work"
+        for skill_key in {
+            "sql_fundamentals", "sql_querying", "sql_aggregation"
+        }:
+            _append_evidence(evidence, skill_key, source)
+
+    for skill_key, threshold in DATACAMP_SKILL_THRESHOLDS.items():
+        if data_position >= threshold:
+            course_name, chapter, _ = DATACAMP_TRACK[threshold - 1]
+            _append_evidence(
+                evidence,
+                skill_key,
+                f"DataCamp: {course_name} — {chapter}",
+            )
+
+    for number in sorted(_completed_duckdb_exercises(conn)):
+        exercise = DUCKDB_EXERCISES[number]
+        source = f"DuckDB Exercise {number:02d}: {exercise['title']}"
+        for skill_key in DUCKDB_SKILL_EVIDENCE.get(number, set()):
+            _append_evidence(evidence, skill_key, source)
+
+    for number in sorted(_completed_applied_exercises(conn)):
+        item = APPLIED_EXERCISES[number]
+        source = f"Applied Lab {number:02d}: {item['title']}"
+        for skill_key in APPLIED_SKILL_EVIDENCE.get(number, set()):
+            _append_evidence(evidence, skill_key, source)
+
+    for title in sorted(_completed_sql(conn)):
+        item = _sql_item(title)
+        if item is None:
+            continue
+        source = f"Completed SQL problem: {title}"
+        for skill_key in _sql_requirements(title, item[2]):
+            if skill_key in SQL_SKILL_ACCEPTED_EVIDENCE:
+                _append_evidence(evidence, skill_key, source)
+
+    changed = True
+    while changed:
+        changed = False
+        for advanced_skill, implied_skills in SQL_SKILL_HIERARCHY.items():
+            sources = evidence.get(advanced_skill, [])
+            if not sources:
+                continue
+            for implied_skill in implied_skills:
+                before = len(evidence.get(implied_skill, []))
+                for source in sources:
+                    _append_evidence(evidence, implied_skill, source)
+                if len(evidence.get(implied_skill, [])) > before:
+                    changed = True
+
+    return evidence
+
+
+def _derived_skills(conn, state):
+    return set(_skill_evidence(conn, state))
+
+def _evidence_source_track(evidence_items, skill_key):
+    sources = set()
+    for item in evidence_items:
+        if item.startswith("Completed Google"):
+            sources.add("google")
+        elif item.startswith("DataCamp:"):
+            sources.add("datacamp")
+        elif item.startswith("DuckDB"):
+            sources.add("duckdb")
+        elif item.startswith("Completed SQL"):
+            sources.add("sql")
+
+    if len(sources) > 1:
+        return "multiple"
+    if sources:
+        return next(iter(sources))
+    if skill_key in {
+        "analytics_foundations", "business_framing", "data_preparation",
+        "data_cleaning", "analysis_foundations", "visualization_foundations",
+        "data_storytelling", "portfolio_delivery", "career_readiness",
+    }:
+        return "google"
+    return "concept_evidence"
+
+
+def _sync_skill_state(conn, state):
+    evidence_map = _skill_evidence(conn, state)
+    unlocked = set(evidence_map)
+
+    for skill_key, (display_name, default_evidence) in SKILL_DEFINITIONS.items():
+        evidence_items = evidence_map.get(skill_key, [])
+        status = "Unlocked" if evidence_items else "Locked"
+        evidence_text = (
+            " • ".join(evidence_items)
+            if evidence_items
+            else SQL_SKILL_ACCEPTED_EVIDENCE.get(
+                skill_key,
+                default_evidence,
+            )
         )
-    if course > 8:
-        skills.add("portfolio_delivery")
-    if course > 9:
-        skills.add("career_readiness")
-
-    # DataCamp positions represent completed official chapters. SQL concepts
-    # unlock only after the chapter that teaches them has been completed.
-    if data_position >= 2:
-        skills.update(
-            {
-                "sql_fundamentals",
-                "sql_querying",
-            }
-        )
-    if data_position >= 3:
-        skills.add("sql_aggregation")
-    if data_position >= 5:
-        skills.add("sql_date_logic")
-    if data_position >= 6:
-        skills.add("sql_case")
-    if data_position >= 8:
-        skills.add("sql_joins")
-    if data_position >= 10:
-        skills.add("sql_subqueries")
-    if data_position >= 11:
-        skills.add("sql_ctes")
-    if data_position >= 12:
-        skills.update(
-            {
-                "sql_window_functions",
-                "sql_intermediate",
-            }
-        )
-    if data_position >= 16:
-        skills.add("power_bi_foundations")
-    if data_position >= 20:
-        skills.add("power_bi")
-    if data_position >= 28:
-        skills.add("python_pandas")
-
-    return skills
-
-
-def _sync_skill_state(
-    conn,
-    state,
-):
-    unlocked = _derived_skills(
-        conn,
-        state,
-    )
-
-    for (
-        skill_key,
-        (
-            display_name,
-            evidence,
-        ),
-    ) in SKILL_DEFINITIONS.items():
-        status = (
-            "Unlocked"
-            if skill_key in unlocked
-            else "Locked"
-        )
-        source_track = (
-            "google"
-            if skill_key
-            in {
-                "analytics_foundations",
-                "business_framing",
-                "data_preparation",
-                "data_cleaning",
-                "analysis_foundations",
-                "visualization_foundations",
-                "data_storytelling",
-                "portfolio_delivery",
-                "career_readiness",
-            }
-            else "datacamp_sql"
-        )
-
         conn.execute(
             """INSERT INTO skill_state
                (skill_key,display_name,status,
@@ -1184,13 +1508,11 @@ def _sync_skill_state(
                 skill_key,
                 display_name,
                 status,
-                source_track,
-                evidence,
+                _evidence_source_track(evidence_items, skill_key),
+                evidence_text,
             ),
         )
-
     return unlocked
-
 
 def _requirements_for_project(
     label,
@@ -1548,6 +1870,629 @@ def _portfolio_target(
     }
 
 
+def _setting_value(
+    conn,
+    key,
+    default,
+):
+    row = conn.execute(
+        """SELECT value
+           FROM settings
+           WHERE key=?""",
+        (key,),
+    ).fetchone()
+    return (
+        row["value"]
+        if row is not None
+        else default
+    )
+
+
+def applied_branch_pin(conn):
+    value = _setting_value(
+        conn,
+        "applied_branch_pin",
+        "Auto",
+    )
+    return (
+        value
+        if value == "Auto"
+        or value in APPLIED_BRANCHES
+        else "Auto"
+    )
+
+
+def _applied_branch_for_number(
+    number,
+):
+    number = int(number)
+    for (
+        branch,
+        numbers,
+    ) in APPLIED_BRANCHES.items():
+        if number in numbers:
+            return branch
+    return None
+
+
+def _applied_number_from_target_key(
+    target_key,
+):
+    text = str(
+        target_key or ""
+    )
+    if not text.startswith("lab:"):
+        return None
+    try:
+        number = int(
+            text.split(":", 1)[1]
+        )
+    except (TypeError, ValueError):
+        return None
+    return (
+        number
+        if number in APPLIED_EXERCISES
+        else None
+    )
+
+
+def _applied_progress_status(
+    conn,
+    number,
+):
+    row = conn.execute(
+        """SELECT status
+           FROM applied_exercise_progress
+           WHERE exercise_number=?""",
+        (int(number),),
+    ).fetchone()
+    return (
+        row["status"]
+        if row is not None
+        else "Not Started"
+    )
+
+
+def _has_dashboard_artifact(
+    conn,
+    completed,
+):
+    if 5 in completed:
+        return True
+
+    row = conn.execute(
+        """SELECT 1
+           FROM evidence
+           WHERE LOWER(skill)
+                     LIKE '%dashboard%'
+              OR LOWER(skill)
+                     LIKE '%report design%'
+              OR LOWER(source_name)
+                     LIKE '%dashboard%'
+              OR LOWER(source_name)
+                     LIKE '%power bi report%'
+           LIMIT 1"""
+    ).fetchone()
+    return row is not None
+
+
+def applied_lab_readiness(
+    conn,
+    state,
+    number,
+    unlocked=None,
+):
+    number = int(number)
+    item = APPLIED_EXERCISES[
+        number
+    ]
+    branch = _applied_branch_for_number(
+        number
+    )
+    completed = (
+        _completed_applied_exercises(
+            conn
+        )
+    )
+
+    if number in completed:
+        return {
+            "ready": True,
+            "branch": branch,
+            "missing": [],
+            "missing_skills": [],
+            "missing_labs": [],
+            "roadmap_week": int(
+                item["week"]
+            ),
+        }
+
+    numbers = APPLIED_BRANCHES[
+        branch
+    ]
+    position = numbers.index(
+        number
+    )
+    missing_labs = [
+        previous
+        for previous in numbers[
+            :position
+        ]
+        if previous not in completed
+    ]
+
+    if unlocked is None:
+        unlocked = _derived_skills(
+            conn,
+            state,
+        )
+    unlocked = set(unlocked)
+
+    required_skills = set(
+        APPLIED_REQUIRED_SKILLS.get(
+            number,
+            set(),
+        )
+    )
+    missing_skill_keys = sorted(
+        required_skills - unlocked
+    )
+    missing = [
+        (
+            f"Complete Applied Lab "
+            f"{lab_number:02d}: "
+            f"{APPLIED_EXERCISES[lab_number]['title']}"
+        )
+        for lab_number in missing_labs
+    ]
+    missing.extend(
+        SKILL_DEFINITIONS[
+            skill_key
+        ][0]
+        for skill_key in missing_skill_keys
+    )
+
+    datacamp = _state_row(
+        conn,
+        "datacamp",
+    )
+    datacamp_position = (
+        int(datacamp["position"])
+        if datacamp is not None
+        else 0
+    )
+
+    if (
+        number == 1
+        and "power_bi_foundations"
+        not in unlocked
+        and datacamp_position < 13
+        and int(
+            state["google_course"]
+        ) < 6
+    ):
+        missing.append(
+            (
+                "Begin Power BI instruction "
+                "or reach Google Course 6"
+            )
+        )
+
+    if (
+        number == 8
+        and "python_pandas"
+        not in unlocked
+        and datacamp_position < 21
+    ):
+        missing.append(
+            (
+                "Begin the DataCamp Python "
+                "or pandas curriculum"
+            )
+        )
+
+    if (
+        number == 13
+        and not _has_dashboard_artifact(
+            conn,
+            completed,
+        )
+    ):
+        missing.append(
+            (
+                "Complete a dashboard artifact "
+                "(Applied Lab 05 or equivalent)"
+            )
+        )
+
+    # Timed requests are deliberately cross-functional.
+    if number == 19:
+        if 12 not in completed and (
+            "analyst_communication"
+            not in unlocked
+        ):
+            missing.append(
+                (
+                    "Complete Applied Lab 12 "
+                    "or equivalent communication evidence"
+                )
+            )
+        if 15 not in completed and (
+            "sql_validation"
+            not in unlocked
+        ):
+            missing.append(
+                (
+                    "Complete Applied Lab 15 "
+                    "or equivalent validation evidence"
+                )
+            )
+
+    # Preserve order while removing duplicate reasons.
+    missing = list(
+        dict.fromkeys(missing)
+    )
+
+    return {
+        "ready": not missing,
+        "branch": branch,
+        "missing": missing,
+        "missing_skills": missing_skill_keys,
+        "missing_labs": missing_labs,
+        "roadmap_week": int(
+            item["week"]
+        ),
+    }
+
+
+def _applied_target_payload(
+    *,
+    number,
+    pace,
+    completed,
+    pin,
+    carryover=False,
+):
+    item = APPLIED_EXERCISES[
+        int(number)
+    ]
+    branch = _applied_branch_for_number(
+        number
+    )
+
+    metadata = {
+        "lab_number": int(number),
+        "title": item["title"],
+        "branch": branch,
+        "category": item["category"],
+        "task_category": item[
+            "task_category"
+        ],
+        "concepts": item["concepts"],
+        "assigned_week": int(
+            item["week"]
+        ),
+        "total_items": len(
+            APPLIED_EXERCISES
+        ),
+        "completed_items": len(
+            completed
+        ),
+        "pin": pin,
+        "carryover": bool(
+            carryover
+        ),
+        "alignment": (
+            f"{branch} branch • "
+            "supplemental applied practice"
+        ),
+    }
+    metadata.update(pace)
+
+    return {
+        "target_key": (
+            f"lab:{int(number)}"
+        ),
+        "label": item["label"],
+        "source_label": (
+            f"Applied Labs • {branch}"
+        ),
+        "estimate": int(
+            item["minutes"]
+        ),
+        "position": len(completed),
+        "subposition": int(number),
+        "linked_entity_id": int(number),
+        "priority": int(
+            item["priority"]
+        ),
+        "energy": item["energy"],
+        "destination": int(
+            item["destination"]
+        ),
+        "category": item[
+            "task_category"
+        ],
+        "metadata": metadata,
+    }
+
+
+def _applied_branch_rank(
+    current_week,
+    branch,
+):
+    order = (
+        APPLIED_WEEK_BRANCH_PRIORITY.get(
+            int(current_week),
+            APPLIED_BRANCH_ORDER,
+        )
+    )
+    try:
+        return order.index(
+            branch
+        )
+    except ValueError:
+        return len(order) + (
+            APPLIED_BRANCH_ORDER.index(
+                branch
+            )
+            if branch
+            in APPLIED_BRANCH_ORDER
+            else 99
+        )
+
+
+def _applied_target(
+    conn,
+    state,
+    pace,
+    unlocked,
+):
+    completed = (
+        _completed_applied_exercises(
+            conn
+        )
+    )
+    pin = applied_branch_pin(
+        conn
+    )
+    current_week = max(
+        1,
+        int(state["current_week"]),
+    )
+
+    # Carry the exact unfinished assignment across week boundaries instead of
+    # replacing it with a new branch merely because the calendar advanced.
+    active = _active_link(
+        conn,
+        "applied",
+    )
+    if active is not None:
+        active_number = (
+            _applied_number_from_target_key(
+                active["target_key"]
+            )
+        )
+        if (
+            active_number is not None
+            and active_number
+            not in completed
+        ):
+            active_branch = (
+                _applied_branch_for_number(
+                    active_number
+                )
+            )
+            readiness = (
+                applied_lab_readiness(
+                    conn,
+                    state,
+                    active_number,
+                    unlocked,
+                )
+            )
+            if (
+                readiness["ready"]
+                and (
+                    pin == "Auto"
+                    or pin
+                    == active_branch
+                )
+            ):
+                return _applied_target_payload(
+                    number=active_number,
+                    pace=pace,
+                    completed=completed,
+                    pin=pin,
+                    carryover=True,
+                )
+
+    candidates = []
+    locked_candidates = []
+
+    branches = (
+        (pin,)
+        if pin != "Auto"
+        else APPLIED_BRANCH_ORDER
+    )
+
+    for branch in branches:
+        numbers = APPLIED_BRANCHES[
+            branch
+        ]
+        next_number = next(
+            (
+                number
+                for number in numbers
+                if number not in completed
+            ),
+            None,
+        )
+        if next_number is None:
+            continue
+
+        item = APPLIED_EXERCISES[
+            next_number
+        ]
+        readiness = (
+            applied_lab_readiness(
+                conn,
+                state,
+                next_number,
+                unlocked,
+            )
+        )
+
+        scheduled = (
+            int(item["week"])
+            <= current_week
+            or pin == branch
+        )
+        missing = list(
+            readiness["missing"]
+        )
+        if not scheduled:
+            missing.append(
+                (
+                    f"Scheduled for roadmap "
+                    f"Week {item['week']}"
+                )
+            )
+
+        candidate = {
+            "number": next_number,
+            "branch": branch,
+            "item": item,
+            "readiness": readiness,
+            "missing": missing,
+            "status": (
+                _applied_progress_status(
+                    conn,
+                    next_number,
+                )
+            ),
+        }
+
+        if readiness["ready"] and scheduled:
+            candidates.append(
+                candidate
+            )
+        else:
+            locked_candidates.append(
+                candidate
+            )
+
+    if candidates:
+        chosen = min(
+            candidates,
+            key=lambda candidate: (
+                0
+                if candidate["status"]
+                == "In Progress"
+                else 1,
+                _applied_branch_rank(
+                    current_week,
+                    candidate[
+                        "branch"
+                    ],
+                ),
+                max(
+                    0,
+                    current_week
+                    - int(
+                        candidate[
+                            "item"
+                        ]["week"]
+                    ),
+                ),
+                int(
+                    candidate["number"]
+                ),
+            ),
+        )
+        return _applied_target_payload(
+            number=chosen["number"],
+            pace=pace,
+            completed=completed,
+            pin=pin,
+        )
+
+    if locked_candidates:
+        blocked = min(
+            locked_candidates,
+            key=lambda candidate: (
+                _applied_branch_rank(
+                    current_week,
+                    candidate[
+                        "branch"
+                    ],
+                ),
+                abs(
+                    current_week
+                    - int(
+                        candidate[
+                            "item"
+                        ]["week"]
+                    )
+                ),
+                int(
+                    candidate["number"]
+                ),
+            ),
+        )
+        item = blocked["item"]
+        metadata = {
+            "lab_number": int(
+                blocked["number"]
+            ),
+            "title": item["title"],
+            "branch": blocked[
+                "branch"
+            ],
+            "category": item[
+                "category"
+            ],
+            "task_category": item[
+                "task_category"
+            ],
+            "concepts": item[
+                "concepts"
+            ],
+            "assigned_week": int(
+                item["week"]
+            ),
+            "total_items": len(
+                APPLIED_EXERCISES
+            ),
+            "completed_items": len(
+                completed
+            ),
+            "pin": pin,
+            "missing": blocked[
+                "missing"
+            ],
+            "blocked_reason": (
+                "Unlock next: "
+                + "; ".join(
+                    blocked["missing"]
+                )
+            ),
+        }
+        metadata.update(pace)
+        return {
+            "locked": True,
+            "position": len(
+                completed
+            ),
+            "subposition": int(
+                blocked["number"]
+            ),
+            "metadata": metadata,
+        }
+
+    return None
+
+
 def _sync_sprint_prerequisites(
     conn,
     state,
@@ -1602,12 +2547,41 @@ def _sync_sprint_prerequisites(
         required = set()
         reason = None
 
+        applied_number = (
+            applied_exercise_number_for_label(
+                label
+            )
+        )
+        if applied_number is not None:
+            readiness = applied_lab_readiness(
+                conn,
+                state,
+                applied_number,
+                unlocked,
+            )
+            reason = (
+                (
+                    "Unlock first: "
+                    + "; ".join(
+                        readiness["missing"]
+                    )
+                )
+                if not readiness["ready"]
+                else (
+                    "Waiting for the Applied Labs "
+                    "adaptive track to select this branch."
+                )
+            )
+
         google_match = re.match(
             r"^\[Google Course (\d+)\]",
             label,
             re.IGNORECASE,
         )
-        if google_match:
+        if (
+            applied_number is None
+            and google_match
+        ):
             target_course = int(
                 google_match.group(1)
             )
@@ -1619,13 +2593,19 @@ def _sync_sprint_prerequisites(
                     f"{target_course} first."
                 )
 
-        elif "datacamp" in lower:
+        elif (
+            applied_number is None
+            and "datacamp" in lower
+        ):
             reason = (
                 "Managed by the independent "
                 "DataCamp track."
             )
 
-        elif row["category"] == "SQL":
+        elif (
+            applied_number is None
+            and row["category"] == "SQL"
+        ):
             title = re.sub(
                 r"^Solve\s+",
                 "",
@@ -1641,7 +2621,10 @@ def _sync_sprint_prerequisites(
                     )
                 )
 
-        elif row["category"] == "Portfolio":
+        elif (
+            applied_number is None
+            and row["category"] == "Portfolio"
+        ):
             required = (
                 _requirements_for_project(
                     label
@@ -1862,6 +2845,14 @@ def initialize(conn, state):
             0,
         ),
         "portfolio": (0, 0),
+        "applied": (
+            len(
+                _completed_applied_exercises(
+                    conn
+                )
+            ),
+            0,
+        ),
     }
 
     for track_key in TRACK_ORDER:
@@ -1974,6 +2965,12 @@ def sync_all(conn, state):
             conn,
             state,
             pace["portfolio"],
+            unlocked,
+        ),
+        "applied": _applied_target(
+            conn,
+            state,
+            pace["applied"],
             unlocked,
         ),
     }
@@ -2118,6 +3115,18 @@ def sync_all(conn, state):
             estimate=target["estimate"],
             linked_entity_id=target.get(
                 "linked_entity_id"
+            ),
+            priority=target.get(
+                "priority"
+            ),
+            energy=target.get(
+                "energy"
+            ),
+            destination=target.get(
+                "destination"
+            ),
+            category=target.get(
+                "category"
             ),
         )
 
@@ -2477,6 +3486,69 @@ def undo_completion(
         )
     )
 
+    applied_number_for_undo = (
+        applied_exercise_number_for_label(
+            task_row["label"]
+        )
+        if task_row is not None
+        else (
+            int(
+                _event_metadata(
+                    event
+                ).get(
+                    "lab_number"
+                )
+            )
+            if (
+                event is not None
+                and _event_metadata(
+                    event
+                ).get(
+                    "lab_number"
+                )
+                is not None
+            )
+            else None
+        )
+    )
+
+    if (
+        applied_number_for_undo
+        is not None
+    ):
+        branch = _applied_branch_for_number(
+            applied_number_for_undo
+        )
+        numbers = APPLIED_BRANCHES[
+            branch
+        ]
+        position = numbers.index(
+            applied_number_for_undo
+        )
+        completed_applied = (
+            _completed_applied_exercises(
+                conn
+            )
+        )
+        later_completed = [
+            number
+            for number in numbers[
+                position + 1:
+            ]
+            if number
+            in completed_applied
+        ]
+        if later_completed:
+            latest = later_completed[-1]
+            raise ValueError(
+                (
+                    f"Undo Applied Lab "
+                    f"{latest:02d} first. "
+                    f"The {branch} branch must "
+                    "remain sequential."
+                )
+            )
+
     if (
         event is not None
         and track_key
@@ -2589,6 +3661,52 @@ def undo_completion(
                WHERE platform='DataLemur'
                  AND title=?""",
             (sql_title,),
+        )
+
+    applied_number = (
+        applied_number_for_undo
+    )
+    if applied_number is not None:
+        item = APPLIED_EXERCISES[applied_number]
+        conn.execute(
+            """UPDATE applied_exercise_progress
+               SET status='Not Started',completed_date=NULL,updated_at=CURRENT_TIMESTAMP
+               WHERE exercise_number=?""",
+            (applied_number,),
+        )
+        conn.execute(
+            "DELETE FROM evidence WHERE source_name=?",
+            (f"Applied Lab {applied_number:02d}: {item['title']}",),
+        )
+
+    duckdb_number = (
+        exercise_number_for_label(
+            task_row["label"]
+        )
+        if task_row is not None
+        else None
+    )
+    if duckdb_number is not None:
+        item = DUCKDB_EXERCISES[
+            duckdb_number
+        ]
+        conn.execute(
+            """UPDATE duckdb_exercise_progress
+               SET status='Not Started',
+                   completed_date=NULL,
+                   updated_at=CURRENT_TIMESTAMP
+               WHERE exercise_number=?""",
+            (duckdb_number,),
+        )
+        conn.execute(
+            """DELETE FROM evidence
+               WHERE source_type='SQL Practice'
+                 AND source_name=?""",
+            (
+                f"DuckDB Exercise "
+                f"{duckdb_number:02d}: "
+                f"{item['title']}",
+            ),
         )
 
     if event is not None:
@@ -2888,6 +4006,19 @@ def task_detail(conn, task_id):
             if aligned_course
             else "Reinforces current SQL skills"
         )
+    elif track_key == "applied":
+        number = metadata.get(
+            "lab_number",
+            "?",
+        )
+        specific_work = (
+            f"Lab {number}: "
+            f"{metadata.get('title', 'Applied practice')}"
+        )
+        context = (
+            f"{metadata.get('branch', 'Applied')} • "
+            f"{pace_status}"
+        )
     elif track_key == "portfolio":
         specific_work = metadata.get(
             "milestone",
@@ -2966,10 +4097,31 @@ def focus_presentation(conn, item):
     )
     if link is not None:
         track_key = link["track_key"]
+        style_category = TRACK_CONFIG[
+            track_key
+        ]["category"]
+        if track_key == "applied":
+            state_row = _state_row(
+                conn,
+                "applied",
+            )
+            try:
+                applied_meta = json.loads(
+                    state_row["metadata"]
+                    or "{}"
+                )
+            except (
+                TypeError,
+                ValueError,
+            ):
+                applied_meta = {}
+            style_category = applied_meta.get(
+                "task_category",
+                style_category,
+            )
+
         return {
-            "style_category": TRACK_CONFIG[
-                track_key
-            ]["category"],
+            "style_category": style_category,
             "title": TRACK_CONFIG[
                 track_key
             ]["display_name"],
@@ -3231,6 +4383,134 @@ def complete_track_task(
             f"SQL completed: {title}"
         )
 
+    elif track_key == "applied":
+        number = (
+            _applied_number_from_target_key(
+                link["target_key"]
+            )
+        )
+        if number is None:
+            raise ValueError(
+                "The active Applied Lab could not be identified."
+            )
+
+        item = APPLIED_EXERCISES[
+            number
+        ]
+        progress_row = conn.execute(
+            """SELECT submission_path,notes
+               FROM applied_exercise_progress
+               WHERE exercise_number=?""",
+            (number,),
+        ).fetchone()
+        submission_path = (
+            progress_row[
+                "submission_path"
+            ]
+            if progress_row is not None
+            else None
+        )
+        notes = (
+            progress_row["notes"]
+            if progress_row is not None
+            else ""
+        )
+
+        conn.execute(
+            """INSERT INTO applied_exercise_progress
+               (
+                   exercise_number,status,
+                   submission_path,notes,
+                   completed_date,updated_at
+               )
+               VALUES(
+                   ?,'Completed',?,?,?,
+                   CURRENT_TIMESTAMP
+               )
+               ON CONFLICT(exercise_number)
+               DO UPDATE SET
+                   status='Completed',
+                   submission_path=COALESCE(
+                       excluded.submission_path,
+                       applied_exercise_progress.submission_path
+                   ),
+                   notes=COALESCE(
+                       excluded.notes,
+                       applied_exercise_progress.notes
+                   ),
+                   completed_date=excluded.completed_date,
+                   updated_at=CURRENT_TIMESTAMP""",
+            (
+                number,
+                submission_path,
+                notes,
+                date.today().isoformat(),
+            ),
+        )
+
+        source_name = (
+            f"Applied Lab {number:02d}: "
+            f"{item['title']}"
+        )
+        description = (
+            f"Completed a guided "
+            f"{item['category']} lab "
+            f"demonstrating "
+            f"{item['concepts']}."
+        )
+        if submission_path:
+            description += (
+                " Submission: "
+                + submission_path
+            )
+
+        conn.execute(
+            """INSERT INTO evidence
+               (
+                   skill,source_type,
+                   source_name,description
+               )
+               VALUES(?,?,?,?)
+               ON CONFLICT(
+                   skill,source_type,source_name
+               )
+               DO UPDATE SET
+                   description=excluded.description""",
+            (
+                item[
+                    "evidence_skill"
+                ],
+                item[
+                    "source_type"
+                ],
+                source_name,
+                description,
+            ),
+        )
+
+        branch = (
+            _applied_branch_for_number(
+                number
+            )
+        )
+        _record_event(
+            conn,
+            "applied",
+            f"lab:{number}",
+            item["title"],
+            metadata={
+                "lab_number": number,
+                "branch": branch,
+                "task_id": int(
+                    task_id
+                ),
+            },
+        )
+        message = (
+            f"Applied Lab {number:02d} "
+            f"completed: {item['title']}"
+        )
+
     elif track_key == "portfolio":
         project_task_id = link[
             "linked_entity_id"
@@ -3387,6 +4667,78 @@ def record_sql_completion(
     conn.commit()
 
 
+def active_applied_task_for_number(
+    conn,
+    number,
+):
+    row = conn.execute(
+        """SELECT
+               tt.task_id,
+               tt.target_key
+           FROM track_tasks tt
+           WHERE tt.track_key='applied'"""
+    ).fetchone()
+    if row is None:
+        return None
+
+    active_number = (
+        _applied_number_from_target_key(
+            row["target_key"]
+        )
+    )
+    return (
+        row
+        if active_number
+        == int(number)
+        else None
+    )
+
+
+def record_applied_change(
+    conn,
+    *,
+    number,
+    completed,
+    task_id=None,
+):
+    number = int(number)
+    item = APPLIED_EXERCISES[
+        number
+    ]
+    event_key = (
+        f"lab:{number}"
+    )
+
+    if completed:
+        _record_event(
+            conn,
+            "applied",
+            event_key,
+            item["title"],
+            metadata={
+                "lab_number": number,
+                "branch": (
+                    _applied_branch_for_number(
+                        number
+                    )
+                ),
+                "task_id": (
+                    int(task_id)
+                    if task_id is not None
+                    else None
+                ),
+            },
+        )
+    else:
+        conn.execute(
+            """DELETE FROM track_events
+               WHERE track_key='applied'
+                 AND event_key=?""",
+            (event_key,),
+        )
+    conn.commit()
+
+
 def record_portfolio_change(
     conn,
     *,
@@ -3483,6 +4835,126 @@ def snapshot(conn, state):
     return result
 
 
+def _skill_in_progress_sources(conn, state):
+    sources = {}
+    course = int(state["google_course"])
+
+    google_current = {
+        1: {"analytics_foundations"},
+        2: {"business_framing"},
+        3: {"data_preparation"},
+        4: {"data_cleaning"},
+        5: {
+            "analysis_foundations", "sql_fundamentals",
+            "sql_querying", "sql_aggregation"
+        },
+        6: {"visualization_foundations", "data_storytelling"},
+        8: {"portfolio_delivery"},
+        9: {"career_readiness"},
+    }
+    for skill_key in google_current.get(course, set()):
+        _append_evidence(
+            sources,
+            skill_key,
+            f"Google Course {course} in progress",
+        )
+
+    datacamp = _state_row(conn, "datacamp")
+    data_position = int(datacamp["position"]) if datacamp else 0
+    next_position = data_position + 1
+    if next_position <= len(DATACAMP_TRACK):
+        course_name, chapter, _ = DATACAMP_TRACK[next_position - 1]
+        for skill_key, threshold in DATACAMP_SKILL_THRESHOLDS.items():
+            if threshold == next_position:
+                _append_evidence(
+                    sources,
+                    skill_key,
+                    f"DataCamp: {course_name} — {chapter} in progress",
+                )
+
+    rows = conn.execute(
+        """SELECT s.label
+           FROM sprint_tasks s
+           JOIN task_metadata m ON m.task_id=s.id
+           WHERE s.completed=0 AND m.status='In Progress'"""
+    ).fetchall()
+    for row in rows:
+        number = exercise_number_for_label(row["label"])
+        if number is None:
+            continue
+        exercise = DUCKDB_EXERCISES[number]
+        for skill_key in DUCKDB_SKILL_EVIDENCE.get(number, set()):
+            _append_evidence(
+                sources,
+                skill_key,
+                f"DuckDB Exercise {number:02d}: {exercise['title']} in progress",
+            )
+    applied_rows = conn.execute(
+        """SELECT s.label FROM sprint_tasks s JOIN task_metadata m ON m.task_id=s.id
+           WHERE s.completed=0 AND m.status='In Progress'"""
+    ).fetchall()
+    for row in applied_rows:
+        number = applied_exercise_number_for_label(row["label"])
+        if number is None:
+            continue
+        item = APPLIED_EXERCISES[number]
+        for skill_key in APPLIED_SKILL_EVIDENCE.get(number, set()):
+            _append_evidence(
+                sources,
+                skill_key,
+                f"Applied Lab {number:02d}: {item['title']} in progress",
+            )
+
+    return sources
+
+
+def skill_inventory(conn, state):
+    evidence_map = _skill_evidence(conn, state)
+    progress_map = _skill_in_progress_sources(conn, state)
+    inventory = []
+
+    for skill_key, (display_name, default_evidence) in SKILL_DEFINITIONS.items():
+        evidence = list(evidence_map.get(skill_key, []))
+        in_progress = list(progress_map.get(skill_key, []))
+
+        if evidence:
+            status = "Learned"
+        elif in_progress:
+            status = "In Progress"
+        else:
+            status = "Locked"
+
+        category = (
+            "SQL"
+            if skill_key.startswith("sql_")
+            else SKILL_CATEGORY.get(skill_key, "Analytics")
+        )
+        inventory.append(
+            {
+                "skill_key": skill_key,
+                "display_name": display_name,
+                "category": category,
+                "status": status,
+                "evidence": evidence,
+                "in_progress": in_progress,
+                "accepted_evidence": SQL_SKILL_ACCEPTED_EVIDENCE.get(
+                    skill_key,
+                    default_evidence,
+                ),
+            }
+        )
+
+    order = {"Learned": 0, "In Progress": 1, "Locked": 2}
+    return sorted(
+        inventory,
+        key=lambda item: (
+            order[item["status"]],
+            item["category"],
+            item["display_name"],
+        ),
+    )
+
+
 def sql_problem_readiness(
     conn,
     state,
@@ -3512,22 +4984,31 @@ def sql_problem_readiness(
         unlocked
     )
 
+    evidence_map = _skill_evidence(conn, state)
+
     return {
         "ready": not missing,
-        "required_keys": sorted(
-            required
-        ),
+        "required_keys": sorted(required),
         "required_names": [
             SKILL_DEFINITIONS[key][0]
             for key in sorted(required)
         ],
-        "missing_keys": sorted(
-            missing
-        ),
+        "missing_keys": sorted(missing),
         "missing_names": [
             SKILL_DEFINITIONS[key][0]
             for key in sorted(missing)
         ],
+        "evidence": {
+            key: list(evidence_map.get(key, []))
+            for key in sorted(required)
+        },
+        "accepted_evidence": {
+            key: SQL_SKILL_ACCEPTED_EVIDENCE.get(
+                key,
+                SKILL_DEFINITIONS[key][1],
+            )
+            for key in sorted(missing)
+        },
     }
 
 

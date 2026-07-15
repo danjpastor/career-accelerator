@@ -60,3 +60,8 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Complete Applied Lab 18: Repair a misleading chart and narrative
+- [ ] Complete Applied Lab 19: Timed analysis of missed deadlines

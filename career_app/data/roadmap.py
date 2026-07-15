@@ -103,6 +103,19 @@ WEEKLY_GUIDANCE = {
 }
 
 
+APPLIED_LAB_SUMMARY = {
+    3: ["Excel analyst workbook"],
+    4: ["SQL validation checklist", "Broken join diagnosis"],
+    5: ["Executive summary and memo", "KPI repair"],
+    6: ["Misleading story repair", "Timed missed-deadlines request"],
+    7: ["Power BI import/profile", "Power Query transformations"],
+    8: ["Power BI model and DAX", "pandas loading and cleaning"],
+    9: ["Power BI report and deployment", "Dashboard walkthrough"],
+    10: ["pandas outputs and SQL parity", "Finance reconciliation"],
+    11: ["Decision log", "Responsible metric response"],
+}
+
+
 DATACAMP_CURRICULUM_VERSION = "2026-07-14"
 
 DATACAMP_TRACK = [

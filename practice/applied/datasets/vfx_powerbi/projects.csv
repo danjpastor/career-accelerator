@@ -1,0 +1,4 @@
+project_id,project_name,client,start_date,target_end_date,budget_hours,status
+PRJ01,Orion,Nova Pictures,2026-01-05,2026-04-30,1600,Active
+PRJ02,Harbor,Blue Finch,2026-02-01,2026-06-15,1100,Active
+PRJ03,Ember,Silver Gate,2025-11-15,2026-02-28,900,Complete
