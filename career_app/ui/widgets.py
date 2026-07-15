@@ -683,6 +683,8 @@ class TaskRow(QWidget):
         category_text="",
         category_color=None,
         on_toggle=None,
+        action_text=None,
+        on_action=None,
     ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
@@ -773,9 +775,34 @@ class TaskRow(QWidget):
                 Qt.AlignRight | Qt.AlignVCenter,
             )
 
+        if action_text and on_action is not None:
+            action = QPushButton(action_text)
+            action.setObjectName("WorkspaceOpen")
+            action.setFixedSize(60, 28)
+            action.setToolTip("Open Task Workspace")
+            action.setProperty(
+                "workspace_open_button",
+                True,
+            )
+            action.clicked.connect(on_action)
+            layout.addWidget(
+                action,
+                0,
+                Qt.AlignVCenter,
+            )
+
 
 class FocusRow(QWidget):
-    def __init__(self, emoji, title, detail, duration, accent):
+    def __init__(
+        self,
+        emoji,
+        title,
+        detail,
+        duration,
+        accent,
+        action_text=None,
+        on_action=None,
+    ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -831,6 +858,22 @@ class FocusRow(QWidget):
             Qt.AlignRight | Qt.AlignVCenter
         )
         layout.addWidget(duration_label)
+
+        if action_text and on_action is not None:
+            action = QPushButton(action_text)
+            action.setObjectName("WorkspaceOpen")
+            action.setFixedSize(60, 28)
+            action.setToolTip("Open Task Workspace")
+            action.setProperty(
+                "workspace_open_button",
+                True,
+            )
+            action.clicked.connect(on_action)
+            layout.addWidget(
+                action,
+                0,
+                Qt.AlignVCenter,
+            )
 
 
 class StatRow(QWidget):

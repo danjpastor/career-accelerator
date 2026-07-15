@@ -46,6 +46,35 @@ CREATE TABLE IF NOT EXISTS task_metadata (
 );
 
 
+CREATE TABLE IF NOT EXISTS task_workspaces (
+    workspace_key TEXT PRIMARY KEY,
+    task_id INTEGER,
+    task_label TEXT NOT NULL,
+    track_key TEXT,
+    target_key TEXT,
+    workspace_type TEXT NOT NULL DEFAULT 'task_notes',
+    document_path TEXT,
+    content TEXT NOT NULL DEFAULT '',
+    scheduled_for TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_opened_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS task_workspace_artifacts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    workspace_key TEXT NOT NULL,
+    artifact_path TEXT NOT NULL,
+    label TEXT,
+    is_managed INTEGER NOT NULL DEFAULT 0,
+    source_key TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(workspace_key, artifact_path),
+    FOREIGN KEY(workspace_key)
+        REFERENCES task_workspaces(workspace_key)
+        ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS daily_focus (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     focus_date TEXT NOT NULL,
@@ -252,6 +281,26 @@ def _ensure_columns(conn):
         "study_sessions": [
             ("notes", "TEXT"),
             ("productivity_score", "INTEGER"),
+            ("task_id", "INTEGER"),
+            ("workspace_key", "TEXT"),
+            ("task_label_snapshot", "TEXT"),
+        ],
+        "task_workspace_artifacts": [
+            ("is_managed", "INTEGER NOT NULL DEFAULT 0"),
+            ("source_key", "TEXT"),
+        ],
+        "task_workspaces": [
+            ("task_id", "INTEGER"),
+            ("task_label", "TEXT NOT NULL DEFAULT ''"),
+            ("track_key", "TEXT"),
+            ("target_key", "TEXT"),
+            ("workspace_type", "TEXT NOT NULL DEFAULT 'task_notes'"),
+            ("document_path", "TEXT"),
+            ("content", "TEXT NOT NULL DEFAULT ''"),
+            ("scheduled_for", "TEXT"),
+            ("created_at", "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"),
+            ("updated_at", "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"),
+            ("last_opened_at", "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"),
         ],
         "sql_practice": [
             ("topic", "TEXT"),
@@ -323,6 +372,8 @@ def factory_reset(conn, start_date):
     """
     progress_tables = [
         "daily_focus",
+        "task_workspace_artifacts",
+        "task_workspaces",
         "achievements",
         "weekly_summaries",
         "retrospective_notes",

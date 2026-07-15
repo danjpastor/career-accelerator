@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.16 includes:
+Version 9.3.20 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -447,3 +447,42 @@ and optional Power BI performance optimization.
 
 The Applied Labs library now contains 36 labs. New work is spaced across
 Weeks 4–12 and uses the existing branched adaptive scheduler.
+
+
+## Unified Task Workspace
+
+Version 9.3.17 adds a task workspace that combines documents, reflections,
+retrospectives, study plans, task scheduling, artifacts, and linked Study
+Sessions. Workspaces are available from Dashboard task rows, Adaptive Planner,
+Weekly Review, Recent Sessions, and a dedicated sidebar page.
+
+
+## Automatic Workspace Artifacts
+
+Version 9.3.18 automatically links DataLemur solution scripts, DuckDB
+submissions, and Applied Lab submissions to their matching Task Workspaces.
+The original file is referenced without being copied.
+
+Google Certificate and DataCamp work remains progress-and-session-only and is
+excluded from Task Workspaces.
+
+
+## Sidebar Layout Correction
+
+Version 9.3.19 compacts the sidebar navigation so the Current Streak and
+Total Study Time cards retain their complete vertical layout at the
+application's supported minimum window size.
+
+Task Workspaces now appears immediately above Settings.
+
+
+The Today's Focus and Next Tasks Open controls now use full-height rows, dedicated unclipped sizing, animated hover feedback, and animated pressed feedback.
+
+
+## Compact Dashboard Restoration
+
+Version 9.3.20 restores the original compact height of the Today's Focus,
+Next Tasks, and Study Session cards.
+
+The workspace Open controls retain hover and pressed animation but use a
+smaller dedicated size that fits the original task-row proportions.

@@ -29,10 +29,12 @@ from career_app.database import (
 from career_app.data.applied_exercises import (
     APPLIED_EXERCISES,
     CATEGORY_ORDER,
+    exercise_number_for_label as applied_exercise_number_for_label,
     exercise_source as applied_exercise_source,
 )
 from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
+    exercise_number_for_label as duckdb_exercise_number_for_label,
     exercise_source,
 )
 from career_app.data.roadmap import (
@@ -48,12 +50,14 @@ from career_app.services import (
     duckdb_workspace,
     session_guard,
     sql_workspace,
+    task_workspace,
     tracks,
 )
 from career_app.services.backup import create_backup
 from career_app.services.migration import migrate
 from career_app.services.publisher import publish
 from career_app.theme import COLORS, stylesheet
+from career_app.ui.task_workspace import TaskWorkspaceDialog
 from career_app.ui.widgets import (
     AreaChart, BadgeCard, Card, CircularTimer, Divider, FocusRow,
     FooterMetricBox, MetricRow, MiniSparkline, Ring, SectionHeader,
@@ -71,8 +75,9 @@ NAV = [
     ("⏱️ Study Session", 5),
     ("🎯 Job Readiness", 6),
     ("💼 Applications", 7),
-    ("📝 Weekly Review", 8),
+    ("📝 Weekly Summary", 8),
     ("🚀 Publish & Git", 9),
+    ("🗂️ Task Workspaces", 11),
     ("⚙️ Settings", 10),
 ]
 
@@ -146,11 +151,31 @@ class ButtonFeedbackFilter(QObject):
                     )
 
             elif event_type == QEvent.MouseButtonRelease:
+                target = (
+                    0.94
+                    if (
+                        watched.property(
+                            "workspace_open_button"
+                        )
+                        and watched.underMouse()
+                    )
+                    else 1.0
+                )
                 self._animate(
                     watched,
-                    1.0,
+                    target,
                     115,
                 )
+
+            elif event_type == QEvent.Enter:
+                if watched.property(
+                    "workspace_open_button"
+                ):
+                    self._animate(
+                        watched,
+                        0.94,
+                        95,
+                    )
 
             elif event_type == QEvent.KeyPress:
                 if event.key() in (
@@ -299,6 +324,7 @@ class CareerAccelerator(QMainWindow):
             self.review_page,
             self.publish_page,
             self.settings_page,
+            self.task_workspaces_page,
         ]
         for builder in builders:
             self.stack.addWidget(builder())
@@ -347,8 +373,8 @@ class CareerAccelerator(QMainWindow):
         side.setFixedWidth(266)
 
         layout = QVBoxLayout(side)
-        layout.setContentsMargins(16, 20, 16, 16)
-        layout.setSpacing(6)
+        layout.setContentsMargins(16, 14, 16, 12)
+        layout.setSpacing(4)
 
         logo_row = QHBoxLayout()
         logo = QLabel("🚀")
@@ -376,23 +402,10 @@ class CareerAccelerator(QMainWindow):
         group.setExclusive(True)
         self.nav_buttons = []
 
-        nav_items = [
-            ("🏠 Dashboard", 0),
-            ("🚀 Adaptive Planner", 1),
-            ("📚 Learning", 2),
-            ("📁 Portfolio Workspace", 3),
-            ("💻 SQL Companion", 4),
-            ("⏱️ Study Session", 5),
-            ("🎯 Job Readiness", 6),
-            ("💼 Applications", 7),
-            ("📝 Weekly Summary", 8),
-            ("🚀 Publish & Git", 9),
-            ("⚙️ Settings", 10),
-        ]
-
-        for text, index in nav_items:
+        for text, index in NAV:
             button = QPushButton(text)
             button.setObjectName("Nav")
+            button.setFixedHeight(38)
             button.setCheckable(True)
             button.clicked.connect(
                 lambda checked=False, target=index: self.navigate(target)
@@ -407,6 +420,8 @@ class CareerAccelerator(QMainWindow):
 
         streak_card = QFrame()
         streak_card.setObjectName("SidebarCard")
+        streak_card.setMinimumHeight(142)
+        self.sidebar_streak_card = streak_card
         streak_layout = QVBoxLayout(streak_card)
         streak_layout.setContentsMargins(16, 14, 16, 14)
         streak_layout.setSpacing(6)
@@ -444,6 +459,8 @@ class CareerAccelerator(QMainWindow):
 
         time_card = QFrame()
         time_card.setObjectName("SidebarCard")
+        time_card.setMinimumHeight(146)
+        self.sidebar_time_card = time_card
         time_layout = QVBoxLayout(time_card)
         time_layout.setContentsMargins(16, 14, 16, 14)
         time_layout.setSpacing(6)
@@ -500,6 +517,7 @@ class CareerAccelerator(QMainWindow):
             8: "Weekly Summary",
             9: "Publish & Git",
             10: "Settings",
+            11: "Task Workspaces",
         }
         target = label_map.get(index)
         if target:
@@ -642,6 +660,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_primary_grid.setContentsMargins(0, 0, 0, 0)
         self.dashboard_primary_grid.setHorizontalSpacing(10)
         self.dashboard_primary_grid.setVerticalSpacing(10)
+        self.dashboard_primary_grid.setRowStretch(0, 0)
 
         self.dashboard_focus_card = Card()
         self.dashboard_focus_card.setMinimumHeight(286)
@@ -1447,6 +1466,9 @@ class CareerAccelerator(QMainWindow):
         body = QHBoxLayout()
         queue = Card("Recommended Priority Queue")
         self.plan_list = QListWidget()
+        self.plan_list.itemDoubleClicked.connect(
+            lambda _item: self.open_plan_workspace()
+        )
         queue.layout.addWidget(self.plan_list)
         queue_buttons = QHBoxLayout()
         continue_button = QPushButton("Continue")
@@ -1456,9 +1478,12 @@ class CareerAccelerator(QMainWindow):
         defer_button.clicked.connect(self.defer_plan)
         block_button = QPushButton("Mark Blocked")
         block_button.clicked.connect(self.block_plan)
+        workspace_button = QPushButton("Open Workspace")
+        workspace_button.clicked.connect(self.open_plan_workspace)
         queue_buttons.addWidget(continue_button)
         queue_buttons.addWidget(defer_button)
         queue_buttons.addWidget(block_button)
+        queue_buttons.addWidget(workspace_button)
         queue.layout.addLayout(queue_buttons)
         body.addWidget(queue, 1)
 
@@ -1473,10 +1498,19 @@ class CareerAccelerator(QMainWindow):
         self.backlog_list.setObjectName(
             "SprintBacklogList"
         )
+        self.backlog_list.itemDoubleClicked.connect(
+            lambda _item: self.open_backlog_workspace()
+        )
         backlog.layout.addWidget(self.backlog_list)
+        backlog_actions = QHBoxLayout()
         edit = QPushButton("Edit Selected Task")
         edit.clicked.connect(self.edit_task)
-        backlog.layout.addWidget(edit)
+        workspace = QPushButton("Open Workspace")
+        workspace.setObjectName("Primary")
+        workspace.clicked.connect(self.open_backlog_workspace)
+        backlog_actions.addWidget(edit)
+        backlog_actions.addWidget(workspace)
+        backlog.layout.addLayout(backlog_actions)
 
         history = QPushButton(
             "Completion History / Undo"
@@ -3163,6 +3197,8 @@ class CareerAccelerator(QMainWindow):
         self.session_productivity.setValue(7)
         self.session_sql = QSpinBox()
         self.session_sql.setRange(0, 20)
+        self.session_task = QComboBox()
+        self.session_task.addItem("No linked task", None)
 
         self.session_google = QLineEdit()
         self.session_google.setPlaceholderText(
@@ -3193,37 +3229,46 @@ class CareerAccelerator(QMainWindow):
         form_grid.addWidget(QLabel("SQL problems"), 1, 2)
         form_grid.addWidget(self.session_sql, 1, 3)
 
-        form_grid.addWidget(QLabel("Google progress"), 2, 0)
+        form_grid.addWidget(QLabel("Linked task"), 2, 0)
         form_grid.addWidget(
-            self.session_google,
+            self.session_task,
             2,
             1,
             1,
             3,
         )
 
-        form_grid.addWidget(QLabel("DataCamp progress"), 3, 0)
+        form_grid.addWidget(QLabel("Google progress"), 3, 0)
         form_grid.addWidget(
-            self.session_datacamp,
+            self.session_google,
             3,
             1,
             1,
             3,
         )
 
-        form_grid.addWidget(QLabel("Portfolio progress"), 4, 0)
+        form_grid.addWidget(QLabel("DataCamp progress"), 4, 0)
         form_grid.addWidget(
-            self.session_portfolio,
+            self.session_datacamp,
             4,
             1,
             1,
             3,
         )
 
-        form_grid.addWidget(QLabel("Notes"), 5, 0)
+        form_grid.addWidget(QLabel("Portfolio progress"), 5, 0)
+        form_grid.addWidget(
+            self.session_portfolio,
+            5,
+            1,
+            1,
+            3,
+        )
+
+        form_grid.addWidget(QLabel("Notes"), 6, 0)
         form_grid.addWidget(
             self.session_notes,
-            5,
+            6,
             1,
             1,
             3,
@@ -3249,7 +3294,16 @@ class CareerAccelerator(QMainWindow):
         )
         self.session_list = QListWidget()
         self.session_list.setMinimumHeight(190)
+        self.session_list.itemDoubleClicked.connect(
+            lambda _item: self.open_selected_session_workspace()
+        )
         recent.layout.addWidget(self.session_list)
+        recent_actions = QHBoxLayout()
+        open_linked = QPushButton("Open Linked Task Workspace")
+        open_linked.clicked.connect(self.open_selected_session_workspace)
+        recent_actions.addWidget(open_linked)
+        recent_actions.addStretch()
+        recent.layout.addLayout(recent_actions)
         root.addWidget(recent, 1)
 
         return page
@@ -3564,6 +3618,18 @@ class CareerAccelerator(QMainWindow):
         generate.setObjectName("Primary")
         generate.clicked.connect(self.generate_summary)
         form_card.layout.addWidget(generate)
+        workspace_buttons = QHBoxLayout()
+        retrospective = QPushButton("Open Retrospective Workspace")
+        retrospective.clicked.connect(
+            lambda: self.open_weekly_workspace("retrospective")
+        )
+        study_plan = QPushButton("Open Study Plan Workspace")
+        study_plan.clicked.connect(
+            lambda: self.open_weekly_workspace("study_plan")
+        )
+        workspace_buttons.addWidget(retrospective)
+        workspace_buttons.addWidget(study_plan)
+        form_card.layout.addLayout(workspace_buttons)
         body.addWidget(form_card, 1)
 
         summaries = Card("Saved Summaries")
@@ -3774,6 +3840,102 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(status_card)
         root.addStretch()
 
+        return page
+
+    # ---------- Task Workspaces ----------
+    def task_workspaces_page(self):
+        page, root = self.page(
+            "🗂️ Task Workspaces",
+            (
+                "Open every task's notes, reflection, retrospective, schedule, "
+                "artifacts, and linked study sessions from one place."
+            ),
+        )
+
+        quick = Card(
+            "Quick Weekly Workspaces",
+            "Create or open the current week's planning and reflection documents.",
+        )
+        quick_row = QHBoxLayout()
+        retrospective = QPushButton("Open Current Retrospective")
+        retrospective.setObjectName("Primary")
+        retrospective.clicked.connect(
+            lambda: self.open_weekly_workspace("retrospective")
+        )
+        study_plan = QPushButton("Open Current Study Plan")
+        study_plan.clicked.connect(
+            lambda: self.open_weekly_workspace("study_plan")
+        )
+        quick_row.addWidget(retrospective)
+        quick_row.addWidget(study_plan)
+        quick_row.addStretch()
+        quick.layout.addLayout(quick_row)
+        root.addWidget(quick)
+
+        controls = Card("Find a Task")
+        filter_row = QHBoxLayout()
+        filter_row.addWidget(QLabel("Week"))
+        self.workspace_week_filter = QComboBox()
+        self.workspace_week_filter.addItem("Current Week", "current")
+        self.workspace_week_filter.addItem("All Weeks", "all")
+        for week in range(1, 13):
+            self.workspace_week_filter.addItem(f"Week {week}", week)
+        self.workspace_week_filter.currentIndexChanged.connect(
+            self.refresh_task_workspaces
+        )
+        filter_row.addWidget(self.workspace_week_filter)
+
+        filter_row.addWidget(QLabel("Status"))
+        self.workspace_status_filter = QComboBox()
+        self.workspace_status_filter.addItems(
+            [
+                "All",
+                "Not Started",
+                "In Progress",
+                "Blocked",
+                "Deferred",
+                "Completed",
+            ]
+        )
+        self.workspace_status_filter.currentTextChanged.connect(
+            self.refresh_task_workspaces
+        )
+        filter_row.addWidget(self.workspace_status_filter)
+
+        self.workspace_search = QLineEdit()
+        self.workspace_search.setPlaceholderText("Search task names")
+        self.workspace_search.textChanged.connect(self.refresh_task_workspaces)
+        filter_row.addWidget(self.workspace_search, 1)
+        controls.layout.addLayout(filter_row)
+        root.addWidget(controls)
+
+        workspace_card = Card(
+            "Task Library",
+            "Double-click a task or select it and choose Open Workspace.",
+        )
+        self.workspace_task_summary = QLabel("")
+        self.workspace_task_summary.setObjectName("Muted")
+        workspace_card.layout.addWidget(self.workspace_task_summary)
+        self.workspace_task_list = QListWidget()
+        self.workspace_task_list.itemDoubleClicked.connect(
+            lambda _item: self.open_selected_task_workspace()
+        )
+        workspace_card.layout.addWidget(self.workspace_task_list, 1)
+
+        buttons = QHBoxLayout()
+        open_button = QPushButton("Open Workspace")
+        open_button.setObjectName("Primary")
+        open_button.clicked.connect(self.open_selected_task_workspace)
+        session_button = QPushButton("Start Linked Study Session")
+        session_button.clicked.connect(self.start_selected_workspace_session)
+        edit_button = QPushButton("Edit Task")
+        edit_button.clicked.connect(self.edit_selected_workspace_task)
+        buttons.addWidget(open_button)
+        buttons.addWidget(session_button)
+        buttons.addWidget(edit_button)
+        buttons.addStretch()
+        workspace_card.layout.addLayout(buttons)
+        root.addWidget(workspace_card, 1)
         return page
 
     def update_time_based_header(self):
@@ -4520,6 +4682,7 @@ class CareerAccelerator(QMainWindow):
         self.refresh_applications()
         self.refresh_summaries()
         self.refresh_git()
+        self.refresh_task_workspaces()
 
         if newly_unlocked and self.isVisible():
             extra = (
@@ -4804,6 +4967,17 @@ class CareerAccelerator(QMainWindow):
                     detail,
                     f"{minutes}m",
                     accent,
+                    action_text=(
+                        "Open"
+                        if item.get("task_id") is not None
+                        else None
+                    ),
+                    on_action=(
+                        lambda _checked=False, task_id=item.get("task_id"):
+                        self.open_task_workspace(task_id=task_id)
+                        if task_id is not None
+                        else None
+                    ),
                 )
             )
 
@@ -4846,6 +5020,11 @@ class CareerAccelerator(QMainWindow):
                     category_color=task_category_colors.get(
                         row["category"],
                         COLORS["muted"],
+                    ),
+                    action_text="Open",
+                    on_action=(
+                        lambda _checked=False, task_id=row["id"]:
+                        self.open_task_workspace(task_id=task_id)
                     ),
                 )
                 task_row.checkbox.stateChanged.connect(
@@ -5587,18 +5766,91 @@ class CareerAccelerator(QMainWindow):
         self.refresh_duckdb_exercises()
 
 
-    def refresh_sessions(self):
-        self.session_list.clear()
+    def refresh_session_task_choices(self):
+        if not hasattr(self, "session_task"):
+            return
+        requested = self.session_task.property("pendingTaskId")
+        current = (
+            requested
+            if requested is not None
+            else self.session_task.currentData()
+        )
+        self.session_task.setProperty("pendingTaskId", None)
+
+        self.session_task.blockSignals(True)
+        self.session_task.clear()
+        self.session_task.addItem("No linked task", None)
         rows = self.conn.execute(
-            "SELECT * FROM study_sessions ORDER BY id DESC LIMIT 30"
+            """SELECT s.id,s.label,m.status,m.category
+               FROM sprint_tasks s
+               JOIN task_metadata m ON m.task_id=s.id
+               WHERE (
+                   s.week=? AND m.status<>'Completed'
+               ) OR s.id=?
+               ORDER BY
+                   CASE WHEN s.id=? THEN 0 ELSE 1 END,
+                   m.priority,
+                   s.sort_order""",
+            (
+                self.state["current_week"],
+                int(current) if current is not None else -1,
+                int(current) if current is not None else -1,
+            ),
         ).fetchall()
         for row in rows:
+            self.session_task.addItem(
+                f"{row['category']} • {row['label']}",
+                int(row["id"]),
+            )
+        index = self.session_task.findData(current)
+        self.session_task.setCurrentIndex(index if index >= 0 else 0)
+        self.session_task.blockSignals(False)
+
+    def refresh_sessions(self):
+        self.refresh_session_task_choices()
+        self.session_list.clear()
+        rows = self.conn.execute(
+            """SELECT * FROM study_sessions
+               ORDER BY id DESC LIMIT 30"""
+        ).fetchall()
+        for row in rows:
+            linked = (
+                f" • Task: {row['task_label_snapshot']}"
+                if row["task_label_snapshot"]
+                else ""
+            )
             self.session_list.addItem(
                 f"{row['session_date']} • {row['hours']:g}h • "
-                f"Productivity {row['productivity_score'] or '-'} • "
+                f"Productivity {row['productivity_score'] or '-'}{linked}\n"
                 f"Google: {row['google_progress'] or '-'} • "
                 f"SQL: {row['sql_problems']}"
             )
+            item = self.session_list.item(self.session_list.count() - 1)
+            item.setData(
+                Qt.ItemDataRole.UserRole,
+                {
+                    "session_id": int(row["id"]),
+                    "task_id": row["task_id"],
+                    "workspace_key": row["workspace_key"],
+                },
+            )
+
+    def open_selected_session_workspace(self):
+        item = self.session_list.currentItem()
+        if item is None:
+            self.statusBar().showMessage("Select a study session first.", 3200)
+            return
+        data = item.data(Qt.ItemDataRole.UserRole) or {}
+        if data.get("workspace_key"):
+            self.open_task_workspace(workspace_key=data["workspace_key"])
+        elif data.get("task_id"):
+            self.open_task_workspace(task_id=int(data["task_id"]))
+        else:
+            self.statusBar().showMessage(
+                "That session is not linked to a task workspace.",
+                4200,
+            )
+
 
     def refresh_readiness(self):
         data = analytics.readiness(
@@ -6008,6 +6260,8 @@ class CareerAccelerator(QMainWindow):
                 f"#{row['id']} • {row['estimated_minutes']}m • "
                 f"{row['energy']} • {row['category']} • {row['label']}"
             )
+            item = self.plan_list.item(self.plan_list.count() - 1)
+            item.setData(Qt.ItemDataRole.UserRole, int(row["id"]))
         if not rows:
             self.plan_list.addItem("No eligible tasks for this time and energy level.")
         elif remaining:
@@ -6084,9 +6338,13 @@ class CareerAccelerator(QMainWindow):
             self.conn.commit()
             self.refresh_all()
 
-    def edit_task(self):
-        task_id = self.selected_task_id(
-            self.backlog_list
+    def edit_task(self, task_id=None):
+        if isinstance(task_id, bool):
+            task_id = None
+        task_id = (
+            int(task_id)
+            if task_id is not None
+            else self.selected_task_id(self.backlog_list)
         )
         if not task_id:
             self.statusBar().showMessage(
@@ -6431,6 +6689,291 @@ class CareerAccelerator(QMainWindow):
             6500,
         )
 
+
+    def complete_workspace_task(self, task_id):
+        task_id = int(task_id)
+        row = task_workspace.task_record(self.conn, task_id)
+        if row is None:
+            raise ValueError("The selected task no longer exists.")
+        if row["prerequisite_state"] == "Blocked":
+            raise ValueError(
+                row["prerequisite_reason"]
+                or "Complete the required prerequisites before finishing this task."
+            )
+
+        label = str(row["label"] or "")
+        applied_number = applied_exercise_number_for_label(label)
+        duckdb_number = duckdb_exercise_number_for_label(label)
+        session_snapshot = session_guard.capture(self)
+
+        try:
+            if applied_number is not None:
+                readiness = tracks.applied_lab_readiness(
+                    self.conn,
+                    self.state,
+                    applied_number,
+                )
+                if not readiness["ready"]:
+                    raise ValueError(
+                        "Complete the following first:\n\n"
+                        + "\n".join(
+                            f"• {reason}"
+                            for reason in readiness["missing"]
+                        )
+                    )
+                submission = applied_workspace.submission_path(
+                    ROOT,
+                    applied_number,
+                )
+                if not submission.exists():
+                    raise ValueError(
+                        "Create the Applied Lab submission before marking it complete."
+                    )
+                if not applied_workspace.submission_has_changes(
+                    ROOT,
+                    applied_number,
+                ):
+                    raise ValueError(
+                        "The Applied Lab submission still matches the starter. "
+                        "Add your completed work and validation before marking it complete."
+                    )
+                progress = applied_workspace.progress(
+                    self.conn,
+                    ROOT,
+                    applied_number,
+                )
+                applied_workspace.save_progress(
+                    self.conn,
+                    ROOT,
+                    applied_number,
+                    status="Completed",
+                    notes=progress["notes"],
+                )
+                active = tracks.active_applied_task_for_number(
+                    self.conn,
+                    applied_number,
+                )
+                if active is not None:
+                    tracks.complete_track_task(
+                        self.conn,
+                        int(active["task_id"]),
+                        self.state,
+                    )
+                else:
+                    tracks.record_applied_change(
+                        self.conn,
+                        number=applied_number,
+                        completed=True,
+                        task_id=task_id,
+                    )
+                message = f"Applied Lab {applied_number:02d} completed."
+
+            elif duckdb_number is not None:
+                submission = duckdb_workspace.submission_path(
+                    ROOT,
+                    duckdb_number,
+                )
+                if not submission.exists():
+                    raise ValueError(
+                        "Create the DuckDB submission before marking it complete."
+                    )
+                if not duckdb_workspace.submission_has_changes(
+                    ROOT,
+                    duckdb_number,
+                ):
+                    raise ValueError(
+                        "The DuckDB submission still matches the starter SQL. "
+                        "Complete and validate the exercise first."
+                    )
+                progress = duckdb_workspace.progress(
+                    self.conn,
+                    ROOT,
+                    duckdb_number,
+                )
+                duckdb_workspace.save_progress(
+                    self.conn,
+                    ROOT,
+                    duckdb_number,
+                    status="Completed",
+                    notes=progress["notes"],
+                )
+                message = f"DuckDB Exercise {duckdb_number:02d} completed."
+
+            else:
+                self.complete_task(task_id)
+                return
+
+            self.state = state(self.conn)
+            tracks.sync_all(self.conn, self.state)
+            self.state = state(self.conn)
+            self.refresh_all(sync_tracks=False)
+            self.statusBar().showMessage(
+                message + " Evidence and scheduling were updated.",
+                5600,
+            )
+        finally:
+            session_guard.restore(self, session_snapshot)
+
+    def open_task_workspace(self, *, task_id=None, workspace_key=None):
+        if task_id is None and workspace_key is None:
+            self.statusBar().showMessage("Select a task first.", 3200)
+            return
+        try:
+            dialog = TaskWorkspaceDialog(
+                self,
+                conn=self.conn,
+                root=ROOT,
+                state=self.state,
+                task_id=(int(task_id) if task_id is not None else None),
+                workspace_key=workspace_key,
+                complete_callback=self.complete_workspace_task,
+                refresh_callback=lambda: self.refresh_all(sync_tracks=False),
+                start_session_callback=self.start_session_for_task,
+                edit_task_callback=self.edit_task,
+            )
+            dialog.exec()
+            self.refresh_all(sync_tracks=False)
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Open Task Workspace",
+                str(exc),
+            )
+
+    def open_plan_workspace(self):
+        task_id = self.selected_task_id(self.plan_list)
+        if task_id is None:
+            self.statusBar().showMessage("Select a planned task first.", 3200)
+            return
+        self.open_task_workspace(task_id=task_id)
+
+    def open_backlog_workspace(self):
+        task_id = self.selected_task_id(self.backlog_list)
+        if task_id is None:
+            self.statusBar().showMessage("Select a backlog task first.", 3200)
+            return
+        self.open_task_workspace(task_id=task_id)
+
+    def selected_workspace_task_id(self):
+        if not hasattr(self, "workspace_task_list"):
+            return None
+        item = self.workspace_task_list.currentItem()
+        if item is None:
+            return None
+        value = item.data(Qt.ItemDataRole.UserRole)
+        return int(value) if value is not None else None
+
+    def open_selected_task_workspace(self):
+        task_id = self.selected_workspace_task_id()
+        if task_id is None:
+            self.statusBar().showMessage("Select a task first.", 3200)
+            return
+        self.open_task_workspace(task_id=task_id)
+
+    def edit_selected_workspace_task(self):
+        task_id = self.selected_workspace_task_id()
+        if task_id is None:
+            self.statusBar().showMessage("Select a task first.", 3200)
+            return
+        self.edit_task(task_id)
+
+    def start_selected_workspace_session(self):
+        task_id = self.selected_workspace_task_id()
+        if task_id is None:
+            self.statusBar().showMessage("Select a task first.", 3200)
+            return
+        self.start_session_for_task(task_id)
+
+    def start_session_for_task(self, task_id):
+        task_id = int(task_id)
+        task_row = task_workspace.task_record(
+            self.conn,
+            task_id,
+        )
+        if task_workspace.workspace_supported(
+            task_row
+        ):
+            task_workspace.ensure_workspace(
+                self.conn,
+                ROOT,
+                task_id=task_id,
+                current_project=int(
+                    self.state["current_project"]
+                ),
+            )
+        task_workspace.mark_in_progress(self.conn, task_id)
+        self.session_task.setProperty("pendingTaskId", task_id)
+        self.refresh_session_task_choices()
+        self.navigate(5)
+        self.start_study_timer()
+        self.statusBar().showMessage(
+            "Study timer started and will be linked to the selected task when logged.",
+            5200,
+        )
+
+    def open_weekly_workspace(self, kind):
+        task_id = task_workspace.ensure_weekly_workspace_task(
+            self.conn,
+            int(self.state["current_week"]),
+            kind,
+        )
+        self.refresh_all(sync_tracks=False)
+        self.open_task_workspace(task_id=task_id)
+
+    def refresh_task_workspaces(self, *_args):
+        if not hasattr(self, "workspace_task_list"):
+            return
+        previous = self.selected_workspace_task_id()
+        week_value = self.workspace_week_filter.currentData()
+        if week_value == "current":
+            week = int(self.state["current_week"])
+        elif week_value == "all":
+            week = None
+        else:
+            week = int(week_value)
+        rows = task_workspace.task_rows(
+            self.conn,
+            week=week,
+            status=self.workspace_status_filter.currentText(),
+            search=self.workspace_search.text(),
+        )
+        self.workspace_task_list.blockSignals(True)
+        self.workspace_task_list.clear()
+        selected_row = None
+        for row in rows:
+            document = "📄" if row["document_path"] else "▫"
+            schedule = (
+                f" • Scheduled {row['scheduled_for']}"
+                if row["scheduled_for"]
+                else ""
+            )
+            linked = (
+                f" • {row['artifact_count']} artifact(s)"
+                f" • {row['session_count']} session(s)"
+            )
+            self.workspace_task_list.addItem(
+                f"{document} Week {row['week']} • {row['status']} • "
+                f"{row['category']} • {row['label']}{schedule}{linked}"
+            )
+            item = self.workspace_task_list.item(
+                self.workspace_task_list.count() - 1
+            )
+            item.setData(Qt.ItemDataRole.UserRole, int(row["id"]))
+            item.setToolTip(
+                f"Priority {row['priority']} • {row['estimated_minutes']} minutes • "
+                f"{row['energy']} energy • {row['prerequisite_state']}"
+            )
+            if previous is not None and int(row["id"]) == int(previous):
+                selected_row = self.workspace_task_list.count() - 1
+        self.workspace_task_list.blockSignals(False)
+        if selected_row is not None:
+            self.workspace_task_list.setCurrentRow(selected_row)
+        elif self.workspace_task_list.count():
+            self.workspace_task_list.setCurrentRow(0)
+        self.workspace_task_summary.setText(
+            f"{len(rows)} task(s) • Documents are created only when opened • "
+            "Autosave is enabled inside each workspace."
+        )
 
     def save_learning(self):
         previous_state = self.state
@@ -6839,6 +7382,31 @@ class CareerAccelerator(QMainWindow):
             concepts=self.sql_concepts.text(),
         )
 
+    def link_current_sql_solution_artifact(
+        self,
+        title,
+        path,
+    ):
+        active = tracks.active_sql_task_for_title(
+            self.conn,
+            title,
+        )
+        task_id = (
+            int(active["task_id"])
+            if active is not None
+            else None
+        )
+        return task_workspace.link_sql_solution_artifact(
+            self.conn,
+            ROOT,
+            title=title,
+            solution_path=path,
+            task_id=task_id,
+            current_project=int(
+                self.state["current_project"]
+            ),
+        )
+
     def save_sql(self):
         title = (
             self.sql_selected_title
@@ -6929,6 +7497,10 @@ class CareerAccelerator(QMainWindow):
                     title,
                 )
             )
+            self.link_current_sql_solution_artifact(
+                title,
+                path,
+            )
 
             if active_sql_task is not None:
                 result = tracks.complete_track_task(
@@ -7018,6 +7590,10 @@ class CareerAccelerator(QMainWindow):
         try:
             path, created = (
                 self.ensure_current_sql_solution()
+            )
+            self.link_current_sql_solution_artifact(
+                title,
+                path,
             )
             editor_name = (
                 sql_workspace.open_in_editor(
@@ -7189,11 +7765,23 @@ class CareerAccelerator(QMainWindow):
         except ValueError:
             QMessageBox.warning(self, "Invalid Hours", "Hours must be numeric.")
             return
+        linked_task_id = self.session_task.currentData()
+        (
+            linked_task_id,
+            linked_workspace_key,
+            linked_task_label,
+        ) = task_workspace.session_link_values(
+            self.conn,
+            linked_task_id,
+        )
         self.conn.execute(
             """INSERT INTO study_sessions
-               (session_date,hours,google_progress,datacamp_progress,
-                sql_problems,portfolio_progress,notes,productivity_score)
-               VALUES(?,?,?,?,?,?,?,?)""",
+               (
+                   session_date,hours,google_progress,datacamp_progress,
+                   sql_problems,portfolio_progress,notes,productivity_score,
+                   task_id,workspace_key,task_label_snapshot
+               )
+               VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 self.session_date.text(),
                 hours,
@@ -7203,6 +7791,9 @@ class CareerAccelerator(QMainWindow):
                 self.session_portfolio.text(),
                 self.session_notes.toPlainText(),
                 self.session_productivity.value(),
+                linked_task_id,
+                linked_workspace_key,
+                linked_task_label,
             ),
         )
         self.conn.commit()
@@ -7489,6 +8080,19 @@ class CareerAccelerator(QMainWindow):
             (week, hours, done, total, sql_count, summary),
         )
         self.conn.commit()
+        retrospective_task_id = task_workspace.ensure_weekly_workspace_task(
+            self.conn,
+            week,
+            "retrospective",
+        )
+        task_workspace.upsert_generated_section(
+            self.conn,
+            ROOT,
+            retrospective_task_id,
+            heading="Generated Weekly Summary",
+            body=summary,
+            current_project=int(self.state["current_project"]),
+        )
         self.refresh_all()
 
     def publish_progress(self):

@@ -20,6 +20,10 @@ VALUE_FIELDS = (
     "session_goal_minutes",
 )
 
+COMBO_FIELDS = (
+    "session_task",
+)
+
 
 def _capture_text(window: Any, name: str) -> str | None:
     widget = getattr(window, name, None)
@@ -71,6 +75,15 @@ def capture(window: Any, *, captured_at: float | None = None) -> dict:
         "value_fields": {
             name: _capture_value(window, name)
             for name in VALUE_FIELDS
+        },
+        "combo_fields": {
+            name: (
+                getattr(window, name).currentData()
+                if getattr(window, name, None) is not None
+                and hasattr(getattr(window, name), "currentData")
+                else None
+            )
+            for name in COMBO_FIELDS
         },
         "notes": notes,
     }
@@ -142,6 +155,17 @@ def restore(
             )
         ):
             widget.setValue(int(value))
+
+    for name, value in snapshot.get(
+        "combo_fields",
+        {},
+    ).items():
+        widget = getattr(window, name, None)
+        if widget is None or not hasattr(widget, "findData"):
+            continue
+        index = widget.findData(value)
+        if index >= 0:
+            widget.setCurrentIndex(index)
 
     notes_widget = getattr(window, "session_notes", None)
     notes = snapshot.get("notes")

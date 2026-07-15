@@ -45,6 +45,83 @@ This file is the single maintained changelog for the project.
 
 
 
+
+
+
+
+## 9.3.20
+
+- Restored Today's Focus to its original compact 286-pixel card height
+- Restored Next Tasks to its original compact 286-pixel card height
+- Restored Study Session to its original compact 286-pixel card height
+- Prevented the three primary dashboard cards from extending into the
+  Growth Over Time and Achievements row
+- Restored compact 38–41-pixel task and focus rows
+- Reduced workspace Open controls from 68×32 to 60×28 pixels
+- Kept dedicated hover styling and smooth hover animation
+- Kept pressed styling and click animation
+- Preserved Task Workspaces above Settings
+- Preserved the sidebar Current Streak and Total Study Time corrections
+
+## 9.3.19
+
+- Moved Task Workspaces immediately above Settings in the sidebar
+- Reduced sidebar navigation spacing and button padding
+- Added stable fixed navigation-button heights
+- Reduced unused top and bottom sidebar margins
+- Added minimum heights for Current Streak and Total Study Time cards
+- Prevented the streak and study-time fields from being compressed or
+  vertically clipped at the supported minimum window size
+- Expanded Today's Focus and Next Tasks rows for full button visibility
+- Replaced the clipped generic Open controls with dedicated 68×32 controls
+- Added distinct hover styling and smooth hover opacity animation
+- Added pressed styling and click opacity animation
+- Increased the primary dashboard-card row height for five Next Tasks
+- Preserved all page indices, shortcuts, data, workspaces, and navigation
+  behavior
+
+## 9.3.18
+
+- Automatically linked DataLemur solution scripts to matching Task Workspaces
+- Linked solutions as soon as they are created or opened
+- Reconciled solution artifacts before adaptive SQL tasks advance
+- Repaired existing historical SQL workspaces when opened
+- Used saved `sql_practice.solution_path` with a standard-path fallback
+- Referenced original solution files without copying or duplication
+- Automatically linked DuckDB and Applied Lab submissions
+- Marked app-managed links as Automatic in the artifact list
+- Prevented accidental removal of automatic artifact links
+- Preserved manually added artifacts and their removal behavior
+- Excluded Google Certificate and DataCamp tasks from Task Workspaces
+- Preserved Google and DataCamp progress and Study Session tracking
+- Added database migration for managed artifact metadata
+- Preserved user databases, submissions, solutions, and portfolio work
+
+## 9.3.17
+
+- Added a unified Task Workspace for every sprint task
+- Added a Task Workspaces sidebar page with week, status, and search filters
+- Added Open Workspace actions to Today's Focus and Next Tasks
+- Added workspace actions and double-click access in Adaptive Planner
+- Added workspace access from Sprint Backlog and Recent Study Sessions
+- Added direct Weekly Review actions for the study plan and retrospective
+- Added automatic task-type recognition and document routing
+- Routed Applied Labs and DuckDB tasks to their existing saved submissions
+- Routed retrospective tasks to weekly RETROSPECTIVE.md files
+- Added on-demand weekly STUDY_PLAN.md creation
+- Added task-specific Markdown workspaces for learning, SQL, portfolio, and general work
+- Added in-app document editing, autosave, reload, external editor, and folder access
+- Added task status, priority, estimate, energy, scheduling, and deferral controls
+- Added prerequisite-aware task completion and detailed task-editor access from the workspace
+- Preserved Applied Lab and DuckDB submission validation when completing from a workspace
+- Added linked artifact files and folders
+- Added task-linked Study Sessions and session-to-workspace navigation
+- Added linking and unlinking of existing study sessions
+- Added historical workspace identities for adaptive track assignments
+- Added generated Weekly Summary synchronization into retrospective documents
+- Added task workspace database tables and Study Session linkage fields
+- Preserved the existing adaptive scheduler, evidence, achievements, submissions, and user data
+
 ## 9.3.16
 
 - Added 15 prerequisite-driven Applied Labs

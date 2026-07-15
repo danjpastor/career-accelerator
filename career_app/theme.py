@@ -116,7 +116,7 @@ def stylesheet():
         border: none;
         background: transparent;
         color: {c['muted']};
-        padding: 13px 15px;
+        padding: 9px 14px;
         border-radius: 9px;
     }}
     QPushButton#Nav:hover {{
@@ -128,8 +128,8 @@ def stylesheet():
         background: #101d32;
         color: white;
         border-left: 3px solid {c['purple']};
-        padding-top: 15px;
-        padding-bottom: 11px;
+        padding-top: 11px;
+        padding-bottom: 7px;
     }}
     QPushButton#Nav:checked {{
         background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
@@ -229,6 +229,30 @@ def stylesheet():
     QScrollBar::sub-line:vertical {{
         height: 0;
     }}
+
+    QPushButton#WorkspaceOpen {{
+        background: #172940;
+        border: 1px solid {c['border']};
+        border-radius: 7px;
+        color: {c['blue']};
+        font-weight: 700;
+        padding: 2px 8px;
+        min-height: 26px;
+        max-height: 28px;
+    }}
+    QPushButton#WorkspaceOpen:hover {{
+        background: #244164;
+        border: 1px solid {c['purple_soft']};
+        color: white;
+    }}
+    QPushButton#WorkspaceOpen:pressed {{
+        background: #0d1728;
+        border: 1px solid {c['purple']};
+        color: white;
+        padding-top: 4px;
+        padding-bottom: 0px;
+    }}
+
     QPushButton#Secondary {{
         background: {c['panel_alt']};
         border: 1px solid {c['border']};
