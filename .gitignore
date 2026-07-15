@@ -10,6 +10,7 @@ venv/
 credentials.*
 secrets.*
 data/raw/private/
+*.vscode
 
 *.pyc
 backups/
