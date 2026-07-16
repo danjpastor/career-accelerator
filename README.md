@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.24 includes:
+Version 9.3.25 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -520,3 +520,13 @@ future-week task for optional extra progress.
 Version 9.3.24 condenses the completed-day Today’s Focus state. It removes
 repeated adaptive detail, shortens the tomorrow preview, and hides the
 redundant metric footer while retaining the Get Ahead and Preview actions.
+
+
+## Achievement Deduplication
+
+Version 9.3.25 gives each logical accomplishment one activity achievement.
+SQL Companion and portfolio completion records take precedence over matching
+generic roadmap-task badges, and repeated completed task rows are collapsed.
+
+Existing duplicate achievement cards are removed automatically without
+changing task, SQL, portfolio, evidence, or completion data.

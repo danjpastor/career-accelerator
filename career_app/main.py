@@ -4250,19 +4250,40 @@ class CareerAccelerator(QMainWindow):
             ):
                 unlocked.append(title)
 
-        completed_tasks = self.conn.execute(
-            """SELECT
-                   s.id,
-                   s.week,
-                   s.sort_order,
-                   s.label,
-                   m.category
-               FROM sprint_tasks s
-               LEFT JOIN task_metadata m
-                 ON m.task_id=s.id
-               WHERE s.completed=1
-               ORDER BY s.week,s.sort_order,s.id"""
-        ).fetchall()
+        canonical_activities = (
+            achievements.canonical_completed_activities(
+                self.conn
+            )
+        )
+        completed_tasks = canonical_activities[
+            "tasks"
+        ]
+        completed_project_tasks = (
+            canonical_activities[
+                "projects"
+            ]
+        )
+        sql_rows = canonical_activities[
+            "sql"
+        ]
+
+        # Specialized records are the canonical representation of SQL and
+        # portfolio accomplishments. Generic roadmap-task badges are generated
+        # only for work that has no specialized completion record.
+        for row in sql_rows:
+            unlock(
+                f"sql-problem:{row['id']}",
+                "SQL Problem Solved",
+                row["title"],
+            )
+
+        for row in completed_project_tasks:
+            unlock(
+                f"project-task:{row['id']}",
+                "Portfolio Milestone Complete",
+                row["label"],
+            )
+
         for row in completed_tasks:
             details = self.roadmap_achievement_details(
                 row
@@ -4271,31 +4292,6 @@ class CareerAccelerator(QMainWindow):
                 f"task:{row['id']}",
                 details["title"],
                 details["description"],
-            )
-
-        completed_project_tasks = self.conn.execute(
-            """SELECT id,label
-               FROM project_tasks
-               WHERE completed=1
-               ORDER BY id"""
-        ).fetchall()
-        for row in completed_project_tasks:
-            unlock(
-                f"project-task:{row['id']}",
-                "Portfolio Milestone Complete",
-                row["label"],
-            )
-
-        sql_rows = (
-            achievements.completed_sql_rows(
-                self.conn
-            )
-        )
-        for row in sql_rows:
-            unlock(
-                f"sql-problem:{row['id']}",
-                "SQL Problem Solved",
-                row["title"],
             )
 
         session_rows = self.conn.execute(
@@ -4323,7 +4319,11 @@ class CareerAccelerator(QMainWindow):
             )
 
         session_count = len(session_rows)
-        task_count = len(completed_tasks)
+        task_count = int(
+            canonical_activities[
+                "task_logical_count"
+            ]
+        )
         project_count = len(completed_project_tasks)
         sql_count = len(sql_rows)
         application_count = len(application_rows)
@@ -4493,6 +4493,36 @@ class CareerAccelerator(QMainWindow):
             valid_keys,
         )
         self.last_removed_achievements = removed
+
+        duplicate_groups = (
+            achievements.duplicate_activity_groups(
+                self.conn
+            )
+        )
+        if duplicate_groups:
+            # Defensive cleanup for any legacy generic task record that still
+            # overlaps a canonical SQL or portfolio record.
+            for keys in duplicate_groups.values():
+                has_specialized = any(
+                    key.startswith(
+                        (
+                            "sql-problem:",
+                            "project-task:",
+                        )
+                    )
+                    for key in keys
+                )
+                if not has_specialized:
+                    continue
+                for key in keys:
+                    if key.startswith(
+                        "task:"
+                    ):
+                        self.conn.execute(
+                            """DELETE FROM achievements
+                               WHERE achievement_key=?""",
+                            (key,),
+                        )
 
         self.conn.commit()
         return unlocked

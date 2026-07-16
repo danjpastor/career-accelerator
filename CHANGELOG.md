@@ -53,6 +53,25 @@ This file is the single maintained changelog for the project.
 
 
 
+
+## 9.3.25
+
+- Added logical accomplishment identities for achievements
+- Normalized punctuation and legacy prefixes such as SQL Challenge:
+- Made SQL Companion completions the canonical SQL activity achievement
+- Removed matching generic SQL Challenge achievements
+- Made project-task completions the canonical portfolio activity achievement
+- Removed matching generic Portfolio Milestone achievements
+- Collapsed repeated completed sprint rows with the same category and label
+- Reconciled and removed existing duplicate managed achievements at startup
+- Preserved cumulative milestone badges such as First Query and On Track
+- Counted roadmap-task milestone progress using unique logical tasks
+- Added achievement-duplication diagnostics to track health
+- Preserved completed tasks, SQL progress, portfolio progress, evidence,
+  completion history, dates, and study records
+- Documented why a two-item focus plan is valid when DataCamp and portfolio
+  weekly quotas are already complete
+
 ## 9.3.24
 
 - Condensed the Today’s Plan Complete banner

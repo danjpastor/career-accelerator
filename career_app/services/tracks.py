@@ -10,6 +10,7 @@ from career_app.data.applied_exercises import (
     APPLIED_SKILL_EVIDENCE,
     exercise_number_for_label as applied_exercise_number_for_label,
 )
+from career_app.services import achievements as achievement_service
 from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
     exercise_for_label,
@@ -3047,6 +3048,19 @@ def health_report(conn, state):
     if external_workspace_count:
         issues.append(
             "external learning tasks stored as workspaces"
+        )
+
+    duplicate_achievements = (
+        achievement_service.duplicate_activity_groups(
+            conn
+        )
+    )
+    if duplicate_achievements:
+        issues.append(
+            (
+                f"{len(duplicate_achievements)} duplicate "
+                "achievement accomplishment group(s)"
+            )
         )
 
     return {
