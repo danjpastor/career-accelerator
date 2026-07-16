@@ -85,6 +85,10 @@ CREATE TABLE IF NOT EXISTS daily_focus (
     category TEXT NOT NULL,
     title TEXT NOT NULL,
     estimated_minutes INTEGER NOT NULL DEFAULT 30,
+    track_key TEXT,
+    target_key TEXT,
+    is_extra INTEGER NOT NULL DEFAULT 0,
+    completed_at TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(focus_date, position),
     FOREIGN KEY(task_id) REFERENCES sprint_tasks(id) ON DELETE SET NULL
@@ -288,6 +292,12 @@ def _ensure_columns(conn):
         "task_workspace_artifacts": [
             ("is_managed", "INTEGER NOT NULL DEFAULT 0"),
             ("source_key", "TEXT"),
+        ],
+        "daily_focus": [
+            ("track_key", "TEXT"),
+            ("target_key", "TEXT"),
+            ("is_extra", "INTEGER NOT NULL DEFAULT 0"),
+            ("completed_at", "TEXT"),
         ],
         "task_workspaces": [
             ("task_id", "INTEGER"),

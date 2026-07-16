@@ -2991,8 +2991,32 @@ def health_report(conn, state):
            FROM (
                SELECT
                    CASE
-                       WHEN tt.track_key IS NOT NULL
-                           THEN 'track:' || tt.track_key
+                       WHEN COALESCE(f.is_extra,0)=1
+                            AND COALESCE(
+                                f.track_key,
+                                tt.track_key
+                            ) IS NOT NULL
+                           THEN
+                               'extra:'
+                               || COALESCE(
+                                   f.track_key,
+                                   tt.track_key
+                               )
+                               || ':'
+                               || COALESCE(
+                                   f.target_key,
+                                   f.source_key
+                               )
+                       WHEN COALESCE(
+                                f.track_key,
+                                tt.track_key
+                            ) IS NOT NULL
+                           THEN
+                               'track:'
+                               || COALESCE(
+                                   f.track_key,
+                                   tt.track_key
+                               )
                        WHEN f.source_key LIKE 'roadmap:%'
                            THEN 'track:' || SUBSTR(f.source_key,10)
                        ELSE f.source_key

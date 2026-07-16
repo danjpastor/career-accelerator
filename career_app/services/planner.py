@@ -645,6 +645,7 @@ def _carryover_tasks(conn, focus_date, current_week):
            JOIN sprint_tasks s ON s.id=f.task_id
            JOIN task_metadata m ON m.task_id=s.id
            WHERE f.focus_date=?
+             AND COALESCE(f.is_extra,0)=0
              AND f.task_id IS NOT NULL
              AND s.completed=0
              AND m.status NOT IN ('Completed','Blocked')
@@ -970,6 +971,1640 @@ def _order_focus_items(conn, items):
         ),
     )
 
+def _daily_focus_track_identity(
+    conn,
+    item,
+):
+    """Return the exact assignment identity stored for a daily-focus row."""
+    track_key = str(
+        item.get("track_key") or ""
+    ).strip().lower()
+    target_key = str(
+        item.get("target_key") or ""
+    ).strip().lower()
+
+    if track_key and target_key:
+        return (
+            f"track:{track_key}:"
+            f"{target_key}"
+        )
+    if track_key:
+        return f"track:{track_key}"
+
+    source_key = str(
+        item.get("source_key") or ""
+    )
+    if source_key.startswith(
+        "roadmap:"
+    ):
+        return (
+            "track:"
+            + source_key.split(
+                ":",
+                1,
+            )[1].lower()
+        )
+
+    task_id = item.get(
+        "task_id"
+    )
+    if task_id is not None:
+        return f"task:{int(task_id)}"
+
+    return (
+        source_key
+        or (
+            "focus:"
+            + _normalized_task_label(
+                item.get("label")
+            )
+        )
+    )
+
+
+def _focus_track_fields(
+    conn,
+    item,
+):
+    track_key = item.get(
+        "track_key"
+    )
+    target_key = item.get(
+        "target_key"
+    )
+
+    task_id = item.get(
+        "task_id"
+    )
+    if (
+        task_id is not None
+        and not track_key
+    ):
+        link = conn.execute(
+            """SELECT track_key,target_key
+               FROM track_tasks
+               WHERE task_id=?""",
+            (int(task_id),),
+        ).fetchone()
+        if link is not None:
+            track_key = link[
+                "track_key"
+            ]
+            target_key = link[
+                "target_key"
+            ]
+
+    source_key = str(
+        item.get("source_key") or ""
+    )
+    if (
+        not track_key
+        and source_key.startswith(
+            "roadmap:"
+        )
+    ):
+        track_key = source_key.split(
+            ":",
+            1,
+        )[1]
+
+    if (
+        track_key
+        and not target_key
+    ):
+        link = conn.execute(
+            """SELECT target_key
+               FROM track_tasks
+               WHERE track_key=?""",
+            (track_key,),
+        ).fetchone()
+        if link is not None:
+            target_key = link[
+                "target_key"
+            ]
+
+    return (
+        track_key,
+        target_key,
+    )
+
+
+def _backfill_daily_focus_fields(
+    conn,
+):
+    rows = conn.execute(
+        """SELECT
+               id,task_id,source_key,
+               title,track_key,target_key
+           FROM daily_focus
+           WHERE focus_date=?""",
+        (
+            date.today().isoformat(),
+        ),
+    ).fetchall()
+
+    changed = False
+    for row in rows:
+        track_key = row[
+            "track_key"
+        ]
+        target_key = row[
+            "target_key"
+        ]
+
+        if (
+            not track_key
+            and row["task_id"]
+            is not None
+        ):
+            link = conn.execute(
+                """SELECT
+                       track_key,target_key
+                   FROM track_tasks
+                   WHERE task_id=?""",
+                (
+                    int(
+                        row["task_id"]
+                    ),
+                ),
+            ).fetchone()
+            if link is not None:
+                track_key = link[
+                    "track_key"
+                ]
+                target_key = link[
+                    "target_key"
+                ]
+
+        if not track_key:
+            source_key = str(
+                row["source_key"]
+                or ""
+            )
+            if source_key.startswith(
+                "roadmap:"
+            ):
+                track_key = (
+                    source_key.split(
+                        ":",
+                        1,
+                    )[1]
+                )
+            else:
+                track_key = (
+                    _managed_external_track_for_label(
+                        row["title"]
+                    )
+                )
+
+        if (
+            track_key
+            and not target_key
+        ):
+            active = conn.execute(
+                """SELECT target_key
+                   FROM track_tasks
+                   WHERE track_key=?""",
+                (track_key,),
+            ).fetchone()
+            if active is not None:
+                target_key = active[
+                    "target_key"
+                ]
+
+        if (
+            track_key
+            != row["track_key"]
+            or target_key
+            != row["target_key"]
+        ):
+            conn.execute(
+                """UPDATE daily_focus
+                   SET track_key=?,
+                       target_key=?
+                   WHERE id=?""",
+                (
+                    track_key,
+                    target_key,
+                    int(row["id"]),
+                ),
+            )
+            changed = True
+
+    if changed:
+        conn.commit()
+
+
+def _track_daily_completed(
+    conn,
+    track_key,
+):
+    row = conn.execute(
+        """SELECT status,metadata
+           FROM track_state
+           WHERE track_key=?""",
+        (track_key,),
+    ).fetchone()
+    if row is None:
+        return False
+
+    try:
+        metadata = json.loads(
+            row["metadata"]
+            or "{}"
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        metadata = {}
+
+    target = int(
+        metadata.get(
+            "today_target",
+            0,
+        )
+        or 0
+    )
+    completed = int(
+        metadata.get(
+            "today_completed",
+            0,
+        )
+        or 0
+    )
+
+    return (
+        target > 0
+        and completed >= target
+    ) or row["status"] in {
+        "Daily Complete",
+        "Weekly Complete",
+    }
+
+
+def reconcile_daily_focus(
+    conn,
+):
+    """Mark persisted focus assignments complete without replacing them."""
+    _backfill_daily_focus_fields(
+        conn
+    )
+    focus_date = (
+        date.today().isoformat()
+    )
+
+    rows = conn.execute(
+        """SELECT
+               f.*,
+               s.completed AS task_completed,
+               m.status AS task_status
+           FROM daily_focus f
+           LEFT JOIN sprint_tasks s
+             ON s.id=f.task_id
+           LEFT JOIN task_metadata m
+             ON m.task_id=f.task_id
+           WHERE f.focus_date=?
+             AND f.completed_at IS NULL
+           ORDER BY f.position""",
+        (focus_date,),
+    ).fetchall()
+
+    changed = False
+    for row in rows:
+        complete = False
+
+        if (
+            row["task_id"]
+            is not None
+            and (
+                bool(
+                    row["task_completed"]
+                )
+                or row["task_status"]
+                == "Completed"
+            )
+        ):
+            complete = True
+
+        track_key = row[
+            "track_key"
+        ]
+        target_key = row[
+            "target_key"
+        ]
+
+        if (
+            not complete
+            and track_key
+        ):
+            active = conn.execute(
+                """SELECT target_key
+                   FROM track_tasks
+                   WHERE track_key=?""",
+                (track_key,),
+            ).fetchone()
+            active_target = (
+                active["target_key"]
+                if active is not None
+                else None
+            )
+
+            if (
+                target_key
+                and active_target
+                and str(active_target)
+                != str(target_key)
+            ):
+                complete = True
+            elif (
+                not bool(
+                    row["is_extra"]
+                )
+                and _track_daily_completed(
+                    conn,
+                    track_key,
+                )
+            ):
+                complete = True
+
+        if complete:
+            conn.execute(
+                """UPDATE daily_focus
+                   SET completed_at=CURRENT_TIMESTAMP
+                   WHERE id=?""",
+                (int(row["id"]),),
+            )
+            changed = True
+
+    if changed:
+        conn.commit()
+
+    return changed
+
+
+def mark_focus_task_completed(
+    conn,
+    task_id,
+):
+    """Freeze the visible daily assignment before an adaptive row is reused."""
+    conn.execute(
+        """UPDATE daily_focus
+           SET completed_at=COALESCE(
+               completed_at,
+               CURRENT_TIMESTAMP
+           )
+           WHERE focus_date=?
+             AND task_id=?""",
+        (
+            date.today().isoformat(),
+            int(task_id),
+        ),
+    )
+    conn.commit()
+
+
+def _stored_focus_plan(
+    conn,
+    week,
+):
+    focus_date = (
+        date.today().isoformat()
+    )
+    rows = conn.execute(
+        """SELECT
+               f.*,
+               m.status,
+               m.priority,
+               m.destination,
+               s.completed AS task_completed
+           FROM daily_focus f
+           LEFT JOIN sprint_tasks s
+             ON s.id=f.task_id
+           LEFT JOIN task_metadata m
+             ON m.task_id=f.task_id
+           WHERE f.focus_date=?
+           ORDER BY f.position""",
+        (focus_date,),
+    ).fetchall()
+
+    if not rows:
+        return []
+
+    stored_weeks = {
+        int(row["week"])
+        for row in rows
+    }
+    if stored_weeks != {
+        int(week)
+    }:
+        conn.execute(
+            """DELETE FROM daily_focus
+               WHERE focus_date=?""",
+            (focus_date,),
+        )
+        conn.commit()
+        return []
+
+    reconcile_daily_focus(
+        conn
+    )
+    rows = conn.execute(
+        """SELECT
+               f.*,
+               m.status,
+               m.priority,
+               m.destination,
+               s.completed AS task_completed
+           FROM daily_focus f
+           LEFT JOIN sprint_tasks s
+             ON s.id=f.task_id
+           LEFT JOIN task_metadata m
+             ON m.task_id=f.task_id
+           WHERE f.focus_date=?
+           ORDER BY f.position""",
+        (focus_date,),
+    ).fetchall()
+
+    display_titles = {
+        "google": "Google Certificate",
+        "datacamp": "DataCamp",
+        "sql": "SQL Practice",
+        "portfolio": "Portfolio Project",
+        "applied": "Applied Labs",
+    }
+
+    result = []
+    for row in rows:
+        source_key = str(
+            row["source_key"]
+            or ""
+        )
+        track_key = row[
+            "track_key"
+        ]
+        completed = bool(
+            row["completed_at"]
+            or row["task_completed"]
+            or row["status"]
+            == "Completed"
+        )
+        roadmap_fallback = (
+            source_key.startswith(
+                "roadmap:"
+            )
+        )
+        result.append(
+            {
+                "task_id": (
+                    int(row["task_id"])
+                    if row["task_id"]
+                    is not None
+                    else None
+                ),
+                "week": int(
+                    row["week"]
+                ),
+                "sort_order": int(
+                    row["position"]
+                ),
+                "label": row["title"],
+                "category": (
+                    row["category"]
+                    or "General"
+                ),
+                "status": (
+                    "Completed"
+                    if completed
+                    else (
+                        row["status"]
+                        or "Not Started"
+                    )
+                ),
+                "priority": int(
+                    row["priority"]
+                    or 3
+                ),
+                "estimated_minutes": int(
+                    row[
+                        "estimated_minutes"
+                    ]
+                    or 30
+                ),
+                "destination": int(
+                    row["destination"]
+                    or 0
+                ),
+                "carryover": False,
+                "carryover_note": None,
+                "roadmap_fallback": (
+                    roadmap_fallback
+                ),
+                "source_key": source_key,
+                "track_key": track_key,
+                "target_key": row[
+                    "target_key"
+                ],
+                "completed": completed,
+                "is_extra": bool(
+                    row["is_extra"]
+                ),
+                "display_title": (
+                    display_titles.get(
+                        track_key
+                    )
+                    if track_key
+                    else None
+                ),
+                "detail": row["title"],
+                "frozen_focus": True,
+            }
+        )
+
+    return result
+
+
+def _today_completion_evidence(
+    conn,
+    week,
+):
+    """Summarize work completed today when no saved base plan exists."""
+    today = date.today().isoformat()
+    items = []
+    seen = set()
+
+    event_rows = conn.execute(
+        """SELECT
+               track_key,event_key,
+               item_label,metadata
+           FROM track_events
+           WHERE completed_date=?
+             AND event_type='Completed'
+           ORDER BY id""",
+        (today,),
+    ).fetchall()
+
+    category_map = {
+        "google": "Learning",
+        "datacamp": "Learning",
+        "sql": "SQL",
+        "portfolio": "Portfolio",
+        "applied": "Learning",
+    }
+
+    for row in event_rows:
+        identity = (
+            f"{row['track_key']}:"
+            f"{row['event_key']}"
+        )
+        if identity in seen:
+            continue
+        seen.add(identity)
+
+        try:
+            metadata = json.loads(
+                row["metadata"]
+                or "{}"
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            metadata = {}
+
+        task_id = metadata.get(
+            "task_id"
+        )
+        estimate = 0
+        if task_id is not None:
+            task_row = conn.execute(
+                """SELECT
+                       m.estimated_minutes
+                   FROM task_metadata m
+                   WHERE m.task_id=?""",
+                (int(task_id),),
+            ).fetchone()
+            if task_row is not None:
+                estimate = int(
+                    task_row[
+                        "estimated_minutes"
+                    ]
+                    or 0
+                )
+
+        items.append(
+            {
+                "title": (
+                    row["item_label"]
+                    or row["track_key"].title()
+                ),
+                "track_key": row[
+                    "track_key"
+                ],
+                "category": category_map.get(
+                    row["track_key"],
+                    "General",
+                ),
+                "estimated_minutes": estimate,
+            }
+        )
+
+    sql_rows = conn.execute(
+        """SELECT title
+           FROM sql_practice
+           WHERE status='Completed'
+             AND completed_date=?
+           ORDER BY title""",
+        (today,),
+    ).fetchall()
+
+    for row in sql_rows:
+        normalized = (
+            "sql:"
+            + _normalized_task_label(
+                row["title"]
+            )
+        )
+        if any(
+            normalized
+            in (
+                "sql:"
+                + _normalized_task_label(
+                    item["title"]
+                )
+            )
+            for item in items
+        ):
+            continue
+        items.append(
+            {
+                "title": row["title"],
+                "track_key": "sql",
+                "category": "SQL",
+                "estimated_minutes": 0,
+            }
+        )
+
+    session_row = conn.execute(
+        """SELECT
+               COUNT(*) AS session_count,
+               COALESCE(SUM(hours),0) AS hours
+           FROM study_sessions
+           WHERE session_date=?""",
+        (today,),
+    ).fetchone()
+
+    return {
+        "items": items,
+        "count": len(items),
+        "minutes": sum(
+            int(
+                item[
+                    "estimated_minutes"
+                ]
+                or 0
+            )
+            for item in items
+        ),
+        "titles": [
+            item["title"]
+            for item in items
+        ],
+        "session_count": int(
+            session_row[
+                "session_count"
+            ]
+            or 0
+        ),
+        "session_minutes": int(
+            round(
+                float(
+                    session_row["hours"]
+                    or 0
+                )
+                * 60
+            )
+        ),
+    }
+
+
+def _empty_plan_is_complete(
+    conn,
+    week,
+    extras,
+):
+    """Treat a genuinely exhausted day as complete, including upgrade days."""
+    if extras:
+        # Optional work can only be started after the required day is complete.
+        return True
+
+    if available(
+        conn,
+        week,
+    ):
+        return False
+
+    for track_key in (
+        "google",
+        "datacamp",
+        "sql",
+        "portfolio",
+    ):
+        if _track_accepts_work_today(
+            conn,
+            track_key,
+        ):
+            return False
+
+    return True
+
+
+def focus_day_summary(
+    items,
+    *,
+    conn=None,
+    week=None,
+):
+    base = [
+        item
+        for item in items
+        if not item.get(
+            "is_extra"
+        )
+    ]
+    extras = [
+        item
+        for item in items
+        if item.get(
+            "is_extra"
+        )
+    ]
+    completed_base = [
+        item
+        for item in base
+        if item.get(
+            "completed"
+        )
+    ]
+    active_extra = next(
+        (
+            item
+            for item in extras
+            if not item.get(
+                "completed"
+            )
+        ),
+        None,
+    )
+
+    inferred = {
+        "items": [],
+        "count": 0,
+        "minutes": 0,
+        "titles": [],
+        "session_count": 0,
+        "session_minutes": 0,
+    }
+    inferred_empty_complete = False
+
+    if (
+        not base
+        and conn is not None
+        and week is not None
+        and _empty_plan_is_complete(
+            conn,
+            int(week),
+            extras,
+        )
+    ):
+        inferred_empty_complete = True
+        inferred = (
+            _today_completion_evidence(
+                conn,
+                int(week),
+            )
+        )
+
+    regular_complete = (
+        bool(base)
+        and len(
+            completed_base
+        )
+        == len(base)
+    )
+    all_complete = (
+        regular_complete
+        or inferred_empty_complete
+    )
+
+    completed_count = (
+        len(completed_base)
+        if base
+        else inferred["count"]
+    )
+    total_count = (
+        len(base)
+        if base
+        else inferred["count"]
+    )
+    planned_minutes = (
+        sum(
+            int(
+                item.get(
+                    "estimated_minutes",
+                    0,
+                )
+            )
+            for item in base
+        )
+        if base
+        else (
+            inferred["minutes"]
+            or inferred[
+                "session_minutes"
+            ]
+        )
+    )
+    completed_titles = (
+        [
+            item.get(
+                "display_title"
+            )
+            or item.get(
+                "label"
+            )
+            or "Task"
+            for item in completed_base
+        ]
+        if base
+        else inferred["titles"]
+    )
+
+    return {
+        "base_items": base,
+        "extra_items": extras,
+        "completed_base": (
+            completed_base
+        ),
+        "completed_count": (
+            completed_count
+        ),
+        "total_count": (
+            total_count
+        ),
+        "planned_minutes": (
+            planned_minutes
+        ),
+        "all_base_complete": (
+            all_complete
+        ),
+        "active_extra": active_extra,
+        "completed_titles": (
+            completed_titles
+        ),
+        "inferred_empty_complete": (
+            inferred_empty_complete
+        ),
+        "session_count": inferred[
+            "session_count"
+        ],
+        "has_completion_evidence": bool(
+            inferred["count"]
+            or inferred[
+                "session_count"
+            ]
+        ),
+    }
+
+
+def _extra_task_rows(
+    conn,
+    week,
+):
+    today = (
+        date.today().isoformat()
+    )
+    return conn.execute(
+        """SELECT
+               s.id,
+               s.week,
+               s.sort_order,
+               s.label,
+               s.completed,
+               m.status,
+               m.priority,
+               m.estimated_minutes,
+               m.energy,
+               m.deferred_until,
+               m.destination,
+               m.category,
+               m.prerequisite_state,
+               m.prerequisite_reason,
+               tt.track_key,
+               tt.target_key,
+               ts.status AS track_status,
+               ts.metadata AS track_metadata
+           FROM sprint_tasks s
+           JOIN task_metadata m
+             ON m.task_id=s.id
+           LEFT JOIN track_tasks tt
+             ON tt.task_id=s.id
+           LEFT JOIN track_state ts
+             ON ts.track_key=tt.track_key
+           WHERE s.week=?
+             AND s.completed=0
+             AND m.status NOT IN (
+                 'Completed',
+                 'Blocked'
+             )
+             AND COALESCE(
+                 m.prerequisite_state,
+                 'Ready'
+             )='Ready'
+             AND (
+                 m.deferred_until IS NULL
+                 OR m.deferred_until<=?
+             )
+           ORDER BY
+               CASE
+                   WHEN m.status='In Progress'
+                       THEN 0
+                   ELSE 1
+               END,
+               m.priority,
+               s.sort_order""",
+        (
+            int(week),
+            today,
+        ),
+    ).fetchall()
+
+
+def _future_extra_task_rows(
+    conn,
+    week,
+    limit=12,
+):
+    today = date.today().isoformat()
+    return conn.execute(
+        """SELECT
+               s.id,
+               s.week,
+               s.sort_order,
+               s.label,
+               s.completed,
+               m.status,
+               m.priority,
+               m.estimated_minutes,
+               m.energy,
+               m.deferred_until,
+               m.destination,
+               m.category,
+               m.prerequisite_state,
+               m.prerequisite_reason,
+               tt.track_key,
+               tt.target_key,
+               ts.status AS track_status,
+               ts.metadata AS track_metadata
+           FROM sprint_tasks s
+           JOIN task_metadata m
+             ON m.task_id=s.id
+           LEFT JOIN track_tasks tt
+             ON tt.task_id=s.id
+           LEFT JOIN track_state ts
+             ON ts.track_key=tt.track_key
+           WHERE s.week>?
+             AND s.completed=0
+             AND m.status NOT IN (
+                 'Completed',
+                 'Blocked'
+             )
+             AND COALESCE(
+                 m.prerequisite_state,
+                 'Ready'
+             )='Ready'
+             AND (
+                 m.deferred_until IS NULL
+                 OR m.deferred_until<=?
+             )
+           ORDER BY
+               s.week,
+               CASE
+                   WHEN m.status='In Progress'
+                       THEN 0
+                   ELSE 1
+               END,
+               m.priority,
+               s.sort_order
+           LIMIT ?""",
+        (
+            int(week),
+            today,
+            int(limit),
+        ),
+    ).fetchall()
+
+
+def _candidate_weekly_gap(
+    row,
+):
+    try:
+        metadata = json.loads(
+            row["track_metadata"]
+            or "{}"
+        )
+    except (
+        TypeError,
+        ValueError,
+    ):
+        metadata = {}
+
+    target = int(
+        metadata.get(
+            "weekly_target",
+            0,
+        )
+        or 0
+    )
+    completed = int(
+        metadata.get(
+            "weekly_completed",
+            0,
+        )
+        or 0
+    )
+    return max(
+        0,
+        target - completed,
+    )
+
+
+def _optional_candidate_pool(
+    conn,
+    week,
+    state,
+):
+    stored = _stored_focus_plan(
+        conn,
+        week,
+    )
+    exact_used = {
+        _daily_focus_track_identity(
+            conn,
+            item,
+        )
+        for item in stored
+    }
+    used_tracks = {
+        str(
+            item.get(
+                "track_key"
+            )
+            or ""
+        )
+        for item in stored
+        if item.get(
+            "track_key"
+        )
+    }
+
+    candidates = []
+    for row in _extra_task_rows(
+        conn,
+        week,
+    ):
+        item = _task_dict(row)
+        item["track_key"] = row[
+            "track_key"
+        ]
+        item["target_key"] = row[
+            "target_key"
+        ]
+        item["track_status"] = row[
+            "track_status"
+        ]
+        item["weekly_gap"] = (
+            _candidate_weekly_gap(
+                row
+            )
+        )
+
+        identity = (
+            _daily_focus_track_identity(
+                conn,
+                item,
+            )
+        )
+        if identity in exact_used:
+            continue
+
+        track_key = str(
+            item.get(
+                "track_key"
+            )
+            or ""
+        )
+        track_status = str(
+            item.get(
+                "track_status"
+            )
+            or "Active"
+        )
+        same_track = (
+            track_key in used_tracks
+        )
+
+        category_rank = {
+            "SQL": 0,
+            "Portfolio": 1,
+            "Review": 3,
+            "Learning": 4,
+            "General": 5,
+        }.get(
+            item["category"],
+            5,
+        )
+        if track_key == "applied":
+            category_rank = 2
+
+        track_status_rank = {
+            "Active": 0,
+            "Daily Complete": 2,
+            "Weekly Complete": 4,
+            "Complete": 5,
+        }.get(
+            track_status,
+            1,
+        )
+
+        if (
+            item["weekly_gap"] > 0
+            and track_status
+            != "Weekly Complete"
+        ):
+            reason = (
+                "Unfinished weekly target"
+            )
+        elif track_key == "portfolio":
+            reason = (
+                "Advance the current "
+                "portfolio milestone"
+            )
+        elif (
+            track_key == "sql"
+            or item["category"]
+            == "SQL"
+        ):
+            reason = (
+                "Practice current SQL skills"
+            )
+        elif track_key == "applied":
+            reason = (
+                "Complete the next "
+                "eligible Applied Lab"
+            )
+        else:
+            reason = (
+                "Get ahead on an "
+                "eligible roadmap task"
+            )
+
+        item["extra_reason"] = reason
+        item["_extra_score"] = (
+            0
+            if item["status"]
+            == "In Progress"
+            else 1,
+            0
+            if item["weekly_gap"] > 0
+            else 1,
+            1
+            if same_track
+            else 0,
+            track_status_rank,
+            category_rank,
+            item["priority"],
+            item["sort_order"],
+        )
+        candidates.append(
+            item
+        )
+
+    if not candidates:
+        for row in _future_extra_task_rows(
+            conn,
+            week,
+        ):
+            item = _task_dict(row)
+            item["track_key"] = row[
+                "track_key"
+            ]
+            item["target_key"] = row[
+                "target_key"
+            ]
+            item["track_status"] = row[
+                "track_status"
+            ]
+            item["weekly_gap"] = 0
+
+            identity = (
+                _daily_focus_track_identity(
+                    conn,
+                    item,
+                )
+            )
+            if identity in exact_used:
+                continue
+
+            item["extra_reason"] = (
+                f"Get ahead on Week "
+                f"{int(row['week'])} roadmap work"
+            )
+            item["_extra_score"] = (
+                2,
+                2,
+                0,
+                5,
+                {
+                    "Portfolio": 0,
+                    "SQL": 1,
+                    "Learning": 2,
+                    "Review": 3,
+                    "General": 4,
+                }.get(
+                    item["category"],
+                    4,
+                ),
+                item["priority"],
+                int(row["week"]),
+                item["sort_order"],
+            )
+            candidates.append(
+                item
+            )
+
+    # External learning tracks may have no distinct real sprint row.
+    for fallback in _roadmap_fallbacks(
+        conn,
+        state,
+    ):
+        track_key = str(
+            fallback["source_key"]
+        ).split(
+            ":",
+            1,
+        )[-1]
+        active = conn.execute(
+            """SELECT target_key
+               FROM track_tasks
+               WHERE track_key=?""",
+            (track_key,),
+        ).fetchone()
+        fallback["track_key"] = (
+            track_key
+        )
+        fallback["target_key"] = (
+            active["target_key"]
+            if active is not None
+            else None
+        )
+        identity = (
+            _daily_focus_track_identity(
+                conn,
+                fallback,
+            )
+        )
+        if identity in exact_used:
+            continue
+
+        state_row = conn.execute(
+            """SELECT status,metadata
+               FROM track_state
+               WHERE track_key=?""",
+            (track_key,),
+        ).fetchone()
+        if state_row is None:
+            continue
+
+        try:
+            metadata = json.loads(
+                state_row["metadata"]
+                or "{}"
+            )
+        except (
+            TypeError,
+            ValueError,
+        ):
+            metadata = {}
+
+        weekly_gap = max(
+            0,
+            int(
+                metadata.get(
+                    "weekly_target",
+                    0,
+                )
+                or 0
+            )
+            - int(
+                metadata.get(
+                    "weekly_completed",
+                    0,
+                )
+                or 0
+            ),
+        )
+        if (
+            weekly_gap <= 0
+            and state_row["status"]
+            == "Weekly Complete"
+        ):
+            continue
+
+        fallback["weekly_gap"] = (
+            weekly_gap
+        )
+        fallback["track_status"] = (
+            state_row["status"]
+        )
+        fallback["extra_reason"] = (
+            "Get ahead on tomorrow's "
+            "external learning"
+        )
+        fallback["_extra_score"] = (
+            1,
+            0
+            if weekly_gap > 0
+            else 1,
+            1
+            if track_key in used_tracks
+            else 0,
+            3,
+            4,
+            fallback["priority"],
+            999,
+        )
+        candidates.append(
+            fallback
+        )
+
+    deduplicated = []
+    seen = set()
+    for item in sorted(
+        candidates,
+        key=lambda candidate:
+        candidate["_extra_score"],
+    ):
+        identity = (
+            _daily_focus_track_identity(
+                conn,
+                item,
+            )
+        )
+        if identity in seen:
+            continue
+        seen.add(identity)
+        deduplicated.append(
+            item
+        )
+
+    return deduplicated
+
+
+def optional_focus_candidate(
+    conn,
+    week,
+    state,
+):
+    plan = _stored_focus_plan(
+        conn,
+        week,
+    )
+    summary = focus_day_summary(
+        plan,
+        conn=conn,
+        week=week,
+    )
+    if not summary[
+        "all_base_complete"
+    ]:
+        return None
+
+    if summary[
+        "active_extra"
+    ] is not None:
+        return summary[
+            "active_extra"
+        ]
+
+    pool = _optional_candidate_pool(
+        conn,
+        week,
+        state,
+    )
+    return (
+        pool[0]
+        if pool
+        else None
+    )
+
+
+def start_extra_focus(
+    conn,
+    week,
+    state,
+    item,
+):
+    plan = _stored_focus_plan(
+        conn,
+        week,
+    )
+    summary = focus_day_summary(
+        plan,
+        conn=conn,
+        week=week,
+    )
+    if not summary[
+        "all_base_complete"
+    ]:
+        raise ValueError(
+            "Complete today's original "
+            "focus plan before starting "
+            "optional extra work."
+        )
+    if summary[
+        "active_extra"
+    ] is not None:
+        return summary[
+            "active_extra"
+        ]
+
+    track_key, target_key = (
+        _focus_track_fields(
+            conn,
+            item,
+        )
+    )
+    position = conn.execute(
+        """SELECT
+               COALESCE(MAX(position),0)+1
+           FROM daily_focus
+           WHERE focus_date=?""",
+        (
+            date.today().isoformat(),
+        ),
+    ).fetchone()[0]
+
+    conn.execute(
+        """INSERT INTO daily_focus
+           (
+               focus_date,week,position,
+               task_id,source_key,
+               category,title,
+               estimated_minutes,
+               track_key,target_key,
+               is_extra
+           )
+           VALUES(
+               ?,?,?,?,?,?,?,?,?,?,1
+           )""",
+        (
+            date.today().isoformat(),
+            int(week),
+            int(position),
+            item.get("task_id"),
+            item["source_key"],
+            item["category"],
+            item["label"],
+            int(
+                item[
+                    "estimated_minutes"
+                ]
+            ),
+            track_key,
+            target_key,
+        ),
+    )
+
+    task_id = item.get(
+        "task_id"
+    )
+    if task_id is not None:
+        conn.execute(
+            """UPDATE task_metadata
+               SET status=CASE
+                   WHEN status IN (
+                       'Not Started',
+                       'Deferred'
+                   )
+                   THEN 'In Progress'
+                   ELSE status
+               END,
+               deferred_until=NULL
+               WHERE task_id=?""",
+            (int(task_id),),
+        )
+
+    conn.commit()
+    return _stored_focus_plan(
+        conn,
+        week,
+    )[-1]
+
+
+def tomorrow_preview(
+    conn,
+    week,
+    state,
+    limit=3,
+):
+    """Return a non-binding preview without modifying tomorrow's plan."""
+    pool = _optional_candidate_pool(
+        conn,
+        week,
+        state,
+    )
+    result = []
+    seen_tracks = set()
+
+    for item in pool:
+        track_key = str(
+            item.get(
+                "track_key"
+            )
+            or ""
+        )
+        if (
+            track_key
+            and track_key
+            in seen_tracks
+        ):
+            continue
+        if track_key:
+            seen_tracks.add(
+                track_key
+            )
+
+        result.append(
+            {
+                "title": (
+                    item.get(
+                        "display_title"
+                    )
+                    or {
+                        "google": (
+                            "Google Certificate"
+                        ),
+                        "datacamp": "DataCamp",
+                        "sql": "SQL Practice",
+                        "portfolio": (
+                            "Portfolio Project"
+                        ),
+                        "applied": (
+                            "Applied Labs"
+                        ),
+                    }.get(
+                        track_key,
+                        {
+                            "SQL": (
+                                "SQL Practice"
+                            ),
+                            "Portfolio": (
+                                "Portfolio Project"
+                            ),
+                            "Review": (
+                                "Weekly Review"
+                            ),
+                            "Learning": (
+                                "Learning"
+                            ),
+                        }.get(
+                            item[
+                                "category"
+                            ],
+                            "Roadmap Task",
+                        ),
+                    )
+                ),
+                "detail": item[
+                    "label"
+                ],
+                "minutes": int(
+                    item[
+                        "estimated_minutes"
+                    ]
+                ),
+            }
+        )
+        if len(result) >= int(
+            limit
+        ):
+            break
+
+    return result
+
+
+
 def intelligent_focus_plan(
     conn,
     week,
@@ -988,6 +2623,13 @@ def intelligent_focus_plan(
     """
     today = date.today()
     yesterday = (today - timedelta(days=1)).isoformat()
+
+    existing_plan = _stored_focus_plan(
+        conn,
+        week,
+    )
+    if existing_plan:
+        return existing_plan
 
     current = []
     for row in available(conn, week):
@@ -1310,29 +2952,59 @@ def intelligent_focus_plan(
     return selected
 
 
-def _record_focus_plan(conn, week, selected):
-    focus_date = date.today().isoformat()
+def _record_focus_plan(
+    conn,
+    week,
+    selected,
+):
+    focus_date = (
+        date.today().isoformat()
+    )
 
     conn.execute(
-        "DELETE FROM daily_focus WHERE focus_date=?",
+        """DELETE FROM daily_focus
+           WHERE focus_date=?""",
         (focus_date,),
     )
 
-    for position, item in enumerate(selected, start=1):
+    for position, item in enumerate(
+        selected,
+        start=1,
+    ):
+        track_key, target_key = (
+            _focus_track_fields(
+                conn,
+                item,
+            )
+        )
         conn.execute(
             """INSERT INTO daily_focus
-               (focus_date,week,position,task_id,source_key,
-                category,title,estimated_minutes)
-               VALUES(?,?,?,?,?,?,?,?)""",
+               (
+                   focus_date,week,
+                   position,task_id,
+                   source_key,category,
+                   title,estimated_minutes,
+                   track_key,target_key,
+                   is_extra
+               )
+               VALUES(
+                   ?,?,?,?,?,?,?,?,?,?,0
+               )""",
             (
                 focus_date,
-                week,
-                position,
+                int(week),
+                int(position),
                 item.get("task_id"),
                 item["source_key"],
                 item["category"],
                 item["label"],
-                item["estimated_minutes"],
+                int(
+                    item[
+                        "estimated_minutes"
+                    ]
+                ),
+                track_key,
+                target_key,
             ),
         )
 

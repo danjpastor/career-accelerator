@@ -671,13 +671,16 @@ class CareerAccelerator(QMainWindow):
             12,
         )
         self.dashboard_focus_card.layout.setSpacing(6)
-        self.dashboard_focus_card.layout.addWidget(
-            SectionHeader(
-                "🎯",
-                "Today's Focus",
-                "Priority-driven plan grounded in this week's roadmap",
-            )
+        self.dashboard_focus_header = SectionHeader(
+            "🎯",
+            "Today's Focus",
+            "Priority-driven plan grounded in this week's roadmap",
         )
+        self.dashboard_focus_card.layout.addWidget(
+            self.dashboard_focus_header
+        )
+        self.dashboard_extra_focus_candidate = None
+        self.dashboard_tomorrow_preview = []
 
         self.focus_layout = QVBoxLayout()
         self.focus_layout.setSpacing(0)
@@ -685,9 +688,26 @@ class CareerAccelerator(QMainWindow):
             self.focus_layout
         )
         self.dashboard_focus_card.layout.addStretch(1)
-        self.dashboard_focus_card.layout.addWidget(Divider())
 
-        focus_footer = QHBoxLayout()
+        self.focus_footer_divider = Divider()
+        self.dashboard_focus_card.layout.addWidget(
+            self.focus_footer_divider
+        )
+
+        self.focus_footer_host = QWidget()
+        self.focus_footer_host.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground,
+            True,
+        )
+        focus_footer = QHBoxLayout(
+            self.focus_footer_host
+        )
+        focus_footer.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
         focus_footer.setSpacing(10)
 
         self.focus_total_time = FooterMetricBox(
@@ -701,9 +721,17 @@ class CareerAccelerator(QMainWindow):
             "0",
         )
 
-        focus_footer.addWidget(self.focus_total_time, 1)
-        focus_footer.addWidget(self.focus_task_count, 1)
-        self.dashboard_focus_card.layout.addLayout(focus_footer)
+        focus_footer.addWidget(
+            self.focus_total_time,
+            1,
+        )
+        focus_footer.addWidget(
+            self.focus_task_count,
+            1,
+        )
+        self.dashboard_focus_card.layout.addWidget(
+            self.focus_footer_host
+        )
 
         self.dashboard_tasks_card = Card()
         self.dashboard_tasks_card.setMinimumHeight(286)
@@ -3026,6 +3054,10 @@ class CareerAccelerator(QMainWindow):
                     notes=self.duckdb_notes.toPlainText(),
                 )
             )
+            planner.mark_focus_task_completed(
+                self.conn,
+                task_id,
+            )
             self.state = state(self.conn)
             tracks.sync_all(
                 self.conn,
@@ -4891,19 +4923,38 @@ class CareerAccelerator(QMainWindow):
         )
 
         # Focus rows.
-        self.clear_layout(self.focus_layout)
+        self.clear_layout(
+            self.focus_layout
+        )
 
-        intelligent_focus = planner.intelligent_focus_plan(
-            self.conn,
-            week,
-            guide,
-            self.state,
-            max_items=4,
+        intelligent_focus = (
+            planner.intelligent_focus_plan(
+                self.conn,
+                week,
+                guide,
+                self.state,
+                max_items=4,
+            )
+        )
+        focus_summary = (
+            planner.focus_day_summary(
+                intelligent_focus,
+                conn=self.conn,
+                week=week,
+            )
         )
 
         focus_styles = {
-            "Learning": ("🎓", "Learning", COLORS["blue"]),
-            "SQL": ("💻", "SQL Practice", COLORS["purple"]),
+            "Learning": (
+                "🎓",
+                "Learning",
+                COLORS["blue"],
+            ),
+            "SQL": (
+                "💻",
+                "SQL Practice",
+                COLORS["purple"],
+            ),
             "Portfolio": (
                 "📁",
                 "Portfolio Project",
@@ -4921,7 +4972,6 @@ class CareerAccelerator(QMainWindow):
             ),
         }
 
-        estimated_minutes = 0
         focus_title_icons = {
             "Google Certificate": "🎓",
             "DataCamp": "📘",
@@ -4930,73 +4980,512 @@ class CareerAccelerator(QMainWindow):
             "DuckDB Practice": "🦆",
             "SQL Fundamentals": "💻",
             "Portfolio Project": "📁",
+            "Applied Labs": "🧪",
             "Weekly Review": "📝",
             "Roadmap Task": "📌",
         }
 
-        for index, item in enumerate(intelligent_focus):
-            presentation = tracks.focus_presentation(
-                self.conn,
-                item,
+        def add_focus_item(
+            item,
+            *,
+            optional=False,
+        ):
+            completed = bool(
+                item.get(
+                    "completed"
+                )
             )
-            style_category = presentation[
-                "style_category"
-            ]
-            (
-                default_emoji,
-                _,
-                accent,
-            ) = focus_styles.get(
-                style_category,
-                focus_styles["General"],
-            )
-            title = presentation["title"]
-            detail = presentation["detail"]
-            emoji = focus_title_icons.get(
-                title,
-                default_emoji,
-            )
+            if completed:
+                style_category = (
+                    item.get(
+                        "category"
+                    )
+                    or "General"
+                )
+                title = (
+                    item.get(
+                        "display_title"
+                    )
+                    or {
+                        "google": (
+                            "Google Certificate"
+                        ),
+                        "datacamp": (
+                            "DataCamp"
+                        ),
+                        "sql": (
+                            "SQL Practice"
+                        ),
+                        "portfolio": (
+                            "Portfolio Project"
+                        ),
+                        "applied": (
+                            "Applied Labs"
+                        ),
+                    }.get(
+                        item.get(
+                            "track_key"
+                        ),
+                        item.get(
+                            "label",
+                            "Completed task",
+                        ),
+                    )
+                )
+                detail = (
+                    f"{item.get('label', title)} "
+                    "• Completed today"
+                )
+                emoji = "✅"
+                duration = "Done"
+                accent = COLORS[
+                    "green"
+                ]
+            else:
+                presentation = (
+                    tracks.focus_presentation(
+                        self.conn,
+                        item,
+                    )
+                )
+                style_category = (
+                    presentation[
+                        "style_category"
+                    ]
+                )
+                (
+                    default_emoji,
+                    _,
+                    accent,
+                ) = focus_styles.get(
+                    style_category,
+                    focus_styles[
+                        "General"
+                    ],
+                )
+                title = presentation[
+                    "title"
+                ]
+                detail = presentation[
+                    "detail"
+                ]
+                emoji = (
+                    "✨"
+                    if optional
+                    else focus_title_icons.get(
+                        title,
+                        default_emoji,
+                    )
+                )
+                duration = (
+                    f"{int(item['estimated_minutes'])}m"
+                )
+                if optional:
+                    original_title = title
+                    task_label = str(
+                        item.get(
+                            "label",
+                            original_title,
+                        )
+                    )
+                    reason = str(
+                        item.get(
+                            "extra_reason",
+                            "Optional progress",
+                        )
+                    )
+                    short_reason = {
+                        "Unfinished weekly target": (
+                            "Weekly target remaining"
+                        ),
+                        (
+                            "Advance the current "
+                            "portfolio milestone"
+                        ): "Portfolio milestone",
+                        (
+                            "Practice current SQL skills"
+                        ): "SQL practice",
+                        (
+                            "Complete the next "
+                            "eligible Applied Lab"
+                        ): "Eligible Applied Lab",
+                        (
+                            "Get ahead on tomorrow's "
+                            "external learning"
+                        ): "External learning",
+                    }.get(
+                        reason,
+                        reason,
+                    )
 
-            minutes = int(item["estimated_minutes"])
-            estimated_minutes += minutes
+                    detail = (
+                        f"{original_title} • "
+                        f"{short_reason}"
+                    )
+                    if item is (
+                        self.dashboard_extra_focus_candidate
+                    ):
+                        title = (
+                            f"Get Ahead • "
+                            f"{task_label}"
+                        )
+                    else:
+                        title = (
+                            f"Extra • "
+                            f"{task_label}"
+                        )
 
-            task_id = item.get("task_id")
+            task_id = item.get(
+                "task_id"
+            )
             workspace_available = (
                 task_workspace.workspace_supported_task_id(
                     self.conn,
                     task_id,
                 )
             )
+            action_text = None
+            action_callback = None
+
+            if optional and item is (
+                self.dashboard_extra_focus_candidate
+            ):
+                action_text = "Start"
+                action_callback = (
+                    lambda _checked=False:
+                    self.start_dashboard_extra_focus()
+                )
+            elif (
+                task_id is not None
+                and workspace_available
+            ):
+                action_text = "Open"
+                action_callback = (
+                    lambda _checked=False,
+                    task_id=task_id:
+                    self.open_task_workspace(
+                        task_id=task_id
+                    )
+                )
+
             self.focus_layout.addWidget(
                 FocusRow(
                     emoji,
                     title,
                     detail,
-                    f"{minutes}m",
+                    duration,
                     accent,
                     action_text=(
-                        "Open"
-                        if workspace_available
-                        else None
+                        action_text
                     ),
                     on_action=(
-                        lambda _checked=False, task_id=task_id:
-                        self.open_task_workspace(task_id=task_id)
-                        if task_id is not None
-                        else None
+                        action_callback
                     ),
                 )
             )
 
-            if index < len(intelligent_focus) - 1:
-                self.focus_layout.addWidget(Divider())
+        if focus_summary[
+            "all_base_complete"
+        ]:
+            complete_panel = SoftPanel()
+            complete_panel.setFixedHeight(
+                38
+            )
+            complete_layout = QHBoxLayout(
+                complete_panel
+            )
+            complete_layout.setContentsMargins(
+                10,
+                3,
+                10,
+                3,
+            )
+            complete_layout.setSpacing(
+                10
+            )
 
+            complete_icon = QLabel(
+                "🎉"
+            )
+            complete_icon.setStyleSheet(
+                "font-size:15pt;"
+            )
+            complete_layout.addWidget(
+                complete_icon
+            )
+
+            complete_text = (
+                QVBoxLayout()
+            )
+            complete_text.setSpacing(0)
+            complete_title = QLabel(
+                "Today's plan complete"
+            )
+            complete_title.setStyleSheet(
+                "font-weight:700;"
+                f"color:{COLORS['green']};"
+            )
+            if focus_summary[
+                "inferred_empty_complete"
+            ]:
+                if focus_summary[
+                    "completed_count"
+                ]:
+                    completion_detail_text = (
+                        f"{focus_summary['completed_count']} "
+                        "completion(s) recorded today"
+                    )
+                elif focus_summary[
+                    "session_count"
+                ]:
+                    completion_detail_text = (
+                        f"{focus_summary['session_count']} "
+                        "study session(s) recorded today"
+                    )
+                else:
+                    completion_detail_text = (
+                        "All currently available focus work is complete"
+                    )
+            else:
+                completion_detail_text = (
+                    f"{focus_summary['completed_count']} "
+                    f"tasks • "
+                    f"{focus_summary['planned_minutes'] // 60}h "
+                    f"{focus_summary['planned_minutes'] % 60:02d}m "
+                    "of planned work"
+                )
+
+            complete_detail = QLabel(
+                completion_detail_text
+            )
+            complete_detail.setObjectName(
+                "Muted"
+            )
+            complete_detail.setStyleSheet(
+                "font-size:8.2pt;"
+            )
+            complete_detail.setToolTip(
+                "\n".join(
+                    focus_summary[
+                        "completed_titles"
+                    ]
+                )
+            )
+            complete_text.addWidget(
+                complete_title
+            )
+            complete_text.addWidget(
+                complete_detail
+            )
+            complete_layout.addLayout(
+                complete_text,
+                1,
+            )
+            self.focus_layout.addWidget(
+                complete_panel
+            )
+
+            active_extra = focus_summary[
+                "active_extra"
+            ]
+            if active_extra is not None:
+                add_focus_item(
+                    active_extra,
+                    optional=True,
+                )
+                self.dashboard_extra_focus_candidate = None
+            else:
+                self.dashboard_extra_focus_candidate = (
+                    planner.optional_focus_candidate(
+                        self.conn,
+                        week,
+                        self.state,
+                    )
+                )
+                if (
+                    self.dashboard_extra_focus_candidate
+                    is not None
+                ):
+                    add_focus_item(
+                        self.dashboard_extra_focus_candidate,
+                        optional=True,
+                    )
+                else:
+                    no_extra = QLabel(
+                        "No additional eligible task is available right now."
+                    )
+                    no_extra.setObjectName(
+                        "Muted"
+                    )
+                    no_extra.setFixedHeight(
+                        38
+                    )
+                    no_extra.setAlignment(
+                        Qt.AlignVCenter
+                    )
+                    self.focus_layout.addWidget(
+                        no_extra
+                    )
+
+            self.dashboard_tomorrow_preview = (
+                planner.tomorrow_preview(
+                    self.conn,
+                    week,
+                    self.state,
+                    limit=3,
+                )
+            )
+            preview_row = QHBoxLayout()
+            preview_row.setContentsMargins(
+                0,
+                0,
+                0,
+                0,
+            )
+            preview_row.setSpacing(6)
+
+            preview_count = len(
+                self.dashboard_tomorrow_preview
+            )
+            if preview_count:
+                first_preview = (
+                    self.dashboard_tomorrow_preview[
+                        0
+                    ]["title"]
+                )
+                remaining_preview = (
+                    preview_count - 1
+                )
+                preview_summary = (
+                    f"Tomorrow • {first_preview}"
+                    + (
+                        f" + {remaining_preview} more"
+                        if remaining_preview
+                        else ""
+                    )
+                )
+            else:
+                preview_summary = (
+                    "Tomorrow • Adaptive plan refreshes automatically"
+                )
+
+            preview_text = QLabel(
+                preview_summary
+            )
+            preview_text.setObjectName(
+                "Muted"
+            )
+            preview_text.setStyleSheet(
+                "font-size:8.2pt;"
+            )
+            preview_text.setMaximumHeight(
+                24
+            )
+            preview_text.setToolTip(
+                "\n".join(
+                    (
+                        f"{item['title']} — "
+                        f"{item['detail']} "
+                        f"({item['minutes']}m)"
+                    )
+                    for item in self.dashboard_tomorrow_preview
+                )
+            )
+            preview_row.addWidget(
+                preview_text,
+                1,
+            )
+
+            preview_button = QPushButton(
+                "Preview"
+            )
+            preview_button.setObjectName(
+                "Link"
+            )
+            preview_button.setFixedHeight(
+                24
+            )
+            preview_button.clicked.connect(
+                self.show_dashboard_tomorrow_preview
+            )
+            preview_row.addWidget(
+                preview_button
+            )
+            self.focus_layout.addLayout(
+                preview_row
+            )
+        else:
+            self.dashboard_extra_focus_candidate = None
+            self.dashboard_tomorrow_preview = []
+
+            for index, item in enumerate(
+                intelligent_focus
+            ):
+                add_focus_item(
+                    item
+                )
+                if (
+                    index
+                    < len(
+                        intelligent_focus
+                    )
+                    - 1
+                ):
+                    self.focus_layout.addWidget(
+                        Divider()
+                    )
+
+        compact_completed_state = bool(
+            focus_summary[
+                "all_base_complete"
+            ]
+        )
+        self.focus_footer_divider.setVisible(
+            not compact_completed_state
+        )
+        self.focus_footer_host.setVisible(
+            not compact_completed_state
+        )
+        self.dashboard_focus_card.layout.setSpacing(
+            3
+            if compact_completed_state
+            else 6
+        )
+
+        planned_minutes = focus_summary[
+            "planned_minutes"
+        ]
         self.focus_total_time.set_value(
-            f"{estimated_minutes // 60}h "
-            f"{estimated_minutes % 60:02d}m"
+            (
+                (
+                    f"{planned_minutes // 60}h "
+                    f"{planned_minutes % 60:02d}m"
+                )
+                if planned_minutes
+                else (
+                    "—"
+                    if focus_summary[
+                        "inferred_empty_complete"
+                    ]
+                    else "0h 00m"
+                )
+            )
         )
         self.focus_task_count.set_value(
-            str(len(intelligent_focus))
+            (
+                f"{focus_summary['completed_count']} / "
+                f"{focus_summary['total_count']}"
+                if focus_summary[
+                    "total_count"
+                ]
+                else (
+                    "Complete"
+                    if focus_summary[
+                        "all_base_complete"
+                    ]
+                    else "0"
+                )
+            )
         )
 
         # Next task rows.
@@ -6268,6 +6757,104 @@ class CareerAccelerator(QMainWindow):
                 5200,
             )
 
+    def start_dashboard_extra_focus(
+        self,
+    ):
+        candidate = getattr(
+            self,
+            "dashboard_extra_focus_candidate",
+            None,
+        )
+        if candidate is None:
+            self.statusBar().showMessage(
+                "No optional extra task is currently available.",
+                3600,
+            )
+            return
+
+        try:
+            started = planner.start_extra_focus(
+                self.conn,
+                int(
+                    self.state[
+                        "current_week"
+                    ]
+                ),
+                self.state,
+                candidate,
+            )
+        except ValueError as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Start Extra Task",
+                str(exc),
+            )
+            return
+
+        self.refresh_all(
+            sync_tracks=False
+        )
+        self.statusBar().showMessage(
+            (
+                "Optional extra task started. "
+                "It does not change today's completed target "
+                "and will not be treated as missed work."
+            ),
+            6000,
+        )
+
+        task_id = started.get(
+            "task_id"
+        )
+        if (
+            task_id is not None
+            and task_workspace.workspace_supported_task_id(
+                self.conn,
+                task_id,
+            )
+        ):
+            self.open_task_workspace(
+                task_id=task_id
+            )
+
+    def show_dashboard_tomorrow_preview(
+        self,
+    ):
+        items = getattr(
+            self,
+            "dashboard_tomorrow_preview",
+            [],
+        )
+        if not items:
+            QMessageBox.information(
+                self,
+                "Tomorrow Preview",
+                (
+                    "Tomorrow's adaptive plan will be created "
+                    "when the new day begins."
+                ),
+            )
+            return
+
+        lines = [
+            (
+                f"• {item['title']} — "
+                f"{item['detail']} "
+                f"({item['minutes']} minutes)"
+            )
+            for item in items
+        ]
+        QMessageBox.information(
+            self,
+            "Tomorrow's Likely Focus",
+            (
+                "This is a non-binding preview. The adaptive "
+                "scheduler may change it when progress, "
+                "prerequisites, or availability change.\n\n"
+                + "\n".join(lines)
+            ),
+        )
+
     def build_plan(self):
         rows, remaining = planner.make_plan(
             self.conn,
@@ -6824,6 +7411,10 @@ class CareerAccelerator(QMainWindow):
                 self.complete_task(task_id)
                 return
 
+            planner.mark_focus_task_completed(
+                self.conn,
+                task_id,
+            )
             self.state = state(self.conn)
             tracks.sync_all(self.conn, self.state)
             self.state = state(self.conn)

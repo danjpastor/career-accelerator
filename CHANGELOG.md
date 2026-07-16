@@ -50,6 +50,65 @@ This file is the single maintained changelog for the project.
 
 
 
+
+
+
+## 9.3.24
+
+- Condensed the Today’s Plan Complete banner
+- Reduced the completed banner from 48 to 38 pixels
+- Shortened Continue & Get Ahead to the task name and one concise reason
+- Removed repeated Today, Week, course-alignment, and pacing text from the
+  visible optional row
+- Preserved the full optional-task detail in tooltips
+- Replaced the multi-item tomorrow text with one likely track and a compact
+  “+ N more” summary
+- Preserved the full Tomorrow Preview dialog
+- Hid the redundant Total Estimated Time and Tasks footer boxes after the
+  required daily plan is complete
+- Kept the normal incomplete-day Today’s Focus layout unchanged
+- Preserved stable daily plans, optional progress, and adaptive scheduling
+
+## 9.3.23
+
+- Fixed the empty 0/0 Today’s Focus state after upgrading on an already
+  completed day
+- Added upgrade-safe empty-plan completion detection
+- Recognized completed track events and SQL completions recorded today
+- Recognized today’s logged study sessions when no task completion record
+  was available
+- Showed Today’s Plan Complete whenever no required eligible work remains
+- Changed the empty completed footer from 0 tasks to Complete
+- Replaced meaningless 0h 00m with a neutral dash when no original plan
+  existed
+- Kept optional work active without causing the empty base plan to reopen
+- Added future-week prerequisite-ready tasks to Continue & Get Ahead when
+  the current week is fully exhausted
+- Allowed Tomorrow Preview to show those future-ready priorities
+- Preserved the stable-plan, no-refill, duplicate-prevention, and adaptive
+  prerequisite behavior
+
+## 9.3.22
+
+- Froze the original Today’s Focus assignments after the first daily plan
+  is generated
+- Prevented completed focus slots from being silently refilled
+- Preserved completed adaptive assignments even when their sprint row is
+  reused for the next target
+- Kept completed items visible as part of the saved daily plan
+- Added a Today’s Plan Complete success state
+- Added completed task count and planned-time summary
+- Added one optional Continue & Get Ahead recommendation
+- Added a Start action for optional extra work
+- Kept optional work separate from the required daily target
+- Prevented optional extra work from becoming missed-yesterday carryover
+- Added a non-binding Tomorrow Preview with up to three likely priorities
+- Added exact track and target identity to stored daily-focus assignments
+- Updated focus health checks to distinguish a new optional target from a
+  duplicate assignment
+- Preserved adaptive prerequisites, weekly pacing, workspace rules, and
+  duplicate prevention
+
 ## 9.3.21
 
 - Added logical-assignment deduplication to Today’s Focus

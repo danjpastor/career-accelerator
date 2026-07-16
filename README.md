@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.21 includes:
+Version 9.3.24 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -494,3 +494,29 @@ Version 9.3.21 prevents the same Google, DataCamp, SQL, or Portfolio assignment
 from appearing twice through both an adaptive task and a roadmap fallback.
 Google Certificate and DataCamp tasks are also fully excluded from Task
 Workspaces while remaining available for progress and Study Session tracking.
+
+
+## Today Complete and Get Ahead
+
+Version 9.3.22 freezes the original Today’s Focus plan for the day. Finishing
+a task updates that saved plan instead of replacing it with another required
+task.
+
+After the original plan is complete, the card shows a success state, one
+optional Continue & Get Ahead recommendation, and a non-binding Tomorrow
+Preview.
+
+
+## Empty-plan Completion Recovery
+
+Version 9.3.23 recognizes an already-finished day even when the stable daily
+plan did not exist before an update. The dashboard shows Today’s Plan
+Complete instead of an empty 0/0 card and can recommend a prerequisite-ready
+future-week task for optional extra progress.
+
+
+## Compact Today Complete Card
+
+Version 9.3.24 condenses the completed-day Today’s Focus state. It removes
+repeated adaptive detail, shortens the tomorrow preview, and hides the
+redundant metric footer while retaining the Get Ahead and Preview actions.
