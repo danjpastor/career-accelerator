@@ -2740,20 +2740,19 @@ def _sync_sprint_prerequisites(
             label,
             re.IGNORECASE,
         )
+        managed_google = (
+            google_match is not None
+            or "google course" in lower
+            or "google certificate" in lower
+        )
         if (
             applied_number is None
-            and google_match
+            and managed_google
         ):
-            target_course = int(
-                google_match.group(1)
+            reason = (
+                "Managed by the independent "
+                "Google Certificate track."
             )
-            if target_course > int(
-                state["google_course"]
-            ):
-                reason = (
-                    f"Reach Google Course "
-                    f"{target_course} first."
-                )
 
         elif (
             applied_number is None
@@ -2985,6 +2984,45 @@ def health_report(conn, state):
     if blocked_visible:
         issues.append(
             "blocked task linked as active"
+        )
+
+    focus_duplicates = conn.execute(
+        """SELECT COUNT(*)
+           FROM (
+               SELECT
+                   CASE
+                       WHEN tt.track_key IS NOT NULL
+                           THEN 'track:' || tt.track_key
+                       WHEN f.source_key LIKE 'roadmap:%'
+                           THEN 'track:' || SUBSTR(f.source_key,10)
+                       ELSE f.source_key
+                   END AS logical_key
+               FROM daily_focus f
+               LEFT JOIN track_tasks tt
+                 ON tt.task_id=f.task_id
+               WHERE f.focus_date=?
+               GROUP BY logical_key
+               HAVING COUNT(*)>1
+           )""",
+        (date.today().isoformat(),),
+    ).fetchone()[0]
+    if focus_duplicates:
+        issues.append(
+            "duplicate logical items in today's focus"
+        )
+
+    external_workspace_count = conn.execute(
+        """SELECT COUNT(*)
+           FROM task_workspaces
+           WHERE LOWER(COALESCE(track_key,''))
+                     IN ('google','datacamp')
+              OR LOWER(task_label) LIKE '%datacamp%'
+              OR LOWER(task_label) LIKE '%google course%'
+              OR LOWER(task_label) LIKE '%google certificate%'"""
+    ).fetchone()[0]
+    if external_workspace_count:
+        issues.append(
+            "external learning tasks stored as workspaces"
         )
 
     return {

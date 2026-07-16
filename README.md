@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.20 includes:
+Version 9.3.21 includes:
 
 - Fixed wide reference-matched dark purple Dashboard with no scrolling
 - Global hover highlights and animated click feedback for every button
@@ -486,3 +486,11 @@ Next Tasks, and Study Session cards.
 
 The workspace Open controls retain hover and pressed animation but use a
 smaller dedicated size that fits the original task-row proportions.
+
+
+## Adaptive Deduplication
+
+Version 9.3.21 prevents the same Google, DataCamp, SQL, or Portfolio assignment
+from appearing twice through both an adaptive task and a roadmap fallback.
+Google Certificate and DataCamp tasks are also fully excluded from Task
+Workspaces while remaining available for progress and Study Session tracking.

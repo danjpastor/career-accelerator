@@ -166,6 +166,95 @@ GOOGLE_COURSE_TASK = re.compile(
 )
 
 
+def _managed_external_track_for_label(label):
+    text = str(label or "").strip()
+    lower = text.lower()
+    if (
+        GOOGLE_COURSE_TASK.match(text)
+        or "google course" in lower
+        or "google certificate" in lower
+        or lower.startswith("google •")
+    ):
+        return "google"
+    if "datacamp" in lower:
+        return "datacamp"
+    return None
+
+
+def _normalized_task_label(label):
+    value = re.sub(
+        r"[^a-z0-9]+",
+        " ",
+        str(label or "").lower(),
+    )
+    return " ".join(value.split())
+
+
+def _row_identity(row):
+    track_key = str(
+        row["track_key"]
+        if "track_key" in row.keys()
+        else ""
+    ).strip().lower()
+    if track_key:
+        return f"track:{track_key}"
+
+    managed = _managed_external_track_for_label(
+        row["label"]
+    )
+    if managed:
+        return f"track:{managed}"
+
+    return (
+        f"week:{int(row['week'])}:"
+        f"{str(row['category'] or 'General').lower()}:"
+        f"{_normalized_task_label(row['label'])}"
+    )
+
+
+def _focus_identity(conn, item):
+    source_key = str(
+        item.get("source_key") or ""
+    )
+    if source_key.startswith("roadmap:"):
+        return (
+            "track:"
+            + source_key.split(":", 1)[1].lower()
+        )
+
+    task_id = item.get("task_id")
+    if task_id is not None:
+        row = conn.execute(
+            """SELECT tt.track_key,s.week,s.label,m.category
+               FROM sprint_tasks s
+               JOIN task_metadata m ON m.task_id=s.id
+               LEFT JOIN track_tasks tt ON tt.task_id=s.id
+               WHERE s.id=?""",
+            (int(task_id),),
+        ).fetchone()
+        if row is not None:
+            return _row_identity(row)
+
+    return source_key or (
+        "fallback:"
+        + _normalized_task_label(
+            item.get("label")
+        )
+    )
+
+
+def _dedupe_focus_items(conn, items):
+    result = []
+    seen = set()
+    for item in items:
+        identity = _focus_identity(conn, item)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        result.append(item)
+    return result
+
+
 def sync_google_course_progress(conn, current_course):
     """Recognize course-specific roadmap work already completed."""
     current_course = max(1, int(current_course))
@@ -227,9 +316,13 @@ def available(conn, week):
                m.destination,
                m.category,
                m.prerequisite_state,
-               m.prerequisite_reason
+               m.prerequisite_reason,
+               tt.track_key,
+               tt.target_key
            FROM sprint_tasks s
            JOIN task_metadata m ON m.task_id=s.id
+           LEFT JOIN track_tasks tt
+             ON tt.task_id=s.id
            WHERE s.week IN (?,?)
              AND s.completed=0
              AND m.status NOT IN ('Completed','Blocked')
@@ -289,9 +382,12 @@ def available(conn, week):
 
         eligible.append(row)
 
-    return sorted(
+    ordered = sorted(
         eligible,
         key=lambda row: (
+            0
+            if row["track_key"]
+            else 1,
             0
             if _is_monday_recovery_retrospective(
                 label=row["label"],
@@ -307,6 +403,16 @@ def available(conn, week):
             int(row["sort_order"]),
         ),
     )
+
+    deduplicated = []
+    seen = set()
+    for row in ordered:
+        identity = _row_identity(row)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        deduplicated.append(row)
+    return deduplicated
 
 def task_schedule_eligibility(
     conn,
@@ -503,6 +609,16 @@ def _task_dict(
         "carryover_note": carryover_note,
         "roadmap_fallback": False,
         "source_key": f"task:{row['id']}",
+        "track_key": (
+            row["track_key"]
+            if "track_key" in row.keys()
+            else None
+        ),
+        "target_key": (
+            row["target_key"]
+            if "target_key" in row.keys()
+            else None
+        ),
     }
 
 
@@ -919,6 +1035,7 @@ def intelligent_focus_plan(
 
     selected = []
     used_task_ids = set()
+    used_focus_identities = set()
     remaining_slots = list(FOCUS_SLOT_ORDER)
 
     # Promote yesterday's unfinished recommendations while preserving
@@ -936,8 +1053,12 @@ def intelligent_focus_plan(
             )
         )
     ][:2]:
+        identity = _focus_identity(conn, item)
+        if identity in used_focus_identities:
+            continue
         selected.append(item)
         used_task_ids.add(item["task_id"])
+        used_focus_identities.add(identity)
         _remove_matching_slot(
             remaining_slots,
             item["category"],
@@ -951,6 +1072,8 @@ def intelligent_focus_plan(
             for candidate in candidates
             if (
                 candidate["task_id"] not in used_task_ids
+                and _focus_identity(conn, candidate)
+                    not in used_focus_identities
                 and candidate["category"] == category
                 and _task_allowed_today(
                     label=candidate["label"],
@@ -964,6 +1087,9 @@ def intelligent_focus_plan(
             chosen = matching[0]
             selected.append(chosen)
             used_task_ids.add(chosen["task_id"])
+            used_focus_identities.add(
+                _focus_identity(conn, chosen)
+            )
 
         if len(selected) >= max_items:
             break
@@ -974,6 +1100,11 @@ def intelligent_focus_plan(
         for candidate in candidates:
             if candidate["task_id"] in used_task_ids:
                 continue
+            if (
+                _focus_identity(conn, candidate)
+                in used_focus_identities
+            ):
+                continue
             if not _task_allowed_today(
                 label=candidate["label"],
                 category=candidate["category"],
@@ -983,6 +1114,9 @@ def intelligent_focus_plan(
                 continue
             selected.append(candidate)
             used_task_ids.add(candidate["task_id"])
+            used_focus_identities.add(
+                _focus_identity(conn, candidate)
+            )
             if len(selected) >= max_items:
                 break
 
@@ -1010,6 +1144,12 @@ def intelligent_focus_plan(
                 continue
 
             fallback = fallbacks[slot_index]
+            fallback_identity = _focus_identity(
+                conn,
+                fallback,
+            )
+            if fallback_identity in used_focus_identities:
+                continue
             fallback_track = str(
                 fallback["source_key"]
             ).split(":", 1)[-1]
@@ -1021,6 +1161,9 @@ def intelligent_focus_plan(
 
             selected.append(fallback)
             represented.append(slot_category)
+            used_focus_identities.add(
+                fallback_identity
+            )
 
     # The Applied Labs track may reserve one slot when it is actively
     # due. It replaces the matching lower-priority core category when
@@ -1059,6 +1202,12 @@ def intelligent_focus_plan(
                 applied_candidate[
                     "task_id"
                 ]
+            )
+            used_focus_identities.add(
+                _focus_identity(
+                    conn,
+                    applied_candidate,
+                )
             )
         else:
             replaceable = []
@@ -1129,6 +1278,12 @@ def intelligent_focus_plan(
                         "task_id"
                     )
                 )
+                used_focus_identities.discard(
+                    _focus_identity(
+                        conn,
+                        removed,
+                    )
+                )
                 selected[
                     replace_index
                 ] = applied_candidate
@@ -1137,10 +1292,19 @@ def intelligent_focus_plan(
                         "task_id"
                     ]
                 )
+                used_focus_identities.add(
+                    _focus_identity(
+                        conn,
+                        applied_candidate,
+                    )
+                )
 
-    selected = _order_focus_items(
+    selected = _dedupe_focus_items(
         conn,
-        selected,
+        _order_focus_items(
+            conn,
+            selected,
+        ),
     )[:max_items]
     _record_focus_plan(conn, week, selected)
     return selected

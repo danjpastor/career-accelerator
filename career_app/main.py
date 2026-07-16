@@ -4960,6 +4960,13 @@ class CareerAccelerator(QMainWindow):
             minutes = int(item["estimated_minutes"])
             estimated_minutes += minutes
 
+            task_id = item.get("task_id")
+            workspace_available = (
+                task_workspace.workspace_supported_task_id(
+                    self.conn,
+                    task_id,
+                )
+            )
             self.focus_layout.addWidget(
                 FocusRow(
                     emoji,
@@ -4969,11 +4976,11 @@ class CareerAccelerator(QMainWindow):
                     accent,
                     action_text=(
                         "Open"
-                        if item.get("task_id") is not None
+                        if workspace_available
                         else None
                     ),
                     on_action=(
-                        lambda _checked=False, task_id=item.get("task_id"):
+                        lambda _checked=False, task_id=task_id:
                         self.open_task_workspace(task_id=task_id)
                         if task_id is not None
                         else None
@@ -5006,6 +5013,12 @@ class CareerAccelerator(QMainWindow):
 
         if available:
             for index, row in enumerate(available[:5]):
+                workspace_available = (
+                    task_workspace.workspace_supported_task_id(
+                        self.conn,
+                        row["id"],
+                    )
+                )
                 task_row = TaskRow(
                     title=row["label"],
                     source=self.dashboard_task_source(
@@ -5021,10 +5034,18 @@ class CareerAccelerator(QMainWindow):
                         row["category"],
                         COLORS["muted"],
                     ),
-                    action_text="Open",
+                    action_text=(
+                        "Open"
+                        if workspace_available
+                        else None
+                    ),
                     on_action=(
-                        lambda _checked=False, task_id=row["id"]:
-                        self.open_task_workspace(task_id=task_id)
+                        (
+                            lambda _checked=False, task_id=row["id"]:
+                            self.open_task_workspace(task_id=task_id)
+                        )
+                        if workspace_available
+                        else None
                     ),
                 )
                 task_row.checkbox.stateChanged.connect(
@@ -6972,7 +6993,8 @@ class CareerAccelerator(QMainWindow):
             self.workspace_task_list.setCurrentRow(0)
         self.workspace_task_summary.setText(
             f"{len(rows)} task(s) • Documents are created only when opened • "
-            "Autosave is enabled inside each workspace."
+            "Google Certificate and DataCamp work stays in Learning and "
+            "Study Sessions rather than Task Workspaces."
         )
 
     def save_learning(self):

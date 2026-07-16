@@ -185,6 +185,13 @@ def migrate(conn, root: Path):
     updated_tasks = _update_duckdb_exercise_tasks(conn)
     applied_tasks = _ensure_applied_exercise_tasks(conn)
 
+    from career_app.services import task_workspace
+    workspace_cleanup = (
+        task_workspace.cleanup_external_learning_workspaces(
+            conn
+        )
+    )
+
     conn.commit()
     return {
         "sprint_tasks": sprint_count,
@@ -192,4 +199,7 @@ def migrate(conn, root: Path):
         "updated_tasks": updated_tasks,
         "applied_tasks_added": applied_tasks["added"],
         "applied_tasks_updated": applied_tasks["updated"],
+        "external_workspaces_removed": (
+            workspace_cleanup["removed"]
+        ),
     }

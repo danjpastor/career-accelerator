@@ -31,6 +31,11 @@ EXTERNAL_LEARNING_TRACKS = {
     "datacamp",
 }
 
+GOOGLE_ROADMAP_PATTERN = re.compile(
+    r"^\s*\[Google Course \d+\]",
+    re.IGNORECASE,
+)
+
 
 WORKSPACE_TYPES = {
     "applied_lab": "Applied Lab Submission",
@@ -110,22 +115,108 @@ def task_record(conn, task_id: int):
     ).fetchone()
 
 
+def is_external_learning_values(
+    *,
+    track_key=None,
+    label=None,
+) -> bool:
+    track = str(track_key or "").strip().lower()
+    if track in EXTERNAL_LEARNING_TRACKS:
+        return True
+
+    text = str(label or "").strip()
+    lower = text.lower()
+    return (
+        GOOGLE_ROADMAP_PATTERN.match(text) is not None
+        or "google course" in lower
+        or "google certificate" in lower
+        or lower.startswith("google •")
+        or "datacamp" in lower
+    )
+
+
 def is_external_learning_task(row) -> bool:
     if row is None:
         return False
-    track_key = str(row["track_key"] or "").lower()
-    if track_key in EXTERNAL_LEARNING_TRACKS:
-        return True
-    label = str(row["label"] or "").lower()
-    return (
-        "google certificate" in label
-        or label.startswith("google •")
-        or "datacamp" in label
+    keys = set(row.keys())
+    label = (
+        row["label"]
+        if "label" in keys
+        else row["task_label"]
+        if "task_label" in keys
+        else ""
+    )
+    track_key = (
+        row["track_key"]
+        if "track_key" in keys
+        else None
+    )
+    return is_external_learning_values(
+        track_key=track_key,
+        label=label,
     )
 
 
 def workspace_supported(row) -> bool:
     return row is not None and not is_external_learning_task(row)
+
+
+def workspace_supported_task_id(conn, task_id: int | None) -> bool:
+    if task_id is None:
+        return False
+    return workspace_supported(
+        task_record(conn, int(task_id))
+    )
+
+
+def cleanup_external_learning_workspaces(conn) -> dict:
+    rows = conn.execute(
+        """SELECT workspace_key,task_id,task_label,track_key
+           FROM task_workspaces"""
+    ).fetchall()
+
+    removed = []
+    for row in rows:
+        task_row = (
+            task_record(conn, int(row["task_id"]))
+            if row["task_id"] is not None
+            else None
+        )
+        external = (
+            is_external_learning_task(task_row)
+            if task_row is not None
+            else is_external_learning_values(
+                track_key=row["track_key"],
+                label=row["task_label"],
+            )
+        )
+        if not external:
+            continue
+
+        key = row["workspace_key"]
+        conn.execute(
+            """UPDATE study_sessions
+               SET workspace_key=NULL
+               WHERE workspace_key=?""",
+            (key,),
+        )
+        conn.execute(
+            """DELETE FROM task_workspace_artifacts
+               WHERE workspace_key=?""",
+            (key,),
+        )
+        conn.execute(
+            """DELETE FROM task_workspaces
+               WHERE workspace_key=?""",
+            (key,),
+        )
+        removed.append(key)
+
+    conn.commit()
+    return {
+        "removed": len(removed),
+        "workspace_keys": removed,
+    }
 
 
 def workspace_key_for_task(conn, task_id: int) -> str:
@@ -820,10 +911,26 @@ def task_rows(
     query += " ORDER BY s.week,m.priority,s.sort_order"
 
     rows = []
+    seen = set()
     for row in conn.execute(query, tuple(values)).fetchall():
         if is_external_learning_task(row):
             continue
         key = workspace_key_for_task(conn, int(row["id"]))
+        logical_key = (
+            key
+            if row["track_key"]
+            else (
+                int(row["week"]),
+                re.sub(
+                    r"[^a-z0-9]+",
+                    " ",
+                    str(row["label"] or "").lower(),
+                ).strip(),
+            )
+        )
+        if logical_key in seen:
+            continue
+        seen.add(logical_key)
         workspace = _workspace_row(conn, key)
         artifact_count = conn.execute(
             """SELECT COUNT(*) FROM task_workspace_artifacts

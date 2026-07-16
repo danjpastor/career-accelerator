@@ -49,6 +49,25 @@ This file is the single maintained changelog for the project.
 
 
 
+
+## 9.3.21
+
+- Added logical-assignment deduplication to Today’s Focus
+- Prevented roadmap fallbacks from duplicating active adaptive tracks
+- Added a final semantic deduplication pass before saving daily focus
+- Deduplicated Next Tasks by active track and normalized task identity
+- Preferred active adaptive tasks over older unlinked roadmap rows
+- Made legacy Google Course checklist tasks subordinate to the adaptive Google track
+- Preserved the independent DataCamp track as the only active DataCamp assignment
+- Removed Task Workspace Open controls from Google and DataCamp rows
+- Excluded all bracketed Google Course tasks from Task Workspaces
+- Excluded Google course review/checklist tasks and DataCamp tasks from Task Workspaces
+- Added migration cleanup for accidental external-learning workspace records
+- Preserved linked Study Session task history while removing unnecessary workspace links
+- Added duplicate-focus and external-workspace checks to track health reporting
+- Deduplicated the Task Workspaces list by workspace or normalized task identity
+- Preserved workspace files on disk during cleanup
+
 ## 9.3.20
 
 - Restored Today's Focus to its original compact 286-pixel card height
