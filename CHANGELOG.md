@@ -1,5 +1,14 @@
 # Changelog
 
+## 10.0.5 - 2026-07-17
+
+- Corrected Dashboard action buttons so their fixed responsive heights can never be smaller than the scaled font and stylesheet size hint, preventing vertically clipped labels on Start Study Session, Pause, Reset, Log, View Full Summary, and Mission Control actions.
+- Added compact Dashboard-specific button padding that retains clear hover and pressed states without consuming excessive no-scroll card height.
+- Rebuilt the sidebar navigation as a flexible equal-height region so links expand into the available space between the logo and progress cards instead of leaving a large empty vertical band.
+- Added a Settings action to rebuild the current day’s frozen Today’s Focus snapshot from live progress and adaptive planning data.
+- Snapshot rebuilding preserves task completions, study sessions, notes, achievements, previous days, and restores the original snapshot automatically if regeneration fails.
+- Added regressions for scaled button height, Study Session control containment, flexible sidebar navigation, Settings action availability, successful daily snapshot replacement, and failed-rebuild rollback.
+
 ## 10.0.4 - 2026-07-17
 
 - Removed the Dashboard vertical scroll path so the front page always fits its live viewport.

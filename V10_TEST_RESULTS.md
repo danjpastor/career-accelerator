@@ -1,13 +1,14 @@
-# Career Accelerator v10.0.4 Test Results
+# Career Accelerator v10.0.5 Test Results
 
 ## Automated verification
 
-- 27 automated tests passed.
+- 32 automated tests passed.
 - Every official SQL Subqueries and SQL Joins solution passed validation.
 - Exercise Pack lesson mappings, starter-template safety, hint persistence, and manifest associations passed.
 - Numbered SQL editor line tracking and DuckDB error navigation passed.
 - Interview submission originality checks passed.
 - Backup deduplication and retention passed.
+- Current-day snapshot replacement and automatic rollback on regeneration failure passed.
 
 ## Responsive verification
 
@@ -16,6 +17,9 @@ The Dashboard was verified at 900×620, 1024×768, 1280×800, 1366×768, 1536×1
 - Dashboard vertical scrolling: none.
 - Dashboard horizontal scrolling: none.
 - Sidebar scrolling at supported sizes: none.
+- Sidebar navigation links evenly consume the available flexible region.
+- Dashboard action-button height is never below its scaled size hint.
+- Study Session controls remain fully inside their card.
 - Circular Study Session timer overlap with controls: none.
 - Dashboard sections retain exact responsive spacing without blank vertical bands.
 - Every main page avoids outer horizontal overflow after repeated resize cycles.

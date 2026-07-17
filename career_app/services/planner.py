@@ -2952,6 +2952,75 @@ def intelligent_focus_plan(
     return selected
 
 
+def rebuild_today_snapshot(
+    conn,
+    week,
+    guide,
+    state,
+    max_items=4,
+):
+    """Discard and regenerate only today's frozen focus recommendation.
+
+    Task completion, study sessions, notes, and all historical daily-focus
+    records remain untouched. Only rows for the current calendar date are
+    replaced using the live adaptive-planning inputs.
+    """
+    focus_date = date.today().isoformat()
+    existing_rows = conn.execute(
+        """SELECT
+               id,focus_date,week,position,task_id,source_key,category,title,
+               estimated_minutes,track_key,target_key,is_extra,completed_at,created_at
+           FROM daily_focus
+           WHERE focus_date=?
+           ORDER BY position""",
+        (focus_date,),
+    ).fetchall()
+    existing_count = len(existing_rows)
+    conn.execute(
+        """DELETE FROM daily_focus
+           WHERE focus_date=?""",
+        (focus_date,),
+    )
+    conn.commit()
+
+    try:
+        rebuilt = intelligent_focus_plan(
+            conn,
+            int(week),
+            guide,
+            state,
+            max_items=max_items,
+        )
+    except Exception:
+        # A snapshot is derived data, but a failed rebuild should still leave
+        # the learner exactly where they started. Restore today's frozen rows
+        # before surfacing the error to the Settings page.
+        conn.execute(
+            """DELETE FROM daily_focus
+               WHERE focus_date=?""",
+            (focus_date,),
+        )
+        for row in existing_rows:
+            conn.execute(
+                """INSERT INTO daily_focus
+                   (
+                       id,focus_date,week,position,task_id,source_key,category,title,
+                       estimated_minutes,track_key,target_key,is_extra,completed_at,created_at
+                   )
+                   VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                tuple(row),
+            )
+        conn.commit()
+        raise
+
+    return {
+        "focus_date": focus_date,
+        "removed": existing_count,
+        "created": len(rebuilt),
+        "items": rebuilt,
+    }
+
+
 def _record_focus_plan(
     conn,
     week,

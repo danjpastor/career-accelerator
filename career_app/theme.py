@@ -310,6 +310,17 @@ def stylesheet(scale: float = 1.0):
         padding-bottom: 8px;
     }}
 
+    QPushButton[dashboardAction="true"] {{
+        padding-top: 4px;
+        padding-bottom: 4px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }}
+    QPushButton[dashboardAction="true"]:pressed {{
+        padding-top: 5px;
+        padding-bottom: 3px;
+    }}
+
     QFrame#SidebarCard QLabel#Tiny {{
         color: {c['muted']};
         font-weight: 700;

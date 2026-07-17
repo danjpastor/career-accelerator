@@ -153,6 +153,77 @@ class ResponsiveLayoutV10Tests(unittest.TestCase):
                 )
 
 
+    def test_dashboard_action_labels_have_full_scaled_height(self) -> None:
+        for size in (
+            (900, 620),
+            (1024, 768),
+            (1280, 800),
+            (1680, 944),
+            (1536, 1020),
+        ):
+            with self.subTest(size=size):
+                self.resize_window(*size)
+                self.window.navigate(0)
+                self._flush()
+                buttons = [
+                    self.window.dashboard_start_button,
+                    *(
+                        self.window.dashboard_timer_controls.itemAt(index).widget()
+                        for index in range(
+                            self.window.dashboard_timer_controls.count()
+                        )
+                    ),
+                    self.window.dashboard_summary_button,
+                    self.window.dashboard_highest_impact_button,
+                    self.window.dashboard_view_readiness_button,
+                ]
+                for button in buttons:
+                    self.assertGreaterEqual(
+                        button.height(),
+                        button.sizeHint().height(),
+                        f"button text clipped for {button.text()} at {size}",
+                    )
+
+                for button in buttons[:4]:
+                    bottom = button.mapTo(
+                        self.window.dashboard_timer_card,
+                        button.rect().bottomLeft(),
+                    ).y()
+                    self.assertLessEqual(
+                        bottom,
+                        self.window.dashboard_timer_card.contentsRect().bottom(),
+                        f"Study Session control overflowed at {size}",
+                    )
+
+    def test_sidebar_links_expand_into_the_available_navigation_region(self) -> None:
+        for size in ((900, 620), (1280, 800), (1680, 944), (1536, 1020)):
+            with self.subTest(size=size):
+                self.resize_window(*size)
+                self.window.navigate(0)
+                self._flush()
+                content = self.window.sidebar_scroll.widget()
+                last_button = self.window.nav_buttons[-1]
+                last_bottom = last_button.mapTo(
+                    content,
+                    last_button.rect().bottomLeft(),
+                ).y()
+                gap = self.window.sidebar_streak_card.y() - last_bottom - 1
+                self.assertLessEqual(
+                    gap,
+                    max(8, self.window.sidebar_content_layout.spacing() + 4),
+                    f"sidebar left an unused band at {size}",
+                )
+                heights = [button.height() for button in self.window.nav_buttons]
+                self.assertLessEqual(max(heights) - min(heights), 1)
+
+    def test_settings_exposes_rebuild_today_snapshot_action(self) -> None:
+        self.resize_window(1024, 768)
+        self.window.navigate(10)
+        self._flush()
+        button = self.window.rebuild_today_snapshot_button
+        self.assertIn("Rebuild Today's Snapshot", button.text())
+        self.assertTrue(button.isEnabled())
+
     def test_dashboard_matches_display_scaled_window_without_scroll_or_timer_overlap(self) -> None:
         # Mirrors the logical client size shown by a 1680-wide Windows desktop
         # using display scaling. This was the remaining real-world regression.

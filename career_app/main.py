@@ -412,7 +412,7 @@ class CareerAccelerator(QMainWindow):
         content.setMinimumWidth(0)
         content.setSizePolicy(
             QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Expanding,
         )
         layout = QVBoxLayout(content)
         layout.setContentsMargins(16, 14, 16, 12)
@@ -452,26 +452,41 @@ class CareerAccelerator(QMainWindow):
         group.setExclusive(True)
         self.nav_buttons = []
 
+        # Navigation receives the flexible portion of the sidebar. The links
+        # expand evenly between the logo and the fixed progress cards instead
+        # of leaving a large unused vertical band above Current Streak.
+        nav_host = QWidget()
+        nav_host.setMinimumHeight(0)
+        nav_host.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
+        nav_layout = QVBoxLayout(nav_host)
+        nav_layout.setContentsMargins(0, 0, 0, 0)
+        nav_layout.setSpacing(4)
+        self.sidebar_nav_host = nav_host
+        self.sidebar_nav_layout = nav_layout
+
         for text, index in NAV:
             button = QPushButton(text)
             button.setObjectName("Nav")
             button.setMinimumHeight(34)
-            button.setMaximumHeight(42)
+            button.setMaximumHeight(52)
             button.setSizePolicy(
                 QSizePolicy.Policy.Expanding,
-                QSizePolicy.Policy.Preferred,
+                QSizePolicy.Policy.Expanding,
             )
             button.setCheckable(True)
             button.clicked.connect(
                 lambda checked=False, target=index: self.navigate(target)
             )
             group.addButton(button)
-            layout.addWidget(button)
+            nav_layout.addWidget(button, 1)
             self.nav_buttons.append(button)
             if index == 0:
                 button.setChecked(True)
 
-        layout.addStretch(1)
+        layout.addWidget(nav_host, 1)
 
         streak_card = QFrame()
         streak_card.setObjectName("SidebarCard")
@@ -679,7 +694,8 @@ class CareerAccelerator(QMainWindow):
             "comfortable": {
                 "margins": (16, 14, 16, 12),
                 "spacing": 4,
-                "nav_height": (34, 42),
+                "nav_height": (34, 52),
+                "nav_spacing": 4,
                 "logo": 28,
                 "career": 17,
                 "accelerator": 15,
@@ -695,7 +711,8 @@ class CareerAccelerator(QMainWindow):
             "compact": {
                 "margins": (12, 9, 12, 8),
                 "spacing": 2,
-                "nav_height": (27, 30),
+                "nav_height": (27, 42),
+                "nav_spacing": 2,
                 "logo": 23,
                 "career": 14,
                 "accelerator": 12,
@@ -711,7 +728,8 @@ class CareerAccelerator(QMainWindow):
             "ultra": {
                 "margins": (10, 6, 10, 5),
                 "spacing": 1,
-                "nav_height": (21, 22),
+                "nav_height": (21, 30),
+                "nav_spacing": 1,
                 "logo": 19,
                 "career": 12,
                 "accelerator": 10,
@@ -728,6 +746,7 @@ class CareerAccelerator(QMainWindow):
 
         self.sidebar_content_layout.setContentsMargins(*values["margins"])
         self.sidebar_content_layout.setSpacing(values["spacing"])
+        self.sidebar_nav_layout.setSpacing(values["nav_spacing"])
         for button in self.nav_buttons:
             button.setMinimumHeight(values["nav_height"][0])
             button.setMaximumHeight(values["nav_height"][1])
@@ -1410,6 +1429,20 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(self.dashboard_footer_section)
         root.setAlignment(Qt.AlignmentFlag.AlignTop)
 
+        # Dashboard actions use compact vertical padding controlled by the
+        # theme. This keeps labels vertically centered even when the no-scroll
+        # density modes reduce card heights.
+        for dashboard_button in (
+            self.dashboard_start_button,
+            pause,
+            reset,
+            log,
+            self.dashboard_summary_button,
+            self.dashboard_highest_impact_button,
+            self.dashboard_view_readiness_button,
+        ):
+            dashboard_button.setProperty("dashboardAction", True)
+
         page.add_responsive_handler(self.update_dashboard_layout)
         page.heightChanged.connect(
             lambda height: self.update_dashboard_layout(
@@ -1702,14 +1735,25 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_timer_stage.setMinimumHeight(timer_stage_height)
         self.dashboard_timer_stage.setMaximumHeight(timer_stage_height)
 
-        start_height = 34 if density == "comfortable" else 27 if density == "compact" else 23
-        self.dashboard_start_button.setMinimumHeight(start_height)
-        self.dashboard_start_button.setMaximumHeight(start_height)
+        def fit_dashboard_button(button, target_height):
+            # Never force a responsive button below the height requested by
+            # its current scaled font and stylesheet padding. Doing so clips
+            # glyph ascenders/descenders even when the surrounding card fits.
+            fitted_height = max(
+                int(target_height),
+                int(button.sizeHint().height()),
+            )
+            button.setMinimumHeight(fitted_height)
+            button.setMaximumHeight(fitted_height)
+            return fitted_height
+
+        start_height = 36 if density == "comfortable" else 31 if density == "compact" else 27
+        fit_dashboard_button(self.dashboard_start_button, start_height)
         for index in range(self.dashboard_timer_controls.count()):
             button = self.dashboard_timer_controls.itemAt(index).widget()
             if button is not None:
-                button.setMinimumHeight(30 if density == "comfortable" else 25 if density == "compact" else 22)
-                button.setMaximumHeight(32 if density == "comfortable" else 27 if density == "compact" else 24)
+                control_height = 32 if density == "comfortable" else 29 if density == "compact" else 26
+                fit_dashboard_button(button, control_height)
 
         self.dashboard_quote.setVisible(density != "ultra")
         self.dashboard_date.setVisible(density != "ultra")
@@ -1722,17 +1766,18 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_summary_button.setText(
             "Summary →" if density == "ultra" else "View Full Summary"
         )
-        summary_button_height = 30 if density == "comfortable" else 25 if density == "compact" else 22
-        self.dashboard_summary_button.setMinimumHeight(summary_button_height)
-        self.dashboard_summary_button.setMaximumHeight(summary_button_height)
+        summary_button_height = 32 if density == "comfortable" else 29 if density == "compact" else 26
+        fit_dashboard_button(
+            self.dashboard_summary_button,
+            summary_button_height,
+        )
 
-        mission_button_height = 32 if density == "comfortable" else 27 if density == "compact" else 23
+        mission_button_height = 34 if density == "comfortable" else 30 if density == "compact" else 27
         for button in (
             self.dashboard_highest_impact_button,
             self.dashboard_view_readiness_button,
         ):
-            button.setMinimumHeight(mission_button_height)
-            button.setMaximumHeight(mission_button_height)
+            fit_dashboard_button(button, mission_button_height)
 
         self.dashboard_content.updateGeometry()
 
@@ -4590,6 +4635,19 @@ class CareerAccelerator(QMainWindow):
         restore.setObjectName("Secondary")
         restore.clicked.connect(self.restore_tasks)
         data_card.layout.addWidget(restore)
+
+        rebuild_snapshot = QPushButton(
+            "🗓️ Rebuild Today's Snapshot"
+        )
+        rebuild_snapshot.setObjectName("Secondary")
+        rebuild_snapshot.setToolTip(
+            "Recalculate Today's Focus from current progress without erasing completions or study history."
+        )
+        rebuild_snapshot.clicked.connect(
+            self.confirm_rebuild_today_snapshot
+        )
+        self.rebuild_today_snapshot_button = rebuild_snapshot
+        data_card.layout.addWidget(rebuild_snapshot)
 
         data_note = QLabel(
             "Automatic backups are deduplicated and retained as the newest 10, daily copies for 7 days, and weekly copies for 4 weeks."
@@ -9712,6 +9770,76 @@ class CareerAccelerator(QMainWindow):
         self.autosave_timer.start(max(60000, interval))
         self.settings_status.setText("Settings saved.")
 
+    def confirm_rebuild_today_snapshot(self):
+        result = QMessageBox.question(
+            self,
+            "Rebuild Today's Snapshot",
+            (
+                "Recalculate Today's Focus from your current progress and "
+                "adaptive roadmap?\n\n"
+                "This replaces only today's frozen recommendation. Completed "
+                "tasks, study sessions, notes, achievements, and previous days "
+                "will not be erased."
+            ),
+            (
+                QMessageBox.StandardButton.Yes
+                | QMessageBox.StandardButton.Cancel
+            ),
+            QMessageBox.StandardButton.Cancel,
+        )
+        if result != QMessageBox.StandardButton.Yes:
+            return
+        self.rebuild_today_snapshot()
+
+    def rebuild_today_snapshot(self):
+        self.state = state(self.conn)
+        tracks.sync_all(self.conn, self.state)
+        self.state = state(self.conn)
+        week = int(self.state["current_week"])
+        guide = WEEKLY_GUIDANCE.get(
+            week,
+            (
+                "Keep Moving",
+                "Continue the current course",
+                "Continue DataCamp",
+                [],
+                "Advance the project",
+            ),
+        )
+        try:
+            report = planner.rebuild_today_snapshot(
+                self.conn,
+                week,
+                guide,
+                self.state,
+                max_items=4,
+            )
+            self.refresh_dashboard(sync_tracks=False)
+            self.refresh_planner()
+            message = (
+                f"Today's snapshot rebuilt: {report['created']} focus "
+                f"item(s) generated for {report['focus_date']}."
+            )
+            self.settings_status.setText(message)
+            self.statusBar().showMessage(message, 7000)
+            QMessageBox.information(
+                self,
+                "Snapshot Rebuilt",
+                message
+                + "\n\nYour task completions and study history were preserved.",
+            )
+        except Exception as error:
+            self.settings_status.setText(
+                f"Today's snapshot could not be rebuilt: {error}"
+            )
+            QMessageBox.critical(
+                self,
+                "Snapshot Rebuild Failed",
+                (
+                    "Career Accelerator could not rebuild today's snapshot.\n\n"
+                    f"{error}"
+                ),
+            )
 
     def reset_progress_details(self):
         return (
