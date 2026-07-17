@@ -1,0 +1,87 @@
+{
+  "id": "customer-activity-capstone",
+  "title": "Capstone: Complete Customer Activity Summary",
+  "stage": "Stage 12 \u2022 Combine the mental models",
+  "subtitle": "Preserve customers, enrich dimensions, and aggregate transactions safely",
+  "difficulty": "Advanced Foundation",
+  "estimated_minutes": 45,
+  "concepts": [
+    "multiple LEFT JOINs",
+    "conditional aggregation",
+    "COUNT DISTINCT",
+    "COALESCE"
+  ],
+  "learning_objective": "Build a complete one-row-per-customer summary while preserving customers with no region or orders.",
+  "recommended_lesson": "Lessons 3, 5, and 6",
+  "why": "A common analyst deliverable is a complete customer dimension enriched with activity metrics and explicit zeroes.",
+  "prompt": "Return `customer_id`, `customer_name`, `region_name`, `completed_order_count`, `completed_revenue`, and `latest_order_date` for every customer. Display `Unassigned` when no region matches. Count and sum only completed orders, but calculate latest_order_date from any order. Order by `customer_id`.",
+  "expected_result": "6 rows, one per customer. Customers 5 and 6 have 0 completed orders, 0 completed revenue, and NULL latest_order_date.",
+  "build_steps": [
+    "Start from customers because every customer must remain.",
+    "LEFT JOIN regions for the readable region name.",
+    "LEFT JOIN orders for activity.",
+    "Use CASE inside COUNT and SUM to include completed orders only.",
+    "Group by customer and region fields.",
+    "Order by customer ID."
+  ],
+  "explanation": "Two left joins preserve the customer set. Conditional aggregation computes selected metrics while MAX can still inspect every order status.",
+  "common_mistakes": [
+    "Filtering completed orders in WHERE, which removes customers with no completed orders.",
+    "Using INNER JOIN to regions and losing the unassigned customer.",
+    "Counting joined rows without restricting to completed orders.",
+    "Forgetting that SUM may need an ELSE 0 branch."
+  ],
+  "hints": [
+    "Use `COALESCE(r.region_name, 'Unassigned')`.",
+    "Use `COUNT(DISTINCT CASE WHEN o.status = 'Completed' THEN o.order_id END)`.",
+    "Use `SUM(CASE WHEN ... THEN o.total_amount ELSE 0 END)`.",
+    "`MAX(o.order_date)` should not be limited to completed status."
+  ],
+  "takeaways": [
+    "Preserve the entity table first.",
+    "Conditional aggregation is safer than filtering away zero-activity entities.",
+    "State the final grain: one row per customer."
+  ],
+  "reflection_questions": [
+    "Why is the status condition inside CASE instead of WHERE?",
+    "Which join preserves Evergreen Health despite a missing region?"
+  ],
+  "stretch_goal": "Add a `has_pending_order` flag using `MAX(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END)`.",
+  "starter_sql": "SELECT\n    c.customer_id,\n    c.customer_name,\n    COALESCE(r.region_name, 'Unassigned') AS region_name,\n    COUNT(DISTINCT CASE\n        WHEN -- completed condition\n        THEN o.order_id\n    END) AS completed_order_count,\n    SUM(CASE\n        WHEN -- completed condition\n        THEN o.total_amount\n        ELSE 0\n    END) AS completed_revenue,\n    MAX(o.order_date) AS latest_order_date\nFROM customers AS c\nLEFT JOIN regions AS r\n    ON -- region relationship\nLEFT JOIN orders AS o\n    ON -- customer relationship\nGROUP BY -- customer and region columns\nORDER BY c.customer_id;\n",
+  "datasets": [
+    {
+      "table": "customers",
+      "file": "datasets/customers.csv"
+    },
+    {
+      "table": "regions",
+      "file": "datasets/regions.csv"
+    },
+    {
+      "table": "orders",
+      "file": "datasets/orders.csv"
+    }
+  ],
+  "solution_file": "solutions/12-customer-activity-capstone.sql",
+  "solution_explanation": "Customers remain the preserved grain while left joins add optional dimensions and transactions; conditional aggregation produces completed metrics without dropping zero-activity customers.",
+  "solution_walkthrough": [
+    "Customers establish the six-row preserved population.",
+    "The region join enriches five customers and leaves one unmatched.",
+    "The order join creates transaction-level rows while retaining inactive customers.",
+    "CASE expressions count and sum only completed orders.",
+    "GROUP BY collapses activity back to one row per customer."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "left join",
+      "coalesce",
+      "case",
+      "count",
+      "sum",
+      "group by"
+    ],
+    "min_select_count": 1
+  }
+}

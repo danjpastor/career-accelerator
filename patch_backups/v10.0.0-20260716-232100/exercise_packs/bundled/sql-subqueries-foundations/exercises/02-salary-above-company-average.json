@@ -1,0 +1,66 @@
+{
+  "id": "salary-above-company-average",
+  "title": "Employees Above the Company Average",
+  "stage": "Stage 2 \u2022 Use one returned value",
+  "difficulty": "Very Beginner",
+  "estimated_minutes": 15,
+  "concepts": [
+    "scalar subquery",
+    "WHERE comparison",
+    "AVG"
+  ],
+  "learning_objective": "Place a scalar subquery inside a WHERE comparison and explain how the outer query consumes its one-value result.",
+  "recommended_lesson": "Lesson 2: One-Value Subqueries",
+  "why": "This is the classic first subquery: calculate one benchmark, then compare every row against it.",
+  "prompt": "Return employee_name and salary for employees whose salary is greater than the company-wide average salary. Sort highest salary first.",
+  "expected_result": "6 rows with columns `employee_name` and `salary`, ordered from the highest qualifying salary downward.",
+  "build_steps": [
+    "Run `SELECT AVG(salary) FROM employees` by itself.",
+    "Place that complete query inside the parentheses after `salary >`.",
+    "Keep the outer query focused on the employee rows to return.",
+    "Sort the final rows by salary descending."
+  ],
+  "explanation": "Put the average-salary query inside parentheses after `salary >`. Read the finished query from the inside outward.",
+  "common_mistakes": [
+    "Writing `AVG(salary)` directly in the outer WHERE clause without a subquery.",
+    "Forgetting `FROM employees` inside the nested query.",
+    "Adding `GROUP BY`, which would return several averages instead of one company average."
+  ],
+  "hints": [
+    "Reuse the complete query from Exercise 1 inside the parentheses.",
+    "The inner query needs its own `FROM employees` clause.",
+    "Do not use `GROUP BY`; you need one company-wide average."
+  ],
+  "takeaways": [
+    "The inner query returns one number.",
+    "The outer query uses that number in a normal comparison."
+  ],
+  "reflection_questions": [
+    "What exact number does the inner query return?",
+    "Does the outer query return the average itself, or rows compared with the average?"
+  ],
+  "stretch_goal": "Add `city` to the selected columns without changing the filtering logic.",
+  "starter_sql": "SELECT employee_name, salary\nFROM employees\nWHERE salary > (\n    -- inner query: return one average value\n)\nORDER BY salary DESC;",
+  "datasets": [
+    {
+      "table": "employees",
+      "file": "datasets/employees.csv"
+    }
+  ],
+  "solution_file": "solutions/02-salary-above-company-average.sql",
+  "solution_explanation": "The inner SELECT produces one company-wide average. The outer WHERE clause compares each employee salary with that scalar result, and ORDER BY affects only the final qualifying rows.",
+  "solution_walkthrough": [
+    "The nested `SELECT AVG(salary)` returns one benchmark value.",
+    "`salary > (...)` compares each outer employee with that benchmark.",
+    "`ORDER BY salary DESC` presents the qualifying employees from highest salary to lowest."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "avg"
+    ],
+    "min_select_count": 2
+  },
+  "subtitle": "Stage 2 \u2022 Use one returned value"
+}

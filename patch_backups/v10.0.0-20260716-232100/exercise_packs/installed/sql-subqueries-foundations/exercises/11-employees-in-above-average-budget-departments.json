@@ -1,0 +1,72 @@
+{
+  "id": "employees-in-above-average-budget-departments",
+  "title": "A Nested Two-Step Filter",
+  "stage": "Stage 6 \u2022 Nest three clear questions",
+  "difficulty": "Intermediate+",
+  "estimated_minutes": 30,
+  "concepts": [
+    "nested subqueries",
+    "IN",
+    "scalar benchmark"
+  ],
+  "learning_objective": "Solve a three-level query by identifying the result shape and purpose of the innermost, middle, and outer queries.",
+  "recommended_lesson": "Lesson 7: Build and Debug from the Inside Out",
+  "why": "Some questions naturally contain three levels: calculate a benchmark, find groups above it, then return detailed rows from those groups.",
+  "prompt": "Return employee_name, department_id, and salary for employees who work in a department whose budget is above the average department budget. Sort by department_id and salary descending.",
+  "expected_result": "6 employee rows from qualifying departments, with columns `employee_name`, `department_id`, and `salary`.",
+  "build_steps": [
+    "Calculate the average department budget as one scalar value.",
+    "Use that value to return a one-column list of above-average department IDs.",
+    "Run the middle query alone and inspect the ID list.",
+    "Use IN so the outer employee query keeps rows belonging to those departments.",
+    "Apply the requested final sort."
+  ],
+  "explanation": "The innermost query finds the average budget. The middle query returns department IDs above that average. The outer query returns employees whose department_id appears in that list.",
+  "common_mistakes": [
+    "Trying to write all three levels at once without testing the middle result.",
+    "Returning department names in the middle query when the outer comparison uses department IDs.",
+    "Using `=` instead of `IN` for the multi-value department list."
+  ],
+  "hints": [
+    "The innermost query is `SELECT AVG(budget) FROM departments`.",
+    "The middle query should return only `department_id`.",
+    "Then the outer `IN` condition can match employee department IDs."
+  ],
+  "takeaways": [
+    "Solve and test nested queries from the deepest level outward.",
+    "Each level should have a clear input and output shape."
+  ],
+  "reflection_questions": [
+    "What result shape is produced at each of the three levels?",
+    "Which query returns details, which returns IDs, and which returns one benchmark value?"
+  ],
+  "stretch_goal": "Add department names to the final output by joining the filtered employees to departments.",
+  "starter_sql": "SELECT employee_name, department_id, salary\nFROM employees\nWHERE department_id IN (\n    SELECT department_id\n    FROM departments\n    WHERE budget > (\n        -- average department budget\n    )\n)\nORDER BY department_id, salary DESC;",
+  "datasets": [
+    {
+      "table": "employees",
+      "file": "datasets/employees.csv"
+    },
+    {
+      "table": "departments",
+      "file": "datasets/departments.csv"
+    }
+  ],
+  "solution_file": "solutions/11-employees-in-above-average-budget-departments.sql",
+  "solution_explanation": "The deepest query returns one average budget. The middle query uses it to produce a list of qualifying department IDs. The outer query uses IN to return detailed employee rows whose department belongs to that list.",
+  "solution_walkthrough": [
+    "Innermost: one scalar average budget.",
+    "Middle: one-column list of department IDs above that average.",
+    "Outer: employee detail rows matched against the returned ID list."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "in",
+      "avg"
+    ],
+    "min_select_count": 3
+  },
+  "subtitle": "Stage 6 \u2022 Nest three clear questions"
+}

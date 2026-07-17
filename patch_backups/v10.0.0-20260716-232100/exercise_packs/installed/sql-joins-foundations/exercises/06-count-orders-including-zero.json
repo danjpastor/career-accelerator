@@ -1,0 +1,74 @@
+{
+  "id": "count-orders-including-zero",
+  "title": "Count Orders Including Zero",
+  "stage": "Stage 6 \u2022 Aggregate preserved rows",
+  "subtitle": "Count a right-side key so unmatched customers receive zero",
+  "difficulty": "Beginner \u2192 Intermediate",
+  "estimated_minutes": 30,
+  "concepts": [
+    "LEFT JOIN",
+    "COUNT",
+    "GROUP BY",
+    "zero matches"
+  ],
+  "learning_objective": "Aggregate a one-to-many left join without losing customers that have no orders.",
+  "recommended_lesson": "Lesson 3: LEFT and RIGHT JOIN and Lesson 6: Join Grain",
+  "why": "Reports frequently need complete entity lists with counts, including explicit zeroes.",
+  "prompt": "Return `customer_id`, `customer_name`, and `order_count` for every customer. Count all orders regardless of status and order by `customer_id`.",
+  "expected_result": "6 rows with counts 2, 1, 2, 1, 0, and 0.",
+  "build_steps": [
+    "Preserve customers with LEFT JOIN.",
+    "Group by the customer identifier and name.",
+    "Count `o.order_id`, not `COUNT(*)`.",
+    "Order by customer ID."
+  ],
+  "explanation": "For an unmatched customer, the joined row still exists but `o.order_id` is NULL. COUNT ignores NULL and returns zero.",
+  "common_mistakes": [
+    "Using INNER JOIN and losing zero-order customers.",
+    "Using `COUNT(*)`, which counts the preserved placeholder row as one.",
+    "Grouping only by customer name when a stable ID exists."
+  ],
+  "hints": [
+    "Use `COUNT(o.order_id) AS order_count`.",
+    "Both selected customer columns belong in GROUP BY.",
+    "Keep customers on the left."
+  ],
+  "takeaways": [
+    "Count the optional table\u2019s non-null key.",
+    "LEFT JOIN can preserve zeroes in grouped reports."
+  ],
+  "reflection_questions": [
+    "Why would COUNT(*) return 1 for an orderless customer?",
+    "What is the output grain?"
+  ],
+  "stretch_goal": "Add `completed_order_count` using a CASE expression.",
+  "starter_sql": "SELECT\n    c.customer_id,\n    c.customer_name,\n    COUNT(-- choose the right-side key) AS order_count\nFROM customers AS c\nLEFT JOIN orders AS o\n    ON c.customer_id = o.customer_id\nGROUP BY -- customer columns\nORDER BY c.customer_id;\n",
+  "datasets": [
+    {
+      "table": "customers",
+      "file": "datasets/customers.csv"
+    },
+    {
+      "table": "orders",
+      "file": "datasets/orders.csv"
+    }
+  ],
+  "solution_file": "solutions/06-count-orders-including-zero.sql",
+  "solution_explanation": "Counting `o.order_id` distinguishes real matches from the NULL placeholder created for unmatched customers.",
+  "solution_walkthrough": [
+    "The left join establishes one or more rows per customer.",
+    "GROUP BY collapses them back to one row per customer.",
+    "COUNT ignores NULL order IDs.",
+    "Orderless customers therefore receive zero."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "left join",
+      "count",
+      "group by"
+    ],
+    "min_select_count": 1
+  }
+}

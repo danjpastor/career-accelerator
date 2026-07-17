@@ -1,0 +1,71 @@
+{
+  "id": "cross-join-planning-grid",
+  "title": "Build a Region\u2013Product Planning Grid",
+  "stage": "Stage 3 \u2022 Every combination",
+  "subtitle": "Use CROSS JOIN deliberately and predict the row count first",
+  "difficulty": "Beginner",
+  "estimated_minutes": 20,
+  "concepts": [
+    "CROSS JOIN",
+    "Cartesian product",
+    "row count"
+  ],
+  "learning_objective": "Create every possible region-product combination and predict the result size.",
+  "recommended_lesson": "Lesson 4: FULL OUTER and CROSS JOIN",
+  "why": "Planning models sometimes need a complete matrix even when no activity exists yet.",
+  "prompt": "Return `region_name` and `product_name` for every possible region-product combination. Order by `region_id`, then `product_id`.",
+  "expected_result": "16 rows: 4 regions \u00d7 4 products.",
+  "build_steps": [
+    "Count the rows in each source table mentally.",
+    "Start from `regions` as `r`.",
+    "CROSS JOIN `products` as `p` without an `ON` clause.",
+    "Order by the numeric IDs while selecting the readable names."
+  ],
+  "explanation": "CROSS JOIN pairs each region with every product, so output rows equal the product of source row counts.",
+  "common_mistakes": [
+    "Adding an `ON` condition to a cross join.",
+    "Using CROSS JOIN accidentally for tables that should have a key relationship.",
+    "Expecting 8 rows instead of 16."
+  ],
+  "hints": [
+    "There are 4 rows in each table.",
+    "The syntax is `FROM regions AS r CROSS JOIN products AS p`.",
+    "You can order by columns that are not displayed."
+  ],
+  "takeaways": [
+    "CROSS JOIN is intentional Cartesian multiplication.",
+    "Predict row count before running it."
+  ],
+  "reflection_questions": [
+    "Why are there 16 rows?",
+    "What would happen if products grew to 100 rows?"
+  ],
+  "stretch_goal": "Add a text column named `planning_key` combining region and product names.",
+  "starter_sql": "SELECT\n    r.region_name,\n    p.product_name\nFROM regions AS r\nCROSS JOIN products AS p\nORDER BY r.region_id, p.product_id;\n",
+  "datasets": [
+    {
+      "table": "regions",
+      "file": "datasets/regions.csv"
+    },
+    {
+      "table": "products",
+      "file": "datasets/products.csv"
+    }
+  ],
+  "solution_file": "solutions/03-cross-join-planning-grid.sql",
+  "solution_explanation": "No key condition is needed because the analytical goal is every possible pairing.",
+  "solution_walkthrough": [
+    "Four region rows form the first dimension.",
+    "Four product rows form the second dimension.",
+    "Each region is paired with all four products.",
+    "The two IDs establish stable ordering."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "cross join"
+    ],
+    "min_select_count": 1
+  }
+}

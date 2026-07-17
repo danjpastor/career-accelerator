@@ -35,7 +35,7 @@ from PySide6.QtWidgets import (
 
 from career_app.services import exercise_packs
 from career_app.theme import COLORS
-from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
+from career_app.ui.course_ui import CoursePageWidget
 from career_app.ui.widgets import Card
 
 
@@ -332,19 +332,26 @@ class ExercisePacksWidget(QWidget):
         self.practice_title = QLabel("Your SQL")
         self.practice_title.setObjectName("SectionTitle")
         practice_layout.addWidget(self.practice_title)
-        self.practice_prompt = QLabel("")
-        self.practice_prompt.setWordWrap(True)
-        self.practice_prompt.setStyleSheet("font-size:11pt;font-weight:700;color:#f4f4fb;background:#1a2030;border:1px solid #343854;border-radius:9px;padding:10px;")
-        self.practice_prompt.hide()
-        practice_layout.addWidget(self.practice_prompt)
         self.practice_intro = QLabel(
             "Build the smallest query first, run it often, and use Check Answer only when the output shape looks right."
         )
         self.practice_intro.setObjectName("Muted")
         self.practice_intro.setWordWrap(True)
         practice_layout.addWidget(self.practice_intro)
-        self.sql_editor = SqlCodeEditor()
-        self.sql_editor.setMinimumHeight(220)
+        self.sql_editor = QTextEdit()
+        self.sql_editor.setPlaceholderText("Write one read-only SELECT or WITH query here.")
+        self.sql_editor.setAcceptRichText(False)
+        self.sql_editor.setLineWrapMode(QTextEdit.NoWrap)
+        code_font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        code_font.setPointSize(10)
+        self.sql_editor.setFont(code_font)
+        self.sql_editor.setTabStopDistance(28)
+        self.sql_editor.setStyleSheet(
+            f"QTextEdit {{background:#111321;color:#f3f4ff;"
+            f"border:1px solid {COLORS.get('border', '#3b3e5b')};"
+            "border-radius:9px;padding:10px;selection-background-color:#6747c7;}"
+            f"QTextEdit:focus {{border:1px solid {COLORS.get('purple', '#8b5cf6')};}}"
+        )
         self.sql_editor.textChanged.connect(self._answer_edited)
         practice_layout.addWidget(self.sql_editor, 2)
 
@@ -731,7 +738,6 @@ class ExercisePacksWidget(QWidget):
     def _set_lesson_practice(self, markdown: str) -> None:
         self.current_lesson_context = self._build_lesson_sandbox_context()
         self.practice_title.setText("Lesson Sandbox")
-        self.practice_prompt.hide()
         if self.current_lesson_context:
             self.practice_intro.setText(
                 "Try the lesson example or write your own read-only query. Run Query "
@@ -746,7 +752,7 @@ class ExercisePacksWidget(QWidget):
         notes_key = self._lesson_sandbox_key("notes")
         saved_sql = self._settings.value(sql_key, "", type=str) if sql_key else ""
         saved_notes = self._settings.value(notes_key, "", type=str) if notes_key else ""
-        starter_sql = saved_sql
+        starter_sql = saved_sql or self._first_sql_code_block(markdown)
         self.sql_editor.blockSignals(True)
         self.sql_editor.setPlainText(starter_sql)
         self.sql_editor.blockSignals(False)
@@ -1073,11 +1079,8 @@ class ExercisePacksWidget(QWidget):
             f"{exercise.get('difficulty', 'Mixed')} • "
             f"{exercise.get('estimated_minutes', 0)} minutes"
         )
-        self.practice_prompt.setText("Your task: " + exercise.get("prompt", "Write the requested query."))
-        self.practice_prompt.show()
         self.sql_editor.blockSignals(True)
-        starter = exercise.get("starter_sql", "") if exercise.get("show_starter_sql", False) else ""
-        self.sql_editor.setPlainText(saved.get("answer_sql") or starter)
+        self.sql_editor.setPlainText(saved.get("answer_sql") or exercise["starter_sql"])
         self.sql_editor.blockSignals(False)
         self.notes.setPlainText(saved.get("notes", ""))
         self.feedback.setText("")
@@ -1118,11 +1121,7 @@ class ExercisePacksWidget(QWidget):
                 query_context, self.sql_editor.toPlainText()
             )
         except exercise_packs.ExercisePackError as exc:
-            message = str(exc)
-            self.feedback.setText(f"❌ {message}")
-            match = re.search(r"(?:line|LINE)\s+(\d+)(?::(\d+))?", message)
-            if match:
-                self.sql_editor.go_to_line(int(match.group(1)), int(match.group(2) or 1))
+            self.feedback.setText(f"❌ {exc}")
             return
         self._display_result(result)
         self.feedback.setText(
@@ -1141,11 +1140,7 @@ class ExercisePacksWidget(QWidget):
                 self.current_exercise, self.sql_editor.toPlainText()
             )
         except exercise_packs.ExercisePackError as exc:
-            message = str(exc)
-            self.feedback.setText(f"❌ {message}")
-            match = re.search(r"(?:line|LINE)\s+(\d+)(?::(\d+))?", message)
-            if match:
-                self.sql_editor.go_to_line(int(match.group(1)), int(match.group(2) or 1))
+            self.feedback.setText(f"❌ {exc}")
             return
         self._display_result(result["user"])
         if result["correct"]:
@@ -1350,7 +1345,6 @@ class ExercisePacksWidget(QWidget):
     def _clear_workspace(self) -> None:
         self.current_exercise = None
         self.current_lesson_context = None
-        self.practice_prompt.hide()
         self.read_view.clear()
         self.sql_editor.clear()
         self.notes.clear()

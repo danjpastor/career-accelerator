@@ -1,0 +1,71 @@
+{
+  "id": "preserve-all-customers",
+  "title": "Preserve Every Customer",
+  "stage": "Stage 4 \u2022 Keep the primary table",
+  "subtitle": "Use LEFT JOIN and interpret unmatched columns as NULL",
+  "difficulty": "Beginner",
+  "estimated_minutes": 25,
+  "concepts": [
+    "LEFT JOIN",
+    "preserved table",
+    "NULL"
+  ],
+  "learning_objective": "Return every customer even when no order exists.",
+  "recommended_lesson": "Lesson 3: LEFT and RIGHT JOIN",
+  "why": "Customer lists often need to show inactivity rather than silently dropping customers with no transactions.",
+  "prompt": "Return `customer_id`, `customer_name`, `order_id`, and `status` for every customer and any matching orders. Order by `customer_id`, then `order_id`.",
+  "expected_result": "8 rows. Evergreen Health and Frostline Labs each appear once with `NULL` order values.",
+  "build_steps": [
+    "Place `customers` on the left because every customer must remain.",
+    "LEFT JOIN `orders` on `customer_id`.",
+    "Select identifiers from both tables.",
+    "Order by customer and order IDs."
+  ],
+  "explanation": "A left join preserves each customer. Customers with multiple orders create multiple rows; customers with no orders create one row with NULL order columns.",
+  "common_mistakes": [
+    "Starting from `orders`, which cannot preserve customers with no orders.",
+    "Changing the join to INNER JOIN.",
+    "Filtering `o.status` in WHERE and accidentally removing NULL rows."
+  ],
+  "hints": [
+    "The preserved table must appear before `LEFT JOIN`.",
+    "Use `ON c.customer_id = o.customer_id`.",
+    "Do not add a WHERE clause."
+  ],
+  "takeaways": [
+    "LEFT JOIN preserves the left table.",
+    "One-to-many matches can create more than one row per preserved record."
+  ],
+  "reflection_questions": [
+    "Why do Apex Studios and Cascade Media appear twice?",
+    "Where did the NULL values come from?"
+  ],
+  "stretch_goal": "Add `COALESCE(o.status, 'No orders') AS order_status`.",
+  "starter_sql": "SELECT\n    c.customer_id,\n    c.customer_name,\n    o.order_id,\n    o.status\nFROM customers AS c\nLEFT JOIN orders AS o\n    ON -- customer relationship\nORDER BY c.customer_id, o.order_id;\n",
+  "datasets": [
+    {
+      "table": "customers",
+      "file": "datasets/customers.csv"
+    },
+    {
+      "table": "orders",
+      "file": "datasets/orders.csv"
+    }
+  ],
+  "solution_file": "solutions/04-preserve-all-customers.sql",
+  "solution_explanation": "The customer table is intentionally preserved, so unmatched customers remain with NULL order fields.",
+  "solution_walkthrough": [
+    "The output starts with all six customers.",
+    "Matching orders expand customers 1 and 3 into two rows each.",
+    "Customers 5 and 6 have no partners.",
+    "Their right-side order columns are filled with NULL."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "left join"
+    ],
+    "min_select_count": 1
+  }
+}

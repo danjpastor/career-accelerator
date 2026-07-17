@@ -1,0 +1,81 @@
+{
+  "id": "subquery-capstone-customer-value",
+  "title": "Capstone: High-Value Repeat Customers",
+  "stage": "Capstone \u2022 Combine the full mental model",
+  "difficulty": "Advanced for This Pack",
+  "estimated_minutes": 45,
+  "concepts": [
+    "derived tables",
+    "nested scalar subquery",
+    "GROUP BY",
+    "HAVING logic"
+  ],
+  "learning_objective": "Plan and execute a realistic multi-stage analysis using a derived summary table, a scalar benchmark subquery, and a join for descriptive columns.",
+  "recommended_lesson": "Lesson 6: Subquery vs. Join vs. CTE and Lesson 7: Build and Debug from the Inside Out",
+  "why": "This combines the pack\u2019s major ideas in a realistic customer-value question while keeping the datasets small enough to inspect manually.",
+  "prompt": "Using Completed orders only, return customer_name, completed_orders, and total_spent for customers who have at least 2 completed orders and whose total_spent is above the average total_spent among customers with completed orders. Sort total_spent highest first.",
+  "expected_result": "3 rows with `customer_name`, `completed_orders`, and `total_spent`, ordered by total spend descending.",
+  "build_steps": [
+    "Create a completed-order summary with one row per customer.",
+    "Verify that the summary contains customer ID, completed-order count, and total spend.",
+    "Join that summary to customers so names can be returned.",
+    "Create a second per-customer total summary as input to the average benchmark.",
+    "Filter for at least two completed orders and total spend above the benchmark.",
+    "Sort the final high-value repeat customers."
+  ],
+  "explanation": "Build a one-row-per-customer summary first. Join it to customer names. Filter the summary by count and compare total_spent with an average calculated from a second grouped summary.",
+  "common_mistakes": [
+    "Averaging individual order amounts instead of customer totals.",
+    "Applying the minimum-order-count condition inside the benchmark when the task does not ask for that.",
+    "Forgetting the Completed filter in one of the summaries.",
+    "Joining raw orders before grouping and accidentally multiplying rows."
+  ],
+  "hints": [
+    "The summary `s` needs `customer_id`, `COUNT(*) AS completed_orders`, and `SUM(amount) AS total_spent`.",
+    "Both summaries use `WHERE status = 'Completed'` and `GROUP BY customer_id`.",
+    "The inner average summary aliases `SUM(amount)` as `customer_total`."
+  ],
+  "takeaways": [
+    "Break complex analysis into named stages before writing SQL.",
+    "A subquery is useful when one stage depends on the result of another.",
+    "After solving it, consider whether a CTE would make the same logic easier to read."
+  ],
+  "reflection_questions": [
+    "Why is a join useful here even though the pack focuses on subqueries?",
+    "What does each row of the summary `s` represent?",
+    "How would naming the stages with CTEs change readability?"
+  ],
+  "stretch_goal": "Rewrite the complete analysis with two CTEs: `customer_summary` and `average_customer_value`. Confirm that the result is identical.",
+  "starter_sql": "SELECT c.customer_name, s.completed_orders, s.total_spent\nFROM customers AS c\nJOIN (\n    -- completed order count and total per customer\n) AS s\n    ON s.customer_id = c.customer_id\nWHERE s.completed_orders >= 2\n  AND s.total_spent > (\n      SELECT AVG(customer_total)\n      FROM (\n          -- completed total per customer\n      ) AS totals_for_average\n  )\nORDER BY s.total_spent DESC;",
+  "datasets": [
+    {
+      "table": "customers",
+      "file": "datasets/customers.csv"
+    },
+    {
+      "table": "orders",
+      "file": "datasets/orders.csv"
+    }
+  ],
+  "solution_file": "solutions/12-subquery-capstone-customer-value.sql",
+  "solution_explanation": "The derived table `s` creates the reusable customer-level facts needed by the final output. A join supplies customer names, while a separate nested summary calculates the average customer total used as a scalar benchmark.",
+  "solution_walkthrough": [
+    "The first grouped subquery creates one row per customer with count and spend metrics.",
+    "The join adds the customer name without changing the summary\u2019s grain.",
+    "The nested benchmark calculates an average across customer totals\u2014not across raw orders.",
+    "The final WHERE clause applies both the repeat-customer and above-average-value conditions."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "join",
+      "sum",
+      "count",
+      "avg",
+      "group by"
+    ],
+    "min_select_count": 4
+  },
+  "subtitle": "Capstone \u2022 Combine the full mental model"
+}

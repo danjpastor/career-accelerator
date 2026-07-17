@@ -156,8 +156,6 @@ class MetricRow(QFrame):
 
         detail_label = QLabel(detail)
         detail_label.setObjectName("Muted")
-        if completed:
-            detail_label.setStyleSheet("color:#7f8798;text-decoration:line-through;")
         detail_label.setWordWrap(True)
 
         text_layout.addWidget(title_label)
@@ -687,7 +685,6 @@ class TaskRow(QWidget):
         on_toggle=None,
         action_text=None,
         on_action=None,
-        completed=False,
     ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
@@ -788,7 +785,6 @@ class TaskRow(QWidget):
                 True,
             )
             action.clicked.connect(on_action)
-            action.setEnabled(not completed)
             layout.addWidget(
                 action,
                 0,
@@ -806,7 +802,6 @@ class FocusRow(QWidget):
         accent,
         action_text=None,
         on_action=None,
-        completed=False,
     ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
@@ -830,8 +825,7 @@ class FocusRow(QWidget):
 
         title_label = QLabel(title)
         title_label.setStyleSheet(
-            f"font-weight:700;color:{COLORS['muted'] if completed else accent};"
-            + ("text-decoration:line-through;" if completed else "")
+            f"font-weight:700;color:{accent};"
         )
         title_label.setSizePolicy(
             QSizePolicy.Expanding,
@@ -858,11 +852,7 @@ class FocusRow(QWidget):
 
         duration_label = QLabel(duration)
         duration_label.setObjectName("Muted")
-        duration_label.setStyleSheet(
-            "color:#7f8798;font-weight:700;"
-            if completed
-            else "font-weight:700;"
-        )
+        duration_label.setStyleSheet("font-weight:700;")
         duration_label.setFixedWidth(42)
         duration_label.setAlignment(
             Qt.AlignRight | Qt.AlignVCenter

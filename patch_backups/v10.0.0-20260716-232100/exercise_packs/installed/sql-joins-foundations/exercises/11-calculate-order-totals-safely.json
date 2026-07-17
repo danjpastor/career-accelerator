@@ -1,0 +1,75 @@
+{
+  "id": "calculate-order-totals-safely",
+  "title": "Calculate Totals Without Fanout Errors",
+  "stage": "Stage 11 \u2022 Control result grain",
+  "subtitle": "Aggregate line values instead of summing repeated order totals",
+  "difficulty": "Intermediate \u2192 Advanced Foundation",
+  "estimated_minutes": 35,
+  "concepts": [
+    "join fanout",
+    "GROUP BY",
+    "SUM",
+    "COUNT"
+  ],
+  "learning_objective": "Return one row per order after joining one-to-many line items and calculate totals at the line grain.",
+  "recommended_lesson": "Lesson 6: Join Grain, Duplicates, and Fanout",
+  "why": "Revenue is easily overstated when order-level totals repeat once per line item.",
+  "prompt": "Return `order_id`, `line_count`, and `calculated_order_total` for every order that has line items. Calculate total from `quantity * unit_price`. Order by `order_id`.",
+  "expected_result": "7 rows. Order 1001 has 2 lines and a calculated total of 1200; all other orders have 1 or 2 lines as defined by the data.",
+  "build_steps": [
+    "Join orders to order_items on order_id.",
+    "Group by the order identifier.",
+    "Count order-item IDs for line_count.",
+    "Sum quantity \u00d7 unit_price for calculated_order_total."
+  ],
+  "explanation": "The detail table repeats the order row. Summing line-level values is safe because each line contributes once.",
+  "common_mistakes": [
+    "Summing `o.total_amount`, which repeats for every line.",
+    "Omitting GROUP BY and returning one total across all orders.",
+    "Counting orders instead of line items."
+  ],
+  "hints": [
+    "Use `COUNT(oi.order_item_id)`.",
+    "Use `SUM(oi.quantity * oi.unit_price)`.",
+    "Group only at the requested one-row-per-order grain."
+  ],
+  "takeaways": [
+    "Always identify which value repeats after a join.",
+    "Aggregate values at their natural grain."
+  ],
+  "reflection_questions": [
+    "Why would SUM(o.total_amount) overstate order 1001?",
+    "What does one output row represent?"
+  ],
+  "stretch_goal": "Join customers and add customer_name without changing the one-row-per-order grain.",
+  "starter_sql": "SELECT\n    o.order_id,\n    COUNT(oi.order_item_id) AS line_count,\n    SUM(-- line-level calculation) AS calculated_order_total\nFROM orders AS o\nINNER JOIN order_items AS oi\n    ON o.order_id = oi.order_id\nGROUP BY o.order_id\nORDER BY o.order_id;\n",
+  "datasets": [
+    {
+      "table": "orders",
+      "file": "datasets/orders.csv"
+    },
+    {
+      "table": "order_items",
+      "file": "datasets/order_items.csv"
+    }
+  ],
+  "solution_file": "solutions/11-calculate-order-totals-safely.sql",
+  "solution_explanation": "The query aggregates order-item values back to one row per order without re-summing a repeated order-level total.",
+  "solution_walkthrough": [
+    "The inner join produces one row per order item.",
+    "COUNT measures how many line rows belong to each order.",
+    "SUM derives total from each unique line.",
+    "GROUP BY restores the requested order grain."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "inner join",
+      "count",
+      "sum",
+      "group by"
+    ],
+    "min_select_count": 1
+  }
+}
