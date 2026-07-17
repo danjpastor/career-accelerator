@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Career Accelerator v10.0.2
+title Career Accelerator v10.0.1
 
 if not exist "Career Accelerator.lnk" (
     cscript //nologo "create-desktop-shortcut.vbs" /LocalOnly >nul 2>nul

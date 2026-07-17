@@ -1,17 +1,5 @@
 # Changelog
 
-## 10.0.2 - 2026-07-17
-
-- Kept every Dashboard card visible without vertical or horizontal scrolling across the supported 900×620 through 1536×1020 desktop-size matrix.
-- Added height-aware sidebar density so navigation, Current Streak, Total Study Time, and the footer also remain visible without scrolling at every supported front-page size.
-- Added height-aware Dashboard density modes that compact card heights, typography, spacing, charts, timers, task rows, focus rows, badges, and secondary details while preserving the complete front-page card set.
-- Rebuilt circular progress-ring painting to center its text dynamically, scale safely with card height, elide long labels, and prevent vertically clipped values or captions.
-- Rebuilt the circular Study Session timer painting with the same density-aware sizing and clipping protections.
-- Removed the transient ghost pill/backdrop in Learning lesson headers by safely hiding and reinserting embedded course extension widgets during content rebuilds.
-- Made rounded lesson subtitle and subheader pills calculate and receive their full wrapped height, preventing vertical clipping in Applied Labs, Exercise Packs, and DuckDB Exercises.
-- Preserved wide presentation at larger sizes while using compact and ultra-compact density rules at shorter displays instead of forcing Dashboard scrolling.
-- Added regression coverage for a no-scroll Dashboard size matrix, metric-ring containment, embedded-widget header placement, and rounded-pill height-for-width behavior.
-
 ## 10.0.1 - 2026-07-17
 
 - Completed a full responsive-layout polish pass across every main application tab and the unified Task Workspace dialog.

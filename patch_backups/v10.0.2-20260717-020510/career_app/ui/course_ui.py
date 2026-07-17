@@ -669,7 +669,6 @@ class CoursePageWidget(QWidget):
         self._parser = CourseMarkdownParser()
         self._bookmarked = False
         self._responsive_columns: list[QBoxLayout] = []
-        self._responsive_pills: list[QLabel] = []
         self._responsive_mode: str | None = None
         self._title_label: QLabel | None = None
         self._build_ui()
@@ -815,10 +814,6 @@ class CoursePageWidget(QWidget):
         self.bookmarkToggled.emit(self._bookmarked)
 
     def clear(self) -> None:
-        # Detach persistent extension hosts without leaving them as visible
-        # floating children while the course page is being rebuilt.
-        self.header_actions_host.hide()
-        self.embedded_host.hide()
         self.header_actions_host.setParent(self)
         self.embedded_host.setParent(self)
         clear_layout(self.page_layout)
@@ -830,7 +825,7 @@ class CoursePageWidget(QWidget):
         title_column.setContentsMargins(0, 0, 0, 0)
         title_column.setSpacing(9)
         pill = QLabel(eyebrow.upper())
-        pill.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        pill.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         pill.setStyleSheet(
             "background:#7652d6;color:white;border-radius:10px;padding:4px 10px;"
             "font-size:8.5pt;font-weight:700;"
@@ -847,18 +842,11 @@ class CoursePageWidget(QWidget):
             subtitle_label = QLabel(subtitle)
             subtitle_label.setWordWrap(True)
             subtitle_label.setMinimumWidth(0)
-            subtitle_label.setAlignment(
-                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-            )
-            subtitle_label.setSizePolicy(
-                QSizePolicy.Policy.Ignored,
-                QSizePolicy.Policy.Preferred,
-            )
+            subtitle_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
             subtitle_label.setStyleSheet(
                 "color:#bec7d7;background:#141c2b;border:1px solid #344159;"
                 "border-radius:12px;padding:4px 10px;font-size:9.5pt;"
             )
-            self._responsive_pills.append(subtitle_label)
             title_column.addWidget(subtitle_label, 0, Qt.AlignmentFlag.AlignLeft)
         top.addLayout(title_column, 1)
         action_row = QHBoxLayout()
@@ -901,20 +889,11 @@ class CoursePageWidget(QWidget):
         target = target or self.page_layout
         label = QLabel(rich_text(text))
         label.setTextFormat(Qt.TextFormat.RichText)
-        label.setWordWrap(True)
-        label.setMinimumWidth(0)
-        label.setAlignment(
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-        )
-        label.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
-        )
+        label.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         label.setStyleSheet(
             "color:#bda8ff;background:#151c2c;border:1px solid #4b3f76;"
             "border-radius:7px;padding:5px 9px;font-size:9.5pt;font-weight:650;"
         )
-        self._responsive_pills.append(label)
         target.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft)
 
     def _add_paragraph(self, text: str, target: QVBoxLayout | None = None) -> None:
@@ -1075,12 +1054,6 @@ class CoursePageWidget(QWidget):
             self._title_label.setStyleSheet(
                 f"color:#f7f8fc;font-size:{title_size}pt;font-weight:700;"
             )
-        for label in self._responsive_pills:
-            width = max(1, label.width())
-            required_height = label.heightForWidth(width)
-            if required_height > 0:
-                label.setMinimumHeight(required_height)
-                label.updateGeometry()
         self.page.updateGeometry()
 
     def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
@@ -1096,31 +1069,19 @@ class CoursePageWidget(QWidget):
         bookmarked: bool = False,
     ) -> None:
         self._bookmarked = bool(bookmarked)
-        # Preserve the caller's requested extension-host visibility, but hide
-        # both hosts while they are detached. Otherwise Qt briefly treats the
-        # embedded workspace as a free-floating child and it can paint a ghost
-        # rounded panel behind the lesson eyebrow.
-        header_controls_enabled = not self.header_actions_host.isHidden()
-        embedded_enabled = not self.embedded_host.isHidden()
-        self.header_actions_host.hide()
-        self.embedded_host.hide()
         self.header_actions_host.setParent(self)
         self.embedded_host.setParent(self)
         self._responsive_columns = []
-        self._responsive_pills = []
         self._responsive_mode = None
         clear_layout(self.page_layout)
         blocks = self._parser.parse(markdown)
         title = "Course material"
         if blocks and blocks[0].kind == "h1":
             title = str(blocks.pop(0).value)
-        if header_controls_enabled:
-            self.header_actions_host.show()
         self._add_title(title, eyebrow, subtitle)
         self._render_blocks(blocks, self.page_layout)
-        if embedded_enabled:
+        if self.embedded_host.isVisible():
             self.page_layout.addWidget(self.embedded_host)
-            self.embedded_host.show()
         self.page_layout.addStretch(1)
         self.scroll.verticalScrollBar().setValue(0)
         self.set_bookmarked(bookmarked)

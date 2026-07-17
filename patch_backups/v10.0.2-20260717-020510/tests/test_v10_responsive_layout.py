@@ -6,7 +6,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 import unittest
 
 from PySide6.QtCore import QCoreApplication, QEvent, Qt
-from PySide6.QtWidgets import QApplication, QFrame, QLabel
+from PySide6.QtWidgets import QApplication, QLabel
 
 from career_app.main import CareerAccelerator, NAV
 from career_app.ui.course_ui import CoursePageWidget
@@ -44,74 +44,20 @@ class ResponsiveLayoutV10Tests(unittest.TestCase):
         self.resize_window(900, 620)
         self.window.navigate(0)
         self._flush()
-        self.assertEqual(self.window.dashboard_layout_mode, "fit")
-        self.assertEqual(self.window.dashboard_density, "ultra")
+        self.assertEqual(self.window.dashboard_layout_mode, "compact")
         self.assertEqual(self.window.sidebar.width(), 180)
-        self.assertEqual(self.window.dashboard_scroll.verticalScrollBar().maximum(), 0)
 
         self.resize_window(1280, 800)
         self.window.navigate(0)
         self._flush()
-        self.assertEqual(self.window.dashboard_layout_mode, "fit")
-        self.assertEqual(self.window.dashboard_density, "compact")
+        self.assertEqual(self.window.dashboard_layout_mode, "medium")
         self.assertEqual(self.window.sidebar.width(), 224)
-        self.assertEqual(self.window.dashboard_scroll.verticalScrollBar().maximum(), 0)
 
         self.resize_window(1536, 1020)
         self.window.navigate(0)
         self._flush()
         self.assertEqual(self.window.dashboard_layout_mode, "wide")
-        self.assertEqual(self.window.dashboard_density, "comfortable")
         self.assertEqual(self.window.sidebar.width(), 266)
-        self.assertEqual(self.window.dashboard_scroll.verticalScrollBar().maximum(), 0)
-
-    def test_dashboard_stays_fully_visible_at_supported_desktop_sizes(self) -> None:
-        for size in (
-            (900, 620),
-            (1024, 768),
-            (1280, 800),
-            (1366, 768),
-            (1536, 1020),
-        ):
-            with self.subTest(size=size):
-                self.resize_window(*size)
-                self.window.navigate(0)
-                self._flush()
-                page = self.window.dashboard_scroll
-                self.assertEqual(page.verticalScrollBar().maximum(), 0)
-                self.assertEqual(page.horizontalScrollBar().maximum(), 0)
-                for card in self.window.dashboard_metric_cards:
-                    ring = card.layout.itemAt(0).widget()
-                    self.assertLessEqual(ring.height(), card.contentsRect().height())
-
-    def test_front_page_sidebar_and_dashboard_fit_without_scrolling(self) -> None:
-        for size in (
-            (900, 620),
-            (1024, 768),
-            (1280, 800),
-            (1366, 768),
-            (1536, 1020),
-        ):
-            with self.subTest(size=size):
-                self.resize_window(*size)
-                self.window.navigate(0)
-                self._flush()
-                self.assertEqual(
-                    self.window.sidebar_scroll.verticalScrollBar().maximum(),
-                    0,
-                )
-                viewport = self.window.sidebar_scroll.viewport()
-                for widget in (
-                    self.window.sidebar_streak_card,
-                    self.window.sidebar_time_card,
-                    self.window.sidebar_footer,
-                ):
-                    top_left = widget.mapTo(viewport, widget.rect().topLeft())
-                    self.assertGreaterEqual(top_left.y(), 0)
-                    self.assertLessEqual(
-                        top_left.y() + widget.height(),
-                        viewport.height(),
-                    )
 
     def test_every_main_page_avoids_horizontal_overflow_after_resize_cycles(self) -> None:
         # Start wide, collapse to the supported minimum, then expand again. This
@@ -184,45 +130,6 @@ class ResponsiveLayoutV10Tests(unittest.TestCase):
         ]
         self.assertEqual(len(final_labels), 1)
         self.assertEqual(len(first_labels), 0)
-        page.close()
-
-    def test_course_extension_host_does_not_float_behind_title_pill(self) -> None:
-        page = CoursePageWidget()
-        embedded = QFrame()
-        embedded.setMinimumHeight(80)
-        page.set_embedded_widget(embedded)
-        page.resize(620, 500)
-        page.show()
-        page.set_markdown(
-            "# Lesson title\n\nBody",
-            eyebrow="Applied Lab",
-            subtitle="Power BI • Week 7 • 45 minutes",
-        )
-        self._flush()
-        self.assertIs(embedded.parentWidget(), page.embedded_host)
-        self.assertIs(page.embedded_host.parentWidget(), page.page)
-        self.assertGreater(page.embedded_host.y(), 100)
-        page.close()
-
-    def test_rounded_course_subtitle_uses_its_required_wrapped_height(self) -> None:
-        page = CoursePageWidget()
-        page.resize(520, 420)
-        page.show()
-        subtitle = (
-            "Week 6 • 45 minutes • 7 questions • 3 datasets • "
-            "INNER JOIN, LEFT JOIN, multi-table joins"
-        )
-        page.set_markdown(
-            "# Join customers, orders, and payments\n\nBody",
-            eyebrow="DuckDB Exercise",
-            subtitle=subtitle,
-        )
-        self._flush()
-        labels = [label for label in page.page.findChildren(QLabel) if label.text() == subtitle]
-        self.assertEqual(len(labels), 1)
-        label = labels[0]
-        self.assertGreater(label.heightForWidth(label.width()), 0)
-        self.assertGreaterEqual(label.height(), label.heightForWidth(label.width()))
         page.close()
 
 

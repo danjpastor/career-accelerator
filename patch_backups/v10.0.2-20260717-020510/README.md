@@ -24,15 +24,11 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.2 includes:
+Version 10.0.1 includes:
 
-- A no-scroll front page that keeps every Dashboard card plus the full sidebar visible from the supported 900×620 minimum through the 1536×1020 reference size
-- Height-aware comfortable, compact, and ultra-compact Dashboard density modes for cards, typography, spacing, charts, rings, timers, rows, and secondary details
-- Dynamically centered circular progress and Study Session graphics that no longer clip their values or captions vertically
-- Correctly sized rounded lesson subtitle pills in Applied Labs, Exercise Packs, and DuckDB Exercises
-- Safe course-header rebuilding without the temporary ghost pill/backdrop behind the main lesson label
 - A full application-wide responsive polish pass with seamless wide, medium, and compact layouts
-- Dynamic card sizing, text wrapping, typography scaling, sidebar sizing, and scroll-safe long-form workspaces
+- A supported 900×620 minimum window with vertical scrolling and no hidden horizontal page overflow
+- Dynamic card sizing, text wrapping, typography scaling, sidebar sizing, and scalable progress/timer graphics
 - Outer-scrollable compact Exercise Pack and DuckDB workspaces that preserve useful heights for navigation, Learn, and Practice
 - Lesson-driven Exercise Packs where every lesson loads one or more practice questions for the concept just taught
 - Answer-safe SQL starting templates that never auto-fill lesson examples or official solutions
@@ -44,6 +40,7 @@ Version 10.0.2 includes:
 - Completed Today’s Focus rows that remain visible but muted, struck through, and non-actionable
 - Content-deduplicated SQLite backups with newest, daily, and weekly retention
 - Live storage totals plus backup cleanup and data-folder controls in Settings
+- Responsive three-column Learn and Practice workspaces with preserved progress and selections
 - Existing adaptive planning, portfolio, study, job-readiness, application, achievement, and tracking features
 
 

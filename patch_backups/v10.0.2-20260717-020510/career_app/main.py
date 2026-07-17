@@ -424,19 +424,16 @@ class CareerAccelerator(QMainWindow):
         logo = QLabel("🚀")
         logo.setStyleSheet("font-size:28pt;")
         logo.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.sidebar_logo = logo
         logo_row.addWidget(logo)
 
         title_layout = QVBoxLayout()
         title_layout.setSpacing(0)
         career = QLabel("CAREER")
         career.setStyleSheet("font-size:17pt;font-weight:800;")
-        self.sidebar_career_label = career
         accelerator = QLabel("ACCELERATOR")
         accelerator.setStyleSheet(
             f"font-size:15pt;font-weight:800;color:{COLORS['purple']};"
         )
-        self.sidebar_accelerator_label = accelerator
         title_layout.addWidget(career)
         title_layout.addWidget(accelerator)
         logo_row.addLayout(title_layout, 1)
@@ -445,7 +442,6 @@ class CareerAccelerator(QMainWindow):
         divider = QFrame()
         divider.setFrameShape(QFrame.HLine)
         divider.setStyleSheet(f"color:{COLORS['border']};")
-        self.sidebar_divider = divider
         layout.addWidget(divider)
 
         group = QButtonGroup(self)
@@ -483,17 +479,14 @@ class CareerAccelerator(QMainWindow):
         streak_layout = QVBoxLayout(streak_card)
         streak_layout.setContentsMargins(16, 14, 16, 14)
         streak_layout.setSpacing(6)
-        self.sidebar_streak_layout = streak_layout
 
         streak_title = QLabel("CURRENT STREAK")
         streak_title.setObjectName("Tiny")
-        self.sidebar_streak_title = streak_title
         streak_layout.addWidget(streak_title)
 
         streak_value_row = QHBoxLayout()
         flame = QLabel("🔥")
         flame.setStyleSheet("font-size:24pt;")
-        self.sidebar_flame = flame
         streak_value_row.addWidget(flame)
 
         self.side_streak_value = QLabel("0")
@@ -502,7 +495,6 @@ class CareerAccelerator(QMainWindow):
 
         days_label = QLabel("days")
         days_label.setObjectName("Muted")
-        self.sidebar_days_label = days_label
         streak_value_row.addWidget(days_label)
         streak_value_row.addStretch()
         streak_layout.addLayout(streak_value_row)
@@ -530,14 +522,12 @@ class CareerAccelerator(QMainWindow):
         time_layout = QVBoxLayout(time_card)
         time_layout.setContentsMargins(16, 14, 16, 14)
         time_layout.setSpacing(6)
-        self.sidebar_time_layout = time_layout
 
         study_title = QLabel("⏱️  TOTAL STUDY TIME")
         study_title.setWordWrap(True)
         study_title.setStyleSheet(
             f"font-weight:700;color:{COLORS['cyan']};"
         )
-        self.sidebar_study_title = study_title
         time_layout.addWidget(study_title)
 
         self.side_hours_value = QLabel("0h")
@@ -546,7 +536,6 @@ class CareerAccelerator(QMainWindow):
 
         this_week = QLabel("This Week")
         this_week.setObjectName("Muted")
-        self.sidebar_this_week = this_week
         time_layout.addWidget(this_week)
 
         self.sidebar_goal = QProgressBar()
@@ -568,7 +557,6 @@ class CareerAccelerator(QMainWindow):
         footer = QLabel("Keep building your future. 🚀")
         footer.setObjectName("Muted")
         footer.setWordWrap(True)
-        self.sidebar_footer = footer
         layout.addWidget(footer)
 
         scroll.setWidget(content)
@@ -646,8 +634,6 @@ class CareerAccelerator(QMainWindow):
             self._ui_scale = scale
             self.setStyleSheet(stylesheet(scale))
         apply_inline_style_scale(self, scale)
-        if hasattr(self, "sidebar_content_layout"):
-            self._apply_sidebar_density(height)
 
         responsive_painted_widgets = [
             *self.findChildren(Ring),
@@ -658,112 +644,8 @@ class CareerAccelerator(QMainWindow):
 
         if hasattr(self, "dashboard_scroll"):
             self.update_dashboard_layout(
-                max(0, self.dashboard_scroll.viewport().width()),
-                max(0, self.dashboard_scroll.viewport().height()),
+                max(0, self.dashboard_scroll.viewport().width())
             )
-
-    def _apply_sidebar_density(self, height):
-        """Keep the complete navigation sidebar visible at supported heights."""
-        height = max(0, int(height))
-        if height >= 900:
-            density = "comfortable"
-        elif height >= 700:
-            density = "compact"
-        else:
-            density = "ultra"
-        if getattr(self, "sidebar_density", None) == density:
-            return
-        self.sidebar_density = density
-
-        values = {
-            "comfortable": {
-                "margins": (16, 14, 16, 12),
-                "spacing": 4,
-                "nav_height": (34, 42),
-                "logo": 28,
-                "career": 17,
-                "accelerator": 15,
-                "card_height": 0,
-                "card_margins": (16, 14, 16, 14),
-                "card_spacing": 6,
-                "flame": 24,
-                "streak_value": 25,
-                "hours": 22,
-                "week": 13,
-                "footer_visible": True,
-            },
-            "compact": {
-                "margins": (12, 9, 12, 8),
-                "spacing": 2,
-                "nav_height": (27, 30),
-                "logo": 23,
-                "career": 14,
-                "accelerator": 12,
-                "card_height": 101,
-                "card_margins": (11, 8, 11, 8),
-                "card_spacing": 3,
-                "flame": 19,
-                "streak_value": 21,
-                "hours": 18,
-                "week": 10,
-                "footer_visible": True,
-            },
-            "ultra": {
-                "margins": (10, 6, 10, 5),
-                "spacing": 1,
-                "nav_height": (21, 22),
-                "logo": 19,
-                "career": 12,
-                "accelerator": 10,
-                "card_height": 80,
-                "card_margins": (9, 5, 9, 5),
-                "card_spacing": 1,
-                "flame": 16,
-                "streak_value": 18,
-                "hours": 16,
-                "week": 8,
-                "footer_visible": True,
-            },
-        }[density]
-
-        self.sidebar_content_layout.setContentsMargins(*values["margins"])
-        self.sidebar_content_layout.setSpacing(values["spacing"])
-        for button in self.nav_buttons:
-            button.setMinimumHeight(values["nav_height"][0])
-            button.setMaximumHeight(values["nav_height"][1])
-        self.sidebar_logo.setStyleSheet(f"font-size:{values['logo']}pt;")
-        self.sidebar_career_label.setStyleSheet(
-            f"font-size:{values['career']}pt;font-weight:800;"
-        )
-        self.sidebar_accelerator_label.setStyleSheet(
-            f"font-size:{values['accelerator']}pt;font-weight:800;"
-            f"color:{COLORS['purple']};"
-        )
-        self.sidebar_streak_layout.setContentsMargins(*values["card_margins"])
-        self.sidebar_streak_layout.setSpacing(values["card_spacing"])
-        self.sidebar_time_layout.setContentsMargins(*values["card_margins"])
-        self.sidebar_time_layout.setSpacing(values["card_spacing"])
-        self.sidebar_flame.setStyleSheet(f"font-size:{values['flame']}pt;")
-        self.side_streak_value.setStyleSheet(
-            f"font-size:{values['streak_value']}pt;font-weight:700;"
-        )
-        self.side_hours_value.setStyleSheet(
-            f"font-size:{values['hours']}pt;font-weight:700;"
-        )
-        self.streak_week.setStyleSheet(
-            f"color:{COLORS['purple']};font-size:{values['week']}pt;"
-        )
-        self.sidebar_footer.setVisible(values["footer_visible"])
-
-        card_height = values["card_height"]
-        for card in (self.sidebar_streak_card, self.sidebar_time_card):
-            if card_height:
-                card.setMinimumHeight(card_height)
-                card.setMaximumHeight(card_height)
-            else:
-                card.setMinimumHeight(0)
-                card.setMaximumHeight(16777215)
-        self.sidebar_scroll.widget().updateGeometry()
 
     def clear_layout(self, layout):
         while layout.count():
@@ -794,7 +676,6 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_content = page.content
         self.dashboard_root_layout = root
         self.dashboard_layout_mode = None
-        self.dashboard_density = None
 
         # ---------- Header ----------
         self.dashboard_header_section = QWidget()
@@ -1002,8 +883,7 @@ class CareerAccelerator(QMainWindow):
             SectionHeader("⏱️", "Study Session")
         )
 
-        self.dashboard_timer_stage = QWidget()
-        timer_stage = self.dashboard_timer_stage
+        timer_stage = QWidget()
         timer_stage.setMinimumHeight(118)
         timer_stage.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground,
@@ -1035,8 +915,7 @@ class CareerAccelerator(QMainWindow):
             self.dashboard_start_button
         )
 
-        self.dashboard_timer_controls = QHBoxLayout()
-        timer_controls = self.dashboard_timer_controls
+        timer_controls = QHBoxLayout()
         timer_controls.setSpacing(7)
 
         pause = QPushButton("⏸️ Pause")
@@ -1179,8 +1058,7 @@ class CareerAccelerator(QMainWindow):
             self.summary_rows
         )
 
-        self.dashboard_summary_button = QPushButton("View Full Summary")
-        summary_button = self.dashboard_summary_button
+        summary_button = QPushButton("View Full Summary")
         summary_button.setObjectName("Secondary")
         summary_button.clicked.connect(lambda: self.navigate(8))
         self.dashboard_summary_card.layout.addWidget(
@@ -1381,12 +1259,6 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(self.dashboard_footer_section)
 
         page.add_responsive_handler(self.update_dashboard_layout)
-        page.heightChanged.connect(
-            lambda height: self.update_dashboard_layout(
-                max(0, page.viewport().width()),
-                height,
-            )
-        )
         QTimer.singleShot(
             0,
             lambda: self.update_dashboard_layout(
@@ -1441,6 +1313,7 @@ class CareerAccelerator(QMainWindow):
                 1,
                 2,
             )
+            self.dashboard_mission_card.setMinimumHeight(178)
         else:
             self.dashboard_mission_actions.addWidget(
                 self.dashboard_highest_impact_button,
@@ -1454,169 +1327,22 @@ class CareerAccelerator(QMainWindow):
             )
             self.dashboard_mission_actions.setColumnStretch(0, 3)
             self.dashboard_mission_actions.setColumnStretch(1, 2)
+            self.dashboard_mission_card.setMinimumHeight(125)
 
-    @staticmethod
-    def _set_dashboard_card_height(card, height):
-        height = max(1, int(height))
-        card.setMinimumHeight(height)
-        card.setMaximumHeight(height)
-
-    def _apply_dashboard_density(self, width, height):
+    def update_dashboard_layout(self, width):
         width = max(0, int(width))
-        height = max(0, int(height))
-        if height >= 900 and width >= 1050:
-            density = "comfortable"
-        elif height >= 700:
-            density = "compact"
-        else:
-            density = "ultra"
-        self.dashboard_density = density
-
-        metrics_height, primary_height, secondary_height, footer_height = {
-            "comfortable": (100, 311, 311, 171),
-            "compact": (78, 190, 160, 104),
-            "ultra": (64, 160, 126, 76),
-        }[density]
-
-        if density == "comfortable":
-            self.dashboard_root_layout.setContentsMargins(24, 16, 24, 14)
-            self.dashboard_root_layout.setSpacing(10)
-            primary_margins = (14, 13, 14, 12)
-            secondary_margins = (14, 13, 14, 12)
-            footer_margins = (16, 12, 16, 12)
-        elif density == "compact":
-            self.dashboard_root_layout.setContentsMargins(12, 8, 12, 8)
-            self.dashboard_root_layout.setSpacing(7)
-            primary_margins = (9, 7, 9, 7)
-            secondary_margins = (9, 7, 9, 7)
-            footer_margins = (10, 7, 10, 7)
-        else:
-            self.dashboard_root_layout.setContentsMargins(8, 5, 8, 5)
-            self.dashboard_root_layout.setSpacing(5)
-            primary_margins = (7, 5, 7, 5)
-            secondary_margins = (7, 5, 7, 5)
-            footer_margins = (8, 5, 8, 5)
-
-        for card, ring in zip(self.dashboard_metric_cards, self.rings):
-            self._set_dashboard_card_height(card, metrics_height)
-            card.layout.setContentsMargins(5, 3, 5, 3)
-            ring.set_density(density)
-
-        for card in (
-            self.dashboard_focus_card,
-            self.dashboard_tasks_card,
-            self.dashboard_timer_card,
-        ):
-            self._set_dashboard_card_height(card, primary_height)
-            card.layout.setContentsMargins(*primary_margins)
-            card.layout.setSpacing(3 if density != "comfortable" else 6)
-
-        for card in (
-            self.dashboard_growth_card,
-            self.dashboard_achievement_card,
-            self.dashboard_summary_card,
-        ):
-            self._set_dashboard_card_height(card, secondary_height)
-            card.layout.setContentsMargins(*secondary_margins)
-            card.layout.setSpacing(3 if density == "ultra" else 6 if density == "compact" else 8)
-
-        for card in (self.encouragement_card, self.dashboard_mission_card):
-            self._set_dashboard_card_height(card, footer_height)
-            card.layout.setContentsMargins(*footer_margins)
-            card.layout.setSpacing(2 if density == "ultra" else 4)
-
-        for header in self.dashboard_content.findChildren(SectionHeader):
-            header.set_density(density)
-        for row in getattr(self, "dashboard_focus_density_widgets", []):
-            row.set_density(density)
-        for row in getattr(self, "dashboard_task_density_widgets", []):
-            row.set_density(density)
-        for row in self.dashboard_summary_card.findChildren(StatRow):
-            row.set_density(density)
-        for badge in self.dashboard_achievement_card.findChildren(BadgeCard):
-            badge.set_density(density)
-        for metric in (self.focus_total_time, self.focus_task_count):
-            metric.set_density(density)
-
-        visible_limit = 99 if density == "comfortable" else 4 if density == "compact" else 3
-        for index, row in enumerate(getattr(self, "dashboard_focus_density_widgets", [])):
-            row.setVisible(index < visible_limit)
-        for index, row in enumerate(getattr(self, "dashboard_task_density_widgets", [])):
-            row.setVisible(index < visible_limit)
-
-        for divider in self.dashboard_focus_card.findChildren(Divider):
-            if divider is not self.focus_footer_divider:
-                divider.setVisible(density == "comfortable")
-        for divider in self.dashboard_tasks_card.findChildren(Divider):
-            divider.setVisible(density == "comfortable")
-        for divider in self.dashboard_summary_card.findChildren(Divider):
-            divider.setVisible(density == "comfortable")
-
-        self.growth_chart.set_density(density)
-        self.circular_timer.set_dashboard_density(density)
-        timer_stage_height = {
-            "comfortable": 118,
-            "compact": 78,
-            "ultra": 66,
-        }[density]
-        self.dashboard_timer_stage.setMinimumHeight(timer_stage_height)
-        self.dashboard_timer_stage.setMaximumHeight(timer_stage_height)
-
-        start_height = 34 if density == "comfortable" else 27 if density == "compact" else 23
-        self.dashboard_start_button.setMinimumHeight(start_height)
-        self.dashboard_start_button.setMaximumHeight(start_height)
-        for index in range(self.dashboard_timer_controls.count()):
-            button = self.dashboard_timer_controls.itemAt(index).widget()
-            if button is not None:
-                button.setMinimumHeight(30 if density == "comfortable" else 25 if density == "compact" else 22)
-                button.setMaximumHeight(32 if density == "comfortable" else 27 if density == "compact" else 24)
-
-        self.dashboard_quote.setVisible(density != "ultra")
-        self.dashboard_date.setVisible(density != "ultra")
-        self.dashboard_mission_detail.setVisible(density == "comfortable")
-        self.footer_subtitle.setVisible(density == "comfortable")
-        self.footer_message.setWordWrap(density == "comfortable")
-        self.summary_period.setVisible(density != "ultra")
-        self.summary_sparkline.setVisible(density == "comfortable")
-        self.growth_period_combo.setVisible(density != "ultra")
-        self.dashboard_summary_button.setText(
-            "Summary →" if density == "ultra" else "View Full Summary"
-        )
-        summary_button_height = 30 if density == "comfortable" else 25 if density == "compact" else 22
-        self.dashboard_summary_button.setMinimumHeight(summary_button_height)
-        self.dashboard_summary_button.setMaximumHeight(summary_button_height)
-
-        mission_button_height = 32 if density == "comfortable" else 27 if density == "compact" else 23
-        for button in (
-            self.dashboard_highest_impact_button,
-            self.dashboard_view_readiness_button,
-        ):
-            button.setMinimumHeight(mission_button_height)
-            button.setMaximumHeight(mission_button_height)
-
-        self.dashboard_content.updateGeometry()
-
-    def update_dashboard_layout(self, width, height=None):
-        width = max(0, int(width))
-        if height is None:
-            height = max(0, self.dashboard_scroll.viewport().height())
-        height = max(0, int(height))
-
         if width >= self.DASHBOARD_WIDE_BREAKPOINT:
             mode = "wide"
-        elif width >= 650:
-            mode = "fit"
+        elif width >= self.DASHBOARD_MEDIUM_BREAKPOINT:
+            mode = "medium"
         else:
             mode = "compact"
 
-        self._apply_dashboard_density(width, height)
-        density = self.dashboard_density or "comfortable"
-
-        compact_header = mode == "compact"
+        compact_header = mode != "wide"
         set_box_direction(
             self.dashboard_header_layout,
             compact_header,
-            spacing=5 if density == "ultra" else 8 if compact_header else 10,
+            spacing=8 if compact_header else 12,
         )
         self.dashboard_program_meta.setAlignment(
             Qt.AlignmentFlag.AlignLeft
@@ -1629,9 +1355,17 @@ class CareerAccelerator(QMainWindow):
             else Qt.AlignmentFlag.AlignRight
         )
         if hasattr(self, "exercise_suggestion_panel"):
-            self.exercise_suggestion_panel.set_compact(
-                mode != "wide" or density != "comfortable"
-            )
+            self.exercise_suggestion_panel.set_compact(mode != "wide")
+
+        if mode == "compact":
+            self.dashboard_root_layout.setContentsMargins(12, 12, 12, 14)
+            self.dashboard_root_layout.setSpacing(9)
+        elif mode == "medium":
+            self.dashboard_root_layout.setContentsMargins(17, 14, 17, 16)
+            self.dashboard_root_layout.setSpacing(10)
+        else:
+            self.dashboard_root_layout.setContentsMargins(24, 16, 24, 14)
+            self.dashboard_root_layout.setSpacing(10)
 
         if mode == self.dashboard_layout_mode:
             self.dashboard_content.updateGeometry()
@@ -1642,33 +1376,76 @@ class CareerAccelerator(QMainWindow):
         self._take_layout_items(self.dashboard_primary_grid)
         self._take_layout_items(self.dashboard_secondary_grid)
         self._take_layout_items(self.dashboard_footer_grid)
-        self._take_layout_items(self.dashboard_compact_footer_layout)
+        self._take_layout_items(
+            self.dashboard_compact_footer_layout
+        )
 
-        if mode in {"wide", "fit"}:
+        if mode == "wide":
             self.dashboard_footer_section.show()
             self.dashboard_compact_footer_stack.hide()
             self._layout_mission_actions(compact=False)
 
-            for column, card in enumerate(self.dashboard_metric_cards):
-                self.dashboard_metrics_grid.addWidget(card, 0, column)
-                self.dashboard_metrics_grid.setColumnStretch(column, 1)
+            for column, card in enumerate(
+                self.dashboard_metric_cards
+            ):
+                self.dashboard_metrics_grid.addWidget(
+                    card,
+                    0,
+                    column,
+                )
+                self.dashboard_metrics_grid.setColumnStretch(
+                    column,
+                    1,
+                )
 
-            self.dashboard_primary_grid.addWidget(self.dashboard_focus_card, 0, 0)
-            self.dashboard_primary_grid.addWidget(self.dashboard_tasks_card, 0, 1)
-            self.dashboard_primary_grid.addWidget(self.dashboard_timer_card, 0, 2)
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_focus_card,
+                0,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_tasks_card,
+                0,
+                1,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_timer_card,
+                0,
+                2,
+            )
             self.dashboard_primary_grid.setColumnStretch(0, 34)
             self.dashboard_primary_grid.setColumnStretch(1, 33)
             self.dashboard_primary_grid.setColumnStretch(2, 33)
 
-            self.dashboard_secondary_grid.addWidget(self.dashboard_growth_card, 0, 0)
-            self.dashboard_secondary_grid.addWidget(self.dashboard_achievement_card, 0, 1)
-            self.dashboard_secondary_grid.addWidget(self.dashboard_summary_card, 0, 2)
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_growth_card,
+                0,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_achievement_card,
+                0,
+                1,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_summary_card,
+                0,
+                2,
+            )
             self.dashboard_secondary_grid.setColumnStretch(0, 38)
             self.dashboard_secondary_grid.setColumnStretch(1, 29)
             self.dashboard_secondary_grid.setColumnStretch(2, 33)
 
-            self.dashboard_footer_grid.addWidget(self.encouragement_card, 0, 0)
-            self.dashboard_footer_grid.addWidget(self.dashboard_mission_card, 0, 1)
+            self.dashboard_footer_grid.addWidget(
+                self.encouragement_card,
+                0,
+                0,
+            )
+            self.dashboard_footer_grid.addWidget(
+                self.dashboard_mission_card,
+                0,
+                1,
+            )
             self.dashboard_footer_grid.setColumnStretch(0, 1)
             self.dashboard_footer_grid.setColumnStretch(1, 1)
 
@@ -1681,39 +1458,159 @@ class CareerAccelerator(QMainWindow):
                     self.dashboard_footer_section,
                 ]
             )
-        else:
-            # Widths below the supported desktop minimum retain a scroll-safe
-            # one-column fallback rather than clipping or creating horizontal
-            # overflow.
+
+        elif mode == "medium":
             self.dashboard_footer_section.hide()
             self.dashboard_compact_footer_stack.show()
             self._layout_mission_actions(compact=True)
 
-            for row, card in enumerate(self.dashboard_metric_cards):
-                self.dashboard_metrics_grid.addWidget(card, row, 0)
-            self.dashboard_metrics_grid.setColumnStretch(0, 1)
-
-            self.dashboard_compact_footer_layout.addWidget(self.encouragement_card)
-            self.dashboard_compact_footer_layout.addWidget(self.dashboard_mission_card)
-            for row, card in enumerate(
-                (
-                    self.dashboard_focus_card,
-                    self.dashboard_tasks_card,
-                    self.dashboard_timer_card,
-                    self.dashboard_compact_footer_stack,
-                )
+            metric_positions = [
+                (0, 0, 1, 2),
+                (0, 2, 1, 2),
+                (0, 4, 1, 2),
+                (1, 0, 1, 3),
+                (1, 3, 1, 3),
+            ]
+            for card, position in zip(
+                self.dashboard_metric_cards,
+                metric_positions,
             ):
-                self.dashboard_primary_grid.addWidget(card, row, 0)
+                self.dashboard_metrics_grid.addWidget(
+                    card,
+                    *position,
+                )
+            for column in range(6):
+                self.dashboard_metrics_grid.setColumnStretch(
+                    column,
+                    1,
+                )
+
+            self.dashboard_compact_footer_layout.addWidget(
+                self.encouragement_card
+            )
+            self.dashboard_compact_footer_layout.addWidget(
+                self.dashboard_mission_card
+            )
+
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_focus_card,
+                0,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_timer_card,
+                0,
+                1,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_tasks_card,
+                1,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_compact_footer_stack,
+                1,
+                1,
+            )
+            self.dashboard_primary_grid.setColumnStretch(0, 1)
+            self.dashboard_primary_grid.setColumnStretch(1, 1)
+
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_growth_card,
+                0,
+                0,
+                1,
+                2,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_achievement_card,
+                1,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_summary_card,
+                1,
+                1,
+            )
+            self.dashboard_secondary_grid.setColumnStretch(0, 1)
+            self.dashboard_secondary_grid.setColumnStretch(1, 1)
+
+            self._set_dashboard_section_order(
+                [
+                    self.dashboard_header_section,
+                    self.dashboard_primary_section,
+                    self.dashboard_metrics_section,
+                    self.dashboard_secondary_section,
+                ]
+            )
+
+        else:
+            self.dashboard_footer_section.hide()
+            self.dashboard_compact_footer_stack.show()
+            self._layout_mission_actions(compact=True)
+
+            metric_positions = [
+                (0, 0, 1, 1),
+                (0, 1, 1, 1),
+                (1, 0, 1, 1),
+                (1, 1, 1, 1),
+                (2, 0, 1, 2),
+            ]
+            for card, position in zip(
+                self.dashboard_metric_cards,
+                metric_positions,
+            ):
+                self.dashboard_metrics_grid.addWidget(
+                    card,
+                    *position,
+                )
+            self.dashboard_metrics_grid.setColumnStretch(0, 1)
+            self.dashboard_metrics_grid.setColumnStretch(1, 1)
+
+            self.dashboard_compact_footer_layout.addWidget(
+                self.encouragement_card
+            )
+            self.dashboard_compact_footer_layout.addWidget(
+                self.dashboard_mission_card
+            )
+
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_focus_card,
+                0,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_tasks_card,
+                1,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_timer_card,
+                2,
+                0,
+            )
+            self.dashboard_primary_grid.addWidget(
+                self.dashboard_compact_footer_stack,
+                3,
+                0,
+            )
             self.dashboard_primary_grid.setColumnStretch(0, 1)
 
-            for row, card in enumerate(
-                (
-                    self.dashboard_growth_card,
-                    self.dashboard_achievement_card,
-                    self.dashboard_summary_card,
-                )
-            ):
-                self.dashboard_secondary_grid.addWidget(card, row, 0)
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_growth_card,
+                0,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_achievement_card,
+                1,
+                0,
+            )
+            self.dashboard_secondary_grid.addWidget(
+                self.dashboard_summary_card,
+                2,
+                0,
+            )
             self.dashboard_secondary_grid.setColumnStretch(0, 1)
 
             self._set_dashboard_section_order(
@@ -5685,7 +5582,6 @@ class CareerAccelerator(QMainWindow):
         self.clear_layout(
             self.focus_layout
         )
-        self.dashboard_focus_density_widgets = []
 
         intelligent_focus = (
             planner.intelligent_focus_plan(
@@ -5928,22 +5824,22 @@ class CareerAccelerator(QMainWindow):
                     )
                 )
 
-            focus_row = FocusRow(
-                emoji,
-                title,
-                detail,
-                duration,
-                accent,
-                action_text=(
-                    action_text
-                ),
-                on_action=(
-                    action_callback
-                ),
-                completed=completed,
+            self.focus_layout.addWidget(
+                FocusRow(
+                    emoji,
+                    title,
+                    detail,
+                    duration,
+                    accent,
+                    action_text=(
+                        action_text
+                    ),
+                    on_action=(
+                        action_callback
+                    ),
+                    completed=completed,
+                )
             )
-            self.focus_layout.addWidget(focus_row)
-            self.dashboard_focus_density_widgets.append(focus_row)
 
         if focus_summary[
             "all_base_complete"
@@ -6256,7 +6152,6 @@ class CareerAccelerator(QMainWindow):
 
         # Next task rows.
         self.clear_layout(self.dashboard_tasks_layout)
-        self.dashboard_task_density_widgets = []
         available = planner.available(self.conn, week)
 
         task_category_colors = {
@@ -6316,7 +6211,6 @@ class CareerAccelerator(QMainWindow):
                     )
                 )
                 self.dashboard_tasks_layout.addWidget(task_row)
-                self.dashboard_task_density_widgets.append(task_row)
                 if index < min(len(available), 5) - 1:
                     self.dashboard_tasks_layout.addWidget(Divider())
         else:
@@ -6415,10 +6309,6 @@ class CareerAccelerator(QMainWindow):
         )
         self.sidebar_goal_percent.setText(
             f"{weekly_goal:.0f}%"
-        )
-        self._apply_dashboard_density(
-            max(0, self.dashboard_scroll.viewport().width()),
-            max(0, self.dashboard_scroll.viewport().height()),
         )
 
     def open_completion_history(self):
