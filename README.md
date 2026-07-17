@@ -24,7 +24,11 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.8 includes:
+Version 10.0.9 includes:
+
+- A persistent text and button size slider that leaves responsive card geometry unchanged.
+- A single-line Dashboard greeting including its emoji.
+- A tighter Study Session log form with top-packed fields and reduced unused gaps.
 
 - rounded Learning Dashboard navigation buttons for Learning Overview, Applied Labs, and Exercises,
 - removal of the remaining native tab-strip divider beneath the Learning header,

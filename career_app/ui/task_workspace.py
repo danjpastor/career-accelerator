@@ -77,7 +77,12 @@ class TaskWorkspaceDialog(QDialog):
         parent_width = max(760, parent.width() if parent is not None else 1120)
         parent_height = max(580, parent.height() if parent is not None else 820)
         self.resize(min(1120, parent_width - 48), min(820, parent_height - 48))
-        self.setStyleSheet(stylesheet(getattr(parent, "_ui_scale", 1.0)))
+        self.setStyleSheet(
+            stylesheet(
+                getattr(parent, "_ui_scale", 1.0),
+                getattr(parent, "_content_scale", 1.0),
+            )
+        )
         self._responsive_rows: list[QBoxLayout] = []
 
         root_layout = QVBoxLayout(self)

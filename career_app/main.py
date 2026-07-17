@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
     QInputDialog,
     QBoxLayout, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout, QLabel, QLayout,
     QLineEdit, QListWidget, QMainWindow, QMessageBox, QPushButton, QProgressBar,
-    QScrollArea, QSizePolicy, QSpinBox, QStackedWidget, QTableWidget,
+    QScrollArea, QSizePolicy, QSlider, QSpinBox, QStackedWidget, QTableWidget,
     QTableWidgetItem, QTabWidget, QTextEdit, QVBoxLayout, QWidget
 )
 
@@ -304,8 +304,17 @@ class CareerAccelerator(QMainWindow):
             self.MINIMUM_WINDOW_HEIGHT,
         )
         self._ui_scale = 1.0
+        try:
+            interface_scale_percent = int(
+                setting(self.conn, "interface_scale_percent", "100")
+            )
+        except (TypeError, ValueError):
+            interface_scale_percent = 100
+        interface_scale_percent = max(80, min(120, interface_scale_percent))
+        self._content_scale = interface_scale_percent / 100.0
+        self._style_signature = None
         self._responsive_update_pending = False
-        self.setStyleSheet(stylesheet(self._ui_scale))
+        self._apply_interface_styles()
 
         self.button_feedback = ButtonFeedbackFilter(self)
         QApplication.instance().installEventFilter(
@@ -659,8 +668,7 @@ class CareerAccelerator(QMainWindow):
 
         if abs(scale - self._ui_scale) >= 0.01:
             self._ui_scale = scale
-            self.setStyleSheet(stylesheet(scale))
-        apply_inline_style_scale(self, scale)
+        self._apply_interface_styles()
         if hasattr(self, "sidebar_content_layout"):
             self._apply_sidebar_density(height)
 
@@ -670,12 +678,44 @@ class CareerAccelerator(QMainWindow):
         ]
         for widget in responsive_painted_widgets:
             widget.set_ui_scale(scale)
+            if hasattr(widget, "set_interface_scale"):
+                widget.set_interface_scale(self._content_scale)
 
         if hasattr(self, "dashboard_scroll"):
             self.update_dashboard_layout(
                 max(0, self.dashboard_scroll.viewport().width()),
                 max(0, self.dashboard_scroll.viewport().height()),
             )
+
+        # Density handlers update several inline styles after the first pass.
+        # Scale those fresh styles once more without changing card geometry.
+        apply_inline_style_scale(
+            self,
+            self._ui_scale,
+            self._content_scale,
+        )
+
+    def _apply_interface_styles(self):
+        """Apply responsive geometry plus the user-selected content scale."""
+        content_scale = max(0.80, min(1.20, float(self._content_scale)))
+        signature = (round(self._ui_scale, 3), round(content_scale, 3))
+        if signature != self._style_signature:
+            self.setStyleSheet(stylesheet(self._ui_scale, content_scale))
+            self._style_signature = signature
+        apply_inline_style_scale(self, self._ui_scale, content_scale)
+
+    def change_interface_scale(self, value):
+        """Preview and persist text/control scaling without resizing cards."""
+        value = max(80, min(120, int(value)))
+        self._content_scale = value / 100.0
+        if hasattr(self, "interface_scale_value"):
+            self.interface_scale_value.setText(f"{value}%")
+        save_setting(self.conn, "interface_scale_percent", value)
+        self._style_signature = None
+        self._apply_interface_styles()
+        # Re-run responsive sizing after the font metrics change. Card geometry
+        # still comes from the window breakpoints; only their contents reflow.
+        QTimer.singleShot(0, self._apply_responsive_shell)
 
     def _apply_sidebar_density(self, height):
         """Keep the complete navigation sidebar visible at supported heights."""
@@ -840,8 +880,12 @@ class CareerAccelerator(QMainWindow):
 
         self.dashboard_hero = QLabel("")
         self.dashboard_hero.setObjectName("Hero")
-        self.dashboard_hero.setWordWrap(True)
+        self.dashboard_hero.setWordWrap(False)
         self.dashboard_hero.setMinimumWidth(0)
+        self.dashboard_hero.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding,
+            QSizePolicy.Policy.Fixed,
+        )
         left_header.addWidget(self.dashboard_hero)
 
         self.dashboard_quote = QLabel("")
@@ -4086,6 +4130,7 @@ class CareerAccelerator(QMainWindow):
         form_grid.setVerticalSpacing(9)
         form_grid.setColumnStretch(1, 1)
         form_grid.setColumnStretch(3, 1)
+        form_grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.session_date = QLineEdit(date.today().isoformat())
         self.session_hours = QLineEdit("1")
@@ -4113,8 +4158,8 @@ class CareerAccelerator(QMainWindow):
         self.session_notes.setPlaceholderText(
             "Key takeaways, blockers, questions, or next steps"
         )
-        self.session_notes.setMinimumHeight(90)
-        self.session_notes.setMaximumHeight(220)
+        self.session_notes.setMinimumHeight(72)
+        self.session_notes.setMaximumHeight(150)
 
         form_grid.addWidget(QLabel("Date"), 0, 0)
         form_grid.addWidget(self.session_date, 0, 1)
@@ -4141,7 +4186,15 @@ class CareerAccelerator(QMainWindow):
         form_grid.addWidget(QLabel("Notes"), 6, 0)
         form_grid.addWidget(self.session_notes, 6, 1, 1, 3)
 
-        log_card.layout.addLayout(form_grid)
+        form_host = QWidget()
+        form_host.setMinimumWidth(0)
+        form_host.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Maximum,
+        )
+        form_host.setLayout(form_grid)
+        log_card.layout.addWidget(form_host)
+        self.study_log_form_host = form_host
 
         save = QPushButton("✅ Finish and Log Session")
         save.setObjectName("Primary")
@@ -4149,6 +4202,9 @@ class CareerAccelerator(QMainWindow):
         save.clicked.connect(self.save_session)
         log_card.layout.addWidget(save)
         self.study_log_scroll = make_card_scrollable(log_card)
+        log_card._content_host.layout().setAlignment(
+            Qt.AlignmentFlag.AlignTop
+        )
 
         self.study_body_grid = body
         self.study_timer_card = timer_card
@@ -4199,6 +4255,17 @@ class CareerAccelerator(QMainWindow):
                 8 if compact_height else 12,
             )
             self.study_timer_card.layout.setSpacing(4 if compact_height else 7)
+            self.study_log_card._content_host.layout().setContentsMargins(
+                12 if compact_height else 18,
+                10 if compact_height else 16,
+                12 if compact_height else 18,
+                10 if compact_height else 16,
+            )
+            self.study_log_card._content_host.layout().setSpacing(
+                7 if compact_height else 10
+            )
+            self.session_notes.setMinimumHeight(58 if compact_height else 72)
+            self.session_notes.setMaximumHeight(110 if compact_height else 150)
 
             margins = root.contentsMargins()
             header_height = page.header.sizeHint().height() if page.header else 0
@@ -4775,6 +4842,54 @@ class CareerAccelerator(QMainWindow):
         autosave_row.addWidget(self.autosave_minutes)
         general_card.layout.addLayout(autosave_row)
 
+        scale_header = QHBoxLayout()
+        scale_header.setSpacing(10)
+        scale_label = QLabel("Text and button size")
+        scale_header.addWidget(scale_label)
+        scale_header.addStretch()
+        self.interface_scale_value = QLabel(
+            f"{round(self._content_scale * 100):d}%"
+        )
+        self.interface_scale_value.setObjectName("Muted")
+        self.interface_scale_value.setMinimumWidth(44)
+        self.interface_scale_value.setAlignment(Qt.AlignRight)
+        scale_header.addWidget(self.interface_scale_value)
+        general_card.layout.addLayout(scale_header)
+
+        scale_row = QHBoxLayout()
+        scale_row.setSpacing(9)
+        smaller = QLabel("A")
+        smaller.setObjectName("Muted")
+        scale_row.addWidget(smaller)
+        self.interface_scale_slider = QSlider(Qt.Orientation.Horizontal)
+        self.interface_scale_slider.setRange(80, 120)
+        self.interface_scale_slider.setSingleStep(5)
+        self.interface_scale_slider.setPageStep(5)
+        self.interface_scale_slider.setTickInterval(5)
+        self.interface_scale_slider.setValue(
+            round(self._content_scale * 100)
+        )
+        self.interface_scale_slider.setToolTip(
+            "Scale text, buttons, editors, lists, and form controls while "
+            "keeping card dimensions tied to the responsive window layout."
+        )
+        self.interface_scale_slider.valueChanged.connect(
+            self.change_interface_scale
+        )
+        scale_row.addWidget(self.interface_scale_slider, 1)
+        larger = QLabel("A")
+        larger.setStyleSheet("font-size:14pt;font-weight:700;")
+        scale_row.addWidget(larger)
+        general_card.layout.addLayout(scale_row)
+
+        scale_note = QLabel(
+            "Changes apply immediately. Cards continue to resize only with "
+            "the application window."
+        )
+        scale_note.setObjectName("Muted")
+        scale_note.setWordWrap(True)
+        general_card.layout.addWidget(scale_note)
+
         save_settings = QPushButton("💾 Save Application Settings")
         save_settings.setObjectName("Primary")
         save_settings.clicked.connect(self.save_settings)
@@ -5080,6 +5195,10 @@ class CareerAccelerator(QMainWindow):
 
         if hasattr(self, "dashboard_hero"):
             self.dashboard_hero.setText(greeting)
+            self.dashboard_hero.setWordWrap(False)
+            self.dashboard_hero.setMinimumHeight(
+                self.dashboard_hero.fontMetrics().height() + 4
+            )
 
         if hasattr(self, "dashboard_date"):
             self.dashboard_date.setText(
@@ -5738,7 +5857,7 @@ class CareerAccelerator(QMainWindow):
     def show_all_achievements(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("All Achievements")
-        dialog.setStyleSheet(stylesheet())
+        dialog.setStyleSheet(stylesheet(self._ui_scale, self._content_scale))
         dialog.resize(650, 560)
 
         layout = QVBoxLayout(dialog)
@@ -6810,7 +6929,7 @@ class CareerAccelerator(QMainWindow):
             "Completion History / Undo"
         )
         dialog.setMinimumSize(760, 460)
-        dialog.setStyleSheet(stylesheet())
+        dialog.setStyleSheet(stylesheet(self._ui_scale, self._content_scale))
 
         layout = QVBoxLayout(dialog)
         instructions = QLabel(
@@ -8161,7 +8280,7 @@ class CareerAccelerator(QMainWindow):
 
         dialog = QDialog(self)
         dialog.setWindowTitle("Edit Task")
-        dialog.setStyleSheet(stylesheet())
+        dialog.setStyleSheet(stylesheet(self._ui_scale, self._content_scale))
         form = QFormLayout(dialog)
 
         status = QComboBox()
@@ -9620,7 +9739,7 @@ class CareerAccelerator(QMainWindow):
             440,
         )
         dialog.setStyleSheet(
-            stylesheet()
+            stylesheet(self._ui_scale, self._content_scale)
         )
         form = QFormLayout(dialog)
 
@@ -9788,7 +9907,7 @@ class CareerAccelerator(QMainWindow):
             380,
         )
         dialog.setStyleSheet(
-            stylesheet()
+            stylesheet(self._ui_scale, self._content_scale)
         )
         form = QFormLayout(dialog)
 
@@ -9947,6 +10066,12 @@ class CareerAccelerator(QMainWindow):
 
     def save_settings(self):
         save_setting(self.conn, "autosave_minutes", self.autosave_minutes.value())
+        if hasattr(self, "interface_scale_slider"):
+            save_setting(
+                self.conn,
+                "interface_scale_percent",
+                self.interface_scale_slider.value(),
+            )
         interval = self.autosave_minutes.value() * 60 * 1000
         self.autosave_timer.start(max(60000, interval))
         self.settings_status.setText("Settings saved.")
@@ -10251,7 +10376,7 @@ class CareerAccelerator(QMainWindow):
     def command_palette(self):
         dialog = QDialog(self)
         dialog.setWindowTitle("Command Palette")
-        dialog.setStyleSheet(stylesheet())
+        dialog.setStyleSheet(stylesheet(self._ui_scale, self._content_scale))
         layout = QVBoxLayout(dialog)
         search = QLineEdit()
         search.setPlaceholderText("Type a command…")

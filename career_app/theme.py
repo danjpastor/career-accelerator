@@ -20,7 +20,7 @@ COLORS = {
     "cyan": "#54c9c2",
 }
 
-def stylesheet(scale: float = 1.0):
+def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
     c = COLORS
     chevron_path = (
         Path(__file__).resolve().parent.parent / "assets" / "chevron-down.svg"
@@ -267,6 +267,31 @@ def stylesheet(scale: float = 1.0):
         background: {c['purple']};
         border-radius: 4px;
     }}
+    QSlider::groove:horizontal {{
+        height: 6px;
+        background: #1c2b42;
+        border-radius: 3px;
+    }}
+    QSlider::sub-page:horizontal {{
+        background: {c['purple']};
+        border-radius: 3px;
+    }}
+    QSlider::add-page:horizontal {{
+        background: #1c2b42;
+        border-radius: 3px;
+    }}
+    QSlider::handle:horizontal {{
+        background: #b9a4ff;
+        border: 2px solid {c['purple_dark']};
+        width: 16px;
+        height: 16px;
+        margin: -6px 0;
+        border-radius: 8px;
+    }}
+    QSlider::handle:horizontal:hover {{
+        background: white;
+        border: 2px solid {c['purple']};
+    }}
     QScrollArea {{
         border: none;
         background: transparent;
@@ -422,5 +447,5 @@ def stylesheet(scale: float = 1.0):
     }}
     """
     from career_app.ui.responsive import scaled_stylesheet
-    return scaled_stylesheet(raw, scale)
+    return scaled_stylesheet(raw, scale, content_scale)
 

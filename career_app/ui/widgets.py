@@ -115,6 +115,7 @@ class Ring(QWidget):
         self.subtitle = ""
         self.extra = ""
         self._ui_scale = 1.0
+        self._interface_scale = 1.0
         self._density = "comfortable"
         self.setMinimumWidth(0)
         self.setMinimumHeight(70)
@@ -147,6 +148,10 @@ class Ring(QWidget):
         self._ui_scale = max(0.76, min(1.14, float(scale)))
         self.set_density(self._density)
 
+    def set_interface_scale(self, scale):
+        self._interface_scale = max(0.80, min(1.20, float(scale)))
+        self.update()
+
     def set_value(self, value, subtitle="", extra=""):
         self.value = max(0, min(100, float(value)))
         self.subtitle = subtitle
@@ -158,6 +163,7 @@ class Ring(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
 
         scale = self._ui_scale
+        font_scale = self._ui_scale * self._interface_scale
         density_scale = {
             "comfortable": 1.0,
             "compact": 0.9,
@@ -203,7 +209,7 @@ class Ring(QWidget):
         painter.setFont(
             QFont(
                 "Segoe UI",
-                max(7, round(11 * scale * density_scale)),
+                max(7, round(11 * font_scale * density_scale)),
                 QFont.Bold,
             )
         )
@@ -218,12 +224,12 @@ class Ring(QWidget):
 
         title_font = QFont(
             "Segoe UI",
-            max(6, round(8.5 * scale * density_scale)),
+            max(6, round(8.5 * font_scale * density_scale)),
             QFont.Bold,
         )
         detail_font = QFont(
             "Segoe UI",
-            max(6, round(7.7 * scale * density_scale)),
+            max(6, round(7.7 * font_scale * density_scale)),
         )
         title_metrics = painter.fontMetrics()
         painter.setFont(title_font)
@@ -305,6 +311,7 @@ class CircularTimer(QWidget):
         self.caption = "Ready to focus • 0 / 60 min"
         self.progress = 0.0
         self._content_scale = 1.0
+        self._interface_scale = 1.0
         self._ui_scale = 1.0
         self._dashboard_base_size = 138
         self._pulse_group = None
@@ -316,6 +323,10 @@ class CircularTimer(QWidget):
         size = round(self._dashboard_base_size * self._ui_scale)
         self.setFixedSize(size, size)
         self.updateGeometry()
+        self.update()
+
+    def set_interface_scale(self, scale):
+        self._interface_scale = max(0.80, min(1.20, float(scale)))
         self.update()
 
     def set_dashboard_density(self, density):
@@ -435,7 +446,7 @@ class CircularTimer(QWidget):
         painter.setPen(QColor(COLORS["text"]))
         time_font = QFont("Segoe UI", 16, QFont.Medium)
         time_size = max(6.5, min(16.0 * scale, shortest / 8.0))
-        time_font.setPointSizeF(time_size * self._content_scale)
+        time_font.setPointSizeF(time_size * self._content_scale * self._interface_scale)
         painter.setFont(time_font)
         time_metrics = painter.fontMetrics()
         time_text = time_metrics.elidedText(
@@ -459,7 +470,7 @@ class CircularTimer(QWidget):
         painter.setPen(QColor(COLORS["muted"]))
         caption_font = QFont("Segoe UI", 8)
         caption_size = max(5.0, min(8.0 * scale, shortest / 14.0))
-        caption_font.setPointSizeF(caption_size * self._content_scale)
+        caption_font.setPointSizeF(caption_size * self._content_scale * self._interface_scale)
         painter.setFont(caption_font)
         caption_metrics = painter.fontMetrics()
         caption_text = caption_metrics.elidedText(

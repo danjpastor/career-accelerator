@@ -5,42 +5,135 @@ from collections.abc import Callable, Iterable
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
+    QAbstractButton,
+    QAbstractItemView,
+    QAbstractSpinBox,
     QBoxLayout,
+    QComboBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QLayout,
+    QLineEdit,
     QScrollArea,
     QSizePolicy,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
 
 _STYLE_NUMBER = re.compile(r"(?P<number>\d+(?:\.\d+)?)(?P<unit>pt|px)")
+_STYLE_BLOCK = re.compile(r"(?P<selectors>[^{}]+)\{(?P<body>[^{}]*)\}", re.S)
+_STYLE_DECLARATION = re.compile(
+    r"(?P<property>[A-Za-z-]+)(?P<separator>\s*:\s*)(?P<value>[^;{}]+)(?P<semicolon>;)",
+    re.S,
+)
+_CONTROL_SIZE_PROPERTIES = {
+    "padding",
+    "padding-top",
+    "padding-right",
+    "padding-bottom",
+    "padding-left",
+    "min-height",
+    "max-height",
+}
+_CONTROL_SELECTORS = (
+    "QPushButton",
+    "QComboBox",
+    "QLineEdit",
+    "QTextEdit",
+    "QSpinBox",
+    "QAbstractItemView",
+    "QListWidget",
+    "QTableWidget",
+)
 
 
-def scaled_stylesheet(source: str, scale: float) -> str:
-    """Scale point/pixel values in an inline Qt stylesheet without compounding."""
-    scale = max(0.72, min(1.18, float(scale)))
-
+def _scaled_style_value(value: str, factor: float) -> str:
     def repl(match: re.Match[str]) -> str:
         number = float(match.group("number"))
         unit = match.group("unit")
         # Borders must remain visible and tiny radii should not collapse.
         minimum = 1.0 if unit == "px" else 6.5
-        value = max(minimum, number * scale)
-        if abs(value - round(value)) < 0.05:
-            rendered = str(int(round(value)))
+        rendered_value = max(minimum, number * factor)
+        if abs(rendered_value - round(rendered_value)) < 0.05:
+            rendered = str(int(round(rendered_value)))
         else:
-            rendered = f"{value:.1f}".rstrip("0").rstrip(".")
+            rendered = f"{rendered_value:.1f}".rstrip("0").rstrip(".")
         return f"{rendered}{unit}"
 
-    return _STYLE_NUMBER.sub(repl, source or "")
+    return _STYLE_NUMBER.sub(repl, value)
 
 
-def apply_inline_style_scale(root: QWidget, scale: float) -> None:
+def _scaled_declarations(
+    body: str,
+    layout_scale: float,
+    content_scale: float,
+    *,
+    control: bool,
+) -> str:
+    def replace_declaration(match: re.Match[str]) -> str:
+        property_name = match.group("property").casefold()
+        factor = layout_scale
+        if property_name == "font-size":
+            factor *= content_scale
+        elif control and property_name in _CONTROL_SIZE_PROPERTIES:
+            factor *= content_scale
+        value = _scaled_style_value(match.group("value"), factor)
+        return (
+            f"{match.group('property')}{match.group('separator')}"
+            f"{value}{match.group('semicolon')}"
+        )
+
+    return _STYLE_DECLARATION.sub(replace_declaration, body)
+
+
+def scaled_stylesheet(
+    source: str,
+    scale: float,
+    content_scale: float = 1.0,
+    *,
+    control: bool = False,
+) -> str:
+    """Scale layout geometry and readable content independently.
+
+    ``scale`` continues to follow the responsive window size. ``content_scale``
+    affects fonts and control padding/heights only, so cards and page geometry
+    remain governed by the existing responsive layout calculations.
+    """
+    layout_scale = max(0.72, min(1.18, float(scale)))
+    content_scale = max(0.80, min(1.20, float(content_scale)))
+    source = source or ""
+
+    if "{" not in source:
+        return _scaled_declarations(
+            source,
+            layout_scale,
+            content_scale,
+            control=control,
+        )
+
+    def replace_block(match: re.Match[str]) -> str:
+        selectors = match.group("selectors")
+        is_control = any(token in selectors for token in _CONTROL_SELECTORS)
+        body = _scaled_declarations(
+            match.group("body"),
+            layout_scale,
+            content_scale,
+            control=is_control,
+        )
+        return f"{selectors}{{{body}}}"
+
+    return _STYLE_BLOCK.sub(replace_block, source)
+
+
+def apply_inline_style_scale(
+    root: QWidget,
+    scale: float,
+    content_scale: float = 1.0,
+) -> None:
     """Scale child inline styles while preserving later dynamic style changes."""
     widgets: list[QWidget] = [root, *root.findChildren(QWidget)]
     for widget in widgets:
@@ -52,7 +145,23 @@ def apply_inline_style_scale(root: QWidget, scale: float) -> None:
         if base is None or current != rendered:
             base = current
             widget.setProperty("responsive_base_stylesheet", base)
-        updated = scaled_stylesheet(str(base), scale)
+        is_control = isinstance(
+            widget,
+            (
+                QAbstractButton,
+                QAbstractItemView,
+                QAbstractSpinBox,
+                QComboBox,
+                QLineEdit,
+                QTextEdit,
+            ),
+        )
+        updated = scaled_stylesheet(
+            str(base),
+            scale,
+            content_scale,
+            control=is_control,
+        )
         if current != updated:
             widget.setStyleSheet(updated)
         widget.setProperty("responsive_rendered_stylesheet", updated)

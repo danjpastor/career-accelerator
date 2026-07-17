@@ -1,5 +1,14 @@
 # Changelog
 
+## 10.0.9 - 2026-07-17
+
+- Added a persistent Settings slider for text, button, editor, list, and form-control scale from 80% to 120%.
+- Kept card dimensions and responsive page geometry tied only to the application window rather than the user content scale.
+- Applied interface scaling live and persisted it in the local settings table.
+- Kept the complete Dashboard greeting and emoji on one line.
+- Top-packed the Study Session Log Session form and reduced note/form spacing so unused vertical gaps no longer separate fields.
+- Applied the active interface scale to application dialogs and Task Workspace windows.
+
 ## 10.0.8 - 2026-07-17
 
 - Replaced the Learning Dashboard native tab strip with three rounded navigation buttons.
