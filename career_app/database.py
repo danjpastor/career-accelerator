@@ -159,6 +159,26 @@ CREATE TABLE IF NOT EXISTS duckdb_exercise_progress (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS exercise_pack_progress (
+    pack_id TEXT NOT NULL,
+    exercise_id TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Not Started',
+    answer_sql TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    updated_at TEXT,
+    completed_at TEXT,
+    PRIMARY KEY (pack_id, exercise_id)
+);
+
+CREATE TABLE IF NOT EXISTS task_concept_tags (
+    task_id INTEGER NOT NULL,
+    concept TEXT NOT NULL,
+    source TEXT NOT NULL,
+    confidence INTEGER NOT NULL DEFAULT 100,
+    updated_at TEXT,
+    PRIMARY KEY (task_id, concept)
+);
+
 CREATE TABLE IF NOT EXISTS retrospective_notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     week INTEGER NOT NULL,
@@ -389,6 +409,8 @@ def factory_reset(conn, start_date):
         "retrospective_notes",
         "study_sessions",
         "sql_practice",
+        "task_concept_tags",
+        "exercise_pack_progress",
         "applications",
         "evidence",
         "project_notes",

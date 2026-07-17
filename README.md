@@ -54,6 +54,36 @@ Version 9.3.25 includes:
 - Job-readiness evidence and application CRM
 - Local SQLite persistence, backups, and Git publishing
 
+
+## Installable Exercise Packs
+
+Learning → Exercises supports portable optional practice packs. A pack may be installed from a folder or `.zip`, is validated before installation, and keeps its completion history when the pack is updated.
+
+The bundled **SQL Subqueries: Foundations to Advanced** pack includes seven plain-language lessons and twelve DuckDB-powered exercises. Dashboard suggestions are recalculated from current incomplete tasks whenever the Dashboard refreshes, so relevant optional practice can appear even after the stable daily task plan has already been created.
+
+### Shared learning-site visual system
+
+Exercise Packs, Applied Labs, and SQL Companion's DuckDB Exercises use shared native Qt course components: compact type pills, readable titles, subtle subtitle labels, quiet dividers, polished tables, syntax-highlighted code cards, callouts, bookmarks, breadcrumbs, and consistent responsive spacing.
+Two-column lesson blocks automatically stack at narrower Learn-card widths, and page margins plus title sizing compact at smaller breakpoints so generated material stays readable rather than compressed. Lesson pages also expose a runnable SQL sandbox using the pack datasets, while checked answers, hints, and solutions remain tied to guided exercises.
+
+### Three-column exercise workspaces
+
+Learning → Exercises and SQL Companion → DuckDB Exercises permanently show course navigation, Learn, and Practice together. DuckDB Learn and Practice use a remembered draggable divider. Each question has its own SQL answer, notes, results, and validation state while Save Submission composes the normal reviewable repository SQL file.
+
+### Applied Labs in the application
+
+Learning → Applied Labs uses a one-third navigation and two-thirds Learn layout. The task-status control appears reliably in the page header immediately before Bookmark, while submission, save, and completion controls appear in the footer beside Next Lab navigation. SQL labs load bundled datasets into an isolated DuckDB environment and apply execution plus lab-specific rubric checks before completion.
+
+### Direct SQL task routing
+
+Opening a recognized DuckDB roadmap task switches directly to SQL Companion → DuckDB Exercises and selects the matching exercise. Opening a recognized interview-problem task switches to Interview Problems and selects that problem. Other tasks continue to use their normal Task Workspace.
+
+### Concept-aware task matching
+
+Exercise recommendations use a live audit of every task's canonical concept tags rather than title keywords alone. Exact mappings cover Google Certificate progress, DataCamp, SQL Companion problems, DuckDB exercises, Applied Labs, and portfolio milestones.
+
+See `exercise_packs/AUTHORING_GUIDE.md`, `STYLE_GUIDE.md`, `FORMAT.md`, and `QUALITY_CHECKLIST.md` to create consistent ChatGPT-generated or community-authored packs.
+
 ## Repository Structure
 
 ```text

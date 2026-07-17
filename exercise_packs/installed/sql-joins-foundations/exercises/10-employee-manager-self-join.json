@@ -1,0 +1,67 @@
+{
+  "id": "employee-manager-self-join",
+  "title": "Match Employees to Their Managers",
+  "stage": "Stage 10 \u2022 One table, two roles",
+  "subtitle": "Use aliases to distinguish child and parent rows in a self join",
+  "difficulty": "Intermediate",
+  "estimated_minutes": 30,
+  "concepts": [
+    "self join",
+    "LEFT JOIN",
+    "hierarchy"
+  ],
+  "learning_objective": "Join employees to other rows in the same table while preserving leaders with no manager.",
+  "recommended_lesson": "Lesson 7: Self Joins and a Reliable Debugging Method",
+  "why": "Hierarchies such as employee-manager, category-parent, or account-referrer relationships are often stored in one table.",
+  "prompt": "Return `employee_id`, `employee_name`, and `manager_name` for every employee. Keep employees with no manager and order by `employee_id`.",
+  "expected_result": "7 rows. Mia and Ethan have `NULL` manager names.",
+  "build_steps": [
+    "Use `employees AS e` for the employee role.",
+    "Join `employees AS m` for the manager role.",
+    "Match `e.manager_id` to `m.employee_id`.",
+    "Use LEFT JOIN so top-level employees remain."
+  ],
+  "explanation": "Aliases make two logical roles from one physical table. The left join preserves employees whose parent key is null.",
+  "common_mistakes": [
+    "Joining `e.employee_id = m.manager_id`, which reverses the relationship.",
+    "Using the same alias for both roles.",
+    "Using INNER JOIN and losing company leaders."
+  ],
+  "hints": [
+    "The employee row stores the manager\u2019s ID in `manager_id`.",
+    "The matching manager row uses its primary key `employee_id`.",
+    "Select `m.employee_name AS manager_name`."
+  ],
+  "takeaways": [
+    "A self join requires role-based aliases.",
+    "Outer joins preserve root nodes in a hierarchy."
+  ],
+  "reflection_questions": [
+    "Which alias represents the reported employee?",
+    "Why are two manager names NULL?"
+  ],
+  "stretch_goal": "Also return each employee\u2019s department ID.",
+  "starter_sql": "SELECT\n    e.employee_id,\n    e.employee_name,\n    m.employee_name AS manager_name\nFROM employees AS e\nLEFT JOIN employees AS m\n    ON -- employee-to-manager relationship\nORDER BY e.employee_id;\n",
+  "datasets": [
+    {
+      "table": "employees",
+      "file": "datasets/employees.csv"
+    }
+  ],
+  "solution_file": "solutions/10-employee-manager-self-join.sql",
+  "solution_explanation": "The same table is assigned employee and manager roles; LEFT JOIN keeps rows whose manager ID is missing.",
+  "solution_walkthrough": [
+    "Alias `e` supplies the current employee row.",
+    "Alias `m` searches for the row whose primary key equals the manager ID.",
+    "The manager\u2019s name is selected from `m`.",
+    "NULL manager keys produce unmatched but preserved employee rows."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "left join"
+    ],
+    "min_select_count": 1
+  }
+}

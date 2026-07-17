@@ -1,0 +1,56 @@
+{
+  "id": "first-exercise",
+  "title": "First Exercise",
+  "stage": "Stage 1 \u2022 First principle",
+  "subtitle": "Practice one focused skill",
+  "difficulty": "Very Beginner",
+  "estimated_minutes": 10,
+  "concepts": [
+    "replace concept"
+  ],
+  "learning_objective": "State one measurable skill.",
+  "recommended_lesson": "Lesson 1: Concept Introduction",
+  "why": "Explain why an analyst uses this.",
+  "prompt": "Return `example_column` from the example table.",
+  "expected_result": "1 column and 1 row.",
+  "build_steps": [
+    "Start from the example table.",
+    "Select the requested column."
+  ],
+  "explanation": "Explain the mental model without giving away every detail.",
+  "common_mistakes": [
+    "Describe one likely error and why it fails."
+  ],
+  "hints": [
+    "Name the relevant clause.",
+    "Reveal the difficult fragment."
+  ],
+  "takeaways": [
+    "State one durable idea."
+  ],
+  "reflection_questions": [
+    "Ask the learner to explain why the query works."
+  ],
+  "stretch_goal": "Add an ORDER BY after the required answer works.",
+  "starter_sql": "SELECT\n    -- requested column\nFROM example;\n",
+  "datasets": [
+    {
+      "table": "example",
+      "file": "datasets/example.csv"
+    }
+  ],
+  "solution_file": "solutions/01-first-exercise.sql",
+  "solution_explanation": "Explain why the official query answers the prompt.",
+  "solution_walkthrough": [
+    "Start from the table.",
+    "Select the required field."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": false,
+    "required_keywords": [
+      "select"
+    ],
+    "min_select_count": 1
+  }
+}

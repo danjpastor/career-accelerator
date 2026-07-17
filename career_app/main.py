@@ -53,10 +53,14 @@ from career_app.services import (
     task_workspace,
     tracks,
 )
+from career_app.services import exercise_packs
 from career_app.services.backup import create_backup
 from career_app.services.migration import migrate
 from career_app.services.publisher import publish
 from career_app.theme import COLORS, stylesheet
+from career_app.ui.duckdb_exercises import DuckDBExercisesWidget
+from career_app.ui.applied_labs import AppliedLabsWidget
+from career_app.ui.exercise_packs import ExercisePacksWidget, ExerciseSuggestionPanel
 from career_app.ui.task_workspace import TaskWorkspaceDialog
 from career_app.ui.widgets import (
     AreaChart, BadgeCard, Card, CircularTimer, Divider, FocusRow,
@@ -603,6 +607,14 @@ class CareerAccelerator(QMainWindow):
 
         header.addLayout(left_header)
         header.addStretch()
+        # BEGIN EXERCISE PACKS
+        self.exercise_suggestion_panel = ExerciseSuggestionPanel(
+            self.open_exercise_pack, self
+        )
+        header.addWidget(
+            self.exercise_suggestion_panel, 0, Qt.AlignVCenter
+        )
+        # END EXERCISE PACKS
 
         right_header = QVBoxLayout()
         right_header.setSpacing(5)
@@ -1718,9 +1730,51 @@ class CareerAccelerator(QMainWindow):
         labs_layout.addWidget(detail, 1)
 
         self.learning_tabs.addTab(overview, "Learning Overview")
-        self.learning_tabs.addTab(labs, "Applied Labs")
+        # BEGIN EXERCISE PACKS
+        self._legacy_applied_labs_page = labs
+        self.applied_labs_widget = AppliedLabsWidget(
+            self.conn, ROOT, self
+        )
+        self.applied_labs_widget.changed.connect(
+            self._applied_labs_changed
+        )
+        self.learning_tabs.addTab(
+            self.applied_labs_widget, "Applied Labs"
+        )
+        # END EXERCISE PACKS
+        # BEGIN EXERCISE PACKS
+        self.exercise_packs_widget = ExercisePacksWidget(
+            self.conn, ROOT, self
+        )
+        self.exercise_packs_widget.packsChanged.connect(
+            self._exercise_packs_changed
+        )
+        self.learning_tabs.addTab(
+            self.exercise_packs_widget, "Exercises"
+        )
+        # END EXERCISE PACKS
         root.addWidget(self.learning_tabs, 1)
         return page
+    # BEGIN EXERCISE PACKS
+    def _applied_labs_changed(self):
+        self.state = state(self.conn)
+        tracks.sync_all(self.conn, self.state)
+        self.state = state(self.conn)
+        self.refresh_all(sync_tracks=False)
+    # END EXERCISE PACKS
+
+    # BEGIN EXERCISE PACKS
+    def _exercise_packs_changed(self):
+        if hasattr(self, "exercise_packs_widget"):
+            self.exercise_packs_widget.refresh()
+        self.refresh_dashboard(sync_tracks=False)
+
+    def open_exercise_pack(self, pack_id):
+        self.navigate(2)
+        self.learning_tabs.setCurrentWidget(self.exercise_packs_widget)
+        self.exercise_packs_widget.select_pack(pack_id)
+    # END EXERCISE PACKS
+
 
     def set_applied_workspace_enabled(self, enabled):
         for widget in (
@@ -2649,15 +2703,112 @@ class CareerAccelerator(QMainWindow):
             problem_tab,
             "Interview Problems",
         )
-        self.sql_tabs.addTab(
-            exercise_tab,
-            "DuckDB Exercises",
+        # BEGIN EXERCISE PACKS
+        self._legacy_duckdb_exercises_page = exercise_tab
+        self.duckdb_exercises_widget = DuckDBExercisesWidget(
+            self.conn, ROOT, self
         )
+        self.duckdb_exercises_widget.changed.connect(
+            self._duckdb_exercises_changed
+        )
+        self.sql_tabs.addTab(
+            self.duckdb_exercises_widget, "DuckDB Exercises"
+        )
+        # END EXERCISE PACKS
         root.addWidget(
             self.sql_tabs,
             1,
         )
         return page
+    # BEGIN EXERCISE PACKS
+    @staticmethod
+    def _normalized_learning_task_label(value):
+        return re.sub(r'[^a-z0-9]+', ' ', str(value or '').casefold()).strip()
+
+    def _route_sql_learning_task(self, task_id):
+        try:
+            task_row = task_workspace.task_record(self.conn, int(task_id))
+        except Exception:
+            return False
+        if task_row is None:
+            return False
+        try:
+            label = str(task_row['label'] or '')
+            track_key = str(task_row['track_key'] or '')
+            target_key = str(task_row['target_key'] or '')
+        except (KeyError, IndexError, TypeError):
+            label = str(getattr(task_row, 'label', '') or '')
+            track_key = str(getattr(task_row, 'track_key', '') or '')
+            target_key = str(getattr(task_row, 'target_key', '') or '')
+
+        duckdb_number = duckdb_exercise_number_for_label(label)
+        if duckdb_number is not None and hasattr(self, 'duckdb_exercises_widget'):
+            self.navigate(4)
+            self.sql_tabs.setCurrentWidget(self.duckdb_exercises_widget)
+            self.duckdb_exercises_widget.select_exercise(int(duckdb_number))
+            self.statusBar().showMessage(
+                f'Opened DuckDB Exercise {int(duckdb_number):02d}.', 3200
+            )
+            return True
+
+        normalized_label = self._normalized_learning_task_label(label)
+        problem_title = None
+        if track_key.casefold() == 'sql' and target_key.casefold().startswith('problem:'):
+            direct_title = target_key.split(':', 1)[1].strip()
+            problem_title = next(
+                (entry[0] for entry in SQL_COMPANION if entry[0] == direct_title),
+                None,
+            )
+        if problem_title is None:
+            problem_title = next(
+                (
+                    entry[0]
+                    for entry in SQL_COMPANION
+                    if self._normalized_learning_task_label(entry[0])
+                    in normalized_label
+                ),
+                None,
+            )
+        if not problem_title or not hasattr(self, 'sql_problem_list'):
+            return False
+        self.navigate(4)
+        self.sql_tabs.setCurrentIndex(0)
+        normalized_title = self._normalized_learning_task_label(problem_title)
+        target_row = None
+        for row_index in range(self.sql_problem_list.count()):
+            item = self.sql_problem_list.item(row_index)
+            item_title = item.data(Qt.ItemDataRole.UserRole) or item.text()
+            if self._normalized_learning_task_label(item_title) == normalized_title:
+                target_row = row_index
+                break
+        if target_row is None:
+            catalog = next(entry for entry in SQL_COMPANION if entry[0] == problem_title)
+            title, difficulty, topic, concepts, _week, estimate = catalog
+            self.sql_problem_list.addItem(
+                f'↪ {title} • {difficulty} • {topic} • {concepts} • {estimate} min'
+            )
+            target_row = self.sql_problem_list.count() - 1
+            item = self.sql_problem_list.item(target_row)
+            item.setData(Qt.ItemDataRole.UserRole, title)
+        item = self.sql_problem_list.item(target_row)
+        if self.sql_problem_list.currentRow() != target_row:
+            self.sql_problem_list.setCurrentRow(target_row)
+        else:
+            self.prefill_sql(item)
+        self.statusBar().showMessage(
+            f'Opened interview problem: {problem_title}.', 3200
+        )
+        return True
+    # END EXERCISE PACKS
+
+    # BEGIN EXERCISE PACKS
+    def _duckdb_exercises_changed(self):
+        self.state = state(self.conn)
+        tracks.sync_all(self.conn, self.state)
+        self.state = state(self.conn)
+        self.refresh_all(sync_tracks=False)
+    # END EXERCISE PACKS
+
 
     def set_duckdb_workspace_enabled(
         self,
@@ -4925,6 +5076,12 @@ class CareerAccelerator(QMainWindow):
             f"Project {self.state['current_project']}"
         )
         self.update_time_based_header()
+        # BEGIN EXERCISE PACKS
+        suggestion = exercise_packs.best_suggestion_for_database(
+            ROOT, self.conn, self.state
+        )
+        self.exercise_suggestion_panel.set_suggestion(suggestion)
+        # END EXERCISE PACKS
 
         readiness_data = analytics.readiness(
             self.conn,
@@ -6144,7 +6301,18 @@ class CareerAccelerator(QMainWindow):
         self.hours_input.setValue(
             int(self.state["weekly_target_hours"])
         )
-        self.refresh_applied_exercises()
+        # BEGIN EXERCISE PACKS
+        if hasattr(self, "applied_labs_widget"):
+            self.applied_labs_widget.refresh()
+        else:
+            self.refresh_applied_exercises()
+        # END EXERCISE PACKS
+        # BEGIN EXERCISE PACKS
+        if hasattr(self, "exercise_packs_widget"):
+            self.exercise_packs_widget.refresh()
+        # END EXERCISE PACKS
+
+
 
     def refresh_project(self):
         self.project_combo.blockSignals(True)
@@ -6303,7 +6471,10 @@ class CareerAccelerator(QMainWindow):
                     "DuckDB exercise, or concept-matched SQL problem."
                 )
             )
-        self.refresh_duckdb_exercises()
+        if hasattr(self, "duckdb_exercises_widget"):
+            self.duckdb_exercises_widget.refresh()
+        else:
+            self.refresh_duckdb_exercises()
 
 
     def refresh_session_task_choices(self):
@@ -7457,6 +7628,10 @@ class CareerAccelerator(QMainWindow):
             session_guard.restore(self, session_snapshot)
 
     def open_task_workspace(self, *, task_id=None, workspace_key=None):
+        # BEGIN SQL LEARNING TASK ROUTING
+        if task_id is not None and self._route_sql_learning_task(task_id):
+            return
+        # END SQL LEARNING TASK ROUTING
         if task_id is None and workspace_key is None:
             self.statusBar().showMessage("Select a task first.", 3200)
             return

@@ -1,0 +1,72 @@
+{
+  "id": "completed-orders-with-customers",
+  "title": "Completed Orders With Customer Names",
+  "stage": "Stage 2 \u2022 Match then filter",
+  "subtitle": "Keep matched orders and apply a separate business filter",
+  "difficulty": "Very Beginner",
+  "estimated_minutes": 20,
+  "concepts": [
+    "INNER JOIN",
+    "WHERE",
+    "table aliases"
+  ],
+  "learning_objective": "Separate the table relationship in `ON` from the completed-order filter in `WHERE`.",
+  "recommended_lesson": "Lesson 2: INNER JOIN: Keep the Matches",
+  "why": "Order tables often store customer IDs while reports need customer names and business-status filters.",
+  "prompt": "Return `order_id`, `customer_name`, and `total_amount` for completed orders with a known customer. Order by `order_id`.",
+  "expected_result": "4 rows for orders 1001, 1002, 1004, and 1006. The orphan order 1007 is excluded because no customer matches.",
+  "build_steps": [
+    "Start from `orders` as `o`.",
+    "INNER JOIN `customers` as `c` on `customer_id`.",
+    "Filter `o.status` to `Completed` in `WHERE`.",
+    "Order by `o.order_id`."
+  ],
+  "explanation": "The join decides which customer row belongs to each order; the WHERE clause decides which matched orders meet the business rule.",
+  "common_mistakes": [
+    "Putting `o.status = 'Completed'` in place of the key relationship.",
+    "Using `customer_name` as a join key.",
+    "Forgetting that an inner join drops the orphan order."
+  ],
+  "hints": [
+    "The `ON` clause is `o.customer_id = c.customer_id`.",
+    "The status filter belongs after the join.",
+    "Use the text value `'Completed'`."
+  ],
+  "takeaways": [
+    "Relationships belong in `ON`.",
+    "Row filters usually belong in `WHERE`."
+  ],
+  "reflection_questions": [
+    "Why does order 1007 disappear?",
+    "Would a LEFT JOIN from orders preserve it?"
+  ],
+  "stretch_goal": "Also return `order_date` and sort newest first.",
+  "starter_sql": "SELECT\n    o.order_id,\n    c.customer_name,\n    o.total_amount\nFROM orders AS o\nINNER JOIN customers AS c\n    ON -- customer relationship\nWHERE -- completed orders only\nORDER BY o.order_id;\n",
+  "datasets": [
+    {
+      "table": "orders",
+      "file": "datasets/orders.csv"
+    },
+    {
+      "table": "customers",
+      "file": "datasets/customers.csv"
+    }
+  ],
+  "solution_file": "solutions/02-completed-orders-with-customers.sql",
+  "solution_explanation": "Only matched customer-order pairs survive the inner join, then the WHERE clause keeps completed orders.",
+  "solution_walkthrough": [
+    "Orders are the starting grain: one row per order.",
+    "The customer key adds a name to known orders.",
+    "The status filter is applied after the relationship is formed.",
+    "The unknown customer on order 1007 has no matching pair."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "inner join",
+      "where"
+    ],
+    "min_select_count": 1
+  }
+}

@@ -1,5 +1,127 @@
 # Changelog
 
+## 9.6.3 - 2026-07-16
+
+- Fixed Exercise Pack navigation when Start Course, Continue, or direct selection targets an already-highlighted learning-path row.
+- Restored interactive Practice content after direct exercise navigation and added a runnable lesson SQL sandbox instead of leaving the Practice card disabled.
+- Added responsive course breakpoints that stack lesson columns and reduce spacing at narrow Learn-card widths.
+- Routed DuckDB roadmap tasks directly to their exact DuckDB exercise.
+- Routed SQL interview tasks directly to their exact Interview Problems selection.
+
+## 9.6.2 - 2026-07-16
+
+- Added a comprehensive Exercise Pack authoring guide covering pedagogy, layout, styling, validation, recommendations, versioning, and installation testing.
+- Added a dedicated visual style guide and pre-release quality checklist.
+- Added a copyable standard-pack template with a lesson, exercise, dataset, solution, and manifest.
+- Added the standalone SQL Joins: Match, Preserve, and Combine Rows pack for manual ZIP or folder installation testing.
+
+## 9.6.1 - 2026-07-16
+
+- Made the DuckDB Learn and Practice cards genuinely resizable with a visible, persistent splitter.
+- Removed horizontal clipping from native course titles, subtitles, code cards, tables, and wrapped lesson content.
+- Split DuckDB submissions into independently editable question answers while preserving the standard repository SQL submission file.
+- Added per-question SQL, notes, results, validation state, and remembered question selection.
+- Updated Run Question and Check Question to operate only on the selected question; Check Exercise and Submit Exercise still validate all answers.
+- Removed Question 1 text from the exercise-level subtitle and replaced it with question and dataset counts.
+- Fixed hidden-tab header controls so the Applied Labs status dropdown appears beside Bookmark instead of leaving an empty floating pill.
+
+## 9.6.0 - 2026-07-16
+
+- Reworked Exercises into a permanent three-column layout with course navigation, Learn, and Practice visible together.
+- Reworked Applied Labs into a single Learn workspace with status in the header and submission actions in the footer.
+- Set the default Applied Labs divider to one-third navigation and two-thirds Learn.
+- Added a native three-column DuckDB Exercises workspace to SQL Companion using the same course styling as Exercise Packs.
+- Added read-only in-app DuckDB execution for the selected exercise question.
+- Added validation-file result checking for individual questions and complete exercises.
+- Added standard submission saving and gated Submit Exercise completion tracking.
+- Preserved the existing DuckDB exercise folders, starter files, datasets, validation checkpoints, notes, evidence, and roadmap synchronization.
+
+## 9.5.0 - 2026-07-16
+
+- Rebuilt Exercise Pack and Applied Lab learning pages with shared native Qt course components to closely match the approved learning-site reference.
+- Added breadcrumb navigation, installed-pack selector, course overview, pack progress, lesson navigation, bookmarks, page menus, code Copy controls, polished tables, and reference-style lesson footers.
+- Replaced the monolithic ExerciseLearnView QTextEdit renderer, eliminating its repeated Qt stylesheet parse warnings.
+- Added matching collapsible library behavior to Applied Labs, including the vertical rail, side-by-side Learn and Practice cards, centered divider, remembered state, and preserved selections.
+- Kept existing SQL execution, checking, hints, notes, progress, pack installation, and adaptive roadmap behavior intact.
+
+## 9.4.9 - 2026-07-16
+
+- Fixed the startup crash caused by refreshing deleted legacy Applied Labs filter widgets after the new course-style Applied Labs tab replaced the old page.
+- Added a guarded refresh path that uses the new AppliedLabsWidget and calls the legacy refresh only as a compatibility fallback.
+- Retained the legacy page wrapper during the transition so any remaining compatibility methods cannot reference deleted Qt controls.
+- Added upgrade and idempotence regression tests for repositories already patched with v9.4.8.
+
+## 9.4.8 - 2026-07-16
+
+- Matched Exercise Pack lesson headers to the approved learning-site reference with compact type pills, large titles, subtle subtitle labels, calmer section headings, and quiet divider lines.
+- Added lesson and exercise subtitle metadata to the bundled SQL Subqueries pack v1.1.2.
+- Replaced the legacy Applied Labs form tab with a polished Learn/Practice workspace using the same course renderer as Exercise Packs.
+- Added an isolated in-memory DuckDB SQL workspace for SQL Applied Labs, including automatic dataset views, multi-statement execution, result tables, saved submissions, and lab-specific automated rubric checks.
+- Added sandbox protections that block external database, file-export, extension-loading, and arbitrary file-reader commands.
+- Added DuckDB to the application requirements while preserving existing progress and submissions.
+
+## 9.4.7 - 2026-07-16
+
+- Replaced platform-default Markdown rendering with a dependency-free course-material renderer for Exercise Pack lessons, guided exercises, and solution walkthroughs.
+- Added boxed SQL/code examples with labeled headers, inline code chips, and lightweight SQL syntax highlighting.
+- Restyled learning tables with strong header bands, alternating rows, cleaner spacing, numeric alignment, and subtle row dividers instead of plain full-cell borders.
+- Added course-style title cards, section headers, accent bars, divider lines, callout cards, and more consistent reading spacing.
+- Upgraded the bundled SQL Subqueries pack to v1.1.1 and converted sample outputs into polished data tables.
+
+## 9.4.6 - 2026-07-16
+
+- Upgraded the bundled SQL Subqueries pack to v1.1.0 with seven consistently structured lessons, twelve enriched exercises, progressive build steps, expected output shapes, common mistakes, reflection prompts, stretch goals, and stage-by-stage solution walkthroughs.
+- Added result-shape teaching throughout the pack and a clearer transition between subqueries, joins, and CTEs.
+- Polished the Exercise workspace with themed learning typography, styled SQL and notes editors, state-aware feedback banners, clearer result tables, richer learning-path rows, and a dedicated solution walkthrough dialog.
+- Added concept-pattern validation for required SQL phrases and minimum nested SELECT counts while preserving result-based answer checking.
+- Updated untouched packs to open at Lesson 1 while retaining resume behavior for in-progress learners.
+
+## 9.4.5 - 2026-07-16
+
+- Centered the collapsed Learn/Practice splitter on the top-level application window rather than merely dividing the remaining workspace equally.
+- Grouped the existing expand arrow directly after the rotated Installed Packs label instead of placing it at the bottom of the collapsed rail.
+- Increased and stabilized the Dashboard exercise suggestion card height so its border, text, and Practice button are no longer vertically clipped.
+- Added regression coverage for app-window centering, collapsed rail control order, and suggestion-card geometry.
+
+## 9.4.4 - 2026-07-16
+
+- Fixed blank Learn and Practice cards by explicitly revealing the real workspace pages after they are removed from the tab widget and reparented.
+- Added a counterclockwise vertical **Installed Packs** label to the collapsed rail.
+- Reused the existing arrow button by moving the same control between the expanded header and collapsed rail.
+- Kept the rail at 42 pixels while preserving the original expanded layout and all active exercise state.
+- Expanded regression coverage for visible reparented content and reuse of the existing arrow control.
+
+## 9.4.3 - 2026-07-16
+
+- Reduced the collapsed Installed Packs card to an arrow-only rail for maximum workspace width.
+- Added a side-by-side collapsed workspace with Learn in a left card and Practice in a right card.
+- Restored the original single Exercise Workspace with Learn and Practice tabs whenever Installed Packs is expanded.
+- Preserved the active lesson or exercise and the preferred tab while switching layouts.
+- Expanded regression coverage for workspace reparenting, arrow-only collapse, and expanded-layout restoration.
+
+## 9.4.2 - 2026-07-16
+
+- Made the Installed Packs card in Learning → Exercises collapsible.
+- Added a compact collapsed header that keeps the active pack and exercise selected while giving the Learn and Practice workspace more width.
+- Remembered the collapsed state and the user's preferred expanded width between app launches.
+- Added regression coverage for the collapsible layout and persisted settings keys.
+
+## 9.4.1 - 2026-07-16
+
+- Fixed the SQL Subqueries pack recommendation for Google Course 5, Module 3; the original rule incorrectly targeted Module 1.
+- Added a persistent canonical concept-tag audit for every stored task, independent of the frozen daily task snapshot.
+- Added exact task mappings for Google courses/modules, all verified DataCamp chapters, SQL Companion problems, DuckDB exercises, applied labs, and portfolio milestones.
+- Added concept-based Exercise Pack triggers and automatic removal of stale tags when a task changes.
+- Added task-tag audit documentation and regression tests for Module 3, DataCamp subqueries, exact SQL mappings, full-catalog coverage, and snapshot independence.
+
+## 9.4.0 - 2026-07-16
+
+- Added a Learning → Exercises tab for portable, manually installable exercise packs.
+- Added schema validation, safe zip extraction, versioned updates, independent progress persistence, hints, solutions, and result-based SQL checking.
+- Added live Dashboard exercise recommendations that are recalculated outside the frozen daily task snapshot.
+- Bundled SQL Subqueries: Foundations to Advanced with 5 lessons, 12 ramped exercises, 4 small datasets, and validated solutions.
+- Documented the public Exercise Pack Format v1 for future ChatGPT-generated packs.
+
 This file is the single maintained changelog for the project.
 
 

@@ -1,0 +1,8 @@
+order_id,customer_id,order_date,status,total_amount
+1001,1,2026-01-10,Completed,1200
+1002,1,2026-02-15,Completed,800
+1003,2,2026-02-20,Pending,450
+1004,3,2026-03-01,Completed,1500
+1005,3,2026-03-12,Cancelled,300
+1006,4,2026-03-18,Completed,700
+1007,99,2026-03-25,Completed,999

@@ -1,0 +1,130 @@
+﻿Task family,Task or catalog item,Canonical concepts,Matching basis
+Google Certificate,Course 1,analytics_foundations,Course-level default
+Google Certificate,Course 2,business_framing,Course-level default
+Google Certificate,Course 3,data_preparation,Course-level default
+Google Certificate,Course 4,data_cleaning,Course-level default
+Google Certificate,Course 5,"analysis_foundations, spreadsheet_analysis, sql_fundamentals",Module 3 override adds sql_joins and sql_subqueries
+Google Certificate,Course 6,"data_storytelling, visualization_foundations",Course-level default
+Google Certificate,Course 7,analysis_foundations,Course-level default
+Google Certificate,Course 8,portfolio_delivery,Course-level default
+Google Certificate,Course 9,career_readiness,Course-level default
+DataCamp,01: Introduction to SQL — Chapter 1: Relational Databases,sql_fundamentals,Exact verified chapter
+DataCamp,02: Introduction to SQL — Chapter 2: Querying,"sql_fundamentals, sql_querying",Exact verified chapter
+DataCamp,03: Intermediate SQL — Chapter 1: Data Aggregation,sql_aggregation,Exact verified chapter
+DataCamp,04: Intermediate SQL — Chapter 2: Data Transformation,sql_querying,Exact verified chapter
+DataCamp,05: Intermediate SQL — Chapter 3: Data Filtering,"sql_date_logic, sql_querying",Exact verified chapter
+DataCamp,06: Intermediate SQL — Chapter 4: Conditional Operations,sql_case,Exact verified chapter
+DataCamp,07: Joining Data in SQL — Chapter 1: Combining Data Vertically,sql_joins,Exact verified chapter
+DataCamp,08: Joining Data in SQL — Chapter 2: Combining Data Horizontally,sql_joins,Exact verified chapter
+DataCamp,09: Data Manipulation in SQL — Chapter 1: We'll take the CASE,sql_case,Exact verified chapter
+DataCamp,10: Data Manipulation in SQL — Chapter 2: Short and Simple Subqueries,"sql_intermediate, sql_subqueries",Exact verified chapter
+DataCamp,"11: Data Manipulation in SQL — Chapter 3: Correlated Queries, Nested Queries, and Common Table Expressions","sql_ctes, sql_intermediate, sql_subqueries",Exact verified chapter
+DataCamp,12: Data Manipulation in SQL — Chapter 4: Window Functions,"sql_intermediate, sql_window_functions",Exact verified chapter
+DataCamp,13: Introduction to Power BI — Chapter 1: Getting Started with Power BI,power_bi_foundations,Exact verified chapter
+DataCamp,14: Introduction to Power BI — Chapter 2: Transforming Data,"power_bi_foundations, power_query",Exact verified chapter
+DataCamp,15: Introduction to Power BI — Chapter 3: Visualizing Data,"power_bi_foundations, report_design",Exact verified chapter
+DataCamp,16: Introduction to Power BI — Chapter 4: Filtering,"power_bi_foundations, report_design",Exact verified chapter
+DataCamp,17: Data Modeling in Power BI — Chapter 1: Defining Tables,"dimensional_modeling, power_bi",Exact verified chapter
+DataCamp,18: Data Modeling in Power BI — Chapter 2: Shaping Tables,"power_bi, power_query",Exact verified chapter
+DataCamp,19: Data Modeling in Power BI — Chapter 3: Dimensional Modeling,"dimensional_modeling, power_bi",Exact verified chapter
+DataCamp,20: Data Modeling in Power BI — Chapter 4: Star and Snowflake schemas,"dimensional_modeling, power_bi",Exact verified chapter
+DataCamp,21: Introduction to Python — Chapter 1: Python Basics,python_fundamentals,Exact verified chapter
+DataCamp,22: Introduction to Python — Chapter 2: Python Lists,python_fundamentals,Exact verified chapter
+DataCamp,23: Introduction to Python — Chapter 3: Functions and Packages,python_fundamentals,Exact verified chapter
+DataCamp,24: Introduction to Python — Chapter 4: NumPy,python_fundamentals,Exact verified chapter
+DataCamp,25: Data Manipulation with pandas — Chapter 1: Transforming DataFrames,python_pandas,Exact verified chapter
+DataCamp,26: Data Manipulation with pandas — Chapter 2: Aggregating DataFrames,python_pandas,Exact verified chapter
+DataCamp,27: Data Manipulation with pandas — Chapter 3: Slicing and Indexing DataFrames,python_pandas,Exact verified chapter
+DataCamp,28: Data Manipulation with pandas — Chapter 4: Creating and Visualizing DataFrames,"python_pandas, visualization_foundations",Exact verified chapter
+SQL Companion,Histogram of Tweets,"sql_aggregation, sql_ctes",Exact problem title
+SQL Companion,Data Science Skills,sql_aggregation,Exact problem title
+SQL Companion,Page With No Likes,sql_joins,Exact problem title
+SQL Companion,Laptop vs. Mobile Viewership,"sql_aggregation, sql_case",Exact problem title
+SQL Companion,Duplicate Job Listings,sql_aggregation,Exact problem title
+SQL Companion,Teams Power Users,sql_aggregation,Exact problem title
+SQL Companion,Pharmacy Analytics Part 1,"analysis_foundations, sql_aggregation",Exact problem title
+SQL Companion,Signup Activation Rate,"sql_aggregation, sql_joins",Exact problem title
+SQL Companion,User's Third Transaction,sql_window_functions,Exact problem title
+SQL Companion,Second Highest Salary,sql_window_functions,Exact problem title
+SQL Companion,Top Three Salaries,"sql_joins, sql_window_functions",Exact problem title
+SQL Companion,Tweets' Rolling Averages,sql_window_functions,Exact problem title
+SQL Companion,Odd and Even Measurements,"sql_ctes, sql_window_functions",Exact problem title
+SQL Companion,User Shopping Sprees,"sql_aggregation, sql_date_logic",Exact problem title
+SQL Companion,Supercloud Customer,"sql_aggregation, sql_joins",Exact problem title
+SQL Companion,Second Day Confirmation,"sql_date_logic, sql_joins",Exact problem title
+SQL Companion,Timed SQL review,sql_intermediate,Exact problem title
+DuckDB,Exercise 01,"sql_fundamentals, sql_querying",Exact exercise number
+DuckDB,Exercise 02,sql_aggregation,Exact exercise number
+DuckDB,Exercise 03,sql_case,Exact exercise number
+DuckDB,Exercise 04,"sql_aggregation, sql_case, sql_date_logic",Exact exercise number
+DuckDB,Exercise 05,"sql_aggregation, sql_case",Exact exercise number
+DuckDB,Exercise 06,sql_joins,Exact exercise number
+DuckDB,Exercise 07,"sql_ctes, sql_intermediate, sql_subqueries",Exact exercise number
+DuckDB,Exercise 08,"sql_aggregation, sql_case, sql_ctes, sql_intermediate, sql_joins, sql_window_functions",Exact exercise number
+DuckDB,Exercise 09,"sql_aggregation, sql_case, sql_ctes, sql_intermediate, sql_joins",Exact exercise number
+DuckDB,Exercise 10,"sql_aggregation, sql_ctes, sql_intermediate, sql_joins, sql_window_functions",Exact exercise number
+DuckDB,Exercise 11,"sql_intermediate, sql_joins, sql_window_functions",Exact exercise number
+DuckDB,Exercise 12,"sql_ctes, sql_intermediate",Exact exercise number
+Applied Labs,Applied Lab 01,power_bi_foundations,Exact lab number
+Applied Labs,Applied Lab 02,power_query,Exact lab number
+Applied Labs,Applied Lab 03,power_query,Exact lab number
+Applied Labs,Applied Lab 04,dimensional_modeling,Exact lab number
+Applied Labs,Applied Lab 05,dax_measures,Exact lab number
+Applied Labs,Applied Lab 06,report_design,Exact lab number
+Applied Labs,Applied Lab 07,data_preparation,Exact lab number
+Applied Labs,Applied Lab 08,python_pandas,Exact lab number
+Applied Labs,Applied Lab 09,python_pandas,Exact lab number
+Applied Labs,Applied Lab 10,python_pandas,Exact lab number
+Applied Labs,Applied Lab 11,sql_aggregation,Exact lab number
+Applied Labs,Applied Lab 12,"analysis_foundations, analyst_communication",Exact lab number
+Applied Labs,Applied Lab 13,analyst_communication,Exact lab number
+Applied Labs,Applied Lab 14,analyst_communication,Exact lab number
+Applied Labs,Applied Lab 15,"sql_querying, sql_validation",Exact lab number
+Applied Labs,Applied Lab 16,"sql_joins, sql_validation",Exact lab number
+Applied Labs,Applied Lab 17,"sql_aggregation, sql_date_logic, sql_validation",Exact lab number
+Applied Labs,Applied Lab 18,data_storytelling,Exact lab number
+Applied Labs,Applied Lab 19,"analyst_communication, sql_validation",Exact lab number
+Applied Labs,Applied Lab 20,analysis_foundations,Exact lab number
+Applied Labs,Applied Lab 21,analyst_communication,Exact lab number
+Applied Labs,Applied Lab 22,descriptive_statistics,Exact lab number
+Applied Labs,Applied Lab 23,"data_preparation, descriptive_statistics",Exact lab number
+Applied Labs,Applied Lab 24,"descriptive_statistics, sampling_bias",Exact lab number
+Applied Labs,Applied Lab 25,confidence_intervals,Exact lab number
+Applied Labs,Applied Lab 26,"analyst_communication, hypothesis_testing",Exact lab number
+Applied Labs,Applied Lab 27,experiment_analysis,Exact lab number
+Applied Labs,Applied Lab 28,"causal_reasoning, python_pandas",Exact lab number
+Applied Labs,Applied Lab 29,"business_framing, funnel_analysis, sql_aggregation",Exact lab number
+Applied Labs,Applied Lab 30,"funnel_analysis, sql_ctes, sql_date_logic",Exact lab number
+Applied Labs,Applied Lab 31,"cohort_analysis, sql_date_logic, sql_joins",Exact lab number
+Applied Labs,Applied Lab 32,"analysis_foundations, churn_analysis, sql_aggregation, variance_analysis",Exact lab number
+Applied Labs,Applied Lab 33,"api_ingestion, data_preparation, python_pandas",Exact lab number
+Applied Labs,Applied Lab 34,"api_ingestion, data_cleaning, data_pipeline, sql_ctes",Exact lab number
+Applied Labs,Applied Lab 35,"ai_validation, analyst_communication, sql_validation",Exact lab number
+Applied Labs,Applied Lab 36,"power_bi, report_design",Exact lab number
+Portfolio,Finalize business problem,business_framing,Exact milestone title
+Portfolio,Finalize stakeholders,business_framing,Exact milestone title
+Portfolio,Finalize KPIs,business_framing,Exact milestone title
+Portfolio,Finalize business questions,business_framing,Exact milestone title
+Portfolio,Create synthetic data specification,data_preparation,Exact milestone title
+Portfolio,Generate dataset,data_preparation,Exact milestone title
+Portfolio,Validate relationships,sql_fundamentals,Exact milestone title
+Portfolio,Complete data dictionary,data_preparation,Exact milestone title
+Portfolio,Create schema,sql_fundamentals,Exact milestone title
+Portfolio,Load data,sql_fundamentals,Exact milestone title
+Portfolio,Run quality checks,"data_cleaning, sql_validation",Exact milestone title
+Portfolio,Answer business questions,"analysis_foundations, sql_fundamentals",Exact milestone title
+Portfolio,Save documented queries,"analyst_communication, sql_fundamentals",Exact milestone title
+Portfolio,Clean data,data_cleaning,Exact milestone title
+Portfolio,Explore distributions,"analysis_foundations, descriptive_statistics",Exact milestone title
+Portfolio,Detect anomalies,analysis_foundations,Exact milestone title
+Portfolio,Validate SQL findings,"sql_fundamentals, sql_joins, sql_validation",Exact milestone title
+Portfolio,Build data model,"dimensional_modeling, power_bi_foundations, visualization_foundations",Exact milestone title
+Portfolio,Create DAX measures,"dax_measures, power_bi",Exact milestone title
+Portfolio,Build executive dashboard,"data_storytelling, power_bi, report_design",Exact milestone title
+Portfolio,Build workload dashboard,"data_storytelling, power_bi, report_design",Exact milestone title
+Portfolio,Add filters and drill-through,"power_bi, report_design",Exact milestone title
+Portfolio,Write executive summary,"analyst_communication, data_storytelling",Exact milestone title
+Portfolio,Add screenshots,"portfolio_delivery, visualization_foundations",Exact milestone title
+Portfolio,Document assumptions and limitations,"analysis_foundations, analyst_communication",Exact milestone title
+Portfolio,Finalize README,"analyst_communication, portfolio_delivery",Exact milestone title
+Portfolio,Publish release,portfolio_delivery,Exact milestone title

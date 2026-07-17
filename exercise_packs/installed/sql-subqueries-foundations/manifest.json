@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "pack_id": "sql-subqueries-foundations",
+  "title": "SQL Subqueries: Foundations to Advanced",
+  "version": "1.1.3",
+  "author": "Career Accelerator / ChatGPT",
+  "description": "A carefully paced, polished SQL subquery course with calm course-site styling, result-shape thinking, boxed code, refined tables, progressive hints, small datasets, and twelve exercises from first principles through correlated and nested analysis.",
+  "difficulty": "Very Beginner \u2192 Advanced Foundation",
+  "estimated_minutes": 390,
+  "concepts": [
+    "SQL subqueries",
+    "result shapes",
+    "scalar subqueries",
+    "IN",
+    "EXISTS",
+    "NOT EXISTS",
+    "derived tables",
+    "correlated subqueries",
+    "nested analysis",
+    "subquery vs join vs CTE",
+    "inside-out debugging"
+  ],
+  "prerequisites": [
+    "SELECT and FROM",
+    "WHERE filters",
+    "ORDER BY",
+    "table aliases",
+    "COUNT, SUM, and AVG",
+    "GROUP BY basics"
+  ],
+  "trigger_concepts": [
+    "sql_subqueries"
+  ],
+  "trigger_keywords": [
+    "subquery",
+    "subqueries",
+    "nested query",
+    "correlated subquery",
+    "exists",
+    "derived table"
+  ],
+  "suggestion_rules": [
+    {
+      "google_course_any": [
+        5
+      ],
+      "google_module_any": [
+        3
+      ],
+      "concept_any": [
+        "sql_subqueries"
+      ],
+      "category_any": [
+        "Learning"
+      ],
+      "score": 180,
+      "reason": "Google Course 5, Module 3 covers SQL joins and subqueries; this optional pack slows subqueries down into much smaller steps."
+    },
+    {
+      "concept_any": [
+        "sql_subqueries"
+      ],
+      "category_any": [
+        "SQL",
+        "Learning"
+      ],
+      "score": 140,
+      "reason": "A current learning or SQL task is tagged with the SQL subqueries concept covered by this pack."
+    },
+    {
+      "task_keyword_any": [
+        "subquery",
+        "subqueries",
+        "nested query",
+        "correlated",
+        "exists",
+        "derived table"
+      ],
+      "category_any": [
+        "SQL",
+        "Learning"
+      ],
+      "score": 100,
+      "reason": "A current learning or SQL task directly references subquery concepts covered by this pack."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "what-is-a-subquery",
+      "title": "What Is a Subquery?",
+      "file": "lessons/01-what-is-a-subquery.md",
+      "subtitle": "Start with one question inside another"
+    },
+    {
+      "id": "one-value-subqueries",
+      "title": "One-Value Subqueries",
+      "file": "lessons/02-one-value-subqueries.md",
+      "subtitle": "Use one calculated value inside a larger filter"
+    },
+    {
+      "id": "in-and-exists",
+      "title": "IN, EXISTS, and NOT EXISTS",
+      "file": "lessons/03-multiple-values-in-and-exists.md",
+      "subtitle": "Work with lists and existence checks"
+    },
+    {
+      "id": "subqueries-in-from",
+      "title": "Subqueries in FROM",
+      "file": "lessons/04-subqueries-in-from.md",
+      "subtitle": "Turn a query result into a temporary table"
+    },
+    {
+      "id": "correlated-subqueries",
+      "title": "Correlated Subqueries",
+      "file": "lessons/05-correlated-subqueries.md",
+      "subtitle": "Let the inner query respond to each outer row"
+    },
+    {
+      "id": "subquery-vs-join-vs-cte",
+      "title": "Subquery vs. Join vs. CTE",
+      "file": "lessons/06-subquery-vs-join-vs-cte.md",
+      "subtitle": "Choose the clearest tool for the analytical job"
+    },
+    {
+      "id": "debugging-subqueries",
+      "title": "Build and Debug from the Inside Out",
+      "file": "lessons/07-debugging-and-building-subqueries.md",
+      "subtitle": "Build complex SQL one verified layer at a time"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "inspect-the-inner-query",
+      "title": "Inspect the Inner Query First",
+      "file": "exercises/01-inspect-the-inner-query.json"
+    },
+    {
+      "id": "salary-above-company-average",
+      "title": "Employees Above the Company Average",
+      "file": "exercises/02-salary-above-company-average.json"
+    },
+    {
+      "id": "budget-above-average",
+      "title": "Departments Above the Average Budget",
+      "file": "exercises/03-budget-above-average.json"
+    },
+    {
+      "id": "customers-with-completed-orders",
+      "title": "Customers With Completed Orders",
+      "file": "exercises/04-customers-with-completed-orders.json"
+    },
+    {
+      "id": "customers-without-completed-orders",
+      "title": "Customers Without Completed Orders",
+      "file": "exercises/05-customers-without-completed-orders.json"
+    },
+    {
+      "id": "derived-department-averages",
+      "title": "Filter a Derived Summary Table",
+      "file": "exercises/06-derived-department-averages.json"
+    },
+    {
+      "id": "above-department-average",
+      "title": "Employees Above Their Department Average",
+      "file": "exercises/07-above-department-average.json"
+    },
+    {
+      "id": "departments-with-high-earners",
+      "title": "Departments With a High Earner",
+      "file": "exercises/08-departments-with-high-earners.json"
+    },
+    {
+      "id": "spend-above-customer-average",
+      "title": "Customer Spend Above the Customer Average",
+      "file": "exercises/09-spend-above-customer-average.json"
+    },
+    {
+      "id": "completed-order-count-per-customer",
+      "title": "Count Related Rows With a Subquery",
+      "file": "exercises/10-completed-order-count-per-customer.json"
+    },
+    {
+      "id": "employees-in-above-average-budget-departments",
+      "title": "A Nested Two-Step Filter",
+      "file": "exercises/11-employees-in-above-average-budget-departments.json"
+    },
+    {
+      "id": "subquery-capstone-customer-value",
+      "title": "Capstone: High-Value Repeat Customers",
+      "file": "exercises/12-subquery-capstone-customer-value.json"
+    }
+  ]
+}

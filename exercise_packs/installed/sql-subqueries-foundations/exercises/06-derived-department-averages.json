@@ -1,0 +1,68 @@
+{
+  "id": "derived-department-averages",
+  "title": "Filter a Derived Summary Table",
+  "stage": "Stage 4 \u2022 Query a temporary table",
+  "difficulty": "Beginner+",
+  "estimated_minutes": 25,
+  "concepts": [
+    "subquery in FROM",
+    "derived table",
+    "GROUP BY"
+  ],
+  "learning_objective": "Build a grouped summary inside FROM and treat its columns and rows as a temporary table for the outer query.",
+  "recommended_lesson": "Lesson 4: Subqueries in FROM",
+  "why": "Analysts often need to aggregate first and then filter the aggregate result. A subquery in FROM makes the first-stage summary act like a table.",
+  "prompt": "Create a department salary summary, then return department_id and avg_salary only for departments with an average salary above 80000. Round avg_salary to two decimals and sort highest first.",
+  "expected_result": "1 row with columns `department_id` and `avg_salary`. The qualifying department average is above 80,000.",
+  "build_steps": [
+    "Write the grouped department-average query and run it alone.",
+    "Confirm it returns one row per department with an `avg_salary` alias.",
+    "Place that query inside the outer FROM clause.",
+    "Give the temporary table an alias such as `department_summary`.",
+    "Filter the summary rows in the outer WHERE clause."
+  ],
+  "explanation": "The inner query groups employees by department. The outer query filters the calculated avg_salary column.",
+  "common_mistakes": [
+    "Forgetting the alias after the closing parenthesis.",
+    "Filtering individual salaries before calculating department averages.",
+    "Trying to select a column in the outer query that the inner summary did not return."
+  ],
+  "hints": [
+    "The inner query needs GROUP BY department_id.",
+    "Calculate ROUND(AVG(salary), 2) AS avg_salary.",
+    "A subquery in FROM needs an alias after the closing parenthesis."
+  ],
+  "takeaways": [
+    "A FROM subquery returns a temporary table.",
+    "The outer query can filter aliases created by the inner query."
+  ],
+  "reflection_questions": [
+    "How many rows does the inner summary return, and what does each row represent?",
+    "Why can the outer query refer to `avg_salary` by its alias?"
+  ],
+  "stretch_goal": "Add `employee_count` to the inner summary and return it from the outer query.",
+  "starter_sql": "SELECT department_id, avg_salary\nFROM (\n    -- create one row per department with avg_salary\n) AS department_summary\nWHERE avg_salary > 80000\nORDER BY avg_salary DESC;",
+  "datasets": [
+    {
+      "table": "employees",
+      "file": "datasets/employees.csv"
+    }
+  ],
+  "solution_file": "solutions/06-derived-department-averages.sql",
+  "solution_explanation": "The grouped inner query creates a table-shaped result with one row per department. The outer query reads that temporary table, filters its calculated average column, and sorts the remaining summary rows.",
+  "solution_walkthrough": [
+    "`GROUP BY department_id` defines one summary row per department.",
+    "`AVG(salary) AS avg_salary` creates the metric the outer query needs.",
+    "The derived-table alias names the temporary result for the outer SELECT."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "avg",
+      "group by"
+    ],
+    "min_select_count": 2
+  },
+  "subtitle": "Stage 4 \u2022 Query a temporary table"
+}

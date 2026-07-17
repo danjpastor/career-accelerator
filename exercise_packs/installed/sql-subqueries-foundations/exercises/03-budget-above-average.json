@@ -1,0 +1,65 @@
+{
+  "id": "budget-above-average",
+  "title": "Departments Above the Average Budget",
+  "stage": "Stage 2 \u2022 Repeat the scalar pattern",
+  "difficulty": "Beginner",
+  "estimated_minutes": 15,
+  "concepts": [
+    "scalar subquery",
+    "AVG",
+    "comparison"
+  ],
+  "learning_objective": "Transfer the scalar-subquery pattern to a new table without relying on memorized column names.",
+  "recommended_lesson": "Lesson 2: One-Value Subqueries",
+  "why": "Repeating the same pattern with a different table helps separate the subquery structure from the specific business topic.",
+  "prompt": "Return department_name and budget for departments whose budget is above the average department budget. Sort budget from highest to lowest.",
+  "expected_result": "2 rows with `department_name` and `budget`, ordered by budget descending.",
+  "build_steps": [
+    "Write the one-value average-budget query first.",
+    "Confirm the inner query reads from `departments`.",
+    "Nest it after `budget >` in the outer query.",
+    "Sort the returned departments from highest budget to lowest."
+  ],
+  "explanation": "The inner query calculates the average budget. The outer query filters departments using that single value.",
+  "common_mistakes": [
+    "Accidentally using the `employees` table from the previous exercise.",
+    "Selecting `department_name` inside the scalar subquery, which changes its shape.",
+    "Using `>=` when the task asks for strictly above average."
+  ],
+  "hints": [
+    "The inner query reads from `departments`.",
+    "Use `SELECT AVG(budget)`.",
+    "The inner query does not need an alias because the outer query only uses its value."
+  ],
+  "takeaways": [
+    "A one-value subquery can appear anywhere a single value is allowed."
+  ],
+  "reflection_questions": [
+    "Which parts of this query are identical in structure to Exercise 2?",
+    "Which names changed because the business question changed?"
+  ],
+  "stretch_goal": "Add a calculated column showing `budget - average_budget`. This may require repeating the scalar subquery in SELECT.",
+  "starter_sql": "SELECT department_name, budget\nFROM departments\nWHERE budget > (\n    -- average department budget\n)\nORDER BY budget DESC;",
+  "datasets": [
+    {
+      "table": "departments",
+      "file": "datasets/departments.csv"
+    }
+  ],
+  "solution_file": "solutions/03-budget-above-average.sql",
+  "solution_explanation": "This is the same benchmark-and-compare structure as the salary exercise. The repeated pattern is more important than the specific table: one inner average, then an outer row filter.",
+  "solution_walkthrough": [
+    "The inner query calculates one average across all department budgets.",
+    "The outer query keeps departments whose budget is greater than that value.",
+    "The final sort makes the result easier to interpret."
+  ],
+  "validation": {
+    "mode": "result",
+    "ordered": true,
+    "required_keywords": [
+      "avg"
+    ],
+    "min_select_count": 2
+  },
+  "subtitle": "Stage 2 \u2022 Repeat the scalar pattern"
+}

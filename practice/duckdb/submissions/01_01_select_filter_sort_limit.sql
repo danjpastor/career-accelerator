@@ -3,51 +3,52 @@
 -- Save your completed copy under practice/duckdb/submissions/
 
 -- Confirm the relevant tables exist.
+DESCRIBE ex01_support_tickets;
 
 
 -- -----------------------------------------------------------------
+
 -- Q1. Return `ticket_id`, `customer_name`, and `status` for every ticket.
--- Write and run your query below this comment.
--- -----------------------------------------------------------------
+
 -- SELECT ticket_id, customer_name, status
--- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv' 
+-- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv'
 
 -- -----------------------------------------------------------------
+
 -- Q2. Return all tickets whose status is `Open`.
--- Write and run your query below this comment.
--- -----------------------------------------------------------------
+
 -- SELECT *
 -- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv'
 -- WHERE status = 'Open'
 
 -- -----------------------------------------------------------------
+
 -- Q3. Return open or pending tickets with `High` or `Urgent` priority.
--- Write and run your query below this comment.
--- -----------------------------------------------------------------
+
 -- SELECT *
 -- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv'
 -- WHERE status IN ('Open','Pending') AND priority IN ('Urgent', 'High')
 
 -- -----------------------------------------------------------------
+
 -- Q4. Return tickets created after June 15, 2026.
--- Write and run your query below this comment.
--- -----------------------------------------------------------------
+
 -- SELECT *
 -- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv'
 -- WHERE created_at >= '2026-06-16';
 
 -- -----------------------------------------------------------------
+
 -- Q5. Return closed tickets ordered from longest to shortest `resolution_hours`.
--- Write and run your query below this comment.
--- -----------------------------------------------------------------
+
 -- SELECT *
 -- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv'
 -- ORDER BY resolution_hours DESC
 
 -- -----------------------------------------------------------------
+
 -- Q6. Return the five highest satisfaction scores among closed tickets; break ties by newest `created_at`.
--- Write and run your query below this comment.
--- -----------------------------------------------------------------
+
 -- SELECT *
 -- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv'
 -- WHERE status = 'Closed'
@@ -55,10 +56,12 @@
 -- LIMIT 5;
 
 -- -----------------------------------------------------------------
+
 -- Q7. Return open Billing tickets ordered from oldest to newest.
--- Write and run your query below this comment.
--- -----------------------------------------------------------------
+
 -- SELECT *
 -- FROM './practice\duckdb\datasets\01_select_filter_sort_limit\support_tickets.csv'
 -- WHERE category = 'Billing' AND status = 'Open'
 -- ORDER BY created_at
+
+-- -----------------------------------------------------------------
