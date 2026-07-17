@@ -194,7 +194,14 @@ class ResponsiveScrollPage(QScrollArea):
             self.date_label = QLabel(date_text)
             self.date_label.setObjectName("Muted")
             self.date_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
-            self.date_label.setWordWrap(True)
+            # Dates are compact metadata and should never split across lines.
+            # At narrow widths the whole label moves below the title instead.
+            self.date_label.setWordWrap(False)
+            self.date_label.setSizePolicy(
+                QSizePolicy.Policy.Minimum,
+                QSizePolicy.Policy.Fixed,
+            )
+            self.date_label.setMinimumWidth(self.date_label.sizeHint().width())
             self.header_layout.addWidget(self.date_label, 0, 1)
         self.header_layout.setColumnStretch(0, 1)
         self.content_layout.addWidget(self.header)

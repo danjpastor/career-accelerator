@@ -152,6 +152,57 @@ class ResponsiveLayoutV10Tests(unittest.TestCase):
                     self.window.encouragement_card.height(),
                 )
 
+
+    def test_dashboard_matches_display_scaled_window_without_scroll_or_timer_overlap(self) -> None:
+        # Mirrors the logical client size shown by a 1680-wide Windows desktop
+        # using display scaling. This was the remaining real-world regression.
+        self.resize_window(1680, 944)
+        self.window.navigate(0)
+        self._flush()
+        page = self.window.dashboard_scroll
+        self.assertEqual(
+            page.verticalScrollBarPolicy(),
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
+        )
+        self.assertEqual(page.verticalScrollBar().maximum(), 0)
+        self.assertLessEqual(
+            self.window.dashboard_content.sizeHint().height(),
+            page.viewport().height(),
+        )
+
+        timer_bottom = (
+            self.window.dashboard_timer_stage.y()
+            + self.window.circular_timer.y()
+            + self.window.circular_timer.height()
+        )
+        self.assertLessEqual(
+            timer_bottom,
+            self.window.dashboard_start_button.y(),
+        )
+
+    def test_page_header_dates_stay_on_one_line(self) -> None:
+        for size in ((900, 620), (1680, 944)):
+            with self.subTest(size=size):
+                self.resize_window(*size)
+                for index in range(1, self.window.stack.count()):
+                    self.window.navigate(index)
+                    self._flush(2)
+                    page = self.window.stack.currentWidget()
+                    date_label = getattr(page, "date_label", None)
+                    if date_label is None:
+                        continue
+                    self.assertFalse(date_label.wordWrap())
+                    self.assertGreaterEqual(
+                        date_label.width(),
+                        date_label.sizeHint().width(),
+                        f"date clipped on page {index} at {size}",
+                    )
+                    self.assertLessEqual(
+                        date_label.height(),
+                        max(40, date_label.sizeHint().height() * 2),
+                        f"date unexpectedly stacked on page {index} at {size}",
+                    )
+
     def test_every_main_page_avoids_horizontal_overflow_after_resize_cycles(self) -> None:
         # Start wide, collapse to the supported minimum, then expand again. This
         # catches stale QGridLayout stretch factors left behind by reflowing.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 10.0.4 - 2026-07-17
+
+- Removed the Dashboard vertical scroll path so the front page always fits its live viewport.
+- Recalculated Dashboard row heights from the actual client height, including Windows display-scaled window sizes.
+- Added a dedicated timer stage based on the circular timer's real scaled dimensions, preventing overlap with Study Session controls.
+- Kept page-header dates on one line; compact layouts move the complete date below the title rather than wrapping it.
+- Added regressions for the 1680×944 display-scaled layout, timer/control separation, and one-line dates across every page.
+
 ## 10.0.3 - 2026-07-17
 
 - Removed the large vertical bands that could appear between Dashboard rows on shorter or display-scaled screens.

@@ -785,6 +785,15 @@ class CareerAccelerator(QMainWindow):
             QSizePolicy.Expanding,
         )
         self.dashboard_scroll = page
+        # The Dashboard is a true single-screen overview. Long-form pages may
+        # scroll, but the front page must always resize to its viewport.
+        page.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        page.content.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding,
+        )
 
         root = page.content_layout
         root.setContentsMargins(24, 16, 24, 14)
@@ -1535,7 +1544,10 @@ class CareerAccelerator(QMainWindow):
     def _apply_dashboard_density(self, width, height):
         width = max(0, int(width))
         height = max(0, int(height))
-        if height >= 900 and width >= 1050:
+        # Height is the limiting dimension for the Dashboard. Use the roomier
+        # visual density only when its complete card stack can fit; otherwise
+        # retain the same three-column layout with tighter internal spacing.
+        if height >= 980 and width >= 1050:
             density = "comfortable"
         elif height >= 700:
             density = "compact"
@@ -1543,12 +1555,19 @@ class CareerAccelerator(QMainWindow):
             density = "ultra"
         self.dashboard_density = density
 
+        # These are content-safe minimums, not fixed target heights. The final
+        # row heights are calculated from the live viewport so their sum plus
+        # the header, margins, and inter-row spacing never exceeds the page.
         base_heights = {
-            "comfortable": (100, 311, 311, 171),
-            "compact": (78, 190, 160, 104),
-            "ultra": (64, 160, 126, 76),
+            "comfortable": (88, 252, 244, 118),
+            "compact": (72, 190, 158, 88),
+            "ultra": (60, 156, 124, 68),
         }[density]
-        comfortable_heights = (100, 311, 311, 171)
+        maximum_heights = {
+            "comfortable": (112, 326, 316, 176),
+            "compact": (100, 292, 276, 154),
+            "ultra": (84, 226, 204, 112),
+        }[density]
 
         if density == "comfortable":
             self.dashboard_root_layout.setContentsMargins(24, 16, 24, 14)
@@ -1582,7 +1601,7 @@ class CareerAccelerator(QMainWindow):
             self.dashboard_header_section.minimumSizeHint().height(),
         )
         available_rows_height = max(
-            sum(base_heights),
+            1,
             height
             - top_margin
             - bottom_margin
@@ -1596,7 +1615,7 @@ class CareerAccelerator(QMainWindow):
             footer_height,
         ) = self._interpolate_dashboard_row_heights(
             base_heights,
-            comfortable_heights,
+            maximum_heights,
             available_rows_height,
         )
 
@@ -1676,11 +1695,10 @@ class CareerAccelerator(QMainWindow):
 
         self.growth_chart.set_density(density)
         self.circular_timer.set_dashboard_density(density)
-        timer_stage_height = {
-            "comfortable": 118,
-            "compact": 78,
-            "ultra": 66,
-        }[density]
+        # Reserve a dedicated region based on the timer's actual scaled size.
+        # A fixed stage smaller than the painted circle let the timer extend
+        # behind the Start/Pause/Reset/Log buttons at compact DPI settings.
+        timer_stage_height = self.circular_timer.height() + (6 if density == "comfortable" else 4)
         self.dashboard_timer_stage.setMinimumHeight(timer_stage_height)
         self.dashboard_timer_stage.setMaximumHeight(timer_stage_height)
 

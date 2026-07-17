@@ -1,43 +1,27 @@
-# Career Accelerator v10.0.3 Test Results
+# Career Accelerator v10.0.4 Test Results
 
-Test date: July 17, 2026
+## Automated verification
 
-## Automated regression suite
-
-- 25 tests passed.
-- Exercise Pack lesson mapping, answer-safe starters, official solutions, hint persistence, and schema migration passed.
-- Interview Problem original-work validation passed.
-- Shared SQL editor line-number and DuckDB error-navigation tests passed.
-- Backup deduplication and retention tests passed.
-- Completed Today’s Focus action-state validation passed.
+- 27 automated tests passed.
+- Every official SQL Subqueries and SQL Joins solution passed validation.
+- Exercise Pack lesson mappings, starter-template safety, hint persistence, and manifest associations passed.
+- Numbered SQL editor line tracking and DuckDB error navigation passed.
+- Interview submission originality checks passed.
+- Backup deduplication and retention passed.
 
 ## Responsive verification
 
-The Dashboard and sidebar were verified at:
+The Dashboard was verified at 900×620, 1024×768, 1280×800, 1366×768, 1536×1020, and the reported 1680×944 display-scaled client size.
 
-- 900×620
-- 1024×768
-- 1280×800
-- 1366×768
-- 1536×1020
+- Dashboard vertical scrolling: none.
+- Dashboard horizontal scrolling: none.
+- Sidebar scrolling at supported sizes: none.
+- Circular Study Session timer overlap with controls: none.
+- Dashboard sections retain exact responsive spacing without blank vertical bands.
+- Every main page avoids outer horizontal overflow after repeated resize cycles.
+- Page-header dates remain on one line at compact and wide sizes.
+- Applied Labs, Exercise Packs, and DuckDB Exercises retain usable compact workspace heights.
 
-At every supported size:
+## Package verification
 
-- Dashboard vertical scrolling remained disabled because all content fit.
-- Dashboard horizontal scrolling remained disabled.
-- Sidebar vertical scrolling remained disabled.
-- Every visible Dashboard section was separated only by the configured responsive layout spacing.
-- Primary, analytics, and footer section heights matched their contained card heights, preventing invisible vertical expansion.
-- Circular progress graphics remained contained within their cards.
-- Repeated wide-to-compact-to-wide resizing produced no stale horizontal grid overflow.
-
-## Visual review
-
-A 1280×768 logical-size render, matching the common 1600×960 Windows display-scaled scenario, confirmed that the large blank bands between the priority, analytics, and footer rows were removed. Cards now form a continuous grouped layout while retaining comfortable internal spacing.
-
-## Cumulative installer verification
-
-- Upgrade from the clean v10.0.2 package completed successfully.
-- Existing database, custom Exercise Pack, and task-workspace sentinel files retained identical SHA-256 hashes.
-- The installed application version changed to 10.0.3.
-- A second installer run replaced zero files, confirming idempotence.
+The clean distribution excludes local databases, backups, caches, Git metadata, generated submissions, and private progress data. The cumulative installer preserves those items in an existing installation and is safe to run repeatedly.

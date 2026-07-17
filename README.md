@@ -24,7 +24,7 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.3 includes:
+Version 10.0.4 includes:
 
 - Fluid Dashboard row heights that consume spare vertical space inside the cards instead of creating large blank bands between card rows
 - Tightly wrapped Dashboard section containers with consistent 5–10 px row spacing at every supported desktop size
