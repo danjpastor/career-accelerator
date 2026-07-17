@@ -1,7 +1,7 @@
 {
   "id": "completed-order-count-per-customer",
   "title": "Count Related Rows With a Subquery",
-  "stage": "Stage 5 \u2022 Calculate one value per outer row",
+  "stage": "Stage 5 • Calculate one value per outer row",
   "difficulty": "Intermediate",
   "estimated_minutes": 25,
   "concepts": [
@@ -12,7 +12,7 @@
   "recommended_lesson": "Lesson 5: Correlated Subqueries",
   "why": "A subquery in SELECT can calculate one related metric for every outer row, such as an order count per customer.",
   "prompt": "Return customer_name and completed_order_count for every customer. The count should include only Completed orders. Sort by completed_order_count descending, then customer_name.",
-  "expected_result": "8 rows\u2014one for every customer\u2014with `customer_name` and `completed_order_count`.",
+  "expected_result": "8 rows—one for every customer—with `customer_name` and `completed_order_count`.",
   "build_steps": [
     "Start with all customers in the outer query.",
     "Inside SELECT, count orders matching the current customer ID.",
@@ -39,7 +39,7 @@
     "Which outer value changes the inner count from customer to customer?"
   ],
   "stretch_goal": "Add another scalar subquery column named `completed_spend` using `SUM(amount)`. Consider how nulls behave for customers with no completed orders.",
-  "starter_sql": "SELECT\n    c.customer_name,\n    (\n        SELECT COUNT(*)\n        FROM orders AS o\n        WHERE o.customer_id = c.customer_id\n          -- completed orders only\n    ) AS completed_order_count\nFROM customers AS c\nORDER BY completed_order_count DESC, c.customer_name;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -65,5 +65,8 @@
     ],
     "min_select_count": 2
   },
-  "subtitle": "Stage 5 \u2022 Calculate one value per outer row"
+  "subtitle": "Stage 5 • Calculate one value per outer row",
+  "lesson_id": "debugging-subqueries",
+  "question_number": 1,
+  "show_starter_sql": true
 }

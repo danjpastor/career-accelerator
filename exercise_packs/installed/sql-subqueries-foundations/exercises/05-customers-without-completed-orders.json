@@ -1,7 +1,7 @@
 {
   "id": "customers-without-completed-orders",
   "title": "Customers Without Completed Orders",
-  "stage": "Stage 3 \u2022 Find missing relationships",
+  "stage": "Stage 3 • Find missing relationships",
   "difficulty": "Beginner",
   "estimated_minutes": 25,
   "concepts": [
@@ -41,7 +41,7 @@
     "Why is `SELECT 1` sufficient inside EXISTS or NOT EXISTS?"
   ],
   "stretch_goal": "Change `NOT EXISTS` to `EXISTS` and predict the result before running it.",
-  "starter_sql": "SELECT c.customer_id, c.customer_name\nFROM customers AS c\nWHERE NOT EXISTS (\n    SELECT 1\n    FROM orders AS o\n    WHERE o.customer_id = c.customer_id\n      -- add the completed-status condition\n)\nORDER BY c.customer_id;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -67,5 +67,8 @@
     ],
     "min_select_count": 2
   },
-  "subtitle": "Stage 3 \u2022 Find missing relationships"
+  "subtitle": "Stage 3 • Find missing relationships",
+  "lesson_id": "in-and-exists",
+  "question_number": 2,
+  "show_starter_sql": true
 }

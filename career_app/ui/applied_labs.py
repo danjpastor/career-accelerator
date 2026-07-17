@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import QSettings, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -34,7 +33,7 @@ from career_app.data.applied_exercises import APPLIED_EXERCISES, CATEGORY_ORDER
 from career_app.database import save_setting, state
 from career_app.services import applied_lab_runner, applied_workspace, tracks
 from career_app.theme import COLORS
-from career_app.ui.course_ui import CoursePageWidget
+from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
 from career_app.ui.exercise_packs import FeedbackLabel, RotatedLabel
 from career_app.ui.widgets import Card
 
@@ -224,23 +223,12 @@ class AppliedLabsWidget(QWidget):
         sql_heading.addWidget(self.dataset_label)
         sql_layout.addLayout(sql_heading)
 
-        self.sql_editor = QTextEdit()
-        self.sql_editor.setAcceptRichText(False)
-        self.sql_editor.setLineWrapMode(QTextEdit.NoWrap)
+        self.sql_editor = SqlCodeEditor()
         self.sql_editor.setPlaceholderText(
             "Write SQL here. Dataset files are loaded automatically as tables named after each file."
         )
-        code_font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        code_font.setPointSize(10)
-        self.sql_editor.setFont(code_font)
-        self.sql_editor.setTabStopDistance(28)
         self.sql_editor.textChanged.connect(self._sql_edited)
-        self.sql_editor.setStyleSheet(
-            "QTextEdit {background:#10131f;color:#f3f4ff;border:1px solid #3b3e5b;"
-            "border-radius:9px;padding:10px;selection-background-color:#6747c7;}"
-            f"QTextEdit:focus {{border:1px solid {COLORS.get('purple', '#8b5cf6')};}}"
-        )
-        self.sql_editor.setMinimumHeight(220)
+        self.sql_editor.setMinimumHeight(240)
         sql_layout.addWidget(self.sql_editor)
 
         sql_actions = QHBoxLayout()
@@ -674,6 +662,7 @@ class AppliedLabsWidget(QWidget):
             self.complete_button,
             self.run_button,
             self.check_button,
+            self.sql_editor,
         ):
             widget.setEnabled(enabled)
 
@@ -714,7 +703,9 @@ class AppliedLabsWidget(QWidget):
                 self.sql_editor.toPlainText(),
             )
         except applied_lab_runner.AppliedLabRunnerError as exc:
-            self.sql_feedback.setText(f"❌ {exc}")
+            message = str(exc)
+            self.sql_feedback.setText(f"❌ {message}")
+            self.sql_editor.navigate_to_error(message)
             self._populate_result(None)
             return
         self._populate_result(result.get("last_result"))
@@ -750,6 +741,7 @@ class AppliedLabsWidget(QWidget):
             self.sql_feedback.setText(
                 "Not quite — complete the remaining automated checks. " + detail + "\n" + "\n".join(lines)
             )
+            self.sql_editor.navigate_to_error(detail)
         return self.current_sql_check_passed
 
     def save_sql_submission(self) -> Path | None:

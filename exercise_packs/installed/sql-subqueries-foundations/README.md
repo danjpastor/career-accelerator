@@ -33,6 +33,6 @@ Estimated total time: approximately 6–7 hours, which can be split across sever
 Lessons and guided exercises are displayed as polished course material inside Career Accelerator. SQL samples use labeled code boxes with syntax highlighting, short SQL expressions use inline code chips, major sections use calm headings and quiet divider lines, and Markdown tables receive a clean alternating-row presentation.
 
 
-## Version 1.1.3
+## Version 2.0.0
 
-This release moves the first lesson into the native course-page layout used by Career Accelerator v9.5.0. It adds the reference-style Learning Goals, SQL example, result table, and Key Idea sections in a responsive two-column arrangement. Exercise IDs and progress keys are unchanged.
+Every lesson now loads one or more associated practice questions directly in the Practice card. New answers begin with only a minimal starting template, while saved learner SQL, progressive hints, checked results, and the separate solution walkthrough remain independent.

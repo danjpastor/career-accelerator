@@ -1,7 +1,7 @@
 {
   "id": "spend-above-customer-average",
   "title": "Customer Spend Above the Customer Average",
-  "stage": "Stage 6 \u2022 Aggregate in layers",
+  "stage": "Stage 6 • Aggregate in layers",
   "difficulty": "Intermediate",
   "estimated_minutes": 35,
   "concepts": [
@@ -42,7 +42,7 @@
     "What does one row of `customer_totals` represent?"
   ],
   "stretch_goal": "Rewrite the solution with a CTE named `customer_totals`, then compare readability with the nested version.",
-  "starter_sql": "SELECT customer_id, total_spent\nFROM (\n    -- one completed-order total per customer\n) AS customer_totals\nWHERE total_spent > (\n    SELECT AVG(customer_total)\n    FROM (\n        -- create the same one-total-per-customer summary\n    ) AS average_input\n)\nORDER BY total_spent DESC;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM orders;\n",
   "datasets": [
     {
       "table": "orders",
@@ -66,5 +66,8 @@
     ],
     "min_select_count": 3
   },
-  "subtitle": "Stage 6 \u2022 Aggregate in layers"
+  "subtitle": "Stage 6 • Aggregate in layers",
+  "lesson_id": "correlated-subqueries",
+  "question_number": 2,
+  "show_starter_sql": true
 }

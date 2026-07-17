@@ -53,12 +53,20 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             status TEXT NOT NULL DEFAULT 'Not Started',
             answer_sql TEXT NOT NULL DEFAULT '',
             notes TEXT NOT NULL DEFAULT '',
+            hint_index INTEGER NOT NULL DEFAULT 0,
             updated_at TEXT,
             completed_at TEXT,
             PRIMARY KEY (pack_id, exercise_id)
         )
         """
     )
+    progress_columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(exercise_pack_progress)").fetchall()
+    }
+    if "hint_index" not in progress_columns:
+        conn.execute(
+            "ALTER TABLE exercise_pack_progress ADD COLUMN hint_index INTEGER NOT NULL DEFAULT 0"
+        )
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS task_concept_tags (
@@ -160,12 +168,63 @@ def validate_pack(pack_dir: Path) -> dict[str, Any]:
     for entry in lessons + exercises:
         _safe_relative(pack_dir, entry["file"])
 
+    lesson_ids = {item["id"] for item in lessons}
+    associated_entries = [item for item in exercises if item.get("lesson_id")]
+    if associated_entries:
+        missing_associations = [item["id"] for item in exercises if not item.get("lesson_id")]
+        if missing_associations:
+            raise ExercisePackError(
+                "When lesson-linked questions are used, every exercise needs a lesson_id. "
+                "Missing: " + ", ".join(missing_associations)
+            )
+        invalid_associations = [
+            item["id"] for item in exercises if item.get("lesson_id") not in lesson_ids
+        ]
+        if invalid_associations:
+            raise ExercisePackError(
+                "Exercises reference an unknown lesson_id: "
+                + ", ".join(invalid_associations)
+            )
+        uncovered_lessons = [
+            item["id"] for item in lessons
+            if not any(exercise.get("lesson_id") == item["id"] for exercise in exercises)
+        ]
+        if uncovered_lessons:
+            raise ExercisePackError(
+                "Every lesson must include at least one practice question. Missing: "
+                + ", ".join(uncovered_lessons)
+            )
+        question_keys: set[tuple[str, int]] = set()
+        for item in exercises:
+            number = item.get("question_number")
+            if isinstance(number, bool) or not isinstance(number, int) or number < 1:
+                raise ExercisePackError(
+                    f"Lesson-linked exercise {item['id']} needs a positive integer question_number."
+                )
+            key = (item["lesson_id"], number)
+            if key in question_keys:
+                raise ExercisePackError(
+                    f"Duplicate question_number {number} for lesson {item['lesson_id']}."
+                )
+            question_keys.add(key)
+            show_starter = item.get("show_starter_sql", True)
+            if not isinstance(show_starter, bool):
+                raise ExercisePackError(
+                    f"Exercise {item['id']} show_starter_sql must be true or false."
+                )
+
     for entry in exercises:
         exercise = _read_json(_safe_relative(pack_dir, entry["file"]))
         if exercise.get("id") != entry["id"]:
             raise ExercisePackError(
                 f"Exercise id mismatch for {entry['file']}: expected {entry['id']!r}."
             )
+        for association_field in ("lesson_id", "question_number", "show_starter_sql"):
+            if association_field in entry and association_field in exercise:
+                if exercise[association_field] != entry[association_field]:
+                    raise ExercisePackError(
+                        f"Exercise {entry['id']} {association_field} disagrees with manifest.json."
+                    )
         for field in ("title", "prompt", "starter_sql", "solution_file"):
             if not isinstance(exercise.get(field), str):
                 raise ExercisePackError(
@@ -431,6 +490,9 @@ def load_exercise(pack: dict[str, Any], exercise_id: str) -> dict[str, Any]:
     if entry is None:
         raise ExercisePackError(f"Exercise was not found: {exercise_id}")
     exercise = _read_json(_safe_relative(Path(pack["path"]), entry["file"]))
+    for field in ("lesson_id", "question_number", "show_starter_sql"):
+        if field in entry and field not in exercise:
+            exercise[field] = entry[field]
     exercise["pack_id"] = pack["pack_id"]
     exercise["pack_path"] = pack["path"]
     return exercise
@@ -467,7 +529,7 @@ def progress_for(
     ensure_schema(conn)
     row = conn.execute(
         """
-        SELECT status,answer_sql,notes,updated_at,completed_at
+        SELECT status,answer_sql,notes,hint_index,updated_at,completed_at
         FROM exercise_pack_progress
         WHERE pack_id=? AND exercise_id=?
         """,
@@ -478,6 +540,7 @@ def progress_for(
             "status": "Not Started",
             "answer_sql": "",
             "notes": "",
+            "hint_index": 0,
             "updated_at": None,
             "completed_at": None,
         }
@@ -487,8 +550,9 @@ def progress_for(
         "status": row[0],
         "answer_sql": row[1],
         "notes": row[2],
-        "updated_at": row[3],
-        "completed_at": row[4],
+        "hint_index": row[3],
+        "updated_at": row[4],
+        "completed_at": row[5],
     }
 
 
@@ -500,12 +564,18 @@ def save_progress(
     status: str,
     answer_sql: str = "",
     notes: str = "",
+    hint_index: int | None = None,
 ) -> None:
     ensure_schema(conn)
     if status not in VALID_STATUSES:
         raise ExercisePackError(f"Unknown exercise status: {status}")
     existing = progress_for(conn, pack_id, exercise_id)
     completed_at = existing.get("completed_at")
+    resolved_hint_index = (
+        int(existing.get("hint_index", 0) or 0)
+        if hint_index is None
+        else max(0, int(hint_index))
+    )
     if status == "Completed" and not completed_at:
         completed_at = _now()
     elif status != "Completed":
@@ -513,12 +583,13 @@ def save_progress(
     conn.execute(
         """
         INSERT INTO exercise_pack_progress(
-            pack_id,exercise_id,status,answer_sql,notes,updated_at,completed_at
-        ) VALUES(?,?,?,?,?,?,?)
+            pack_id,exercise_id,status,answer_sql,notes,hint_index,updated_at,completed_at
+        ) VALUES(?,?,?,?,?,?,?,?)
         ON CONFLICT(pack_id,exercise_id) DO UPDATE SET
             status=excluded.status,
             answer_sql=excluded.answer_sql,
             notes=excluded.notes,
+            hint_index=excluded.hint_index,
             updated_at=excluded.updated_at,
             completed_at=excluded.completed_at
         """,
@@ -528,6 +599,7 @@ def save_progress(
             status,
             answer_sql,
             notes,
+            resolved_hint_index,
             _now(),
             completed_at,
         ),

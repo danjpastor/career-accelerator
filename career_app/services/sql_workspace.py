@@ -28,6 +28,28 @@ def solution_path(root: Path, title: str) -> Path:
     )
 
 
+def starter_template(
+    *, title: str, difficulty: str, topic: str, concepts: str
+) -> str:
+    """Return a minimal learner-owned interview submission template."""
+    return (
+        f"-- Problem: {title}\n"
+        "-- Platform: DataLemur\n"
+        f"-- Difficulty: {difficulty}\n"
+        f"-- Topic: {topic}\n"
+        f"-- Required concepts: {concepts}\n"
+        "\n"
+        "-- Write and test your own solution below.\n"
+        "-- Record assumptions and validation checks as comments.\n"
+        "\n"
+        "SELECT\n"
+        "    -- requested columns\n"
+        "FROM\n"
+        "    -- source table\n"
+        ";\n"
+    )
+
+
 def ensure_solution_file(
     root: Path,
     *,
@@ -46,17 +68,11 @@ def ensure_solution_file(
     created = not path.exists()
     if created:
         path.write_text(
-            (
-                f"-- Problem: {title}\n"
-                f"-- Platform: DataLemur\n"
-                f"-- Difficulty: {difficulty}\n"
-                f"-- Topic: {topic}\n"
-                f"-- Required concepts: {concepts}\n"
-                "\n"
-                "-- Write and test your own solution below.\n"
-                "-- Record assumptions and validation checks as comments.\n"
-                "\n"
-                "-- My solution:\n"
+            starter_template(
+                title=title,
+                difficulty=difficulty,
+                topic=topic,
+                concepts=concepts,
             ),
             encoding="utf-8",
         )

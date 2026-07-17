@@ -1,7 +1,7 @@
 {
   "id": "customers-without-orders",
   "title": "Find Customers Without Orders",
-  "stage": "Stage 5 \u2022 Anti-join pattern",
+  "stage": "Stage 5 • Anti-join pattern",
   "subtitle": "Preserve customers, then keep only missing matches",
   "difficulty": "Beginner",
   "estimated_minutes": 25,
@@ -41,7 +41,7 @@
     "What would `IS NOT NULL` return instead?"
   ],
   "stretch_goal": "Return a third column containing the text `No orders`.",
-  "starter_sql": "SELECT\n    c.customer_id,\n    c.customer_name\nFROM customers AS c\nLEFT JOIN orders AS o\n    ON c.customer_id = o.customer_id\nWHERE -- no matching order\nORDER BY c.customer_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -71,5 +71,8 @@
       "not exists"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "left-and-right-joins",
+  "question_number": 2,
+  "show_starter_sql": true
 }

@@ -1,7 +1,7 @@
 {
   "id": "preserve-all-customers",
   "title": "Preserve Every Customer",
-  "stage": "Stage 4 \u2022 Keep the primary table",
+  "stage": "Stage 4 • Keep the primary table",
   "subtitle": "Use LEFT JOIN and interpret unmatched columns as NULL",
   "difficulty": "Beginner",
   "estimated_minutes": 25,
@@ -41,7 +41,7 @@
     "Where did the NULL values come from?"
   ],
   "stretch_goal": "Add `COALESCE(o.status, 'No orders') AS order_status`.",
-  "starter_sql": "SELECT\n    c.customer_id,\n    c.customer_name,\n    o.order_id,\n    o.status\nFROM customers AS c\nLEFT JOIN orders AS o\n    ON -- customer relationship\nORDER BY c.customer_id, o.order_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -67,5 +67,8 @@
       "left join"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "left-and-right-joins",
+  "question_number": 1,
+  "show_starter_sql": true
 }

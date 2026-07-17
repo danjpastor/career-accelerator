@@ -1,7 +1,7 @@
 {
   "id": "cross-join-planning-grid",
-  "title": "Build a Region\u2013Product Planning Grid",
-  "stage": "Stage 3 \u2022 Every combination",
+  "title": "Build a Region–Product Planning Grid",
+  "stage": "Stage 3 • Every combination",
   "subtitle": "Use CROSS JOIN deliberately and predict the row count first",
   "difficulty": "Beginner",
   "estimated_minutes": 20,
@@ -14,7 +14,7 @@
   "recommended_lesson": "Lesson 4: FULL OUTER and CROSS JOIN",
   "why": "Planning models sometimes need a complete matrix even when no activity exists yet.",
   "prompt": "Return `region_name` and `product_name` for every possible region-product combination. Order by `region_id`, then `product_id`.",
-  "expected_result": "16 rows: 4 regions \u00d7 4 products.",
+  "expected_result": "16 rows: 4 regions × 4 products.",
   "build_steps": [
     "Count the rows in each source table mentally.",
     "Start from `regions` as `r`.",
@@ -41,7 +41,7 @@
     "What would happen if products grew to 100 rows?"
   ],
   "stretch_goal": "Add a text column named `planning_key` combining region and product names.",
-  "starter_sql": "SELECT\n    r.region_name,\n    p.product_name\nFROM regions AS r\nCROSS JOIN products AS p\nORDER BY r.region_id, p.product_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM regions;\n",
   "datasets": [
     {
       "table": "regions",
@@ -67,5 +67,8 @@
       "cross join"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "full-and-cross-joins",
+  "question_number": 1,
+  "show_starter_sql": true
 }

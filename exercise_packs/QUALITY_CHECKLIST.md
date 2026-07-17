@@ -17,6 +17,8 @@ Use this checklist before releasing or installing a new pack.
 - [ ] The pack teaches one coherent concept family.
 - [ ] Prerequisites are explicit and realistic.
 - [ ] Lessons progress from recognition to application.
+- [ ] Every lesson has at least one associated practice question.
+- [ ] Question numbers are ordered within each lesson.
 - [ ] Exercises ramp gradually rather than jumping in difficulty.
 - [ ] The capstone combines previously taught skills.
 - [ ] Optional stretch work does not block completion.
@@ -40,11 +42,15 @@ Use this checklist before releasing or installing a new pack.
 - [ ] The prompt states exact output requirements.
 - [ ] Expected result shape includes columns, rows, ordering, and edge cases.
 - [ ] Starter SQL helps without solving the task.
+- [ ] Starter SQL does not copy a lesson example, official solution, or nearly completed answer.
+- [ ] A brand-new question opens with only its authored starter template or an empty editor.
+- [ ] Previously saved learner SQL reopens instead of resetting to the template.
 - [ ] Build steps are small and testable.
 - [ ] Hints become progressively more specific.
 - [ ] Common mistakes explain why the mistake fails.
 - [ ] Reflection questions check understanding.
 - [ ] The official solution has a stage-by-stage walkthrough.
+- [ ] Viewing the solution does not overwrite learner SQL or mark the question complete.
 
 ## Datasets
 
@@ -80,6 +86,8 @@ Use this checklist before releasing or installing a new pack.
 - [ ] The pack appears immediately in the selector and navigation.
 - [ ] Lessons render without clipped or malformed content.
 - [ ] Learn and Practice remain synchronized.
+- [ ] Selecting each lesson loads only that lesson’s questions.
+- [ ] Run Query, Check Answer, Exercise Hint, and View Solution operate on the selected question.
 - [ ] SQL can run and be checked.
 - [ ] A version update preserves saved SQL, notes, and completion.
 - [ ] SHA-256 checksum is generated for the release archive.

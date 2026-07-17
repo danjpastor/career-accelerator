@@ -1,7 +1,7 @@
 {
   "id": "preserve-all-regions",
   "title": "Preserve Every Region",
-  "stage": "Stage 7 \u2022 Choose the correct side",
+  "stage": "Stage 7 • Choose the correct side",
   "subtitle": "Reorder tables so LEFT JOIN expresses a right-preservation goal clearly",
   "difficulty": "Intermediate",
   "estimated_minutes": 25,
@@ -10,7 +10,7 @@
     "RIGHT JOIN equivalence",
     "preserved side"
   ],
-  "learning_objective": "Preserve all regions\u2014including a region with no customers\u2014by choosing the correct starting table.",
+  "learning_objective": "Preserve all regions—including a region with no customers—by choosing the correct starting table.",
   "recommended_lesson": "Lesson 3: LEFT and RIGHT JOIN",
   "why": "Dimension reports often need all categories even when no activity exists.",
   "prompt": "Return `region_id`, `region_name`, and `customer_count` for every region. Include International with a count of 0. Order by `region_id`.",
@@ -41,7 +41,7 @@
     "What would the equivalent RIGHT JOIN look like?"
   ],
   "stretch_goal": "Rewrite the query using RIGHT JOIN and compare the result.",
-  "starter_sql": "SELECT\n    r.region_id,\n    r.region_name,\n    COUNT(c.customer_id) AS customer_count\nFROM regions AS r\nLEFT JOIN customers AS c\n    ON -- region relationship\nGROUP BY r.region_id, r.region_name\nORDER BY r.region_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM regions;\n",
   "datasets": [
     {
       "table": "regions",
@@ -69,5 +69,8 @@
       "group by"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "left-and-right-joins",
+  "question_number": 4,
+  "show_starter_sql": true
 }

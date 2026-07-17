@@ -24,35 +24,20 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 9.3.25 includes:
+Version 10.0.0 includes:
 
-- Fixed wide reference-matched dark purple Dashboard with no scrolling
-- Global hover highlights and animated click feedback for every button
-- A distinct named achievement for every completed roadmap task or challenge
-- Time-aware greeting that refreshes every minute
-- Rotating motivational quotes and encouragement
-- Functional streak, best-streak, and current-week study totals
-- Selectable 7, 14, 30, or 90-day growth chart
-- Adaptive planning by available time and energy
-- Intelligent Today’s Focus grounded in the weekly roadmap
-- Automatic promotion of up to two unfinished focus tasks from yesterday
-- Visible Job Readiness and Applications workspaces
-- Google, DataCamp, SQL, Power BI, Python, and portfolio tracking
-- Portfolio workspace for three analytics projects
-- SQL Companion with mastery and review scheduling
-- Matching goal-based circular timers on Dashboard and Study Session pages
-- Animated timer text/status feedback on Start, Pause, and Reset
-- Current-week Weekly Summary sparkline driven only by logged sessions
-- Custom Career Accelerator application and shortcut icon
-- Study timer with Start, Pause, confirmed Reset, and Log Session controls
-- Compact two-column Settings control center
-- Future AI integration readiness status without storing credentials
-- Dashboard Mission Control with live Job Readiness progress
-- Persistent rewards for every completed task, milestone, SQL problem, session, and application
-- Compact evidence-driven Job Readiness workspace
-- Weekly summaries, achievements, charts, and streak tracking
-- Job-readiness evidence and application CRM
-- Local SQLite persistence, backups, and Git publishing
+- Lesson-driven Exercise Packs where every lesson loads one or more practice questions for the concept just taught
+- Answer-safe SQL starting templates that never auto-fill lesson examples or official solutions
+- Functional Run Query, Check Answer, progressive Exercise Hint, and separate View Solution workflows
+- A shared line-numbered SQL editor across Exercise Packs, DuckDB Exercises, Applied Labs, and Interview Problems
+- SQL syntax highlighting, current-line emphasis, DuckDB error-line highlighting, and cursor navigation
+- Exact Dashboard and roadmap routing to assigned DuckDB Exercises and Interview Problems
+- In-app Interview Problem submissions with saved learner SQL, notes, completion validation, and Demonstrated Evidence
+- Completed Today’s Focus rows that remain visible but muted, struck through, and non-actionable
+- Content-deduplicated SQLite backups with newest, daily, and weekly retention
+- Live storage totals plus backup cleanup and data-folder controls in Settings
+- Responsive three-column Learn and Practice workspaces with preserved progress and selections
+- Existing adaptive planning, portfolio, study, job-readiness, application, achievement, and tracking features
 
 
 ## Installable Exercise Packs
@@ -64,11 +49,11 @@ The bundled **SQL Subqueries: Foundations to Advanced** pack includes seven plai
 ### Shared learning-site visual system
 
 Exercise Packs, Applied Labs, and SQL Companion's DuckDB Exercises use shared native Qt course components: compact type pills, readable titles, subtle subtitle labels, quiet dividers, polished tables, syntax-highlighted code cards, callouts, bookmarks, breadcrumbs, and consistent responsive spacing.
-Two-column lesson blocks automatically stack at narrower Learn-card widths, and page margins plus title sizing compact at smaller breakpoints so generated material stays readable rather than compressed. Lesson pages also expose a runnable SQL sandbox using the pack datasets, while checked answers, hints, and solutions remain tied to guided exercises.
+Two-column lesson blocks automatically stack at narrower Learn-card widths, and page margins plus title sizing compact at smaller breakpoints so generated material stays readable rather than compressed. Selecting a lesson loads its associated questions directly in Practice. A new answer contains only that question’s intentionally minimal starting template; saved learner SQL reopens normally, while checked answers, progressive hints, and official solutions remain separate.
 
 ### Three-column exercise workspaces
 
-Learning → Exercises and SQL Companion → DuckDB Exercises permanently show course navigation, Learn, and Practice together. DuckDB Learn and Practice use a remembered draggable divider. Each question has its own SQL answer, notes, results, and validation state while Save Submission composes the normal reviewable repository SQL file.
+Learning → Exercises and SQL Companion → DuckDB Exercises permanently show course navigation, Learn, and Practice together. DuckDB Learn and Practice use a remembered draggable divider. Each lesson exposes its own ordered practice questions, and each question has independent SQL, notes, results, hint progress, and validation state. Save Submission still composes the normal reviewable repository SQL file.
 
 ### Applied Labs in the application
 

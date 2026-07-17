@@ -1,7 +1,7 @@
 {
   "id": "salary-above-company-average",
   "title": "Employees Above the Company Average",
-  "stage": "Stage 2 \u2022 Use one returned value",
+  "stage": "Stage 2 • Use one returned value",
   "difficulty": "Very Beginner",
   "estimated_minutes": 15,
   "concepts": [
@@ -40,7 +40,7 @@
     "Does the outer query return the average itself, or rows compared with the average?"
   ],
   "stretch_goal": "Add `city` to the selected columns without changing the filtering logic.",
-  "starter_sql": "SELECT employee_name, salary\nFROM employees\nWHERE salary > (\n    -- inner query: return one average value\n)\nORDER BY salary DESC;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM employees;\n",
   "datasets": [
     {
       "table": "employees",
@@ -62,5 +62,8 @@
     ],
     "min_select_count": 2
   },
-  "subtitle": "Stage 2 \u2022 Use one returned value"
+  "subtitle": "Stage 2 • Use one returned value",
+  "lesson_id": "one-value-subqueries",
+  "question_number": 1,
+  "show_starter_sql": true
 }

@@ -32,7 +32,7 @@
     "Ask the learner to explain why the query works."
   ],
   "stretch_goal": "Add an ORDER BY after the required answer works.",
-  "starter_sql": "SELECT\n    -- requested column\nFROM example;\n",
+  "starter_sql": "-- Write your answer below.\n\nSELECT\n    -- requested columns\nFROM example;\n",
   "datasets": [
     {
       "table": "example",
@@ -52,5 +52,8 @@
       "select"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "concept-introduction",
+  "question_number": 1,
+  "show_starter_sql": true
 }

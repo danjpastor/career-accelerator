@@ -1,5 +1,23 @@
 # Changelog
 
+## 10.0.0 - 2026-07-16
+
+- Rebuilt Exercise Packs around lesson-linked practice questions so every lesson immediately offers one or more concept-specific SQL questions in the Practice card.
+- Added per-lesson question selection, question numbering, independent saved SQL, notes, results, hint progress, and completion state.
+- Changed new Exercise Pack answers to load only an intentionally minimal starting template; lesson examples and official solutions are never inserted automatically.
+- Added progressive Exercise Hint behavior and a separate solution walkthrough that preserves the learner's work unless Copy to Editor is explicitly chosen.
+- Strengthened Check Answer with isolated in-memory DuckDB execution, read-only protections, expected-result comparison, ordering rules, required SQL patterns, and nested-query validation.
+- Added a reusable line-numbered SQL editor with syntax highlighting, current-line emphasis, error-line emphasis, and DuckDB line navigation across Exercise Packs, DuckDB Exercises, Applied Labs, and Interview Problems.
+- Added editable Interview Problem submissions, in-app saving, completion validation, submission-file reopening, and duplicate-resistant Demonstrated Evidence creation from original learner work.
+- Preserved exact DuckDB Exercise and Interview Problem routing from Dashboard and roadmap actions.
+- Restored completed Today’s Focus styling with checked state, muted strikethrough text, disabled actions, and safe refresh behavior.
+- Reworked automatic backups to use consistent SQLite snapshots, SHA-256 duplicate detection, newest/daily/weekly retention groups, and recoverable pruning reports.
+- Added Settings storage reporting, Clean Old Backups, and Open Data Folder controls.
+- Updated the Subqueries, Joins, and standard template packs to schema-compatible v2.0.0 content with every lesson mapped to practice questions and answer-safe starter templates.
+- Added v10 regression coverage for pack validation, official solutions, lesson-question mapping, starter-template safety, editor line navigation, backup deduplication and retention, application startup, routing, Interview Problem evidence, and package cleanliness.
+- Added a cumulative, idempotent v10 installer that validates the repository, skips identical files, backs up every replaced file, and preserves local progress, submissions, databases, and custom packs.
+
+
 ## 9.6.3 - 2026-07-16
 
 - Fixed Exercise Pack navigation when Start Course, Continue, or direct selection targets an already-highlighted learning-path row.

@@ -54,11 +54,12 @@ from career_app.services import (
     tracks,
 )
 from career_app.services import exercise_packs
-from career_app.services.backup import create_backup
+from career_app.services.backup import create_backup, prune_backups_with_report
 from career_app.services.migration import migrate
 from career_app.services.publisher import publish
 from career_app.theme import COLORS, stylesheet
 from career_app.ui.duckdb_exercises import DuckDBExercisesWidget
+from career_app.ui.course_ui import SqlCodeEditor
 from career_app.ui.applied_labs import AppliedLabsWidget
 from career_app.ui.exercise_packs import ExercisePacksWidget, ExerciseSuggestionPanel
 from career_app.ui.task_workspace import TaskWorkspaceDialog
@@ -2439,6 +2440,8 @@ class CareerAccelerator(QMainWindow):
         self.sql_mastery.setRange(1, 5)
         self.sql_mastery.setValue(1)
         self.sql_review = QLineEdit()
+        self.sql_submission_path = QLineEdit()
+        self.sql_submission_path.setReadOnly(True)
         self.sql_notes = QTextEdit()
         form.addRow(
             "Problem title",
@@ -2465,12 +2468,35 @@ class CareerAccelerator(QMainWindow):
             self.sql_review,
         )
         form.addRow(
+            "Submission",
+            self.sql_submission_path,
+        )
+        form.addRow(
             "Notes",
             self.sql_notes,
         )
         detail.layout.addLayout(form)
 
+        sql_answer_label = QLabel("Your SQL submission")
+        sql_answer_label.setObjectName("SectionTitle")
+        detail.layout.addWidget(sql_answer_label)
+        self.sql_answer_editor = SqlCodeEditor()
+        self.sql_answer_editor.setMinimumHeight(260)
+        self.sql_answer_editor.setPlaceholderText(
+            "Write your interview-problem solution here. Save it before marking the problem complete."
+        )
+        detail.layout.addWidget(self.sql_answer_editor, 1)
+
         buttons = QHBoxLayout()
+        self.sql_save_button = QPushButton(
+            "Save Submission"
+        )
+        self.sql_save_button.setObjectName(
+            "Secondary"
+        )
+        self.sql_save_button.clicked.connect(
+            self.save_sql_submission
+        )
         self.sql_complete_button = QPushButton(
             "Mark Complete"
         )
@@ -2487,10 +2513,13 @@ class CareerAccelerator(QMainWindow):
             self.sql_hint
         )
         self.sql_solution_button = QPushButton(
-            "Open My Solution"
+            "Open Submission File"
         )
         self.sql_solution_button.clicked.connect(
             self.open_sql_solution
+        )
+        buttons.addWidget(
+            self.sql_save_button
         )
         buttons.addWidget(
             self.sql_complete_button
@@ -3914,6 +3943,22 @@ class CareerAccelerator(QMainWindow):
         backup.clicked.connect(self.backup_database)
         data_card.layout.addWidget(backup)
 
+        self.storage_summary_label = QLabel(self.storage_summary_text())
+        self.storage_summary_label.setObjectName("Muted")
+        self.storage_summary_label.setWordWrap(True)
+        data_card.layout.addWidget(self.storage_summary_label)
+
+        storage_actions = QHBoxLayout()
+        clean_backups = QPushButton("🧹 Clean Old Backups")
+        clean_backups.setObjectName("Secondary")
+        clean_backups.clicked.connect(self.clean_old_backups)
+        open_data = QPushButton("📂 Open Data Folder")
+        open_data.setObjectName("Secondary")
+        open_data.clicked.connect(self.open_data_folder)
+        storage_actions.addWidget(clean_backups)
+        storage_actions.addWidget(open_data)
+        data_card.layout.addLayout(storage_actions)
+
         restore = QPushButton(
             "🔄 Restore Tasks From Repository Files"
         )
@@ -3922,7 +3967,7 @@ class CareerAccelerator(QMainWindow):
         data_card.layout.addWidget(restore)
 
         data_note = QLabel(
-            "Backups exclude the repository and are stored locally in the backups folder."
+            "Automatic backups are deduplicated and retained as the newest 10, daily copies for 7 days, and weekly copies for 4 weeks."
         )
         data_note.setObjectName("Muted")
         data_note.setWordWrap(True)
@@ -5368,6 +5413,7 @@ class CareerAccelerator(QMainWindow):
                     on_action=(
                         action_callback
                     ),
+                    completed=completed,
                 )
             )
 
@@ -5723,6 +5769,7 @@ class CareerAccelerator(QMainWindow):
                         if workspace_available
                         else None
                     ),
+                    completed=bool(row["completed"]),
                 )
                 task_row.checkbox.stateChanged.connect(
                     lambda state_value,
@@ -8025,6 +8072,8 @@ class CareerAccelerator(QMainWindow):
             self.sql_mastery,
             self.sql_review,
             self.sql_notes,
+            self.sql_answer_editor,
+            self.sql_save_button,
             self.sql_complete_button,
             self.sql_hint_button,
             self.sql_solution_button,
@@ -8046,6 +8095,8 @@ class CareerAccelerator(QMainWindow):
             field.clear()
         self.sql_mastery.setValue(1)
         self.sql_notes.clear()
+        self.sql_submission_path.clear()
+        self.sql_answer_editor.clear()
         self.sql_workspace_status.setText(
             message
         )
@@ -8127,6 +8178,21 @@ class CareerAccelerator(QMainWindow):
                 else ""
             )
         )
+        submission_path = sql_workspace.solution_path(ROOT, title)
+        relative_submission = str(submission_path.relative_to(ROOT)).replace("\\", "/")
+        self.sql_submission_path.setText(relative_submission)
+        if submission_path.exists():
+            try:
+                submission_sql = submission_path.read_text(encoding="utf-8")
+            except OSError:
+                submission_sql = ""
+        else:
+            submission_sql = sql_workspace.starter_template(
+                title=match[0], difficulty=match[1], topic=match[2], concepts=match[3]
+            )
+        self.sql_answer_editor.blockSignals(True)
+        self.sql_answer_editor.setPlainText(submission_sql)
+        self.sql_answer_editor.blockSignals(False)
 
         completed = (
             record is not None
@@ -8225,136 +8291,164 @@ class CareerAccelerator(QMainWindow):
             ),
         )
 
-    def save_sql(self):
-        title = (
-            self.sql_selected_title
-            or self.sql_title.text().strip()
+    @staticmethod
+    def _sql_submission_has_original_query(sql_text):
+        sql_text = str(sql_text or "")
+        without_comments = re.sub(r"--[^\n]*|/\*.*?\*/", " ", sql_text, flags=re.S)
+        normalized = " ".join(without_comments.split())
+        if not re.match(r"^(?:SELECT|WITH)\b", normalized, re.IGNORECASE):
+            return False
+        placeholders = (
+            "requested columns",
+            "source table",
+            "write your answer",
+            "write and test your own solution",
         )
+        lower = sql_text.casefold()
+        return len(normalized) >= 18 and not any(phrase in lower for phrase in placeholders)
+
+    def _persist_sql_submission(self, *, completed=False):
+        title = self.sql_selected_title or self.sql_title.text().strip()
         if not title:
-            self.statusBar().showMessage(
-                "Select a SQL problem first.",
-                3200,
+            raise ValueError("Select a SQL problem first.")
+        sql_text = self.sql_answer_editor.toPlainText().rstrip() + "\n"
+        if completed and not self._sql_submission_has_original_query(sql_text):
+            raise ValueError(
+                "Write your own SQL query before marking the interview problem complete. "
+                "The untouched starting template is not a completed submission."
+            )
+        path = sql_workspace.solution_path(ROOT, title)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(sql_text, encoding="utf-8")
+        relative_path = str(path.relative_to(ROOT)).replace("\\", "/")
+        existing = self.conn.execute(
+            "SELECT status,completed_date FROM sql_practice WHERE platform='DataLemur' AND title=?",
+            (title,),
+        ).fetchone()
+        status = "Completed" if completed or (existing and existing["status"] == "Completed") else "In Progress"
+        completed_date = (
+            date.today().isoformat() if completed
+            else (existing["completed_date"] if existing and existing["status"] == "Completed" else None)
+        )
+        self.conn.execute(
+            """INSERT INTO sql_practice
+               (platform,title,difficulty,topic,concepts,status,mastery,review_date,
+                completed_date,solution_path,notes)
+               VALUES('DataLemur',?,?,?,?,?,?,?,?,?,?)
+               ON CONFLICT(platform,title) DO UPDATE SET
+                   difficulty=excluded.difficulty,topic=excluded.topic,
+                   concepts=excluded.concepts,status=excluded.status,
+                   mastery=excluded.mastery,review_date=excluded.review_date,
+                   completed_date=excluded.completed_date,
+                   solution_path=excluded.solution_path,notes=excluded.notes""",
+            (
+                title,
+                self.sql_difficulty.text(),
+                self.sql_topic.text(),
+                self.sql_concepts.text(),
+                status,
+                self.sql_mastery.value(),
+                self.sql_review.text().strip() or None,
+                completed_date,
+                relative_path,
+                self.sql_notes.toPlainText(),
+            ),
+        )
+        if completed:
+            source_name = f"Interview Problem: {title}"
+            description = (
+                f"Completed a {self.sql_difficulty.text()} SQL interview problem. "
+                f"Concepts: {self.sql_concepts.text()}. "
+                f"Mastery: {self.sql_mastery.value()}/5. "
+                f"Completed: {completed_date}. Submission: {relative_path}."
+            )
+            notes = self.sql_notes.toPlainText().strip()
+            if notes:
+                description += f" Notes: {notes}"
+            self.conn.execute(
+                """INSERT INTO evidence(skill,source_type,source_name,description)
+                   VALUES(?,?,?,?)
+                   ON CONFLICT(skill,source_type,source_name)
+                   DO UPDATE SET description=excluded.description""",
+                (
+                    f"SQL — {self.sql_concepts.text()}",
+                    "Interview Problem",
+                    source_name,
+                    description,
+                ),
+            )
+        self.conn.commit()
+        self.link_current_sql_solution_artifact(title, path)
+        self.sql_submission_path.setText(relative_path)
+        return path, status
+
+    def save_sql_submission(self):
+        title = self.sql_selected_title or self.sql_title.text().strip()
+        if not title:
+            self.statusBar().showMessage("Select a SQL problem first.", 3200)
+            return
+        readiness = tracks.sql_problem_readiness(self.conn, self.state, title)
+        if not readiness["ready"] and not self.conn.execute(
+            "SELECT 1 FROM sql_practice WHERE platform='DataLemur' AND title=? AND status='Completed'",
+            (title,),
+        ).fetchone():
+            QMessageBox.warning(
+                self, "Problem Locked",
+                "Complete the required concepts before saving a submission for this problem.",
             )
             return
-
-        readiness = tracks.sql_problem_readiness(
-            self.conn,
-            self.state,
-            title,
+        try:
+            path, status = self._persist_sql_submission(completed=False)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Save Submission", str(exc))
+            return
+        self.statusBar().showMessage(
+            f"Saved {path.name} as {status}. Your submission remains editable.", 4200
         )
+
+    def save_sql(self):
+        title = self.sql_selected_title or self.sql_title.text().strip()
+        if not title:
+            self.statusBar().showMessage("Select a SQL problem first.", 3200)
+            return
+
+        readiness = tracks.sql_problem_readiness(self.conn, self.state, title)
         if not readiness["ready"]:
             QMessageBox.warning(
                 self,
                 "Problem Locked",
-                (
-                    "Complete these concepts before "
-                    "attempting this problem:\n\n"
-                    + "\n".join(
-                        readiness["missing_names"]
-                    )
-                ),
+                "Complete these concepts before attempting this problem:\n\n"
+                + "\n".join(readiness["missing_names"]),
             )
             return
 
-        study_session_snapshot = (
-            session_guard.capture(self)
-        )
-        completion_message = (
-            f"SQL completed: {title}"
-        )
-
+        study_session_snapshot = session_guard.capture(self)
+        completion_message = f"SQL completed: {title}"
         try:
-            path, _created = (
-                self.ensure_current_sql_solution()
-            )
-            relative_path = str(
-                path.relative_to(ROOT)
-            ).replace("\\", "/")
-
-            self.conn.execute(
-                """INSERT INTO sql_practice
-                   (platform,title,difficulty,topic,
-                    concepts,status,mastery,
-                    review_date,completed_date,
-                    solution_path,notes)
-                   VALUES(
-                       'DataLemur',?,?,?,?,?,?,?,?,?,?
-                   )
-                   ON CONFLICT(platform,title)
-                   DO UPDATE SET
-                       difficulty=excluded.difficulty,
-                       topic=excluded.topic,
-                       concepts=excluded.concepts,
-                       status='Completed',
-                       mastery=excluded.mastery,
-                       review_date=excluded.review_date,
-                       completed_date=excluded.completed_date,
-                       solution_path=excluded.solution_path,
-                       notes=excluded.notes""",
-                (
-                    title,
-                    self.sql_difficulty.text(),
-                    self.sql_topic.text(),
-                    self.sql_concepts.text(),
-                    "Completed",
-                    self.sql_mastery.value(),
-                    (
-                        self.sql_review.text().strip()
-                        or None
-                    ),
-                    date.today().isoformat(),
-                    relative_path,
-                    self.sql_notes.toPlainText(),
-                ),
-            )
-            self.conn.commit()
-
-            active_sql_task = (
-                tracks.active_sql_task_for_title(
-                    self.conn,
-                    title,
-                )
-            )
-            self.link_current_sql_solution_artifact(
-                title,
-                path,
-            )
-
+            path, _status = self._persist_sql_submission(completed=True)
+            active_sql_task = tracks.active_sql_task_for_title(self.conn, title)
             if active_sql_task is not None:
                 result = tracks.complete_track_task(
-                    self.conn,
-                    int(
-                        active_sql_task["task_id"]
-                    ),
-                    self.state,
+                    self.conn, int(active_sql_task["task_id"]), self.state
                 )
-                completion_message = result.get(
-                    "message",
-                    completion_message,
-                )
+                completion_message = result.get("message", completion_message)
             else:
-                tracks.record_sql_completion(
-                    self.conn,
-                    title,
-                )
+                tracks.record_sql_completion(self.conn, title)
 
             self.state = state(self.conn)
-            tracks.sync_all(
-                self.conn,
-                self.state,
-            )
+            tracks.sync_all(self.conn, self.state)
             self.sql_selected_title = None
             self.refresh_all()
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Complete Interview Problem", str(exc))
+            return
         finally:
-            session_guard.restore(
-                self,
-                study_session_snapshot,
-            )
+            session_guard.restore(self, study_session_snapshot)
 
         self.statusBar().showMessage(
             completion_message
-            + " The next eligible problem has been selected.",
-            5200,
+            + " Added to Demonstrated Evidence and selected the next eligible problem.",
+            6000,
         )
 
     def sql_hint(self):
@@ -8394,47 +8488,18 @@ class CareerAccelerator(QMainWindow):
         )
 
     def open_sql_solution(self):
-        title = (
-            self.sql_selected_title
-            or self.sql_title.text().strip()
-        )
+        title = self.sql_selected_title or self.sql_title.text().strip()
         if not title:
-            self.statusBar().showMessage(
-                "Select a SQL problem first.",
-                3200,
-            )
+            self.statusBar().showMessage("Select a SQL problem first.", 3200)
             return
-
         try:
-            path, created = (
-                self.ensure_current_sql_solution()
-            )
-            self.link_current_sql_solution_artifact(
-                title,
-                path,
-            )
-            editor_name = (
-                sql_workspace.open_in_editor(
-                    path,
-                    root=ROOT,
-                )
-            )
+            path, _status = self._persist_sql_submission(completed=False)
+            editor_name = sql_workspace.open_in_editor(path, root=ROOT)
         except Exception as exc:
-            QMessageBox.warning(
-                self,
-                "Could Not Open Solution",
-                str(exc),
-            )
+            QMessageBox.warning(self, "Could Not Open Submission", str(exc))
             return
-
-        action = (
-            "Created and opened"
-            if created
-            else "Opened"
-        )
         self.statusBar().showMessage(
-            f"{action} {path.name} in {editor_name}.",
-            4200,
+            f"Saved and opened {path.name} in {editor_name}.", 4200
         )
 
     def session_goal_seconds(self):
@@ -9085,9 +9150,81 @@ class CareerAccelerator(QMainWindow):
             )
             raise
 
+    @staticmethod
+    def _format_bytes(value):
+        value = int(value or 0)
+        units = ("B", "KB", "MB", "GB", "TB")
+        amount = float(value)
+        for unit in units:
+            if amount < 1024 or unit == units[-1]:
+                return f"{amount:.1f} {unit}" if unit != "B" else f"{int(amount)} B"
+            amount /= 1024
+        return f"{value} B"
+
+    @staticmethod
+    def _directory_size(path):
+        path = Path(path)
+        if not path.exists():
+            return 0
+        total = 0
+        for item in path.rglob("*"):
+            if item.is_file():
+                try:
+                    total += item.stat().st_size
+                except OSError:
+                    continue
+        return total
+
+    def storage_summary_text(self):
+        database_path = ROOT / "data" / "career_accelerator.db"
+        database_size = database_path.stat().st_size if database_path.exists() else 0
+        backup_size = self._directory_size(ROOT / "backups")
+        sql_size = sum(
+            self._directory_size(path)
+            for path in (
+                ROOT / "practice" / "duckdb",
+                ROOT / "practice" / "submissions",
+                ROOT / "resources" / "sql",
+            )
+        )
+        total = database_size + backup_size + sql_size
+        return (
+            f"Database: {self._format_bytes(database_size)}  •  "
+            f"Backups: {self._format_bytes(backup_size)}\n"
+            f"DuckDB and local SQL: {self._format_bytes(sql_size)}  •  "
+            f"Combined local data: {self._format_bytes(total)}"
+        )
+
+    def refresh_storage_summary(self):
+        if hasattr(self, "storage_summary_label"):
+            self.storage_summary_label.setText(self.storage_summary_text())
+
+    def clean_old_backups(self):
+        report = prune_backups_with_report(ROOT / "backups")
+        self.refresh_storage_summary()
+        self.settings_status.setText(
+            f"Removed {report['removed']} old backup(s) and recovered "
+            f"{self._format_bytes(report['recovered_bytes'])}. "
+            f"{report['kept']} retained backup(s) remain."
+        )
+
+    def open_data_folder(self):
+        path = ROOT / "data"
+        path.mkdir(parents=True, exist_ok=True)
+        try:
+            if os.name == "nt":
+                os.startfile(str(path))
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", str(path)])
+            else:
+                subprocess.Popen(["xdg-open", str(path)])
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Data Folder", str(exc))
+
     def backup_database(self):
         path = create_backup(ROOT)
-        self.settings_status.setText(f"Backup created: {path}")
+        self.refresh_storage_summary()
+        self.settings_status.setText(f"Backup ready: {path}")
 
     def restore_tasks(self):
         result = migrate(self.conn, ROOT)

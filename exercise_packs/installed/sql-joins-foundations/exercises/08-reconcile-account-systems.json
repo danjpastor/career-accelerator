@@ -1,7 +1,7 @@
 {
   "id": "reconcile-account-systems",
   "title": "Reconcile CRM and Billing Accounts",
-  "stage": "Stage 8 \u2022 Preserve both systems",
+  "stage": "Stage 8 • Preserve both systems",
   "subtitle": "Use FULL OUTER JOIN to classify matched and unmatched records",
   "difficulty": "Intermediate",
   "estimated_minutes": 35,
@@ -42,7 +42,7 @@
     "Which columns reveal that account 3 is CRM only?"
   ],
   "stretch_goal": "Add a `name_mismatch` flag for matched IDs whose two names differ.",
-  "starter_sql": "SELECT\n    COALESCE(c.account_id, b.account_id) AS account_id,\n    c.account_name AS crm_name,\n    b.billing_name,\n    CASE\n        -- classify matched and unmatched rows\n    END AS source_status\nFROM crm_accounts AS c\nFULL OUTER JOIN billing_accounts AS b\n    ON c.account_id = b.account_id\nORDER BY account_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM crm_accounts;\n",
   "datasets": [
     {
       "table": "crm_accounts",
@@ -70,5 +70,8 @@
       "case"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "full-and-cross-joins",
+  "question_number": 2,
+  "show_starter_sql": true
 }

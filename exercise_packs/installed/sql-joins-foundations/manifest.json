@@ -2,10 +2,10 @@
   "schema_version": 1,
   "pack_id": "sql-joins-foundations",
   "title": "SQL Joins: Match, Preserve, and Combine Rows",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Career Accelerator / ChatGPT",
   "description": "A carefully paced SQL joins course that makes INNER, LEFT, RIGHT, FULL OUTER, CROSS, multi-table, and self joins predictable through preserved-side thinking, row-grain checks, polished lessons, small datasets, progressive hints, and twelve checked exercises.",
-  "difficulty": "Very Beginner \u2192 Advanced Foundation",
+  "difficulty": "Very Beginner → Advanced Foundation",
   "estimated_minutes": 360,
   "concepts": [
     "SQL joins",
@@ -99,7 +99,7 @@
       "id": "what-a-join-does",
       "title": "What a Join Actually Does",
       "file": "lessons/01-what-a-join-does.md",
-      "subtitle": "Match rows by a relationship\u2014not by their position"
+      "subtitle": "Match rows by a relationship—not by their position"
     },
     {
       "id": "inner-joins",
@@ -117,7 +117,7 @@
       "id": "full-and-cross-joins",
       "title": "FULL OUTER and CROSS JOIN",
       "file": "lessons/04-full-and-cross-joins.md",
-      "subtitle": "Cover every unmatched row\u2014or deliberately create combinations"
+      "subtitle": "Cover every unmatched row—or deliberately create combinations"
     },
     {
       "id": "multi-table-joins",
@@ -142,62 +142,98 @@
     {
       "id": "first-inner-join",
       "title": "Match Customers to Regions",
-      "file": "exercises/01-first-inner-join.json"
+      "file": "exercises/01-first-inner-join.json",
+      "lesson_id": "what-a-join-does",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "completed-orders-with-customers",
       "title": "Completed Orders With Customer Names",
-      "file": "exercises/02-completed-orders-with-customers.json"
+      "file": "exercises/02-completed-orders-with-customers.json",
+      "lesson_id": "inner-joins",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "cross-join-planning-grid",
-      "title": "Build a Region\u2013Product Planning Grid",
-      "file": "exercises/03-cross-join-planning-grid.json"
+      "title": "Build a Region–Product Planning Grid",
+      "file": "exercises/03-cross-join-planning-grid.json",
+      "lesson_id": "full-and-cross-joins",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "preserve-all-customers",
       "title": "Preserve Every Customer",
-      "file": "exercises/04-preserve-all-customers.json"
+      "file": "exercises/04-preserve-all-customers.json",
+      "lesson_id": "left-and-right-joins",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "customers-without-orders",
       "title": "Find Customers Without Orders",
-      "file": "exercises/05-customers-without-orders.json"
+      "file": "exercises/05-customers-without-orders.json",
+      "lesson_id": "left-and-right-joins",
+      "question_number": 2,
+      "show_starter_sql": true
     },
     {
       "id": "count-orders-including-zero",
       "title": "Count Orders Including Zero",
-      "file": "exercises/06-count-orders-including-zero.json"
+      "file": "exercises/06-count-orders-including-zero.json",
+      "lesson_id": "left-and-right-joins",
+      "question_number": 3,
+      "show_starter_sql": true
     },
     {
       "id": "preserve-all-regions",
       "title": "Preserve Every Region",
-      "file": "exercises/07-preserve-all-regions.json"
+      "file": "exercises/07-preserve-all-regions.json",
+      "lesson_id": "left-and-right-joins",
+      "question_number": 4,
+      "show_starter_sql": true
     },
     {
       "id": "reconcile-account-systems",
       "title": "Reconcile CRM and Billing Accounts",
-      "file": "exercises/08-reconcile-account-systems.json"
+      "file": "exercises/08-reconcile-account-systems.json",
+      "lesson_id": "full-and-cross-joins",
+      "question_number": 2,
+      "show_starter_sql": true
     },
     {
       "id": "multi-table-order-lines",
       "title": "Trace Order Lines Across Four Tables",
-      "file": "exercises/09-multi-table-order-lines.json"
+      "file": "exercises/09-multi-table-order-lines.json",
+      "lesson_id": "multi-table-joins",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "employee-manager-self-join",
       "title": "Match Employees to Their Managers",
-      "file": "exercises/10-employee-manager-self-join.json"
+      "file": "exercises/10-employee-manager-self-join.json",
+      "lesson_id": "self-joins-and-debugging",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "calculate-order-totals-safely",
       "title": "Calculate Totals Without Fanout Errors",
-      "file": "exercises/11-calculate-order-totals-safely.json"
+      "file": "exercises/11-calculate-order-totals-safely.json",
+      "lesson_id": "join-grain-and-fanout",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "customer-activity-capstone",
       "title": "Capstone: Complete Customer Activity Summary",
-      "file": "exercises/12-customer-activity-capstone.json"
+      "file": "exercises/12-customer-activity-capstone.json",
+      "lesson_id": "join-grain-and-fanout",
+      "question_number": 2,
+      "show_starter_sql": true
     }
   ]
 }

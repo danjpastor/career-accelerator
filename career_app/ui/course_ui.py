@@ -12,7 +12,10 @@ from dataclasses import dataclass
 from typing import Callable, Iterable
 
 from PySide6.QtCore import Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QFont, QFontDatabase, QSyntaxHighlighter, QTextCharFormat
+from PySide6.QtGui import (
+    QColor, QFont, QFontDatabase, QSyntaxHighlighter, QTextCharFormat,
+    QTextCursor, QTextFormat,
+)
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
@@ -27,6 +30,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -240,6 +244,157 @@ class CodeCard(QFrame):
     def copy_code(self) -> None:
         QApplication.clipboard().setText(self.editor.toPlainText())
         self.copied.emit()
+
+
+
+
+class SqlCodeEditor(QWidget):
+    """Reusable SQL editor with line numbers and navigable error highlighting."""
+
+    textChanged = Signal()
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self._error_line: int | None = None
+
+        self._layout = QHBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
+
+        fixed_font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
+        fixed_font.setPointSize(10)
+
+        self.line_numbers = QPlainTextEdit()
+        self.line_numbers.setReadOnly(True)
+        self.line_numbers.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.line_numbers.setFrameShape(QFrame.Shape.NoFrame)
+        self.line_numbers.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+        self.line_numbers.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.line_numbers.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.line_numbers.setFont(fixed_font)
+        self.line_numbers.setStyleSheet(
+            "QPlainTextEdit {background:#0c111c;color:#72809a;border:none;"
+            "border-right:1px solid #29334a;padding:10px 7px;}"
+        )
+
+        self.editor = QPlainTextEdit()
+        self.editor.setFrameShape(QFrame.Shape.NoFrame)
+        self.editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+        self.editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.editor.setFont(fixed_font)
+        self.editor.setTabStopDistance(28)
+        self.editor.setPlaceholderText("Write one read-only SELECT or WITH query here.")
+        self.editor.setStyleSheet(
+            "QPlainTextEdit {background:#111321;color:#f3f4ff;border:none;padding:10px;"
+            "selection-background-color:#6747c7;}"
+        )
+        self._highlighter = SqlHighlighter(self.editor.document())
+
+        self._layout.addWidget(self.line_numbers)
+        self._layout.addWidget(self.editor, 1)
+
+        self.editor.textChanged.connect(self._refresh_line_numbers)
+        self.editor.textChanged.connect(self.clear_error_line)
+        self.editor.textChanged.connect(self.textChanged.emit)
+        self.editor.cursorPositionChanged.connect(self._refresh_extra_selections)
+        self.editor.verticalScrollBar().valueChanged.connect(
+            self.line_numbers.verticalScrollBar().setValue
+        )
+        self._refresh_line_numbers()
+        self._refresh_extra_selections()
+
+    def _refresh_line_numbers(self) -> None:
+        count = max(1, self.editor.blockCount())
+        self.line_numbers.setPlainText("\n".join(str(i) for i in range(1, count + 1)))
+        self.line_numbers.setFixedWidth(max(42, 24 + len(str(count)) * 9))
+        self.line_numbers.verticalScrollBar().setValue(
+            self.editor.verticalScrollBar().value()
+        )
+
+    def _selection_for_line(self, line_number: int, background: str) -> QTextEdit.ExtraSelection | None:
+        block = self.editor.document().findBlockByNumber(max(0, line_number - 1))
+        if not block.isValid():
+            return None
+        selection = QTextEdit.ExtraSelection()
+        selection.cursor = QTextCursor(block)
+        selection.cursor.clearSelection()
+        selection.format.setBackground(QColor(background))
+        selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
+        return selection
+
+    def _refresh_extra_selections(self) -> None:
+        selections: list[QTextEdit.ExtraSelection] = []
+        current = self._selection_for_line(
+            self.editor.textCursor().blockNumber() + 1, "#191c31"
+        )
+        if current is not None:
+            selections.append(current)
+        if self._error_line is not None:
+            error = self._selection_for_line(self._error_line, "#452330")
+            if error is not None:
+                selections.append(error)
+        self.editor.setExtraSelections(selections)
+
+    def set_error_line(self, line_number: int | None, column: int = 1) -> None:
+        self._error_line = int(line_number) if line_number else None
+        self._refresh_extra_selections()
+        if line_number:
+            self.go_to_line(int(line_number), column)
+
+    def clear_error_line(self) -> None:
+        if self._error_line is not None:
+            self._error_line = None
+            self._refresh_extra_selections()
+
+    def setPlainText(self, text: str) -> None:
+        self.editor.setPlainText(str(text or ""))
+
+    def toPlainText(self) -> str:
+        return self.editor.toPlainText()
+
+    def clear(self) -> None:
+        self.editor.clear()
+
+    def setPlaceholderText(self, text: str) -> None:
+        self.editor.setPlaceholderText(text)
+
+    def setReadOnly(self, read_only: bool) -> None:
+        self.editor.setReadOnly(read_only)
+
+    def setEnabled(self, enabled: bool) -> None:
+        super().setEnabled(enabled)
+        self.editor.setEnabled(enabled)
+        self.line_numbers.setEnabled(enabled)
+
+    def setFocus(self, reason=Qt.FocusReason.OtherFocusReason) -> None:
+        self.editor.setFocus(reason)
+
+    def blockSignals(self, block: bool) -> bool:
+        previous = self.editor.blockSignals(block)
+        super().blockSignals(block)
+        return previous
+
+    def navigate_to_error(self, message: str) -> bool:
+        match = re.search(r"(?:line|LINE)\s+(\d+)(?::(\d+))?", str(message or ""))
+        if not match:
+            match = re.search(r"LINE\s+(\d+):", str(message or ""), re.IGNORECASE)
+        if not match:
+            return False
+        line = int(match.group(1))
+        column = int(match.group(2) or 1) if match.lastindex and match.lastindex >= 2 else 1
+        self.set_error_line(line, column)
+        return True
+
+    def go_to_line(self, line_number: int, column: int = 1) -> None:
+        block = self.editor.document().findBlockByNumber(max(0, line_number - 1))
+        if not block.isValid():
+            return
+        cursor = self.editor.textCursor()
+        cursor.setPosition(block.position() + max(0, column - 1))
+        self.editor.setTextCursor(cursor)
+        self.editor.centerCursor()
+        self.editor.setFocus()
+        self._refresh_extra_selections()
 
 
 class CourseTable(QTableWidget):

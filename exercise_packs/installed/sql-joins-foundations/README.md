@@ -29,3 +29,8 @@ For every join, answer four questions before writing SQL:
 4. Can one row match zero, one, or many rows on the other side?
 
 The pack covers `INNER JOIN`, `LEFT JOIN`, the meaning of `RIGHT JOIN`, `FULL OUTER JOIN`, `CROSS JOIN`, multi-table joins, self joins, unmatched rows, `NULL`, one-to-many relationships, and fanout-safe aggregation.
+
+
+## Version 2.0.0
+
+Every lesson is mapped to concept-specific practice questions. New answers contain only minimal scaffolding, never the worked lesson example or official solution.

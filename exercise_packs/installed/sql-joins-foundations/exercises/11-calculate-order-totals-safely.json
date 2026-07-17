@@ -1,9 +1,9 @@
 {
   "id": "calculate-order-totals-safely",
   "title": "Calculate Totals Without Fanout Errors",
-  "stage": "Stage 11 \u2022 Control result grain",
+  "stage": "Stage 11 • Control result grain",
   "subtitle": "Aggregate line values instead of summing repeated order totals",
-  "difficulty": "Intermediate \u2192 Advanced Foundation",
+  "difficulty": "Intermediate → Advanced Foundation",
   "estimated_minutes": 35,
   "concepts": [
     "join fanout",
@@ -20,7 +20,7 @@
     "Join orders to order_items on order_id.",
     "Group by the order identifier.",
     "Count order-item IDs for line_count.",
-    "Sum quantity \u00d7 unit_price for calculated_order_total."
+    "Sum quantity × unit_price for calculated_order_total."
   ],
   "explanation": "The detail table repeats the order row. Summing line-level values is safe because each line contributes once.",
   "common_mistakes": [
@@ -42,7 +42,7 @@
     "What does one output row represent?"
   ],
   "stretch_goal": "Join customers and add customer_name without changing the one-row-per-order grain.",
-  "starter_sql": "SELECT\n    o.order_id,\n    COUNT(oi.order_item_id) AS line_count,\n    SUM(-- line-level calculation) AS calculated_order_total\nFROM orders AS o\nINNER JOIN order_items AS oi\n    ON o.order_id = oi.order_id\nGROUP BY o.order_id\nORDER BY o.order_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM orders;\n",
   "datasets": [
     {
       "table": "orders",
@@ -71,5 +71,8 @@
       "group by"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "join-grain-and-fanout",
+  "question_number": 1,
+  "show_starter_sql": true
 }

@@ -9,6 +9,23 @@ Related references:
 - `QUALITY_CHECKLIST.md` — pre-release acceptance checklist
 - `templates/standard-pack-template/` — copyable starting structure
 
+## v10 lesson-practice contract
+
+Every lesson must teach a concept and immediately provide at least one question that asks the learner to use that concept. Questions are associated through `lesson_id` and ordered with `question_number`. When the learner selects a lesson, the Practice card must show those questions—not a generic sandbox and not a detached exercise list.
+
+For each question, author a direct task, expected output shape, dataset details, progressive hints, validation rules, and an official walkthrough. New learner SQL may contain only a minimal starting template. Never auto-fill a lesson example, the official solution, or enough completed SQL to remove the reasoning step. Previously saved learner SQL should reopen unchanged.
+
+Use this learning loop consistently:
+
+1. Explain the mental model in Learn.
+2. Ask a focused question in Practice.
+3. Let the learner write and run SQL.
+4. Check the result and required concept patterns.
+5. Reveal hints progressively.
+6. Keep the official solution in a separate walkthrough.
+
+Viewing or copying a solution must not count as mastery or create Demonstrated Evidence.
+
 ## 1. Product purpose
 
 Exercise Packs are **optional supplemental courses**. They help a learner slow down, revisit, or deepen a concept without changing the required roadmap.

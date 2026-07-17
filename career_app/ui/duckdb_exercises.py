@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import QSettings, Qt, QTimer, Signal
-from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -36,7 +35,7 @@ from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 from career_app.services import duckdb_workspace
 from career_app.services import duckdb_exercise_runner as runner
 from career_app.theme import COLORS
-from career_app.ui.course_ui import CoursePageWidget
+from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
 from career_app.ui.widgets import Card
 
 
@@ -222,23 +221,12 @@ class DuckDBExercisesWidget(QWidget):
         )
         self.practice_card.layout.addWidget(self.question_prompt)
 
-        self.sql_editor = QTextEdit()
+        self.sql_editor = SqlCodeEditor()
         self.sql_editor.setObjectName("DuckDBExerciseSqlEditor")
-        self.sql_editor.setAcceptRichText(False)
-        self.sql_editor.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
         self.sql_editor.setPlaceholderText(
             "Write the SQL answer for the selected question. Each question is saved independently."
         )
-        code_font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
-        code_font.setPointSize(10)
-        self.sql_editor.setFont(code_font)
-        self.sql_editor.setTabStopDistance(28)
-        self.sql_editor.setStyleSheet(
-            "QTextEdit#DuckDBExerciseSqlEditor {background:#0f1420;color:#f3f5fb;"
-            "border:1px solid #343c55;border-radius:9px;padding:10px;"
-            "selection-background-color:#6043b6;}"
-            f"QTextEdit#DuckDBExerciseSqlEditor:focus {{border:1px solid {COLORS.get('purple', '#8b5cf6')};}}"
-        )
+        self.sql_editor.setMinimumHeight(240)
         self.sql_editor.textChanged.connect(self._answer_changed)
         self.practice_card.layout.addWidget(self.sql_editor, 3)
 
@@ -655,7 +643,9 @@ class DuckDBExercisesWidget(QWidget):
                 self.root, self.current_number, full_sql, question_number
             )
         except runner.DuckDBExerciseRunnerError as exc:
-            self.feedback.show_message(str(exc), "error")
+            message = str(exc)
+            self.feedback.show_message(message, "error")
+            self.sql_editor.navigate_to_error(message)
             return
         self._question_results[question_number] = run
         self._populate_result(run)

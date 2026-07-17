@@ -2,7 +2,7 @@
   "schema_version": 1,
   "pack_id": "replace-with-stable-pack-id",
   "title": "Replace With Pack Title",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Your Name",
   "description": "Explain what the learner will understand and practice.",
   "difficulty": "Very Beginner \u2192 Intermediate",
@@ -44,7 +44,10 @@
     {
       "id": "first-exercise",
       "title": "First Exercise",
-      "file": "exercises/01-first-exercise.json"
+      "file": "exercises/01-first-exercise.json",
+      "lesson_id": "concept-introduction",
+      "question_number": 1,
+      "show_starter_sql": true
     }
   ]
 }

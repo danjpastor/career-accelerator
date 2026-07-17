@@ -1,7 +1,7 @@
 {
   "id": "completed-orders-with-customers",
   "title": "Completed Orders With Customer Names",
-  "stage": "Stage 2 \u2022 Match then filter",
+  "stage": "Stage 2 • Match then filter",
   "subtitle": "Keep matched orders and apply a separate business filter",
   "difficulty": "Very Beginner",
   "estimated_minutes": 20,
@@ -41,7 +41,7 @@
     "Would a LEFT JOIN from orders preserve it?"
   ],
   "stretch_goal": "Also return `order_date` and sort newest first.",
-  "starter_sql": "SELECT\n    o.order_id,\n    c.customer_name,\n    o.total_amount\nFROM orders AS o\nINNER JOIN customers AS c\n    ON -- customer relationship\nWHERE -- completed orders only\nORDER BY o.order_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM orders;\n",
   "datasets": [
     {
       "table": "orders",
@@ -68,5 +68,8 @@
       "where"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "inner-joins",
+  "question_number": 1,
+  "show_starter_sql": true
 }

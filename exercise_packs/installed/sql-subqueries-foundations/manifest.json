@@ -2,10 +2,10 @@
   "schema_version": 1,
   "pack_id": "sql-subqueries-foundations",
   "title": "SQL Subqueries: Foundations to Advanced",
-  "version": "1.1.3",
+  "version": "2.0.0",
   "author": "Career Accelerator / ChatGPT",
   "description": "A carefully paced, polished SQL subquery course with calm course-site styling, result-shape thinking, boxed code, refined tables, progressive hints, small datasets, and twelve exercises from first principles through correlated and nested analysis.",
-  "difficulty": "Very Beginner \u2192 Advanced Foundation",
+  "difficulty": "Very Beginner → Advanced Foundation",
   "estimated_minutes": 390,
   "concepts": [
     "SQL subqueries",
@@ -132,62 +132,98 @@
     {
       "id": "inspect-the-inner-query",
       "title": "Inspect the Inner Query First",
-      "file": "exercises/01-inspect-the-inner-query.json"
+      "file": "exercises/01-inspect-the-inner-query.json",
+      "lesson_id": "what-is-a-subquery",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "salary-above-company-average",
       "title": "Employees Above the Company Average",
-      "file": "exercises/02-salary-above-company-average.json"
+      "file": "exercises/02-salary-above-company-average.json",
+      "lesson_id": "one-value-subqueries",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "budget-above-average",
       "title": "Departments Above the Average Budget",
-      "file": "exercises/03-budget-above-average.json"
+      "file": "exercises/03-budget-above-average.json",
+      "lesson_id": "one-value-subqueries",
+      "question_number": 2,
+      "show_starter_sql": true
     },
     {
       "id": "customers-with-completed-orders",
       "title": "Customers With Completed Orders",
-      "file": "exercises/04-customers-with-completed-orders.json"
+      "file": "exercises/04-customers-with-completed-orders.json",
+      "lesson_id": "in-and-exists",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "customers-without-completed-orders",
       "title": "Customers Without Completed Orders",
-      "file": "exercises/05-customers-without-completed-orders.json"
+      "file": "exercises/05-customers-without-completed-orders.json",
+      "lesson_id": "in-and-exists",
+      "question_number": 2,
+      "show_starter_sql": true
     },
     {
       "id": "derived-department-averages",
       "title": "Filter a Derived Summary Table",
-      "file": "exercises/06-derived-department-averages.json"
+      "file": "exercises/06-derived-department-averages.json",
+      "lesson_id": "subqueries-in-from",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "above-department-average",
       "title": "Employees Above Their Department Average",
-      "file": "exercises/07-above-department-average.json"
+      "file": "exercises/07-above-department-average.json",
+      "lesson_id": "correlated-subqueries",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "departments-with-high-earners",
       "title": "Departments With a High Earner",
-      "file": "exercises/08-departments-with-high-earners.json"
+      "file": "exercises/08-departments-with-high-earners.json",
+      "lesson_id": "subquery-vs-join-vs-cte",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "spend-above-customer-average",
       "title": "Customer Spend Above the Customer Average",
-      "file": "exercises/09-spend-above-customer-average.json"
+      "file": "exercises/09-spend-above-customer-average.json",
+      "lesson_id": "correlated-subqueries",
+      "question_number": 2,
+      "show_starter_sql": true
     },
     {
       "id": "completed-order-count-per-customer",
       "title": "Count Related Rows With a Subquery",
-      "file": "exercises/10-completed-order-count-per-customer.json"
+      "file": "exercises/10-completed-order-count-per-customer.json",
+      "lesson_id": "debugging-subqueries",
+      "question_number": 1,
+      "show_starter_sql": true
     },
     {
       "id": "employees-in-above-average-budget-departments",
       "title": "A Nested Two-Step Filter",
-      "file": "exercises/11-employees-in-above-average-budget-departments.json"
+      "file": "exercises/11-employees-in-above-average-budget-departments.json",
+      "lesson_id": "subquery-vs-join-vs-cte",
+      "question_number": 2,
+      "show_starter_sql": true
     },
     {
       "id": "subquery-capstone-customer-value",
       "title": "Capstone: High-Value Repeat Customers",
-      "file": "exercises/12-subquery-capstone-customer-value.json"
+      "file": "exercises/12-subquery-capstone-customer-value.json",
+      "lesson_id": "debugging-subqueries",
+      "question_number": 2,
+      "show_starter_sql": true
     }
   ]
 }

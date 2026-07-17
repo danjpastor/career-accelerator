@@ -1,7 +1,7 @@
 {
   "id": "multi-table-order-lines",
   "title": "Trace Order Lines Across Four Tables",
-  "stage": "Stage 9 \u2022 Relationship chain",
+  "stage": "Stage 9 • Relationship chain",
   "subtitle": "Add one join at a time and finish at line-item grain",
   "difficulty": "Intermediate",
   "estimated_minutes": 35,
@@ -13,7 +13,7 @@
   "learning_objective": "Follow customer, order, line-item, and product relationships without joining unrelated keys.",
   "recommended_lesson": "Lesson 5: Multi-Table Joins and Aliases",
   "why": "Transactional models split descriptive and detailed data across several normalized tables.",
-  "prompt": "Return `order_id`, `customer_name`, `product_name`, `quantity`, and `line_total` for order lines whose order has a known customer. Calculate `line_total` as quantity \u00d7 unit price. Order by `order_id`, then `product_id`.",
+  "prompt": "Return `order_id`, `customer_name`, `product_name`, `quantity`, and `line_total` for order lines whose order has a known customer. Calculate `line_total` as quantity × unit price. Order by `order_id`, then `product_id`.",
   "expected_result": "8 rows. The orphan order 1007 is excluded because no customer matches; order 1001 appears twice because it has two lines.",
   "build_steps": [
     "Start at orders.",
@@ -29,7 +29,7 @@
     "Expecting one row per order after selecting line details."
   ],
   "hints": [
-    "The path is orders \u2192 customers and orders \u2192 order_items \u2192 products.",
+    "The path is orders → customers and orders → order_items → products.",
     "The line calculation is `oi.quantity * oi.unit_price`.",
     "Use four aliases: `o`, `c`, `oi`, and `p`."
   ],
@@ -42,7 +42,7 @@
     "Which join removes order 1007?"
   ],
   "stretch_goal": "Filter the result to completed orders only.",
-  "starter_sql": "SELECT\n    o.order_id,\n    c.customer_name,\n    p.product_name,\n    oi.quantity,\n    oi.quantity * oi.unit_price AS line_total\nFROM orders AS o\nINNER JOIN customers AS c\n    ON -- customer relationship\nINNER JOIN order_items AS oi\n    ON -- order relationship\nINNER JOIN products AS p\n    ON -- product relationship\nORDER BY o.order_id, p.product_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM orders;\n",
   "datasets": [
     {
       "table": "orders",
@@ -76,5 +76,8 @@
       "inner join"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "multi-table-joins",
+  "question_number": 1,
+  "show_starter_sql": true
 }

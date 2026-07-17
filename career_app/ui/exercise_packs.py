@@ -35,7 +35,7 @@ from PySide6.QtWidgets import (
 
 from career_app.services import exercise_packs
 from career_app.theme import COLORS
-from career_app.ui.course_ui import CoursePageWidget
+from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
 from career_app.ui.widgets import Card
 
 
@@ -185,6 +185,7 @@ class ExercisePacksWidget(QWidget):
         self.current_content_kind: str | None = None
         self.current_content_id: str | None = None
         self._building_lists = False
+        self._question_selector_loading = False
 
         exercise_packs.ensure_schema(self.conn)
         exercise_packs.ensure_bundled_packs(self.root, self.conn)
@@ -332,26 +333,38 @@ class ExercisePacksWidget(QWidget):
         self.practice_title = QLabel("Your SQL")
         self.practice_title.setObjectName("SectionTitle")
         practice_layout.addWidget(self.practice_title)
+
+        self.question_selector_row = QWidget()
+        question_selector_layout = QHBoxLayout(self.question_selector_row)
+        question_selector_layout.setContentsMargins(0, 0, 0, 0)
+        question_selector_layout.setSpacing(8)
+        question_selector_label = QLabel("Practice question")
+        question_selector_label.setObjectName("Muted")
+        self.lesson_question_combo = QComboBox()
+        self.lesson_question_combo.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+        self.lesson_question_combo.currentIndexChanged.connect(
+            self._lesson_question_changed
+        )
+        question_selector_layout.addWidget(question_selector_label)
+        question_selector_layout.addWidget(self.lesson_question_combo, 1)
+        self.question_selector_row.hide()
+        practice_layout.addWidget(self.question_selector_row)
+
+        self.practice_prompt = QLabel("")
+        self.practice_prompt.setWordWrap(True)
+        self.practice_prompt.setStyleSheet("font-size:11pt;font-weight:700;color:#f4f4fb;background:#1a2030;border:1px solid #343854;border-radius:9px;padding:10px;")
+        self.practice_prompt.hide()
+        practice_layout.addWidget(self.practice_prompt)
         self.practice_intro = QLabel(
             "Build the smallest query first, run it often, and use Check Answer only when the output shape looks right."
         )
         self.practice_intro.setObjectName("Muted")
         self.practice_intro.setWordWrap(True)
         practice_layout.addWidget(self.practice_intro)
-        self.sql_editor = QTextEdit()
-        self.sql_editor.setPlaceholderText("Write one read-only SELECT or WITH query here.")
-        self.sql_editor.setAcceptRichText(False)
-        self.sql_editor.setLineWrapMode(QTextEdit.NoWrap)
-        code_font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        code_font.setPointSize(10)
-        self.sql_editor.setFont(code_font)
-        self.sql_editor.setTabStopDistance(28)
-        self.sql_editor.setStyleSheet(
-            f"QTextEdit {{background:#111321;color:#f3f4ff;"
-            f"border:1px solid {COLORS.get('border', '#3b3e5b')};"
-            "border-radius:9px;padding:10px;selection-background-color:#6747c7;}"
-            f"QTextEdit:focus {{border:1px solid {COLORS.get('purple', '#8b5cf6')};}}"
-        )
+        self.sql_editor = SqlCodeEditor()
+        self.sql_editor.setMinimumHeight(220)
         self.sql_editor.textChanged.connect(self._answer_edited)
         practice_layout.addWidget(self.sql_editor, 2)
 
@@ -534,6 +547,7 @@ class ExercisePacksWidget(QWidget):
                     status="Not Started",
                     answer_sql="",
                     notes="",
+                    hint_index=0,
                 )
                 self._show_exercise(self.current_exercise["id"])
                 self.packsChanged.emit()
@@ -576,7 +590,10 @@ class ExercisePacksWidget(QWidget):
         if not self.current_pack:
             return
         if self.current_content_kind == "lesson":
-            self._save_lesson_sandbox()
+            if self.current_exercise:
+                self._save_question_before_switch()
+            else:
+                self._save_lesson_sandbox()
         self.current_exercise = None
         self.current_lesson_context = None
         self.current_exercise_valid = False
@@ -619,8 +636,8 @@ class ExercisePacksWidget(QWidget):
         )
         self.practice_title.setText("Practice")
         self.practice_intro.setText(
-            "Start the course or choose a guided exercise from the learning path. "
-            "Lesson pages include a runnable sandbox; exercises add checking, hints, and solutions."
+            "Start the course or choose a lesson from the learning path. "
+            "Each v10 lesson loads its own checked practice questions, hints, and solutions."
         )
         self.sql_editor.clear()
         self.notes.clear()
@@ -735,9 +752,144 @@ class ExercisePacksWidget(QWidget):
         if notes_key:
             self._settings.setValue(notes_key, self.notes.toPlainText())
 
+    def _questions_for_lesson(self, lesson_id: str) -> list[dict[str, Any]]:
+        if not self.current_pack:
+            return []
+        questions = [
+            entry for entry in self.current_pack.get("exercises", [])
+            if entry.get("lesson_id") == lesson_id
+        ]
+        return sorted(
+            questions,
+            key=lambda entry: (int(entry.get("question_number", 999)), entry.get("title", "")),
+        )
+
+    def _populate_question_selector(
+        self, lesson_id: str, selected_exercise_id: str | None = None
+    ) -> None:
+        questions = self._questions_for_lesson(lesson_id)
+        self._question_selector_loading = True
+        self.lesson_question_combo.clear()
+        selected_index = 0
+        for index, entry in enumerate(questions):
+            number = int(entry.get("question_number", index + 1))
+            self.lesson_question_combo.addItem(
+                f"Question {number}: {entry['title']}", entry["id"]
+            )
+            if entry["id"] == selected_exercise_id:
+                selected_index = index
+        if questions:
+            self.lesson_question_combo.setCurrentIndex(selected_index)
+            self.question_selector_row.show()
+        else:
+            self.question_selector_row.hide()
+        self._question_selector_loading = False
+
+    def _save_question_before_switch(self) -> None:
+        if not self.current_exercise:
+            return
+        saved = exercise_packs.progress_for(
+            self.conn, self.current_exercise["pack_id"], self.current_exercise["id"]
+        )
+        sql = self.sql_editor.toPlainText()
+        notes = self.notes.toPlainText()
+        starter = (
+            self.current_exercise.get("starter_sql", "")
+            if self.current_exercise.get("show_starter_sql", True)
+            else ""
+        )
+        unchanged_new = (
+            saved["status"] == "Not Started"
+            and sql.strip() == starter.strip()
+            and not notes.strip()
+        )
+        if unchanged_new:
+            return
+        if sql != saved.get("answer_sql", "") or notes != saved.get("notes", ""):
+            status = "Completed" if saved["status"] == "Completed" else "In Progress"
+            exercise_packs.save_progress(
+                self.conn,
+                self.current_exercise["pack_id"],
+                self.current_exercise["id"],
+                status=status,
+                answer_sql=sql,
+                notes=notes,
+                hint_index=getattr(self, "_hint_index", 0),
+            )
+
+    def _lesson_question_changed(self, index: int) -> None:
+        if self._question_selector_loading or index < 0:
+            return
+        exercise_id = self.lesson_question_combo.itemData(index)
+        if not exercise_id:
+            return
+        if self.current_exercise and self.current_exercise.get("id") == exercise_id:
+            return
+        self._save_question_before_switch()
+        self._load_question_practice(str(exercise_id))
+
+    def _load_question_practice(
+        self, exercise_id: str, *, exercise: dict[str, Any] | None = None
+    ) -> None:
+        if not self.current_pack:
+            return
+        try:
+            exercise = exercise or exercise_packs.load_exercise(
+                self.current_pack, exercise_id
+            )
+        except exercise_packs.ExercisePackError as exc:
+            self.feedback.setText(f"❌ {exc}")
+            return
+        self.current_exercise = exercise
+        self.current_lesson_context = None
+        self.current_exercise_valid = False
+        saved = exercise_packs.progress_for(
+            self.conn, exercise["pack_id"], exercise["id"]
+        )
+        self._restore_exercise_practice_labels()
+        number = int(exercise.get("question_number", 1))
+        self.practice_title.setText(f"Question {number}: {exercise['title']}")
+        self.workspace_status.setText(
+            f"{saved['status']} • {exercise.get('stage', 'Practice question')} • "
+            f"{exercise.get('difficulty', 'Mixed')} • "
+            f"{exercise.get('estimated_minutes', 0)} minutes"
+        )
+        self.practice_prompt.setText(
+            "Your task: " + exercise.get("prompt", "Write the requested query.")
+        )
+        self.practice_prompt.show()
+        self.sql_editor.blockSignals(True)
+        # Only the authored starting template is inserted for a new answer.
+        # Lesson examples and official solutions are never copied automatically.
+        starter_sql = (
+            exercise.get("starter_sql", "")
+            if exercise.get("show_starter_sql", True)
+            else ""
+        )
+        saved_sql = saved.get("answer_sql", "")
+        self.sql_editor.setPlainText(
+            starter_sql
+            if saved.get("status") == "Not Started" and not saved_sql
+            else saved_sql
+        )
+        self.sql_editor.blockSignals(False)
+        self.notes.setPlainText(saved.get("notes", ""))
+        self.feedback.setText(
+            "Write your own query from the starting template, then Run Query and Check Answer."
+        )
+        self._hint_index = int(saved.get("hint_index", 0) or 0)
+        self._set_practice_enabled(True)
+        self._update_hint_button()
+        self.complete_button.setEnabled(saved["status"] == "Completed")
+        self.result_table.clear()
+        self.result_table.setRowCount(0)
+        self.result_table.setColumnCount(0)
+
     def _set_lesson_practice(self, markdown: str) -> None:
         self.current_lesson_context = self._build_lesson_sandbox_context()
+        self.question_selector_row.hide()
         self.practice_title.setText("Lesson Sandbox")
+        self.practice_prompt.hide()
         if self.current_lesson_context:
             self.practice_intro.setText(
                 "Try the lesson example or write your own read-only query. Run Query "
@@ -752,14 +904,14 @@ class ExercisePacksWidget(QWidget):
         notes_key = self._lesson_sandbox_key("notes")
         saved_sql = self._settings.value(sql_key, "", type=str) if sql_key else ""
         saved_notes = self._settings.value(notes_key, "", type=str) if notes_key else ""
-        starter_sql = saved_sql or self._first_sql_code_block(markdown)
+        starter_sql = saved_sql
         self.sql_editor.blockSignals(True)
         self.sql_editor.setPlainText(starter_sql)
         self.sql_editor.blockSignals(False)
         self.notes.setPlainText(saved_notes)
         self.feedback.setText(
-            "Lesson sandbox ready. Edit and run the example here; select a guided "
-            "exercise when you are ready for answer checking."
+            "Legacy scratchpad ready. Write your own read-only query here; select a "
+            "practice question when you are ready for answer checking."
         )
         self.result_table.clear()
         self.result_table.setRowCount(0)
@@ -904,37 +1056,66 @@ class ExercisePacksWidget(QWidget):
         self.content_list.blockSignals(True)
         self.content_list.clear()
         lessons = pack.get("lessons", [])
-        for number, lesson in enumerate(lessons, start=1):
-            item = QListWidgetItem(f"●  {lesson['title']}")
+        any_started = False
+        linked_ids = set()
+        for lesson_number, lesson in enumerate(lessons, start=1):
+            item = QListWidgetItem(f"●  Lesson {lesson_number}: {lesson['title']}")
             item.setSizeHint(QSize(0, 44))
             item.setData(
                 Qt.ItemDataRole.UserRole, {"kind": "lesson", "id": lesson["id"]}
             )
             self.content_list.addItem(item)
-        any_started = False
-        for number, exercise in enumerate(pack.get("exercises", []), start=1):
+            lesson_questions = [
+                entry for entry in pack.get("exercises", [])
+                if entry.get("lesson_id") == lesson["id"]
+            ]
+            lesson_questions.sort(
+                key=lambda entry: int(entry.get("question_number", 999))
+            )
+            for question in lesson_questions:
+                linked_ids.add(question["id"])
+                saved = exercise_packs.progress_for(
+                    self.conn, pack["pack_id"], question["id"]
+                )
+                any_started = any_started or saved["status"] != "Not Started"
+                icon = (
+                    "✅" if saved["status"] == "Completed"
+                    else ("◐" if saved["status"] == "In Progress" else "○")
+                )
+                q_number = int(question.get("question_number", 1))
+                q_item = QListWidgetItem(
+                    f"    {icon}  Question {q_number}: {question['title']}"
+                )
+                q_item.setSizeHint(QSize(0, 40))
+                q_item.setToolTip(
+                    f"Practice for {lesson['title']} • "
+                    f"{question.get('difficulty', 'Mixed')} • "
+                    f"{question.get('estimated_minutes', 0)} minutes"
+                )
+                q_item.setData(
+                    Qt.ItemDataRole.UserRole,
+                    {"kind": "exercise", "id": question["id"]},
+                )
+                self.content_list.addItem(q_item)
+        # Legacy packs without lesson_id associations remain navigable.
+        for exercise in pack.get("exercises", []):
+            if exercise["id"] in linked_ids:
+                continue
             saved = exercise_packs.progress_for(
                 self.conn, pack["pack_id"], exercise["id"]
             )
             any_started = any_started or saved["status"] != "Not Started"
             icon = (
-                "✅"
-                if saved["status"] == "Completed"
+                "✅" if saved["status"] == "Completed"
                 else ("◐" if saved["status"] == "In Progress" else "○")
             )
-            item = QListWidgetItem(
-                f"{icon}  {exercise['title']}"
-            )
-            item.setSizeHint(QSize(0, 44))
-            item.setToolTip(
-                f"{exercise.get('difficulty', 'Mixed')} • "
-                f"{exercise.get('estimated_minutes', 0)} minutes"
-            )
-            item.setData(
+            q_item = QListWidgetItem(f"{icon}  {exercise['title']}")
+            q_item.setSizeHint(QSize(0, 44))
+            q_item.setData(
                 Qt.ItemDataRole.UserRole,
                 {"kind": "exercise", "id": exercise["id"]},
             )
-            self.content_list.addItem(item)
+            self.content_list.addItem(q_item)
         self.content_list.blockSignals(False)
         next_id = progress.get("next_id")
         if lessons and progress.get("completed", 0) == 0 and not any_started:
@@ -948,7 +1129,10 @@ class ExercisePacksWidget(QWidget):
         if current is None or not self.current_pack:
             return
         if self.current_content_kind == "lesson":
-            self._save_lesson_sandbox()
+            if self.current_exercise:
+                self._save_question_before_switch()
+            else:
+                self._save_lesson_sandbox()
         data = current.data(Qt.ItemDataRole.UserRole) or {}
         if data.get("kind") == "lesson":
             self._show_lesson(data["id"])
@@ -985,7 +1169,12 @@ class ExercisePacksWidget(QWidget):
             next_title=self._next_content_title("lesson", lesson_id),
             show_back=True,
         )
-        self._set_lesson_practice(markdown)
+        questions = self._questions_for_lesson(lesson_id)
+        if questions:
+            self._populate_question_selector(lesson_id)
+            self._load_question_practice(questions[0]["id"])
+        else:
+            self._set_lesson_practice(markdown)
         self._set_workspace_focus(0)
 
     def _show_exercise(self, exercise_id: str) -> None:
@@ -1073,25 +1262,13 @@ class ExercisePacksWidget(QWidget):
             show_back=True,
             continue_text="Next  →",
         )
-        self._restore_exercise_practice_labels()
-        self.workspace_status.setText(
-            f"{saved['status']} • {exercise.get('stage', 'Practice exercise')} • "
-            f"{exercise.get('difficulty', 'Mixed')} • "
-            f"{exercise.get('estimated_minutes', 0)} minutes"
-        )
-        self.sql_editor.blockSignals(True)
-        self.sql_editor.setPlainText(saved.get("answer_sql") or exercise["starter_sql"])
-        self.sql_editor.blockSignals(False)
-        self.notes.setPlainText(saved.get("notes", ""))
-        self.feedback.setText("")
-        self._hint_index = 0
-        self._set_practice_enabled(True)
-        self._update_hint_button()
-        self.complete_button.setEnabled(saved["status"] == "Completed")
+        lesson_id = exercise.get("lesson_id")
+        if lesson_id:
+            self._populate_question_selector(lesson_id, exercise_id)
+        else:
+            self.question_selector_row.hide()
+        self._load_question_practice(exercise_id, exercise=exercise)
         self._set_workspace_focus(1)
-        self.result_table.clear()
-        self.result_table.setRowCount(0)
-        self.result_table.setColumnCount(0)
 
     def _answer_edited(self) -> None:
         self.current_exercise_valid = False
@@ -1121,7 +1298,9 @@ class ExercisePacksWidget(QWidget):
                 query_context, self.sql_editor.toPlainText()
             )
         except exercise_packs.ExercisePackError as exc:
-            self.feedback.setText(f"❌ {exc}")
+            message = str(exc)
+            self.feedback.setText(f"❌ {message}")
+            self.sql_editor.navigate_to_error(message)
             return
         self._display_result(result)
         self.feedback.setText(
@@ -1140,7 +1319,9 @@ class ExercisePacksWidget(QWidget):
                 self.current_exercise, self.sql_editor.toPlainText()
             )
         except exercise_packs.ExercisePackError as exc:
-            self.feedback.setText(f"❌ {exc}")
+            message = str(exc)
+            self.feedback.setText(f"❌ {message}")
+            self.sql_editor.navigate_to_error(message)
             return
         self._display_result(result["user"])
         if result["correct"]:
@@ -1209,6 +1390,7 @@ class ExercisePacksWidget(QWidget):
         self.feedback.setText(f"💡 Hint {index + 1}/{len(hints)}: {hints[index]}")
         self._hint_index = min(index + 1, len(hints))
         self._update_hint_button()
+        self._save_as_in_progress()
 
     def show_solution(self) -> None:
         if not self.current_exercise:
@@ -1300,6 +1482,7 @@ class ExercisePacksWidget(QWidget):
             status=status,
             answer_sql=self.sql_editor.toPlainText(),
             notes=self.notes.toPlainText(),
+            hint_index=getattr(self, "_hint_index", 0),
         )
 
     def save_current_progress(self) -> None:
@@ -1310,7 +1493,7 @@ class ExercisePacksWidget(QWidget):
             return
         if self.current_content_kind == "lesson":
             self._save_lesson_sandbox()
-            self.feedback.setText("Lesson sandbox saved.")
+            self.feedback.setText("Lesson scratchpad saved.")
 
     def complete_current_exercise(self) -> None:
         if not self.current_exercise:
@@ -1330,6 +1513,7 @@ class ExercisePacksWidget(QWidget):
             status="Completed",
             answer_sql=self.sql_editor.toPlainText(),
             notes=self.notes.toPlainText(),
+            hint_index=getattr(self, "_hint_index", 0),
         )
         self.feedback.setText("✅ Exercise completed. The next exercise is now ready.")
         self.packsChanged.emit()
@@ -1345,6 +1529,8 @@ class ExercisePacksWidget(QWidget):
     def _clear_workspace(self) -> None:
         self.current_exercise = None
         self.current_lesson_context = None
+        self.practice_prompt.hide()
+        self.question_selector_row.hide()
         self.read_view.clear()
         self.sql_editor.clear()
         self.notes.clear()

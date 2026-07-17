@@ -1,7 +1,7 @@
 {
   "id": "customer-activity-capstone",
   "title": "Capstone: Complete Customer Activity Summary",
-  "stage": "Stage 12 \u2022 Combine the mental models",
+  "stage": "Stage 12 • Combine the mental models",
   "subtitle": "Preserve customers, enrich dimensions, and aggregate transactions safely",
   "difficulty": "Advanced Foundation",
   "estimated_minutes": 45,
@@ -47,7 +47,7 @@
     "Which join preserves Evergreen Health despite a missing region?"
   ],
   "stretch_goal": "Add a `has_pending_order` flag using `MAX(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END)`.",
-  "starter_sql": "SELECT\n    c.customer_id,\n    c.customer_name,\n    COALESCE(r.region_name, 'Unassigned') AS region_name,\n    COUNT(DISTINCT CASE\n        WHEN -- completed condition\n        THEN o.order_id\n    END) AS completed_order_count,\n    SUM(CASE\n        WHEN -- completed condition\n        THEN o.total_amount\n        ELSE 0\n    END) AS completed_revenue,\n    MAX(o.order_date) AS latest_order_date\nFROM customers AS c\nLEFT JOIN regions AS r\n    ON -- region relationship\nLEFT JOIN orders AS o\n    ON -- customer relationship\nGROUP BY -- customer and region columns\nORDER BY c.customer_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -83,5 +83,8 @@
       "group by"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "join-grain-and-fanout",
+  "question_number": 2,
+  "show_starter_sql": true
 }

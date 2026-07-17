@@ -1,7 +1,7 @@
 {
   "id": "first-inner-join",
   "title": "Match Customers to Regions",
-  "stage": "Stage 1 \u2022 First relationship",
+  "stage": "Stage 1 • First relationship",
   "subtitle": "Use an explicit INNER JOIN to keep only matching keys",
   "difficulty": "Very Beginner",
   "estimated_minutes": 15,
@@ -41,7 +41,7 @@
     "Why is Evergreen Health absent?"
   ],
   "stretch_goal": "Add `region_id` to the result and qualify which table supplies it.",
-  "starter_sql": "SELECT\n    -- customer columns,\n    -- readable region name\nFROM customers AS c\nINNER JOIN regions AS r\n    ON -- match the region keys\nORDER BY -- customer id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -67,5 +67,8 @@
       "inner join"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "what-a-join-does",
+  "question_number": 1,
+  "show_starter_sql": true
 }

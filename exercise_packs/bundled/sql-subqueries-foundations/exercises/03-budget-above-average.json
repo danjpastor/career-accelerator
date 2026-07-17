@@ -1,7 +1,7 @@
 {
   "id": "budget-above-average",
   "title": "Departments Above the Average Budget",
-  "stage": "Stage 2 \u2022 Repeat the scalar pattern",
+  "stage": "Stage 2 • Repeat the scalar pattern",
   "difficulty": "Beginner",
   "estimated_minutes": 15,
   "concepts": [
@@ -39,7 +39,7 @@
     "Which names changed because the business question changed?"
   ],
   "stretch_goal": "Add a calculated column showing `budget - average_budget`. This may require repeating the scalar subquery in SELECT.",
-  "starter_sql": "SELECT department_name, budget\nFROM departments\nWHERE budget > (\n    -- average department budget\n)\nORDER BY budget DESC;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM departments;\n",
   "datasets": [
     {
       "table": "departments",
@@ -61,5 +61,8 @@
     ],
     "min_select_count": 2
   },
-  "subtitle": "Stage 2 \u2022 Repeat the scalar pattern"
+  "subtitle": "Stage 2 • Repeat the scalar pattern",
+  "lesson_id": "one-value-subqueries",
+  "question_number": 2,
+  "show_starter_sql": true
 }

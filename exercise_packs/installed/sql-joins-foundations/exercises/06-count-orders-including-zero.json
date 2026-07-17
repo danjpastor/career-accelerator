@@ -1,9 +1,9 @@
 {
   "id": "count-orders-including-zero",
   "title": "Count Orders Including Zero",
-  "stage": "Stage 6 \u2022 Aggregate preserved rows",
+  "stage": "Stage 6 • Aggregate preserved rows",
   "subtitle": "Count a right-side key so unmatched customers receive zero",
-  "difficulty": "Beginner \u2192 Intermediate",
+  "difficulty": "Beginner → Intermediate",
   "estimated_minutes": 30,
   "concepts": [
     "LEFT JOIN",
@@ -34,7 +34,7 @@
     "Keep customers on the left."
   ],
   "takeaways": [
-    "Count the optional table\u2019s non-null key.",
+    "Count the optional table’s non-null key.",
     "LEFT JOIN can preserve zeroes in grouped reports."
   ],
   "reflection_questions": [
@@ -42,7 +42,7 @@
     "What is the output grain?"
   ],
   "stretch_goal": "Add `completed_order_count` using a CASE expression.",
-  "starter_sql": "SELECT\n    c.customer_id,\n    c.customer_name,\n    COUNT(-- choose the right-side key) AS order_count\nFROM customers AS c\nLEFT JOIN orders AS o\n    ON c.customer_id = o.customer_id\nGROUP BY -- customer columns\nORDER BY c.customer_id;\n",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -70,5 +70,8 @@
       "group by"
     ],
     "min_select_count": 1
-  }
+  },
+  "lesson_id": "left-and-right-joins",
+  "question_number": 3,
+  "show_starter_sql": true
 }

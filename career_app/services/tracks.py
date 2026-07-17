@@ -3901,6 +3901,13 @@ def undo_completion(
             (sql_title,),
         )
 
+        conn.execute(
+            """DELETE FROM evidence
+               WHERE source_type='Interview Problem'
+                 AND source_name=?""",
+            (f"Interview Problem: {sql_title}",),
+        )
+
     applied_number = (
         applied_number_for_undo
     )

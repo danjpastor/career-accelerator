@@ -1,7 +1,7 @@
 {
   "id": "subquery-capstone-customer-value",
   "title": "Capstone: High-Value Repeat Customers",
-  "stage": "Capstone \u2022 Combine the full mental model",
+  "stage": "Capstone • Combine the full mental model",
   "difficulty": "Advanced for This Pack",
   "estimated_minutes": 45,
   "concepts": [
@@ -12,7 +12,7 @@
   ],
   "learning_objective": "Plan and execute a realistic multi-stage analysis using a derived summary table, a scalar benchmark subquery, and a join for descriptive columns.",
   "recommended_lesson": "Lesson 6: Subquery vs. Join vs. CTE and Lesson 7: Build and Debug from the Inside Out",
-  "why": "This combines the pack\u2019s major ideas in a realistic customer-value question while keeping the datasets small enough to inspect manually.",
+  "why": "This combines the pack’s major ideas in a realistic customer-value question while keeping the datasets small enough to inspect manually.",
   "prompt": "Using Completed orders only, return customer_name, completed_orders, and total_spent for customers who have at least 2 completed orders and whose total_spent is above the average total_spent among customers with completed orders. Sort total_spent highest first.",
   "expected_result": "3 rows with `customer_name`, `completed_orders`, and `total_spent`, ordered by total spend descending.",
   "build_steps": [
@@ -46,7 +46,7 @@
     "How would naming the stages with CTEs change readability?"
   ],
   "stretch_goal": "Rewrite the complete analysis with two CTEs: `customer_summary` and `average_customer_value`. Confirm that the result is identical.",
-  "starter_sql": "SELECT c.customer_name, s.completed_orders, s.total_spent\nFROM customers AS c\nJOIN (\n    -- completed order count and total per customer\n) AS s\n    ON s.customer_id = c.customer_id\nWHERE s.completed_orders >= 2\n  AND s.total_spent > (\n      SELECT AVG(customer_total)\n      FROM (\n          -- completed total per customer\n      ) AS totals_for_average\n  )\nORDER BY s.total_spent DESC;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM customers;\n",
   "datasets": [
     {
       "table": "customers",
@@ -61,8 +61,8 @@
   "solution_explanation": "The derived table `s` creates the reusable customer-level facts needed by the final output. A join supplies customer names, while a separate nested summary calculates the average customer total used as a scalar benchmark.",
   "solution_walkthrough": [
     "The first grouped subquery creates one row per customer with count and spend metrics.",
-    "The join adds the customer name without changing the summary\u2019s grain.",
-    "The nested benchmark calculates an average across customer totals\u2014not across raw orders.",
+    "The join adds the customer name without changing the summary’s grain.",
+    "The nested benchmark calculates an average across customer totals—not across raw orders.",
     "The final WHERE clause applies both the repeat-customer and above-average-value conditions."
   ],
   "validation": {
@@ -77,5 +77,8 @@
     ],
     "min_select_count": 4
   },
-  "subtitle": "Capstone \u2022 Combine the full mental model"
+  "subtitle": "Capstone • Combine the full mental model",
+  "lesson_id": "debugging-subqueries",
+  "question_number": 2,
+  "show_starter_sql": true
 }

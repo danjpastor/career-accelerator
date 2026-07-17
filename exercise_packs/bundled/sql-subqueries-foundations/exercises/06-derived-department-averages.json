@@ -1,7 +1,7 @@
 {
   "id": "derived-department-averages",
   "title": "Filter a Derived Summary Table",
-  "stage": "Stage 4 \u2022 Query a temporary table",
+  "stage": "Stage 4 • Query a temporary table",
   "difficulty": "Beginner+",
   "estimated_minutes": 25,
   "concepts": [
@@ -41,7 +41,7 @@
     "Why can the outer query refer to `avg_salary` by its alias?"
   ],
   "stretch_goal": "Add `employee_count` to the inner summary and return it from the outer query.",
-  "starter_sql": "SELECT department_id, avg_salary\nFROM (\n    -- create one row per department with avg_salary\n) AS department_summary\nWHERE avg_salary > 80000\nORDER BY avg_salary DESC;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM employees;\n",
   "datasets": [
     {
       "table": "employees",
@@ -64,5 +64,8 @@
     ],
     "min_select_count": 2
   },
-  "subtitle": "Stage 4 \u2022 Query a temporary table"
+  "subtitle": "Stage 4 • Query a temporary table",
+  "lesson_id": "subqueries-in-from",
+  "question_number": 1,
+  "show_starter_sql": true
 }

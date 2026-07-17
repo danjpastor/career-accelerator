@@ -187,6 +187,16 @@ Exercise fields appear in the Practice card. Keep each field focused:
 - `reflection_questions`: explanation questions, not trivia
 - `stretch_goal`: optional and clearly outside completion requirements
 
+## Practice-question and starter-template style
+
+- Write one direct deliverable per question.
+- Put required columns, row count, ordering, and edge cases in `expected_result` rather than hiding them in hints.
+- Keep question titles action-oriented and distinguish multiple questions within the same lesson.
+- Use progressive hints: concept first, structure second, implementation detail last.
+- Keep `starter_sql` visibly incomplete. Comments and placeholders are appropriate; completed predicates, joins, grouping, nested-query logic, and copied lesson examples are not.
+- Do not use the starter editor as another teaching example. Teaching examples belong in Learn; learner construction belongs in Practice.
+- Ensure the Practice card remains understandable without opening View Solution.
+
 ## Accessibility and responsiveness
 
 - Do not rely on color alone to communicate meaning

@@ -1,7 +1,7 @@
 {
   "id": "employees-in-above-average-budget-departments",
   "title": "A Nested Two-Step Filter",
-  "stage": "Stage 6 \u2022 Nest three clear questions",
+  "stage": "Stage 6 • Nest three clear questions",
   "difficulty": "Intermediate+",
   "estimated_minutes": 30,
   "concepts": [
@@ -41,7 +41,7 @@
     "Which query returns details, which returns IDs, and which returns one benchmark value?"
   ],
   "stretch_goal": "Add department names to the final output by joining the filtered employees to departments.",
-  "starter_sql": "SELECT employee_name, department_id, salary\nFROM employees\nWHERE department_id IN (\n    SELECT department_id\n    FROM departments\n    WHERE budget > (\n        -- average department budget\n    )\n)\nORDER BY department_id, salary DESC;",
+  "starter_sql": "-- Write your answer below.\n-- Use the task, expected output, and dataset details above.\n\nSELECT\n    -- requested columns\nFROM employees;\n",
   "datasets": [
     {
       "table": "employees",
@@ -68,5 +68,8 @@
     ],
     "min_select_count": 3
   },
-  "subtitle": "Stage 6 \u2022 Nest three clear questions"
+  "subtitle": "Stage 6 • Nest three clear questions",
+  "lesson_id": "subquery-vs-join-vs-cte",
+  "question_number": 2,
+  "show_starter_sql": true
 }

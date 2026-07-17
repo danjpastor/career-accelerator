@@ -1,4 +1,4 @@
-# Career Accelerator Exercise Pack Format v1
+# Career Accelerator Exercise Pack Format v1 — v10 authoring rules
 
 
 > **Authoring documentation:** Start with `AUTHORING_GUIDE.md`, use `STYLE_GUIDE.md` for course presentation, and complete `QUALITY_CHECKLIST.md` before release. A copyable starter is available in `templates/standard-pack-template/`.
@@ -68,7 +68,10 @@ The selected folder—or the single top-level folder inside a `.zip`—must cont
     {
       "id": "first-exercise",
       "title": "First Exercise",
-      "file": "exercises/01-first-exercise.json"
+      "file": "exercises/01-first-exercise.json",
+      "lesson_id": "concept-introduction",
+      "question_number": 1,
+      "show_starter_sql": true
     }
   ]
 }
@@ -83,9 +86,19 @@ The selected folder—or the single top-level folder inside a `.zip`—must cont
 | `title` | User-facing pack title. |
 | `version` | Pack version string. |
 | `description` | Plain-language explanation of the pack. |
-| `exercises` | At least one exercise entry. Each entry needs `id`, `title`, and `file`. |
+| `exercises` | At least one question entry. Each entry needs `id`, `title`, `file`, `lesson_id`, and `question_number`. Every lesson must have at least one associated question. |
 
 Lesson and exercise IDs must be unique across the whole pack. Referenced paths must stay inside the pack folder.
+
+### Lesson-to-question rules in v10
+
+- Every lesson must have at least one associated practice question.
+- `lesson_id` must exactly match a manifest lesson ID.
+- `question_number` controls the order shown within that lesson and should begin at `1`.
+- `show_starter_sql` controls whether the authored `starter_sql` appears for a brand-new answer. When false, the editor opens empty.
+- A learner's previously saved SQL always takes precedence over the starter template.
+- A starter template may contain comments, requested column placeholders, an empty CTE, or a required table name, but it must not contain the solution logic, a lesson example copied into the editor, or a nearly completed answer.
+- Lesson Markdown code examples are instructional only and are never copied into Practice automatically.
 
 ## Dashboard suggestion rules
 
@@ -112,6 +125,9 @@ Suggestions remain optional. A completed pack is no longer recommended.
 ```json
 {
   "id": "first-exercise",
+  "lesson_id": "concept-introduction",
+  "question_number": 1,
+  "show_starter_sql": true,
   "title": "First Exercise",
   "stage": "Stage 1 • First principle",
   "subtitle": "Stage 1 • Build the first mental model",
@@ -154,7 +170,24 @@ Suggestions remain optional. A completed pack is no longer recommended.
 }
 ```
 
-Required fields are `id`, `title`, `prompt`, `starter_sql`, `datasets`, and `solution_file`. Dataset table and CSV column names must be valid SQL identifiers containing letters, numbers, and underscores.
+Required fields are `id`, `lesson_id`, `question_number`, `title`, `prompt`, `starter_sql`, `datasets`, and `solution_file`. `show_starter_sql` is strongly recommended and defaults to true for compatible packs. Dataset table and CSV column names must be valid SQL identifiers containing letters, numbers, and underscores.
+
+### Starting-template policy
+
+The SQL editor is a learner workspace, not an answer preview. For a new question it may load only the authored `starter_sql`, and that template must leave the taught reasoning for the learner to complete. Do not paste the official solution, the lesson's example query, completed joins, completed predicates, completed aggregation logic, or hard-coded expected rows into `starter_sql`.
+
+A safe default is:
+
+```sql
+-- Write your answer below.
+-- Use the task, expected output, and dataset details above.
+
+SELECT
+    -- requested columns
+FROM table_name;
+```
+
+Set `show_starter_sql` to false when even that amount of scaffolding would reveal too much. Opening View Solution never replaces learner SQL; copying a solution requires a separate explicit action.
 
 ### Recommended instructional fields
 
