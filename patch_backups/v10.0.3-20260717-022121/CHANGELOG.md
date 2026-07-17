@@ -1,13 +1,5 @@
 # Changelog
 
-## 10.0.3 - 2026-07-17
-
-- Removed the large vertical bands that could appear between Dashboard rows on shorter or display-scaled screens.
-- Changed Dashboard rows to wrap tightly around their cards instead of allowing empty QGridLayout hosts to absorb spare height.
-- Added fluid row-height interpolation so available vertical space grows the metric, priority, analytics, and footer cards themselves.
-- Preserved the complete no-scroll Dashboard and sidebar at 900×620, 1024×768, 1280×800, 1366×768, and 1536×1020.
-- Added regression checks that ensure visible Dashboard rows remain separated only by the configured responsive spacing.
-
 ## 10.0.2 - 2026-07-17
 
 - Kept every Dashboard card visible without vertical or horizontal scrolling across the supported 900×620 through 1536×1020 desktop-size matrix.

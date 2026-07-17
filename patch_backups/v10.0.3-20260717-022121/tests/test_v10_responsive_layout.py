@@ -113,45 +113,6 @@ class ResponsiveLayoutV10Tests(unittest.TestCase):
                         viewport.height(),
                     )
 
-    def test_dashboard_rows_do_not_expand_into_large_blank_bands(self) -> None:
-        for size in (
-            (900, 620),
-            (1024, 768),
-            (1280, 800),
-            (1366, 768),
-            (1536, 1020),
-        ):
-            with self.subTest(size=size):
-                self.resize_window(*size)
-                self.window.navigate(0)
-                self._flush()
-                sections = (
-                    self.window.dashboard_header_section,
-                    self.window.dashboard_metrics_section,
-                    self.window.dashboard_primary_section,
-                    self.window.dashboard_secondary_section,
-                    self.window.dashboard_footer_section,
-                )
-                expected_gap = self.window.dashboard_root_layout.spacing()
-                for previous, current in zip(sections, sections[1:]):
-                    actual_gap = current.y() - (
-                        previous.y() + previous.height()
-                    )
-                    self.assertEqual(actual_gap, expected_gap)
-
-                self.assertEqual(
-                    self.window.dashboard_primary_section.height(),
-                    self.window.dashboard_focus_card.height(),
-                )
-                self.assertEqual(
-                    self.window.dashboard_secondary_section.height(),
-                    self.window.dashboard_growth_card.height(),
-                )
-                self.assertEqual(
-                    self.window.dashboard_footer_section.height(),
-                    self.window.encouragement_card.height(),
-                )
-
     def test_every_main_page_avoids_horizontal_overflow_after_resize_cycles(self) -> None:
         # Start wide, collapse to the supported minimum, then expand again. This
         # catches stale QGridLayout stretch factors left behind by reflowing.

@@ -1,23 +1,19 @@
-# Career Accelerator v10.0.2 Test Results
+# Career Accelerator v10.0.3 Test Results
 
-Verification date: July 17, 2026
+Test date: July 17, 2026
 
-## Automated regressions
+## Automated regression suite
 
-- `python -m pytest -q`: **24 passed, 76 subtests passed**
-- Exercise Pack schema, lesson-question mapping, starter safety, official solutions, and progress migration: passed
-- Shared SQL editor line numbering, error navigation, and error reset: passed
-- Interview Problem original-work validation: passed
-- Backup snapshot deduplication and retention pruning: passed
-- Responsive resize cycles, breakpoints, compact card width, guided-workspace height, course-title rebuilding, and page-overflow checks: passed
-- Dashboard no-scroll matrix and metric-ring containment: passed
-- Sidebar no-scroll matrix and complete-card viewport containment: passed
-- Embedded course-extension placement and ghost-pill prevention: passed
-- Rounded lesson subtitle height-for-width sizing: passed
+- 25 tests passed.
+- Exercise Pack lesson mapping, answer-safe starters, official solutions, hint persistence, and schema migration passed.
+- Interview Problem original-work validation passed.
+- Shared SQL editor line-number and DuckDB error-navigation tests passed.
+- Backup deduplication and retention tests passed.
+- Completed Today’s Focus action-state validation passed.
 
-## Dashboard visibility matrix
+## Responsive verification
 
-The full PySide6 application was constructed offscreen and the Dashboard was verified at:
+The Dashboard and sidebar were verified at:
 
 - 900×620
 - 1024×768
@@ -25,45 +21,23 @@ The full PySide6 application was constructed offscreen and the Dashboard was ver
 - 1366×768
 - 1536×1020
 
-At every size:
+At every supported size:
 
-- Dashboard vertical scrollbar maximum: 0
-- Dashboard horizontal scrollbar maximum: 0
-- Sidebar vertical scrollbar maximum: 0
-- All metric, primary, secondary, and footer cards remain in the visible viewport
-- Current Streak, Total Study Time, and the sidebar footer remain in the visible viewport
-- Every circular progress graphic remains within its card content rectangle
-- The intended comfortable, compact, or ultra-compact density mode is applied
+- Dashboard vertical scrolling remained disabled because all content fit.
+- Dashboard horizontal scrolling remained disabled.
+- Sidebar vertical scrolling remained disabled.
+- Every visible Dashboard section was separated only by the configured responsive layout spacing.
+- Primary, analytics, and footer section heights matched their contained card heights, preventing invisible vertical expansion.
+- Circular progress graphics remained contained within their cards.
+- Repeated wide-to-compact-to-wide resizing produced no stale horizontal grid overflow.
 
-## Full application responsive matrix
+## Visual review
 
-The application was also resized through 1536×1020, 1280×800, 1024×768, and 900×620. All 12 main pages reported zero outer horizontal-scroll range after repeated wide-to-compact-to-wide cycles:
+A 1280×768 logical-size render, matching the common 1600×960 Windows display-scaled scenario, confirmed that the large blank bands between the priority, analytics, and footer rows were removed. Cards now form a continuous grouped layout while retaining comfortable internal spacing.
 
-- Dashboard
-- Adaptive Planner
-- Learning
-- Portfolio Workspace
-- SQL Companion
-- Study Session
-- Job Readiness
-- Applications
-- Weekly Summary
-- Publish & Git
-- Task Workspaces
-- Settings
+## Cumulative installer verification
 
-Long-form learning and SQL workspaces remain vertically scrollable where their full instructional content exceeds the viewport.
-
-## Targeted visual regressions
-
-- Applied Lab embedded progress panel is reinserted below the lesson header and does not float behind the type pill: passed
-- Wrapped rounded subtitles receive at least their calculated height-for-width: passed
-- Applied Labs long subtitle pill displays without vertical clipping: passed
-- DuckDB Exercises long subtitle pill displays without vertical clipping: passed
-- Exercise Pack lesson header remains clean and correctly spaced: passed
-- Circular Dashboard progress values and labels remain vertically centered: passed
-- Circular Study Session timer remains contained at ultra-compact density: passed
-
-## Package verification
-
-The clean release is compiled and tested again after runtime/private files are removed. The cumulative installer was applied independently to the uploaded v9.6.4 repository and to v10.0.1, with sentinel databases, custom packs, learner SQL, backups, generated DuckDB data, and task workspaces preserved. A second installer run against each target reported zero replacements. Both upgraded copies completed an offscreen 900×620 startup and no-scroll front-page check.
+- Upgrade from the clean v10.0.2 package completed successfully.
+- Existing database, custom Exercise Pack, and task-workspace sentinel files retained identical SHA-256 hashes.
+- The installed application version changed to 10.0.3.
+- A second installer run replaced zero files, confirming idempotence.

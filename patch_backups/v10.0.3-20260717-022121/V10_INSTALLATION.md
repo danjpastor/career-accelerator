@@ -1,0 +1,28 @@
+# Installing Career Accelerator v10.0.2
+
+## Upgrade an existing repository
+
+Use `career-accelerator-v10.0.2-patch.zip`.
+
+1. Close Career Accelerator.
+2. Extract the patch ZIP.
+3. Open Command Prompt or PowerShell in the extracted patch folder.
+4. Run:
+
+```text
+python install_v10.py "C:\Users\Dan\Documents\GitHub\career-accelerator"
+```
+
+The installer validates the repository, skips files that already match v10.0.2, and backs up each replaced file under `patch_backups/v10.0.2-<timestamp>/`.
+
+It does not delete the local SQLite database, backups, learner submissions, generated DuckDB data, task workspaces, or custom Exercise Packs.
+
+## Clean installation
+
+Use `career-accelerator-v10.0.2.zip`, extract it to a normal writable folder, and run `Career Accelerator.bat`.
+
+The clean package does not include Git history, virtual environments, caches, local databases, backup history, learner submissions, or private task-workspace content.
+
+## Verify the build
+
+The application title bar and Settings status should report **10.0.2**. Resize the window through 900×620, 1024×768, 1280×800, 1366×768, and 1536×1020. The full front page—including the sidebar and every Dashboard card—should remain visible without scrolling, while long-form lesson and SQL pages remain scrollable when their instructional content exceeds the available height.

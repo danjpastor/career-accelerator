@@ -798,10 +798,6 @@ class CareerAccelerator(QMainWindow):
 
         # ---------- Header ----------
         self.dashboard_header_section = QWidget()
-        self.dashboard_header_section.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
         header = QBoxLayout(QBoxLayout.Direction.LeftToRight, self.dashboard_header_section)
         self.dashboard_header_layout = header
         header.setContentsMargins(0, 0, 0, 0)
@@ -855,10 +851,6 @@ class CareerAccelerator(QMainWindow):
 
         # ---------- Progress metrics ----------
         self.dashboard_metrics_section = QWidget()
-        self.dashboard_metrics_section.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
         self.dashboard_metrics_grid = QGridLayout(
             self.dashboard_metrics_section
         )
@@ -890,10 +882,6 @@ class CareerAccelerator(QMainWindow):
 
         # ---------- Priority section ----------
         self.dashboard_primary_section = QWidget()
-        self.dashboard_primary_section.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
         self.dashboard_primary_grid = QGridLayout(
             self.dashboard_primary_section
         )
@@ -1070,10 +1058,6 @@ class CareerAccelerator(QMainWindow):
 
         # ---------- Analytics section ----------
         self.dashboard_secondary_section = QWidget()
-        self.dashboard_secondary_section.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
         self.dashboard_secondary_grid = QGridLayout(
             self.dashboard_secondary_section
         )
@@ -1205,10 +1189,6 @@ class CareerAccelerator(QMainWindow):
 
         # ---------- Encouragement and Mission Control ----------
         self.dashboard_footer_section = QWidget()
-        self.dashboard_footer_section.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
         self.dashboard_footer_grid = QGridLayout(
             self.dashboard_footer_section
         )
@@ -1399,7 +1379,6 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(self.dashboard_primary_section)
         root.addWidget(self.dashboard_secondary_section)
         root.addWidget(self.dashboard_footer_section)
-        root.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         page.add_responsive_handler(self.update_dashboard_layout)
         page.heightChanged.connect(
@@ -1482,56 +1461,6 @@ class CareerAccelerator(QMainWindow):
         card.setMinimumHeight(height)
         card.setMaximumHeight(height)
 
-    @staticmethod
-    def _set_dashboard_section_height(section, height):
-        """Keep a dashboard row wrapped tightly around its fixed-height cards.
-
-        A QGridLayout expands its host widget when the surrounding page has
-        spare height. Because the cards themselves have fixed heights, Qt then
-        centers them inside those enlarged hosts, which appears as large blank
-        bands between dashboard rows. Locking each row host to the calculated
-        row height keeps the page grouped while still allowing the card heights
-        themselves to scale fluidly with the viewport.
-        """
-        height = max(1, int(height))
-        section.setMinimumHeight(height)
-        section.setMaximumHeight(height)
-
-    @staticmethod
-    def _interpolate_dashboard_row_heights(base_heights, max_heights, target_total):
-        """Interpolate row heights to fill the viewport without stretching gaps."""
-        base = [max(1, int(value)) for value in base_heights]
-        maximum = [max(base_value, int(value)) for base_value, value in zip(base, max_heights)]
-        base_total = sum(base)
-        max_total = sum(maximum)
-        target = max(base_total, min(int(target_total), max_total))
-        if target <= base_total or max_total <= base_total:
-            return tuple(base)
-
-        ratio = (target - base_total) / (max_total - base_total)
-        values = [
-            base_value + round((max_value - base_value) * ratio)
-            for base_value, max_value in zip(base, maximum)
-        ]
-
-        # Rounding can leave the rows a few pixels short or tall. Reconcile the
-        # remainder so the section stack uses the intended viewport height.
-        remainder = target - sum(values)
-        direction = 1 if remainder > 0 else -1
-        while remainder:
-            changed = False
-            for index in (1, 2, 3, 0):
-                candidate = values[index] + direction
-                if base[index] <= candidate <= maximum[index]:
-                    values[index] = candidate
-                    remainder -= direction
-                    changed = True
-                    if remainder == 0:
-                        break
-            if not changed:
-                break
-        return tuple(values)
-
     def _apply_dashboard_density(self, width, height):
         width = max(0, int(width))
         height = max(0, int(height))
@@ -1543,12 +1472,11 @@ class CareerAccelerator(QMainWindow):
             density = "ultra"
         self.dashboard_density = density
 
-        base_heights = {
+        metrics_height, primary_height, secondary_height, footer_height = {
             "comfortable": (100, 311, 311, 171),
             "compact": (78, 190, 160, 104),
             "ultra": (64, 160, 126, 76),
         }[density]
-        comfortable_heights = (100, 311, 311, 171)
 
         if density == "comfortable":
             self.dashboard_root_layout.setContentsMargins(24, 16, 24, 14)
@@ -1568,56 +1496,6 @@ class CareerAccelerator(QMainWindow):
             primary_margins = (7, 5, 7, 5)
             secondary_margins = (7, 5, 7, 5)
             footer_margins = (8, 5, 8, 5)
-
-        # Use spare vertical space to grow the cards themselves rather than
-        # allowing QGridLayout host widgets to grow around fixed-height cards.
-        # This produces a compact, continuous dashboard at 125%/150% Windows
-        # scaling while preserving the no-scroll front page.
-        top_margin = self.dashboard_root_layout.contentsMargins().top()
-        bottom_margin = self.dashboard_root_layout.contentsMargins().bottom()
-        section_spacing = max(0, self.dashboard_root_layout.spacing())
-        header_height = max(
-            1,
-            self.dashboard_header_section.sizeHint().height(),
-            self.dashboard_header_section.minimumSizeHint().height(),
-        )
-        available_rows_height = max(
-            sum(base_heights),
-            height
-            - top_margin
-            - bottom_margin
-            - header_height
-            - (section_spacing * 4),
-        )
-        (
-            metrics_height,
-            primary_height,
-            secondary_height,
-            footer_height,
-        ) = self._interpolate_dashboard_row_heights(
-            base_heights,
-            comfortable_heights,
-            available_rows_height,
-        )
-
-        self.dashboard_header_section.setMinimumHeight(header_height)
-        self.dashboard_header_section.setMaximumHeight(header_height)
-        self._set_dashboard_section_height(
-            self.dashboard_metrics_section,
-            metrics_height,
-        )
-        self._set_dashboard_section_height(
-            self.dashboard_primary_section,
-            primary_height,
-        )
-        self._set_dashboard_section_height(
-            self.dashboard_secondary_section,
-            secondary_height,
-        )
-        self._set_dashboard_section_height(
-            self.dashboard_footer_section,
-            footer_height,
-        )
 
         for card, ring in zip(self.dashboard_metric_cards, self.rings):
             self._set_dashboard_card_height(card, metrics_height)

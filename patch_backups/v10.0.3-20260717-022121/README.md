@@ -24,10 +24,8 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.3 includes:
+Version 10.0.2 includes:
 
-- Fluid Dashboard row heights that consume spare vertical space inside the cards instead of creating large blank bands between card rows
-- Tightly wrapped Dashboard section containers with consistent 5–10 px row spacing at every supported desktop size
 - A no-scroll front page that keeps every Dashboard card plus the full sidebar visible from the supported 900×620 minimum through the 1536×1020 reference size
 - Height-aware comfortable, compact, and ultra-compact Dashboard density modes for cards, typography, spacing, charts, rings, timers, rows, and secondary details
 - Dynamically centered circular progress and Study Session graphics that no longer clip their values or captions vertically
