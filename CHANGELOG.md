@@ -1,5 +1,18 @@
 # Changelog
 
+## 10.0.6 - 2026-07-17
+
+- Converted Learning, SQL Companion, Study Session, Applications, and Weekly Summary to fixed outer page shells so page headers and tab bars remain anchored and only individual cards, lists, editors, tables, and forms scroll.
+- Locked non-scrolling page content to the live viewport height, eliminating hidden outer overflow while preserving responsive resizing from 900×620 upward.
+- Made Available Data course tables wrap complete column lists, disable text elision, cap their visible height, and scroll vertically when a schema is longer than the table viewport.
+- Reauthored every bundled Subqueries and Joins lesson example so it demonstrates the concept with a different scenario, dataset, requested output, and final query from its linked practice questions.
+- Preserved one SQL editor state per lesson-question pair: switching between the lesson and its active question keeps SQL, notes, cursor, hints, and validation state; only changing to another pair loads another saved answer.
+- Renamed the answer-validation action to **Submit Solution** and made **Mark Complete** automatically validate the current answer before recording completion.
+- Removed the duplicate pack list beneath the selected pack title and added a persistent **Select Pack** label immediately left of the top pack dropdown.
+- Rebuilt the compact Exercise Pack toolbar into two grouped rows so breadcrumbs and pack selection fit without forcing the Learning page to scroll.
+- Kept the Applications form and kanban pipeline visible together while each owns its appropriate internal scrolling region.
+- Expanded regression coverage for fixed outer pages, internal schema scrolling, lesson/example separation, pair-state preservation, submission/completion, selector layout, and Applications non-overlap.
+
 ## 10.0.5 - 2026-07-17
 
 - Corrected Dashboard action buttons so their fixed responsive heights can never be smaller than the scaled font and stylesheet size hint, preventing vertically clipped labels on Start Study Session, Pause, Reset, Log, View Full Summary, and Mission Control actions.

@@ -2,52 +2,46 @@
 
 > **Learning goal:** Choose a clear SQL structure based on the question instead of assuming every multi-step problem must use a subquery.
 
-The same analytical question can often be answered in several valid ways. The goal is not to force every question into a subquery. The goal is to understand what each tool expresses clearly.
+The same analytical question can often be answered in several valid ways.
 
 ## Example question
 
-> Which customers have at least one completed order?
+> Which stores have at least one low-stock alert?
 
 ### IN subquery
 
 ```sql
-SELECT customer_id, customer_name
-FROM customers
-WHERE customer_id IN (
-    SELECT customer_id
-    FROM orders
-    WHERE status = 'Completed'
+SELECT store_id, store_name
+FROM stores
+WHERE store_id IN (
+    SELECT store_id
+    FROM inventory_alerts
+    WHERE alert_type = 'Low Stock'
 );
 ```
-
-This emphasizes a **list of qualifying customer IDs**.
 
 ### EXISTS subquery
 
 ```sql
-SELECT c.customer_id, c.customer_name
-FROM customers AS c
+SELECT s.store_id, s.store_name
+FROM stores AS s
 WHERE EXISTS (
     SELECT 1
-    FROM orders AS o
-    WHERE o.customer_id = c.customer_id
-      AND o.status = 'Completed'
+    FROM inventory_alerts AS a
+    WHERE a.store_id = s.store_id
+      AND a.alert_type = 'Low Stock'
 );
 ```
-
-This emphasizes **whether a related row exists**.
 
 ### JOIN
 
 ```sql
-SELECT DISTINCT c.customer_id, c.customer_name
-FROM customers AS c
-JOIN orders AS o
-    ON o.customer_id = c.customer_id
-WHERE o.status = 'Completed';
+SELECT DISTINCT s.store_id, s.store_name
+FROM stores AS s
+JOIN inventory_alerts AS a
+    ON a.store_id = s.store_id
+WHERE a.alert_type = 'Low Stock';
 ```
-
-This directly combines rows from both tables. `DISTINCT` is needed because one customer can match several completed orders.
 
 ## Practical decision guide
 
@@ -62,30 +56,15 @@ This directly combines rows from both tables. `DISTINCT` is needed because one c
 
 ## CTEs are named query stages
 
-A CTE can make a nested query easier to read:
-
 ```sql
-WITH customer_totals AS (
-    SELECT customer_id, SUM(amount) AS total_spent
-    FROM orders
-    WHERE status = 'Completed'
-    GROUP BY customer_id
+WITH campaign_totals AS (
+    SELECT campaign_id, SUM(clicks) AS total_clicks
+    FROM daily_campaign_metrics
+    GROUP BY campaign_id
 )
-SELECT customer_id, total_spent
-FROM customer_totals
-WHERE total_spent > 1000;
+SELECT campaign_id, total_clicks
+FROM campaign_totals
+WHERE total_clicks > 10000;
 ```
 
-The CTE is not “more advanced magic.” It simply names a query stage before the final `SELECT`.
-
-## A useful rule of thumb
-
-- Start with the form that makes the question easiest to explain.
-- Verify correctness on small data.
-- Compare alternatives when readability or performance matters.
-
-Do not treat joins, subqueries, and CTEs as competing topics. They are related tools for organizing multi-table and multi-step logic.
-
-### Quick checkpoint
-
-If you need columns from both `customers` and `orders`, a `JOIN` may be natural. If you only need to know whether an order exists, `EXISTS` may communicate the intent more directly.
+Start with the form that makes the question easiest to explain, verify it on small data, and compare alternatives when readability or performance matters.

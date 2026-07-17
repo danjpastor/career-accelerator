@@ -24,8 +24,14 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.5 includes:
+Version 10.0.6 includes:
 
+- fixed outer layouts for Learning, SQL Companion, Study Session, Applications, and Weekly Summary, with overflow delegated to the individual cards, lists, tables, and editors that need it,
+- vertically scrollable Available Data tables that wrap complete schema column lists instead of truncating them with ellipses,
+- lesson examples that teach each SQL concept with a different scenario and dataset from the linked practice question,
+- a shared editor state for each lesson-question pair so toggling between Learn and Practice never clears the learner's SQL, notes, hints, or validation state,
+- a visible **Submit Solution** action plus a functional **Mark Complete** workflow that validates the active answer before completion,
+- a streamlined Exercise Pack header with one top **Select Pack** control and no duplicate pack list beneath the selected pack title,
 - vertically safe Dashboard action buttons at every responsive density,
 - a flexible sidebar whose navigation links use the available height,
 - a Settings control to rebuild today’s adaptive focus snapshot without erasing progress,
@@ -38,7 +44,7 @@ Version 10.0.5 includes:
 - Safe course-header rebuilding without the temporary ghost pill/backdrop behind the main lesson label
 - A full application-wide responsive polish pass with seamless wide, medium, and compact layouts
 - Dynamic card sizing, text wrapping, typography scaling, sidebar sizing, and scroll-safe long-form workspaces
-- Outer-scrollable compact Exercise Pack and DuckDB workspaces that preserve useful heights for navigation, Learn, and Practice
+- Fixed-shell Exercise Pack and DuckDB workspaces whose navigation, Learn, Practice, editors, tables, and results scroll internally as needed
 - Lesson-driven Exercise Packs where every lesson loads one or more practice questions for the concept just taught
 - Answer-safe SQL starting templates that never auto-fill lesson examples or official solutions
 - Functional Run Query, Check Answer, progressive Exercise Hint, and separate View Solution workflows

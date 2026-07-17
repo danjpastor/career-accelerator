@@ -11,33 +11,27 @@ Real analysis often follows a chain of relationships. Build that chain one join 
 :::column
 ```sql
 SELECT
-    o.order_id,
-    c.customer_name,
-    p.product_name,
-    oi.quantity
-FROM orders AS o
-INNER JOIN customers AS c
-    ON o.customer_id = c.customer_id
-INNER JOIN order_items AS oi
-    ON o.order_id = oi.order_id
-INNER JOIN products AS p
-    ON oi.product_id = p.product_id;
+    t.ticket_id,
+    a.agent_name,
+    tm.team_name,
+    d.department_name
+FROM support_tickets AS t
+INNER JOIN support_agents AS a
+    ON t.assigned_agent_id = a.agent_id
+INNER JOIN support_teams AS tm
+    ON a.team_id = tm.team_id
+INNER JOIN departments AS d
+    ON tm.department_id = d.department_id;
 ```
 :::
 
 ## Read the relationship chain
 
 ```text
-customers → orders → order_items → products
+support_tickets → support_agents → support_teams → departments
 ```
 
-Each arrow represents a different key comparison:
-
-| Relationship | Join condition |
-|---|---|
-| Customer to order | `c.customer_id = o.customer_id` |
-| Order to line item | `o.order_id = oi.order_id` |
-| Line item to product | `oi.product_id = p.product_id` |
+Each arrow represents a different key comparison.
 
 ## Add one join at a time
 
@@ -49,15 +43,6 @@ Each arrow represents a different key comparison:
 
 ## Alias preferences
 
-Use short, recognizable aliases:
+Use short, recognizable aliases that communicate the table role. Avoid aliases so cryptic that they hide the model.
 
-| Table | Good alias |
-|---|---|
-| `customers` | `c` |
-| `orders` | `o` |
-| `order_items` | `oi` |
-| `products` | `p` |
-
-Avoid aliases that are so cryptic that they hide the model.
-
-> **Key Idea:** Every added one-to-many relationship can multiply rows. The final result’s grain is determined by the most detailed table selected—often `order_items` in an order analysis.
+> **Key Idea:** Every added one-to-many relationship can multiply rows. The final result’s grain is determined by the most detailed table selected.

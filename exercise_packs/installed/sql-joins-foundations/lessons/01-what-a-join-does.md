@@ -11,11 +11,11 @@ A **join** combines rows from two tables by testing a relationship between them.
 :::column
 ```sql
 SELECT
-    c.customer_name,
-    r.region_name
-FROM customers AS c
-INNER JOIN regions AS r
-    ON c.region_id = r.region_id;
+    p.project_name,
+    c.client_name
+FROM projects AS p
+INNER JOIN clients AS c
+    ON p.client_id = c.client_id;
 ```
 :::
 
@@ -23,15 +23,13 @@ INNER JOIN regions AS r
 :::column
 ## Example Result
 
-| customer_name | region_name |
+| project_name | client_name |
 |---|---|
-| Apex Studios | East |
-| Bluebird Games | West |
-| Cascade Media | East |
-| Delta Retail | Central |
-| Frostline Labs | West |
+| Website Refresh | Northwind Studio |
+| Mobile Launch | Harbor Media |
+| Reporting Upgrade | Northwind Studio |
 :::column
-> **Key Idea:** The join condition compares `customers.region_id` with `regions.region_id`. Evergreen Health has no region key, so an `INNER JOIN` does not return it.
+> **Key Idea:** The join condition compares the client key stored on each project with the client table's primary key. A project with no matching client does not survive an `INNER JOIN`.
 :::
 
 ## Start with table grain
@@ -40,12 +38,10 @@ INNER JOIN regions AS r
 
 | Table | One row represents | Likely key |
 |---|---|---|
-| `customers` | One customer | `customer_id` |
-| `regions` | One region | `region_id` |
-| `orders` | One order | `order_id` |
-| `order_items` | One product line on one order | `order_item_id` |
-
-If you cannot state the grain, it is hard to predict the number of rows after a join.
+| `projects` | One project | `project_id` |
+| `clients` | One client | `client_id` |
+| `tasks` | One task | `task_id` |
+| `time_entries` | One time entry | `time_entry_id` |
 
 ## The four questions to ask
 
@@ -59,15 +55,13 @@ If you cannot state the grain, it is hard to predict the number of rows after a 
 The `ON` clause explains **how the tables relate**.
 
 ```sql
-ON c.customer_id = o.customer_id
+ON p.client_id = c.client_id
 ```
 
-A `WHERE` clause usually filters the already joined result.
+A `WHERE` clause filters the joined result.
 
 ```sql
-WHERE o.status = 'Completed'
+WHERE p.status = 'Active'
 ```
-
-Keeping those jobs separate makes joins much easier to read.
 
 > **First survival rule:** Before running a join, predict whether each row on the preserved side can produce zero, one, or many output rows.

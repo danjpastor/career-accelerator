@@ -11,8 +11,8 @@ from PySide6.QtGui import (
     QLinearGradient
 )
 from PySide6.QtWidgets import (
-    QCheckBox, QFrame, QLabel, QHBoxLayout, QPushButton, QSizePolicy,
-    QVBoxLayout, QWidget
+    QCheckBox, QFrame, QLabel, QHBoxLayout, QPushButton, QScrollArea,
+    QSizePolicy, QVBoxLayout, QWidget
 )
 
 from career_app.theme import COLORS
@@ -42,6 +42,62 @@ class Card(QFrame):
             subtitle_label.setObjectName("Muted")
             subtitle_label.setWordWrap(True)
             self.layout.addWidget(subtitle_label)
+
+
+def make_card_scrollable(card: Card) -> QScrollArea:
+    """Move a card's existing contents into its own vertical scroll area.
+
+    The card keeps its normal border and rounded background while long forms or
+    workspaces scroll inside the card instead of forcing the entire page to
+    grow.  Calling this after the card has been populated preserves all child
+    widgets and nested layouts.
+    """
+    if getattr(card, "_content_scroll", None) is not None:
+        return card._content_scroll
+
+    original = card.layout
+    margins = original.contentsMargins()
+    spacing = original.spacing()
+
+    host = QWidget()
+    host.setMinimumWidth(0)
+    host.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+    host_layout = QVBoxLayout(host)
+    host_layout.setContentsMargins(
+        margins.left(), margins.top(), margins.right(), margins.bottom()
+    )
+    host_layout.setSpacing(spacing)
+
+    while original.count():
+        item = original.takeAt(0)
+        widget = item.widget()
+        child_layout = item.layout()
+        spacer = item.spacerItem()
+        if widget is not None:
+            host_layout.addWidget(widget, 0, item.alignment())
+        elif child_layout is not None:
+            host_layout.addLayout(child_layout)
+        elif spacer is not None:
+            host_layout.addItem(spacer)
+
+    scroll = QScrollArea(card)
+    scroll.setWidgetResizable(True)
+    scroll.setMinimumSize(0, 0)
+    scroll.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
+    scroll.setFrameShape(QFrame.Shape.NoFrame)
+    scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+    scroll.setStyleSheet("QScrollArea {background:transparent;border:none;}")
+    scroll.setWidget(host)
+
+    original.setContentsMargins(0, 0, 0, 0)
+    original.setSpacing(0)
+    original.addWidget(scroll, 1)
+    card.setMinimumHeight(0)
+    card.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
+    card._content_scroll = scroll
+    card._content_host = host
+    return scroll
 
 
 class SoftPanel(QFrame):

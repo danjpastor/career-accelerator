@@ -11,13 +11,13 @@
 :::column
 ```sql
 SELECT
-    o.order_id,
-    c.customer_name,
-    o.total_amount
-FROM orders AS o
-INNER JOIN customers AS c
-    ON o.customer_id = c.customer_id
-WHERE o.status = 'Completed';
+    t.ticket_id,
+    a.agent_name,
+    t.resolution_minutes
+FROM support_tickets AS t
+INNER JOIN support_agents AS a
+    ON t.assigned_agent_id = a.agent_id
+WHERE t.status = 'Closed';
 ```
 :::
 
@@ -27,42 +27,28 @@ With an `INNER JOIN`, neither table is guaranteed to be preserved. A row survive
 
 | Situation | Returned by `INNER JOIN`? |
 |---|---|
-| Customer has a matching order | Yes |
-| Customer has no orders | No |
-| Order has an unknown customer ID | No |
-| Key is `NULL` | No equality match |
+| Ticket has a matching agent | Yes |
+| Agent has no tickets | No |
+| Ticket references an unknown agent | No |
+| Join key is `NULL` | No equality match |
 
 ## Think in pairs
 
-Suppose customer 1 has two orders. The customer row can match twice, producing two output rows. Joins do not automatically keep one row per customer.
+Suppose one agent owns three tickets. The agent row can match three times, producing three output rows.
 
 ```sql
 SELECT
-    c.customer_id,
-    c.customer_name,
-    o.order_id
-FROM customers AS c
-INNER JOIN orders AS o
-    ON c.customer_id = o.customer_id
-ORDER BY c.customer_id, o.order_id;
+    a.agent_id,
+    a.agent_name,
+    t.ticket_id
+FROM support_agents AS a
+INNER JOIN support_tickets AS t
+    ON a.agent_id = t.assigned_agent_id
+ORDER BY a.agent_id, t.ticket_id;
 ```
 
-> **Key Idea:** `INNER JOIN` answers, “Show me rows that participate in this relationship.” It is ideal when unmatched records should not appear.
+> **Key Idea:** `INNER JOIN` answers, “Show me rows that participate in this relationship.”
 
 ## `JOIN` and `INNER JOIN`
 
-These are equivalent:
-
-```sql
-FROM customers AS c
-JOIN orders AS o
-    ON c.customer_id = o.customer_id
-```
-
-```sql
-FROM customers AS c
-INNER JOIN orders AS o
-    ON c.customer_id = o.customer_id
-```
-
-Writing `INNER JOIN` while learning can make your intent more obvious.
+These keywords are equivalent. Writing `INNER JOIN` while learning can make your intent more obvious.

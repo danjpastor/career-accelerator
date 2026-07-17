@@ -200,6 +200,7 @@ class ExercisePacksWidget(QWidget):
         self.current_exercise_valid = False
         self.current_content_kind: str | None = None
         self.current_content_id: str | None = None
+        self._active_question_by_lesson: dict[str, str] = {}
         self._building_lists = False
         self._question_selector_loading = False
         self._responsive_mode: str | None = None
@@ -219,33 +220,63 @@ class ExercisePacksWidget(QWidget):
         toolbar_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.toolbar_row = toolbar_row
         toolbar_row.setSpacing(8)
+        # Group breadcrumbs and pack selection into two compact horizontal
+        # rows.  At narrow widths the toolbar stacks these two groups only;
+        # individual labels never become a tall one-widget-per-line column.
+        self.breadcrumb_host = QWidget()
+        breadcrumb_layout = QHBoxLayout(self.breadcrumb_host)
+        breadcrumb_layout.setContentsMargins(0, 0, 0, 0)
+        breadcrumb_layout.setSpacing(8)
         self.breadcrumb_back = QPushButton("‹")
         self.breadcrumb_back.setObjectName("Secondary")
         self.breadcrumb_back.setFixedSize(34, 34)
         self.breadcrumb_back.setToolTip("Back to pack overview")
         self.breadcrumb_back.clicked.connect(self.show_pack_overview)
-        toolbar_row.addWidget(self.breadcrumb_back)
+        breadcrumb_layout.addWidget(self.breadcrumb_back)
         self.breadcrumb_root = QLabel("Exercises")
         self.breadcrumb_root.setStyleSheet("color:#b8c3d8;font-size:9.5pt;")
-        toolbar_row.addWidget(self.breadcrumb_root)
+        breadcrumb_layout.addWidget(self.breadcrumb_root)
         self.breadcrumb_pack = QLabel("›  Select a pack")
         self.breadcrumb_pack.setStyleSheet("color:#b8c3d8;font-size:9.5pt;")
-        toolbar_row.addWidget(self.breadcrumb_pack)
+        breadcrumb_layout.addWidget(self.breadcrumb_pack)
         self.breadcrumb_page = QLabel("")
         self.breadcrumb_page.setStyleSheet("color:#dce4f3;font-size:9.5pt;")
-        toolbar_row.addWidget(self.breadcrumb_page)
+        self.breadcrumb_page.setMinimumWidth(0)
+        self.breadcrumb_page.setSizePolicy(
+            QSizePolicy.Policy.Ignored,
+            QSizePolicy.Policy.Preferred,
+        )
+        breadcrumb_layout.addWidget(self.breadcrumb_page, 1)
+        toolbar_row.addWidget(self.breadcrumb_host, 1)
         toolbar_row.addStretch()
+
+        # Keep the selector itself as one horizontal unit.  The surrounding
+        # toolbar may stack at compact widths, but "Select Pack" must always
+        # remain immediately to the left of its dropdown.
+        self.pack_selector_host = QWidget()
+        selector_layout = QHBoxLayout(self.pack_selector_host)
+        selector_layout.setContentsMargins(0, 0, 0, 0)
+        selector_layout.setSpacing(8)
+        self.pack_selector_label = QLabel("Select Pack")
+        self.pack_selector_label.setObjectName("Muted")
+        self.pack_selector_label.setWordWrap(False)
+        selector_layout.addWidget(self.pack_selector_label)
         self.pack_selector = QComboBox()
         self.pack_selector.setMinimumWidth(170)
+        self.pack_selector.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
+        )
         self.pack_selector.setToolTip("Switch installed exercise pack")
         self.pack_selector.currentIndexChanged.connect(self._pack_selector_changed)
-        toolbar_row.addWidget(self.pack_selector)
+        selector_layout.addWidget(self.pack_selector, 1)
         self.manage_packs_button = QPushButton("⋮")
         self.manage_packs_button.setObjectName("Secondary")
         self.manage_packs_button.setFixedSize(34, 34)
         self.manage_packs_button.setToolTip("Manage exercise packs")
         self.manage_packs_button.clicked.connect(self._show_manage_packs_menu)
-        toolbar_row.addWidget(self.manage_packs_button)
+        selector_layout.addWidget(self.manage_packs_button)
+        toolbar_row.addWidget(self.pack_selector_host)
         self.course_toolbar.layout.addLayout(toolbar_row)
         root.addWidget(self.course_toolbar)
 
@@ -291,7 +322,12 @@ class ExercisePacksWidget(QWidget):
         self.pack_list.setSpacing(4)
         self.pack_list.setAlternatingRowColors(False)
         self.pack_list.currentItemChanged.connect(self._pack_selected)
-        self.pack_list.setMaximumHeight(86)
+        # The top selector is now the only pack switcher.  Keep this hidden
+        # widget as the internal selection model so existing routing and pack
+        # refresh logic remain compatible without showing a duplicate list.
+        self.pack_list.setMinimumHeight(0)
+        self.pack_list.setMaximumHeight(0)
+        self.pack_list.hide()
         library_body_layout.addWidget(self.pack_list)
         self.pack_summary = QLabel("Select a pack to view its contents.")
         self.pack_summary.setObjectName("Muted")
@@ -394,7 +430,7 @@ class ExercisePacksWidget(QWidget):
         self.practice_prompt.hide()
         practice_layout.addWidget(self.practice_prompt)
         self.practice_intro = QLabel(
-            "Build the smallest query first, run it often, and use Check Answer only when the output shape looks right."
+            "Build the smallest query first, run it often, and use Submit Solution only when the output shape looks right."
         )
         self.practice_intro.setObjectName("Muted")
         self.practice_intro.setWordWrap(True)
@@ -409,7 +445,7 @@ class ExercisePacksWidget(QWidget):
         self.run_button = QPushButton("▶ Run Query")
         self.run_button.setObjectName("Secondary")
         self.run_button.clicked.connect(self.run_query)
-        self.check_button = QPushButton("✓ Check Answer")
+        self.check_button = QPushButton("✓ Submit Solution")
         self.check_button.setObjectName("Primary")
         self.check_button.clicked.connect(self.check_answer)
         self.hint_button = QPushButton("💡 Show Hint")
@@ -526,24 +562,26 @@ class ExercisePacksWidget(QWidget):
             else QBoxLayout.Direction.LeftToRight
         )
 
+        # The Learning page owns a fixed-height outer shell.  Keep the pack
+        # navigation beside the internally scrollable Learn/Practice cards so
+        # compact windows never force the entire page to scroll vertically.
+        self.setMinimumHeight(0)
+        self.setMaximumHeight(16777215)
         if compact:
-            self.setMinimumHeight(1500)
-            self.exercise_splitter.setOrientation(Qt.Orientation.Vertical)
+            self.exercise_splitter.setOrientation(Qt.Orientation.Horizontal)
             self.workspace_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.library_card.setMinimumWidth(0)
-            self.library_card.setMaximumWidth(16777215)
-            self.exercise_splitter.setSizes([330, 1150])
-            self.workspace_splitter.setSizes([560, 650])
+            self.library_card.setMinimumWidth(190)
+            self.library_card.setMaximumWidth(235)
+            self.exercise_splitter.setSizes([205, max(430, width - 205)])
+            self.workspace_splitter.setSizes([240, 270])
         elif mode == "medium":
-            self.setMinimumHeight(1120)
             self.exercise_splitter.setOrientation(Qt.Orientation.Horizontal)
             self.workspace_splitter.setOrientation(Qt.Orientation.Vertical)
             self.library_card.setMinimumWidth(250)
             self.library_card.setMaximumWidth(330)
             self.exercise_splitter.setSizes([280, 760])
-            self.workspace_splitter.setSizes([390, 480])
+            self.workspace_splitter.setSizes([300, 350])
         else:
-            self.setMinimumHeight(0)
             self.exercise_splitter.setOrientation(Qt.Orientation.Horizontal)
             self.workspace_splitter.setOrientation(Qt.Orientation.Horizontal)
             self.library_card.setMinimumWidth(270)
@@ -660,15 +698,58 @@ class ExercisePacksWidget(QWidget):
         if not self.current_pack:
             return []
         ordered: list[tuple[str, str, str]] = []
-        ordered.extend(
-            ("lesson", item["id"], item["title"])
-            for item in self.current_pack.get("lessons", [])
-        )
+        linked_ids: set[str] = set()
+        for lesson in self.current_pack.get("lessons", []):
+            ordered.append(("lesson", lesson["id"], lesson["title"]))
+            for question in self._questions_for_lesson(lesson["id"]):
+                linked_ids.add(question["id"])
+                ordered.append(("exercise", question["id"], question["title"]))
         ordered.extend(
             ("exercise", item["id"], item["title"])
             for item in self.current_pack.get("exercises", [])
+            if item["id"] not in linked_ids
         )
         return ordered
+
+    def _lesson_active_question_key(self, lesson_id: str) -> str | None:
+        if not self.current_pack:
+            return None
+        return (
+            f"exercise_packs/active_question/{self.current_pack['pack_id']}/"
+            f"{lesson_id}"
+        )
+
+    def _remember_active_question(self, exercise: dict[str, Any]) -> None:
+        lesson_id = str(exercise.get("lesson_id", "") or "")
+        exercise_id = str(exercise.get("id", "") or "")
+        if not lesson_id or not exercise_id:
+            return
+        self._active_question_by_lesson[lesson_id] = exercise_id
+        key = self._lesson_active_question_key(lesson_id)
+        if key:
+            self._settings.setValue(key, exercise_id)
+
+    def _preferred_question_for_lesson(
+        self, lesson_id: str, questions: list[dict[str, Any]]
+    ) -> dict[str, Any] | None:
+        if not questions:
+            return None
+        current_id = None
+        if (
+            self.current_exercise
+            and self.current_exercise.get("lesson_id") == lesson_id
+        ):
+            current_id = self.current_exercise.get("id")
+        remembered = self._active_question_by_lesson.get(lesson_id)
+        if not remembered:
+            key = self._lesson_active_question_key(lesson_id)
+            remembered = self._settings.value(key, "", type=str) if key else ""
+        preferred_id = current_id or remembered
+        if preferred_id:
+            for question in questions:
+                if question.get("id") == preferred_id:
+                    return question
+        return questions[0]
 
     def _next_content_title(self, kind: str, content_id: str) -> str | None:
         ordered = self._ordered_content()
@@ -693,11 +774,10 @@ class ExercisePacksWidget(QWidget):
     def show_pack_overview(self) -> None:
         if not self.current_pack:
             return
-        if self.current_content_kind == "lesson":
-            if self.current_exercise:
-                self._save_question_before_switch()
-            else:
-                self._save_lesson_sandbox()
+        if self.current_exercise:
+            self._save_question_before_switch()
+        elif self.current_content_kind == "lesson":
+            self._save_lesson_sandbox()
         self.current_exercise = None
         self.current_lesson_context = None
         self.current_exercise_valid = False
@@ -792,10 +872,11 @@ class ExercisePacksWidget(QWidget):
     def _restore_exercise_practice_labels(self) -> None:
         self.practice_title.setText("Your SQL")
         self.practice_intro.setText(
-            "Build the smallest query first, run it often, and use Check Answer "
+            "Build the smallest query first, run it often, and use Submit Solution "
             "only when the output shape looks right."
         )
         self.run_button.setText("▶ Run Query")
+        self.check_button.setText("✓ Submit Solution")
         self.run_button.setToolTip("")
         self.check_button.setToolTip("")
         self.hint_button.setToolTip("")
@@ -945,6 +1026,7 @@ class ExercisePacksWidget(QWidget):
             self.feedback.setText(f"❌ {exc}")
             return
         self.current_exercise = exercise
+        self._remember_active_question(exercise)
         self.current_lesson_context = None
         self.current_exercise_valid = False
         saved = exercise_packs.progress_for(
@@ -979,12 +1061,14 @@ class ExercisePacksWidget(QWidget):
         self.sql_editor.blockSignals(False)
         self.notes.setPlainText(saved.get("notes", ""))
         self.feedback.setText(
-            "Write your own query from the starting template, then Run Query and Check Answer."
+            "Write your own query from the starting template, then Run Query and Submit Solution."
         )
         self._hint_index = int(saved.get("hint_index", 0) or 0)
         self._set_practice_enabled(True)
         self._update_hint_button()
-        self.complete_button.setEnabled(saved["status"] == "Completed")
+        completed = saved["status"] == "Completed"
+        self.complete_button.setText("Completed ✓" if completed else "Mark Complete")
+        self.complete_button.setEnabled(not completed)
         self.result_table.clear()
         self.result_table.setRowCount(0)
         self.result_table.setColumnCount(0)
@@ -1062,7 +1146,7 @@ class ExercisePacksWidget(QWidget):
             self.pack_list.addItem(item)
             if pack["pack_id"] == previous_pack:
                 row_to_select = row
-        self.pack_list.setVisible(len(packs) > 1)
+        self.pack_list.hide()
         self.pack_selector.blockSignals(True)
         self.pack_selector.clear()
         selector_row = None
@@ -1232,11 +1316,10 @@ class ExercisePacksWidget(QWidget):
     def _content_selected(self, current: QListWidgetItem | None, _previous) -> None:
         if current is None or not self.current_pack:
             return
-        if self.current_content_kind == "lesson":
-            if self.current_exercise:
-                self._save_question_before_switch()
-            else:
-                self._save_lesson_sandbox()
+        if self.current_exercise:
+            self._save_question_before_switch()
+        elif self.current_content_kind == "lesson":
+            self._save_lesson_sandbox()
         data = current.data(Qt.ItemDataRole.UserRole) or {}
         if data.get("kind") == "lesson":
             self._show_lesson(data["id"])
@@ -1249,9 +1332,16 @@ class ExercisePacksWidget(QWidget):
         except exercise_packs.ExercisePackError as exc:
             QMessageBox.warning(self, "Lesson Error", str(exc))
             return
-        self.current_exercise = None
+        preserved_exercise_id = None
+        if (
+            self.current_exercise
+            and self.current_exercise.get("lesson_id") == lesson_id
+        ):
+            preserved_exercise_id = self.current_exercise.get("id")
+        else:
+            self.current_exercise = None
+            self.current_exercise_valid = False
         self.current_lesson_context = None
-        self.current_exercise_valid = False
         self.current_content_kind = "lesson"
         self.current_content_id = lesson_id
         lesson_title = next(
@@ -1275,9 +1365,16 @@ class ExercisePacksWidget(QWidget):
         )
         questions = self._questions_for_lesson(lesson_id)
         if questions:
-            self._populate_question_selector(lesson_id)
-            self._load_question_practice(questions[0]["id"])
+            preferred = self._preferred_question_for_lesson(lesson_id, questions)
+            preferred_id = preferred["id"] if preferred else questions[0]["id"]
+            self._populate_question_selector(lesson_id, preferred_id)
+            # Lesson and linked question are two views of the same pair.  Keep
+            # the editor, notes, cursor, hint level, and validation state intact
+            # when the learner toggles between them.
+            if preserved_exercise_id != preferred_id:
+                self._load_question_practice(preferred_id)
         else:
+            self.current_exercise = None
             self._set_lesson_practice(markdown)
         self._set_workspace_focus(0)
 
@@ -1287,9 +1384,15 @@ class ExercisePacksWidget(QWidget):
         except exercise_packs.ExercisePackError as exc:
             QMessageBox.warning(self, "Exercise Error", str(exc))
             return
+        same_question = bool(
+            self.current_exercise
+            and self.current_exercise.get("id") == exercise_id
+        )
+        preserved_valid = self.current_exercise_valid if same_question else False
         self.current_exercise = exercise
+        self._remember_active_question(exercise)
         self.current_lesson_context = None
-        self.current_exercise_valid = False
+        self.current_exercise_valid = preserved_valid
         self.current_content_kind = "exercise"
         self.current_content_id = exercise_id
         self.breadcrumb_page.setText(f"›  {exercise['title']}")
@@ -1371,13 +1474,21 @@ class ExercisePacksWidget(QWidget):
             self._populate_question_selector(lesson_id, exercise_id)
         else:
             self.question_selector_row.hide()
-        self._load_question_practice(exercise_id, exercise=exercise)
+        if not same_question:
+            self._load_question_practice(exercise_id, exercise=exercise)
         self._set_workspace_focus(1)
 
     def _answer_edited(self) -> None:
         self.current_exercise_valid = False
         if self.current_exercise:
-            self.complete_button.setEnabled(False)
+            saved = exercise_packs.progress_for(
+                self.conn,
+                self.current_exercise["pack_id"],
+                self.current_exercise["id"],
+            )
+            if saved["status"] != "Completed":
+                self.complete_button.setText("Mark Complete")
+                self.complete_button.setEnabled(True)
 
     def _display_result(self, result: dict[str, Any]) -> None:
         columns = result.get("columns", [])
@@ -1415,9 +1526,9 @@ class ExercisePacksWidget(QWidget):
         else:
             self._save_lesson_sandbox()
 
-    def check_answer(self) -> None:
+    def check_answer(self) -> bool:
         if not self.current_exercise:
-            return
+            return False
         try:
             result = exercise_packs.check_answer(
                 self.current_exercise, self.sql_editor.toPlainText()
@@ -1426,21 +1537,21 @@ class ExercisePacksWidget(QWidget):
             message = str(exc)
             self.feedback.setText(f"❌ {message}")
             self.sql_editor.navigate_to_error(message)
-            return
+            return False
         self._display_result(result["user"])
         if result["correct"]:
             self.current_exercise_valid = True
             self.complete_button.setEnabled(True)
             self.feedback.setText(
-                "✅ Correct. Your query returns the expected columns and rows "
-                "and uses the requested SQL pattern. Mark the exercise complete "
-                "when you are ready."
+                "✅ Solution accepted. Your query returns the expected columns "
+                "and rows and uses the requested SQL pattern. Select Mark "
+                "Complete when you are ready to finish the question."
             )
             self._save_as_in_progress()
-            return
+            return True
 
         self.current_exercise_valid = False
-        self.complete_button.setEnabled(False)
+        self.complete_button.setEnabled(True)
         details: list[str] = []
         if not result["columns_match"]:
             actual = ", ".join(result["user"].get("columns", [])) or "none"
@@ -1482,6 +1593,7 @@ class ExercisePacksWidget(QWidget):
             "Run the smallest inner query by itself and compare its output shape "
             "with the Learn card."
         )
+        return False
 
     def show_next_hint(self) -> None:
         if not self.current_exercise:
@@ -1612,8 +1724,12 @@ class ExercisePacksWidget(QWidget):
             self.current_exercise["id"],
         )
         if not self.current_exercise_valid and current["status"] != "Completed":
-            self.feedback.setText("Check the answer successfully before marking it complete.")
-            return
+            if not self.check_answer():
+                self.feedback.setText(
+                    self.feedback.text()
+                    + " The question was not marked complete."
+                )
+                return
         exercise_packs.save_progress(
             self.conn,
             self.current_exercise["pack_id"],
@@ -1624,6 +1740,8 @@ class ExercisePacksWidget(QWidget):
             hint_index=getattr(self, "_hint_index", 0),
         )
         self.feedback.setText("✅ Exercise completed. The next exercise is now ready.")
+        self.complete_button.setText("Completed ✓")
+        self.complete_button.setEnabled(False)
         self.packsChanged.emit()
         self._refresh_current_pack_preserving_exercise(select_next=True)
 

@@ -9,7 +9,7 @@ from PySide6.QtCore import QCoreApplication, QEvent, Qt
 from PySide6.QtWidgets import QApplication, QFrame, QLabel
 
 from career_app.main import CareerAccelerator, NAV
-from career_app.ui.course_ui import CoursePageWidget
+from career_app.ui.course_ui import CoursePageWidget, CourseTable
 
 
 class ResponsiveLayoutV10Tests(unittest.TestCase):
@@ -289,44 +289,128 @@ class ResponsiveLayoutV10Tests(unittest.TestCase):
                     f"page {index} overflowed horizontally at {size}",
                 )
 
-    def test_compact_single_column_cards_use_the_full_page_width(self) -> None:
+    def test_fixed_outer_pages_fit_while_dense_cards_scroll_internally(self) -> None:
         self.resize_window(900, 620)
 
+        # Settings remains a normal single-column page at compact width.
         self.window.navigate(10)
         self._flush()
         settings_page = self.window.stack.currentWidget()
         available = settings_page.viewport().width()
         self.assertGreater(self.window.settings_cards[0].width(), available * 0.88)
 
+        # Study Session deliberately keeps its two working cards side by side;
+        # each card owns its own scroll area instead of making the page scroll.
         self.window.navigate(5)
         self._flush()
         study_page = self.window.stack.currentWidget()
         available = study_page.viewport().width()
-        self.assertGreater(self.window.study_timer_card.width(), available * 0.88)
-        self.assertGreater(self.window.study_log_card.width(), available * 0.88)
+        self.assertEqual(study_page.verticalScrollBar().maximum(), 0)
+        self.assertNotEqual(
+            self.window.study_timer_card.x(),
+            self.window.study_log_card.x(),
+        )
+        self.assertGreater(self.window.study_timer_card.width(), available * 0.28)
+        self.assertGreater(self.window.study_log_card.width(), available * 0.28)
+        self.assertIsNotNone(self.window.study_timer_scroll)
+        self.assertIsNotNone(self.window.study_log_scroll)
 
-    def test_guided_sql_workspaces_receive_usable_compact_heights(self) -> None:
+    def test_guided_sql_workspaces_fit_the_fixed_outer_pages(self) -> None:
         self.resize_window(900, 620)
 
         self.window.navigate(2)
         self.window.learning_tabs.setCurrentWidget(self.window.exercise_packs_widget)
         self._flush()
+        learning_page = self.window.stack.currentWidget()
         packs = self.window.exercise_packs_widget
+        self.assertEqual(learning_page.verticalScrollBar().maximum(), 0)
         self.assertEqual(packs._responsive_mode, "compact")
-        self.assertEqual(packs.exercise_splitter.orientation(), Qt.Orientation.Vertical)
+        self.assertEqual(packs.exercise_splitter.orientation(), Qt.Orientation.Horizontal)
         self.assertEqual(packs.workspace_splitter.orientation(), Qt.Orientation.Vertical)
-        self.assertGreaterEqual(packs.minimumHeight(), 1400)
-        self.assertGreaterEqual(self.window.learning_tabs.minimumHeight(), 1500)
+        self.assertLessEqual(packs.minimumHeight(), learning_page.viewport().height())
+        self.assertLessEqual(
+            self.window.learning_tabs.minimumHeight(),
+            learning_page.viewport().height(),
+        )
 
         self.window.navigate(4)
         self.window.sql_tabs.setCurrentWidget(self.window.duckdb_exercises_widget)
         self._flush()
+        sql_page = self.window.stack.currentWidget()
         duckdb = self.window.duckdb_exercises_widget
+        self.assertEqual(sql_page.verticalScrollBar().maximum(), 0)
         self.assertEqual(duckdb._responsive_mode, "compact")
-        self.assertEqual(duckdb.main_splitter.orientation(), Qt.Orientation.Vertical)
+        self.assertEqual(duckdb.main_splitter.orientation(), Qt.Orientation.Horizontal)
         self.assertEqual(duckdb.workspace_splitter.orientation(), Qt.Orientation.Vertical)
-        self.assertGreaterEqual(duckdb.minimumHeight(), 1400)
-        self.assertGreaterEqual(self.window.sql_tabs.minimumHeight(), 1500)
+        self.assertLessEqual(duckdb.minimumHeight(), sql_page.viewport().height())
+        self.assertLessEqual(
+            self.window.sql_tabs.minimumHeight(),
+            sql_page.viewport().height(),
+        )
+
+    def test_applications_form_and_pipeline_share_the_fixed_page_without_overlap(self) -> None:
+        self.resize_window(900, 620)
+        self.window.navigate(7)
+        self._flush()
+        form = self.window.applications_form_card
+        pipeline = self.window.applications_kanban_scroll
+        self.assertTrue(form.isVisible())
+        self.assertGreaterEqual(form.width(), 240)
+        self.assertGreaterEqual(
+            pipeline.x(),
+            form.x() + form.width() + self.window.applications_body_layout.spacing(),
+        )
+        self.assertEqual(
+            self.window.stack.currentWidget().verticalScrollBar().maximum(),
+            0,
+        )
+
+    def test_requested_pages_never_use_outer_vertical_scrolling(self) -> None:
+        fixed_pages = (2, 4, 5, 7, 8)
+        for size in ((900, 620), (1024, 768), (1280, 800), (1680, 944)):
+            with self.subTest(size=size):
+                self.resize_window(*size)
+                for index in fixed_pages:
+                    self.window.navigate(index)
+                    self._flush(3)
+                    page = self.window.stack.currentWidget()
+                    self.assertEqual(
+                        page.verticalScrollBarPolicy(),
+                        Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
+                        f"page {index} still permits outer scrolling at {size}",
+                    )
+                    self.assertEqual(
+                        page.verticalScrollBar().maximum(),
+                        0,
+                        f"page {index} overflowed vertically at {size}",
+                    )
+                    self.assertEqual(
+                        page.horizontalScrollBar().maximum(),
+                        0,
+                        f"page {index} overflowed horizontally at {size}",
+                    )
+
+
+    def test_available_data_tables_wrap_and_scroll_instead_of_eliding_columns(self) -> None:
+        columns = ", ".join(
+            f"column_{index:02d}_with_a_descriptive_name" for index in range(45)
+        )
+        table = CourseTable(
+            ["Table", "Rows", "Columns"],
+            [["operational_events", "200", columns]],
+        )
+        table.resize(360, 280)
+        table.show()
+        self._flush()
+        self.assertTrue(table.wordWrap())
+        self.assertEqual(table.textElideMode(), Qt.TextElideMode.ElideNone)
+        self.assertEqual(
+            table.verticalScrollBarPolicy(),
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded,
+        )
+        self.assertGreater(table.verticalScrollBar().maximum(), 0)
+        self.assertGreater(table.rowHeight(0), table.viewport().height())
+        table.close()
 
     def test_rebuilding_course_content_does_not_leave_overlapping_titles(self) -> None:
         page = CoursePageWidget()

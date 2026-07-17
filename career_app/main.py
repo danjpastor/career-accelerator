@@ -70,7 +70,7 @@ from career_app.ui.responsive import (
 from career_app.ui.widgets import (
     AreaChart, BadgeCard, Card, CircularTimer, Divider, FocusRow,
     FooterMetricBox, MetricRow, MiniSparkline, Ring, SectionHeader,
-    SidebarMetricCard, SoftPanel, StatRow, TaskRow
+    SidebarMetricCard, SoftPanel, StatRow, TaskRow, make_card_scrollable
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -2025,11 +2025,12 @@ class CareerAccelerator(QMainWindow):
             "📚 Learning Dashboard",
             "Track structured learning and complete guided labs that produce employer-ready evidence.",
         )
+        page.set_outer_scroll_enabled(False)
         self.learning_tabs = QTabWidget()
         self.learning_tabs.setMinimumWidth(0)
         self.learning_tabs.setSizePolicy(
             QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Expanding,
         )
 
         overview = QWidget()
@@ -2198,7 +2199,18 @@ class CareerAccelerator(QMainWindow):
         self.set_applied_workspace_enabled(False)
         labs_layout.addWidget(detail, 1)
 
-        self.learning_tabs.addTab(overview, "Learning Overview")
+        overview_scroll = QScrollArea()
+        overview_scroll.setWidgetResizable(True)
+        overview_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        overview_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        overview_scroll.setStyleSheet(
+            "QScrollArea {background:transparent;border:none;}"
+        )
+        overview_scroll.setWidget(overview)
+        self.learning_overview_scroll = overview_scroll
+        self.learning_tabs.addTab(overview_scroll, "Learning Overview")
         # BEGIN EXERCISE PACKS
         self._legacy_applied_labs_page = labs
         self.applied_labs_widget = AppliedLabsWidget(
@@ -2235,15 +2247,8 @@ class CareerAccelerator(QMainWindow):
             set_box_direction(self.legacy_labs_layout, stacked, 10)
             set_box_direction(self.legacy_labs_refs, width < 720, 7)
             set_box_direction(self.legacy_labs_actions, width < 620, 7)
-            current = self.learning_tabs.currentWidget()
-            guided = current in (self.applied_labs_widget, self.exercise_packs_widget)
-            if width < 760:
-                minimum = 1580 if guided else 920
-            elif width < 1080:
-                minimum = 1180 if guided else 720
-            else:
-                minimum = 680 if guided else 610
-            self.learning_tabs.setMinimumHeight(minimum)
+            self.learning_tabs.setMinimumHeight(0)
+            self.learning_tabs.setMaximumHeight(16777215)
 
         self._learning_layout_handler = update_learning_layout
         self.learning_tabs.currentChanged.connect(
@@ -2883,12 +2888,13 @@ class CareerAccelerator(QMainWindow):
                 "exercises with saved local submissions."
             ),
         )
+        page.set_outer_scroll_enabled(False)
 
         self.sql_tabs = QTabWidget()
         self.sql_tabs.setMinimumWidth(0)
         self.sql_tabs.setSizePolicy(
             QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Expanding,
         )
 
         # DataLemur problem workspace.
@@ -3052,6 +3058,7 @@ class CareerAccelerator(QMainWindow):
             self.sql_solution_button
         )
         detail.layout.addLayout(buttons)
+        self.sql_detail_scroll = make_card_scrollable(detail)
 
         self.sql_selected_title = None
         self.set_sql_workspace_enabled(False)
@@ -3275,7 +3282,9 @@ class CareerAccelerator(QMainWindow):
         )
 
         def update_sql_layout(width):
-            compact = width < 900
+            # At the supported desktop minimum the library and workspace stay
+            # side by side; their own lists/editors/cards handle overflow.
+            compact = width < 620
             set_box_direction(self.sql_problem_layout, compact, 10)
             set_box_direction(self.legacy_duckdb_layout, compact, 10)
             set_box_direction(self.sql_problem_buttons, width < 680, 7)
@@ -3285,19 +3294,13 @@ class CareerAccelerator(QMainWindow):
             set_box_direction(
                 self.legacy_duckdb_submission_buttons, width < 620, 7
             )
-            self.sql_recommendations_card.setMinimumHeight(230 if compact else 0)
-            self.sql_recommendations_card.setMaximumHeight(280 if compact else 16777215)
-            self.sql_detail_card.setMinimumHeight(760 if compact else 0)
+            self.sql_recommendations_card.setMinimumHeight(180 if compact else 0)
+            self.sql_recommendations_card.setMaximumHeight(250 if compact else 16777215)
+            self.sql_detail_card.setMinimumHeight(0)
             self.sql_problem_layout.setStretch(0, 0 if compact else 1)
             self.sql_problem_layout.setStretch(1, 1)
-            current = self.sql_tabs.currentWidget()
-            if width < 760:
-                minimum = 1580 if current is self.duckdb_exercises_widget else 1120
-            elif width < 1080:
-                minimum = 1220 if current is self.duckdb_exercises_widget else 820
-            else:
-                minimum = 650
-            self.sql_tabs.setMinimumHeight(minimum)
+            self.sql_tabs.setMinimumHeight(0)
+            self.sql_tabs.setMaximumHeight(16777215)
 
         self._sql_layout_handler = update_sql_layout
         self.sql_tabs.currentChanged.connect(
@@ -3835,6 +3838,7 @@ class CareerAccelerator(QMainWindow):
             "⏱️ Study Session",
             "Track focused time, capture what you completed, and turn each session into progress evidence.",
         )
+        page.set_outer_scroll_enabled(False)
 
         body = QGridLayout()
         body.setHorizontalSpacing(12)
@@ -3945,6 +3949,7 @@ class CareerAccelerator(QMainWindow):
         timer_tip.setWordWrap(True)
         timer_tip.setAlignment(Qt.AlignCenter)
         timer_card.layout.addWidget(timer_tip)
+        self.study_timer_scroll = make_card_scrollable(timer_card)
 
         # Compact session form.
         log_card = Card(
@@ -4051,6 +4056,7 @@ class CareerAccelerator(QMainWindow):
         save.setMinimumHeight(38)
         save.clicked.connect(self.save_session)
         log_card.layout.addWidget(save)
+        self.study_log_scroll = make_card_scrollable(log_card)
 
         self.study_body_grid = body
         self.study_timer_card = timer_card
@@ -4059,18 +4065,19 @@ class CareerAccelerator(QMainWindow):
         body.addWidget(log_card, 0, 1)
         body.setColumnStretch(0, 34)
         body.setColumnStretch(1, 66)
-        root.addLayout(body)
+        root.addLayout(body, 2)
 
         recent = Card(
             "📚 Recent Sessions",
             "Your latest logged study activity.",
         )
+        self.study_recent_card = recent
         self.session_list = QListWidget()
         self.session_list.setWordWrap(True)
         self.session_list.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
-        self.session_list.setMinimumHeight(170)
+        self.session_list.setMinimumHeight(80)
         self.session_list.itemDoubleClicked.connect(
             lambda _item: self.open_selected_session_workspace()
         )
@@ -4086,7 +4093,7 @@ class CareerAccelerator(QMainWindow):
 
         def update_study_layout(width):
             clear_layout_positions(self.study_body_grid)
-            if width >= 900:
+            if width >= 620:
                 self.study_body_grid.addWidget(self.study_timer_card, 0, 0)
                 self.study_body_grid.addWidget(self.study_log_card, 0, 1)
                 self.study_body_grid.setColumnStretch(0, 34)
@@ -4098,7 +4105,29 @@ class CareerAccelerator(QMainWindow):
             set_box_direction(self.study_timer_controls, width < 560, 7)
             set_box_direction(self.study_recent_actions, width < 560, 7)
 
+            viewport_height = max(0, page.viewport().height())
+            margins = root.contentsMargins()
+            header_height = page.header.sizeHint().height() if page.header else 0
+            usable = max(
+                260,
+                viewport_height
+                - margins.top()
+                - margins.bottom()
+                - header_height
+                - (root.spacing() * 2),
+            )
+            recent_height = max(92, min(170, round(usable * 0.27)))
+            body_height = max(160, usable - recent_height - root.spacing())
+            for card in (self.study_timer_card, self.study_log_card):
+                card.setMinimumHeight(0)
+                card.setMaximumHeight(body_height)
+            self.study_recent_card.setMinimumHeight(0)
+            self.study_recent_card.setMaximumHeight(recent_height)
+
         self._register_page_responsive(page, update_study_layout)
+        page.heightChanged.connect(
+            lambda _height: update_study_layout(max(0, page.viewport().width()))
+        )
         return page
 
     # ---------- Readiness ----------
@@ -4393,8 +4422,14 @@ class CareerAccelerator(QMainWindow):
             "💼 Applications CRM",
             "Move opportunities from wishlist to offer using a visual pipeline.",
         )
+        page.set_outer_scroll_enabled(False)
+
+        applications_body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        applications_body.setSpacing(10)
+        self.applications_body_layout = applications_body
 
         form_card = Card("Add Opportunity")
+        self.applications_form_card = form_card
         form = QFormLayout()
         self.app_date = QLineEdit(date.today().isoformat())
         self.app_company = QLineEdit()
@@ -4429,7 +4464,8 @@ class CareerAccelerator(QMainWindow):
         add.setObjectName("Primary")
         add.clicked.connect(self.add_application)
         form_card.layout.addWidget(add)
-        root.addWidget(form_card)
+        self.applications_form_scroll = make_card_scrollable(form_card)
+        applications_body.addWidget(form_card, 0)
 
         kanban_scroll = QScrollArea()
         kanban_scroll.setWidgetResizable(True)
@@ -4438,12 +4474,47 @@ class CareerAccelerator(QMainWindow):
         self.kanban_host = kanban_host
         self.kanban_layout.setSpacing(8)
         kanban_scroll.setWidget(kanban_host)
-        kanban_scroll.setMinimumHeight(390)
-        root.addWidget(kanban_scroll, 1)
+        kanban_scroll.setMinimumSize(0, 0)
+        kanban_scroll.setSizePolicy(
+            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+        )
+        self.applications_kanban_scroll = kanban_scroll
+        applications_body.addWidget(kanban_scroll, 1)
+        root.addLayout(applications_body, 1)
 
         def update_applications_layout(width):
-            vertical = width < 860
+            stacked = width < 620
+            set_box_direction(self.applications_body_layout, stacked, 10)
+            # Keep pipeline columns horizontal at supported desktop widths so
+            # the kanban card scrolls internally rather than growing the page.
+            vertical = width < 540
             set_box_direction(self.kanban_layout, vertical, 8)
+            if stacked:
+                self.applications_form_card.setMinimumWidth(0)
+                self.applications_form_card.setMaximumWidth(16777215)
+                self.applications_kanban_scroll.setMinimumWidth(0)
+                self.applications_kanban_scroll.setMaximumWidth(16777215)
+            else:
+                form_width = 250 if width < 800 else 300 if width < 1100 else 340
+                page_margins = page.content_layout.contentsMargins()
+                available_body_width = max(
+                    0,
+                    width - page_margins.left() - page_margins.right(),
+                )
+                pipeline_width = max(
+                    240,
+                    available_body_width
+                    - form_width
+                    - self.applications_body_layout.spacing(),
+                )
+                self.applications_form_card.setMinimumWidth(form_width)
+                self.applications_form_card.setMaximumWidth(form_width)
+                # The kanban host is intentionally wider than its viewport and
+                # scrolls internally.  Cap the viewport itself so its child
+                # size hint cannot force the outer page wider or overlap the
+                # fixed-width form card.
+                self.applications_kanban_scroll.setMinimumWidth(pipeline_width)
+                self.applications_kanban_scroll.setMaximumWidth(pipeline_width)
             for card in self.kanban_host.findChildren(Card):
                 card.setMinimumWidth(0 if vertical else 220)
                 card.setMaximumWidth(16777215)
@@ -4457,6 +4528,7 @@ class CareerAccelerator(QMainWindow):
             "📝 Weekly Review",
             "Turn your activity into an automatic coaching summary.",
         )
+        page.set_outer_scroll_enabled(False)
         body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.review_body_layout = body
         form_card = Card("Generate Summary")
@@ -4491,6 +4563,7 @@ class CareerAccelerator(QMainWindow):
         workspace_buttons.addWidget(retrospective)
         workspace_buttons.addWidget(study_plan)
         form_card.layout.addLayout(workspace_buttons)
+        self.review_form_scroll = make_card_scrollable(form_card)
         body.addWidget(form_card, 1)
 
         summaries = Card("Saved Summaries")
@@ -4504,9 +4577,9 @@ class CareerAccelerator(QMainWindow):
         root.addLayout(body, 1)
 
         def update_review_layout(width):
-            set_box_direction(self.review_body_layout, width < 880, 10)
+            set_box_direction(self.review_body_layout, width < 620, 10)
             set_box_direction(self.review_workspace_buttons, width < 620, 7)
-            self.summary_list.setMinimumHeight(230)
+            self.summary_list.setMinimumHeight(0)
 
         self._register_page_responsive(page, update_review_layout)
         return page

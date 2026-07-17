@@ -63,6 +63,8 @@ The app adds:
 
 Do not use indented code, raw HTML `<pre>` tags, or plain paragraphs for multi-line SQL.
 
+A teaching example must not double as the answer to the linked practice question. Keep the concept consistent but change the scenario, tables, requested columns, and result shape so the learner must transfer the pattern rather than copy it.
+
 Use inline code for short identifiers and expressions:
 
 ```markdown
@@ -195,6 +197,7 @@ Exercise fields appear in the Practice card. Keep each field focused:
 - Use progressive hints: concept first, structure second, implementation detail last.
 - Keep `starter_sql` visibly incomplete. Comments and placeholders are appropriate; completed predicates, joins, grouping, nested-query logic, and copied lesson examples are not.
 - Do not use the starter editor as another teaching example. Teaching examples belong in Learn; learner construction belongs in Practice.
+- Do not make the Learn example the paired question's solution. Use a distinct dataset and deliverable while teaching the same mental model.
 - Ensure the Practice card remains understandable without opening View Solution.
 
 ## Accessibility and responsiveness

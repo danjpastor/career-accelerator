@@ -30,6 +30,8 @@ Use this checklist before releasing or installing a new pack.
 - [ ] Every manifest lesson entry has a calm subtitle.
 - [ ] Major sections use `##`; smaller checkpoints use `###`.
 - [ ] Every multi-line code sample is in a labeled fenced code box.
+- [ ] Every lesson example uses a different scenario, dataset combination, requested output, and final query from its paired questions.
+- [ ] No lesson code block can be copied directly into a paired question as the correct solution.
 - [ ] Every schema, comparison, and result sample uses a Markdown table.
 - [ ] No ASCII-art tables are present.
 - [ ] Callouts are concise and use blockquotes.
@@ -45,6 +47,9 @@ Use this checklist before releasing or installing a new pack.
 - [ ] Starter SQL does not copy a lesson example, official solution, or nearly completed answer.
 - [ ] A brand-new question opens with only its authored starter template or an empty editor.
 - [ ] Previously saved learner SQL reopens instead of resetting to the template.
+- [ ] Toggling between a lesson and its linked question preserves the same editor, notes, hints, and validation state.
+- [ ] Switching to a different lesson-question pair loads only that pair's saved editor state.
+- [ ] Submit Solution validates the active question and Mark Complete completes only a valid answer.
 - [ ] Build steps are small and testable.
 - [ ] Hints become progressively more specific.
 - [ ] Common mistakes explain why the mistake fails.
@@ -64,7 +69,7 @@ Use this checklist before releasing or installing a new pack.
 ## Validation
 
 - [ ] Every official solution executes successfully.
-- [ ] Every official solution passes `Check Answer`.
+- [ ] Every official solution passes `Submit Solution`.
 - [ ] An obviously wrong query fails.
 - [ ] Column names and ordering are correct.
 - [ ] `ordered` is true only when order matters.
@@ -87,7 +92,7 @@ Use this checklist before releasing or installing a new pack.
 - [ ] Lessons render without clipped or malformed content.
 - [ ] Learn and Practice remain synchronized.
 - [ ] Selecting each lesson loads only that lesson’s questions.
-- [ ] Run Query, Check Answer, Exercise Hint, and View Solution operate on the selected question.
+- [ ] Run Query, Submit Solution, Exercise Hint, and View Solution operate on the selected question.
 - [ ] SQL can run and be checked.
 - [ ] A version update preserves saved SQL, notes, and completion.
 - [ ] SHA-256 checksum is generated for the release archive.

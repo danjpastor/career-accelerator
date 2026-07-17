@@ -1,20 +1,20 @@
 # What Is a Subquery?
 
-A **subquery** is a complete SQL query placed inside another SQL query. It lets you break a complex question into smaller questions and use one answer as the input for the next step.
+A **subquery** is a complete SQL query placed inside another SQL query. It lets you solve a larger question by calculating a smaller result first.
 
 :::columns
 :::column
 > **Learning Goals:**
-> ✓ Recognize a subquery and identify its inner and outer queries.
+> ✓ Recognize the inner and outer query.
 > ✓ Predict whether the inner query returns one value, a list, or a table.
-> ✓ Explain how the outer query uses the inner result.
+> ✓ Explain how the outer query consumes that result.
 :::column
 ```sql
-SELECT employee_name, salary
-FROM employees
-WHERE salary > (
-    SELECT AVG(salary)
-    FROM employees
+SELECT product_name, unit_price
+FROM products
+WHERE unit_price > (
+    SELECT AVG(unit_price)
+    FROM products
 );
 ```
 :::
@@ -23,55 +23,47 @@ WHERE salary > (
 :::column
 ## Example Result
 
-| employee_name | salary |
+| product_name | unit_price |
 |---|---:|
-| Priya | 91000 |
-| Mina | 88000 |
-| Chris | 96000 |
-| Sam | 105000 |
-| Iris | 83000 |
-
-These employees earn more than the company-wide average salary.
+| Studio Monitor | 349.00 |
+| Color Panel | 799.00 |
+| Reference Display | 1299.00 |
 :::column
-> **Key Idea:** The inner query runs first and returns one value: the average salary. The outer query then uses that value to keep only employees whose salary is greater.
+> **Key Idea:** The inner query calculates one benchmark—the average product price. The outer query uses that benchmark to filter product rows.
 :::
 
-## The two questions inside this query
+## The two questions inside the example
 
-### 1. Smaller question: What is the average salary?
+### 1. Smaller question: What is the average product price?
 
 ```sql
-SELECT AVG(salary)
-FROM employees;
+SELECT AVG(unit_price)
+FROM products;
 ```
 
-This returns **one row and one column**: one number.
+This returns **one row and one column**.
 
-### 2. Larger question: Which salaries are greater than that number?
+### 2. Larger question: Which products cost more than that value?
 
 ```sql
-SELECT employee_name, salary
-FROM employees
-WHERE salary > (...);
+SELECT product_name, unit_price
+FROM products
+WHERE unit_price > (...);
 ```
 
 The outer query treats the inner result like a value written after `>`.
 
 ## The three result shapes
 
-Before nesting anything, determine what the inner query returns.
-
 | Inner result shape | Example | Common outer use |
 |---|---|---|
-| One value | One average salary | `=`, `>`, `<`, `>=`, `<=` |
-| One column with many values | A list of customer IDs | `IN` or `NOT IN` |
-| A table | One summary row per department | Put it in `FROM` and give it an alias |
+| One value | One average price | `=`, `>`, `<`, `>=`, `<=` |
+| One column with many values | A list of product IDs | `IN` or `NOT IN` |
+| A table | One summary row per store | Put it in `FROM` and give it an alias |
 
 `EXISTS` and `NOT EXISTS` are slightly different: they ask only whether the inner search returns any rows.
 
 ## Read from the inside outward
-
-When a nested query looks intimidating, temporarily ignore the outside.
 
 1. What question does the innermost query answer?
 2. What columns and rows does it return?
@@ -83,23 +75,11 @@ Use these two sentences throughout the pack:
 - **The inner query returns...**
 - **The outer query uses that result to...**
 
-## Why analysts use subqueries
-
-Subqueries help express questions in which one step depends on another result:
-
-- Employees earning more than the company average.
-- Customers who placed at least one completed order.
-- Departments whose average salary exceeds a benchmark.
-- Records for which no related record exists.
-- Detailed rows belonging to groups that passed another test.
-
-A subquery is not automatically better than a join or CTE. It is one tool for expressing multi-step logic clearly.
-
-> **First survival rule:** Run the inner query by itself before nesting it. If you cannot explain its output, the complete query will feel much harder than it needs to.
+> **First survival rule:** Run the inner query by itself before nesting it. If you cannot explain its output, do not build the outer query yet.
 
 ### Quick checkpoint
 
-For the example above, complete these sentences:
+For the product example, complete these sentences:
 
-- The inner query returns **one value: the company-wide average salary**.
-- The outer query uses it to **keep employees whose salary is greater than that value**.
+- The inner query returns **one value: the average unit price**.
+- The outer query uses it to **keep products whose price is greater than that value**.

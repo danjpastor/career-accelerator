@@ -98,6 +98,8 @@ Lesson and exercise IDs must be unique across the whole pack. Referenced paths m
 - `show_starter_sql` controls whether the authored `starter_sql` appears for a brand-new answer. When false, the editor opens empty.
 - A learner's previously saved SQL always takes precedence over the starter template.
 - A starter template may contain comments, requested column placeholders, an empty CTE, or a required table name, but it must not contain the solution logic, a lesson example copied into the editor, or a nearly completed answer.
+- Lesson examples and paired questions must use distinct scenarios and final queries. The lesson may teach the same SQL pattern, but it must not reproduce the question's datasets, requested result, or official solution.
+- Selecting the lesson or any question within the same lesson-question pair must preserve that question's editor state. Only moving to another pair loads another saved answer.
 - Lesson Markdown code examples are instructional only and are never copied into Practice automatically.
 
 ## Dashboard suggestion rules
@@ -211,6 +213,8 @@ These fields are optional for compatibility, but polished packs should use them 
 
 Lesson files use a constrained Markdown subset that is rendered consistently across platforms. The Exercises UI supplies the course-site presentation automatically using native Qt course components rather than a single rich-text document. This gives pack authors consistent responsive spacing, code controls, tables, callouts, breadcrumbs, bookmarks, and lesson navigation.
 
+SQL examples in a lesson must teach the concept with a different scenario than the linked question. Do not include the paired question's official query, the same table combination, or a result that can be copied directly into the Practice editor.
+
 - Start each lesson with one `#` title. The UI renders it beneath a compact content-type pill, followed by the optional manifest `subtitle` label and a quiet divider.
 - Use `##` for major sections and `###` for smaller checkpoints. The UI adds hierarchy and divider lines.
 - Put every multi-line code example in a fenced block with a language label. SQL examples should use ` ```sql ` so they receive an **SQL** header, line numbers, syntax highlighting, and a Copy button.
@@ -272,7 +276,7 @@ Format v1 SQL exercises run in an isolated, in-memory SQLite database created fr
 
 Only one read-only `SELECT` or `WITH` statement may run. Statements that modify data, attach databases, load extensions, create objects, or access the filesystem are rejected.
 
-When **Check Answer** is selected:
+When **Submit Solution** is selected:
 
 1. The learner query runs against a fresh database.
 2. The solution query runs against a separate fresh database with the same CSV data.

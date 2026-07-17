@@ -15,6 +15,8 @@ Every lesson must teach a concept and immediately provide at least one question 
 
 For each question, author a direct task, expected output shape, dataset details, progressive hints, validation rules, and an official walkthrough. New learner SQL may contain only a minimal starting template. Never auto-fill a lesson example, the official solution, or enough completed SQL to remove the reasoning step. Previously saved learner SQL should reopen unchanged.
 
+A lesson example must demonstrate the same concept through a **different scenario, dataset, requested output, and final query** from every question paired with that lesson. The learner may see the pattern, but must still decide how to apply it. Do not rename the question tables and present the same finished solution in Learn.
+
 Use this learning loop consistently:
 
 1. Explain the mental model in Learn.
@@ -140,6 +142,10 @@ SELECT ...;
 ````
 
 The first screenful should orient the learner quickly. Avoid opening with a long wall of text.
+
+### Keep examples separate from assessed questions
+
+The representative SQL in a lesson is instructional, not an answer key. Use different table names and a different business question from the linked practice question. Change the requested columns and result shape as well—not only the values. A learner who copies a lesson example into Practice should not receive a correct answer without meaningful adaptation.
 
 ## 5. Exercise blueprint
 

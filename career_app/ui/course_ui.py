@@ -420,9 +420,13 @@ class CourseTable(QTableWidget):
         self.setMinimumWidth(0)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         self.setAlternatingRowColors(True)
+        self.setWordWrap(True)
+        self.setTextElideMode(Qt.TextElideMode.ElideNone)
         self.setShowGrid(False)
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
@@ -451,8 +455,23 @@ class CourseTable(QTableWidget):
         self.resizeRowsToContents()
         header_height = self.horizontalHeader().height() or 30
         rows_height = sum(self.rowHeight(row) for row in range(self.rowCount()))
-        self.setMinimumHeight(min(header_height + rows_height + 6, 320))
-        self.setMaximumHeight(min(header_height + rows_height + 8, 420))
+        natural_height = header_height + rows_height + 8
+        # Long schema/column cells must remain fully readable.  The table caps
+        # its on-page height and scrolls vertically instead of eliding the
+        # column list with an ellipsis.
+        visible_height = min(max(natural_height, 92), 280)
+        self.setMinimumHeight(visible_height)
+        self.setMaximumHeight(visible_height)
+        self.horizontalHeader().sectionResized.connect(
+            lambda *_args: QTimer.singleShot(0, self._refresh_wrapped_rows)
+        )
+
+    def _refresh_wrapped_rows(self) -> None:
+        self.resizeRowsToContents()
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
+        super().resizeEvent(event)
+        QTimer.singleShot(0, self._refresh_wrapped_rows)
 
 
 class CourseCallout(QFrame):

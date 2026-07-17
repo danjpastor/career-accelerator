@@ -145,6 +145,7 @@ class ResponsiveScrollPage(QScrollArea):
         self.date_label: QLabel | None = None
         self._responsive_handlers: list[Callable[[int], None]] = []
         self._mode: str | None = None
+        self._outer_scroll_enabled = True
 
         if title:
             self._build_header(title, subtitle, date_text)
@@ -212,6 +213,42 @@ class ResponsiveScrollPage(QScrollArea):
         if width:
             handler(width)
 
+    def set_outer_scroll_enabled(self, enabled: bool) -> None:
+        """Choose whether the page shell itself may scroll vertically.
+
+        Dense workspaces use a fixed outer shell and delegate overflow to the
+        lists, editors, tables, and cards inside the page.  This keeps the page
+        header and tab bar anchored while still allowing long card content to
+        remain accessible.
+        """
+        enabled = bool(enabled)
+        self._outer_scroll_enabled = enabled
+        self.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+            if enabled
+            else Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        if enabled:
+            self.content.setMinimumHeight(0)
+            self.content.setMaximumHeight(16777215)
+        else:
+            self._sync_fixed_content_height()
+        self.content.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Preferred
+            if enabled
+            else QSizePolicy.Policy.Ignored,
+        )
+        self.content.updateGeometry()
+
+    def _sync_fixed_content_height(self) -> None:
+        """Lock non-scrolling page content to the live viewport height."""
+        if self._outer_scroll_enabled:
+            return
+        height = max(0, self.viewport().height())
+        if height:
+            self.content.setFixedHeight(height)
+
     def _apply_shell_mode(self, width: int) -> None:
         mode = "compact" if width < 700 else "medium" if width < 1040 else "wide"
         if mode == self._mode:
@@ -252,6 +289,7 @@ class ResponsiveScrollPage(QScrollArea):
         super().resizeEvent(event)
         width = max(0, self.viewport().width())
         height = max(0, self.viewport().height())
+        self._sync_fixed_content_height()
         self._apply_shell_mode(width)
         for handler in tuple(self._responsive_handlers):
             handler(width)
