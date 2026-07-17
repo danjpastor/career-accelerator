@@ -210,10 +210,24 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         border: none;
         padding: 0;
     }}
-    QListWidget::item {{
+    QListWidget::item, QTreeWidget::item, QTreeView::item {{
         background: transparent;
         border: none;
-        padding: 6px 2px;
+        min-height: 20px;
+        padding: 6px 4px;
+    }}
+    QTableWidget::item, QTableView::item {{
+        padding: 5px 7px;
+    }}
+    QHeaderView::section {{
+        background: #17243a;
+        color: {c['text']};
+        border: none;
+        border-right: 1px solid {c['border']};
+        border-bottom: 1px solid {c['border']};
+        min-height: 20px;
+        padding: 6px 8px;
+        font-weight: 700;
     }}
     QListWidget::item:hover {{
         background: {c['panel_alt']};

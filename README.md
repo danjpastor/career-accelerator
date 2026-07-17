@@ -24,8 +24,11 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.9 includes:
+Version 10.0.10 includes:
 
+- Text-bearing rows now scale with the Settings interface-size control, including task rows, focus rows, sidebar metrics, list items, tree items, tables, form fields, dropdowns, and buttons.
+- Explicit fixed-height controls are raised only as needed by their live font metrics, preventing vertical clipping at 110% and 120% while leaving card geometry tied to the window.
+- The Growth Over Time period selector dynamically reserves enough width for its label, padding, and arrow button at every interface scale.
 - A persistent text and button size slider that leaves responsive card geometry unchanged.
 - A single-line Dashboard greeting including its emoji.
 - A tighter Study Session log form with top-packed fields and reduced unused gaps.

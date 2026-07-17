@@ -1,5 +1,13 @@
 # Changelog
 
+## 10.0.10 - 2026-07-17
+
+- Scaled text-bearing row heights together with the Settings interface-size slider so larger fonts no longer clip inside task rows, focus rows, sidebar metrics, list/tree items, table rows, form controls, dropdowns, or buttons.
+- Derived safe control heights from live font metrics while preserving the existing responsive card dimensions and page geometry.
+- Added reversible row-height baselines so lowering the interface scale returns controls and item rows to their intended compact sizes.
+- Expanded table rows and headers for larger text, while retaining wrapped multi-line rows and internal card scrolling.
+- Made the Growth Over Time period dropdown dynamically widen for its longest label plus padding and arrow chrome, preventing right-side text clipping.
+
 ## 10.0.9 - 2026-07-17
 
 - Added a persistent Settings slider for text, button, editor, list, and form-control scale from 80% to 120%.

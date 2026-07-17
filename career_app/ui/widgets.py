@@ -946,6 +946,7 @@ class TaskRow(QWidget):
     ):
         super().__init__()
         self._forced_density = "comfortable"
+        self._interface_scale = 1.0
         self.setStyleSheet("background:transparent;border:none;")
         self.setMinimumWidth(0)
         self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
@@ -967,6 +968,7 @@ class TaskRow(QWidget):
         )
 
         text = QVBoxLayout()
+        self.text_layout = text
         text.setContentsMargins(0, 0, 0, 0)
         text.setSpacing(1)
 
@@ -1057,13 +1059,29 @@ class TaskRow(QWidget):
                 Qt.AlignVCenter,
             )
 
+    def _refresh_content_height(self):
+        compact = self._forced_density != "comfortable"
+        ultra = self._forced_density == "ultra"
+        base = 25 if ultra else 30 if compact else 39
+        margins = self.row_layout.contentsMargins()
+        text_height = self.title_label.fontMetrics().height()
+        if self.source_label.isVisible():
+            text_height += self.source_label.fontMetrics().height()
+            text_height += self.text_layout.spacing()
+        required = text_height + margins.top() + margins.bottom() + 2
+        self.setMinimumHeight(max(base, required))
+
+    def set_interface_scale(self, scale):
+        self._interface_scale = max(0.80, min(1.20, float(scale)))
+        self._refresh_content_height()
+        self.updateGeometry()
+
     def set_density(self, density):
         self._forced_density = str(density or "comfortable")
         compact = self._forced_density != "comfortable"
         ultra = self._forced_density == "ultra"
         self.source_label.setVisible(not compact)
         self.title_label.setWordWrap(False)
-        self.setMinimumHeight(25 if ultra else 30 if compact else 39)
         self.row_layout.setContentsMargins(0, 1 if compact else 3, 0, 1 if compact else 3)
         self.row_layout.setSpacing(4 if ultra else 6 if compact else 9)
         if self.metadata_label is not None:
@@ -1071,6 +1089,7 @@ class TaskRow(QWidget):
         if self.action_button is not None:
             self.action_button.setMinimumSize(40 if ultra else 46, 24 if ultra else 27)
             self.action_button.setMaximumHeight(26 if ultra else 30)
+        self._refresh_content_height()
         self.updateGeometry()
 
     def resizeEvent(self, event):
@@ -1079,6 +1098,7 @@ class TaskRow(QWidget):
             self.title_label.setWordWrap(compact)
             self.source_label.setWordWrap(compact)
             self.row_layout.setSpacing(6 if compact else 9)
+        self._refresh_content_height()
         self.updateGeometry()
         super().resizeEvent(event)
 
@@ -1097,6 +1117,7 @@ class FocusRow(QWidget):
     ):
         super().__init__()
         self._forced_density = "comfortable"
+        self._interface_scale = 1.0
         self.setStyleSheet("background:transparent;border:none;")
         self.setMinimumWidth(0)
         self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
@@ -1116,6 +1137,7 @@ class FocusRow(QWidget):
         layout.addWidget(icon, 0, Qt.AlignVCenter)
 
         text = QVBoxLayout()
+        self.text_layout = text
         text.setContentsMargins(0, 0, 0, 0)
         text.setSpacing(1)
 
@@ -1182,13 +1204,29 @@ class FocusRow(QWidget):
                 Qt.AlignVCenter,
             )
 
+    def _refresh_content_height(self):
+        compact = self._forced_density != "comfortable"
+        ultra = self._forced_density == "ultra"
+        base = 25 if ultra else 30 if compact else 38
+        margins = self.row_layout.contentsMargins()
+        text_height = self.title_label.fontMetrics().height()
+        if self.detail_label.isVisible():
+            text_height += self.detail_label.fontMetrics().height()
+            text_height += self.text_layout.spacing()
+        required = text_height + margins.top() + margins.bottom() + 2
+        self.setMinimumHeight(max(base, required))
+
+    def set_interface_scale(self, scale):
+        self._interface_scale = max(0.80, min(1.20, float(scale)))
+        self._refresh_content_height()
+        self.updateGeometry()
+
     def set_density(self, density):
         self._forced_density = str(density or "comfortable")
         compact = self._forced_density != "comfortable"
         ultra = self._forced_density == "ultra"
         self.detail_label.setVisible(not compact)
         self.title_label.setWordWrap(False)
-        self.setMinimumHeight(25 if ultra else 30 if compact else 38)
         self.row_layout.setContentsMargins(0, 1 if compact else 3, 0, 1 if compact else 3)
         self.row_layout.setSpacing(4 if ultra else 6 if compact else 9)
         self.icon_label.setFixedWidth(24 if ultra else 28 if compact else 34)
@@ -1200,6 +1238,7 @@ class FocusRow(QWidget):
         if self.action_button is not None:
             self.action_button.setMinimumSize(40 if ultra else 46, 24 if ultra else 27)
             self.action_button.setMaximumHeight(26 if ultra else 30)
+        self._refresh_content_height()
         self.updateGeometry()
 
     def resizeEvent(self, event):
@@ -1208,6 +1247,7 @@ class FocusRow(QWidget):
             self.title_label.setWordWrap(compact)
             self.detail_label.setWordWrap(compact)
             self.row_layout.setSpacing(6 if compact else 9)
+        self._refresh_content_height()
         self.updateGeometry()
         super().resizeEvent(event)
 
@@ -1217,6 +1257,8 @@ class StatRow(QWidget):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
         self._row_layout = None
+        self._density = "comfortable"
+        self._interface_scale = 1.0
 
         layout = QHBoxLayout(self)
         self._row_layout = layout
@@ -1242,9 +1284,30 @@ class StatRow(QWidget):
         value_widget.setStyleSheet(style)
         layout.addWidget(value_widget)
 
+    def _refresh_content_height(self):
+        compact = self._density != "comfortable"
+        ultra = self._density == "ultra"
+        base_minimum = 14 if ultra else 17 if compact else 0
+        margins = self._row_layout.contentsMargins()
+        required = max(
+            self.icon_label.fontMetrics().height(),
+            self.label_widget.fontMetrics().height(),
+            self.value_widget.fontMetrics().height(),
+        ) + margins.top() + margins.bottom() + 2
+        target = max(base_minimum, required)
+        self.setMinimumHeight(target)
+        base_maximum = 16 if ultra else 20 if compact else 16777215
+        self.setMaximumHeight(max(base_maximum, target) if compact else 16777215)
+
+    def set_interface_scale(self, scale):
+        self._interface_scale = max(0.80, min(1.20, float(scale)))
+        self._refresh_content_height()
+        self.updateGeometry()
+
     def set_density(self, density):
-        compact = str(density or "comfortable") != "comfortable"
-        ultra = str(density or "comfortable") == "ultra"
+        self._density = str(density or "comfortable")
+        compact = self._density != "comfortable"
+        ultra = self._density == "ultra"
         self._row_layout.setContentsMargins(
             0,
             0 if ultra else 1 if compact else 6,
@@ -1252,8 +1315,6 @@ class StatRow(QWidget):
             0 if ultra else 1 if compact else 6,
         )
         self._row_layout.setSpacing(3 if ultra else 5 if compact else 8)
-        self.setMinimumHeight(14 if ultra else 17 if compact else 0)
-        self.setMaximumHeight(16 if ultra else 20 if compact else 16777215)
         font_size = 6.5 if ultra else 7.5 if compact else 9.5
         self.icon_label.setFixedWidth(14 if ultra else 18 if compact else 22)
         self.icon_label.setStyleSheet(
@@ -1264,6 +1325,7 @@ class StatRow(QWidget):
             f"font-size:{font_size}pt;font-weight:700;"
             f"color:{COLORS['purple']};"
         )
+        self._refresh_content_height()
         self.updateGeometry()
 
 
@@ -1283,6 +1345,8 @@ class SidebarMetricCard(QFrame):
 class FooterMetricBox(QFrame):
     def __init__(self, emoji, label, value=""):
         super().__init__()
+        self._density = "comfortable"
+        self._interface_scale = 1.0
         self.setObjectName("SoftPanel")
         self.setMinimumHeight(48)
         self.setMaximumHeight(16777215)
@@ -1303,6 +1367,7 @@ class FooterMetricBox(QFrame):
         layout.addWidget(icon)
 
         text = QVBoxLayout()
+        self._text_layout = text
         text.setSpacing(1)
 
         self.label_widget = QLabel(label)
@@ -1320,11 +1385,27 @@ class FooterMetricBox(QFrame):
     def set_value(self, value):
         self.value_label.setText(value)
 
+    def _refresh_content_height(self):
+        compact = self._density != "comfortable"
+        ultra = self._density == "ultra"
+        base = 32 if ultra else 39 if compact else 48
+        margins = self._box_layout.contentsMargins()
+        text_height = self.value_label.fontMetrics().height()
+        if self.label_widget.isVisible():
+            text_height += self.label_widget.fontMetrics().height()
+            text_height += self._text_layout.spacing()
+        required = text_height + margins.top() + margins.bottom() + 2
+        self.setMinimumHeight(max(base, required))
+
+    def set_interface_scale(self, scale):
+        self._interface_scale = max(0.80, min(1.20, float(scale)))
+        self._refresh_content_height()
+        self.updateGeometry()
+
     def set_density(self, density):
-        density = str(density or "comfortable")
-        compact = density != "comfortable"
-        ultra = density == "ultra"
-        self.setMinimumHeight(32 if ultra else 39 if compact else 48)
+        self._density = str(density or "comfortable")
+        compact = self._density != "comfortable"
+        ultra = self._density == "ultra"
         self._box_layout.setContentsMargins(
             6 if ultra else 8 if compact else 12,
             4 if ultra else 6 if compact else 9,
@@ -1337,6 +1418,7 @@ class FooterMetricBox(QFrame):
             f"font-size:{11 if ultra else 14 if compact else 17}pt;"
         )
         self.label_widget.setVisible(not ultra)
+        self._refresh_content_height()
         self.updateGeometry()
 
 

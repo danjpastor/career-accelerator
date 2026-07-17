@@ -64,8 +64,9 @@ from career_app.ui.applied_labs import AppliedLabsWidget
 from career_app.ui.exercise_packs import ExercisePacksWidget, ExerciseSuggestionPanel
 from career_app.ui.task_workspace import TaskWorkspaceDialog
 from career_app.ui.responsive import (
-    ResponsiveScrollPage, apply_inline_style_scale, clear_layout_positions,
-    reflow_grid, set_box_direction,
+    ResponsiveScrollPage, apply_content_row_metrics,
+    apply_inline_style_scale, clear_layout_positions, reflow_grid,
+    set_box_direction,
 )
 from career_app.ui.widgets import (
     AreaChart, BadgeCard, Card, CircularTimer, Divider, FocusRow,
@@ -678,8 +679,14 @@ class CareerAccelerator(QMainWindow):
         ]
         for widget in responsive_painted_widgets:
             widget.set_ui_scale(scale)
-            if hasattr(widget, "set_interface_scale"):
-                widget.set_interface_scale(self._content_scale)
+
+        # Custom text rows recalculate their own minimum heights from the live
+        # font metrics.  Cards keep the same responsive geometry; only their
+        # internal rows receive enough vertical room for the selected scale.
+        for widget in self.findChildren(QWidget):
+            setter = getattr(widget, "set_interface_scale", None)
+            if callable(setter):
+                setter(self._content_scale)
 
         if hasattr(self, "dashboard_scroll"):
             self.update_dashboard_layout(
@@ -694,6 +701,12 @@ class CareerAccelerator(QMainWindow):
             self._ui_scale,
             self._content_scale,
         )
+        apply_content_row_metrics(
+            self,
+            self._ui_scale,
+            self._content_scale,
+        )
+        self._update_growth_period_combo_width()
 
     def _apply_interface_styles(self):
         """Apply responsive geometry plus the user-selected content scale."""
@@ -703,6 +716,24 @@ class CareerAccelerator(QMainWindow):
             self.setStyleSheet(stylesheet(self._ui_scale, content_scale))
             self._style_signature = signature
         apply_inline_style_scale(self, self._ui_scale, content_scale)
+        self._update_growth_period_combo_width()
+
+    def _update_growth_period_combo_width(self):
+        """Keep the Dashboard period selector readable at every text scale."""
+        combo = getattr(self, "growth_period_combo", None)
+        if combo is None:
+            return
+        labels = [combo.itemText(index) for index in range(combo.count())]
+        widest = max(
+            (combo.fontMetrics().horizontalAdvance(label) for label in labels),
+            default=0,
+        )
+        # Reserve room for both internal padding and the separate arrow button.
+        chrome = round(66 * self._ui_scale * self._content_scale)
+        target = max(108, min(172, widest + chrome))
+        combo.setMinimumWidth(target)
+        combo.setMaximumWidth(max(target, min(184, target + 12)))
+        combo.updateGeometry()
 
     def change_interface_scale(self, value):
         """Preview and persist text/control scaling without resizing cards."""
@@ -1183,8 +1214,11 @@ class CareerAccelerator(QMainWindow):
             ["7 Days", "14 Days", "30 Days", "90 Days"]
         )
         self.growth_period_combo.setCurrentText("14 Days")
-        self.growth_period_combo.setMinimumWidth(88)
-        self.growth_period_combo.setMaximumWidth(112)
+        self.growth_period_combo.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToContents
+        )
+        self.growth_period_combo.setMinimumWidth(108)
+        self.growth_period_combo.setMaximumWidth(184)
         growth_header.addWidget(
             self.growth_period_combo,
             0,

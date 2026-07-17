@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Iterable
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractButton,
     QAbstractItemView,
@@ -11,14 +11,21 @@ from PySide6.QtWidgets import (
     QBoxLayout,
     QComboBox,
     QFrame,
+    QHeaderView,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QLayout,
     QLineEdit,
+    QListWidget,
     QScrollArea,
     QSizePolicy,
+    QTableView,
+    QTableWidget,
     QTextEdit,
+    QTreeView,
+    QTreeWidget,
+    QTreeWidgetItemIterator,
     QVBoxLayout,
     QWidget,
 )
@@ -48,6 +55,10 @@ _CONTROL_SELECTORS = (
     "QAbstractItemView",
     "QListWidget",
     "QTableWidget",
+    "QTableView",
+    "QTreeWidget",
+    "QTreeView",
+    "QHeaderView",
 )
 
 
@@ -165,6 +176,151 @@ def apply_inline_style_scale(
         if current != updated:
             widget.setStyleSheet(updated)
         widget.setProperty("responsive_rendered_stylesheet", updated)
+
+
+
+def _metric_base(widget: QWidget, name: str, current: int) -> tuple[int, int | None]:
+    """Return the unscaled baseline and the last height applied by this module."""
+    base_name = f"_responsive_{name}_base"
+    last_name = f"_responsive_{name}_last"
+    base = getattr(widget, base_name, None)
+    last = getattr(widget, last_name, None)
+    if base is None or last is None or int(current) != int(last):
+        base = int(current)
+        setattr(widget, base_name, base)
+    return int(base), None if last is None else int(last)
+
+
+def _set_content_minimum_height(widget: QWidget, required: int) -> None:
+    """Raise a widget's row height without permanently losing its base size."""
+    required = max(0, int(required))
+    current_minimum = int(widget.minimumHeight())
+    base_minimum, _ = _metric_base(widget, "minimum_height", current_minimum)
+    target_minimum = max(base_minimum, required)
+    widget.setMinimumHeight(target_minimum)
+    setattr(widget, "_responsive_minimum_height_last", target_minimum)
+
+    current_maximum = int(widget.maximumHeight())
+    if current_maximum < 16777215:
+        base_maximum, _ = _metric_base(widget, "maximum_height", current_maximum)
+        target_maximum = max(base_maximum, target_minimum)
+        widget.setMaximumHeight(target_maximum)
+        setattr(widget, "_responsive_maximum_height_last", target_maximum)
+
+
+def _scale_list_widget_rows(view: QListWidget, required: int) -> None:
+    """Keep QListWidget rows tall enough for the active font scale."""
+    state = getattr(view, "_responsive_list_row_state", {})
+    next_state: dict[int, tuple[int, int]] = {}
+    for row in range(view.count()):
+        item = view.item(row)
+        key = id(item)
+        current = item.sizeHint().height()
+        base, last = state.get(key, (current, None))
+        if last is None or current != last:
+            base = current
+        target = max(int(base), int(required))
+        size = item.sizeHint()
+        item.setSizeHint(QSize(size.width(), target))
+        next_state[key] = (int(base), target)
+    view._responsive_list_row_state = next_state
+
+
+def _scale_tree_widget_rows(view: QTreeWidget, required: int) -> None:
+    """Keep every visible learning/task tree row readable at larger scales."""
+    state = getattr(view, "_responsive_tree_row_state", {})
+    next_state: dict[int, tuple[int, int]] = {}
+    iterator = QTreeWidgetItemIterator(view)
+    while iterator.value() is not None:
+        item = iterator.value()
+        key = id(item)
+        current = item.sizeHint(0).height()
+        base, last = state.get(key, (current, None))
+        if last is None or current != last:
+            base = current
+        target = max(int(base), int(required))
+        for column in range(max(1, view.columnCount())):
+            size = item.sizeHint(column)
+            item.setSizeHint(column, QSize(size.width(), target))
+        next_state[key] = (int(base), target)
+        iterator += 1
+    view._responsive_tree_row_state = next_state
+
+
+def apply_content_row_metrics(
+    root: QWidget,
+    layout_scale: float,
+    content_scale: float = 1.0,
+) -> None:
+    """Scale text-bearing rows and controls without resizing their cards.
+
+    Qt stylesheets scale fonts and padding, but explicit row heights and item
+    view section sizes can remain at their original values.  This pass derives
+    safe heights from the live font metrics after styling, then adjusts only
+    controls and rows.  Card/page geometry remains owned by the responsive
+    layout code.
+    """
+    layout_scale = max(0.72, min(1.18, float(layout_scale)))
+    content_scale = max(0.80, min(1.20, float(content_scale)))
+    widgets: list[QWidget] = [root, *root.findChildren(QWidget)]
+
+    for widget in widgets:
+        font_height = max(1, widget.fontMetrics().height())
+        if isinstance(widget, QComboBox):
+            _set_content_minimum_height(
+                widget,
+                font_height + round(16 * layout_scale * content_scale),
+            )
+        elif isinstance(widget, (QLineEdit, QAbstractSpinBox)):
+            _set_content_minimum_height(
+                widget,
+                font_height + round(14 * layout_scale * content_scale),
+            )
+        elif isinstance(widget, QAbstractButton):
+            compact_dashboard = bool(widget.property("dashboardAction"))
+            vertical_room = 8 if compact_dashboard else 12
+            _set_content_minimum_height(
+                widget,
+                font_height
+                + round(vertical_room * layout_scale * content_scale),
+            )
+
+    row_room = round(11 * layout_scale * content_scale)
+    for view in root.findChildren(QListWidget):
+        required = max(20, view.fontMetrics().height() + row_room)
+        _scale_list_widget_rows(view, required)
+
+    for view in root.findChildren(QTreeWidget):
+        required = max(20, view.fontMetrics().height() + row_room)
+        _scale_tree_widget_rows(view, required)
+
+    for view in root.findChildren(QTableView):
+        header = view.verticalHeader()
+        if not isinstance(header, QHeaderView):
+            continue
+        required = max(22, view.fontMetrics().height() + row_room)
+        current_default = int(header.defaultSectionSize())
+        base_default = getattr(header, "_responsive_default_section_base", None)
+        last_default = getattr(header, "_responsive_default_section_last", None)
+        if (
+            base_default is None
+            or last_default is None
+            or current_default != int(last_default)
+        ):
+            base_default = current_default
+            header._responsive_default_section_base = base_default
+        target_default = max(int(base_default), required)
+        header.setMinimumSectionSize(min(target_default, required))
+        header.setDefaultSectionSize(target_default)
+        header._responsive_default_section_last = target_default
+
+        model = view.model()
+        row_count = model.rowCount() if model is not None else 0
+        if isinstance(view, QTableWidget) and view.wordWrap():
+            view.resizeRowsToContents()
+        for row in range(row_count):
+            if not header.isSectionHidden(row) and header.sectionSize(row) < required:
+                header.resizeSection(row, required)
 
 
 def clear_layout_positions(layout: QLayout) -> None:
