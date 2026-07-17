@@ -1,20 +1,5 @@
 # Changelog
 
-## 10.0.1 - 2026-07-17
-
-- Completed a full responsive-layout polish pass across every main application tab and the unified Task Workspace dialog.
-- Lowered the supported minimum window size to 900×620 while keeping all main pages free of horizontal overflow.
-- Replaced the dashboard's forced wide layout with true wide, medium, and compact breakpoints, including single-column compact cards and adaptive action labels.
-- Fixed stale QGridLayout row and column stretch values that could leave compact cards constrained to half width after resizing.
-- Changed reusable cards and long task rows to ignore oversized content hints, wrap at narrow widths, and expand vertically instead of forcing hidden horizontal overflow.
-- Added dynamic application-wide typography and inline-style scaling, responsive sidebar widths, and scalable ring/timer painting.
-- Made every main page vertically scroll-safe with adaptive margins, headers, card grids, action rows, forms, and tab workspaces.
-- Reflowed Exercise Packs and DuckDB Exercises into tall outer-scrollable compact workspaces so navigation, Learn, and Practice receive usable heights instead of compressed nested panes.
-- Added responsive layouts for Learning, Portfolio, SQL Companion, Study Session, Job Readiness, Applications, Weekly Summary, Publish & Git, Task Workspaces, and Settings.
-- Fixed transient duplicate course titles when lesson content is rebuilt quickly during navigation or resizing.
-- Made long list entries and dashboard completion summaries wrap without clipping.
-- Added responsive regression coverage for resize cycles, breakpoints, full-width compact cards, guided SQL workspace heights, course-title rebuilding, and horizontal-overflow prevention across every page.
-
 ## 10.0.0 - 2026-07-16
 
 - Rebuilt Exercise Packs around lesson-linked practice questions so every lesson immediately offers one or more concept-specific SQL questions in the Practice card.

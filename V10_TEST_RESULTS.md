@@ -1,60 +1,54 @@
-# Career Accelerator v10.0.0 Test Results
+# Career Accelerator v10.0.1 Test Results
 
-Test date: July 16, 2026
+Verification date: July 17, 2026
 
-## Automated regression suite
+## Automated regressions
 
-- Python compilation for `app.py` and all `career_app` modules: passed
-- Focused `unittest` suite: **15 tests passed**
-- Exercise Pack manifest and association validation: passed
-- Every lesson has associated, uniquely ordered questions: passed
-- Manifest and question JSON associations agree: passed
-- Minimal starter-template safety: passed
-- All official SQL Subqueries solutions: passed
-- All official SQL Joins solutions: passed
-- Standard authoring-template solution: passed
-- Existing progress-table migration for saved hint levels: passed
-- Per-question hint-level persistence: passed
-- Shared SQL editor line numbers and DuckDB error navigation: passed
-- Editing clears stale error highlighting: passed
-- Completed Today’s Focus actions are disabled: passed
-- Interview starting-template completion guard: passed
-- SQLite backup content deduplication: passed
-- Backup newest/daily/weekly retention: passed
+- `python -m pytest -q`: **20 passed, 66 subtests passed**
+- Exercise Pack schema, lesson-question mapping, starter safety, official solutions, and progress migration: passed
+- Shared SQL editor line numbering, error navigation, and error reset: passed
+- Interview Problem original-work validation: passed
+- Backup snapshot deduplication and retention pruning: passed
+- Responsive resize cycles, breakpoints, compact card width, guided-workspace height, course-title rebuilding, and page overflow checks: passed
 
-## Clean packaged-copy smoke test
+## Responsive application matrix
 
-The application was launched from a clean staging copy with `QT_QPA_PLATFORM=offscreen` and no preexisting user database.
+The full PySide6 application was constructed offscreen and resized through:
 
-- Full `CareerAccelerator` window construction: passed
-- Window and internal version report `10.0.0`: passed
-- Bundled/installed pack discovery: 2 packs loaded
-- Shared `SqlCodeEditor` present in Exercise Packs, DuckDB Exercises, Applied Labs, and Interview Problems: passed
-- Selecting a lesson with multiple questions populates the Practice selector: passed
-- A brand-new question opens with only its minimal starting template: passed
-- Progressive hints reveal one step at a time and survive question switching: passed
-- An official solution passes Check Answer without changing submitted SQL: passed
-- Viewing the solution and closing it without Copy to Editor preserves learner SQL: passed
-- Exact DuckDB routing selected Exercise 06: passed
-- Exact Interview Problem routing selected Histogram of Tweets: passed
-- Saving an Interview submission before completion created no evidence: passed
-- Completing the Interview submission twice produced exactly one evidence record: passed
-- Settings storage summary constructed successfully: passed
+- 1536×1020
+- 1280×800
+- 1024×768
+- 900×620
 
-## Release cleanliness
+At both 1536×1020 and 900×620, all 12 main pages reported zero outer horizontal-scroll range:
 
-The clean build excludes Git history, virtual environments, Python caches, the local SQLite database, backup history, patch backups, the generated DuckDB database, learner DuckDB submissions, learner DataLemur solutions, task workspace files, and the generated Windows shortcut.
+- Dashboard
+- Adaptive Planner
+- Learning
+- Portfolio Workspace
+- SQL Companion
+- Study Session
+- Job Readiness
+- Applications
+- Weekly Summary
+- Publish & Git
+- Task Workspaces
+- Settings
 
-## Installer verification
+Additional checks:
 
-The cumulative patch was applied to a fresh extraction of the uploaded v9.6.4 package.
+- Dashboard switches among wide, medium, and compact layouts: passed
+- Compact Settings and Study cards occupy the full available page width: passed
+- Exercise Packs use vertical compact splitters and at least 1400 pixels of scrollable workspace height: passed
+- DuckDB Exercises use vertical compact splitters and at least 1400 pixels of scrollable workspace height: passed
+- Compact lesson workspaces remain reachable through the outer page scrollbar: passed
+- Rapid course-page rebuilding leaves one visible title and no stale overlapping title: passed
+- Unified Task Workspace fits inside a 900×620 parent and reflows action rows: passed
 
-- Existing repository validation: passed
-- First application replaced 63 files and added 7 missing v10 files: passed
-- Every replaced file was backed up under `patch_backups/v10.0.0-<timestamp>/`: passed
-- Existing `data/career_accelerator.db` SHA-256 remained unchanged: passed
-- A custom installed-pack file remained present: passed
-- Second application reported 0 replaced and 0 added files: passed
-- Second application created no unnecessary backup folder: passed
-- Patched repository compilation: passed
-- Patched repository offscreen application startup as v10.0.0: passed
+## Visual smoke review
+
+Screenshots were reviewed at the supported minimum and the reference desktop size. Cards remain inside the viewport, long text wraps, narrow pages use vertical reflow, and wide layouts retain the intended multi-column presentation.
+
+## Package verification
+
+The final release package is compiled and tested again after private/generated runtime data is removed. The cumulative installer is also applied to a fresh v10.0.0 copy twice to verify data preservation and idempotence.

@@ -18,9 +18,9 @@ COLORS = {
     "cyan": "#54c9c2",
 }
 
-def stylesheet(scale: float = 1.0):
+def stylesheet():
     c = COLORS
-    raw = f"""
+    return f"""
     QWidget {{
         background: {c['bg']};
         color: {c['text']};
@@ -316,6 +316,3 @@ def stylesheet(scale: float = 1.0):
         letter-spacing: 0.4px;
     }}
     """
-    from career_app.ui.responsive import scaled_stylesheet
-    return scaled_stylesheet(raw, scale)
-

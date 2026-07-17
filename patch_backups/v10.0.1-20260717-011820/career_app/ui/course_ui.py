@@ -53,12 +53,6 @@ def clear_layout(layout: QVBoxLayout | QHBoxLayout) -> None:
         widget = item.widget()
         child_layout = item.layout()
         if widget is not None:
-            # deleteLater() alone can leave the old course header painted until
-            # the next deferred-delete pass when lessons are rebuilt quickly.
-            # Detach and hide it immediately so responsive refreshes never show
-            # duplicated/overlapping titles.
-            widget.hide()
-            widget.setParent(None)
             widget.deleteLater()
         elif child_layout is not None:
             clear_layout(child_layout)  # type: ignore[arg-type]
@@ -1041,11 +1035,11 @@ class CoursePageWidget(QWidget):
         if mode == "compact":
             self.page_layout.setContentsMargins(12, 14, 12, 16)
             self.page_layout.setSpacing(10)
-            title_size = 17
+            title_size = 19
         elif mode == "stacked":
             self.page_layout.setContentsMargins(16, 17, 16, 18)
             self.page_layout.setSpacing(11)
-            title_size = 19
+            title_size = 21
         else:
             self.page_layout.setContentsMargins(22, 20, 22, 22)
             self.page_layout.setSpacing(12)

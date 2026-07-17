@@ -14,7 +14,6 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
     QHeaderView,
-    QBoxLayout,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -23,7 +22,6 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QSplitter,
-    QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
     QTextEdit,
@@ -47,11 +45,6 @@ class AppliedLabsWidget(QWidget):
 
     def __init__(self, conn, root: Path, parent: QWidget | None = None):
         super().__init__(parent)
-        self.setMinimumWidth(0)
-        self.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.conn = conn
         self.root = Path(root)
         self.current_number: int | None = None
@@ -62,8 +55,6 @@ class AppliedLabsWidget(QWidget):
         self._library_collapsed = self._settings.value(
             "applied_labs/library_collapsed", False, type=bool
         )
-        self._preferred_library_collapsed = self._library_collapsed
-        self._responsive_mode: str | None = None
         saved_width = self._settings.value("applied_labs/library_width_v2", None)
         self._library_expanded_width = int(saved_width) if saved_width else None
         self._build_ui()
@@ -77,8 +68,7 @@ class AppliedLabsWidget(QWidget):
 
         self.course_toolbar = Card()
         self.course_toolbar.layout.setContentsMargins(10, 7, 10, 7)
-        toolbar_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.toolbar_row = toolbar_row
+        toolbar_row = QHBoxLayout()
         toolbar_row.setSpacing(8)
         self.breadcrumb_root = QLabel("Applied Labs")
         self.breadcrumb_root.setStyleSheet("color:#b8c3d8;font-size:9.5pt;")
@@ -98,16 +88,11 @@ class AppliedLabsWidget(QWidget):
         outer.addWidget(self.course_toolbar)
 
         self.lab_splitter = QSplitter(Qt.Horizontal)
-        self.lab_splitter.setMinimumWidth(0)
-        self.lab_splitter.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.lab_splitter.setChildrenCollapsible(False)
         self.lab_splitter.setHandleWidth(5)
 
         self.library_card = Card()
-        self.library_card.setMinimumWidth(270)
+        self.library_card.setMinimumWidth(330)
         self.library_card.setMaximumWidth(16777215)
         library_margins = self.library_card.layout.contentsMargins()
         self._library_expanded_margins = (
@@ -190,10 +175,6 @@ class AppliedLabsWidget(QWidget):
         library_body_layout.addWidget(self.track_summary)
 
         self.lab_list = QListWidget()
-        self.lab_list.setWordWrap(True)
-        self.lab_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.lab_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.lab_list.setSpacing(4)
         self.lab_list.currentItemChanged.connect(self._lab_selected)
@@ -247,11 +228,10 @@ class AppliedLabsWidget(QWidget):
             "Write SQL here. Dataset files are loaded automatically as tables named after each file."
         )
         self.sql_editor.textChanged.connect(self._sql_edited)
-        self.sql_editor.setMinimumHeight(180)
+        self.sql_editor.setMinimumHeight(240)
         sql_layout.addWidget(self.sql_editor)
 
-        sql_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.sql_actions = sql_actions
+        sql_actions = QHBoxLayout()
         self.run_button = QPushButton("▶ Run SQL")
         self.run_button.setObjectName("Secondary")
         self.run_button.clicked.connect(self.run_sql)
@@ -272,7 +252,7 @@ class AppliedLabsWidget(QWidget):
         self.result_table.verticalHeader().setVisible(False)
         self.result_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.result_table.horizontalHeader().setStretchLastSection(True)
-        self.result_table.setMinimumHeight(140)
+        self.result_table.setMinimumHeight(190)
         self.result_table.setStyleSheet(
             f"QTableWidget {{background:{COLORS.get('surface_alt', '#191a2c')};"
             "alternate-background-color:#202238;color:#f4f4fb;"
@@ -300,8 +280,7 @@ class AppliedLabsWidget(QWidget):
         self.notes.setPlaceholderText(
             "Record assumptions, validation findings, decisions, artifact paths, and interview-ready takeaways."
         )
-        self.notes.setMinimumHeight(72)
-        self.notes.setMaximumHeight(145)
+        self.notes.setMaximumHeight(120)
         self.notes.setStyleSheet(
             f"QTextEdit {{background:{COLORS.get('surface_alt', '#191a2c')};"
             f"border:1px solid {COLORS.get('border', '#373955')};"
@@ -310,8 +289,7 @@ class AppliedLabsWidget(QWidget):
         )
         progress_layout.addWidget(self.notes)
 
-        file_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.file_actions = file_actions
+        file_actions = QHBoxLayout()
         self.instructions_button = QPushButton("Open Instructions")
         self.instructions_button.clicked.connect(lambda: self.open_reference("instructions"))
         self.starter_button = QPushButton("Open Starter")
@@ -365,44 +343,8 @@ class AppliedLabsWidget(QWidget):
         QTimer.singleShot(0, self._apply_initial_split)
         self._set_enabled(False)
 
-    def _apply_responsive_layout(self) -> None:
-        width = max(0, self.width())
-        mode = "compact" if width < 760 else "medium" if width < 1080 else "wide"
-        if mode == self._responsive_mode:
-            return
-        self._responsive_mode = mode
-
-        self.toolbar_row.setDirection(
-            QBoxLayout.Direction.TopToBottom
-            if mode == "compact"
-            else QBoxLayout.Direction.LeftToRight
-        )
-        for layout in (self.sql_actions, self.file_actions):
-            layout.setDirection(
-                QBoxLayout.Direction.TopToBottom
-                if width < 660
-                else QBoxLayout.Direction.LeftToRight
-            )
-
-        if mode == "compact":
-            self._set_library_collapsed(True, persist=False)
-            self.lab_splitter.setSizes([42, max(560, width - 42)])
-        else:
-            self._set_library_collapsed(
-                self._preferred_library_collapsed,
-                persist=False,
-            )
-            if not self._library_collapsed:
-                QTimer.singleShot(0, self._apply_initial_split)
-        self.updateGeometry()
-
-    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
-        super().resizeEvent(event)
-        self._apply_responsive_layout()
-
     def toggle_library(self) -> None:
-        self._preferred_library_collapsed = not self._library_collapsed
-        self._set_library_collapsed(self._preferred_library_collapsed)
+        self._set_library_collapsed(not self._library_collapsed)
 
     def _apply_initial_split(self) -> None:
         """Default the expanded layout to one-third navigation, two-thirds Learn."""
@@ -412,15 +354,15 @@ class AppliedLabsWidget(QWidget):
         if total <= 0:
             return
         preferred = self._library_expanded_width or round(total / 3)
-        maximum = max(total - 560, 270)
-        width = min(max(int(preferred), 270), maximum)
-        self.lab_splitter.setSizes([width, max(total - width, 560)])
+        maximum = max(total - 680, 330)
+        width = min(max(int(preferred), 330), maximum)
+        self.lab_splitter.setSizes([width, max(total - width, 680)])
 
     def _set_library_collapsed(self, collapsed: bool, *, persist: bool = True) -> None:
         self._library_collapsed = bool(collapsed)
         if collapsed:
             sizes = self.lab_splitter.sizes()
-            if sizes and sizes[0] >= 270:
+            if sizes and sizes[0] >= 330:
                 self._library_expanded_width = sizes[0]
             self.library_body.hide()
             self.library_header.removeWidget(self.library_toggle)
@@ -434,29 +376,28 @@ class AppliedLabsWidget(QWidget):
             self.library_card.setMaximumWidth(42)
             self.library_toggle.setText("▶")
             self.library_toggle.setToolTip("Expand Applied Labs")
-            total = max(sum(sizes), self.width(), 720)
-            self.lab_splitter.setSizes([42, max(total - 42, 560)])
+            total = max(sum(sizes), self.width(), 900)
+            self.lab_splitter.setSizes([42, max(total - 42, 680)])
         else:
             self.library_collapsed_cluster_layout.removeWidget(self.library_toggle)
             self.library_header.addWidget(self.library_toggle)
             self.library_collapsed_control.hide()
             self.library_header_widget.show()
             self.library_card.setMaximumWidth(16777215)
-            self.library_card.setMinimumWidth(270)
+            self.library_card.setMinimumWidth(330)
             self.library_card.layout.setContentsMargins(*self._library_expanded_margins)
             self.library_body.show()
             self.library_toggle.setText("◀")
             self.library_toggle.setToolTip("Collapse Applied Labs")
             QTimer.singleShot(0, self._apply_initial_split)
         if persist:
-            self._preferred_library_collapsed = self._library_collapsed
             self._settings.setValue("applied_labs/library_collapsed", self._library_collapsed)
 
     def _remember_library_width(self, _position: int, _index: int) -> None:
         if self._library_collapsed:
             return
         sizes = self.lab_splitter.sizes()
-        if sizes and sizes[0] >= 270:
+        if sizes and sizes[0] >= 330:
             self._library_expanded_width = sizes[0]
             self._settings.setValue("applied_labs/library_width_v2", sizes[0])
 

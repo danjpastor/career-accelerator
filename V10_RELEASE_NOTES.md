@@ -1,46 +1,40 @@
-# Career Accelerator v10.0.0 Release Notes
+# Career Accelerator v10.0.1 Release Notes
 
-Release date: July 16, 2026
+Release date: July 17, 2026
 
-Career Accelerator v10.0.0 is a cumulative rebuild on the confirmed v9.6.4 baseline. It restores the changes that were lost during the revert and tightens the Exercise Pack learning flow around real learner practice.
+Career Accelerator v10.0.1 is the polished cumulative v10 release. It keeps the lesson-driven Exercise Pack, shared SQL editor, Interview Evidence, routing, and backup improvements from v10.0.0 while rebuilding the application shell and every major page for reliable window resizing.
 
-## Exercise Packs
+## Responsive layout polish
 
-- Every lesson is associated with one or more ordered practice questions.
-- Selecting a lesson loads those questions directly in the Practice card.
-- New answers contain only the question's intentionally minimal starting template, or an empty editor when the pack disables scaffolding.
-- Lesson examples and official solutions are never copied into the editor automatically.
-- Saved learner SQL, notes, results, hint level, and completion state remain independent per question.
-- Run Query, Check Answer, Exercise Hint, and View Solution operate on the selected question.
-- Official solutions remain in a separate walkthrough and do not overwrite learner SQL.
+- The supported minimum window is now 900×620.
+- Every main page uses a scroll-safe responsive shell with adaptive margins and header placement.
+- Dashboard content switches between true wide, medium, and compact layouts instead of remaining forced into the wide grid.
+- Compact Dashboard mode uses readable full-width cards rather than squeezing narrow secondary columns.
+- Reusable cards, task rows, focus rows, badge cards, labels, and long list entries wrap and grow vertically instead of forcing hidden overflow.
+- Application typography and inline Qt styles scale with the available window dimensions.
+- Sidebar width, navigation controls, progress rings, and circular timers scale with the shell.
+- Grid reflow clears obsolete row and column stretch values, preventing one-column cards from remaining trapped at half width after a resize.
+- Learning, Portfolio, SQL Companion, Study Session, Job Readiness, Applications, Weekly Summary, Publish & Git, Task Workspaces, and Settings all have page-specific breakpoints.
+- The unified Task Workspace dialog sizes itself relative to the parent window and reflows its action rows on narrower displays.
 
-## SQL workspaces
+## Guided learning workspaces
 
-- Exercise Packs, DuckDB Exercises, Applied Labs, and Interview Problems use the same line-numbered SQL editor.
-- The editor includes syntax highlighting, a synchronized gutter, current-line emphasis, error-line emphasis, horizontal scrolling, and DuckDB error navigation.
-- Interview Problems now support editable in-app submissions, saved notes, completion validation, and submission-file reopening.
-- Completing original Interview Problem work creates duplicate-resistant Demonstrated Evidence. Merely viewing a solution does not.
+- Exercise Packs and DuckDB Exercises become deliberately tall, outer-scrollable workspaces at compact widths.
+- Navigation, Learn, and Practice receive usable minimum heights instead of being divided into very short nested splitter panes.
+- Lesson columns, course headers, action groups, result areas, editors, and navigation footers continue to reflow internally.
+- Rapid lesson rebuilding no longer leaves a temporarily duplicated or overlapping course title.
 
-## Dashboard and routing
+## v10 learning and evidence features retained
 
-- Completed Today’s Focus tasks remain visible with a checked, muted, struck-through, non-actionable presentation.
-- DuckDB tasks still route to the exact assigned exercise.
-- Interview tasks still route to the exact assigned problem.
-
-## Data safety and storage
-
-- Backups use consistent SQLite snapshots, including databases using WAL mode.
-- Identical database content does not create duplicate backups.
-- Retention keeps the newest 10 backups, daily representatives for seven days, and weekly representatives for four weeks.
-- Settings shows database, backup, DuckDB, and combined storage totals.
-- Settings includes Clean Old Backups and Open Data Folder controls.
-
-## Content and authoring
-
-- SQL Subqueries and SQL Joins were updated to pack version 2.0.0.
-- All bundled lessons now have associated practice questions.
-- The standard pack template and authoring documentation enforce the v10 lesson-practice and starter-template rules.
+- Every Exercise Pack lesson is associated with one or more ordered practice questions.
+- New answers contain only minimal authored scaffolding; examples and solutions are not inserted automatically.
+- Run Query, Check Answer, progressive Exercise Hint, and separate View Solution workflows remain functional.
+- Exercise Packs, DuckDB Exercises, Applied Labs, and Interview Problems share the numbered SQL editor with syntax highlighting and DuckDB error navigation.
+- Interview Problem submissions create duplicate-resistant Demonstrated Evidence only from original learner work.
+- Exact DuckDB and Interview Problem routing is preserved.
+- Completed Today’s Focus rows remain visible, styled as complete, and non-actionable.
+- SQLite backup deduplication, retention pruning, storage reporting, and Settings cleanup controls remain active.
 
 ## Upgrade safety
 
-Use the cumulative patch installer when upgrading an existing repository. It validates the target, skips identical files, backs up every file it replaces, and does not delete the local database, backups, submissions, generated DuckDB database, task workspaces, or custom Exercise Packs.
+Use the cumulative patch installer to upgrade either v9.6.4 or v10.0.0. It validates the target repository, skips identical files, backs up each replaced file under `patch_backups/v10.0.1-<timestamp>/`, and preserves local databases, backups, submissions, task workspaces, generated datasets, and custom Exercise Packs.

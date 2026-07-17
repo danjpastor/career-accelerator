@@ -14,7 +14,6 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
     QHeaderView,
-    QBoxLayout,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -23,7 +22,6 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
-    QScrollArea,
     QSizePolicy,
     QSplitter,
     QTableWidget,
@@ -44,11 +42,6 @@ from career_app.ui.widgets import Card
 class FeedbackBanner(QLabel):
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        self.setMinimumWidth(0)
-        self.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.setWordWrap(True)
         self.hide()
 
@@ -85,7 +78,6 @@ class DuckDBExercisesWidget(QWidget):
         self._question_notes: dict[int, str] = {}
         self._active_question_number: int | None = None
         self._question_results: dict[int, dict[str, Any]] = {}
-        self._responsive_mode: str | None = None
         self._build_ui()
         self.refresh()
 
@@ -100,8 +92,7 @@ class DuckDBExercisesWidget(QWidget):
             "QFrame#DuckDBExerciseToolbar {background:#111a29;border:1px solid #2d3850;"
             "border-radius:10px;}"
         )
-        toolbar_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, toolbar)
-        self.toolbar_layout = toolbar_layout
+        toolbar_layout = QHBoxLayout(toolbar)
         toolbar_layout.setContentsMargins(10, 7, 10, 7)
         toolbar_layout.setSpacing(8)
         self.back_button = QPushButton("‹")
@@ -119,16 +110,11 @@ class DuckDBExercisesWidget(QWidget):
         outer.addWidget(toolbar)
 
         self.main_splitter = QSplitter(Qt.Orientation.Horizontal)
-        self.main_splitter.setMinimumWidth(0)
-        self.main_splitter.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.main_splitter.setChildrenCollapsible(False)
         self.main_splitter.setHandleWidth(4)
 
         self.navigation_card = Card()
-        self.navigation_card.setMinimumWidth(250)
+        self.navigation_card.setMinimumWidth(310)
         self.navigation_card.layout.setContentsMargins(12, 12, 12, 12)
         self.navigation_card.layout.setSpacing(9)
         nav_title_row = QHBoxLayout()
@@ -151,10 +137,6 @@ class DuckDBExercisesWidget(QWidget):
         self.track_caption.setWordWrap(True)
         self.navigation_card.layout.addWidget(self.track_caption)
         self.exercise_list = QListWidget()
-        self.exercise_list.setWordWrap(True)
-        self.exercise_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.exercise_list.setObjectName("DuckDBCourseNavigation")
         self.exercise_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.exercise_list.setStyleSheet(
@@ -170,11 +152,6 @@ class DuckDBExercisesWidget(QWidget):
         self.main_splitter.addWidget(self.navigation_card)
 
         self.workspace_splitter = QSplitter(Qt.Orientation.Horizontal)
-        self.workspace_splitter.setMinimumWidth(0)
-        self.workspace_splitter.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.workspace_splitter.setObjectName("DuckDBLearnPracticeSplitter")
         self.workspace_splitter.setChildrenCollapsible(False)
         self.workspace_splitter.setOpaqueResize(True)
@@ -186,7 +163,7 @@ class DuckDBExercisesWidget(QWidget):
         )
 
         self.learn_card = Card()
-        self.learn_card.setMinimumWidth(0)
+        self.learn_card.setMinimumWidth(340)
         self.learn_card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.learn_card.layout.setContentsMargins(8, 8, 8, 8)
         self.learn_card.layout.setSpacing(0)
@@ -200,27 +177,10 @@ class DuckDBExercisesWidget(QWidget):
         self.workspace_splitter.addWidget(self.learn_card)
 
         self.practice_card = Card()
-        self.practice_card.setMinimumWidth(0)
+        self.practice_card.setMinimumWidth(380)
         self.practice_card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.practice_card.layout.setContentsMargins(8, 8, 8, 8)
-        self.practice_card.layout.setSpacing(0)
-
-        self.practice_scroll = QScrollArea()
-        self.practice_scroll.setWidgetResizable(True)
-        self.practice_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        self.practice_scroll.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.practice_scroll.setStyleSheet(
-            "QScrollArea {background:transparent;border:none;}"
-        )
-        practice_content = QWidget()
-        practice_content.setMinimumWidth(0)
-        practice_layout = QVBoxLayout(practice_content)
-        practice_layout.setContentsMargins(6, 6, 6, 6)
-        practice_layout.setSpacing(9)
-        self.practice_scroll.setWidget(practice_content)
-        self.practice_card.layout.addWidget(self.practice_scroll, 1)
+        self.practice_card.layout.setContentsMargins(12, 12, 12, 12)
+        self.practice_card.layout.setSpacing(9)
         practice_heading = QHBoxLayout()
         practice_title = QLabel("Practice")
         practice_title.setStyleSheet("font-size:13pt;font-weight:700;color:#f4f6fb;")
@@ -231,7 +191,7 @@ class DuckDBExercisesWidget(QWidget):
         self.status_combo.setMinimumWidth(126)
         self.status_combo.setToolTip("Exercise status")
         practice_heading.addWidget(self.status_combo)
-        practice_layout.addLayout(practice_heading)
+        self.practice_card.layout.addLayout(practice_heading)
 
         selector_row = QHBoxLayout()
         selector_label = QLabel("Question")
@@ -251,7 +211,7 @@ class DuckDBExercisesWidget(QWidget):
         self.dataset_label = QLabel("")
         self.dataset_label.setObjectName("Muted")
         selector_row.addWidget(self.dataset_label)
-        practice_layout.addLayout(selector_row)
+        self.practice_card.layout.addLayout(selector_row)
 
         self.question_prompt = QLabel("")
         self.question_prompt.setWordWrap(True)
@@ -259,19 +219,18 @@ class DuckDBExercisesWidget(QWidget):
             "background:#181c31;border:1px solid #3b3f61;border-radius:8px;"
             "color:#d9def0;padding:8px 10px;"
         )
-        practice_layout.addWidget(self.question_prompt)
+        self.practice_card.layout.addWidget(self.question_prompt)
 
         self.sql_editor = SqlCodeEditor()
         self.sql_editor.setObjectName("DuckDBExerciseSqlEditor")
         self.sql_editor.setPlaceholderText(
             "Write the SQL answer for the selected question. Each question is saved independently."
         )
-        self.sql_editor.setMinimumHeight(190)
+        self.sql_editor.setMinimumHeight(240)
         self.sql_editor.textChanged.connect(self._answer_changed)
-        practice_layout.addWidget(self.sql_editor, 3)
+        self.practice_card.layout.addWidget(self.sql_editor, 3)
 
-        first_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.first_actions = first_actions
+        first_actions = QHBoxLayout()
         self.run_button = QPushButton("▶ Run Question")
         self.run_button.setObjectName("Secondary")
         self.run_button.clicked.connect(self.run_question)
@@ -285,10 +244,10 @@ class DuckDBExercisesWidget(QWidget):
         first_actions.addWidget(self.check_question_button)
         first_actions.addWidget(self.check_exercise_button)
         first_actions.addStretch()
-        practice_layout.addLayout(first_actions)
+        self.practice_card.layout.addLayout(first_actions)
 
         self.feedback = FeedbackBanner()
-        practice_layout.addWidget(self.feedback)
+        self.practice_card.layout.addWidget(self.feedback)
 
         self.result_table = QTableWidget()
         self.result_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -298,32 +257,30 @@ class DuckDBExercisesWidget(QWidget):
         self.result_table.verticalHeader().setVisible(False)
         self.result_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.result_table.horizontalHeader().setStretchLastSection(True)
-        self.result_table.setMinimumHeight(125)
+        self.result_table.setMinimumHeight(150)
         self.result_table.setStyleSheet(
             "QTableWidget {background:#111827;alternate-background-color:#182235;"
             "color:#eef2fa;border:1px solid #303a52;border-radius:8px;}"
             "QHeaderView::section {background:#202b40;color:#f4f6fb;padding:7px;"
             "border:none;border-right:1px solid #34405a;font-weight:650;}"
         )
-        practice_layout.addWidget(self.result_table, 2)
+        self.practice_card.layout.addWidget(self.result_table, 2)
 
         notes_label = QLabel("Notes & reasoning")
         notes_label.setStyleSheet("font-weight:650;color:#e7ebf5;")
-        practice_layout.addWidget(notes_label)
+        self.practice_card.layout.addWidget(notes_label)
         self.notes = QTextEdit()
         self.notes.setPlaceholderText(
             "Record what the query does, mistakes you corrected, and why the final answer works."
         )
-        self.notes.setMinimumHeight(70)
-        self.notes.setMaximumHeight(135)
+        self.notes.setMaximumHeight(92)
         self.notes.textChanged.connect(self._notes_changed)
         self.notes.setStyleSheet(
             "QTextEdit {background:#151c2b;border:1px solid #343c55;border-radius:8px;padding:7px;}"
         )
-        practice_layout.addWidget(self.notes)
+        self.practice_card.layout.addWidget(self.notes)
 
-        reference_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.reference_row = reference_row
+        reference_row = QHBoxLayout()
         for label, callback in (
             ("Instructions", lambda: self.open_reference("instructions")),
             ("Starter", lambda: self.open_reference("starter")),
@@ -335,10 +292,9 @@ class DuckDBExercisesWidget(QWidget):
             button.clicked.connect(callback)
             reference_row.addWidget(button)
         reference_row.addStretch()
-        practice_layout.addLayout(reference_row)
+        self.practice_card.layout.addLayout(reference_row)
 
-        submission_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.submission_row = submission_row
+        submission_row = QHBoxLayout()
         self.save_button = QPushButton("Save Submission")
         self.save_button.setObjectName("Secondary")
         self.save_button.clicked.connect(self.save_progress)
@@ -348,7 +304,7 @@ class DuckDBExercisesWidget(QWidget):
         submission_row.addWidget(self.save_button)
         submission_row.addWidget(self.submit_button)
         submission_row.addStretch()
-        practice_layout.addLayout(submission_row)
+        self.practice_card.layout.addLayout(submission_row)
 
         self.workspace_splitter.addWidget(self.practice_card)
         self.workspace_splitter.setStretchFactor(0, 1)
@@ -360,52 +316,6 @@ class DuckDBExercisesWidget(QWidget):
         self.main_splitter.setSizes([330, 1080])
         outer.addWidget(self.main_splitter, 1)
         QTimer.singleShot(0, self._apply_workspace_split)
-
-    def _apply_responsive_layout(self) -> None:
-        width = max(0, self.width())
-        mode = "compact" if width < 820 else "medium" if width < 1160 else "wide"
-        if mode == self._responsive_mode:
-            return
-        self._responsive_mode = mode
-
-        self.toolbar_layout.setDirection(
-            QBoxLayout.Direction.TopToBottom
-            if mode == "compact"
-            else QBoxLayout.Direction.LeftToRight
-        )
-        for layout in (self.first_actions, self.reference_row, self.submission_row):
-            layout.setDirection(
-                QBoxLayout.Direction.TopToBottom
-                if width < 680
-                else QBoxLayout.Direction.LeftToRight
-            )
-
-        if mode == "compact":
-            self.setMinimumHeight(1500)
-            self.main_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.workspace_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.navigation_card.setMinimumWidth(0)
-            self.main_splitter.setSizes([330, 1150])
-            self.workspace_splitter.setSizes([560, 650])
-        elif mode == "medium":
-            self.setMinimumHeight(1120)
-            self.main_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.workspace_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.navigation_card.setMinimumWidth(240)
-            self.main_splitter.setSizes([260, 760])
-            self.workspace_splitter.setSizes([370, 470])
-        else:
-            self.setMinimumHeight(0)
-            self.main_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.workspace_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.navigation_card.setMinimumWidth(250)
-            self.main_splitter.setSizes([300, 1050])
-            self.workspace_splitter.setSizes([520, 590])
-        self.updateGeometry()
-
-    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
-        super().resizeEvent(event)
-        self._apply_responsive_layout()
 
     def refresh(self, *, preserve_number: bool = True) -> None:
         preferred = self.current_number if preserve_number else None

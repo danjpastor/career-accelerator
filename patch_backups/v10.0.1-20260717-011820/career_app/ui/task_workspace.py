@@ -6,7 +6,6 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
-    QBoxLayout,
     QComboBox,
     QDialog,
     QFileDialog,
@@ -18,7 +17,6 @@ from PySide6.QtWidgets import (
     QListWidget,
     QMessageBox,
     QPushButton,
-    QSizePolicy,
     QSpinBox,
     QTabWidget,
     QTextEdit,
@@ -73,12 +71,9 @@ class TaskWorkspaceDialog(QDialog):
         self.setWindowTitle(
             f"Task Workspace — {self.workspace['task_label']}"
         )
-        self.setMinimumSize(720, 540)
-        parent_width = max(760, parent.width() if parent is not None else 1120)
-        parent_height = max(580, parent.height() if parent is not None else 820)
-        self.resize(min(1120, parent_width - 48), min(820, parent_height - 48))
-        self.setStyleSheet(stylesheet(getattr(parent, "_ui_scale", 1.0)))
-        self._responsive_rows: list[QBoxLayout] = []
+        self.setMinimumSize(1040, 760)
+        self.resize(1120, 820)
+        self.setStyleSheet(stylesheet())
 
         root_layout = QVBoxLayout(self)
         root_layout.setContentsMargins(18, 16, 18, 16)
@@ -95,17 +90,12 @@ class TaskWorkspaceDialog(QDialog):
         root_layout.addWidget(self.summary)
 
         self.tabs = QTabWidget()
-        self.tabs.setMinimumWidth(0)
-        self.tabs.setSizePolicy(
-            QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
-        )
         self.tabs.addTab(self._document_tab(), "Document")
         self.tabs.addTab(self._task_tab(), "Task & Schedule")
         self.tabs.addTab(self._evidence_tab(), "Artifacts & Sessions")
         root_layout.addWidget(self.tabs, 1)
 
-        bottom = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self._responsive_rows.append(bottom)
+        bottom = QHBoxLayout()
         self.save_state = QLabel("Saved")
         self.save_state.setObjectName("Muted")
         bottom.addWidget(self.save_state)
@@ -128,8 +118,7 @@ class TaskWorkspaceDialog(QDialog):
         layout.setContentsMargins(10, 12, 10, 10)
         layout.setSpacing(9)
 
-        path_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self._responsive_rows.append(path_row)
+        path_row = QHBoxLayout()
         path_row.addWidget(QLabel("Document"))
         self.path_label = QLineEdit()
         self.path_label.setReadOnly(True)
@@ -143,8 +132,7 @@ class TaskWorkspaceDialog(QDialog):
         self.editor.textChanged.connect(self._document_changed)
         layout.addWidget(self.editor, 1)
 
-        buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self._responsive_rows.append(buttons)
+        buttons = QHBoxLayout()
         save_button = QPushButton("Save")
         save_button.setObjectName("Primary")
         save_button.clicked.connect(self.save_document)
@@ -221,8 +209,7 @@ class TaskWorkspaceDialog(QDialog):
         hint.setWordWrap(True)
         layout.addWidget(hint)
 
-        actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self._responsive_rows.append(actions)
+        actions = QHBoxLayout()
         save_task = QPushButton("Save Task & Schedule")
         save_task.setObjectName("Primary")
         save_task.clicked.connect(self.save_task_settings)
@@ -275,8 +262,7 @@ class TaskWorkspaceDialog(QDialog):
         artifact_form.addWidget(self.artifact_label, 0, 1, 1, 2)
         artifact_form.addWidget(QLabel("Path"), 1, 0)
         artifact_form.addWidget(self.artifact_path, 1, 1)
-        browse_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self._responsive_rows.append(browse_row)
+        browse_row = QHBoxLayout()
         browse_row.addWidget(browse)
         browse_row.addWidget(browse_folder)
         artifact_form.addLayout(browse_row, 1, 2)
@@ -286,15 +272,10 @@ class TaskWorkspaceDialog(QDialog):
 
         layout.addWidget(QLabel("Linked artifacts"))
         self.artifact_list = QListWidget()
-        self.artifact_list.setWordWrap(True)
-        self.artifact_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.artifact_list.itemDoubleClicked.connect(self.open_artifact)
         layout.addWidget(self.artifact_list, 1)
 
-        artifact_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self._responsive_rows.append(artifact_buttons)
+        artifact_buttons = QHBoxLayout()
         open_artifact = QPushButton("Open Selected Artifact")
         open_artifact.clicked.connect(self.open_artifact)
         remove_artifact = QPushButton("Remove Link")
@@ -306,14 +287,9 @@ class TaskWorkspaceDialog(QDialog):
 
         layout.addWidget(QLabel("Linked study sessions"))
         self.session_list = QListWidget()
-        self.session_list.setWordWrap(True)
-        self.session_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         layout.addWidget(self.session_list, 1)
 
-        session_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self._responsive_rows.append(session_buttons)
+        session_buttons = QHBoxLayout()
         link_recent = QPushButton("Link Most Recent Unlinked Session")
         link_recent.clicked.connect(self.link_recent_session)
         start_session = QPushButton("Start New Linked Session")
@@ -638,18 +614,6 @@ class TaskWorkspaceDialog(QDialog):
         self._refresh_sessions()
         if self.refresh_callback:
             self.refresh_callback()
-
-    def resizeEvent(self, event):  # noqa: N802 - Qt API
-        super().resizeEvent(event)
-        compact = self.width() < 780
-        direction = (
-            QBoxLayout.Direction.TopToBottom
-            if compact
-            else QBoxLayout.Direction.LeftToRight
-        )
-        for row in self._responsive_rows:
-            row.setDirection(direction)
-            row.setSpacing(7 if compact else 8)
 
     def closeEvent(self, event):
         if self._dirty:

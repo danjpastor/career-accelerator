@@ -16,7 +16,7 @@ from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QComboBox, QDialog, QFormLayout,
     QInputDialog,
-    QBoxLayout, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout, QLabel, QLayout,
+    QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout, QLabel, QLayout,
     QLineEdit, QListWidget, QMainWindow, QMessageBox, QPushButton, QProgressBar,
     QScrollArea, QSizePolicy, QSpinBox, QStackedWidget, QTableWidget,
     QTableWidgetItem, QTabWidget, QTextEdit, QVBoxLayout, QWidget
@@ -63,10 +63,6 @@ from career_app.ui.course_ui import SqlCodeEditor
 from career_app.ui.applied_labs import AppliedLabsWidget
 from career_app.ui.exercise_packs import ExercisePacksWidget, ExerciseSuggestionPanel
 from career_app.ui.task_workspace import TaskWorkspaceDialog
-from career_app.ui.responsive import (
-    ResponsiveScrollPage, apply_inline_style_scale, clear_layout_positions,
-    reflow_grid, set_box_direction,
-)
 from career_app.ui.widgets import (
     AreaChart, BadgeCard, Card, CircularTimer, Divider, FocusRow,
     FooterMetricBox, MetricRow, MiniSparkline, Ring, SectionHeader,
@@ -251,10 +247,10 @@ class ResponsiveDashboardContent(QWidget):
 
 
 class CareerAccelerator(QMainWindow):
-    DASHBOARD_WIDE_BREAKPOINT = 1120
-    DASHBOARD_MEDIUM_BREAKPOINT = 840
-    MINIMUM_WINDOW_WIDTH = 900
-    MINIMUM_WINDOW_HEIGHT = 620
+    DASHBOARD_WIDE_BREAKPOINT = 1150
+    DASHBOARD_MEDIUM_BREAKPOINT = 700
+    MINIMUM_WINDOW_WIDTH = 1500
+    MINIMUM_WINDOW_HEIGHT = 1020
 
     def __init__(self):
         super().__init__()
@@ -303,9 +299,7 @@ class CareerAccelerator(QMainWindow):
             self.MINIMUM_WINDOW_WIDTH,
             self.MINIMUM_WINDOW_HEIGHT,
         )
-        self._ui_scale = 1.0
-        self._responsive_update_pending = False
-        self.setStyleSheet(stylesheet(self._ui_scale))
+        self.setStyleSheet(stylesheet())
 
         self.button_feedback = ButtonFeedbackFilter(self)
         QApplication.instance().installEventFilter(
@@ -318,8 +312,7 @@ class CareerAccelerator(QMainWindow):
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
 
-        self.sidebar = self.build_sidebar()
-        outer.addWidget(self.sidebar)
+        outer.addWidget(self.build_sidebar())
 
         self.stack = QStackedWidget()
         outer.addWidget(self.stack, 1)
@@ -344,7 +337,6 @@ class CareerAccelerator(QMainWindow):
         self.setup_shortcuts()
         self.update_timer_visuals()
         self.refresh_all()
-        QTimer.singleShot(0, self._apply_responsive_shell)
 
         track_health = tracks.health_report(
             self.conn,
@@ -383,51 +375,18 @@ class CareerAccelerator(QMainWindow):
     def build_sidebar(self):
         side = QFrame()
         side.setObjectName("Sidebar")
-        side.setMinimumWidth(196)
-        side.setMaximumWidth(266)
-        side.setSizePolicy(
-            QSizePolicy.Policy.Fixed,
-            QSizePolicy.Policy.Expanding,
-        )
+        side.setFixedWidth(266)
 
-        shell = QVBoxLayout(side)
-        shell.setContentsMargins(0, 0, 0, 0)
-        shell.setSpacing(0)
-
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        scroll.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        scroll.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded
-        )
-        scroll.setStyleSheet(
-            "QScrollArea {background:transparent;border:none;}"
-        )
-        self.sidebar_scroll = scroll
-
-        content = QWidget()
-        content.setMinimumWidth(0)
-        content.setSizePolicy(
-            QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Preferred,
-        )
-        layout = QVBoxLayout(content)
+        layout = QVBoxLayout(side)
         layout.setContentsMargins(16, 14, 16, 12)
         layout.setSpacing(4)
-        self.sidebar_content_layout = layout
 
         logo_row = QHBoxLayout()
-        logo_row.setSpacing(8)
         logo = QLabel("🚀")
         logo.setStyleSheet("font-size:28pt;")
-        logo.setAlignment(Qt.AlignmentFlag.AlignTop)
         logo_row.addWidget(logo)
 
         title_layout = QVBoxLayout()
-        title_layout.setSpacing(0)
         career = QLabel("CAREER")
         career.setStyleSheet("font-size:17pt;font-weight:800;")
         accelerator = QLabel("ACCELERATOR")
@@ -451,12 +410,7 @@ class CareerAccelerator(QMainWindow):
         for text, index in NAV:
             button = QPushButton(text)
             button.setObjectName("Nav")
-            button.setMinimumHeight(34)
-            button.setMaximumHeight(42)
-            button.setSizePolicy(
-                QSizePolicy.Policy.Expanding,
-                QSizePolicy.Policy.Preferred,
-            )
+            button.setFixedHeight(38)
             button.setCheckable(True)
             button.clicked.connect(
                 lambda checked=False, target=index: self.navigate(target)
@@ -467,14 +421,11 @@ class CareerAccelerator(QMainWindow):
             if index == 0:
                 button.setChecked(True)
 
-        layout.addStretch(1)
+        layout.addStretch()
 
         streak_card = QFrame()
         streak_card.setObjectName("SidebarCard")
-        streak_card.setSizePolicy(
-            QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Preferred,
-        )
+        streak_card.setMinimumHeight(142)
         self.sidebar_streak_card = streak_card
         streak_layout = QVBoxLayout(streak_card)
         streak_layout.setContentsMargins(16, 14, 16, 14)
@@ -500,7 +451,6 @@ class CareerAccelerator(QMainWindow):
         streak_layout.addLayout(streak_value_row)
 
         self.streak_week = QLabel("○  ○  ○  ○  ○  ○  ○")
-        self.streak_week.setWordWrap(True)
         self.streak_week.setStyleSheet(
             f"color:{COLORS['purple']};font-size:13pt;"
         )
@@ -508,23 +458,19 @@ class CareerAccelerator(QMainWindow):
 
         self.best_streak_label = QLabel("Best Streak: 0 days")
         self.best_streak_label.setObjectName("Muted")
-        self.best_streak_label.setWordWrap(True)
         streak_layout.addWidget(self.best_streak_label)
+
         layout.addWidget(streak_card)
 
         time_card = QFrame()
         time_card.setObjectName("SidebarCard")
-        time_card.setSizePolicy(
-            QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Preferred,
-        )
+        time_card.setMinimumHeight(146)
         self.sidebar_time_card = time_card
         time_layout = QVBoxLayout(time_card)
         time_layout.setContentsMargins(16, 14, 16, 14)
         time_layout.setSpacing(6)
 
         study_title = QLabel("⏱️  TOTAL STUDY TIME")
-        study_title.setWordWrap(True)
         study_title.setStyleSheet(
             f"font-weight:700;color:{COLORS['cyan']};"
         )
@@ -552,15 +498,12 @@ class CareerAccelerator(QMainWindow):
         self.sidebar_goal_percent.setObjectName("Muted")
         goal_row.addWidget(self.sidebar_goal_percent)
         time_layout.addLayout(goal_row)
+
         layout.addWidget(time_card)
 
         footer = QLabel("Keep building your future. 🚀")
         footer.setObjectName("Muted")
-        footer.setWordWrap(True)
         layout.addWidget(footer)
-
-        scroll.setWidget(content)
-        shell.addWidget(scroll)
         return side
 
     def navigate(self, index):
@@ -589,63 +532,30 @@ class CareerAccelerator(QMainWindow):
                     break
 
     def page(self, title, subtitle=None):
-        page = ResponsiveScrollPage(
-            title,
-            subtitle,
-            f"📅 {datetime.now():%A, %B %d, %Y}",
-        )
-        return page, page.content_layout
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(22, 18, 22, 18)
+        layout.setSpacing(12)
 
-    def _register_page_responsive(self, page, handler):
-        if isinstance(page, ResponsiveScrollPage):
-            page.add_responsive_handler(handler)
-            QTimer.singleShot(
-                0,
-                lambda: handler(max(0, page.viewport().width())),
-            )
+        heading = QHBoxLayout()
+        text = QVBoxLayout()
+        hero = QLabel(title)
+        hero.setObjectName("Hero")
+        hero.setStyleSheet("background:transparent;border:none;")
+        text.addWidget(hero)
+        if subtitle:
+            sub = QLabel(subtitle)
+            sub.setObjectName("Muted")
+            sub.setWordWrap(True)
+            text.addWidget(sub)
+        heading.addLayout(text)
+        heading.addStretch()
 
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        if not self._responsive_update_pending:
-            self._responsive_update_pending = True
-            QTimer.singleShot(25, self._apply_responsive_shell)
-
-    def _apply_responsive_shell(self):
-        self._responsive_update_pending = False
-        width = max(self.width(), self.MINIMUM_WINDOW_WIDTH)
-        height = max(self.height(), self.MINIMUM_WINDOW_HEIGHT)
-        raw_scale = min(width / 1536.0, height / 1020.0)
-        scale = max(0.78, min(1.08, raw_scale))
-        scale = round(scale * 20) / 20
-
-        if width < 1000:
-            sidebar_width = 180
-        elif width < 1120:
-            sidebar_width = 196
-        elif width < 1375:
-            sidebar_width = 224
-        else:
-            sidebar_width = 266
-        if hasattr(self, "sidebar"):
-            self.sidebar.setMinimumWidth(sidebar_width)
-            self.sidebar.setMaximumWidth(sidebar_width)
-
-        if abs(scale - self._ui_scale) >= 0.01:
-            self._ui_scale = scale
-            self.setStyleSheet(stylesheet(scale))
-        apply_inline_style_scale(self, scale)
-
-        responsive_painted_widgets = [
-            *self.findChildren(Ring),
-            *self.findChildren(CircularTimer),
-        ]
-        for widget in responsive_painted_widgets:
-            widget.set_ui_scale(scale)
-
-        if hasattr(self, "dashboard_scroll"):
-            self.update_dashboard_layout(
-                max(0, self.dashboard_scroll.viewport().width())
-            )
+        today = QLabel(f"📅 {datetime.now():%A, %B %d, %Y}")
+        today.setObjectName("Muted")
+        heading.addWidget(today)
+        layout.addLayout(heading)
+        return page, layout
 
     def clear_layout(self, layout):
         while layout.count():
@@ -661,26 +571,24 @@ class CareerAccelerator(QMainWindow):
 
     # ---------- Dashboard ----------
     def dashboard_page(self):
-        page = ResponsiveScrollPage()
+        page = QWidget()
         page.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
-        self.dashboard_scroll = page
 
-        root = page.content_layout
+        root = QVBoxLayout(page)
         root.setContentsMargins(24, 16, 24, 14)
         root.setSpacing(10)
         root.setSizeConstraint(QLayout.SetDefaultConstraint)
 
-        self.dashboard_content = page.content
+        self.dashboard_content = page
         self.dashboard_root_layout = root
         self.dashboard_layout_mode = None
 
         # ---------- Header ----------
         self.dashboard_header_section = QWidget()
-        header = QBoxLayout(QBoxLayout.Direction.LeftToRight, self.dashboard_header_section)
-        self.dashboard_header_layout = header
+        header = QHBoxLayout(self.dashboard_header_section)
         header.setContentsMargins(0, 0, 0, 0)
         header.setSpacing(12)
 
@@ -689,14 +597,10 @@ class CareerAccelerator(QMainWindow):
 
         self.dashboard_hero = QLabel("")
         self.dashboard_hero.setObjectName("Hero")
-        self.dashboard_hero.setWordWrap(True)
-        self.dashboard_hero.setMinimumWidth(0)
         left_header.addWidget(self.dashboard_hero)
 
         self.dashboard_quote = QLabel("")
         self.dashboard_quote.setObjectName("Muted")
-        self.dashboard_quote.setWordWrap(True)
-        self.dashboard_quote.setMinimumWidth(0)
         self.dashboard_quote.setStyleSheet(
             "font-style:italic;color:#b6bfd0;"
         )
@@ -750,8 +654,8 @@ class CareerAccelerator(QMainWindow):
 
         for ring in self.rings:
             card = Card()
-            card.setMinimumHeight(96)
-            card.setMaximumHeight(16777215)
+            card.setMinimumHeight(116)
+            card.setMaximumHeight(120)
             card.layout.setContentsMargins(8, 7, 8, 7)
             card.layout.setSpacing(0)
             card.layout.addWidget(
@@ -772,7 +676,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_primary_grid.setRowStretch(0, 0)
 
         self.dashboard_focus_card = Card()
-        self.dashboard_focus_card.setMinimumHeight(248)
+        self.dashboard_focus_card.setMinimumHeight(286)
         self.dashboard_focus_card.layout.setContentsMargins(
             14,
             13,
@@ -843,7 +747,7 @@ class CareerAccelerator(QMainWindow):
         )
 
         self.dashboard_tasks_card = Card()
-        self.dashboard_tasks_card.setMinimumHeight(248)
+        self.dashboard_tasks_card.setMinimumHeight(286)
         self.dashboard_tasks_card.layout.setContentsMargins(
             14,
             13,
@@ -871,7 +775,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_tasks_card.layout.addStretch()
 
         self.dashboard_timer_card = Card()
-        self.dashboard_timer_card.setMinimumHeight(248)
+        self.dashboard_timer_card.setMinimumHeight(286)
         self.dashboard_timer_card.layout.setContentsMargins(
             14,
             13,
@@ -884,7 +788,7 @@ class CareerAccelerator(QMainWindow):
         )
 
         timer_stage = QWidget()
-        timer_stage.setMinimumHeight(118)
+        timer_stage.setFixedHeight(144)
         timer_stage.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground,
             True,
@@ -950,7 +854,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_secondary_grid.setVerticalSpacing(10)
 
         self.dashboard_growth_card = Card()
-        self.dashboard_growth_card.setMinimumHeight(190)
+        self.dashboard_growth_card.setMinimumHeight(232)
         self.dashboard_growth_card.layout.setContentsMargins(
             14,
             13,
@@ -974,8 +878,7 @@ class CareerAccelerator(QMainWindow):
             ["7 Days", "14 Days", "30 Days", "90 Days"]
         )
         self.growth_period_combo.setCurrentText("14 Days")
-        self.growth_period_combo.setMinimumWidth(88)
-        self.growth_period_combo.setMaximumWidth(112)
+        self.growth_period_combo.setFixedWidth(104)
         growth_header.addWidget(
             self.growth_period_combo,
             0,
@@ -992,7 +895,7 @@ class CareerAccelerator(QMainWindow):
         )
 
         self.dashboard_achievement_card = Card()
-        self.dashboard_achievement_card.setMinimumHeight(190)
+        self.dashboard_achievement_card.setMinimumHeight(232)
         self.dashboard_achievement_card.layout.setContentsMargins(
             14,
             13,
@@ -1023,7 +926,7 @@ class CareerAccelerator(QMainWindow):
         )
 
         self.dashboard_summary_card = Card()
-        self.dashboard_summary_card.setMinimumHeight(190)
+        self.dashboard_summary_card.setMinimumHeight(232)
         self.dashboard_summary_card.layout.setContentsMargins(
             14,
             13,
@@ -1075,7 +978,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_footer_grid.setVerticalSpacing(10)
 
         self.encouragement_card = Card()
-        self.encouragement_card.setMinimumHeight(125)
+        self.encouragement_card.setMinimumHeight(150)
         self.encouragement_card.layout.setContentsMargins(
             16,
             12,
@@ -1116,26 +1019,26 @@ class CareerAccelerator(QMainWindow):
 
         self.footer_message = QLabel("")
         self.footer_message.setStyleSheet("font-weight:700;")
-        self.footer_message.setWordWrap(True)
+        self.footer_message.setWordWrap(False)
         self.footer_message.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Fixed,
         )
-        self.footer_message.setMinimumHeight(0)
-        self.footer_message.setMaximumHeight(16777215)
+        self.footer_message.setMinimumHeight(19)
+        self.footer_message.setMaximumHeight(20)
         encouragement_text_layout.addWidget(
             self.footer_message
         )
 
         self.footer_subtitle = QLabel("")
         self.footer_subtitle.setObjectName("Muted")
-        self.footer_subtitle.setWordWrap(True)
+        self.footer_subtitle.setWordWrap(False)
         self.footer_subtitle.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Fixed,
         )
-        self.footer_subtitle.setMinimumHeight(0)
-        self.footer_subtitle.setMaximumHeight(16777215)
+        self.footer_subtitle.setMinimumHeight(18)
+        self.footer_subtitle.setMaximumHeight(19)
         encouragement_text_layout.addWidget(
             self.footer_subtitle
         )
@@ -1148,7 +1051,7 @@ class CareerAccelerator(QMainWindow):
         self.encouragement_card.layout.addLayout(encouragement_row)
 
         self.dashboard_mission_card = Card()
-        self.dashboard_mission_card.setMinimumHeight(125)
+        self.dashboard_mission_card.setMinimumHeight(150)
         self.dashboard_mission_card.layout.setContentsMargins(
             14,
             10,
@@ -1194,8 +1097,8 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_mission_detail = QLabel("")
         self.dashboard_mission_detail.setObjectName("Muted")
         self.dashboard_mission_detail.setWordWrap(True)
-        self.dashboard_mission_detail.setMinimumHeight(0)
-        self.dashboard_mission_detail.setMaximumHeight(16777215)
+        self.dashboard_mission_detail.setMinimumHeight(18)
+        self.dashboard_mission_detail.setMaximumHeight(36)
         self.dashboard_mission_card.layout.addWidget(
             self.dashboard_mission_detail
         )
@@ -1258,26 +1161,15 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(self.dashboard_secondary_section)
         root.addWidget(self.dashboard_footer_section)
 
-        page.add_responsive_handler(self.update_dashboard_layout)
         QTimer.singleShot(
             0,
             lambda: self.update_dashboard_layout(
-                max(0, page.viewport().width())
+                self.DASHBOARD_WIDE_BREAKPOINT
             ),
         )
         return page
 
     def _take_layout_items(self, layout):
-        # Grid stretch factors survive when widgets are removed. Reset them so
-        # moving from a wide dashboard to a compact one cannot leave invisible
-        # empty columns that squeeze the visible cards.
-        if isinstance(layout, QGridLayout):
-            for column in range(max(layout.columnCount(), 8)):
-                layout.setColumnStretch(column, 0)
-                layout.setColumnMinimumWidth(column, 0)
-            for row in range(max(layout.rowCount(), 8)):
-                layout.setRowStretch(row, 0)
-                layout.setRowMinimumHeight(row, 0)
         while layout.count():
             layout.takeAt(0)
 
@@ -1313,7 +1205,7 @@ class CareerAccelerator(QMainWindow):
                 1,
                 2,
             )
-            self.dashboard_mission_card.setMinimumHeight(178)
+            self.dashboard_mission_card.setMinimumHeight(205)
         else:
             self.dashboard_mission_actions.addWidget(
                 self.dashboard_highest_impact_button,
@@ -1327,48 +1219,12 @@ class CareerAccelerator(QMainWindow):
             )
             self.dashboard_mission_actions.setColumnStretch(0, 3)
             self.dashboard_mission_actions.setColumnStretch(1, 2)
-            self.dashboard_mission_card.setMinimumHeight(125)
+            self.dashboard_mission_card.setMinimumHeight(150)
 
     def update_dashboard_layout(self, width):
-        width = max(0, int(width))
-        if width >= self.DASHBOARD_WIDE_BREAKPOINT:
-            mode = "wide"
-        elif width >= self.DASHBOARD_MEDIUM_BREAKPOINT:
-            mode = "medium"
-        else:
-            mode = "compact"
-
-        compact_header = mode != "wide"
-        set_box_direction(
-            self.dashboard_header_layout,
-            compact_header,
-            spacing=8 if compact_header else 12,
-        )
-        self.dashboard_program_meta.setAlignment(
-            Qt.AlignmentFlag.AlignLeft
-            if compact_header
-            else Qt.AlignmentFlag.AlignRight
-        )
-        self.dashboard_date.setAlignment(
-            Qt.AlignmentFlag.AlignLeft
-            if compact_header
-            else Qt.AlignmentFlag.AlignRight
-        )
-        if hasattr(self, "exercise_suggestion_panel"):
-            self.exercise_suggestion_panel.set_compact(mode != "wide")
-
-        if mode == "compact":
-            self.dashboard_root_layout.setContentsMargins(12, 12, 12, 14)
-            self.dashboard_root_layout.setSpacing(9)
-        elif mode == "medium":
-            self.dashboard_root_layout.setContentsMargins(17, 14, 17, 16)
-            self.dashboard_root_layout.setSpacing(10)
-        else:
-            self.dashboard_root_layout.setContentsMargins(24, 16, 24, 14)
-            self.dashboard_root_layout.setSpacing(10)
+        mode = "wide"
 
         if mode == self.dashboard_layout_mode:
-            self.dashboard_content.updateGeometry()
             return
         self.dashboard_layout_mode = mode
 
@@ -1648,20 +1504,14 @@ class CareerAccelerator(QMainWindow):
         controls.layout.addWidget(build)
         root.addWidget(controls)
 
-        body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.planner_body_layout = body
+        body = QHBoxLayout()
         queue = Card("Recommended Priority Queue")
         self.plan_list = QListWidget()
-        self.plan_list.setWordWrap(True)
-        self.plan_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.plan_list.itemDoubleClicked.connect(
             lambda _item: self.open_plan_workspace()
         )
         queue.layout.addWidget(self.plan_list)
-        queue_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.planner_queue_buttons = queue_buttons
+        queue_buttons = QHBoxLayout()
         continue_button = QPushButton("Continue")
         continue_button.setObjectName("Primary")
         continue_button.clicked.connect(self.continue_plan)
@@ -1686,10 +1536,6 @@ class CareerAccelerator(QMainWindow):
             ),
         )
         self.backlog_list = QListWidget()
-        self.backlog_list.setWordWrap(True)
-        self.backlog_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.backlog_list.setObjectName(
             "SprintBacklogList"
         )
@@ -1697,8 +1543,7 @@ class CareerAccelerator(QMainWindow):
             lambda _item: self.open_backlog_workspace()
         )
         backlog.layout.addWidget(self.backlog_list)
-        backlog_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.planner_backlog_actions = backlog_actions
+        backlog_actions = QHBoxLayout()
         edit = QPushButton("Edit Selected Task")
         edit.clicked.connect(self.edit_task)
         workspace = QPushButton("Open Workspace")
@@ -1718,17 +1563,6 @@ class CareerAccelerator(QMainWindow):
 
         body.addWidget(backlog, 1)
         root.addLayout(body, 1)
-
-        def update_planner_layout(width):
-            stacked = width < 900
-            set_box_direction(self.planner_body_layout, stacked, 10)
-            compact_actions = width < 720
-            set_box_direction(self.planner_queue_buttons, compact_actions, 7)
-            set_box_direction(self.planner_backlog_actions, compact_actions, 7)
-            self.plan_list.setMinimumHeight(210 if stacked else 260)
-            self.backlog_list.setMinimumHeight(210 if stacked else 260)
-
-        self._register_page_responsive(page, update_planner_layout)
         return page
 
     # ---------- Learning ----------
@@ -1738,11 +1572,6 @@ class CareerAccelerator(QMainWindow):
             "Track structured learning and complete guided labs that produce employer-ready evidence.",
         )
         self.learning_tabs = QTabWidget()
-        self.learning_tabs.setMinimumWidth(0)
-        self.learning_tabs.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
-        )
 
         overview = QWidget()
         overview_root = QVBoxLayout(overview)
@@ -1750,8 +1579,6 @@ class CareerAccelerator(QMainWindow):
         overview_root.setSpacing(12)
         self.learning_cards = {}
         grid = QGridLayout()
-        self.learning_overview_grid = grid
-        self.learning_overview_cards = []
         learning_tracks = [
             ("🎓 Google Certificate", "Google"),
             ("📘 DataCamp", "DataCamp"),
@@ -1774,7 +1601,7 @@ class CareerAccelerator(QMainWindow):
             card.layout.addWidget(detail)
             card.layout.addStretch()
             card.layout.addWidget(button)
-            self.learning_overview_cards.append(card)
+            grid.addWidget(card, index // 3, index % 3)
             self.learning_cards[key] = (value, detail)
         overview_root.addLayout(grid)
 
@@ -1797,8 +1624,7 @@ class CareerAccelerator(QMainWindow):
         overview_root.addStretch(1)
 
         labs = QWidget()
-        labs_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, labs)
-        self.legacy_labs_layout = labs_layout
+        labs_layout = QHBoxLayout(labs)
         labs_layout.setContentsMargins(0, 8, 0, 0)
         labs_layout.setSpacing(10)
 
@@ -1849,10 +1675,6 @@ class CareerAccelerator(QMainWindow):
         filter_row.addWidget(self.applied_category_filter, 1)
         library.layout.addLayout(filter_row)
         self.applied_exercise_list = QListWidget()
-        self.applied_exercise_list.setWordWrap(True)
-        self.applied_exercise_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.applied_exercise_list.currentItemChanged.connect(self.prefill_applied_exercise)
         library.layout.addWidget(self.applied_exercise_list, 1)
         labs_layout.addWidget(library, 1)
@@ -1882,8 +1704,7 @@ class CareerAccelerator(QMainWindow):
         detail_form.addRow("Notes", self.applied_notes)
         detail.layout.addLayout(detail_form)
 
-        refs = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_labs_refs = refs
+        refs = QHBoxLayout()
         self.applied_instructions_button = QPushButton("Open Instructions")
         self.applied_instructions_button.clicked.connect(lambda: self.open_applied_reference("instructions"))
         self.applied_starter_button = QPushButton("Open Starter")
@@ -1896,8 +1717,7 @@ class CareerAccelerator(QMainWindow):
             refs.addWidget(button)
         detail.layout.addLayout(refs)
 
-        actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_labs_actions = actions
+        actions = QHBoxLayout()
         self.applied_submission_button = QPushButton("Create / Open Submission")
         self.applied_submission_button.setObjectName("Primary")
         self.applied_submission_button.clicked.connect(self.open_applied_submission)
@@ -1935,33 +1755,6 @@ class CareerAccelerator(QMainWindow):
         )
         # END EXERCISE PACKS
         root.addWidget(self.learning_tabs, 1)
-
-        def update_learning_layout(width):
-            columns = 3 if width >= 1040 else 2 if width >= 680 else 1
-            reflow_grid(
-                self.learning_overview_grid,
-                self.learning_overview_cards,
-                columns,
-            )
-            stacked = width < 880
-            set_box_direction(self.legacy_labs_layout, stacked, 10)
-            set_box_direction(self.legacy_labs_refs, width < 720, 7)
-            set_box_direction(self.legacy_labs_actions, width < 620, 7)
-            current = self.learning_tabs.currentWidget()
-            guided = current in (self.applied_labs_widget, self.exercise_packs_widget)
-            if width < 760:
-                minimum = 1580 if guided else 920
-            elif width < 1080:
-                minimum = 1180 if guided else 720
-            else:
-                minimum = 680 if guided else 610
-            self.learning_tabs.setMinimumHeight(minimum)
-
-        self._learning_layout_handler = update_learning_layout
-        self.learning_tabs.currentChanged.connect(
-            lambda _index: update_learning_layout(max(0, page.viewport().width()))
-        )
-        self._register_page_responsive(page, update_learning_layout)
         return page
     # BEGIN EXERCISE PACKS
     def _applied_labs_changed(self):
@@ -2527,8 +2320,7 @@ class CareerAccelerator(QMainWindow):
             "A guided workspace for building evidence-quality analytics projects.",
         )
 
-        top = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.portfolio_top_layout = top
+        top = QHBoxLayout()
         self.project_combo = QComboBox()
         for project_id, name in PROJECT_NAMES.items():
             self.project_combo.addItem(f"{project_id} — {name}", project_id)
@@ -2541,11 +2333,6 @@ class CareerAccelerator(QMainWindow):
         root.addLayout(top)
 
         self.project_tabs = QTabWidget()
-        self.project_tabs.setMinimumWidth(0)
-        self.project_tabs.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
-        )
         root.addWidget(self.project_tabs, 1)
 
         self.project_task_checks = []
@@ -2578,12 +2365,6 @@ class CareerAccelerator(QMainWindow):
         save_tasks.setObjectName("Primary")
         save_tasks.clicked.connect(self.save_project_tasks)
         root.addWidget(save_tasks)
-
-        def update_portfolio_layout(width):
-            set_box_direction(self.portfolio_top_layout, width < 620, 8)
-            self.project_tabs.setMinimumHeight(520 if width >= 700 else 620)
-
-        self._register_page_responsive(page, update_portfolio_layout)
         return page
 
     # ---------- SQL ----------
@@ -2597,19 +2378,12 @@ class CareerAccelerator(QMainWindow):
         )
 
         self.sql_tabs = QTabWidget()
-        self.sql_tabs.setMinimumWidth(0)
-        self.sql_tabs.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
-        )
 
         # DataLemur problem workspace.
         problem_tab = QWidget()
-        problem_layout = QBoxLayout(
-            QBoxLayout.Direction.LeftToRight,
-            problem_tab,
+        problem_layout = QHBoxLayout(
+            problem_tab
         )
-        self.sql_problem_layout = problem_layout
         problem_layout.setContentsMargins(
             0,
             8,
@@ -2621,12 +2395,7 @@ class CareerAccelerator(QMainWindow):
         recommendations = Card(
             "Today's SQL"
         )
-        self.sql_recommendations_card = recommendations
         self.sql_problem_list = QListWidget()
-        self.sql_problem_list.setWordWrap(True)
-        self.sql_problem_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.sql_problem_list.currentItemChanged.connect(
             self.prefill_sql
         )
@@ -2639,7 +2408,6 @@ class CareerAccelerator(QMainWindow):
         )
 
         detail = Card("Problem Workspace")
-        self.sql_detail_card = detail
         self.sql_workspace_status = QLabel(
             "Select a problem on the left."
         )
@@ -2713,14 +2481,13 @@ class CareerAccelerator(QMainWindow):
         sql_answer_label.setObjectName("SectionTitle")
         detail.layout.addWidget(sql_answer_label)
         self.sql_answer_editor = SqlCodeEditor()
-        self.sql_answer_editor.setMinimumHeight(190)
+        self.sql_answer_editor.setMinimumHeight(260)
         self.sql_answer_editor.setPlaceholderText(
             "Write your interview-problem solution here. Save it before marking the problem complete."
         )
         detail.layout.addWidget(self.sql_answer_editor, 1)
 
-        buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.sql_problem_buttons = buttons
+        buttons = QHBoxLayout()
         self.sql_save_button = QPushButton(
             "Save Submission"
         )
@@ -2771,11 +2538,9 @@ class CareerAccelerator(QMainWindow):
 
         # Guided DuckDB exercise workspace.
         exercise_tab = QWidget()
-        exercise_layout = QBoxLayout(
-            QBoxLayout.Direction.LeftToRight,
-            exercise_tab,
+        exercise_layout = QHBoxLayout(
+            exercise_tab
         )
-        self.legacy_duckdb_layout = exercise_layout
         exercise_layout.setContentsMargins(
             0,
             8,
@@ -2884,8 +2649,7 @@ class CareerAccelerator(QMainWindow):
             exercise_form
         )
 
-        reference_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_duckdb_reference_buttons = reference_buttons
+        reference_buttons = QHBoxLayout()
         self.duckdb_instructions_button = (
             QPushButton("Open Instructions")
         )
@@ -2927,8 +2691,7 @@ class CareerAccelerator(QMainWindow):
             reference_buttons
         )
 
-        submission_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_duckdb_submission_buttons = submission_buttons
+        submission_buttons = QHBoxLayout()
         self.duckdb_submission_button = (
             QPushButton(
                 "Create / Open Submission"
@@ -2985,37 +2748,6 @@ class CareerAccelerator(QMainWindow):
             self.sql_tabs,
             1,
         )
-
-        def update_sql_layout(width):
-            compact = width < 900
-            set_box_direction(self.sql_problem_layout, compact, 10)
-            set_box_direction(self.legacy_duckdb_layout, compact, 10)
-            set_box_direction(self.sql_problem_buttons, width < 680, 7)
-            set_box_direction(
-                self.legacy_duckdb_reference_buttons, width < 720, 7
-            )
-            set_box_direction(
-                self.legacy_duckdb_submission_buttons, width < 620, 7
-            )
-            self.sql_recommendations_card.setMinimumHeight(230 if compact else 0)
-            self.sql_recommendations_card.setMaximumHeight(280 if compact else 16777215)
-            self.sql_detail_card.setMinimumHeight(760 if compact else 0)
-            self.sql_problem_layout.setStretch(0, 0 if compact else 1)
-            self.sql_problem_layout.setStretch(1, 1)
-            current = self.sql_tabs.currentWidget()
-            if width < 760:
-                minimum = 1580 if current is self.duckdb_exercises_widget else 1120
-            elif width < 1080:
-                minimum = 1220 if current is self.duckdb_exercises_widget else 820
-            else:
-                minimum = 650
-            self.sql_tabs.setMinimumHeight(minimum)
-
-        self._sql_layout_handler = update_sql_layout
-        self.sql_tabs.currentChanged.connect(
-            lambda _index: update_sql_layout(max(0, page.viewport().width()))
-        )
-        self._register_page_responsive(page, update_sql_layout)
         return page
     # BEGIN EXERCISE PACKS
     @staticmethod
@@ -3557,12 +3289,12 @@ class CareerAccelerator(QMainWindow):
             "⏱️ Live Timer",
             "The timer is shared with the Dashboard.",
         )
-        timer_card.setMinimumWidth(0)
+        timer_card.setMinimumWidth(350)
         timer_card.layout.setContentsMargins(18, 16, 18, 16)
         timer_card.layout.setSpacing(10)
 
         timer_stage = QWidget()
-        timer_stage.setMinimumHeight(132)
+        timer_stage.setFixedHeight(174)
         timer_stage.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground,
             True,
@@ -3602,8 +3334,7 @@ class CareerAccelerator(QMainWindow):
                 )
             )
         )
-        self.session_goal_minutes.setMinimumWidth(92)
-        self.session_goal_minutes.setMaximumWidth(120)
+        self.session_goal_minutes.setFixedWidth(110)
         self.session_goal_minutes.valueChanged.connect(
             self.change_session_goal
         )
@@ -3620,8 +3351,7 @@ class CareerAccelerator(QMainWindow):
         )
         timer_card.layout.addWidget(self.study_start_button)
 
-        timer_controls = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.study_timer_controls = timer_controls
+        timer_controls = QHBoxLayout()
         timer_controls.setSpacing(8)
 
         self.study_pause_button = QPushButton("⏸️ Pause")
@@ -3698,8 +3428,8 @@ class CareerAccelerator(QMainWindow):
         self.session_notes.setPlaceholderText(
             "Key takeaways, blockers, questions, or next steps"
         )
-        self.session_notes.setMinimumHeight(100)
-        self.session_notes.setMaximumHeight(190)
+        self.session_notes.setMinimumHeight(115)
+        self.session_notes.setMaximumHeight(145)
 
         form_grid.addWidget(QLabel("Date"), 0, 0)
         form_grid.addWidget(self.session_date, 0, 1)
@@ -3764,9 +3494,6 @@ class CareerAccelerator(QMainWindow):
         save.clicked.connect(self.save_session)
         log_card.layout.addWidget(save)
 
-        self.study_body_grid = body
-        self.study_timer_card = timer_card
-        self.study_log_card = log_card
         body.addWidget(timer_card, 0, 0)
         body.addWidget(log_card, 0, 1)
         body.setColumnStretch(0, 34)
@@ -3778,17 +3505,12 @@ class CareerAccelerator(QMainWindow):
             "Your latest logged study activity.",
         )
         self.session_list = QListWidget()
-        self.session_list.setWordWrap(True)
-        self.session_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.session_list.setMinimumHeight(170)
+        self.session_list.setMinimumHeight(190)
         self.session_list.itemDoubleClicked.connect(
             lambda _item: self.open_selected_session_workspace()
         )
         recent.layout.addWidget(self.session_list)
-        recent_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.study_recent_actions = recent_actions
+        recent_actions = QHBoxLayout()
         open_linked = QPushButton("Open Linked Task Workspace")
         open_linked.clicked.connect(self.open_selected_session_workspace)
         recent_actions.addWidget(open_linked)
@@ -3796,21 +3518,6 @@ class CareerAccelerator(QMainWindow):
         recent.layout.addLayout(recent_actions)
         root.addWidget(recent, 1)
 
-        def update_study_layout(width):
-            clear_layout_positions(self.study_body_grid)
-            if width >= 900:
-                self.study_body_grid.addWidget(self.study_timer_card, 0, 0)
-                self.study_body_grid.addWidget(self.study_log_card, 0, 1)
-                self.study_body_grid.setColumnStretch(0, 34)
-                self.study_body_grid.setColumnStretch(1, 66)
-            else:
-                self.study_body_grid.addWidget(self.study_timer_card, 0, 0)
-                self.study_body_grid.addWidget(self.study_log_card, 1, 0)
-                self.study_body_grid.setColumnStretch(0, 1)
-            set_box_direction(self.study_timer_controls, width < 560, 7)
-            set_box_direction(self.study_recent_actions, width < 560, 7)
-
-        self._register_page_responsive(page, update_study_layout)
         return page
 
     # ---------- Readiness ----------
@@ -3850,9 +3557,7 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(scroll, 1)
 
         self.readiness_rings = {}
-        rings = QGridLayout()
-        self.readiness_rings_grid = rings
-        self.readiness_ring_cards = []
+        rings = QHBoxLayout()
         rings.setSpacing(10)
 
         for title, color in [
@@ -3864,19 +3569,18 @@ class CareerAccelerator(QMainWindow):
             ("Overall", COLORS["cyan"]),
         ]:
             card = Card()
-            card.setMinimumHeight(104)
-            card.setMaximumHeight(16777215)
+            card.setMinimumHeight(138)
+            card.setMaximumHeight(148)
             card.layout.setContentsMargins(10, 8, 10, 8)
 
             ring = Ring(title, color)
             card.layout.addWidget(ring)
-            self.readiness_ring_cards.append(card)
+            rings.addWidget(card)
             self.readiness_rings[title] = ring
 
         content_layout.addLayout(rings)
 
         body = QGridLayout()
-        self.readiness_body_grid = body
         body.setHorizontalSpacing(10)
         body.setVerticalSpacing(10)
 
@@ -3884,7 +3588,7 @@ class CareerAccelerator(QMainWindow):
             "✅ Demonstrated Evidence",
             "Proof that supports your résumé, portfolio, and interview stories.",
         )
-        evidence_card.setMinimumHeight(380)
+        evidence_card.setMinimumHeight(560)
         evidence_help = QLabel(
             (
                 "Add proof you could show or explain to an employer: "
@@ -3899,11 +3603,7 @@ class CareerAccelerator(QMainWindow):
         )
 
         self.evidence_list = QListWidget()
-        self.evidence_list.setWordWrap(True)
-        self.evidence_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.evidence_list.setMinimumHeight(210)
+        self.evidence_list.setMinimumHeight(250)
         self.evidence_list.itemDoubleClicked.connect(
             self.view_selected_evidence
         )
@@ -3940,7 +3640,7 @@ class CareerAccelerator(QMainWindow):
             "🧭 Readiness Coach",
             "Prioritized recommendations based on your current progress.",
         )
-        coach_card.setMinimumHeight(230)
+        coach_card.setMinimumHeight(300)
         self.readiness_coach_layout = QVBoxLayout()
         self.readiness_coach_layout.setSpacing(8)
         coach_card.layout.addLayout(self.readiness_coach_layout)
@@ -3950,7 +3650,7 @@ class CareerAccelerator(QMainWindow):
             "🚀 Highest Leverage",
             "The next action most likely to improve employability.",
         )
-        leverage_card.setMinimumHeight(230)
+        leverage_card.setMinimumHeight(300)
 
         leverage_score_row = QHBoxLayout()
         leverage_score_row.addWidget(QLabel("Overall readiness"))
@@ -3996,7 +3696,7 @@ class CareerAccelerator(QMainWindow):
             "📊 Evidence Coverage",
             "Where your documented proof is strongest and where it is still missing.",
         )
-        coverage_card.setMinimumHeight(210)
+        coverage_card.setMinimumHeight(250)
         self.readiness_coverage_layout = QVBoxLayout()
         self.readiness_coverage_layout.setSpacing(0)
         coverage_card.layout.addLayout(self.readiness_coverage_layout)
@@ -4010,6 +3710,8 @@ class CareerAccelerator(QMainWindow):
         body.setColumnStretch(0, 34)
         body.setColumnStretch(1, 33)
         body.setColumnStretch(2, 33)
+        body.setRowMinimumHeight(0, 300)
+        body.setRowMinimumHeight(1, 250)
         body.setRowStretch(0, 0)
         body.setRowStretch(1, 0)
 
@@ -4028,26 +3730,9 @@ class CareerAccelerator(QMainWindow):
         skills_card.layout.addWidget(self.skills_summary_label)
 
         self.skills_tabs = QTabWidget()
-        self.skills_tabs.setMinimumWidth(0)
-        self.skills_tabs.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
-        )
         self.skills_learned_list = QListWidget()
-        self.skills_learned_list.setWordWrap(True)
-        self.skills_learned_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.skills_progress_list = QListWidget()
-        self.skills_progress_list.setWordWrap(True)
-        self.skills_progress_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.skills_locked_list = QListWidget()
-        self.skills_locked_list.setWordWrap(True)
-        self.skills_locked_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
 
         for skill_list in (
             self.skills_learned_list,
@@ -4056,47 +3741,16 @@ class CareerAccelerator(QMainWindow):
         ):
             skill_list.setWordWrap(True)
             skill_list.setSpacing(4)
-            skill_list.setMinimumHeight(170)
+            skill_list.setMinimumHeight(220)
 
         self.skills_tabs.addTab(self.skills_learned_list, "Learned")
         self.skills_tabs.addTab(self.skills_progress_list, "In Progress")
         self.skills_tabs.addTab(self.skills_locked_list, "Locked")
         skills_card.layout.addWidget(self.skills_tabs)
-        skills_card.setMinimumHeight(270)
+        skills_card.setMinimumHeight(340)
         content_layout.addWidget(skills_card)
         content_layout.addStretch(1)
 
-        def update_readiness_layout(width):
-            ring_columns = 6 if width >= 1180 else 3 if width >= 760 else 2 if width >= 520 else 1
-            reflow_grid(
-                self.readiness_rings_grid,
-                self.readiness_ring_cards,
-                ring_columns,
-            )
-            clear_layout_positions(self.readiness_body_grid)
-            if width >= 1120:
-                self.readiness_body_grid.addWidget(evidence_card, 0, 0, 2, 1)
-                self.readiness_body_grid.addWidget(coach_card, 0, 1)
-                self.readiness_body_grid.addWidget(leverage_card, 0, 2)
-                self.readiness_body_grid.addWidget(coverage_card, 1, 1, 1, 2)
-                self.readiness_body_grid.setColumnStretch(0, 34)
-                self.readiness_body_grid.setColumnStretch(1, 33)
-                self.readiness_body_grid.setColumnStretch(2, 33)
-            elif width >= 720:
-                self.readiness_body_grid.addWidget(evidence_card, 0, 0, 1, 2)
-                self.readiness_body_grid.addWidget(coach_card, 1, 0)
-                self.readiness_body_grid.addWidget(leverage_card, 1, 1)
-                self.readiness_body_grid.addWidget(coverage_card, 2, 0, 1, 2)
-                self.readiness_body_grid.setColumnStretch(0, 1)
-                self.readiness_body_grid.setColumnStretch(1, 1)
-            else:
-                for row, card in enumerate(
-                    (evidence_card, coach_card, leverage_card, coverage_card)
-                ):
-                    self.readiness_body_grid.addWidget(card, row, 0)
-                self.readiness_body_grid.setColumnStretch(0, 1)
-
-        self._register_page_responsive(page, update_readiness_layout)
         return page
 
     # ---------- Applications ----------
@@ -4121,8 +3775,6 @@ class CareerAccelerator(QMainWindow):
         self.app_resume = QLineEdit()
         self.app_contact = QLineEdit()
         self.app_notes = QTextEdit()
-        self.app_notes.setMinimumHeight(85)
-        self.app_notes.setMaximumHeight(150)
         for label, widget in [
             ("Date", self.app_date),
             ("Company", self.app_company),
@@ -4146,21 +3798,10 @@ class CareerAccelerator(QMainWindow):
         kanban_scroll = QScrollArea()
         kanban_scroll.setWidgetResizable(True)
         kanban_host = QWidget()
-        self.kanban_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, kanban_host)
-        self.kanban_host = kanban_host
+        self.kanban_layout = QHBoxLayout(kanban_host)
         self.kanban_layout.setSpacing(8)
         kanban_scroll.setWidget(kanban_host)
-        kanban_scroll.setMinimumHeight(390)
         root.addWidget(kanban_scroll, 1)
-
-        def update_applications_layout(width):
-            vertical = width < 860
-            set_box_direction(self.kanban_layout, vertical, 8)
-            for card in self.kanban_host.findChildren(Card):
-                card.setMinimumWidth(0 if vertical else 220)
-                card.setMaximumWidth(16777215)
-
-        self._register_page_responsive(page, update_applications_layout)
         return page
 
     # ---------- Review ----------
@@ -4169,8 +3810,7 @@ class CareerAccelerator(QMainWindow):
             "📝 Weekly Review",
             "Turn your activity into an automatic coaching summary.",
         )
-        body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.review_body_layout = body
+        body = QHBoxLayout()
         form_card = Card("Generate Summary")
         form = QFormLayout()
         self.review_win = QTextEdit()
@@ -4190,8 +3830,7 @@ class CareerAccelerator(QMainWindow):
         generate.setObjectName("Primary")
         generate.clicked.connect(self.generate_summary)
         form_card.layout.addWidget(generate)
-        workspace_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.review_workspace_buttons = workspace_buttons
+        workspace_buttons = QHBoxLayout()
         retrospective = QPushButton("Open Retrospective Workspace")
         retrospective.clicked.connect(
             lambda: self.open_weekly_workspace("retrospective")
@@ -4207,20 +3846,9 @@ class CareerAccelerator(QMainWindow):
 
         summaries = Card("Saved Summaries")
         self.summary_list = QListWidget()
-        self.summary_list.setWordWrap(True)
-        self.summary_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         summaries.layout.addWidget(self.summary_list)
         body.addWidget(summaries, 1)
         root.addLayout(body, 1)
-
-        def update_review_layout(width):
-            set_box_direction(self.review_body_layout, width < 880, 10)
-            set_box_direction(self.review_workspace_buttons, width < 620, 7)
-            self.summary_list.setMinimumHeight(230)
-
-        self._register_page_responsive(page, update_review_layout)
         return page
 
     # ---------- Publish ----------
@@ -4237,14 +3865,12 @@ class CareerAccelerator(QMainWindow):
 
         self.git_status = QTextEdit()
         self.git_status.setReadOnly(True)
-        self.git_status.setMinimumHeight(280)
         card.layout.addWidget(self.git_status)
 
         self.commit_message = QLineEdit("progress: update career accelerator")
         card.layout.addWidget(self.commit_message)
 
-        buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.publish_buttons = buttons
+        buttons = QHBoxLayout()
         refresh = QPushButton("Refresh")
         refresh.clicked.connect(self.refresh_git)
         commit = QPushButton("Commit")
@@ -4256,11 +3882,6 @@ class CareerAccelerator(QMainWindow):
         buttons.addWidget(push)
         card.layout.addLayout(buttons)
         root.addWidget(card)
-
-        def update_publish_layout(width):
-            set_box_direction(self.publish_buttons, width < 560, 7)
-
-        self._register_page_responsive(page, update_publish_layout)
         return page
 
     # ---------- Settings ----------
@@ -4271,7 +3892,6 @@ class CareerAccelerator(QMainWindow):
         )
 
         settings_grid = QGridLayout()
-        self.settings_grid = settings_grid
         settings_grid.setHorizontalSpacing(12)
         settings_grid.setVerticalSpacing(12)
 
@@ -4301,8 +3921,7 @@ class CareerAccelerator(QMainWindow):
                 )
             )
         )
-        self.autosave_minutes.setMinimumWidth(92)
-        self.autosave_minutes.setMaximumWidth(120)
+        self.autosave_minutes.setFixedWidth(110)
         autosave_row.addWidget(self.autosave_minutes)
         general_card.layout.addLayout(autosave_row)
 
@@ -4329,8 +3948,7 @@ class CareerAccelerator(QMainWindow):
         self.storage_summary_label.setWordWrap(True)
         data_card.layout.addWidget(self.storage_summary_label)
 
-        storage_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.settings_storage_actions = storage_actions
+        storage_actions = QHBoxLayout()
         clean_backups = QPushButton("🧹 Clean Old Backups")
         clean_backups.setObjectName("Secondary")
         clean_backups.clicked.connect(self.clean_old_backups)
@@ -4421,12 +4039,6 @@ class CareerAccelerator(QMainWindow):
             self.reset_progress_button
         )
 
-        self.settings_cards = [
-            general_card,
-            data_card,
-            repository_card,
-            reset_card,
-        ]
         settings_grid.addWidget(general_card, 0, 0)
         settings_grid.addWidget(data_card, 0, 1)
         settings_grid.addWidget(repository_card, 1, 0)
@@ -4439,8 +4051,7 @@ class CareerAccelerator(QMainWindow):
         status_card = Card("ℹ️ Status")
         status_card.layout.setContentsMargins(18, 12, 18, 12)
 
-        status_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.settings_status_row = status_row
+        status_row = QHBoxLayout()
         self.settings_status = QLabel(
             f"Career Accelerator v{__version__} • Local SQLite mode"
         )
@@ -4457,18 +4068,6 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(status_card)
         root.addStretch()
 
-        def update_settings_layout(width):
-            columns = 2 if width >= 820 else 1
-            reflow_grid(self.settings_grid, self.settings_cards, columns)
-            set_box_direction(self.settings_storage_actions, width < 620, 7)
-            set_box_direction(self.settings_status_row, width < 650, 7)
-            shortcuts.setAlignment(
-                Qt.AlignmentFlag.AlignLeft
-                if width < 650
-                else Qt.AlignmentFlag.AlignRight
-            )
-
-        self._register_page_responsive(page, update_settings_layout)
         return page
 
     # ---------- Task Workspaces ----------
@@ -4485,8 +4084,7 @@ class CareerAccelerator(QMainWindow):
             "Quick Weekly Workspaces",
             "Create or open the current week's planning and reflection documents.",
         )
-        quick_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.workspace_quick_row = quick_row
+        quick_row = QHBoxLayout()
         retrospective = QPushButton("Open Current Retrospective")
         retrospective.setObjectName("Primary")
         retrospective.clicked.connect(
@@ -4503,8 +4101,7 @@ class CareerAccelerator(QMainWindow):
         root.addWidget(quick)
 
         controls = Card("Find a Task")
-        filter_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.workspace_filter_row = filter_row
+        filter_row = QHBoxLayout()
         filter_row.addWidget(QLabel("Week"))
         self.workspace_week_filter = QComboBox()
         self.workspace_week_filter.addItem("Current Week", "current")
@@ -4548,18 +4145,12 @@ class CareerAccelerator(QMainWindow):
         self.workspace_task_summary.setObjectName("Muted")
         workspace_card.layout.addWidget(self.workspace_task_summary)
         self.workspace_task_list = QListWidget()
-        self.workspace_task_list.setWordWrap(True)
-        self.workspace_task_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.workspace_task_list.setMinimumHeight(300)
         self.workspace_task_list.itemDoubleClicked.connect(
             lambda _item: self.open_selected_task_workspace()
         )
         workspace_card.layout.addWidget(self.workspace_task_list, 1)
 
-        buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.workspace_buttons = buttons
+        buttons = QHBoxLayout()
         open_button = QPushButton("Open Workspace")
         open_button.setObjectName("Primary")
         open_button.clicked.connect(self.open_selected_task_workspace)
@@ -4573,13 +4164,6 @@ class CareerAccelerator(QMainWindow):
         buttons.addStretch()
         workspace_card.layout.addLayout(buttons)
         root.addWidget(workspace_card, 1)
-
-        def update_workspace_layout(width):
-            set_box_direction(self.workspace_quick_row, width < 650, 7)
-            set_box_direction(self.workspace_filter_row, width < 760, 7)
-            set_box_direction(self.workspace_buttons, width < 700, 7)
-
-        self._register_page_responsive(page, update_workspace_layout)
         return page
 
     def update_time_based_header(self):
@@ -5281,10 +4865,6 @@ class CareerAccelerator(QMainWindow):
         layout.addWidget(unlocked_label)
 
         achievement_list = QListWidget()
-        achievement_list.setWordWrap(True)
-        achievement_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         records = self.recent_achievement_records(limit=200)
 
         if records:
@@ -5309,10 +4889,6 @@ class CareerAccelerator(QMainWindow):
         layout.addWidget(progress_label)
 
         progress_list = QListWidget()
-        progress_list.setWordWrap(True)
-        progress_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         for achievement in self.achievement_progress():
             unlocked = (
                 achievement["current"]
@@ -5845,12 +5421,8 @@ class CareerAccelerator(QMainWindow):
             "all_base_complete"
         ]:
             complete_panel = SoftPanel()
-            complete_panel.setMinimumHeight(
-                44
-            )
-            complete_panel.setSizePolicy(
-                QSizePolicy.Policy.Expanding,
-                QSizePolicy.Policy.Preferred,
+            complete_panel.setFixedHeight(
+                38
             )
             complete_layout = QHBoxLayout(
                 complete_panel
@@ -5922,7 +5494,6 @@ class CareerAccelerator(QMainWindow):
             complete_detail.setObjectName(
                 "Muted"
             )
-            complete_detail.setWordWrap(True)
             complete_detail.setStyleSheet(
                 "font-size:8.2pt;"
             )
@@ -5979,10 +5550,9 @@ class CareerAccelerator(QMainWindow):
                     no_extra.setObjectName(
                         "Muted"
                     )
-                    no_extra.setMinimumHeight(
+                    no_extra.setFixedHeight(
                         38
                     )
-                    no_extra.setWordWrap(True)
                     no_extra.setAlignment(
                         Qt.AlignVCenter
                     )
@@ -6041,8 +5611,9 @@ class CareerAccelerator(QMainWindow):
             preview_text.setStyleSheet(
                 "font-size:8.2pt;"
             )
-            preview_text.setWordWrap(True)
-            preview_text.setMinimumHeight(24)
+            preview_text.setMaximumHeight(
+                24
+            )
             preview_text.setToolTip(
                 "\n".join(
                     (
@@ -6335,10 +5906,6 @@ class CareerAccelerator(QMainWindow):
         layout.addWidget(instructions)
 
         history_list = QListWidget()
-        history_list.setWordWrap(True)
-        history_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         layout.addWidget(history_list, 1)
 
         for record in history_rows:
@@ -7272,12 +6839,7 @@ class CareerAccelerator(QMainWindow):
         statuses = ["Wishlist", "Applying", "Applied", "Interview", "Final", "Offer"]
         for status in statuses:
             column = Card(status)
-            vertical_kanban = (
-                hasattr(self, "kanban_layout")
-                and self.kanban_layout.direction()
-                == QBoxLayout.Direction.TopToBottom
-            )
-            column.setMinimumWidth(0 if vertical_kanban else 220)
+            column.setMinimumWidth(220)
             rows = self.conn.execute(
                 "SELECT * FROM applications WHERE status=? ORDER BY id DESC",
                 (status,),

@@ -21,9 +21,6 @@ class Card(QFrame):
     def __init__(self, title=None, subtitle=None):
         super().__init__()
         self.setObjectName("Card")
-        self.setMinimumWidth(0)
-        self.setMaximumHeight(16777215)
-        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(14, 14, 14, 14)
         self.layout.setSpacing(8)
@@ -31,9 +28,6 @@ class Card(QFrame):
         if title:
             title_label = QLabel(title)
             title_label.setObjectName("CardTitle")
-            title_label.setWordWrap(True)
-            title_label.setMinimumWidth(0)
-            title_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
             self.layout.addWidget(title_label)
 
         if subtitle:
@@ -57,20 +51,13 @@ class Ring(QWidget):
         self.value = 0
         self.subtitle = ""
         self.extra = ""
-        self._ui_scale = 1.0
-        self.setMinimumWidth(126)
-        self.setMinimumHeight(84)
-        self.setMaximumHeight(16777215)
+        self.setMinimumWidth(172)
+        self.setMinimumHeight(94)
+        self.setMaximumHeight(98)
         self.setSizePolicy(
             QSizePolicy.Expanding,
-            QSizePolicy.Preferred,
+            QSizePolicy.Fixed,
         )
-
-    def set_ui_scale(self, scale):
-        self._ui_scale = max(0.76, min(1.14, float(scale)))
-        self.setMinimumHeight(round(84 * self._ui_scale))
-        self.updateGeometry()
-        self.update()
 
     def set_value(self, value, subtitle="", extra=""):
         self.value = max(0, min(100, float(value)))
@@ -82,14 +69,12 @@ class Ring(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        scale = self._ui_scale
-        diameter = min(76 * scale, max(58.0, self.height() - 16.0))
-        ring_rect = QRectF(8, max(6.0, (self.height() - diameter) / 2), diameter, diameter)
+        ring_rect = QRectF(8, 8, 76, 76)
 
         painter.setPen(
             QPen(
                 QColor(COLORS["border"]),
-                8.5 * scale,
+                8.5,
                 Qt.SolidLine,
                 Qt.RoundCap,
             )
@@ -99,7 +84,7 @@ class Ring(QWidget):
         painter.setPen(
             QPen(
                 self.color,
-                8.5 * scale,
+                8.5,
                 Qt.SolidLine,
                 Qt.RoundCap,
             )
@@ -111,21 +96,21 @@ class Ring(QWidget):
         )
 
         painter.setPen(QColor(COLORS["text"]))
-        painter.setFont(QFont("Segoe UI", max(8, round(12 * scale)), QFont.Bold))
+        painter.setFont(QFont("Segoe UI", 12, QFont.Bold))
         painter.drawText(
             ring_rect,
             Qt.AlignCenter,
             f"{self.value:.0f}%",
         )
 
-        text_left = int(ring_rect.right() + 12 * scale)
+        text_left = 96
         text_width = max(
             88,
             self.width() - text_left - 6,
         )
 
         painter.setFont(
-            QFont("Segoe UI", max(7, round(9 * scale)), QFont.Bold)
+            QFont("Segoe UI", 9, QFont.Bold)
         )
         painter.drawText(
             QRectF(text_left, 10, text_width, 20),
@@ -134,7 +119,7 @@ class Ring(QWidget):
         )
 
         painter.setPen(QColor(COLORS["muted"]))
-        painter.setFont(QFont("Segoe UI", max(7, round(8.5 * scale))))
+        painter.setFont(QFont("Segoe UI", 8.5))
         painter.drawText(
             QRectF(text_left, 38, text_width, 19),
             Qt.AlignLeft | Qt.AlignVCenter,
@@ -171,6 +156,8 @@ class MetricRow(QFrame):
 
         detail_label = QLabel(detail)
         detail_label.setObjectName("Muted")
+        if completed:
+            detail_label.setStyleSheet("color:#7f8798;text-decoration:line-through;")
         detail_label.setWordWrap(True)
 
         text_layout.addWidget(title_label)
@@ -193,17 +180,9 @@ class CircularTimer(QWidget):
         self.caption = "Ready to focus • 0 / 60 min"
         self.progress = 0.0
         self._content_scale = 1.0
-        self._ui_scale = 1.0
         self._pulse_group = None
         self.setFixedSize(138, 138)
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
-    def set_ui_scale(self, scale):
-        self._ui_scale = max(0.78, min(1.12, float(scale)))
-        size = round(138 * self._ui_scale)
-        self.setFixedSize(size, size)
-        self.updateGeometry()
-        self.update()
 
     def set_display(self, text, caption, progress):
         self.text = text
@@ -271,9 +250,7 @@ class CircularTimer(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        scale = self._ui_scale
-        margin = 8 * scale
-        rect = QRectF(margin, 4 * scale, self.width() - 2 * margin, self.height() - 16 * scale)
+        rect = QRectF(8, 4, 122, 122)
         progress_color = QColor(
             COLORS["green"]
             if self.progress >= 1.0
@@ -283,7 +260,7 @@ class CircularTimer(QWidget):
         painter.setPen(
             QPen(
                 QColor("#493777"),
-                10 * scale,
+                10,
                 Qt.SolidLine,
                 Qt.RoundCap,
             )
@@ -294,7 +271,7 @@ class CircularTimer(QWidget):
             painter.setPen(
                 QPen(
                     progress_color,
-                    10 * scale,
+                    10,
                     Qt.SolidLine,
                     Qt.RoundCap,
                 )
@@ -307,7 +284,7 @@ class CircularTimer(QWidget):
 
         painter.setPen(QColor(COLORS["text"]))
         time_font = QFont("Segoe UI", 16, QFont.Medium)
-        time_font.setPointSizeF(16 * self._content_scale * scale)
+        time_font.setPointSizeF(16 * self._content_scale)
         painter.setFont(time_font)
         painter.drawText(
             rect.adjusted(0, -7, 0, 0),
@@ -317,7 +294,7 @@ class CircularTimer(QWidget):
 
         painter.setPen(QColor(COLORS["muted"]))
         caption_font = QFont("Segoe UI", 8)
-        caption_font.setPointSizeF(8 * self._content_scale * scale)
+        caption_font.setPointSizeF(8 * self._content_scale)
         painter.setFont(caption_font)
         painter.drawText(
             rect.adjusted(-8, 33, 8, 0),
@@ -333,8 +310,7 @@ class AreaChart(QWidget):
         self._points = []
         self._hover_index = None
         self.setMouseTracking(True)
-        self.setMinimumHeight(130)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setMinimumHeight(175)
 
     def set_values(self, values):
         self.values = list(values)
@@ -529,9 +505,8 @@ class BadgeCard(QFrame):
     def __init__(self, icon, title, description, accent):
         super().__init__()
         self.setObjectName("SoftPanel")
-        self.setMinimumHeight(118)
-        self.setMinimumWidth(0)
-        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
+        self.setMinimumHeight(142)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setStyleSheet(
             f"QFrame#SoftPanel{{"
             f"background:{COLORS['panel_alt']};"
@@ -552,9 +527,6 @@ class BadgeCard(QFrame):
 
         title_label = QLabel(title)
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setWordWrap(True)
-        title_label.setMinimumWidth(0)
-        title_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         title_label.setStyleSheet("font-weight:700;")
 
         description_label = QLabel(description)
@@ -582,9 +554,8 @@ class Divider(QFrame):
 class SectionHeader(QWidget):
     def __init__(self, emoji, title, subtitle="", action_text=""):
         super().__init__()
-        self.setMinimumWidth(0)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.setMaximumHeight(16777215)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setMaximumHeight(48 if subtitle else 32)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -599,15 +570,11 @@ class SectionHeader(QWidget):
 
         title_label = QLabel(title)
         title_label.setObjectName("CardTitle")
-        title_label.setWordWrap(True)
-        title_label.setMinimumWidth(0)
         text.addWidget(title_label)
 
         if subtitle:
             subtitle_label = QLabel(subtitle)
             subtitle_label.setObjectName("Muted")
-            subtitle_label.setWordWrap(True)
-            subtitle_label.setMinimumWidth(0)
             subtitle_label.setStyleSheet("font-size:8.8pt;")
             text.addWidget(subtitle_label)
 
@@ -724,13 +691,11 @@ class TaskRow(QWidget):
     ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
-        self.setMinimumWidth(0)
-        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.setMinimumHeight(39)
-        self.setMaximumHeight(16777215)
+        self.setMaximumHeight(41)
 
         layout = QHBoxLayout(self)
-        self.row_layout = layout
         layout.setContentsMargins(0, 3, 0, 3)
         layout.setSpacing(9)
 
@@ -750,14 +715,15 @@ class TaskRow(QWidget):
         self.title_label = QLabel(title)
         title_label = self.title_label
         title_label.setWordWrap(False)
-        title_label.setMinimumWidth(0)
         title_label.setStyleSheet(
             "font-weight:600;background:transparent;border:none;"
         )
         title_label.setSizePolicy(
-            QSizePolicy.Ignored,
-            QSizePolicy.Preferred,
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
         )
+        title_label.setMinimumHeight(17)
+        title_label.setMaximumHeight(18)
         title_label.setToolTip(title)
         text.addWidget(title_label)
 
@@ -765,12 +731,12 @@ class TaskRow(QWidget):
         source_label = self.source_label
         source_label.setObjectName("TaskSource")
         source_label.setStyleSheet("font-size:8.7pt;")
-        source_label.setMinimumWidth(0)
-        source_label.setWordWrap(False)
         source_label.setSizePolicy(
-            QSizePolicy.Ignored,
-            QSizePolicy.Preferred,
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
         )
+        source_label.setMinimumHeight(15)
+        source_label.setMaximumHeight(16)
         source_label.setToolTip(source)
         text.addWidget(source_label)
 
@@ -783,8 +749,7 @@ class TaskRow(QWidget):
             )
             metadata = self.metadata_label
             metadata.setObjectName("TaskCategory")
-            metadata.setMinimumWidth(58)
-            metadata.setMaximumWidth(78)
+            metadata.setFixedWidth(78)
             metadata.setAlignment(
                 Qt.AlignRight | Qt.AlignVCenter
             )
@@ -816,8 +781,7 @@ class TaskRow(QWidget):
         if action_text and on_action is not None:
             action = QPushButton(action_text)
             action.setObjectName("WorkspaceOpen")
-            action.setMinimumSize(52, 28)
-            action.setMaximumHeight(32)
+            action.setFixedSize(60, 28)
             action.setToolTip("Open Task Workspace")
             action.setProperty(
                 "workspace_open_button",
@@ -830,14 +794,6 @@ class TaskRow(QWidget):
                 0,
                 Qt.AlignVCenter,
             )
-
-    def resizeEvent(self, event):
-        compact = event.size().width() < 430
-        self.title_label.setWordWrap(compact)
-        self.source_label.setWordWrap(compact)
-        self.row_layout.setSpacing(6 if compact else 9)
-        self.updateGeometry()
-        super().resizeEvent(event)
 
 
 class FocusRow(QWidget):
@@ -854,13 +810,11 @@ class FocusRow(QWidget):
     ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
-        self.setMinimumWidth(0)
-        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.setMinimumHeight(38)
-        self.setMaximumHeight(16777215)
+        self.setMaximumHeight(40)
 
         layout = QHBoxLayout(self)
-        self.row_layout = layout
         layout.setContentsMargins(0, 3, 0, 3)
         layout.setSpacing(9)
 
@@ -874,29 +828,29 @@ class FocusRow(QWidget):
         text.setContentsMargins(0, 0, 0, 0)
         text.setSpacing(1)
 
-        self.title_label = QLabel(title)
-        title_label = self.title_label
-        title_label.setMinimumWidth(0)
+        title_label = QLabel(title)
         title_label.setStyleSheet(
             f"font-weight:700;color:{COLORS['muted'] if completed else accent};"
             + ("text-decoration:line-through;" if completed else "")
         )
         title_label.setSizePolicy(
-            QSizePolicy.Ignored,
-            QSizePolicy.Preferred,
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
         )
+        title_label.setMinimumHeight(17)
+        title_label.setMaximumHeight(18)
         title_label.setToolTip(title)
         text.addWidget(title_label)
 
-        self.detail_label = QLabel(detail)
-        detail_label = self.detail_label
+        detail_label = QLabel(detail)
         detail_label.setObjectName("Muted")
         detail_label.setWordWrap(False)
-        detail_label.setMinimumWidth(0)
         detail_label.setSizePolicy(
-            QSizePolicy.Ignored,
-            QSizePolicy.Preferred,
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
         )
+        detail_label.setMinimumHeight(16)
+        detail_label.setMaximumHeight(17)
         detail_label.setToolTip(detail)
         text.addWidget(detail_label)
 
@@ -909,8 +863,7 @@ class FocusRow(QWidget):
             if completed
             else "font-weight:700;"
         )
-        duration_label.setMinimumWidth(34)
-        duration_label.setMaximumWidth(48)
+        duration_label.setFixedWidth(42)
         duration_label.setAlignment(
             Qt.AlignRight | Qt.AlignVCenter
         )
@@ -919,8 +872,7 @@ class FocusRow(QWidget):
         if action_text and on_action is not None:
             action = QPushButton(action_text)
             action.setObjectName("WorkspaceOpen")
-            action.setMinimumSize(52, 28)
-            action.setMaximumHeight(32)
+            action.setFixedSize(60, 28)
             action.setToolTip("Open Task Workspace")
             action.setProperty(
                 "workspace_open_button",
@@ -933,14 +885,6 @@ class FocusRow(QWidget):
                 0,
                 Qt.AlignVCenter,
             )
-
-    def resizeEvent(self, event):
-        compact = event.size().width() < 440
-        self.title_label.setWordWrap(compact)
-        self.detail_label.setWordWrap(compact)
-        self.row_layout.setSpacing(6 if compact else 9)
-        self.updateGeometry()
-        super().resizeEvent(event)
 
 
 class StatRow(QWidget):
@@ -986,11 +930,10 @@ class FooterMetricBox(QFrame):
     def __init__(self, emoji, label, value=""):
         super().__init__()
         self.setObjectName("SoftPanel")
-        self.setMinimumHeight(48)
-        self.setMaximumHeight(16777215)
+        self.setFixedHeight(50)
         self.setSizePolicy(
             QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Preferred,
+            QSizePolicy.Policy.Fixed,
         )
 
         layout = QHBoxLayout(self)

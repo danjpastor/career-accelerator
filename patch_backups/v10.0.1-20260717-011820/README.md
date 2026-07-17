@@ -24,12 +24,8 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.1 includes:
+Version 10.0.0 includes:
 
-- A full application-wide responsive polish pass with seamless wide, medium, and compact layouts
-- A supported 900×620 minimum window with vertical scrolling and no hidden horizontal page overflow
-- Dynamic card sizing, text wrapping, typography scaling, sidebar sizing, and scalable progress/timer graphics
-- Outer-scrollable compact Exercise Pack and DuckDB workspaces that preserve useful heights for navigation, Learn, and Practice
 - Lesson-driven Exercise Packs where every lesson loads one or more practice questions for the concept just taught
 - Answer-safe SQL starting templates that never auto-fill lesson examples or official solutions
 - Functional Run Query, Check Answer, progressive Exercise Hint, and separate View Solution workflows

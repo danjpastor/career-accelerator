@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QFrame,
     QHeaderView,
-    QBoxLayout,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -25,7 +24,6 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
-    QScrollArea,
     QSizePolicy,
     QSplitter,
     QTableWidget,
@@ -79,11 +77,6 @@ class FeedbackLabel(QLabel):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
-        self.setMinimumWidth(0)
-        self.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.setWordWrap(True)
         self.setMinimumHeight(46)
         self.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
@@ -124,11 +117,10 @@ class ExerciseSuggestionPanel(QFrame):
         self._on_open = on_open
         self._pack_id: str | None = None
         self.setObjectName("ExerciseSuggestion")
-        self.setMinimumHeight(54)
-        self.setMaximumHeight(16777215)
-        self.setMinimumWidth(240)
+        self.setFixedHeight(58)
+        self.setMinimumWidth(360)
         self.setMaximumWidth(560)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         self.setStyleSheet(
             "QFrame#ExerciseSuggestion {"
             f"background:{COLORS.get('surface_alt', '#20213a')};"
@@ -143,25 +135,17 @@ class ExerciseSuggestionPanel(QFrame):
         icon.setStyleSheet("font-size:14pt;background:transparent;border:none;")
         layout.addWidget(icon)
         self.text = QLabel("")
-        self.text.setWordWrap(True)
-        self.text.setMinimumHeight(28)
+        self.text.setWordWrap(False)
+        self.text.setMinimumHeight(32)
         self.text.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.text.setStyleSheet("background:transparent;border:none;font-size:9.5pt;")
         layout.addWidget(self.text, 1)
         self.open_button = QPushButton("Practice")
         self.open_button.setObjectName("Secondary")
-        self.open_button.setMinimumHeight(30)
-        self.open_button.setMaximumHeight(36)
+        self.open_button.setFixedHeight(32)
         self.open_button.clicked.connect(self._open)
         layout.addWidget(self.open_button)
         self.hide()
-
-    def set_compact(self, compact: bool) -> None:
-        self.setMinimumWidth(0 if compact else 240)
-        self.setMaximumWidth(16777215 if compact else 560)
-        self.open_button.setText("Open" if compact else "Practice")
-        self.text.setWordWrap(True)
-        self.updateGeometry()
 
     def _open(self) -> None:
         if self._pack_id:
@@ -202,7 +186,6 @@ class ExercisePacksWidget(QWidget):
         self.current_content_id: str | None = None
         self._building_lists = False
         self._question_selector_loading = False
-        self._responsive_mode: str | None = None
 
         exercise_packs.ensure_schema(self.conn)
         exercise_packs.ensure_bundled_packs(self.root, self.conn)
@@ -216,8 +199,7 @@ class ExercisePacksWidget(QWidget):
 
         self.course_toolbar = Card()
         self.course_toolbar.layout.setContentsMargins(10, 7, 10, 7)
-        toolbar_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.toolbar_row = toolbar_row
+        toolbar_row = QHBoxLayout()
         toolbar_row.setSpacing(8)
         self.breadcrumb_back = QPushButton("‹")
         self.breadcrumb_back.setObjectName("Secondary")
@@ -236,7 +218,7 @@ class ExercisePacksWidget(QWidget):
         toolbar_row.addWidget(self.breadcrumb_page)
         toolbar_row.addStretch()
         self.pack_selector = QComboBox()
-        self.pack_selector.setMinimumWidth(170)
+        self.pack_selector.setMinimumWidth(245)
         self.pack_selector.setToolTip("Switch installed exercise pack")
         self.pack_selector.currentIndexChanged.connect(self._pack_selector_changed)
         toolbar_row.addWidget(self.pack_selector)
@@ -250,17 +232,12 @@ class ExercisePacksWidget(QWidget):
         root.addWidget(self.course_toolbar)
 
         self.exercise_splitter = QSplitter(Qt.Horizontal)
-        self.exercise_splitter.setMinimumWidth(0)
-        self.exercise_splitter.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.exercise_splitter.setChildrenCollapsible(False)
 
         self._settings = QSettings("DanjPastor", "Career Accelerator")
 
         self.library_card = Card()
-        self.library_card.setMinimumWidth(270)
+        self.library_card.setMinimumWidth(330)
         margins = self.library_card.layout.contentsMargins()
         self._library_expanded_margins = (
             margins.left(),
@@ -283,10 +260,6 @@ class ExercisePacksWidget(QWidget):
         library_body_layout.setContentsMargins(0, 4, 0, 0)
         library_body_layout.setSpacing(8)
         self.pack_list = QListWidget()
-        self.pack_list.setWordWrap(True)
-        self.pack_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.pack_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.pack_list.setSpacing(4)
         self.pack_list.setAlternatingRowColors(False)
@@ -323,10 +296,6 @@ class ExercisePacksWidget(QWidget):
         content_label.setStyleSheet("color:#aebbd1;font-size:8.5pt;font-weight:700;")
         library_body_layout.addWidget(content_label)
         self.content_list = QListWidget()
-        self.content_list.setWordWrap(True)
-        self.content_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
         self.content_list.setSelectionMode(QAbstractItemView.SingleSelection)
         self.content_list.setSpacing(3)
         self.content_list.setAlternatingRowColors(False)
@@ -339,11 +308,6 @@ class ExercisePacksWidget(QWidget):
         self.workspace_status.hide()
 
         self.workspace_splitter = QSplitter(Qt.Horizontal)
-        self.workspace_splitter.setMinimumWidth(0)
-        self.workspace_splitter.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
         self.workspace_splitter.setChildrenCollapsible(False)
         self.workspace_splitter.setHandleWidth(5)
 
@@ -404,8 +368,7 @@ class ExercisePacksWidget(QWidget):
         self.sql_editor.textChanged.connect(self._answer_edited)
         practice_layout.addWidget(self.sql_editor, 2)
 
-        action_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.practice_action_row = action_row
+        action_row = QHBoxLayout()
         self.run_button = QPushButton("▶ Run Query")
         self.run_button.setObjectName("Secondary")
         self.run_button.clicked.connect(self.run_query)
@@ -429,7 +392,6 @@ class ExercisePacksWidget(QWidget):
         practice_layout.addWidget(self.feedback)
 
         self.result_table = QTableWidget()
-        self.result_table.setMinimumHeight(130)
         self.result_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.result_table.setAlternatingRowColors(True)
         self.result_table.setShowGrid(False)
@@ -452,8 +414,7 @@ class ExercisePacksWidget(QWidget):
         self.notes.setPlaceholderText(
             "Write what the inner query returns, what the outer query does, and anything that confused you."
         )
-        self.notes.setMinimumHeight(72)
-        self.notes.setMaximumHeight(145)
+        self.notes.setMaximumHeight(105)
         self.notes.setStyleSheet(
             f"QTextEdit {{background:{COLORS.get('surface_alt', '#191a2c')};"
             f"border:1px solid {COLORS.get('border', '#373955')};"
@@ -462,8 +423,7 @@ class ExercisePacksWidget(QWidget):
         )
         practice_layout.addWidget(self.notes)
 
-        save_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.practice_save_row = save_row
+        save_row = QHBoxLayout()
         self.save_button = QPushButton("Save Progress")
         self.save_button.setObjectName("Secondary")
         self.save_button.clicked.connect(self.save_current_progress)
@@ -474,17 +434,7 @@ class ExercisePacksWidget(QWidget):
         save_row.addWidget(self.save_button)
         save_row.addWidget(self.complete_button)
         practice_layout.addLayout(save_row)
-        self.practice_scroll = QScrollArea()
-        self.practice_scroll.setWidgetResizable(True)
-        self.practice_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        self.practice_scroll.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.practice_scroll.setStyleSheet(
-            "QScrollArea {background:transparent;border:none;}"
-        )
-        self.practice_scroll.setWidget(self.practice_tab)
-        self.practice_card.layout.addWidget(self.practice_scroll, 1)
+        self.practice_card.layout.addWidget(self.practice_tab, 1)
 
         self.workspace_splitter.addWidget(self.learn_card)
         self.workspace_splitter.addWidget(self.practice_card)
@@ -497,64 +447,10 @@ class ExercisePacksWidget(QWidget):
         self.exercise_splitter.setStretchFactor(1, 3)
         root.addWidget(self.exercise_splitter, 1)
 
-        self.library_card.setMinimumWidth(270)
-        self.library_card.setMaximumWidth(410)
+        self.library_card.setMinimumWidth(330)
+        self.library_card.setMaximumWidth(430)
         self.exercise_splitter.setSizes([350, 1050])
         self._set_practice_enabled(False)
-
-    def _apply_responsive_layout(self) -> None:
-        width = max(0, self.width())
-        mode = "compact" if width < 860 else "medium" if width < 1180 else "wide"
-        if mode == self._responsive_mode:
-            return
-        self._responsive_mode = mode
-
-        compact = mode == "compact"
-        self.toolbar_row.setDirection(
-            QBoxLayout.Direction.TopToBottom
-            if compact
-            else QBoxLayout.Direction.LeftToRight
-        )
-        self.practice_action_row.setDirection(
-            QBoxLayout.Direction.TopToBottom
-            if width < 720
-            else QBoxLayout.Direction.LeftToRight
-        )
-        self.practice_save_row.setDirection(
-            QBoxLayout.Direction.TopToBottom
-            if width < 620
-            else QBoxLayout.Direction.LeftToRight
-        )
-
-        if compact:
-            self.setMinimumHeight(1500)
-            self.exercise_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.workspace_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.library_card.setMinimumWidth(0)
-            self.library_card.setMaximumWidth(16777215)
-            self.exercise_splitter.setSizes([330, 1150])
-            self.workspace_splitter.setSizes([560, 650])
-        elif mode == "medium":
-            self.setMinimumHeight(1120)
-            self.exercise_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.workspace_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.library_card.setMinimumWidth(250)
-            self.library_card.setMaximumWidth(330)
-            self.exercise_splitter.setSizes([280, 760])
-            self.workspace_splitter.setSizes([390, 480])
-        else:
-            self.setMinimumHeight(0)
-            self.exercise_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.workspace_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.library_card.setMinimumWidth(270)
-            self.library_card.setMaximumWidth(410)
-            self.exercise_splitter.setSizes([350, 1050])
-            self.workspace_splitter.setSizes([470, 530])
-        self.updateGeometry()
-
-    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
-        super().resizeEvent(event)
-        self._apply_responsive_layout()
 
     def _set_course_markdown(
         self,
@@ -1521,11 +1417,7 @@ class ExercisePacksWidget(QWidget):
 
         dialog = QDialog(self)
         dialog.setWindowTitle(f"Solution Walkthrough • {self.current_exercise['title']}")
-        dialog.setMinimumSize(620, 480)
-        dialog.resize(
-            min(820, max(620, self.window().width() - 72)),
-            min(700, max(480, self.window().height() - 72)),
-        )
+        dialog.resize(820, 700)
         layout = QVBoxLayout(dialog)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(10)
