@@ -1,3 +1,5 @@
+from pathlib import Path
+
 COLORS = {
     "bg": "#08111f",
     "sidebar": "#0b1627",
@@ -20,6 +22,9 @@ COLORS = {
 
 def stylesheet(scale: float = 1.0):
     c = COLORS
+    chevron_path = (
+        Path(__file__).resolve().parent.parent / "assets" / "chevron-down.svg"
+    ).as_posix()
     raw = f"""
     QWidget {{
         background: {c['bg']};
@@ -149,6 +154,57 @@ def stylesheet(scale: float = 1.0):
         padding: 7px;
         selection-background-color: #50348d;
     }}
+    QComboBox {{
+        padding: 7px 34px 7px 10px;
+        min-height: 20px;
+        background: {c['panel_alt']};
+        border: 1px solid {c['border']};
+        border-radius: 9px;
+    }}
+    QComboBox:hover {{
+        background: {c['panel_hover']};
+        border: 1px solid {c['purple_soft']};
+    }}
+    QComboBox:focus, QComboBox:on {{
+        background: #17253b;
+        border: 1px solid {c['purple']};
+    }}
+    QComboBox::drop-down {{
+        subcontrol-origin: padding;
+        subcontrol-position: top right;
+        width: 30px;
+        background: #17243a;
+        border: none;
+        border-left: 1px solid {c['border']};
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }}
+    QComboBox::drop-down:hover {{
+        background: #223552;
+    }}
+    QComboBox::down-arrow {{
+        image: url({chevron_path});
+        width: 12px;
+        height: 8px;
+    }}
+    QComboBox QAbstractItemView {{
+        background: #111d30;
+        color: {c['text']};
+        border: 1px solid {c['border']};
+        border-radius: 9px;
+        padding: 5px;
+        outline: 0;
+        selection-background-color: #4d367f;
+        selection-color: white;
+    }}
+    QComboBox QAbstractItemView::item {{
+        min-height: 26px;
+        padding: 5px 8px;
+        border-radius: 6px;
+    }}
+    QComboBox QAbstractItemView::item:hover {{
+        background: {c['panel_hover']};
+    }}
     QListWidget {{
         background: transparent;
         border: none;
@@ -217,17 +273,55 @@ def stylesheet(scale: float = 1.0):
     }}
     QScrollBar:vertical {{
         background: transparent;
-        width: 10px;
-        margin: 2px;
+        width: 12px;
+        margin: 3px 2px;
+        border: none;
     }}
     QScrollBar::handle:vertical {{
-        background: #31405c;
-        min-height: 28px;
+        background: #344660;
+        min-height: 34px;
+        border: 2px solid transparent;
         border-radius: 5px;
     }}
+    QScrollBar::handle:vertical:hover {{
+        background: {c['purple_soft']};
+    }}
+    QScrollBar::handle:vertical:pressed {{
+        background: {c['purple']};
+    }}
+    QScrollBar:horizontal {{
+        background: transparent;
+        height: 12px;
+        margin: 2px 3px;
+        border: none;
+    }}
+    QScrollBar::handle:horizontal {{
+        background: #344660;
+        min-width: 34px;
+        border: 2px solid transparent;
+        border-radius: 5px;
+    }}
+    QScrollBar::handle:horizontal:hover {{
+        background: {c['purple_soft']};
+    }}
+    QScrollBar::handle:horizontal:pressed {{
+        background: {c['purple']};
+    }}
     QScrollBar::add-line:vertical,
-    QScrollBar::sub-line:vertical {{
+    QScrollBar::sub-line:vertical,
+    QScrollBar::add-line:horizontal,
+    QScrollBar::sub-line:horizontal {{
+        width: 0;
         height: 0;
+        border: none;
+        background: transparent;
+    }}
+    QScrollBar::add-page:vertical,
+    QScrollBar::sub-page:vertical,
+    QScrollBar::add-page:horizontal,
+    QScrollBar::sub-page:horizontal {{
+        background: transparent;
+        border: none;
     }}
 
     QPushButton#WorkspaceOpen {{

@@ -1,5 +1,15 @@
 # Changelog
 
+## 10.0.7 - 2026-07-17
+
+- Removed the extra square QTabWidget pane border around the Learning content area so the toolbar and course cards sit as independent rounded surfaces.
+- Reorganized Study Session into a two-column workspace: compact Live Timer plus Recent Sessions on the left, and the internally scrollable Log Session card on the right.
+- Reduced the Study Session timer footprint dynamically on short displays while retaining fixed outer-page behavior and internal card scrolling.
+- Modernized application-wide vertical and horizontal scrollbars with rounded handles and clear hover/pressed states.
+- Modernized combo boxes and popup lists with rounded surfaces, focused borders, dedicated drop-down buttons, and a clean chevron asset.
+- Added both `patch_backup/` and `patch_backups/` to `.gitignore`.
+- Removed v10-specific release documentation, manifests, and regression-test files from distributable builds and cumulative patch payloads.
+
 ## 10.0.6 - 2026-07-17
 
 - Converted Learning, SQL Companion, Study Session, Applications, and Weekly Summary to fixed outer page shells so page headers and tab bars remain anchored and only individual cards, lists, editors, tables, and forms scroll.

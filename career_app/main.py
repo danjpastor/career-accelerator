@@ -2027,6 +2027,13 @@ class CareerAccelerator(QMainWindow):
         )
         page.set_outer_scroll_enabled(False)
         self.learning_tabs = QTabWidget()
+        self.learning_tabs.setObjectName("LearningTabs")
+        self.learning_tabs.setDocumentMode(True)
+        self.learning_tabs.setStyleSheet(
+            "QTabWidget#LearningTabs::pane {"
+            "border:none;background:transparent;margin:0;padding:0;"
+            "}"
+        )
         self.learning_tabs.setMinimumWidth(0)
         self.learning_tabs.setSizePolicy(
             QSizePolicy.Policy.Ignored,
@@ -3843,30 +3850,32 @@ class CareerAccelerator(QMainWindow):
         body = QGridLayout()
         body.setHorizontalSpacing(12)
         body.setVerticalSpacing(12)
+        body.setContentsMargins(0, 0, 0, 0)
 
-        # Live timer mirrors the Dashboard timer component.
+        # Live timer mirrors the Dashboard timer, but uses the compact ring so
+        # it can share a balanced left column with Recent Sessions.
         timer_card = Card(
             "⏱️ Live Timer",
             "The timer is shared with the Dashboard.",
         )
         timer_card.setMinimumWidth(0)
-        timer_card.layout.setContentsMargins(18, 16, 18, 16)
-        timer_card.layout.setSpacing(10)
+        timer_card.layout.setContentsMargins(14, 12, 14, 12)
+        timer_card.layout.setSpacing(7)
+        self.study_timer_subtitle = timer_card.layout.itemAt(1).widget()
 
         timer_stage = QWidget()
-        timer_stage.setMinimumHeight(132)
+        timer_stage.setMinimumHeight(102)
         timer_stage.setAttribute(
             Qt.WidgetAttribute.WA_TranslucentBackground,
             True,
         )
         timer_stage_layout = QVBoxLayout(timer_stage)
-        timer_stage_layout.setContentsMargins(0, 8, 0, 4)
+        timer_stage_layout.setContentsMargins(0, 2, 0, 2)
         timer_stage_layout.setSpacing(0)
-        timer_stage_layout.setAlignment(
-            Qt.AlignCenter,
-        )
+        timer_stage_layout.setAlignment(Qt.AlignCenter)
 
         self.study_circular_timer = CircularTimer()
+        self.study_circular_timer.set_dashboard_density("compact")
         timer_stage_layout.addWidget(
             self.study_circular_timer,
             0,
@@ -3875,7 +3884,7 @@ class CareerAccelerator(QMainWindow):
         timer_card.layout.addWidget(timer_stage)
 
         goal_row = QHBoxLayout()
-        goal_row.setSpacing(10)
+        goal_row.setSpacing(8)
         goal_label = QLabel("Focus goal")
         goal_label.setObjectName("Muted")
         goal_row.addWidget(goal_label)
@@ -3894,39 +3903,33 @@ class CareerAccelerator(QMainWindow):
                 )
             )
         )
-        self.session_goal_minutes.setMinimumWidth(92)
-        self.session_goal_minutes.setMaximumWidth(120)
+        self.session_goal_minutes.setMinimumWidth(88)
+        self.session_goal_minutes.setMaximumWidth(116)
         self.session_goal_minutes.valueChanged.connect(
             self.change_session_goal
         )
         goal_row.addWidget(self.session_goal_minutes)
         timer_card.layout.addLayout(goal_row)
 
-        self.study_start_button = QPushButton(
-            "▶ Start Study Session"
-        )
+        self.study_start_button = QPushButton("▶ Start Study Session")
         self.study_start_button.setObjectName("Primary")
-        self.study_start_button.setMinimumHeight(38)
-        self.study_start_button.clicked.connect(
-            self.start_study_timer
-        )
+        self.study_start_button.setMinimumHeight(36)
+        self.study_start_button.clicked.connect(self.start_study_timer)
         timer_card.layout.addWidget(self.study_start_button)
 
         timer_controls = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.study_timer_controls = timer_controls
-        timer_controls.setSpacing(8)
+        timer_controls.setSpacing(7)
 
         self.study_pause_button = QPushButton("⏸️ Pause")
         self.study_pause_button.setObjectName("Secondary")
-        self.study_pause_button.setMinimumHeight(34)
+        self.study_pause_button.setMinimumHeight(32)
         self.study_pause_button.clicked.connect(self.pause_study_timer)
 
         self.study_reset_button = QPushButton("🔄 Reset")
         self.study_reset_button.setObjectName("Secondary")
-        self.study_reset_button.setMinimumHeight(34)
-        self.study_reset_button.clicked.connect(
-            self.confirm_reset_timer
-        )
+        self.study_reset_button.setMinimumHeight(32)
+        self.study_reset_button.clicked.connect(self.confirm_reset_timer)
 
         timer_controls.addWidget(self.study_pause_button, 1)
         timer_controls.addWidget(self.study_reset_button, 1)
@@ -3936,7 +3939,7 @@ class CareerAccelerator(QMainWindow):
             "📝 Use Current Time in Session Log"
         )
         self.study_use_time_button.setObjectName("Secondary")
-        self.study_use_time_button.setMinimumHeight(34)
+        self.study_use_time_button.setMinimumHeight(32)
         self.study_use_time_button.clicked.connect(
             self.apply_timer_to_session_log
         )
@@ -3949,9 +3952,53 @@ class CareerAccelerator(QMainWindow):
         timer_tip.setWordWrap(True)
         timer_tip.setAlignment(Qt.AlignCenter)
         timer_card.layout.addWidget(timer_tip)
+        self.study_timer_tip = timer_tip
+        self.study_timer_stage = timer_stage
         self.study_timer_scroll = make_card_scrollable(timer_card)
 
-        # Compact session form.
+        recent = Card(
+            "📚 Recent Sessions",
+            "Your latest logged study activity.",
+        )
+        recent.setMinimumWidth(0)
+        recent.layout.setContentsMargins(14, 12, 14, 12)
+        recent.layout.setSpacing(7)
+        self.study_recent_card = recent
+        self.session_list = QListWidget()
+        self.session_list.setWordWrap(True)
+        self.session_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.session_list.setMinimumHeight(54)
+        self.session_list.itemDoubleClicked.connect(
+            lambda _item: self.open_selected_session_workspace()
+        )
+        recent.layout.addWidget(self.session_list, 1)
+        recent_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.study_recent_actions = recent_actions
+        open_linked = QPushButton("Open Linked Task Workspace")
+        open_linked.clicked.connect(self.open_selected_session_workspace)
+        recent_actions.addWidget(open_linked)
+        recent_actions.addStretch()
+        recent.layout.addLayout(recent_actions)
+
+        # The left side is intentionally a column of two cards: the compact
+        # timer above the independently scrollable recent-session list.
+        left_column = QWidget()
+        left_column.setMinimumWidth(0)
+        left_column.setSizePolicy(
+            QSizePolicy.Policy.Ignored,
+            QSizePolicy.Policy.Expanding,
+        )
+        left_layout = QVBoxLayout(left_column)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(12)
+        left_layout.addWidget(timer_card, 56)
+        left_layout.addWidget(recent, 44)
+        self.study_left_column = left_column
+        self.study_left_layout = left_layout
+
+        # Session log remains the large right-hand card and scrolls internally.
         log_card = Card(
             "📝 Log Session",
             "Document enough detail to support streaks, achievements, weekly summaries, and job-readiness evidence.",
@@ -3991,8 +4038,8 @@ class CareerAccelerator(QMainWindow):
         self.session_notes.setPlaceholderText(
             "Key takeaways, blockers, questions, or next steps"
         )
-        self.session_notes.setMinimumHeight(100)
-        self.session_notes.setMaximumHeight(190)
+        self.session_notes.setMinimumHeight(90)
+        self.session_notes.setMaximumHeight(220)
 
         form_grid.addWidget(QLabel("Date"), 0, 0)
         form_grid.addWidget(self.session_date, 0, 1)
@@ -4005,49 +4052,19 @@ class CareerAccelerator(QMainWindow):
         form_grid.addWidget(self.session_sql, 1, 3)
 
         form_grid.addWidget(QLabel("Linked task"), 2, 0)
-        form_grid.addWidget(
-            self.session_task,
-            2,
-            1,
-            1,
-            3,
-        )
+        form_grid.addWidget(self.session_task, 2, 1, 1, 3)
 
         form_grid.addWidget(QLabel("Google progress"), 3, 0)
-        form_grid.addWidget(
-            self.session_google,
-            3,
-            1,
-            1,
-            3,
-        )
+        form_grid.addWidget(self.session_google, 3, 1, 1, 3)
 
         form_grid.addWidget(QLabel("DataCamp progress"), 4, 0)
-        form_grid.addWidget(
-            self.session_datacamp,
-            4,
-            1,
-            1,
-            3,
-        )
+        form_grid.addWidget(self.session_datacamp, 4, 1, 1, 3)
 
         form_grid.addWidget(QLabel("Portfolio progress"), 5, 0)
-        form_grid.addWidget(
-            self.session_portfolio,
-            5,
-            1,
-            1,
-            3,
-        )
+        form_grid.addWidget(self.session_portfolio, 5, 1, 1, 3)
 
         form_grid.addWidget(QLabel("Notes"), 6, 0)
-        form_grid.addWidget(
-            self.session_notes,
-            6,
-            1,
-            1,
-            3,
-        )
+        form_grid.addWidget(self.session_notes, 6, 1, 1, 3)
 
         log_card.layout.addLayout(form_grid)
 
@@ -4061,68 +4078,84 @@ class CareerAccelerator(QMainWindow):
         self.study_body_grid = body
         self.study_timer_card = timer_card
         self.study_log_card = log_card
-        body.addWidget(timer_card, 0, 0)
+        body.addWidget(left_column, 0, 0)
         body.addWidget(log_card, 0, 1)
-        body.setColumnStretch(0, 34)
-        body.setColumnStretch(1, 66)
-        root.addLayout(body, 2)
-
-        recent = Card(
-            "📚 Recent Sessions",
-            "Your latest logged study activity.",
-        )
-        self.study_recent_card = recent
-        self.session_list = QListWidget()
-        self.session_list.setWordWrap(True)
-        self.session_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.session_list.setMinimumHeight(80)
-        self.session_list.itemDoubleClicked.connect(
-            lambda _item: self.open_selected_session_workspace()
-        )
-        recent.layout.addWidget(self.session_list)
-        recent_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.study_recent_actions = recent_actions
-        open_linked = QPushButton("Open Linked Task Workspace")
-        open_linked.clicked.connect(self.open_selected_session_workspace)
-        recent_actions.addWidget(open_linked)
-        recent_actions.addStretch()
-        recent.layout.addLayout(recent_actions)
-        root.addWidget(recent, 1)
+        body.setColumnStretch(0, 40)
+        body.setColumnStretch(1, 60)
+        body.setRowStretch(0, 1)
+        root.addLayout(body, 1)
 
         def update_study_layout(width):
             clear_layout_positions(self.study_body_grid)
-            if width >= 620:
-                self.study_body_grid.addWidget(self.study_timer_card, 0, 0)
+            horizontal = width >= 580
+            if horizontal:
+                self.study_body_grid.addWidget(self.study_left_column, 0, 0)
                 self.study_body_grid.addWidget(self.study_log_card, 0, 1)
-                self.study_body_grid.setColumnStretch(0, 34)
-                self.study_body_grid.setColumnStretch(1, 66)
+                self.study_body_grid.setColumnStretch(0, 40)
+                self.study_body_grid.setColumnStretch(1, 60)
+                self.study_body_grid.setRowStretch(0, 1)
             else:
-                self.study_body_grid.addWidget(self.study_timer_card, 0, 0)
+                self.study_body_grid.addWidget(self.study_left_column, 0, 0)
                 self.study_body_grid.addWidget(self.study_log_card, 1, 0)
                 self.study_body_grid.setColumnStretch(0, 1)
-            set_box_direction(self.study_timer_controls, width < 560, 7)
-            set_box_direction(self.study_recent_actions, width < 560, 7)
+                self.study_body_grid.setRowStretch(0, 1)
+                self.study_body_grid.setRowStretch(1, 1)
+
+            set_box_direction(self.study_timer_controls, width < 500, 6)
+            set_box_direction(self.study_recent_actions, width < 520, 6)
 
             viewport_height = max(0, page.viewport().height())
+            compact_height = viewport_height < 790
+            self.study_timer_tip.setVisible(not compact_height)
+            self.study_timer_subtitle.setVisible(not compact_height)
+            self.study_timer_stage.setMinimumHeight(86 if compact_height else 104)
+            self.study_circular_timer.set_dashboard_density(
+                "ultra" if compact_height else "compact"
+            )
+            self.study_use_time_button.setText(
+                "📝 Use Time in Session Log"
+                if compact_height
+                else "📝 Use Current Time in Session Log"
+            )
+            self.study_timer_card.layout.setContentsMargins(
+                9 if compact_height else 14,
+                8 if compact_height else 12,
+                9 if compact_height else 14,
+                8 if compact_height else 12,
+            )
+            self.study_timer_card.layout.setSpacing(4 if compact_height else 7)
+
             margins = root.contentsMargins()
             header_height = page.header.sizeHint().height() if page.header else 0
-            usable = max(
-                260,
-                viewport_height
-                - margins.top()
-                - margins.bottom()
-                - header_height
-                - (root.spacing() * 2),
-            )
-            recent_height = max(92, min(170, round(usable * 0.27)))
-            body_height = max(160, usable - recent_height - root.spacing())
-            for card in (self.study_timer_card, self.study_log_card):
-                card.setMinimumHeight(0)
-                card.setMaximumHeight(body_height)
-            self.study_recent_card.setMinimumHeight(0)
-            self.study_recent_card.setMaximumHeight(recent_height)
+            body_height = max(260, viewport_height - margins.top() - margins.bottom() - header_height - root.spacing())
+            if horizontal:
+                left_gap = self.study_left_layout.spacing()
+                timer_height = max(190, round((body_height - left_gap) * 0.56))
+                recent_height = max(140, body_height - left_gap - timer_height)
+                self.study_left_column.setFixedHeight(body_height)
+                self.study_timer_card.setFixedHeight(timer_height)
+                self.study_recent_card.setFixedHeight(recent_height)
+                self.study_log_card.setFixedHeight(body_height)
+            else:
+                self.study_left_column.setMinimumHeight(0)
+                self.study_left_column.setMaximumHeight(16777215)
+                for card in (
+                    self.study_timer_card,
+                    self.study_recent_card,
+                    self.study_log_card,
+                ):
+                    card.setMinimumHeight(0)
+                    card.setMaximumHeight(16777215)
+
+            for card in (
+                self.study_timer_card,
+                self.study_recent_card,
+                self.study_log_card,
+            ):
+                card.setSizePolicy(
+                    QSizePolicy.Policy.Ignored,
+                    QSizePolicy.Policy.Expanding,
+                )
 
         self._register_page_responsive(page, update_study_layout)
         page.heightChanged.connect(

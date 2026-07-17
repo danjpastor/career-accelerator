@@ -24,8 +24,12 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.6 includes:
+Version 10.0.7 includes:
 
+- a borderless Learning workspace whose Exercise Pack cards float directly on the page without an extra square pane frame,
+- a redesigned Study Session page with a compact Live Timer and Recent Sessions stacked in the left column and the internally scrollable Log Session card on the right,
+- rounded modern scrollbars and dropdowns with clean hover, focus, popup, and chevron states across the application,
+- repository cleanup rules for both `patch_backup/` and `patch_backups/`,
 - fixed outer layouts for Learning, SQL Companion, Study Session, Applications, and Weekly Summary, with overflow delegated to the individual cards, lists, tables, and editors that need it,
 - vertically scrollable Available Data tables that wrap complete schema column lists instead of truncating them with ellipses,
 - lesson examples that teach each SQL concept with a different scenario and dataset from the linked practice question,
