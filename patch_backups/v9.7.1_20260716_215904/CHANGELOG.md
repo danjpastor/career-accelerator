@@ -1,9 +1,3 @@
-# v9.7.2
-
-- Fixed startup crash caused by an undefined `completed` variable in `FocusRow`.
-- Restored completed Today’s Focus styling and disabled completed task actions.
-- Fixed completed duration styling being overwritten.
-
 # v9.7.0
 
 - Rebuilt Exercise Pack practice as question-first work: blank SQL by default, prominent prompts, working hints/checking/solutions.

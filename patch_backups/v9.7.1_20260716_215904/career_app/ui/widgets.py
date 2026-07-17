@@ -788,7 +788,6 @@ class TaskRow(QWidget):
                 True,
             )
             action.clicked.connect(on_action)
-            action.setEnabled(not completed)
             layout.addWidget(
                 action,
                 0,
@@ -806,7 +805,6 @@ class FocusRow(QWidget):
         accent,
         action_text=None,
         on_action=None,
-        completed=False,
     ):
         super().__init__()
         self.setStyleSheet("background:transparent;border:none;")
@@ -858,11 +856,9 @@ class FocusRow(QWidget):
 
         duration_label = QLabel(duration)
         duration_label.setObjectName("Muted")
-        duration_label.setStyleSheet(
-            "color:#7f8798;font-weight:700;"
-            if completed
-            else "font-weight:700;"
-        )
+        if completed:
+            duration_label.setStyleSheet("color:#7f8798;font-weight:700;")
+        duration_label.setStyleSheet("font-weight:700;")
         duration_label.setFixedWidth(42)
         duration_label.setAlignment(
             Qt.AlignRight | Qt.AlignVCenter
