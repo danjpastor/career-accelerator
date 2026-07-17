@@ -2028,7 +2028,11 @@ class CareerAccelerator(QMainWindow):
         page.set_outer_scroll_enabled(False)
         self.learning_tabs = QTabWidget()
         self.learning_tabs.setObjectName("LearningTabs")
-        self.learning_tabs.setDocumentMode(True)
+        # The Learning sections use dedicated navigation buttons instead of a
+        # native tab strip.  Keeping the QTabWidget as the page stack preserves
+        # existing routing while eliminating the tab-bar baseline/divider.
+        self.learning_tabs.tabBar().hide()
+        self.learning_tabs.setDocumentMode(False)
         self.learning_tabs.setStyleSheet(
             "QTabWidget#LearningTabs::pane {"
             "border:none;background:transparent;margin:0;padding:0;"
@@ -2039,6 +2043,71 @@ class CareerAccelerator(QMainWindow):
             QSizePolicy.Policy.Ignored,
             QSizePolicy.Policy.Expanding,
         )
+
+        self.learning_section_nav = QWidget()
+        self.learning_section_nav.setObjectName("LearningSectionNav")
+        learning_section_layout = QHBoxLayout(self.learning_section_nav)
+        learning_section_layout.setContentsMargins(0, 0, 0, 0)
+        learning_section_layout.setSpacing(8)
+        self.learning_tab_button_group = QButtonGroup(self.learning_section_nav)
+        self.learning_tab_button_group.setExclusive(True)
+        self.learning_tab_buttons = []
+        for index, label in enumerate((
+            "Learning Overview",
+            "Applied Labs",
+            "Exercises",
+        )):
+            button = QPushButton(label)
+            button.setObjectName("LearningSectionButton")
+            button.setCheckable(True)
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.clicked.connect(
+                lambda checked=False, target=index: (
+                    self.learning_tabs.setCurrentIndex(target)
+                    if checked else None
+                )
+            )
+            self.learning_tab_button_group.addButton(button, index)
+            self.learning_tab_buttons.append(button)
+            learning_section_layout.addWidget(button)
+        learning_section_layout.addStretch(1)
+        self.learning_tab_buttons[0].setChecked(True)
+        self.learning_section_nav.setStyleSheet(
+            f"""
+            QWidget#LearningSectionNav {{
+                background: transparent;
+                border: none;
+            }}
+            QPushButton#LearningSectionButton {{
+                background: {COLORS['panel']};
+                color: {COLORS['muted']};
+                border: 1px solid {COLORS['border']};
+                border-radius: 10px;
+                padding: 8px 15px;
+                min-height: 20px;
+                font-weight: 600;
+            }}
+            QPushButton#LearningSectionButton:hover {{
+                background: {COLORS['panel_hover']};
+                color: white;
+                border-color: {COLORS['purple_soft']};
+            }}
+            QPushButton#LearningSectionButton:checked {{
+                background: {COLORS['purple_dark']};
+                color: white;
+                border-color: {COLORS['purple']};
+                font-weight: 700;
+            }}
+            QPushButton#LearningSectionButton:checked:hover {{
+                background: {COLORS['purple_soft']};
+                border-color: #b9a4ff;
+            }}
+            QPushButton#LearningSectionButton:pressed {{
+                padding: 8px 15px;
+            }}
+            """
+        )
+        root.addWidget(self.learning_section_nav, 0)
 
         overview = QWidget()
         overview_root = QVBoxLayout(overview)
@@ -2258,6 +2327,12 @@ class CareerAccelerator(QMainWindow):
             self.learning_tabs.setMaximumHeight(16777215)
 
         self._learning_layout_handler = update_learning_layout
+        def sync_learning_section_button(index):
+            button = self.learning_tab_button_group.button(index)
+            if button is not None:
+                button.setChecked(True)
+
+        self.learning_tabs.currentChanged.connect(sync_learning_section_button)
         self.learning_tabs.currentChanged.connect(
             lambda _index: update_learning_layout(max(0, page.viewport().width()))
         )

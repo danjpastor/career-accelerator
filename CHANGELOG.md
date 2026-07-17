@@ -1,5 +1,11 @@
 # Changelog
 
+## 10.0.8 - 2026-07-17
+
+- Replaced the Learning Dashboard native tab strip with three rounded navigation buttons.
+- Removed the remaining tab-bar baseline beneath the Learning Dashboard header.
+- Preserved programmatic routing between Learning Overview, Applied Labs, and Exercises.
+
 ## 10.0.7 - 2026-07-17
 
 - Removed the extra square QTabWidget pane border around the Learning content area so the toolbar and course cards sit as independent rounded surfaces.

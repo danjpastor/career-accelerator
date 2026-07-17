@@ -24,8 +24,10 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.7 includes:
+Version 10.0.8 includes:
 
+- rounded Learning Dashboard navigation buttons for Learning Overview, Applied Labs, and Exercises,
+- removal of the remaining native tab-strip divider beneath the Learning header,
 - a borderless Learning workspace whose Exercise Pack cards float directly on the page without an extra square pane frame,
 - a redesigned Study Session page with a compact Live Timer and Recent Sessions stacked in the left column and the internally scrollable Log Session card on the right,
 - rounded modern scrollbars and dropdowns with clean hover, focus, popup, and chevron states across the application,
