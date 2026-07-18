@@ -1,5 +1,15 @@
 # Changelog
 
+## 10.1.0 - 2026-07-18
+
+- Split persistent data into a Git-safe progress database and a local-only private database.
+- Moved job applications and device settings to `data/career_private.db`.
+- Added an automatic legacy migration that copies private rows, drops their old public tables, and vacuums `data/career_accelerator.db`.
+- Allowed `data/career_accelerator.db` and `PROGRESS_SNAPSHOT.md` to be tracked while explicitly ignoring the private database and SQLite sidecar files.
+- Removed company and role names from public application achievement records.
+- Updated backup creation and retention to maintain timestamp-matched progress and private database pairs.
+- Updated Settings storage labels, reset messaging, and documentation for the public/private data boundary.
+
 ## 10.0.10 - 2026-07-17
 
 - Scaled text-bearing row heights together with the Settings interface-size slider so larger fonts no longer clip inside task rows, focus rows, sidebar metrics, list/tree items, table rows, form controls, dropdowns, or buttons.

@@ -24,7 +24,13 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.10 includes:
+Version 10.1.0 includes:
+
+- A Git-safe `data/career_accelerator.db` containing learning, study, SQL, portfolio, roadmap, achievement, evidence, and summary progress.
+- A separate local-only `data/career_private.db` containing job-application details and device-specific application settings.
+- Automatic one-time migration of legacy application and settings rows into the private database, followed by a progress-database vacuum that removes dropped private values from unused SQLite pages.
+- Paired progress/private backups while keeping the private database and all backup files excluded from Git.
+- Public progress publishing that exposes application counts only, never company names, contacts, follow-up details, or application notes.
 
 - Text-bearing rows now scale with the Settings interface-size control, including task rows, focus rows, sidebar metrics, list items, tree items, tables, form fields, dropdowns, and buttons.
 - Explicit fixed-height controls are raised only as needed by their live font metrics, preventing vertical clipping at 110% and 120% while leaving card geometry tied to the window.
@@ -114,14 +120,23 @@ app.py           Application entry point
 
 ## Data
 
-Runtime progress is stored locally in:
+Career Accelerator separates shareable progress from private local records:
 
 ```text
-data/career_accelerator.db
+data/career_accelerator.db   # Git-safe progress; may be committed
+data/career_private.db       # applications + local settings; Git-ignored
 ```
 
-The database and backup directory are excluded from Git by default.
-Existing progress is preserved when application files are updated.
+The progress database contains roadmap completion, study sessions, SQL
+practice, portfolio milestones, achievements, demonstrated evidence, and
+weekly summaries. The private database contains company, role, contact,
+follow-up, resume-version, application-note, and local UI preference data.
+
+On first launch after upgrading, existing application and settings rows are
+moved automatically into the private database. The progress database is then
+vacuumed so the removed private values are not retained in unused SQLite
+pages. Backups contain a paired copy of both databases and remain excluded
+from Git.
 
 ## Keyboard Shortcuts
 

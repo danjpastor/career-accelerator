@@ -1,0 +1,2 @@
+# SQLite progress data is intentionally versioned as a binary artifact.
+data/career_accelerator.db binary

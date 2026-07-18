@@ -10,14 +10,17 @@ venv/
 credentials.*
 secrets.*
 data/raw/private/
+# Local private data never belongs in Git.
+data/career_private.db
+data/career_private.db-*
+
+# SQLite transient files for the Git-safe progress database.
+data/career_accelerator.db-*
 *.vscode
 
 *.pyc
 backups/
 
-data/career_accelerator.db
-data/career_accelerator.db-*
-PROGRESS_SNAPSHOT.md
 
 practice/duckdb/career_practice.duckdb
 patch_backup/

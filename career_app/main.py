@@ -4932,12 +4932,12 @@ class CareerAccelerator(QMainWindow):
         # Data maintenance.
         data_card = Card(
             "🗄️ Data and Recovery",
-            "Create a backup or rebuild task data from repository files.",
+            "Back up both the Git-safe progress database and the local private database.",
         )
         data_card.layout.setContentsMargins(18, 16, 18, 16)
         data_card.layout.setSpacing(9)
 
-        backup = QPushButton("💾 Create Database Backup")
+        backup = QPushButton("💾 Back Up Both Databases")
         backup.setObjectName("Secondary")
         backup.clicked.connect(self.backup_database)
         data_card.layout.addWidget(backup)
@@ -4980,7 +4980,7 @@ class CareerAccelerator(QMainWindow):
         data_card.layout.addWidget(rebuild_snapshot)
 
         data_note = QLabel(
-            "Automatic backups are deduplicated and retained as the newest 10, daily copies for 7 days, and weekly copies for 4 weeks."
+            "Progress and private database backups are paired, deduplicated, and retained as the newest 10, daily copies for 7 days, and weekly copies for 4 weeks."
         )
         data_note.setObjectName("Muted")
         data_note.setWordWrap(True)
@@ -5005,7 +5005,10 @@ class CareerAccelerator(QMainWindow):
         repository_card.layout.addWidget(open_repo)
 
         database_location = QLabel(
-            f"Database\n{ROOT / 'data' / 'career_accelerator.db'}"
+            "Git-safe progress database\n"
+            f"{ROOT / 'data' / 'career_accelerator.db'}\n\n"
+            "Local private database\n"
+            f"{ROOT / 'data' / 'career_private.db'}"
         )
         database_location.setObjectName("Muted")
         database_location.setWordWrap(True)
@@ -5034,7 +5037,7 @@ class CareerAccelerator(QMainWindow):
         reset_summary = QLabel(
             "Reset returns the app to Week 1, Google Course 1, Module 1, "
             "Portfolio Project 1, and today as the new start date. It clears "
-            "all tracked progress while preserving technical preferences and backups."
+            "all tracked progress while preserving private applications, local preferences, and backups."
         )
         reset_summary.setObjectName("Muted")
         reset_summary.setWordWrap(True)
@@ -5554,15 +5557,15 @@ class CareerAccelerator(QMainWindow):
             )
 
         application_rows = self.conn.execute(
-            """SELECT id,company,role
-               FROM applications
+            """SELECT id
+               FROM private_data.applications
                ORDER BY id"""
         ).fetchall()
         for row in application_rows:
             unlock(
                 f"application:{row['id']}",
                 "Application Tracked",
-                f"{row['role']} at {row['company']}",
+                "Tracked a private job application.",
             )
 
         session_count = len(session_rows)
@@ -5790,7 +5793,7 @@ class CareerAccelerator(QMainWindow):
             "SELECT COUNT(*) FROM project_tasks WHERE completed=1"
         ).fetchone()[0]
         applications = self.conn.execute(
-            "SELECT COUNT(*) FROM applications"
+            "SELECT COUNT(*) FROM private_data.applications"
         ).fetchone()[0]
         total_hours = self.conn.execute(
             "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
@@ -7921,7 +7924,7 @@ class CareerAccelerator(QMainWindow):
             )
             column.setMinimumWidth(0 if vertical_kanban else 220)
             rows = self.conn.execute(
-                "SELECT * FROM applications WHERE status=? ORDER BY id DESC",
+                "SELECT * FROM private_data.applications WHERE status=? ORDER BY id DESC",
                 (status,),
             ).fetchall()
             if rows:
@@ -9986,7 +9989,7 @@ class CareerAccelerator(QMainWindow):
         if not self.app_company.text().strip() or not self.app_role.text().strip():
             return
         self.conn.execute(
-            """INSERT INTO applications
+            """INSERT INTO private_data.applications
                (applied_date,company,role,location,source,status,
                 follow_up_date,resume_version,contact,notes)
                VALUES(?,?,?,?,?,?,?,?,?,?)""",
@@ -10190,7 +10193,7 @@ class CareerAccelerator(QMainWindow):
             "• All study sessions, hours, streaks, and productivity scores\\n"
             "• All completed SQL problems and review dates\\n"
             "• All achievements and weekly summaries\\n"
-            "• All applications, follow-up dates, and evidence records\\n"
+            "• All job-readiness evidence records\\n"
             "• All retrospective notes and progress dates\\n\\n"
             "The application will restart at:\\n"
             "• Week 1 of 12\\n"
@@ -10198,8 +10201,8 @@ class CareerAccelerator(QMainWindow):
             "• Portfolio Project 1\\n"
             "• 0 study hours and 0 completed tasks\\n"
             f"• Start date: {date.today().isoformat()}\\n\\n"
-            "A safety database backup will be created first. "
-            "Autosave preferences, focus-goal preferences, and existing backup "
+            "A safety backup of both databases will be created first. "
+            "Private applications, local preferences, and existing backup "
             "files will be preserved."
         )
 
@@ -10332,8 +10335,10 @@ class CareerAccelerator(QMainWindow):
         return total
 
     def storage_summary_text(self):
-        database_path = ROOT / "data" / "career_accelerator.db"
-        database_size = database_path.stat().st_size if database_path.exists() else 0
+        progress_path = ROOT / "data" / "career_accelerator.db"
+        private_path = ROOT / "data" / "career_private.db"
+        progress_size = progress_path.stat().st_size if progress_path.exists() else 0
+        private_size = private_path.stat().st_size if private_path.exists() else 0
         backup_size = self._directory_size(ROOT / "backups")
         sql_size = sum(
             self._directory_size(path)
@@ -10343,11 +10348,12 @@ class CareerAccelerator(QMainWindow):
                 ROOT / "resources" / "sql",
             )
         )
-        total = database_size + backup_size + sql_size
+        total = progress_size + private_size + backup_size + sql_size
         return (
-            f"Database: {self._format_bytes(database_size)}  •  "
-            f"Backups: {self._format_bytes(backup_size)}\n"
-            f"DuckDB and local SQL: {self._format_bytes(sql_size)}  •  "
+            f"Git-safe progress DB: {self._format_bytes(progress_size)}  •  "
+            f"Private local DB: {self._format_bytes(private_size)}\n"
+            f"Backups: {self._format_bytes(backup_size)}  •  "
+            f"DuckDB and local SQL: {self._format_bytes(sql_size)}\n"
             f"Combined local data: {self._format_bytes(total)}"
         )
 
@@ -10380,7 +10386,7 @@ class CareerAccelerator(QMainWindow):
     def backup_database(self):
         path = create_backup(ROOT)
         self.refresh_storage_summary()
-        self.settings_status.setText(f"Backup ready: {path}")
+        self.settings_status.setText(f"Backup pair ready: {path.parent}")
 
     def restore_tasks(self):
         result = migrate(self.conn, ROOT)
@@ -10393,7 +10399,7 @@ class CareerAccelerator(QMainWindow):
 
     def autosave(self):
         create_backup(ROOT)
-        self.statusBar().showMessage("Autosave backup created.", 3000)
+        self.statusBar().showMessage("Autosave backup pair created.", 3000)
 
     # ---------- Shortcuts / Command Palette ----------
     def setup_shortcuts(self):

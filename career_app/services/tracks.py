@@ -2034,7 +2034,7 @@ def _setting_value(
 ):
     row = conn.execute(
         """SELECT value
-           FROM settings
+           FROM private_data.settings
            WHERE key=?""",
         (key,),
     ).fetchone()
