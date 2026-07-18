@@ -14,11 +14,10 @@ data/raw/private/
 
 *.pyc
 backups/
-
-data/career_accelerator.db
-data/career_accelerator.db-*
-PROGRESS_SNAPSHOT.md
-
-practice/duckdb/career_practice.duckdb
 patch_backup/
 patch_backups/
+
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
