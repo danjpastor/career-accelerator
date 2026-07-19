@@ -1,6 +1,6 @@
 # Quick Start
 
-1. Run `Data Career Accelerator.bat`.
+1. Run `Career Accelerator.bat`.
 2. Use the Dashboard to view Today’s Focus and Next Tasks.
 3. Update your current Google course and module on the Learning page.
 4. Log study time through Study Session.

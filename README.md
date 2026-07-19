@@ -10,7 +10,7 @@ job-readiness evidence, applications, and Git publishing.
 On Windows, double-click:
 
 ```text
-Data Career Accelerator.bat
+Career Accelerator.bat
 ```
 
 The launcher creates a local `.venv`, installs the requirements, and
@@ -24,7 +24,12 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.15 includes:
+Version 10.0.16 includes:
+- A cleaned repository root containing only the launcher, shortcut creator, requirements file, and README as visible files
+- Application source and brand assets consolidated under `application/`
+- Project documentation consolidated under `documentation/`
+- Progress snapshots published into `documentation/` instead of cluttering the repository root
+- Updated launcher, shortcut, database, asset, and project-root path handling with no functional changes
 - Seamlessly faded encouragement-card rocket artwork clipped to the card's rounded geometry
 - Slow animated gradients on visible primary-action buttons, paused while the app is inactive
 - Larger responsive sidebar brand lockup
@@ -119,13 +124,20 @@ See `exercise_packs/AUTHORING_GUIDE.md`, `STYLE_GUIDE.md`, `FORMAT.md`, and `QUA
 ## Repository Structure
 
 ```text
-career_app/     PySide6 application code
-data/           Local SQLite database location
-projects/       Portfolio project specifications and milestones
-weeks/          Twelve weekly sprint plans and retrospectives
-resources/      SQL, Power BI, Python, interview, and career resources
-career/         Resume and LinkedIn materials
-app.py           Application entry point
+Career Accelerator.bat          Windows launcher
+create-desktop-shortcut.vbs     Shortcut creator
+requirements.txt                Python dependencies
+README.md                       Main project guide
+application/                    Entry point, PySide6 source, and brand assets
+documentation/                  Roadmaps, progress guides, changelog, and technical docs
+data/                           Local SQLite database location
+exercise_packs/                 Bundled, installed, and template learning packs
+practice/                       DuckDB exercises, applied labs, and submissions
+projects/                       Portfolio project specifications and milestones
+weeks/                          Twelve weekly sprint plans and retrospectives
+resources/                      SQL, Power BI, Python, interview, and career resources
+career/                         Resume and LinkedIn materials
+workspaces/                     Managed task workspaces
 ```
 
 ## Data
@@ -146,11 +158,11 @@ Existing progress is preserved when application files are updated.
 
 ## Core Documents
 
-- [Master Roadmap](MASTER_ROADMAP.md)
-- [Current Progress](PROGRESS.md)
-- [Quick Start](QUICK_START.md)
-- [Contributing Workflow](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
+- [Master Roadmap](documentation/MASTER_ROADMAP.md)
+- [Current Progress](documentation/PROGRESS.md)
+- [Quick Start](documentation/QUICK_START.md)
+- [Contributing Workflow](documentation/CONTRIBUTING.md)
+- [Changelog](documentation/CHANGELOG.md)
 
 ## Guiding Principle
 
@@ -208,7 +220,7 @@ Portfolio maintain independent checkpoints, weekly targets, and completion
 histories. Their current actions feed the existing Today’s Focus, Next Tasks,
 Learning cards, and SQL Companion without changing the finished layout.
 
-See `MODULAR_TRACKS.md` for the architecture.
+See `documentation/MODULAR_TRACKS.md` for the architecture.
 
 
 ## Adaptive Pacing
@@ -223,7 +235,7 @@ Portfolio milestones are prerequisite-gated. The planner will not suggest
 a portfolio task until the necessary certificate, SQL, DataCamp, Power BI,
 storytelling, or delivery skills are unlocked.
 
-See `ADAPTIVE_PACING.md` for details.
+See `documentation/ADAPTIVE_PACING.md` for details.
 
 
 ## Final Reliability Pass
@@ -233,7 +245,7 @@ adaptive engine also repairs stale track links, distinguishes locked SQL
 work from completed work, unlocks skills only after their source course is
 complete, and records skipped same-course modules accurately.
 
-See `RELEASE_READINESS.md` for covered edge cases and intentional boundaries.
+See `documentation/RELEASE_READINESS.md` for covered edge cases and intentional boundaries.
 
 
 ## Next Tasks Completion Fix

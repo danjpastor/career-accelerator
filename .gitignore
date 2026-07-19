@@ -17,7 +17,7 @@ backups/
 
 data/career_accelerator.db
 data/career_accelerator.db-*
-PROGRESS_SNAPSHOT.md
+documentation/PROGRESS_SNAPSHOT.md
 
 practice/duckdb/career_practice.duckdb
 patch_backup/

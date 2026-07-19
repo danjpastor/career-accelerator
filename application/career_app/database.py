@@ -2,7 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 import sqlite3
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 DB_PATH = ROOT / "data" / "career_accelerator.db"
 
 SCHEMA = """

@@ -8,8 +8,8 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 
 repo = fso.GetParentFolderName(WScript.ScriptFullName)
 desktop = shell.SpecialFolders("Desktop")
-iconPath = repo & "\assets\career_accelerator.ico"
-targetPath = repo & "\Data Career Accelerator.bat"
+iconPath = repo & "\application\assets\career_accelerator.ico"
+targetPath = repo & "\Career Accelerator.bat"
 localOnly = WScript.Arguments.Named.Exists("LocalOnly")
 
 Sub ConfigureShortcut(shortcutPath)

@@ -74,7 +74,8 @@ from career_app.ui.widgets import (
     SidebarMetricCard, SoftPanel, StatRow, TaskRow, make_card_scrollable
 )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
 
 NAV = [
     ("🏠 Dashboard", 0),
@@ -387,7 +388,7 @@ class CareerAccelerator(QMainWindow):
         self.setWindowTitle(f"Data Career Accelerator v{__version__}")
 
         self.app_icon_path = (
-            ROOT / "assets" / "career_accelerator.ico"
+            ASSET_ROOT / "career_accelerator.ico"
         )
         if self.app_icon_path.exists():
             app_icon = QIcon(str(self.app_icon_path))
@@ -547,7 +548,7 @@ class CareerAccelerator(QMainWindow):
             QSizePolicy.Policy.Fixed,
         )
         logo.setMinimumWidth(0)
-        logo_path = ROOT / "assets" / "data_career_accelerator_horizontal.png"
+        logo_path = ASSET_ROOT / "data_career_accelerator_horizontal.png"
         self._sidebar_logo_source = QPixmap(str(logo_path))
         self._sidebar_brand_height = 66
         self.sidebar_logo = logo
@@ -1435,7 +1436,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_footer_grid.setVerticalSpacing(10)
 
         self.encouragement_card = BrandedBannerCard(
-            ROOT / "assets" / "dashboard_encouragement_rocket.png",
+            ASSET_ROOT / "dashboard_encouragement_rocket.png",
             art_opacity=0.92,
         )
         self.encouragement_card.setMinimumHeight(125)

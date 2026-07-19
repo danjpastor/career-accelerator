@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title Data Career Accelerator v10.0.15
+title Data Career Accelerator v10.0.16
 
 if not exist "Data Career Accelerator.lnk" (
     cscript //nologo "create-desktop-shortcut.vbs" /LocalOnly >nul 2>nul
@@ -31,7 +31,7 @@ if errorlevel 1 (
 )
 
 echo Starting Data Career Accelerator...
-".venv\Scripts\python.exe" app.py
+".venv\Scripts\python.exe" application\app.py
 
 if errorlevel 1 (
     echo.

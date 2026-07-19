@@ -1,6 +1,16 @@
 # Changelog
 
 
+## 10.0.16 - 2026-07-19
+
+- Cleaned the visible repository root so it contains only the launcher, shortcut creator, requirements file, and README.
+- Consolidated the application entry point, PySide6 package, and brand assets under `application/`.
+- Consolidated roadmap, progress, release, contribution, and technical documentation under `documentation/`.
+- Redirected generated progress snapshots into `documentation/`.
+- Updated launcher, shortcut, asset, database, and repository-root path handling without changing application behavior.
+- Removed the duplicate `Data Career Accelerator.bat` launcher while preserving the branded shortcut name.
+
+
 ## 10.0.15 - 2026-07-19
 
 - Blended the Dashboard encouragement artwork into the card with a responsive left-edge alpha fade instead of a hard rectangular seam.

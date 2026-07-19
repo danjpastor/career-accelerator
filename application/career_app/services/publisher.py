@@ -25,4 +25,6 @@ def publish(conn, root: Path, state, project_names, readiness):
         if key != "Overall":
             summary += f"| {key} | {value}% |\n"
 
-    (root / "PROGRESS_SNAPSHOT.md").write_text(summary, encoding="utf-8")
+    snapshot_path = root / "documentation" / "PROGRESS_SNAPSHOT.md"
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+    snapshot_path.write_text(summary, encoding="utf-8")
