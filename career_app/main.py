@@ -12,7 +12,7 @@ from pathlib import Path
 from PySide6.QtCore import (
     QEasingCurve, QEvent, QObject, QPropertyAnimation, Qt, QTimer, Signal
 )
-from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QComboBox, QDialog, QFormLayout,
     QInputDialog,
@@ -69,7 +69,7 @@ from career_app.ui.responsive import (
     set_box_direction,
 )
 from career_app.ui.widgets import (
-    AreaChart, BadgeCard, Card, CircularTimer, Divider, FocusRow,
+    AreaChart, BadgeCard, BrandedBannerCard, Card, CircularTimer, Divider, FocusRow,
     FooterMetricBox, MetricRow, MiniSparkline, Ring, SectionHeader,
     SidebarMetricCard, SoftPanel, StatRow, TaskRow, make_card_scrollable
 )
@@ -243,6 +243,110 @@ class ButtonFeedbackFilter(QObject):
         return super().eventFilter(watched, event)
 
 
+class GradientButtonAnimator(QObject):
+    """Gives primary action gradients a subtle, low-cost color drift.
+
+    Only visible primary buttons are updated, and the animation pauses while
+    the window is hidden or inactive.  Layout, fonts, padding, signals, and
+    button behavior remain owned by the existing stylesheet and widgets.
+    """
+
+    PALETTE = (
+        QColor("#FF4DB8"),
+        QColor("#A85CFF"),
+        QColor("#6D72FF"),
+        QColor("#39B0FF"),
+        QColor("#8A5CFF"),
+        QColor("#FF6A9F"),
+    )
+
+    def __init__(self, root, parent=None):
+        super().__init__(parent or root)
+        self.root = root
+        self.phase = 0.0
+        self.timer = QTimer(self)
+        self.timer.setInterval(90)
+        self.timer.timeout.connect(self._advance)
+        self.timer.start()
+
+    @staticmethod
+    def _mix(first, second, amount):
+        amount = max(0.0, min(1.0, float(amount)))
+        return QColor(
+            round(first.red() + (second.red() - first.red()) * amount),
+            round(first.green() + (second.green() - first.green()) * amount),
+            round(first.blue() + (second.blue() - first.blue()) * amount),
+        )
+
+    def _sample(self, position):
+        position = float(position) % 1.0
+        scaled = position * len(self.PALETTE)
+        index = int(scaled) % len(self.PALETTE)
+        next_index = (index + 1) % len(self.PALETTE)
+        return self._mix(
+            self.PALETTE[index],
+            self.PALETTE[next_index],
+            scaled - int(scaled),
+        )
+
+    @staticmethod
+    def _lighter(color, factor=118):
+        return color.lighter(factor)
+
+    @staticmethod
+    def _darker(color, factor=132):
+        return color.darker(factor)
+
+    def _button_style(self):
+        first = self._sample(self.phase)
+        middle = self._sample(self.phase + 0.21)
+        last = self._sample(self.phase + 0.47)
+        hover_first = self._lighter(first, 116)
+        hover_middle = self._lighter(middle, 112)
+        hover_last = self._lighter(last, 114)
+        pressed_first = self._darker(first, 138)
+        pressed_middle = self._darker(middle, 142)
+        pressed_last = self._darker(last, 136)
+
+        return f"""
+        QPushButton#Primary {{
+            background:qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                stop:0 {first.name()},
+                stop:0.52 {middle.name()},
+                stop:1 {last.name()});
+            border:1px solid {hover_middle.name()};
+        }}
+        QPushButton#Primary:hover {{
+            background:qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                stop:0 {hover_first.name()},
+                stop:0.52 {hover_middle.name()},
+                stop:1 {hover_last.name()});
+            border:1px solid #F0C8FF;
+        }}
+        QPushButton#Primary:pressed {{
+            background:qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                stop:0 {pressed_first.name()},
+                stop:0.52 {pressed_middle.name()},
+                stop:1 {pressed_last.name()});
+            border:1px solid #F3C5FF;
+        }}
+        QPushButton#Primary:disabled {{
+            background:#0D1625;
+            border:1px solid #1B293D;
+        }}
+        """
+
+    def _advance(self):
+        if not self.root.isVisible() or not self.root.isActiveWindow():
+            return
+        self.phase = (self.phase + 0.0085) % 1.0
+        style = self._button_style()
+        for button in self.root.findChildren(QPushButton):
+            if button.objectName() != "Primary" or not button.isVisible():
+                continue
+            button.setStyleSheet(style)
+
+
 class ResponsiveDashboardContent(QWidget):
     widthChanged = Signal(int)
 
@@ -280,7 +384,7 @@ class CareerAccelerator(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick_timer)
 
-        self.setWindowTitle(f"Career Accelerator v{__version__}")
+        self.setWindowTitle(f"Data Career Accelerator v{__version__}")
 
         self.app_icon_path = (
             ROOT / "assets" / "career_accelerator.ico"
@@ -294,7 +398,7 @@ class CareerAccelerator(QMainWindow):
             try:
                 import ctypes
                 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                    "DanielPastor.CareerAccelerator"
+                    "DanielPastor.DataCareerAccelerator"
                 )
             except Exception:
                 pass
@@ -350,6 +454,8 @@ class CareerAccelerator(QMainWindow):
         ]
         for builder in builders:
             self.stack.addWidget(builder())
+
+        self.gradient_button_animator = GradientButtonAnimator(self, self)
 
         self.setup_shortcuts()
         self.update_timer_visuals()
@@ -429,28 +535,24 @@ class CareerAccelerator(QMainWindow):
         layout.setSpacing(4)
         self.sidebar_content_layout = layout
 
-        logo_row = QHBoxLayout()
-        logo_row.setSpacing(8)
-        logo = QLabel("🚀")
-        logo.setStyleSheet("font-size:28pt;")
-        logo.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.sidebar_logo = logo
-        logo_row.addWidget(logo)
-
-        title_layout = QVBoxLayout()
-        title_layout.setSpacing(0)
-        career = QLabel("CAREER")
-        career.setStyleSheet("font-size:17pt;font-weight:800;")
-        self.sidebar_career_label = career
-        accelerator = QLabel("ACCELERATOR")
-        accelerator.setStyleSheet(
-            f"font-size:15pt;font-weight:800;color:{COLORS['purple']};"
+        # Use the approved horizontal Data Career Accelerator lockup as one
+        # locked asset. This prevents the icon, wordmark, spacing, and gradient
+        # from drifting at different window sizes while keeping the sidebar's
+        # existing responsive layout rules intact.
+        logo = QLabel()
+        logo.setObjectName("BrandLogo")
+        logo.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        logo.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
         )
-        self.sidebar_accelerator_label = accelerator
-        title_layout.addWidget(career)
-        title_layout.addWidget(accelerator)
-        logo_row.addLayout(title_layout, 1)
-        layout.addLayout(logo_row)
+        logo.setMinimumWidth(0)
+        logo_path = ROOT / "assets" / "data_career_accelerator_horizontal.png"
+        self._sidebar_logo_source = QPixmap(str(logo_path))
+        self._sidebar_brand_height = 66
+        self.sidebar_logo = logo
+        layout.addWidget(logo)
+        self._update_sidebar_brand_logo()
 
         divider = QFrame()
         divider.setFrameShape(QFrame.HLine)
@@ -666,6 +768,7 @@ class CareerAccelerator(QMainWindow):
         if hasattr(self, "sidebar"):
             self.sidebar.setMinimumWidth(sidebar_width)
             self.sidebar.setMaximumWidth(sidebar_width)
+            self._update_sidebar_brand_logo()
 
         if abs(scale - self._ui_scale) >= 0.01:
             self._ui_scale = scale
@@ -748,6 +851,27 @@ class CareerAccelerator(QMainWindow):
         # still comes from the window breakpoints; only their contents reflow.
         QTimer.singleShot(0, self._apply_responsive_shell)
 
+    def _update_sidebar_brand_logo(self):
+        """Scale the approved horizontal brand lockup inside the live sidebar."""
+        label = getattr(self, "sidebar_logo", None)
+        source = getattr(self, "_sidebar_logo_source", None)
+        if label is None or source is None or source.isNull():
+            return
+        margins = self.sidebar_content_layout.contentsMargins()
+        sidebar_width = self.sidebar.maximumWidth() if hasattr(self, "sidebar") else 224
+        available_width = max(96, sidebar_width - margins.left() - margins.right())
+        target_height = max(30, int(getattr(self, "_sidebar_brand_height", 58)))
+        scaled = source.scaled(
+            available_width,
+            target_height,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        label.setPixmap(scaled)
+        label.setFixedHeight(target_height)
+        label.setToolTip("Data Career Accelerator")
+        label.updateGeometry()
+
     def _apply_sidebar_density(self, height):
         """Keep the complete navigation sidebar visible at supported heights."""
         height = max(0, int(height))
@@ -767,9 +891,7 @@ class CareerAccelerator(QMainWindow):
                 "spacing": 4,
                 "nav_height": (34, 52),
                 "nav_spacing": 4,
-                "logo": 28,
-                "career": 17,
-                "accelerator": 15,
+                "brand_height": 66,
                 "card_height": 0,
                 "card_margins": (16, 14, 16, 14),
                 "card_spacing": 6,
@@ -784,9 +906,7 @@ class CareerAccelerator(QMainWindow):
                 "spacing": 2,
                 "nav_height": (27, 42),
                 "nav_spacing": 2,
-                "logo": 23,
-                "career": 14,
-                "accelerator": 12,
+                "brand_height": 56,
                 "card_height": 101,
                 "card_margins": (11, 8, 11, 8),
                 "card_spacing": 3,
@@ -801,9 +921,7 @@ class CareerAccelerator(QMainWindow):
                 "spacing": 1,
                 "nav_height": (21, 30),
                 "nav_spacing": 1,
-                "logo": 19,
-                "career": 12,
-                "accelerator": 10,
+                "brand_height": 44,
                 "card_height": 80,
                 "card_margins": (9, 5, 9, 5),
                 "card_spacing": 1,
@@ -821,14 +939,8 @@ class CareerAccelerator(QMainWindow):
         for button in self.nav_buttons:
             button.setMinimumHeight(values["nav_height"][0])
             button.setMaximumHeight(values["nav_height"][1])
-        self.sidebar_logo.setStyleSheet(f"font-size:{values['logo']}pt;")
-        self.sidebar_career_label.setStyleSheet(
-            f"font-size:{values['career']}pt;font-weight:800;"
-        )
-        self.sidebar_accelerator_label.setStyleSheet(
-            f"font-size:{values['accelerator']}pt;font-weight:800;"
-            f"color:{COLORS['purple']};"
-        )
+        self._sidebar_brand_height = values["brand_height"]
+        self._update_sidebar_brand_logo()
         self.sidebar_streak_layout.setContentsMargins(*values["card_margins"])
         self.sidebar_streak_layout.setSpacing(values["card_spacing"])
         self.sidebar_time_layout.setContentsMargins(*values["card_margins"])
@@ -1322,7 +1434,10 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_footer_grid.setHorizontalSpacing(10)
         self.dashboard_footer_grid.setVerticalSpacing(10)
 
-        self.encouragement_card = Card()
+        self.encouragement_card = BrandedBannerCard(
+            ROOT / "assets" / "dashboard_encouragement_rocket.png",
+            art_opacity=0.92,
+        )
         self.encouragement_card.setMinimumHeight(125)
         self.encouragement_card.layout.setContentsMargins(
             16,
@@ -2171,14 +2286,16 @@ class CareerAccelerator(QMainWindow):
                 border-color: {COLORS['purple_soft']};
             }}
             QPushButton#LearningSectionButton:checked {{
-                background: {COLORS['purple_dark']};
+                background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                            stop:0 {COLORS['magenta']}, stop:1 {COLORS['purple']});
                 color: white;
-                border-color: {COLORS['purple']};
+                border-color: #C07BFF;
                 font-weight: 700;
             }}
             QPushButton#LearningSectionButton:checked:hover {{
-                background: {COLORS['purple_soft']};
-                border-color: #b9a4ff;
+                background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                            stop:0 #FF6BC6, stop:1 #A477FF);
+                border-color: #E0B5FF;
             }}
             QPushButton#LearningSectionButton:pressed {{
                 padding: 8px 15px;
@@ -2225,7 +2342,10 @@ class CareerAccelerator(QMainWindow):
         form = QFormLayout()
         self.week_input = QSpinBox(); self.week_input.setRange(1, 12)
         self.course_input = QSpinBox(); self.course_input.setRange(1, 9)
-        self.module_input = QSpinBox(); self.module_input.setRange(1, 20)
+        self.module_input = QSpinBox(); self.module_input.setRange(1, 4)
+        self.course_input.valueChanged.connect(
+            self.update_google_module_range
+        )
         self.hours_input = QSpinBox(); self.hours_input.setRange(1, 40)
         form.addRow("Current week", self.week_input)
         form.addRow("Google course", self.course_input)
@@ -4932,12 +5052,12 @@ class CareerAccelerator(QMainWindow):
         # Data maintenance.
         data_card = Card(
             "🗄️ Data and Recovery",
-            "Back up both the Git-safe progress database and the local private database.",
+            "Create a backup or rebuild task data from repository files.",
         )
         data_card.layout.setContentsMargins(18, 16, 18, 16)
         data_card.layout.setSpacing(9)
 
-        backup = QPushButton("💾 Back Up Both Databases")
+        backup = QPushButton("💾 Create Database Backup")
         backup.setObjectName("Secondary")
         backup.clicked.connect(self.backup_database)
         data_card.layout.addWidget(backup)
@@ -4980,7 +5100,7 @@ class CareerAccelerator(QMainWindow):
         data_card.layout.addWidget(rebuild_snapshot)
 
         data_note = QLabel(
-            "Progress and private database backups are paired, deduplicated, and retained as the newest 10, daily copies for 7 days, and weekly copies for 4 weeks."
+            "Automatic backups are deduplicated and retained as the newest 10, daily copies for 7 days, and weekly copies for 4 weeks."
         )
         data_note.setObjectName("Muted")
         data_note.setWordWrap(True)
@@ -5005,10 +5125,7 @@ class CareerAccelerator(QMainWindow):
         repository_card.layout.addWidget(open_repo)
 
         database_location = QLabel(
-            "Git-safe progress database\n"
-            f"{ROOT / 'data' / 'career_accelerator.db'}\n\n"
-            "Local private database\n"
-            f"{ROOT / 'data' / 'career_private.db'}"
+            f"Database\n{ROOT / 'data' / 'career_accelerator.db'}"
         )
         database_location.setObjectName("Muted")
         database_location.setWordWrap(True)
@@ -5037,7 +5154,7 @@ class CareerAccelerator(QMainWindow):
         reset_summary = QLabel(
             "Reset returns the app to Week 1, Google Course 1, Module 1, "
             "Portfolio Project 1, and today as the new start date. It clears "
-            "all tracked progress while preserving private applications, local preferences, and backups."
+            "all tracked progress while preserving technical preferences and backups."
         )
         reset_summary.setObjectName("Muted")
         reset_summary.setWordWrap(True)
@@ -5076,7 +5193,7 @@ class CareerAccelerator(QMainWindow):
         status_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.settings_status_row = status_row
         self.settings_status = QLabel(
-            f"Career Accelerator v{__version__} • Local SQLite mode"
+            f"Data Career Accelerator v{__version__} • Local SQLite mode"
         )
         self.settings_status.setObjectName("Muted")
         self.settings_status.setWordWrap(True)
@@ -5557,15 +5674,15 @@ class CareerAccelerator(QMainWindow):
             )
 
         application_rows = self.conn.execute(
-            """SELECT id
-               FROM private_data.applications
+            """SELECT id,company,role
+               FROM applications
                ORDER BY id"""
         ).fetchall()
         for row in application_rows:
             unlock(
                 f"application:{row['id']}",
                 "Application Tracked",
-                "Tracked a private job application.",
+                f"{row['role']} at {row['company']}",
             )
 
         session_count = len(session_rows)
@@ -5793,7 +5910,7 @@ class CareerAccelerator(QMainWindow):
             "SELECT COUNT(*) FROM project_tasks WHERE completed=1"
         ).fetchone()[0]
         applications = self.conn.execute(
-            "SELECT COUNT(*) FROM private_data.applications"
+            "SELECT COUNT(*) FROM applications"
         ).fetchone()[0]
         total_hours = self.conn.execute(
             "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
@@ -7420,6 +7537,9 @@ class CareerAccelerator(QMainWindow):
         self.course_input.setValue(
             self.state["google_course"]
         )
+        self.update_google_module_range(
+            self.state["google_course"]
+        )
         self.module_input.setValue(
             self.state["google_module"]
         )
@@ -7924,7 +8044,7 @@ class CareerAccelerator(QMainWindow):
             )
             column.setMinimumWidth(0 if vertical_kanban else 220)
             rows = self.conn.execute(
-                "SELECT * FROM private_data.applications WHERE status=? ORDER BY id DESC",
+                "SELECT * FROM applications WHERE status=? ORDER BY id DESC",
                 (status,),
             ).fetchall()
             if rows:
@@ -8923,20 +9043,36 @@ class CareerAccelerator(QMainWindow):
             "Study Sessions rather than Task Workspaces."
         )
 
+    def update_google_module_range(self, course=None):
+        course = int(
+            self.course_input.value()
+            if course is None
+            else course
+        )
+        maximum = tracks.google_module_count(course)
+        self.module_input.setMaximum(maximum)
+        self.module_input.setToolTip(
+            f"Google Course {course} contains {maximum} modules."
+        )
+
     def save_learning(self):
         previous_state = self.state
+        google_course, google_module = tracks.normalize_google_position(
+            self.course_input.value(),
+            self.module_input.value(),
+        )
         tracks.record_google_manual_change(
             self.conn,
             previous_state,
-            self.course_input.value(),
-            self.module_input.value(),
+            google_course,
+            google_module,
         )
 
         update_state(
             self.conn,
             current_week=self.week_input.value(),
-            google_course=self.course_input.value(),
-            google_module=self.module_input.value(),
+            google_course=google_course,
+            google_module=google_module,
             weekly_target_hours=self.hours_input.value(),
         )
         planner.sync_google_course_progress(
@@ -9989,7 +10125,7 @@ class CareerAccelerator(QMainWindow):
         if not self.app_company.text().strip() or not self.app_role.text().strip():
             return
         self.conn.execute(
-            """INSERT INTO private_data.applications
+            """INSERT INTO applications
                (applied_date,company,role,location,source,status,
                 follow_up_date,resume_version,contact,notes)
                VALUES(?,?,?,?,?,?,?,?,?,?)""",
@@ -10179,21 +10315,21 @@ class CareerAccelerator(QMainWindow):
                 self,
                 "Snapshot Rebuild Failed",
                 (
-                    "Career Accelerator could not rebuild today's snapshot.\n\n"
+                    "Data Career Accelerator could not rebuild today's snapshot.\n\n"
                     f"{error}"
                 ),
             )
 
     def reset_progress_details(self):
         return (
-            "This will permanently reset the active Career Accelerator profile.\\n\\n"
+            "This will permanently reset the active Data Career Accelerator profile.\\n\\n"
             "The following progress will be cleared:\\n"
             "• All roadmap and daily-focus completion\\n"
             "• All portfolio milestones and saved project notes\\n"
             "• All study sessions, hours, streaks, and productivity scores\\n"
             "• All completed SQL problems and review dates\\n"
             "• All achievements and weekly summaries\\n"
-            "• All job-readiness evidence records\\n"
+            "• All applications, follow-up dates, and evidence records\\n"
             "• All retrospective notes and progress dates\\n\\n"
             "The application will restart at:\\n"
             "• Week 1 of 12\\n"
@@ -10201,8 +10337,8 @@ class CareerAccelerator(QMainWindow):
             "• Portfolio Project 1\\n"
             "• 0 study hours and 0 completed tasks\\n"
             f"• Start date: {date.today().isoformat()}\\n\\n"
-            "A safety backup of both databases will be created first. "
-            "Private applications, local preferences, and existing backup "
+            "A safety database backup will be created first. "
+            "Autosave preferences, focus-goal preferences, and existing backup "
             "files will be preserved."
         )
 
@@ -10242,7 +10378,7 @@ class CareerAccelerator(QMainWindow):
             "Reset All Progress — Final Confirmation",
             (
                 "This is the final confirmation.\\n\\n"
-                "Career Accelerator will create a safety backup and then erase "
+                "Data Career Accelerator will create a safety backup and then erase "
                 "all tracked progress listed in the previous warning. The active "
                 "profile will be rebuilt from the Course 1 starter roadmap.\\n\\n"
                 "Proceed with the irreversible reset?"
@@ -10292,7 +10428,7 @@ class CareerAccelerator(QMainWindow):
                 self,
                 "Progress Reset Complete",
                 (
-                    "Career Accelerator has been reset to a clean starter profile.\\n\\n"
+                    "Data Career Accelerator has been reset to a clean starter profile.\\n\\n"
                     f"Imported {migrate_result['sprint_tasks']} roadmap tasks and "
                     f"{migrate_result['project_tasks']} portfolio milestones.\\n\\n"
                     f"Safety backup:\\n{backup_path}"
@@ -10335,10 +10471,8 @@ class CareerAccelerator(QMainWindow):
         return total
 
     def storage_summary_text(self):
-        progress_path = ROOT / "data" / "career_accelerator.db"
-        private_path = ROOT / "data" / "career_private.db"
-        progress_size = progress_path.stat().st_size if progress_path.exists() else 0
-        private_size = private_path.stat().st_size if private_path.exists() else 0
+        database_path = ROOT / "data" / "career_accelerator.db"
+        database_size = database_path.stat().st_size if database_path.exists() else 0
         backup_size = self._directory_size(ROOT / "backups")
         sql_size = sum(
             self._directory_size(path)
@@ -10348,12 +10482,11 @@ class CareerAccelerator(QMainWindow):
                 ROOT / "resources" / "sql",
             )
         )
-        total = progress_size + private_size + backup_size + sql_size
+        total = database_size + backup_size + sql_size
         return (
-            f"Git-safe progress DB: {self._format_bytes(progress_size)}  •  "
-            f"Private local DB: {self._format_bytes(private_size)}\n"
-            f"Backups: {self._format_bytes(backup_size)}  •  "
-            f"DuckDB and local SQL: {self._format_bytes(sql_size)}\n"
+            f"Database: {self._format_bytes(database_size)}  •  "
+            f"Backups: {self._format_bytes(backup_size)}\n"
+            f"DuckDB and local SQL: {self._format_bytes(sql_size)}  •  "
             f"Combined local data: {self._format_bytes(total)}"
         )
 
@@ -10386,7 +10519,7 @@ class CareerAccelerator(QMainWindow):
     def backup_database(self):
         path = create_backup(ROOT)
         self.refresh_storage_summary()
-        self.settings_status.setText(f"Backup pair ready: {path.parent}")
+        self.settings_status.setText(f"Backup ready: {path}")
 
     def restore_tasks(self):
         result = migrate(self.conn, ROOT)
@@ -10399,7 +10532,7 @@ class CareerAccelerator(QMainWindow):
 
     def autosave(self):
         create_backup(ROOT)
-        self.statusBar().showMessage("Autosave backup pair created.", 3000)
+        self.statusBar().showMessage("Autosave backup created.", 3000)
 
     # ---------- Shortcuts / Command Palette ----------
     def setup_shortcuts(self):

@@ -55,8 +55,8 @@ class FeedbackBanner(QLabel):
     def show_message(self, text: str, kind: str = "neutral") -> None:
         palette = {
             "success": ("#17392f", "#63dfa9", "#9af0ca"),
-            "error": ("#3a202d", "#ec7caa", "#ffc1d8"),
-            "hint": ("#292342", "#9b77f4", "#d9cbff"),
+            "error": ("#3a202d", "#FF4DB8", "#FFD0EC"),
+            "hint": ("#292342", "#A56CFF", "#DCCEFF"),
             "neutral": ("#172333", "#4b6688", "#cbd8ea"),
         }
         background, border, foreground = palette.get(kind, palette["neutral"])
@@ -97,7 +97,7 @@ class DuckDBExercisesWidget(QWidget):
         toolbar = QFrame()
         toolbar.setObjectName("DuckDBExerciseToolbar")
         toolbar.setStyleSheet(
-            "QFrame#DuckDBExerciseToolbar {background:#111a29;border:1px solid #2d3850;"
+            "QFrame#DuckDBExerciseToolbar {background:#111a29;border:1px solid #263754;"
             "border-radius:10px;}"
         )
         toolbar_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, toolbar)
@@ -133,7 +133,7 @@ class DuckDBExercisesWidget(QWidget):
         self.navigation_card.layout.setSpacing(9)
         nav_title_row = QHBoxLayout()
         nav_title = QLabel("▤  DuckDB Exercises")
-        nav_title.setStyleSheet("font-size:13pt;font-weight:700;color:#f4f6fb;")
+        nav_title.setStyleSheet("font-size:13pt;font-weight:700;color:#FFFFFF;")
         nav_title_row.addWidget(nav_title, 1)
         self.progress_count = QLabel("0/12")
         self.progress_count.setObjectName("Muted")
@@ -161,9 +161,9 @@ class DuckDBExercisesWidget(QWidget):
             "QListWidget#DuckDBCourseNavigation {background:transparent;border:none;outline:none;}"
             "QListWidget#DuckDBCourseNavigation::item {padding:9px 8px;border-radius:7px;"
             "border-left:3px solid transparent;}"
-            "QListWidget#DuckDBCourseNavigation::item:selected {background:#202b40;"
-            "border-left:3px solid #8b5cf6;color:#ffffff;}"
-            "QListWidget#DuckDBCourseNavigation::item:hover {background:#182235;}"
+            "QListWidget#DuckDBCourseNavigation::item:selected {background:#16253D;"
+            "border-left:3px solid #8A5CFF;color:#ffffff;}"
+            "QListWidget#DuckDBCourseNavigation::item:hover {background:#121F34;}"
         )
         self.exercise_list.currentItemChanged.connect(self._exercise_selected)
         self.navigation_card.layout.addWidget(self.exercise_list, 1)
@@ -180,9 +180,9 @@ class DuckDBExercisesWidget(QWidget):
         self.workspace_splitter.setOpaqueResize(True)
         self.workspace_splitter.setHandleWidth(7)
         self.workspace_splitter.setStyleSheet(
-            "QSplitter#DuckDBLearnPracticeSplitter::handle {background:#303a52;"
+            "QSplitter#DuckDBLearnPracticeSplitter::handle {background:#263754;"
             "border-radius:2px;margin:4px 1px;}"
-            "QSplitter#DuckDBLearnPracticeSplitter::handle:hover {background:#8b5cf6;}"
+            "QSplitter#DuckDBLearnPracticeSplitter::handle:hover {background:#8A5CFF;}"
         )
 
         self.learn_card = Card()
@@ -223,7 +223,7 @@ class DuckDBExercisesWidget(QWidget):
         self.practice_card.layout.addWidget(self.practice_scroll, 1)
         practice_heading = QHBoxLayout()
         practice_title = QLabel("Practice")
-        practice_title.setStyleSheet("font-size:13pt;font-weight:700;color:#f4f6fb;")
+        practice_title.setStyleSheet("font-size:13pt;font-weight:700;color:#FFFFFF;")
         practice_heading.addWidget(practice_title)
         practice_heading.addStretch()
         self.status_combo = QComboBox()
@@ -256,7 +256,7 @@ class DuckDBExercisesWidget(QWidget):
         self.question_prompt = QLabel("")
         self.question_prompt.setWordWrap(True)
         self.question_prompt.setStyleSheet(
-            "background:#181c31;border:1px solid #3b3f61;border-radius:8px;"
+            "background:#111A2D;border:1px solid #3b3f61;border-radius:8px;"
             "color:#d9def0;padding:8px 10px;"
         )
         practice_layout.addWidget(self.question_prompt)
@@ -300,15 +300,15 @@ class DuckDBExercisesWidget(QWidget):
         self.result_table.horizontalHeader().setStretchLastSection(True)
         self.result_table.setMinimumHeight(125)
         self.result_table.setStyleSheet(
-            "QTableWidget {background:#111827;alternate-background-color:#182235;"
-            "color:#eef2fa;border:1px solid #303a52;border-radius:8px;}"
-            "QHeaderView::section {background:#202b40;color:#f4f6fb;padding:7px;"
-            "border:none;border-right:1px solid #34405a;font-weight:650;}"
+            "QTableWidget {background:#0C1627;alternate-background-color:#121F34;"
+            "color:#EEF4FF;border:1px solid #263754;border-radius:8px;}"
+            "QHeaderView::section {background:#16253D;color:#FFFFFF;padding:7px;"
+            "border:none;border-right:1px solid #33425E;font-weight:650;}"
         )
         practice_layout.addWidget(self.result_table, 2)
 
         notes_label = QLabel("Notes & reasoning")
-        notes_label.setStyleSheet("font-weight:650;color:#e7ebf5;")
+        notes_label.setStyleSheet("font-weight:650;color:#E9EFFA;")
         practice_layout.addWidget(notes_label)
         self.notes = QTextEdit()
         self.notes.setPlaceholderText(
@@ -318,7 +318,7 @@ class DuckDBExercisesWidget(QWidget):
         self.notes.setMaximumHeight(135)
         self.notes.textChanged.connect(self._notes_changed)
         self.notes.setStyleSheet(
-            "QTextEdit {background:#151c2b;border:1px solid #343c55;border-radius:8px;padding:7px;}"
+            "QTextEdit {background:#151c2b;border:1px solid #2D3B58;border-radius:8px;padding:7px;}"
         )
         practice_layout.addWidget(self.notes)
 

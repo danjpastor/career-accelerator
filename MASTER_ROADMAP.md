@@ -1,4 +1,4 @@
-# Career Accelerator — 90-Day Roadmap
+# Data Career Accelerator — 90-Day Roadmap
 
 This roadmap assumes the learner is beginning the Google Data Analytics
 Professional Certificate at **Course 1** with no prior certificate progress.

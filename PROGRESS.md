@@ -1,6 +1,6 @@
 # Progress
 
-Progress is managed by the Career Accelerator application and its local SQLite
+Progress is managed by the Data Career Accelerator application and its local SQLite
 database.
 
 The starter roadmap begins at:

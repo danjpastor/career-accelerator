@@ -7,38 +7,20 @@ import sqlite3
 import tempfile
 
 
-PROGRESS_PREFIX = "career_accelerator_"
-PRIVATE_PREFIX = "career_private_"
-
-def _database_digest(path: Path) -> str:
-    """Hash logical SQLite content so page-layout differences do not duplicate backups."""
+def _digest(path: Path) -> str:
     hasher = hashlib.sha256()
-    conn = sqlite3.connect(str(path))
-    try:
-        for line in conn.iterdump():
-            hasher.update(line.encode("utf-8"))
-            hasher.update(b"\n")
-    finally:
-        conn.close()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            hasher.update(chunk)
     return hasher.hexdigest()
 
 
 def _backup_files(backup_dir: Path) -> list[Path]:
-    """Return progress snapshots, which anchor each paired backup."""
     return sorted(
-        (
-            path
-            for path in Path(backup_dir).glob(f"{PROGRESS_PREFIX}*.db")
-            if "snapshot_" not in path.name
-        ),
+        Path(backup_dir).glob("career_accelerator_*.db"),
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
-
-
-def _private_pair(progress_backup: Path) -> Path:
-    suffix = progress_backup.name.removeprefix(PROGRESS_PREFIX)
-    return progress_backup.with_name(f"{PRIVATE_PREFIX}{suffix}")
 
 
 def _retained_backups(files: list[Path], now: datetime | None = None) -> set[Path]:
@@ -65,48 +47,20 @@ def _retained_backups(files: list[Path], now: datetime | None = None) -> set[Pat
 def prune_backups_with_report(backup_dir: Path) -> dict[str, int]:
     backup_dir = Path(backup_dir)
     backup_dir.mkdir(parents=True, exist_ok=True)
-    progress_files = _backup_files(backup_dir)
-    keep = _retained_backups(progress_files)
+    files = _backup_files(backup_dir)
+    keep = _retained_backups(files)
     removed = 0
     recovered_bytes = 0
-
-    for progress_path in progress_files:
-        if progress_path in keep:
-            continue
-        for path in (progress_path, _private_pair(progress_path)):
-            if not path.exists():
-                continue
-            try:
-                recovered_bytes += path.stat().st_size
-                path.unlink()
-                removed += 1
-            except OSError:
-                continue
-
-    # Clean private snapshots whose matching progress snapshot no longer exists.
-    for private_path in backup_dir.glob(f"{PRIVATE_PREFIX}*.db"):
-        suffix = private_path.name.removeprefix(PRIVATE_PREFIX)
-        progress_path = backup_dir / f"{PROGRESS_PREFIX}{suffix}"
-        if progress_path.exists():
+    for path in files:
+        if path in keep:
             continue
         try:
-            recovered_bytes += private_path.stat().st_size
-            private_path.unlink()
+            recovered_bytes += path.stat().st_size
+            path.unlink()
             removed += 1
         except OSError:
             continue
-
-    kept_files = 0
-    for progress_path in keep:
-        kept_files += 1
-        if _private_pair(progress_path).exists():
-            kept_files += 1
-
-    return {
-        "removed": removed,
-        "recovered_bytes": recovered_bytes,
-        "kept": kept_files,
-    }
+    return {"removed": removed, "recovered_bytes": recovered_bytes, "kept": len(keep)}
 
 
 def prune_backups(backup_dir: Path) -> int:
@@ -126,95 +80,44 @@ def _consistent_snapshot(source: Path, destination: Path) -> None:
         source_conn.close()
 
 
-def _same_snapshot(current: Path, previous: Path | None) -> bool:
-    if previous is None or not previous.exists():
-        return False
-    try:
-        return _database_digest(current) == _database_digest(previous)
-    except (OSError, sqlite3.DatabaseError):
-        return False
-
-
-def _temporary_snapshot(source: Path, backup_dir: Path, prefix: str) -> Path:
-    with tempfile.NamedTemporaryFile(
-        prefix=f"{prefix}snapshot_",
-        suffix=".db",
-        dir=backup_dir,
-        delete=False,
-    ) as handle:
-        snapshot = Path(handle.name)
-    snapshot.unlink(missing_ok=True)
-    _consistent_snapshot(source, snapshot)
-    return snapshot
-
-
 def create_backup(root: Path):
-    """Create a timestamp-matched backup pair for public and private data."""
     root = Path(root)
-    progress_source = root / "data" / "career_accelerator.db"
-    private_source = root / "data" / "career_private.db"
+    source = root / "data" / "career_accelerator.db"
     backup_dir = root / "backups"
     backup_dir.mkdir(parents=True, exist_ok=True)
+    if not source.exists():
+        return backup_dir / f"career_accelerator_{datetime.now():%Y%m%d_%H%M%S}.db"
 
-    if not progress_source.exists():
-        return backup_dir / f"{PROGRESS_PREFIX}{datetime.now():%Y%m%d_%H%M%S}.db"
-
-    progress_snapshot = _temporary_snapshot(
-        progress_source,
-        backup_dir,
-        PROGRESS_PREFIX,
-    )
-    private_snapshot = (
-        _temporary_snapshot(private_source, backup_dir, PRIVATE_PREFIX)
-        if private_source.exists()
-        else None
-    )
-
+    existing = _backup_files(backup_dir)
+    with tempfile.NamedTemporaryFile(
+        prefix="career_accelerator_snapshot_", suffix=".db", dir=backup_dir, delete=False
+    ) as handle:
+        snapshot = Path(handle.name)
     try:
-        existing = _backup_files(backup_dir)
-        newest_progress = existing[0] if existing else None
-        newest_private = (
-            _private_pair(newest_progress)
-            if newest_progress is not None
-            else None
-        )
+        snapshot.unlink(missing_ok=True)
+        _consistent_snapshot(source, snapshot)
+        if existing:
+            newest = existing[0]
+            try:
+                if (
+                    snapshot.stat().st_size == newest.stat().st_size
+                    and _digest(snapshot) == _digest(newest)
+                ):
+                    snapshot.unlink(missing_ok=True)
+                    prune_backups_with_report(backup_dir)
+                    return newest
+            except OSError:
+                pass
 
-        progress_unchanged = _same_snapshot(
-            progress_snapshot,
-            newest_progress,
-        )
-        private_unchanged = (
-            private_snapshot is None
-            and (newest_private is None or not newest_private.exists())
-        ) or (
-            private_snapshot is not None
-            and _same_snapshot(private_snapshot, newest_private)
-        )
-
-        if newest_progress is not None and progress_unchanged and private_unchanged:
-            progress_snapshot.unlink(missing_ok=True)
-            if private_snapshot is not None:
-                private_snapshot.unlink(missing_ok=True)
-            prune_backups_with_report(backup_dir)
-            return newest_progress
-
-        stamp = f"{datetime.now():%Y%m%d_%H%M%S}"
-        progress_target = backup_dir / f"{PROGRESS_PREFIX}{stamp}.db"
-        private_target = backup_dir / f"{PRIVATE_PREFIX}{stamp}.db"
+        target = backup_dir / f"career_accelerator_{datetime.now():%Y%m%d_%H%M%S}.db"
         counter = 1
-        while progress_target.exists() or private_target.exists():
-            token = f"{stamp}_{counter}"
-            progress_target = backup_dir / f"{PROGRESS_PREFIX}{token}.db"
-            private_target = backup_dir / f"{PRIVATE_PREFIX}{token}.db"
+        while target.exists():
+            target = backup_dir / (
+                f"career_accelerator_{datetime.now():%Y%m%d_%H%M%S}_{counter}.db"
+            )
             counter += 1
-
-        progress_snapshot.replace(progress_target)
-        if private_snapshot is not None:
-            private_snapshot.replace(private_target)
-
+        snapshot.replace(target)
         prune_backups_with_report(backup_dir)
-        return progress_target
+        return target
     finally:
-        progress_snapshot.unlink(missing_ok=True)
-        if private_snapshot is not None:
-            private_snapshot.unlink(missing_ok=True)
+        snapshot.unlink(missing_ok=True)

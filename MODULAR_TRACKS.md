@@ -1,6 +1,6 @@
 # Modular Progress Architecture
 
-Career Accelerator uses two independent layers.
+Data Career Accelerator uses two independent layers.
 
 ## Sprint Layer
 

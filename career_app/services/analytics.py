@@ -153,7 +153,7 @@ def readiness(conn, state):
         "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
     ).fetchone()[0]
     applications = conn.execute(
-        "SELECT COUNT(*) FROM private_data.applications"
+        "SELECT COUNT(*) FROM applications"
     ).fetchone()[0]
     evidence_count = conn.execute(
         "SELECT COUNT(*) FROM evidence"

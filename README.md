@@ -1,4 +1,4 @@
-# Career Accelerator
+# Data Career Accelerator
 
 A local desktop application for managing a 90-day transition into data
 analytics. It combines learning progress, adaptive planning, SQL
@@ -10,7 +10,7 @@ job-readiness evidence, applications, and Git publishing.
 On Windows, double-click:
 
 ```text
-Career Accelerator.bat
+Data Career Accelerator.bat
 ```
 
 The launcher creates a local `.venv`, installs the requirements, and
@@ -24,14 +24,24 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.1.0 includes:
+Version 10.0.15 includes:
+- Seamlessly faded encouragement-card rocket artwork clipped to the card's rounded geometry
+- Slow animated gradients on visible primary-action buttons, paused while the app is inactive
+- Larger responsive sidebar brand lockup
+- Dashboard encouragement-card rocket artwork
+- Gradient optional-practice recommendation card
 
-- A Git-safe `data/career_accelerator.db` containing learning, study, SQL, portfolio, roadmap, achievement, evidence, and summary progress.
-- A separate local-only `data/career_private.db` containing job-application details and device-specific application settings.
-- Automatic one-time migration of legacy application and settings rows into the private database, followed by a progress-database vacuum that removes dropped private values from unused SQLite pages.
-- Paired progress/private backups while keeping the private database and all backup files excluded from Git.
-- Public progress publishing that exposes application counts only, never company names, contacts, follow-up details, or application notes.
+- the Data Career Accelerator rebrand using the approved horizontal DATA logo,
+- a shared midnight-navy, electric-violet, magenta, coral-orange, accent-blue, and white visual system,
+- gradient primary actions, rebranded navigation states, cards, forms, tables, editors, scrollbars, and learning workspaces,
+- the approved Data program/app icon in the window, launcher, shortcuts, and sidebar,
+- unchanged functional behavior, page routing, responsive breakpoints, card geometry, database structure, and progress data,
 
+- Automatically removes false Google Course 5 Module 5/6 completion events created by older builds.
+- Recalculates the current weekly Google quota after removing invalid completion credit.
+- Clears and regenerates today's frozen focus snapshot when invalid certificate progress is repaired.
+- Preserves learner notes and study-session history while removing only the invalid generated task links.
+- Keeps the corrected checkpoint at Course 6, Module 1 after valid completion of Course 5 Module 4.
 - Text-bearing rows now scale with the Settings interface-size control, including task rows, focus rows, sidebar metrics, list items, tree items, tables, form fields, dropdowns, and buttons.
 - Explicit fixed-height controls are raised only as needed by their live font metrics, preventing vertical clipping at 110% and 120% while leaving card geometry tied to the window.
 - The Growth Over Time period selector dynamically reserves enough width for its label, padding, and arrow button at every interface scale.
@@ -120,23 +130,14 @@ app.py           Application entry point
 
 ## Data
 
-Career Accelerator separates shareable progress from private local records:
+Runtime progress is stored locally in:
 
 ```text
-data/career_accelerator.db   # Git-safe progress; may be committed
-data/career_private.db       # applications + local settings; Git-ignored
+data/career_accelerator.db
 ```
 
-The progress database contains roadmap completion, study sessions, SQL
-practice, portfolio milestones, achievements, demonstrated evidence, and
-weekly summaries. The private database contains company, role, contact,
-follow-up, resume-version, application-note, and local UI preference data.
-
-On first launch after upgrading, existing application and settings rows are
-moved automatically into the private database. The progress database is then
-vacuumed so the removed private values are not retained in unused SQLite
-pages. Backups contain a paired copy of both databases and remain excluded
-from Git.
+The database and backup directory are excluded from Git by default.
+Existing progress is preserved when application files are updated.
 
 ## Keyboard Shortcuts
 
@@ -159,10 +160,10 @@ from Git.
 ## Windows Icon and Shortcuts
 
 Windows does not support assigning a unique icon directly to an individual
-`.bat` file. Career Accelerator therefore applies the custom icon to:
+`.bat` file. Data Career Accelerator therefore applies the custom icon to:
 
 - The PySide6 application window and taskbar entry
-- A repository launcher shortcut named `Career Accelerator.lnk`
+- A repository launcher shortcut named `Data Career Accelerator.lnk`
 - The Desktop shortcut created by `create-desktop-shortcut.vbs`
 
 The batch launcher automatically creates the repository shortcut when it is
@@ -194,7 +195,7 @@ as Dashboard tasks. Clicking a milestone saves the state immediately.
 
 ## Current Google Checkpoint Task
 
-Career Accelerator keeps one tracked task for the active Google course and
+Data Career Accelerator keeps one tracked task for the active Google course and
 module. It receives highest Learning priority and appears in Today’s Focus
 and Next Tasks until completed. Changing the course, module, or sprint
 retargets and reopens it. Factory Reset creates Course 1, Module 1.

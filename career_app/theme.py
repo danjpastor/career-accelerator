@@ -1,23 +1,30 @@
 from pathlib import Path
 
 COLORS = {
-    "bg": "#08111f",
-    "sidebar": "#0b1627",
-    "panel": "#101a2b",
-    "panel_alt": "#131f33",
-    "panel_hover": "#182844",
-    "border": "#24344d",
-    "text": "#f7f9fd",
-    "muted": "#9aa9bf",
-    "purple": "#8b5cf6",
-    "purple_soft": "#6d4cc7",
-    "purple_dark": "#402b73",
-    "blue": "#4c8dff",
-    "green": "#4fd08b",
-    "orange": "#ff9d54",
-    "gold": "#f5c451",
-    "red": "#ef6577",
-    "cyan": "#54c9c2",
+    # Data Career Accelerator rebrand palette. These values are deliberately
+    # centralized so every existing page inherits the new visual system while
+    # keeping its current layout and behavior unchanged.
+    "bg": "#080F1D",
+    "sidebar": "#090F1B",
+    "panel": "#0E192B",
+    "panel_alt": "#121F34",
+    "panel_hover": "#182A46",
+    "border": "#263754",
+    "text": "#FFFFFF",
+    "muted": "#A8B4C8",
+    "purple": "#8A5CFF",
+    "purple_soft": "#A56CFF",
+    "purple_dark": "#4D2E84",
+    "magenta": "#FF4DB8",
+    "blue": "#39B0FF",
+    "green": "#4FD08B",
+    "orange": "#FF8A3D",
+    "gold": "#F5C451",
+    "red": "#FF657D",
+    "cyan": "#39B0FF",
+    # Course-style widgets use these semantic aliases.
+    "surface": "#0C1627",
+    "surface_alt": "#111D31",
 }
 
 def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
@@ -36,23 +43,33 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         background: {c['bg']};
     }}
     QFrame#Sidebar {{
-        background: {c['sidebar']};
-        border-right: 1px solid {c['border']};
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 #070D18, stop:1 {c['sidebar']});
+        border-right: 1px solid #2A2444;
     }}
     QFrame#Card {{
-        background: {c['panel']};
+        background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+                    stop:0 #101D31, stop:1 {c['panel']});
         border: 1px solid {c['border']};
         border-radius: 13px;
     }}
     QFrame#SoftPanel {{
-        background: {c['panel_alt']};
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:1,
+                    stop:0 #14233B, stop:1 {c['panel_alt']});
         border: 1px solid {c['border']};
         border-radius: 10px;
     }}
     QFrame#SidebarCard {{
-        background: {c['panel']};
-        border: 1px solid {c['border']};
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:1,
+                    stop:0 #111C31, stop:1 #0D1728);
+        border: 1px solid #2D3658;
         border-radius: 12px;
+    }}
+    QFrame#BrandBanner {{
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 #351536, stop:0.42 #20143B, stop:0.72 #151A38, stop:1 #251536);
+        border: 1px solid #D05AAA;
+        border-radius: 13px;
     }}
     QLabel {{
         background: transparent;
@@ -100,19 +117,22 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         color: #66758c;
     }}
     QPushButton#Primary {{
-        background: {c['purple']};
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 {c['magenta']}, stop:1 {c['purple']});
         color: white;
         font-weight: 700;
-        border: none;
+        border: 1px solid #B66CFF;
         padding: 11px 14px;
     }}
     QPushButton#Primary:hover {{
-        background: #9d75f7;
-        border: 1px solid #c4b0ff;
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 #FF6BC6, stop:1 #A477FF);
+        border: 1px solid #E0B5FF;
     }}
     QPushButton#Primary:pressed {{
-        background: #7444e8;
-        border: 1px solid #d0c0ff;
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 #D6379A, stop:1 #6F42D8);
+        border: 1px solid #F3C5FF;
         padding-top: 13px;
         padding-bottom: 9px;
     }}
@@ -125,9 +145,9 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         border-radius: 9px;
     }}
     QPushButton#Nav:hover {{
-        background: #1a2d4b;
+        background: #17243C;
         color: white;
-        border-left: 3px solid {c['purple_soft']};
+        border-left: 3px solid {c['magenta']};
     }}
     QPushButton#Nav:pressed {{
         background: #101d32;
@@ -138,21 +158,23 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
     }}
     QPushButton#Nav:checked {{
         background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                    stop:0 #563c9f, stop:1 #47307f);
+                    stop:0 #3A174F, stop:0.58 #512677, stop:1 #342358);
         color: white;
-        border-left: 3px solid #a98bff;
+        border: 1px solid #7E4FC4;
+        border-left: 3px solid {c['magenta']};
     }}
     QPushButton#Nav:checked:hover {{
         background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                    stop:0 #6549b4, stop:1 #52378f);
-        border-left: 3px solid #c4b0ff;
+                    stop:0 #4A1C66, stop:0.58 #673294, stop:1 #44306E);
+        border: 1px solid #A46CEC;
+        border-left: 3px solid #FF72C9;
     }}
     QLineEdit, QTextEdit, QComboBox, QListWidget, QTableWidget, QSpinBox {{
         background: {c['panel_alt']};
         border: 1px solid {c['border']};
         border-radius: 8px;
         padding: 7px;
-        selection-background-color: #50348d;
+        selection-background-color: #6B2F94;
     }}
     QComboBox {{
         padding: 7px 34px 7px 10px;
@@ -167,7 +189,7 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
     }}
     QComboBox:focus, QComboBox:on {{
         background: #17253b;
-        border: 1px solid {c['purple']};
+        border: 1px solid {c['magenta']};
     }}
     QComboBox::drop-down {{
         subcontrol-origin: padding;
@@ -194,7 +216,7 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         border-radius: 9px;
         padding: 5px;
         outline: 0;
-        selection-background-color: #4d367f;
+        selection-background-color: #5F2D85;
         selection-color: white;
     }}
     QComboBox QAbstractItemView::item {{
@@ -278,7 +300,8 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         color: transparent;
     }}
     QProgressBar::chunk {{
-        background: {c['purple']};
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 {c['magenta']}, stop:1 {c['purple']});
         border-radius: 4px;
     }}
     QSlider::groove:horizontal {{
@@ -287,7 +310,8 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         border-radius: 3px;
     }}
     QSlider::sub-page:horizontal {{
-        background: {c['purple']};
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+                    stop:0 {c['magenta']}, stop:1 {c['purple']});
         border-radius: 3px;
     }}
     QSlider::add-page:horizontal {{
@@ -295,7 +319,7 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         border-radius: 3px;
     }}
     QSlider::handle:horizontal {{
-        background: #b9a4ff;
+        background: #FF8AD3;
         border: 2px solid {c['purple_dark']};
         width: 16px;
         height: 16px;
@@ -317,7 +341,7 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         border: none;
     }}
     QScrollBar::handle:vertical {{
-        background: #344660;
+        background: #34415C;
         min-height: 34px;
         border: 2px solid transparent;
         border-radius: 5px;
@@ -335,7 +359,7 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         border: none;
     }}
     QScrollBar::handle:horizontal {{
-        background: #344660;
+        background: #34415C;
         min-width: 34px;
         border: 2px solid transparent;
         border-radius: 5px;
@@ -458,6 +482,18 @@ def stylesheet(scale: float = 1.0, content_scale: float = 1.0):
         color: {c['muted']};
         font-weight: 700;
         letter-spacing: 0.4px;
+    }}
+    QStatusBar {{
+        background: #070D18;
+        color: {c['muted']};
+        border-top: 1px solid #1D2B43;
+    }}
+    QToolTip {{
+        background: #121F34;
+        color: white;
+        border: 1px solid {c['purple_soft']};
+        padding: 5px 8px;
+        border-radius: 6px;
     }}
     """
     from career_app.ui.responsive import scaled_stylesheet

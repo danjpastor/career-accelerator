@@ -92,20 +92,20 @@ class FeedbackLabel(QLabel):
 
     def setText(self, text: str) -> None:  # noqa: N802 - Qt API name
         super().setText(text)
-        purple = COLORS.get("purple", "#8b5cf6")
+        purple = COLORS.get("purple", "#8A5CFF")
         if text.startswith("✅"):
             background, border, foreground = "#15382d", "#2fa67d", "#d8fff0"
         elif text.startswith("❌") or text.startswith("Not quite"):
             background, border, foreground = "#3a2028", "#d25b76", "#ffe4ea"
         elif text.startswith("💡"):
-            background, border, foreground = "#29223f", purple, "#f2eaff"
+            background, border, foreground = "#251737", purple, "#f2eaff"
         elif text:
-            background, border, foreground = "#20283b", "#52627f", "#e7ecf8"
+            background, border, foreground = "#14233B", "#52627f", "#e7ecf8"
         else:
             background, border, foreground = (
                 "transparent",
                 "transparent",
-                COLORS.get("muted", "#aeb0c5"),
+                COLORS.get("muted", "#A8B4C8"),
             )
         self.setStyleSheet(
             "QLabel {"
@@ -131,9 +131,26 @@ class ExerciseSuggestionPanel(QFrame):
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.setStyleSheet(
             "QFrame#ExerciseSuggestion {"
-            f"background:{COLORS.get('surface_alt', '#20213a')};"
-            f"border:1px solid {COLORS.get('purple', '#8b5cf6')};"
-            "border-radius:9px;"
+            "background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
+            "stop:0 #7117D9, stop:0.48 #C72A9C, stop:1 #F26F3D);"
+            "border:1px solid #FF9B58;"
+            "border-radius:10px;"
+            "}"
+            "QFrame#ExerciseSuggestion QLabel {"
+            "background:transparent;border:none;color:#FFFFFF;"
+            "}"
+            "QPushButton#SuggestionAction {"
+            "background:rgba(19,20,43,210);"
+            "border:1px solid rgba(255,255,255,90);"
+            "border-radius:8px;color:#FFFFFF;font-weight:700;"
+            "padding:6px 12px;"
+            "}"
+            "QPushButton#SuggestionAction:hover {"
+            "background:rgba(38,28,66,235);"
+            "border:1px solid #FFFFFF;"
+            "}"
+            "QPushButton#SuggestionAction:pressed {"
+            "background:rgba(10,12,28,235);"
             "}"
         )
         layout = QHBoxLayout(self)
@@ -149,7 +166,7 @@ class ExerciseSuggestionPanel(QFrame):
         self.text.setStyleSheet("background:transparent;border:none;font-size:9.5pt;")
         layout.addWidget(self.text, 1)
         self.open_button = QPushButton("Practice")
-        self.open_button.setObjectName("Secondary")
+        self.open_button.setObjectName("SuggestionAction")
         self.open_button.setMinimumHeight(30)
         self.open_button.setMaximumHeight(36)
         self.open_button.clicked.connect(self._open)
@@ -234,10 +251,10 @@ class ExercisePacksWidget(QWidget):
         self.breadcrumb_back.clicked.connect(self.show_pack_overview)
         breadcrumb_layout.addWidget(self.breadcrumb_back)
         self.breadcrumb_root = QLabel("Exercises")
-        self.breadcrumb_root.setStyleSheet("color:#b8c3d8;font-size:9.5pt;")
+        self.breadcrumb_root.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
         breadcrumb_layout.addWidget(self.breadcrumb_root)
         self.breadcrumb_pack = QLabel("›  Select a pack")
-        self.breadcrumb_pack.setStyleSheet("color:#b8c3d8;font-size:9.5pt;")
+        self.breadcrumb_pack.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
         breadcrumb_layout.addWidget(self.breadcrumb_pack)
         self.breadcrumb_page = QLabel("")
         self.breadcrumb_page.setStyleSheet("color:#dce4f3;font-size:9.5pt;")
@@ -342,11 +359,11 @@ class ExercisePacksWidget(QWidget):
 
         progress_heading = QLabel("PACK PROGRESS")
         progress_heading.setStyleSheet(
-            "color:#aebbd1;font-size:8.5pt;font-weight:700;"
+            "color:#A8B4C8;font-size:8.5pt;font-weight:700;"
         )
         library_body_layout.addWidget(progress_heading)
         self.pack_progress_text = QLabel("0%")
-        self.pack_progress_text.setStyleSheet("color:#f5f7fb;font-size:20pt;font-weight:700;")
+        self.pack_progress_text.setStyleSheet("color:#FFFFFF;font-size:20pt;font-weight:700;")
         library_body_layout.addWidget(self.pack_progress_text)
         self.pack_progress = QProgressBar()
         self.pack_progress.setRange(0, 100)
@@ -356,7 +373,7 @@ class ExercisePacksWidget(QWidget):
         self.pack_progress.setMaximumHeight(8)
         library_body_layout.addWidget(self.pack_progress)
         content_label = QLabel("LEARNING PATH")
-        content_label.setStyleSheet("color:#aebbd1;font-size:8.5pt;font-weight:700;")
+        content_label.setStyleSheet("color:#A8B4C8;font-size:8.5pt;font-weight:700;")
         library_body_layout.addWidget(content_label)
         self.content_list = QListWidget()
         self.content_list.setWordWrap(True)
@@ -426,7 +443,7 @@ class ExercisePacksWidget(QWidget):
 
         self.practice_prompt = QLabel("")
         self.practice_prompt.setWordWrap(True)
-        self.practice_prompt.setStyleSheet("font-size:11pt;font-weight:700;color:#f4f4fb;background:#1a2030;border:1px solid #343854;border-radius:9px;padding:10px;")
+        self.practice_prompt.setStyleSheet("font-size:11pt;font-weight:700;color:#FFFFFF;background:#0F1B2E;border:1px solid #263754;border-radius:9px;padding:10px;")
         self.practice_prompt.hide()
         practice_layout.addWidget(self.practice_prompt)
         self.practice_intro = QLabel(
@@ -473,10 +490,10 @@ class ExercisePacksWidget(QWidget):
         self.result_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.result_table.horizontalHeader().setStretchLastSection(True)
         self.result_table.setStyleSheet(
-            f"QTableWidget {{background:{COLORS.get('surface_alt', '#191a2c')};"
-            f"alternate-background-color:#202238;color:{COLORS.get('text', '#f4f4fb')};"
-            f"border:1px solid {COLORS.get('border', '#373955')};border-radius:8px;}}"
-            "QHeaderView::section {background:#292b47;color:#f4f4fb;"
+            f"QTableWidget {{background:{COLORS.get('surface_alt', '#111A2C')};"
+            f"alternate-background-color:#121F34;color:{COLORS.get('text', '#FFFFFF')};"
+            f"border:1px solid {COLORS.get('border', '#2B3656')};border-radius:8px;}}"
+            "QHeaderView::section {background:#1B2540;color:#FFFFFF;"
             "padding:7px;border:none;border-right:1px solid #3a3d5e;font-weight:600;}"
         )
         practice_layout.addWidget(self.result_table, 2)
@@ -491,10 +508,10 @@ class ExercisePacksWidget(QWidget):
         self.notes.setMinimumHeight(72)
         self.notes.setMaximumHeight(145)
         self.notes.setStyleSheet(
-            f"QTextEdit {{background:{COLORS.get('surface_alt', '#191a2c')};"
-            f"border:1px solid {COLORS.get('border', '#373955')};"
+            f"QTextEdit {{background:{COLORS.get('surface_alt', '#111A2C')};"
+            f"border:1px solid {COLORS.get('border', '#2B3656')};"
             "border-radius:8px;padding:7px;}"
-            f"QTextEdit:focus {{border:1px solid {COLORS.get('purple', '#8b5cf6')};}}"
+            f"QTextEdit:focus {{border:1px solid {COLORS.get('purple', '#8A5CFF')};}}"
         )
         practice_layout.addWidget(self.notes)
 

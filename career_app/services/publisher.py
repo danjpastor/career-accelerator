@@ -3,7 +3,7 @@ from pathlib import Path
 def publish(conn, root: Path, state, project_names, readiness):
     sql_count = conn.execute("SELECT COUNT(*) FROM sql_practice").fetchone()[0]
     hours = conn.execute("SELECT COALESCE(SUM(hours),0) FROM study_sessions").fetchone()[0]
-    applications = conn.execute("SELECT COUNT(*) FROM private_data.applications").fetchone()[0]
+    applications = conn.execute("SELECT COUNT(*) FROM applications").fetchone()[0]
     summary = f"""# Career Accelerator Progress Snapshot
 
 ## Current State

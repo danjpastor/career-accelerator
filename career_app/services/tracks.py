@@ -74,6 +74,274 @@ TRACK_ORDER = (
 )
 
 
+# Current English Google Data Analytics Professional Certificate curriculum.
+# Progression must use course-specific module totals rather than assuming every
+# course has the same number of modules.
+GOOGLE_COURSE_MODULE_COUNTS = {
+    1: 4,
+    2: 4,
+    3: 5,
+    4: 6,
+    5: 4,
+    6: 4,
+    7: 5,
+    8: 4,
+    9: 4,
+}
+
+
+def google_module_count(course):
+    """Return the valid module count for a Google certificate course."""
+    return int(GOOGLE_COURSE_MODULE_COUNTS.get(max(1, int(course)), 4))
+
+
+def normalize_google_position(course, module):
+    """Return a valid certificate checkpoint.
+
+    Invalid legacy checkpoints (for example Course 5, Module 5 or 6) move to
+    the first module of the next course. We intentionally do not carry an
+    overflow count because the overflow modules never represented real work.
+    """
+    course = max(1, int(course))
+    module = max(1, int(module))
+    total_courses = max(GOOGLE_COURSE_MODULE_COUNTS)
+
+    if course > total_courses:
+        return total_courses, google_module_count(total_courses)
+
+    if module > google_module_count(course):
+        if course < total_courses:
+            return course + 1, 1
+        return course, google_module_count(course)
+
+    return course, module
+
+
+def next_google_position(course, module):
+    """Advance one real module, rolling directly into the next course."""
+    course, module = normalize_google_position(course, module)
+    if module < google_module_count(course):
+        return course, module + 1
+    if course < max(GOOGLE_COURSE_MODULE_COUNTS):
+        return course + 1, 1
+    return course, module
+
+
+def _google_position_from_text(value):
+    match = re.search(
+        r"course\s*:?\s*(\d+).*module\s*:?\s*(\d+)",
+        str(value or ""),
+        re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    return int(match.group(1)), int(match.group(2))
+
+
+def _google_event_details(row):
+    try:
+        metadata = json.loads(row["metadata"] or "{}")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        metadata = {}
+
+    course = metadata.get("course")
+    module = metadata.get("module")
+    try:
+        if course is not None and module is not None:
+            position = (int(course), int(module))
+        else:
+            position = None
+    except (TypeError, ValueError):
+        position = None
+
+    if position is None:
+        position = _google_position_from_text(row["event_key"])
+    if position is None:
+        position = _google_position_from_text(row["item_label"])
+
+    task_id = metadata.get("task_id")
+    try:
+        task_id = int(task_id) if task_id is not None else None
+    except (TypeError, ValueError):
+        task_id = None
+    return position, task_id
+
+
+def _invalid_google_position(position):
+    if position is None:
+        return False
+    course, module = position
+    if course not in GOOGLE_COURSE_MODULE_COUNTS:
+        return True
+    return module < 1 or module > google_module_count(course)
+
+
+def repair_invalid_google_progress(conn):
+    """Remove legacy completions for certificate modules that never existed.
+
+    Earlier builds could generate Course 5 Modules 5 and 6. Those events must
+    not count toward the weekly quota, completion history, or today's frozen
+    focus plan. The repair preserves any learner notes by detaching task
+    workspaces before removing the invalid generated task rows.
+    """
+    event_rows = conn.execute(
+        """SELECT id,event_key,item_label,metadata
+           FROM track_events
+           WHERE track_key='google'"""
+    ).fetchall()
+
+    invalid_event_ids = []
+    invalid_target_keys = set()
+    invalid_task_ids = set()
+    for row in event_rows:
+        position, task_id = _google_event_details(row)
+        if not _invalid_google_position(position):
+            continue
+        invalid_event_ids.append(int(row["id"]))
+        invalid_target_keys.add(str(row["event_key"]))
+        if task_id is not None:
+            invalid_task_ids.add(task_id)
+
+    # Also catch an invalid active task or an old generated task whose event
+    # metadata did not contain its task id.
+    generated_rows = conn.execute(
+        """SELECT id,label
+           FROM sprint_tasks
+           WHERE sort_order<=?
+             AND sort_order>?
+             AND LOWER(label) LIKE 'continue google course%, module%'""",
+        (
+            TRACK_CONFIG["google"]["sort_band"],
+            TRACK_CONFIG["google"]["sort_band"] - 99999,
+        ),
+    ).fetchall()
+    for row in generated_rows:
+        position = _google_position_from_text(row["label"])
+        if _invalid_google_position(position):
+            invalid_task_ids.add(int(row["id"]))
+            if position is not None:
+                invalid_target_keys.add(
+                    f"course:{position[0]}:module:{position[1]}"
+                )
+
+    active = conn.execute(
+        """SELECT task_id,target_key
+           FROM track_tasks
+           WHERE track_key='google'"""
+    ).fetchone()
+    if active is not None:
+        position = _google_position_from_text(active["target_key"])
+        if _invalid_google_position(position):
+            invalid_task_ids.add(int(active["task_id"]))
+            invalid_target_keys.add(str(active["target_key"]))
+
+    if not invalid_event_ids and not invalid_task_ids and not invalid_target_keys:
+        return {
+            "events_removed": 0,
+            "tasks_removed": 0,
+            "snapshot_rebuilt": False,
+        }
+
+    if invalid_event_ids:
+        placeholders = ",".join("?" for _ in invalid_event_ids)
+        conn.execute(
+            f"DELETE FROM track_events WHERE id IN ({placeholders})",
+            tuple(invalid_event_ids),
+        )
+
+    if invalid_target_keys:
+        placeholders = ",".join("?" for _ in invalid_target_keys)
+        values = tuple(sorted(invalid_target_keys))
+        conn.execute(
+            f"""DELETE FROM daily_focus
+                WHERE track_key='google'
+                  AND target_key IN ({placeholders})""",
+            values,
+        )
+        conn.execute(
+            f"""DELETE FROM track_tasks
+                WHERE track_key='google'
+                  AND target_key IN ({placeholders})""",
+            values,
+        )
+
+    if invalid_task_ids:
+        task_ids = tuple(sorted(invalid_task_ids))
+        placeholders = ",".join("?" for _ in task_ids)
+        # Keep notes and study-session history, but remove their stale task link.
+        conn.execute(
+            f"UPDATE task_workspaces SET task_id=NULL WHERE task_id IN ({placeholders})",
+            task_ids,
+        )
+        conn.execute(
+            f"UPDATE study_sessions SET task_id=NULL WHERE task_id IN ({placeholders})",
+            task_ids,
+        )
+        conn.execute(
+            f"DELETE FROM daily_focus WHERE task_id IN ({placeholders})",
+            task_ids,
+        )
+        conn.execute(
+            f"DELETE FROM sprint_tasks WHERE id IN ({placeholders})",
+            task_ids,
+        )
+
+    # Today's plan was calculated from the now-invalid weekly count. Remove the
+    # derived snapshot so the normal refresh path rebuilds it from clean data.
+    conn.execute(
+        "DELETE FROM daily_focus WHERE focus_date=?",
+        (date.today().isoformat(),),
+    )
+    conn.execute(
+        "DELETE FROM track_tasks WHERE track_key='google'"
+    )
+    conn.execute(
+        "DELETE FROM settings WHERE key='current_google_task_id'"
+    )
+    conn.execute(
+        """UPDATE track_state
+           SET status='Active',metadata='{}',updated_at=CURRENT_TIMESTAMP
+           WHERE track_key='google'"""
+    )
+    conn.commit()
+    return {
+        "events_removed": len(invalid_event_ids),
+        "tasks_removed": len(invalid_task_ids),
+        "snapshot_rebuilt": True,
+    }
+
+
+def normalize_google_checkpoint(conn, state):
+    """Repair invalid stored Google checkpoints before adaptive planning."""
+    repair_invalid_google_progress(conn)
+
+    current_course = int(state["google_course"])
+    current_module = int(state["google_module"])
+    course, module = normalize_google_position(current_course, current_module)
+    normalized = dict(state)
+    normalized["google_course"] = course
+    normalized["google_module"] = module
+
+    if (course, module) == (current_course, current_module):
+        return normalized
+
+    conn.execute(
+        """UPDATE program_state
+           SET google_course=?,google_module=?
+           WHERE id=1""",
+        (course, module),
+    )
+    # Remove the stale adaptive link so sync_all builds the corrected target.
+    conn.execute(
+        "DELETE FROM track_tasks WHERE track_key='google'"
+    )
+    conn.execute(
+        "DELETE FROM settings WHERE key='current_google_task_id'"
+    )
+    conn.commit()
+    return normalized
+
+
 APPLIED_BRANCHES = {'Power BI': (1, 2, 3, 4, 5, 6, 36),
  'Excel': (7,),
  'pandas': (8, 9, 10, 11),
@@ -1323,13 +1591,9 @@ def _google_target(
     state,
     pace,
 ):
-    course = max(
-        1,
-        int(state["google_course"]),
-    )
-    module = max(
-        1,
-        int(state["google_module"]),
+    course, module = normalize_google_position(
+        state["google_course"],
+        state["google_module"],
     )
     alignment = GOOGLE_ALIGNMENT.get(
         course,
@@ -2034,7 +2298,7 @@ def _setting_value(
 ):
     row = conn.execute(
         """SELECT value
-           FROM private_data.settings
+           FROM settings
            WHERE key=?""",
         (key,),
     ).fetchone()
@@ -3112,6 +3376,7 @@ def initialize(conn, state):
 
 
 def sync_all(conn, state):
+    state = normalize_google_checkpoint(conn, state)
     repair_track_links(conn)
     initialize(conn, state)
 
@@ -4521,16 +4786,24 @@ def complete_track_task(
                 "task_id": int(task_id),
             },
         )
+        next_course, next_module = next_google_position(
+            course,
+            module,
+        )
         conn.execute(
             """UPDATE program_state
-               SET google_module=google_module+1
-               WHERE id=1"""
+               SET google_course=?,google_module=?
+               WHERE id=1""",
+            (next_course, next_module),
         )
-        message = (
-            f"Google progress advanced to "
-            f"Course {course}, "
-            f"Module {module + 1}."
-        )
+        if (next_course, next_module) == (course, module):
+            message = "Google certificate progress is complete."
+        else:
+            message = (
+                f"Google progress advanced to "
+                f"Course {next_course}, "
+                f"Module {next_module}."
+            )
 
     elif track_key == "datacamp":
         row = _state_row(

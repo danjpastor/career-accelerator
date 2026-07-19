@@ -6,7 +6,7 @@
 git pull
 ```
 
-Launch `Career Accelerator.bat` and make routine progress changes
+Launch `Data Career Accelerator.bat` and make routine progress changes
 through the application.
 
 ## Before Committing

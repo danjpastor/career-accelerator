@@ -8,7 +8,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import (
     QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPen, QBrush,
-    QLinearGradient
+    QLinearGradient, QPixmap, QImage
 )
 from PySide6.QtWidgets import (
     QCheckBox, QFrame, QLabel, QHBoxLayout, QPushButton, QScrollArea,
@@ -42,6 +42,92 @@ class Card(QFrame):
             subtitle_label.setObjectName("Muted")
             subtitle_label.setWordWrap(True)
             self.layout.addWidget(subtitle_label)
+
+
+class BrandedBannerCard(Card):
+    """Card with responsive brand artwork painted behind its live contents.
+
+    The artwork is composited into the right side of the card instead of being
+    pasted in as a rectangular image.  A soft horizontal alpha fade blends the
+    illustration into the live card background, while a rounded clipping path
+    keeps every edge aligned with the card border at all responsive sizes.
+    """
+
+    def __init__(self, art_path=None, art_opacity=0.90):
+        super().__init__()
+        self.setObjectName("BrandBanner")
+        self._brand_art = QPixmap(str(art_path)) if art_path else QPixmap()
+        self._brand_art_opacity = max(0.0, min(1.0, float(art_opacity)))
+
+    def _trimmed_source_rect(self):
+        """Exclude the artwork's presentation-board top highlight."""
+        source_width = max(1.0, float(self._brand_art.width()))
+        source_height = max(1.0, float(self._brand_art.height()))
+        top_trim = min(4.0, max(0.0, source_height * 0.025))
+        return QRectF(0.0, top_trim, source_width, source_height - top_trim)
+
+    def paintEvent(self, event):  # noqa: N802 - Qt API name
+        super().paintEvent(event)
+        if self._brand_art.isNull() or self.width() <= 0 or self.height() <= 0:
+            return
+
+        width = self.width()
+        height = self.height()
+        inset = 1.0
+        radius = 13.0
+        card_rect = QRectF(inset, inset, width - (inset * 2), height - (inset * 2))
+        clip_path = QPainterPath()
+        clip_path.addRoundedRect(card_rect, radius, radius)
+
+        # Scale the complete illustration from the card height rather than
+        # stretching it to fill a wide rectangle.  This keeps the whole rocket
+        # visible and preserves the artwork's intended proportions.
+        source_rect = self._trimmed_source_rect()
+        art_height = max(1.0, height - 2.0)
+        aspect = source_rect.width() / max(1.0, source_rect.height())
+        natural_width = art_height * aspect
+        maximum_width = max(96.0, min(width * 0.48, 310.0))
+        art_width = min(natural_width, maximum_width)
+        if art_width < natural_width:
+            art_height = art_width / max(0.01, aspect)
+        art_rect = QRectF(
+            width - art_width - inset,
+            height - art_height - inset,
+            art_width,
+            art_height,
+        )
+
+        layer = QImage(width, height, QImage.Format.Format_ARGB32_Premultiplied)
+        layer.fill(Qt.GlobalColor.transparent)
+        layer_painter = QPainter(layer)
+        layer_painter.setRenderHint(
+            QPainter.RenderHint.SmoothPixmapTransform,
+            True,
+        )
+        layer_painter.drawPixmap(art_rect, self._brand_art, source_rect)
+
+        # Multiply the layer alpha by a wide fade.  The art now emerges from
+        # the card background gradually rather than ending at a hard vertical
+        # seam, with full detail retained near the rocket on the right.
+        layer_painter.setCompositionMode(
+            QPainter.CompositionMode.CompositionMode_DestinationIn
+        )
+        fade = QLinearGradient(art_rect.left(), 0, art_rect.right(), 0)
+        fade.setColorAt(0.00, QColor(255, 255, 255, 0))
+        fade.setColorAt(0.20, QColor(255, 255, 255, 24))
+        fade.setColorAt(0.48, QColor(255, 255, 255, 150))
+        fade.setColorAt(0.72, QColor(255, 255, 255, 235))
+        fade.setColorAt(1.00, QColor(255, 255, 255, 255))
+        layer_painter.fillRect(art_rect, QBrush(fade))
+        layer_painter.end()
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
+        painter.setClipPath(clip_path)
+        painter.setOpacity(self._brand_art_opacity)
+        painter.drawImage(0, 0, layer)
+
 
 
 def make_card_scrollable(card: Card) -> QScrollArea:
@@ -420,7 +506,7 @@ class CircularTimer(QWidget):
 
         painter.setPen(
             QPen(
-                QColor("#493777"),
+                QColor("#4D2E84"),
                 max(4.0, min(10 * scale, shortest * 0.08)),
                 Qt.SolidLine,
                 Qt.RoundCap,
@@ -565,7 +651,7 @@ class AreaChart(QWidget):
             y = top + plot_height * fraction
             label_value = axis_max * (1 - fraction)
 
-            painter.setPen(QPen(QColor("#1e2b42"), 1, Qt.DotLine))
+            painter.setPen(QPen(QColor("#233450"), 1, Qt.DotLine))
             painter.drawLine(left, int(y), width - right, int(y))
 
             painter.setPen(QColor(COLORS["muted"]))
@@ -683,7 +769,7 @@ class AreaChart(QWidget):
                 tooltip_width,
                 tooltip_height,
             )
-            painter.setBrush(QColor("#152238"))
+            painter.setBrush(QColor("#111D31"))
             painter.setPen(QPen(QColor(COLORS["border"]), 1))
             painter.drawRoundedRect(tooltip_rect, 7, 7)
 
@@ -901,13 +987,13 @@ class VisibleCheckBox(QWidget):
 
         if self._checked:
             fill = QColor(COLORS["purple"])
-            border = QColor("#a98bff")
+            border = QColor("#C18CFF")
         elif self._hovered:
-            fill = QColor("#182844")
-            border = QColor("#9aa9bf")
+            fill = QColor("#182A46")
+            border = QColor("#A8B4C8")
         else:
-            fill = QColor("#0c1728")
-            border = QColor("#72819a")
+            fill = QColor("#091321")
+            border = QColor("#7E8DA5")
 
         painter.setBrush(fill)
         painter.setPen(QPen(border, 1.6))
@@ -1173,7 +1259,7 @@ class FocusRow(QWidget):
         duration_label = self.duration_label
         duration_label.setObjectName("Muted")
         duration_label.setStyleSheet(
-            "color:#7f8798;font-weight:700;"
+            "color:#8A96AA;font-weight:700;"
             if completed
             else "font-weight:700;"
         )

@@ -1,14 +1,45 @@
 # Changelog
 
-## 10.1.0 - 2026-07-18
 
-- Split persistent data into a Git-safe progress database and a local-only private database.
-- Moved job applications and device settings to `data/career_private.db`.
-- Added an automatic legacy migration that copies private rows, drops their old public tables, and vacuums `data/career_accelerator.db`.
-- Allowed `data/career_accelerator.db` and `PROGRESS_SNAPSHOT.md` to be tracked while explicitly ignoring the private database and SQLite sidecar files.
-- Removed company and role names from public application achievement records.
-- Updated backup creation and retention to maintain timestamp-matched progress and private database pairs.
-- Updated Settings storage labels, reset messaging, and documentation for the public/private data boundary.
+## 10.0.15 - 2026-07-19
+
+- Blended the Dashboard encouragement artwork into the card with a responsive left-edge alpha fade instead of a hard rectangular seam.
+- Cropped the source artwork's presentation edge and clipped it to the live 13 px rounded card path so the artwork follows the card's top and corner geometry.
+- Added a slow animated color drift to visible primary-action button gradients while preserving existing button sizing, hover, press, keyboard, and click behavior.
+- Paused gradient animation whenever the application window is hidden or inactive to avoid unnecessary background work.
+- Preserved all page layouts, responsive breakpoints, database behavior, task logic, and navigation.
+
+
+## 10.0.14 - 2026-07-19
+
+- Enlarged the responsive horizontal Data Career Accelerator sidebar logo without changing sidebar breakpoints.
+- Added the approved rocket illustration as responsive background artwork in the Dashboard encouragement card.
+- Added the approved violet-magenta-coral gradient treatment to the optional Exercise Pack suggestion card.
+- Preserved all application behavior, database structures, responsive card geometry, and navigation rules.
+
+## 10.0.13 - 2026-07-19
+
+- Rebranded the application as **Data Career Accelerator** using the approved horizontal DATA logo and official program/app icon.
+- Applied the rebrand palette across the shared Qt theme, navigation, cards, controls, tables, editors, scrollbars, progress bars, and learning workspaces.
+- Added magenta-to-violet primary-action gradients, restrained branded borders, and a branded encouragement panel while preserving all existing layout rules.
+- Updated Windows titles, launcher messaging, shortcut names, and application icons without changing the underlying settings, database, planner, or progress model.
+- Preserved page structure, routing, responsive breakpoints, card sizing, task behavior, submissions, and all tracked functionality.
+
+## 10.0.12 - 2026-07-19
+
+- Removed legacy Google Course 5 Module 5 and Module 6 completion events so they no longer count toward weekly certificate quotas.
+- Removed the invalid generated roadmap tasks and daily-focus history rows while preserving learner notes and study-session text.
+- Cleared stale current-day focus snapshots produced from the incorrect completion count so the normal planner rebuilds today from corrected progress.
+- Reset cached Google track pace metadata and adaptive links before recalculating the active Course 6 Module 1 target.
+- Made the repair automatic and idempotent during normal track synchronization.
+
+## 10.0.11 - 2026-07-18
+
+- Corrected Google Certificate progression to use the actual module count for each course.
+- Course 5 now advances from Module 4 directly to Course 6, Module 1.
+- Existing invalid Course 5 Module 5 or 6 checkpoints are repaired automatically.
+- The Learning Progress module selector now limits modules based on the selected course.
+- Added explicit curriculum counts for all nine current certificate courses.
 
 ## 10.0.10 - 2026-07-17
 

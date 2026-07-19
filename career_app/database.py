@@ -3,13 +3,9 @@ from pathlib import Path
 import sqlite3
 
 ROOT = Path(__file__).resolve().parents[1]
-PROGRESS_DB_PATH = ROOT / "data" / "career_accelerator.db"
-PRIVATE_DB_PATH = ROOT / "data" / "career_private.db"
-# Compatibility alias retained for services that import DB_PATH.
-DB_PATH = PROGRESS_DB_PATH
-PRIVATE_SCHEMA_NAME = "private_data"
+DB_PATH = ROOT / "data" / "career_accelerator.db"
 
-PROGRESS_SCHEMA = """
+SCHEMA = """
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS program_state (
@@ -210,6 +206,19 @@ CREATE TABLE IF NOT EXISTS weekly_summaries (
     summary TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    applied_date TEXT NOT NULL,
+    company TEXT NOT NULL,
+    role TEXT NOT NULL,
+    location TEXT,
+    source TEXT,
+    status TEXT NOT NULL DEFAULT 'Wishlist',
+    follow_up_date TEXT,
+    resume_version TEXT,
+    contact TEXT,
+    notes TEXT
+);
 
 CREATE TABLE IF NOT EXISTS evidence (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -220,6 +229,10 @@ CREATE TABLE IF NOT EXISTS evidence (
     UNIQUE(skill, source_type, source_name)
 );
 
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
 
 
 CREATE TABLE IF NOT EXISTS track_state (
@@ -267,136 +280,14 @@ CREATE TABLE IF NOT EXISTS skill_state (
 );
 """
 
-# Tables in this schema remain local and must never be committed.
-PRIVATE_SCHEMA = """
-CREATE TABLE IF NOT EXISTS private_data.applications (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    applied_date TEXT NOT NULL,
-    company TEXT NOT NULL,
-    role TEXT NOT NULL,
-    location TEXT,
-    source TEXT,
-    status TEXT NOT NULL DEFAULT 'Wishlist',
-    follow_up_date TEXT,
-    resume_version TEXT,
-    contact TEXT,
-    notes TEXT
-);
-
-CREATE TABLE IF NOT EXISTS private_data.settings (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-);
-"""
-
-# Compatibility alias for older imports.
-SCHEMA = PROGRESS_SCHEMA
-
-
-def _table_exists(conn, schema: str, table: str) -> bool:
-    row = conn.execute(
-        f"SELECT 1 FROM {schema}.sqlite_master "
-        "WHERE type='table' AND name=?",
-        (table,),
-    ).fetchone()
-    return row is not None
-
-
-def _table_columns(conn, schema: str, table: str) -> set[str]:
-    return {
-        row["name"]
-        for row in conn.execute(
-            f"PRAGMA {schema}.table_info({table})"
-        ).fetchall()
-    }
-
-
-def _copy_legacy_table_to_private(
-    conn,
-    table: str,
-    target_columns: tuple[str, ...],
-) -> bool:
-    """Move a legacy public table into the attached private database."""
-    if not _table_exists(conn, "main", table):
-        return False
-
-    source_columns = _table_columns(conn, "main", table)
-    shared = [column for column in target_columns if column in source_columns]
-    if shared:
-        columns_sql = ", ".join(shared)
-        conn.execute(
-            f"INSERT OR REPLACE INTO {PRIVATE_SCHEMA_NAME}.{table} "
-            f"({columns_sql}) SELECT {columns_sql} FROM main.{table}"
-        )
-
-    conn.execute(f"DROP TABLE main.{table}")
-    return True
-
-
-def _migrate_private_data(conn) -> bool:
-    """Move existing private rows out of the Git-safe progress database."""
-    migrated = False
-    migrated |= _copy_legacy_table_to_private(
-        conn,
-        "applications",
-        (
-            "id",
-            "applied_date",
-            "company",
-            "role",
-            "location",
-            "source",
-            "status",
-            "follow_up_date",
-            "resume_version",
-            "contact",
-            "notes",
-        ),
-    )
-    migrated |= _copy_legacy_table_to_private(
-        conn,
-        "settings",
-        ("key", "value"),
-    )
-
-    # Older releases stored company and role names in application achievement
-    # descriptions. Keep the progress milestone while removing those details.
-    if _table_exists(conn, "main", "achievements"):
-        cursor = conn.execute(
-            """UPDATE main.achievements
-               SET description='Tracked a private job application.'
-               WHERE achievement_key LIKE 'application:%'"""
-        )
-        migrated |= cursor.rowcount > 0
-
-    conn.commit()
-    return bool(migrated)
-
-
 def connect():
-    PROGRESS_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PRIVATE_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    conn = sqlite3.connect(PROGRESS_DB_PATH)
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.execute(
-        f"ATTACH DATABASE ? AS {PRIVATE_SCHEMA_NAME}",
-        (str(PRIVATE_DB_PATH),),
-    )
-    conn.executescript(PROGRESS_SCHEMA)
-    conn.executescript(PRIVATE_SCHEMA)
+    conn.executescript(SCHEMA)
     _ensure_columns(conn)
-    migrated = _migrate_private_data(conn)
     conn.commit()
-
-    # Rebuild the public database after moving private rows. This removes
-    # dropped-table content from free pages before the database is committed.
-    if migrated:
-        conn.execute("VACUUM main")
-
     return conn
-
 
 def _ensure_columns(conn):
     additions = {
@@ -447,30 +338,19 @@ def _ensure_columns(conn):
             ("mastery", "INTEGER NOT NULL DEFAULT 1"),
             ("review_date", "TEXT"),
         ],
-    }
-    for table, columns in additions.items():
-        existing = _table_columns(conn, "main", table)
-        for name, definition in columns:
-            if name not in existing:
-                conn.execute(
-                    f"ALTER TABLE main.{table} ADD COLUMN {name} {definition}"
-                )
-
-    private_additions = {
         "applications": [
             ("resume_version", "TEXT"),
             ("contact", "TEXT"),
         ],
     }
-    for table, columns in private_additions.items():
-        existing = _table_columns(conn, PRIVATE_SCHEMA_NAME, table)
+    for table, columns in additions.items():
+        existing = {
+            row["name"]
+            for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+        }
         for name, definition in columns:
             if name not in existing:
-                conn.execute(
-                    f"ALTER TABLE {PRIVATE_SCHEMA_NAME}.{table} "
-                    f"ADD COLUMN {name} {definition}"
-                )
-
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
 
 def ensure_default_state(conn, start_date):
     if not conn.execute("SELECT 1 FROM program_state WHERE id=1").fetchone():
@@ -503,15 +383,12 @@ def update_state(conn, **fields):
     conn.commit()
 
 def setting(conn, key, default=None):
-    row = conn.execute(
-        f"SELECT value FROM {PRIVATE_SCHEMA_NAME}.settings WHERE key=?",
-        (key,),
-    ).fetchone()
+    row = conn.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
     return row["value"] if row else default
 
 def save_setting(conn, key, value):
     conn.execute(
-        f"""INSERT INTO {PRIVATE_SCHEMA_NAME}.settings(key,value) VALUES(?,?)
+        """INSERT INTO settings(key,value) VALUES(?,?)
            ON CONFLICT(key) DO UPDATE SET value=excluded.value""",
         (key, str(value)),
     )
@@ -520,8 +397,8 @@ def save_setting(conn, key, value):
 def factory_reset(conn, start_date):
     """Clear all user progress and rebuild a clean Course 1 state.
 
-    Private applications, local settings, and backup files on disk are
-    intentionally preserved.
+    Application preferences in the settings table and backup files on disk
+    are intentionally preserved.
     """
     progress_tables = [
         "daily_focus",
@@ -534,6 +411,7 @@ def factory_reset(conn, start_date):
         "sql_practice",
         "task_concept_tags",
         "exercise_pack_progress",
+        "applications",
         "evidence",
         "project_notes",
         "task_metadata",
@@ -573,7 +451,7 @@ def factory_reset(conn, start_date):
             sequence_tables,
         )
         conn.execute(
-            f"""DELETE FROM {PRIVATE_SCHEMA_NAME}.settings
+            """DELETE FROM settings
                WHERE key='current_google_task_id'
                   OR key LIKE 'track_%'"""
         )

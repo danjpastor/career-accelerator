@@ -81,10 +81,10 @@ class AppliedLabsWidget(QWidget):
         self.toolbar_row = toolbar_row
         toolbar_row.setSpacing(8)
         self.breadcrumb_root = QLabel("Applied Labs")
-        self.breadcrumb_root.setStyleSheet("color:#b8c3d8;font-size:9.5pt;")
+        self.breadcrumb_root.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
         toolbar_row.addWidget(self.breadcrumb_root)
         self.breadcrumb_category = QLabel("›  Select a lab")
-        self.breadcrumb_category.setStyleSheet("color:#b8c3d8;font-size:9.5pt;")
+        self.breadcrumb_category.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
         toolbar_row.addWidget(self.breadcrumb_category)
         self.breadcrumb_page = QLabel("")
         self.breadcrumb_page.setStyleSheet("color:#dce4f3;font-size:9.5pt;")
@@ -226,7 +226,7 @@ class AppliedLabsWidget(QWidget):
         self.sql_section = QFrame()
         self.sql_section.setObjectName("AppliedLabSqlCard")
         self.sql_section.setStyleSheet(
-            "QFrame#AppliedLabSqlCard {background:#121a2a;border:1px solid #2d3850;"
+            "QFrame#AppliedLabSqlCard {background:#121a2a;border:1px solid #263754;"
             "border-radius:10px;}"
         )
         sql_layout = QVBoxLayout(self.sql_section)
@@ -274,10 +274,10 @@ class AppliedLabsWidget(QWidget):
         self.result_table.horizontalHeader().setStretchLastSection(True)
         self.result_table.setMinimumHeight(140)
         self.result_table.setStyleSheet(
-            f"QTableWidget {{background:{COLORS.get('surface_alt', '#191a2c')};"
-            "alternate-background-color:#202238;color:#f4f4fb;"
-            f"border:1px solid {COLORS.get('border', '#373955')};border-radius:8px;}}"
-            "QHeaderView::section {background:#292b47;color:#f4f4fb;padding:7px;"
+            f"QTableWidget {{background:{COLORS.get('surface_alt', '#111A2C')};"
+            "alternate-background-color:#121F34;color:#FFFFFF;"
+            f"border:1px solid {COLORS.get('border', '#2B3656')};border-radius:8px;}}"
+            "QHeaderView::section {background:#1B2540;color:#FFFFFF;padding:7px;"
             "border:none;border-right:1px solid #3a3d5e;font-weight:600;}"
         )
         sql_layout.addWidget(self.result_table)
@@ -286,7 +286,7 @@ class AppliedLabsWidget(QWidget):
         progress_card = QFrame()
         progress_card.setObjectName("AppliedLabProgressCard")
         progress_card.setStyleSheet(
-            "QFrame#AppliedLabProgressCard {background:#171a2a;border:1px solid #343854;"
+            "QFrame#AppliedLabProgressCard {background:#111D31;border:1px solid #263754;"
             "border-radius:9px;}"
         )
         progress_layout = QVBoxLayout(progress_card)
@@ -303,10 +303,10 @@ class AppliedLabsWidget(QWidget):
         self.notes.setMinimumHeight(72)
         self.notes.setMaximumHeight(145)
         self.notes.setStyleSheet(
-            f"QTextEdit {{background:{COLORS.get('surface_alt', '#191a2c')};"
-            f"border:1px solid {COLORS.get('border', '#373955')};"
+            f"QTextEdit {{background:{COLORS.get('surface_alt', '#111A2C')};"
+            f"border:1px solid {COLORS.get('border', '#2B3656')};"
             "border-radius:8px;padding:7px;}"
-            f"QTextEdit:focus {{border:1px solid {COLORS.get('purple', '#8b5cf6')};}}"
+            f"QTextEdit:focus {{border:1px solid {COLORS.get('purple', '#8A5CFF')};}}"
         )
         progress_layout.addWidget(self.notes)
 

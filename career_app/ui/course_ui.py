@@ -38,12 +38,12 @@ from PySide6.QtWidgets import (
 from career_app.theme import COLORS
 
 
-ACCENT = COLORS.get("purple", "#8b5cf6")
-TEXT = COLORS.get("text", "#f4f4fb")
+ACCENT = COLORS.get("purple", "#8A5CFF")
+TEXT = COLORS.get("text", "#FFFFFF")
 MUTED = COLORS.get("muted", "#b5b7ca")
-BORDER = COLORS.get("border", "#343854")
-SURFACE = COLORS.get("surface", "#111827")
-SURFACE_ALT = COLORS.get("surface_alt", "#171a2a")
+BORDER = COLORS.get("border", "#263754")
+SURFACE = COLORS.get("surface", "#0C1627")
+SURFACE_ALT = COLORS.get("surface_alt", "#111D31")
 
 
 def clear_layout(layout: QVBoxLayout | QHBoxLayout) -> None:
@@ -92,7 +92,7 @@ def rich_text(value: str) -> str:
     rendered = re.sub(r"(?<!\*)\*([^*\n]+?)\*(?!\*)", r"<i>\1</i>", rendered)
     rendered = re.sub(
         r"\[([^\]]+)\]\(([^)]+)\)",
-        r"<a style='color:#c5b3ff;text-decoration:none;' href='\2'>\1</a>",
+        r"<a style='color:#D9C1FF;text-decoration:none;' href='\2'>\1</a>",
         rendered,
     )
     for key, token in tokens.items():
@@ -108,7 +108,7 @@ class SqlHighlighter(QSyntaxHighlighter):
         self.rules: list[tuple[re.Pattern[str], QTextCharFormat]] = []
 
         keyword = QTextCharFormat()
-        keyword.setForeground(QColor("#c6a3ff"))
+        keyword.setForeground(QColor("#D8B8FF"))
         keyword.setFontWeight(QFont.Weight.Bold)
         keyword_pattern = re.compile(
             r"\b(?:SELECT|FROM|WHERE|AND|OR|NOT|IN|EXISTS|JOIN|LEFT|RIGHT|INNER|"
@@ -134,7 +134,7 @@ class SqlHighlighter(QSyntaxHighlighter):
         self.rules.append((re.compile(r"\b\d+(?:\.\d+)?\b"), number))
 
         comment = QTextCharFormat()
-        comment.setForeground(QColor("#7f8aa6"))
+        comment.setForeground(QColor("#8392AA"))
         comment.setFontItalic(True)
         self.rules.append((re.compile(r"--[^\n]*"), comment))
 
@@ -155,7 +155,7 @@ class CodeCard(QFrame):
         self.setMinimumWidth(0)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.setStyleSheet(
-            "QFrame#CourseCodeCard {background:#101522;border:1px solid #303a52;"
+            "QFrame#CourseCodeCard {background:#0A1322;border:1px solid #263754;"
             "border-radius:10px;}"
         )
         layout = QVBoxLayout(self)
@@ -165,8 +165,8 @@ class CodeCard(QFrame):
         header = QWidget()
         header.setObjectName("CourseCodeHeader")
         header.setStyleSheet(
-            "QWidget#CourseCodeHeader {background:#151d2d;border-top-left-radius:10px;"
-            "border-top-right-radius:10px;border-bottom:1px solid #29334a;}"
+            "QWidget#CourseCodeHeader {background:#111D31;border-top-left-radius:10px;"
+            "border-top-right-radius:10px;border-bottom:1px solid #263754;}"
         )
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(12, 7, 8, 7)
@@ -184,7 +184,7 @@ class CodeCard(QFrame):
         language_key = (language or "code").lower()
         language_label = QLabel(label_map.get(language_key, language_key.upper()))
         language_label.setStyleSheet(
-            "color:#b9c4da;font-size:9pt;font-weight:600;"
+            "color:#B8C4D8;font-size:9pt;font-weight:600;"
         )
         header_layout.addWidget(language_label)
         header_layout.addStretch()
@@ -214,7 +214,7 @@ class CodeCard(QFrame):
         self.line_numbers.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.line_numbers.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.line_numbers.setStyleSheet(
-            "QPlainTextEdit {background:#111827;color:#6f7d95;border:none;"
+            "QPlainTextEdit {background:#0C1627;color:#6f7d95;border:none;"
             "border-right:1px solid #263148;padding:10px 7px;}"
         )
         code_row_layout.addWidget(self.line_numbers)
@@ -228,8 +228,8 @@ class CodeCard(QFrame):
         self.editor.setFrameShape(QFrame.Shape.NoFrame)
         self.editor.setFont(fixed_font)
         self.editor.setStyleSheet(
-            "QPlainTextEdit {background:#0f1420;color:#f3f5fb;border:none;"
-            "padding:10px 12px;selection-background-color:#6043b6;}"
+            "QPlainTextEdit {background:#091321;color:#FFFFFF;border:none;"
+            "padding:10px 12px;selection-background-color:#6B3FC5;}"
         )
         if language_key in {"sql", "duckdb", "sqlite"}:
             self._highlighter = SqlHighlighter(self.editor.document())
@@ -279,8 +279,8 @@ class SqlCodeEditor(QWidget):
         self.line_numbers.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.line_numbers.setFont(fixed_font)
         self.line_numbers.setStyleSheet(
-            "QPlainTextEdit {background:#0c111c;color:#72809a;border:none;"
-            "border-right:1px solid #29334a;padding:10px 7px;}"
+            "QPlainTextEdit {background:#080F1D;color:#72809a;border:none;"
+            "border-right:1px solid #263754;padding:10px 7px;}"
         )
 
         self.editor = QPlainTextEdit()
@@ -291,8 +291,8 @@ class SqlCodeEditor(QWidget):
         self.editor.setTabStopDistance(28)
         self.editor.setPlaceholderText("Write one read-only SELECT or WITH query here.")
         self.editor.setStyleSheet(
-            "QPlainTextEdit {background:#111321;color:#f3f4ff;border:none;padding:10px;"
-            "selection-background-color:#6747c7;}"
+            "QPlainTextEdit {background:#111321;color:#FFFFFF;border:none;padding:10px;"
+            "selection-background-color:#7346D1;}"
         )
         self._highlighter = SqlHighlighter(self.editor.document())
 
@@ -433,11 +433,11 @@ class CourseTable(QTableWidget):
         self.horizontalHeader().setMinimumSectionSize(60)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setStyleSheet(
-            "QTableWidget {background:#121927;alternate-background-color:#182235;"
-            "color:#edf1f8;border:1px solid #303a51;border-radius:9px;}"
+            "QTableWidget {background:#0D182A;alternate-background-color:#121F34;"
+            "color:#edf1f8;border:1px solid #263754;border-radius:9px;}"
             "QTableWidget::item {padding:7px 10px;border-bottom:1px solid #253047;}"
-            "QHeaderView::section {background:#1d293c;color:#dbe4f4;padding:8px 10px;"
-            "border:none;border-bottom:2px solid #7f5ae8;font-weight:650;}"
+            "QHeaderView::section {background:#172641;color:#dbe4f4;padding:8px 10px;"
+            "border:none;border-bottom:2px solid #8A5CFF;font-weight:650;}"
         )
         alignments = list(alignments or ["left"] * len(headers))
         for row_index, row in enumerate(rows):
@@ -478,10 +478,10 @@ class CourseCallout(QFrame):
     """Soft course callout used for goals, tasks, key ideas, and checkpoints."""
 
     STYLES = {
-        "goal": ("◎", "#7656dd", "#181c31", "#3d3f6a"),
-        "task": ("✓", "#7656dd", "#181c31", "#3d3f6a"),
-        "idea": ("♧", "#9d76ff", "#191b31", "#5f4f8d"),
-        "note": ("i", "#6d7d9b", "#171e2d", "#354158"),
+        "goal": ("◎", "#8A5CFF", "#111A2D", "#4D3A70"),
+        "task": ("✓", "#8A5CFF", "#111A2D", "#4D3A70"),
+        "idea": ("♧", "#A56CFF", "#121A2D", "#6D4D8D"),
+        "note": ("i", "#6d7d9b", "#101B2D", "#354158"),
         "warning": ("!", "#d7a55a", "#272116", "#6f5931"),
     }
 
@@ -738,7 +738,7 @@ class CoursePageWidget(QWidget):
         self.navigation = QFrame()
         self.navigation.setObjectName("CourseNavigationFooter")
         self.navigation.setStyleSheet(
-            "QFrame#CourseNavigationFooter {background:#121a2a;border:1px solid #2d3850;"
+            "QFrame#CourseNavigationFooter {background:#121a2a;border:1px solid #263754;"
             "border-radius:10px;}"
         )
         navigation_layout = QHBoxLayout(self.navigation)
@@ -760,7 +760,7 @@ class CoursePageWidget(QWidget):
         next_caption = QLabel("Next")
         next_caption.setStyleSheet("color:#8f9ab0;font-size:8.5pt;")
         self.next_title = QLabel("Continue")
-        self.next_title.setStyleSheet("color:#f3f5fb;font-size:10.5pt;font-weight:650;")
+        self.next_title.setStyleSheet("color:#FFFFFF;font-size:10.5pt;font-weight:650;")
         next_layout.addWidget(next_caption, 0, Qt.AlignmentFlag.AlignRight)
         next_layout.addWidget(self.next_title, 0, Qt.AlignmentFlag.AlignRight)
         navigation_layout.addLayout(next_layout)
@@ -860,7 +860,7 @@ class CoursePageWidget(QWidget):
         title_label.setWordWrap(True)
         title_label.setMinimumWidth(0)
         title_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
-        title_label.setStyleSheet("color:#f7f8fc;font-size:24pt;font-weight:700;")
+        title_label.setStyleSheet("color:#FFFFFF;font-size:24pt;font-weight:700;")
         title_column.addWidget(title_label)
         if subtitle:
             subtitle_label = QLabel(subtitle)
@@ -911,7 +911,7 @@ class CoursePageWidget(QWidget):
         layout.setSpacing(6)
         label = QLabel(rich_text(text))
         label.setTextFormat(Qt.TextFormat.RichText)
-        label.setStyleSheet("color:#f4f6fb;font-size:12pt;font-weight:700;")
+        label.setStyleSheet("color:#FFFFFF;font-size:12pt;font-weight:700;")
         layout.addWidget(label)
         layout.addWidget(horizontal_rule())
         target.addWidget(container)
@@ -930,7 +930,7 @@ class CoursePageWidget(QWidget):
             QSizePolicy.Policy.Preferred,
         )
         label.setStyleSheet(
-            "color:#bda8ff;background:#151c2c;border:1px solid #4b3f76;"
+            "color:#D0B2FF;background:#151c2c;border:1px solid #4b3f76;"
             "border-radius:7px;padding:5px 9px;font-size:9.5pt;font-weight:650;"
         )
         self._responsive_pills.append(label)
@@ -966,7 +966,7 @@ class CoursePageWidget(QWidget):
             marker.setFixedWidth(24)
             marker.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
             marker.setStyleSheet(
-                "color:#a987ff;font-size:10pt;font-weight:700;"
+                "color:#B679FF;font-size:10pt;font-weight:700;"
                 + (
                     "background:#2b2350;border-radius:9px;padding:1px;"
                     if ordered
@@ -1092,7 +1092,7 @@ class CoursePageWidget(QWidget):
             title_size = 24
         if self._title_label is not None:
             self._title_label.setStyleSheet(
-                f"color:#f7f8fc;font-size:{title_size}pt;font-weight:700;"
+                f"color:#FFFFFF;font-size:{title_size}pt;font-weight:700;"
             )
         for label in self._responsive_pills:
             width = max(1, label.width())
