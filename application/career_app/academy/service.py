@@ -259,10 +259,9 @@ class AcademyService:
         else:
             result = ValidationResult(False, f"Unsupported activity runtime: {activity.runtime}")
         state = self.progress.record_validation(lesson, activity, answer, result.as_dict())
-        if result.passed:
-            self._record_activity_evidence(lesson, activity)
-            if state.value == "Mastered":
-                self._record_lesson_mastery(lesson)
+        # Lesson and checkpoint progress demonstrate learning, but only
+        # substantial Academy projects, capstones, and labs belong in the
+        # employer-facing Demonstrated Evidence collection.
         self.sync_planner_task()
         return result
 
@@ -483,21 +482,32 @@ class AcademyService:
             )
         artifact_path = self._save_submission("skills_lab", lab.lab_id, lab.title, sql, notes, result)
         if result.passed:
+            source_type = str(
+                lab.evidence.get("source_type")
+                or ("Academy Capstone" if "capstone" in lab.lab_id.casefold() else "Academy Project")
+            )
+            relative_artifact = str(artifact_path.relative_to(self.repository_root))
             for skill in lab.teaches:
                 self._insert_evidence(
                     skill=skill,
-                    source_type="Skills Lab",
+                    source_type=source_type,
                     source_id=lab.lab_id,
                     source_name=lab.title,
-                    course_id=self.catalog.courses()[0].course_id,
+                    course_id=self._course_id_for_lab(lab.lab_id),
                     learning_item_id=lab.lab_id,
                     difficulty=lab.activity.difficulty,
                     dataset=lab.dataset_id,
-                    submission_path=str(artifact_path.relative_to(self.repository_root)),
+                    submission_path=relative_artifact,
                     job_competency=str(lab.evidence.get("job_competency") or "Applied analysis"),
                     notes=notes,
                     metadata={"validation": result.as_dict(), "deliverables": list(lab.deliverables)},
                 )
+            self._record_project_evidence(
+                lab=lab,
+                source_type=source_type,
+                artifact_path=relative_artifact,
+                notes=notes,
+            )
         self.sync_planner_task()
         return result
 
@@ -543,46 +553,44 @@ class AcademyService:
         self.conn.commit()
         return artifact
 
-    def _record_activity_evidence(self, lesson: LessonDefinition, activity: ActivityDefinition) -> None:
-        if not activity.evidence_eligible:
-            return
-        row = self.progress.activity_row(lesson.lesson_id, activity.activity_id)
-        if row is None or row["solution_viewed_at"] or row["last_attempt_solution_assisted"]:
-            return
-        location = self.index.lesson(lesson.lesson_id)
-        for skill in lesson.teaches:
-            self._insert_evidence(
-                skill=skill,
-                source_type="Academy Practice",
-                source_id=activity.activity_id,
-                source_name=f"{lesson.title} — {activity.title}",
-                course_id=location.course.course_id,
-                learning_item_id=activity.activity_id,
-                difficulty=activity.difficulty,
-                dataset=str(activity.validator.get("dataset_id") or ""),
-                submission_path=None,
-                job_competency="Independent problem solving",
-                notes="Validated independent work completed without viewing the full solution.",
-                metadata={"lesson_id": lesson.lesson_id, "activity_type": activity.activity_type.value},
-            )
+    def _course_id_for_lab(self, lab_id: str) -> str | None:
+        for course in self.catalog.courses():
+            if any(lab.lab_id == lab_id for lab in course.skills_labs):
+                return course.course_id
+        return None
 
-    def _record_lesson_mastery(self, lesson: LessonDefinition) -> None:
-        location = self.index.lesson(lesson.lesson_id)
-        for skill in lesson.teaches:
-            self._insert_evidence(
-                skill=skill,
-                source_type="Academy Mastery",
-                source_id=lesson.lesson_id,
-                source_name=lesson.title,
-                course_id=location.course.course_id,
-                learning_item_id=lesson.lesson_id,
-                difficulty=lesson.difficulty,
-                dataset=None,
-                submission_path=None,
-                job_competency="Foundation query construction",
-                notes="Lesson mastery requirements passed without solution assistance.",
-                metadata={"state": "Mastered"},
-            )
+    def _record_project_evidence(
+        self,
+        *,
+        lab: SkillsLabDefinition,
+        source_type: str,
+        artifact_path: str,
+        notes: str,
+    ) -> None:
+        display_skills = [
+            str(self.catalog.skills.get(skill, {}).get("title") or skill)
+            for skill in lab.teaches
+        ]
+        skill_summary = ", ".join(dict.fromkeys(display_skills)) or "Applied analysis"
+        competency = str(lab.evidence.get("job_competency") or "Applied analysis")
+        description = (
+            f"Completed and validated {lab.title}. "
+            f"Skills demonstrated: {skill_summary}. "
+            f"Artifact: {artifact_path}."
+        )
+        if notes.strip():
+            description += " Findings and notes are saved with the submission."
+        self.conn.execute(
+            """DELETE FROM evidence
+               WHERE source_type=? AND source_name=?""",
+            (source_type, lab.title),
+        )
+        self.conn.execute(
+            """INSERT INTO evidence(skill,source_type,source_name,description)
+               VALUES(?,?,?,?)""",
+            (skill_summary, source_type, lab.title, description),
+        )
+        self.conn.commit()
 
     def _insert_evidence(
         self,
@@ -630,17 +638,6 @@ class AcademyService:
                 json.dumps(metadata, sort_keys=True, default=str),
             ),
         )
-        # Project rich Academy evidence into the application's existing evidence surface.
-        try:
-            display = str(self.catalog.skills.get(skill, {}).get("title") or skill)
-            self.conn.execute(
-                """INSERT INTO evidence(skill,source_type,source_name,description)
-                   VALUES(?,?,?,?)
-                   ON CONFLICT(skill,source_type,source_name) DO UPDATE SET description=excluded.description""",
-                (display, source_type, source_name, notes),
-            )
-        except sqlite3.OperationalError:
-            pass
         # Keep the existing prerequisite inventory aware of Academy mastery.
         try:
             display = str(self.catalog.skills.get(skill, {}).get("title") or skill)
@@ -664,6 +661,7 @@ class AcademyService:
             """SELECT skill_key,source_type,source_id,difficulty,dataset,submission_path,
                       job_competency,reviewer_status,evidence_notes,demonstrated_at
                FROM academy_skill_evidence
+               WHERE source_type IN ('Skills Lab','Academy Project','Academy Capstone')
                ORDER BY demonstrated_at DESC, id DESC"""
         ).fetchall()
 

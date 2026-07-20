@@ -24,12 +24,23 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.10.0 includes:
-- A seven-course SQL Fundamentals roadmap organized by the requested course and chapter sequence
-- Thirty-five SQL lessons, seven course checkpoints, and two integrated bonus projects
-- Chapter headers inside each collapsible SQL course in the Academy pathway
-- Original Accelerator Academy instruction, datasets, exercises, solutions, and project work
-- Progress-preserving reuse of stable lesson and activity IDs where earlier Academy work maps cleanly
+Version 10.11.0 includes:
+- A cleaned weekly roadmap containing only cross-track review, interview, job-readiness, and application tasks
+- Automatic archival of historical static tasks already owned by Google, Accelerator Academy, SQL Practice, Applied Labs, or Portfolio tracks
+- Clear task briefs, definitions of done, and guided starter documents for every retained roadmap task
+- Demonstrated Evidence limited to substantial Academy projects, capstones, and labs rather than routine lesson completions
+- Interview Practice based only on completed SQL interview questions and explicit interview rehearsals
+
+### Roadmap and Evidence Cleanup
+
+- Replaced the legacy 12-week static task list with dedicated adaptive tracks plus a small curated set of cross-track milestones.
+- Archived removed rows in `roadmap_task_archive` so historical context is preserved without inflating current sprint progress.
+- Removed duplicated DataCamp, Google, Academy, SQL, DuckDB, Applied Lab, and portfolio execution tasks from the active roadmap.
+- Added task descriptions, completion criteria, and purpose-built Markdown starter files for retrospectives, interview practice, résumé work, LinkedIn, STAR stories, application tracking, application batches, follow-ups, and the 90-day retrospective.
+- Removed Academy lesson and lesson-mastery rows from Demonstrated Evidence.
+- Kept one employer-facing evidence entry per validated Academy project, capstone, or lab while retaining skill-level detail internally.
+- Recalculated Interview Practice from explicit practice only, with transparent SQL-question and rehearsal targets.
+
 
 ### SQL Fundamentals Curriculum Reorganization
 

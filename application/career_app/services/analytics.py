@@ -143,6 +143,76 @@ def weekly_daily_hours(conn, reference=None):
         for offset in range(7)
     ]
 
+
+
+def interview_practice_progress(conn):
+    """Return evidence-based interview-practice progress.
+
+    This metric intentionally excludes general Demonstrated Evidence. A project
+    artifact can support an interview answer, but it is not the same as actually
+    practicing one.
+    """
+    sql_completed = int(
+        conn.execute(
+            """SELECT COUNT(*) FROM sql_practice
+               WHERE status='Completed'"""
+        ).fetchone()[0]
+        or 0
+    )
+    patterns = (
+        "%interview walkthrough%",
+        "%interview answer%",
+        "%star stories%",
+        "%explain one completed sql solution aloud%",
+    )
+    active = int(
+        conn.execute(
+            """SELECT COUNT(DISTINCT id) FROM sprint_tasks
+               WHERE completed=1 AND (
+                   LOWER(label) LIKE ? OR LOWER(label) LIKE ? OR
+                   LOWER(label) LIKE ? OR LOWER(label) LIKE ?
+               )""",
+            patterns,
+        ).fetchone()[0]
+        or 0
+    )
+    tables = {
+        row["name"]
+        for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+    }
+    archived = 0
+    if "roadmap_task_archive" in tables:
+        archived = int(
+            conn.execute(
+                """SELECT COUNT(DISTINCT original_task_id)
+                   FROM roadmap_task_archive
+                   WHERE completed=1 AND (
+                       LOWER(label) LIKE ? OR LOWER(label) LIKE ? OR
+                       LOWER(label) LIKE ? OR LOWER(label) LIKE ?
+                   )""",
+                patterns,
+            ).fetchone()[0]
+            or 0
+        )
+    interview_tasks = active + archived
+    sql_target = 25
+    task_target = 5
+    score = min(
+        100.0,
+        min(1.0, sql_completed / sql_target) * 70.0
+        + min(1.0, interview_tasks / task_target) * 30.0,
+    )
+    return {
+        "score": round(score),
+        "sql_completed": sql_completed,
+        "sql_target": sql_target,
+        "interview_tasks_completed": interview_tasks,
+        "interview_task_target": task_target,
+    }
+
+
 def readiness(conn, state):
     sql_count = conn.execute(
         """SELECT COUNT(*)
@@ -185,10 +255,8 @@ def readiness(conn, state):
         sum(project_scores) / len(project_scores)
         if project_scores else 0
     )
-    interview = min(
-        100,
-        evidence_count * 8 + sql_count / 50 * 40,
-    )
+    interview_stats = interview_practice_progress(conn)
+    interview = interview_stats["score"]
     networking = min(
         100,
         applications / 25 * 70 + evidence_count * 3,

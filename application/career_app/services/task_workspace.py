@@ -102,6 +102,10 @@ def task_record(conn, task_id: int):
                m.category,
                m.prerequisite_state,
                m.prerequisite_reason,
+               m.description,
+               m.definition_of_done,
+               m.starter_path,
+               m.managed_key,
                tt.track_key,
                tt.target_key,
                tt.source_label
@@ -323,7 +327,35 @@ def _task_snapshot(conn, week: int) -> str:
     ) or "- All assigned tasks are complete."
 
 
-def _template(conn, row, workspace_type: str) -> str:
+def _starter_template(root: Path, row) -> str | None:
+    starter = str(row["starter_path"] or "").strip() if "starter_path" in row.keys() else ""
+    if not starter:
+        return None
+    path = _resolve(Path(root), starter)
+    if path is None or not path.is_file():
+        return None
+    content = path.read_text(encoding="utf-8")
+    return content.format(
+        week=int(row["week"]),
+        label=str(row["label"]),
+        date=date.today().isoformat(),
+    )
+
+
+def _generic_template_marker(content: str) -> bool:
+    text = str(content or "")
+    return (
+        "What needs to be completed and why?" in text
+        or "## Objective\n\n## Plan" in text
+        or "- DataCamp progress:" in text
+    )
+
+
+def _template(conn, root: Path, row, workspace_type: str) -> str:
+    starter = _starter_template(root, row)
+    if starter is not None:
+        return starter
+
     week = int(row["week"])
     label = str(row["label"])
     today = date.today().isoformat()
@@ -334,7 +366,7 @@ def _template(conn, row, workspace_type: str) -> str:
             "## Completion\n"
             "- Hours studied:\n"
             "- Google progress:\n"
-            "- DataCamp progress:\n"
+            "- Accelerator Academy progress:\n"
             "- SQL practice:\n"
             "- Portfolio or Applied Labs:\n\n"
             "## Biggest Wins\n\n- \n\n"
@@ -383,8 +415,10 @@ def _template(conn, row, workspace_type: str) -> str:
         f"**Week:** {week}  \n"
         f"**Category:** {row['category']}  \n"
         f"**Created:** {today}\n\n"
-        "## Objective\n\n"
-        "What needs to be completed and why?\n\n"
+        "## Task Brief\n\n"
+        f"{str(row['description'] or 'Complete the task described in the title.')}\n\n"
+        "## Definition of Done\n\n"
+        f"{str(row['definition_of_done'] or 'Finish the work, review it, and save the result.')}\n\n"
         "## Plan\n\n- [ ] \n\n"
         "## Work Log\n\n"
         f"### {today}\n- \n\n"
@@ -432,6 +466,11 @@ def ensure_workspace(
         if not path.exists():
             path.write_text(existing["content"] or "", encoding="utf-8")
         content = path.read_text(encoding="utf-8")
+        if current_row is not None and _generic_template_marker(content):
+            upgraded = _starter_template(root, current_row)
+            if upgraded is not None:
+                content = upgraded
+                path.write_text(content, encoding="utf-8")
         conn.execute(
             """UPDATE task_workspaces
                SET content=?,last_opened_at=CURRENT_TIMESTAMP,
@@ -492,7 +531,7 @@ def ensure_workspace(
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         path.write_text(
-            _template(conn, row, workspace_type),
+            _template(conn, root, row, workspace_type),
             encoding="utf-8",
         )
     content = path.read_text(encoding="utf-8")

@@ -1,9 +1,11 @@
 from __future__ import annotations
+import json
 import re
 from pathlib import Path
 
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+from career_app.data.roadmap_tasks import task_key, task_spec
 
 CHECKBOX = re.compile(r"^\s*-\s+\[([ xX])\]\s+(.+?)\s*$")
 
@@ -49,6 +51,220 @@ def stage_for(label):
         if any(word in lower for word in words):
             return stage
     return "Overview"
+
+
+
+
+ACTIVE_DYNAMIC_TRACKS = {"google", "academy", "sql", "portfolio", "applied"}
+ACADEMY_EVIDENCE_TYPES = {"Skills Lab", "Academy Project", "Academy Capstone"}
+
+
+def _archive_roadmap_task(conn, row, reason: str) -> None:
+    metadata = {
+        "priority": row["priority"],
+        "estimated_minutes": row["estimated_minutes"],
+        "energy": row["energy"],
+        "destination": row["destination"],
+        "prerequisite_state": row["prerequisite_state"],
+        "prerequisite_reason": row["prerequisite_reason"],
+        "target_key": row["target_key"],
+        "source_label": row["source_label"],
+        "linked_entity_id": row["linked_entity_id"],
+    }
+    conn.execute(
+        """INSERT INTO roadmap_task_archive
+           (original_task_id,week,sort_order,label,completed,status,category,track_key,reason,metadata)
+           VALUES(?,?,?,?,?,?,?,?,?,?)
+           ON CONFLICT(original_task_id) DO UPDATE SET
+               reason=excluded.reason,
+               metadata=excluded.metadata""",
+        (
+            int(row["id"]),
+            int(row["week"]),
+            int(row["sort_order"]),
+            str(row["label"]),
+            int(row["completed"] or 0),
+            row["status"],
+            row["category"],
+            row["track_key"],
+            reason,
+            json.dumps(metadata, sort_keys=True, default=str),
+        ),
+    )
+    # Preserve any user-authored document as a historical workspace while
+    # disconnecting it from the active roadmap assignment.
+    conn.execute(
+        "UPDATE task_workspaces SET task_id=NULL WHERE task_id=?",
+        (int(row["id"]),),
+    )
+    # Incomplete frozen focus rows should be rebuilt from the cleaned roadmap.
+    conn.execute(
+        "DELETE FROM daily_focus WHERE task_id=? AND completed_at IS NULL",
+        (int(row["id"]),),
+    )
+    conn.execute("DELETE FROM sprint_tasks WHERE id=?", (int(row["id"]),))
+
+
+def _clean_legacy_roadmap_tasks(conn) -> dict:
+    rows = conn.execute(
+        """SELECT s.id,s.week,s.sort_order,s.label,s.completed,
+                  m.status,m.priority,m.estimated_minutes,m.energy,m.destination,
+                  m.category,m.prerequisite_state,m.prerequisite_reason,
+                  tt.track_key,tt.target_key,tt.source_label,tt.linked_entity_id
+           FROM sprint_tasks s
+           LEFT JOIN task_metadata m ON m.task_id=s.id
+           LEFT JOIN track_tasks tt ON tt.task_id=s.id
+           ORDER BY s.week,s.sort_order,s.id"""
+    ).fetchall()
+    archived = 0
+    retained = 0
+    updated = 0
+    for row in rows:
+        track_key = str(row["track_key"] or "").strip().lower()
+        if track_key in ACTIVE_DYNAMIC_TRACKS:
+            if track_key == "academy":
+                cleaned = re.sub(
+                    r"^\s*\[Accelerator Academy\]\s*",
+                    "",
+                    str(row["label"] or ""),
+                    flags=re.IGNORECASE,
+                )
+                cleaned = re.sub(r"^Learn:\s*", "", cleaned, flags=re.IGNORECASE)
+                if cleaned and cleaned != row["label"]:
+                    conn.execute(
+                        "UPDATE sprint_tasks SET label=? WHERE id=?",
+                        (cleaned, int(row["id"])),
+                    )
+            retained += 1
+            continue
+        if track_key == "datacamp" or "datacamp" in str(row["label"] or "").casefold():
+            _archive_roadmap_task(conn, row, "Replaced by Accelerator Academy")
+            archived += 1
+            continue
+
+        spec = task_spec(str(row["label"] or ""))
+        if spec is None:
+            _archive_roadmap_task(
+                conn,
+                row,
+                "Historical static task replaced by a dedicated adaptive track or project milestone",
+            )
+            archived += 1
+            continue
+
+        conn.execute(
+            """UPDATE task_metadata
+               SET status=CASE WHEN ? THEN 'Completed' ELSE COALESCE(status,'Not Started') END,
+                   priority=?,estimated_minutes=?,energy=?,destination=?,category=?,
+                   prerequisite_state='Ready',prerequisite_reason=NULL,
+                   description=?,definition_of_done=?,starter_path=?,managed_key=?
+               WHERE task_id=?""",
+            (
+                int(row["completed"] or 0),
+                spec.priority,
+                spec.estimated_minutes,
+                spec.energy,
+                spec.destination,
+                spec.category,
+                spec.description,
+                spec.definition_of_done,
+                spec.starter_path,
+                task_key(str(row["label"] or "")),
+                int(row["id"]),
+            ),
+        )
+        retained += 1
+        updated += 1
+
+    conn.execute(
+        """UPDATE track_state
+           SET status='Historical',weekly_target=0,
+               metadata=json_set(COALESCE(metadata,'{}'),'$.replacement','Accelerator Academy'),
+               updated_at=CURRENT_TIMESTAMP
+           WHERE track_key='datacamp'"""
+    )
+    conn.execute(
+        """DELETE FROM daily_focus
+           WHERE completed_at IS NULL
+             AND (source_key LIKE 'roadmap:%'
+                  OR track_key='datacamp'
+                  OR LOWER(title) LIKE '%datacamp%')"""
+    )
+    return {"archived": archived, "retained": retained, "updated": updated}
+
+
+def _clean_academy_evidence(conn) -> dict:
+    tables = {
+        row["name"]
+        for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+    }
+    if "academy_skill_evidence" not in tables:
+        return {
+            "academy_rows_removed": 0,
+            "main_rows_removed": 0,
+            "projects_consolidated": 0,
+        }
+    placeholders = ",".join("?" for _ in ACADEMY_EVIDENCE_TYPES)
+    removed_academy = conn.execute(
+        f"SELECT COUNT(*) FROM academy_skill_evidence WHERE source_type NOT IN ({placeholders})",
+        tuple(sorted(ACADEMY_EVIDENCE_TYPES)),
+    ).fetchone()[0]
+    conn.execute(
+        f"DELETE FROM academy_skill_evidence WHERE source_type NOT IN ({placeholders})",
+        tuple(sorted(ACADEMY_EVIDENCE_TYPES)),
+    )
+    removed_main = conn.execute(
+        """SELECT COUNT(*) FROM evidence
+           WHERE source_type IN ('Academy Practice','Academy Mastery')"""
+    ).fetchone()[0]
+    conn.execute(
+        """DELETE FROM evidence
+           WHERE source_type IN ('Academy Practice','Academy Mastery')"""
+    )
+    conn.execute(
+        """DELETE FROM skill_state
+           WHERE source_track='academy'
+             AND (evidence LIKE 'Academy Practice:%' OR evidence LIKE 'Academy Mastery:%')"""
+    )
+
+    # Keep one employer-facing evidence row per substantial Academy project,
+    # even though the internal skill table records several skills per project.
+    project_rows = conn.execute(
+        f"""SELECT source_type,source_name,
+                   GROUP_CONCAT(DISTINCT skill) AS skills,
+                   MAX(description) AS description,
+                   COUNT(*) AS row_count
+            FROM evidence
+            WHERE source_type IN ({placeholders})
+            GROUP BY source_type,source_name""",
+        tuple(sorted(ACADEMY_EVIDENCE_TYPES)),
+    ).fetchall()
+    consolidated = 0
+    for row in project_rows:
+        if int(row["row_count"] or 0) <= 1:
+            continue
+        conn.execute(
+            "DELETE FROM evidence WHERE source_type=? AND source_name=?",
+            (row["source_type"], row["source_name"]),
+        )
+        conn.execute(
+            """INSERT INTO evidence(skill,source_type,source_name,description)
+               VALUES(?,?,?,?)""",
+            (
+                row["skills"] or "Applied analysis",
+                row["source_type"],
+                row["source_name"],
+                row["description"],
+            ),
+        )
+        consolidated += 1
+    return {
+        "academy_rows_removed": int(removed_academy),
+        "main_rows_removed": int(removed_main),
+        "projects_consolidated": consolidated,
+    }
 
 
 def _update_duckdb_exercise_tasks(conn):
@@ -183,7 +399,11 @@ def migrate(conn, root: Path):
             project_count += 1
 
     updated_tasks = _update_duckdb_exercise_tasks(conn)
-    applied_tasks = _ensure_applied_exercise_tasks(conn)
+    # Applied Labs are now owned by the adaptive Applied track. Recreating all
+    # 36 historical static sprint rows would immediately duplicate that track.
+    applied_tasks = {"added": 0, "updated": 0}
+    roadmap_cleanup = _clean_legacy_roadmap_tasks(conn)
+    evidence_cleanup = _clean_academy_evidence(conn)
 
     from career_app.services import task_workspace
     workspace_cleanup = (
@@ -202,4 +422,12 @@ def migrate(conn, root: Path):
         "external_workspaces_removed": (
             workspace_cleanup["removed"]
         ),
+        "roadmap_tasks_archived": roadmap_cleanup["archived"],
+        "roadmap_tasks_retained": roadmap_cleanup["retained"],
+        "roadmap_tasks_updated": roadmap_cleanup["updated"],
+        "academy_evidence_removed": (
+            evidence_cleanup["academy_rows_removed"]
+            + evidence_cleanup["main_rows_removed"]
+        ),
+        "academy_projects_consolidated": evidence_cleanup["projects_consolidated"],
     }

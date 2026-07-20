@@ -43,6 +43,10 @@ CREATE TABLE IF NOT EXISTS task_metadata (
     category TEXT NOT NULL DEFAULT 'General',
     prerequisite_state TEXT NOT NULL DEFAULT 'Ready',
     prerequisite_reason TEXT,
+    description TEXT NOT NULL DEFAULT '',
+    definition_of_done TEXT NOT NULL DEFAULT '',
+    starter_path TEXT,
+    managed_key TEXT,
     FOREIGN KEY(task_id) REFERENCES sprint_tasks(id) ON DELETE CASCADE
 );
 
@@ -93,6 +97,22 @@ CREATE TABLE IF NOT EXISTS daily_focus (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(focus_date, position),
     FOREIGN KEY(task_id) REFERENCES sprint_tasks(id) ON DELETE SET NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS roadmap_task_archive (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    original_task_id INTEGER NOT NULL UNIQUE,
+    week INTEGER NOT NULL,
+    sort_order INTEGER NOT NULL,
+    label TEXT NOT NULL,
+    completed INTEGER NOT NULL DEFAULT 0,
+    status TEXT,
+    category TEXT,
+    track_key TEXT,
+    reason TEXT NOT NULL,
+    metadata TEXT NOT NULL DEFAULT '{}',
+    archived_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS project_tasks (
@@ -299,6 +319,10 @@ def _ensure_columns(conn):
                 "TEXT NOT NULL DEFAULT 'Ready'",
             ),
             ("prerequisite_reason", "TEXT"),
+            ("description", "TEXT NOT NULL DEFAULT ''"),
+            ("definition_of_done", "TEXT NOT NULL DEFAULT ''"),
+            ("starter_path", "TEXT"),
+            ("managed_key", "TEXT"),
         ],
         "project_tasks": [
             ("stage", "TEXT NOT NULL DEFAULT 'Overview'"),
@@ -457,6 +481,7 @@ def factory_reset(conn, start_date):
     """
     progress_tables = [
         "daily_focus",
+        "roadmap_task_archive",
         "task_workspace_artifacts",
         "task_workspaces",
         "achievements",

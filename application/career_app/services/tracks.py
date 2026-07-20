@@ -4663,11 +4663,20 @@ def focus_presentation(conn, item):
         f"Priority {int(item.get('priority') or 3)}"
     )
 
+    task_description = ""
+    if task_id is not None:
+        detail_row = conn.execute(
+            "SELECT description FROM task_metadata WHERE task_id=?",
+            (int(task_id),),
+        ).fetchone()
+        if detail_row is not None:
+            task_description = _clean_focus_text(detail_row["description"])
+
     return {
         "style_category": display_category,
         "title": title,
         "detail": " • ".join(
-            [label, *metadata]
+            [task_description or label, *metadata]
         ),
     }
 

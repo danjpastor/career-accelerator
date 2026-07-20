@@ -178,12 +178,20 @@ class TaskWorkspaceDialog(QDialog):
         self.info_category = QLabel("—")
         self.info_eligibility = QLabel("—")
         self.info_eligibility.setWordWrap(True)
+        self.info_description = QLabel("—")
+        self.info_description.setWordWrap(True)
+        self.info_definition = QLabel("—")
+        self.info_definition.setWordWrap(True)
         info.addWidget(QLabel("Roadmap week"), 0, 0)
         info.addWidget(self.info_week, 0, 1)
         info.addWidget(QLabel("Category"), 1, 0)
         info.addWidget(self.info_category, 1, 1)
         info.addWidget(QLabel("Eligibility"), 2, 0)
         info.addWidget(self.info_eligibility, 2, 1)
+        info.addWidget(QLabel("Task brief"), 3, 0, Qt.AlignmentFlag.AlignTop)
+        info.addWidget(self.info_description, 3, 1)
+        info.addWidget(QLabel("Done when"), 4, 0, Qt.AlignmentFlag.AlignTop)
+        info.addWidget(self.info_definition, 4, 1)
         info.setColumnStretch(1, 1)
         layout.addLayout(info)
 
@@ -363,6 +371,12 @@ class TaskWorkspaceDialog(QDialog):
                 if task["prerequisite_reason"]:
                     eligibility += f" — {task['prerequisite_reason']}"
                 self.info_eligibility.setText(eligibility)
+                self.info_description.setText(
+                    task["description"] or "Open the workspace for the guided task brief."
+                )
+                self.info_definition.setText(
+                    task["definition_of_done"] or "Complete the work and save the result."
+                )
                 self.status_combo.setCurrentText(task["status"] or "Not Started")
                 self.priority_spin.setValue(int(task["priority"] or 3))
                 self.minutes_spin.setValue(int(task["estimated_minutes"] or 30))
@@ -376,6 +390,12 @@ class TaskWorkspaceDialog(QDialog):
                 self.info_eligibility.setText(
                     "The original adaptive assignment has moved on. The document, "
                     "artifacts, and sessions remain available."
+                )
+                self.info_description.setText(
+                    "This workspace is retained as historical work."
+                )
+                self.info_definition.setText(
+                    "No additional completion action is required."
                 )
                 for control in self.task_controls:
                     control.setEnabled(False)

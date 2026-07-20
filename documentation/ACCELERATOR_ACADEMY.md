@@ -172,7 +172,21 @@ The package loader rejects missing or unknown table references. Academy loads th
 5. A solution-assisted mastery attempt must be passed again independently.
 6. The checkpoint unlocks only after required lesson skills are mastered.
 7. The applied project unlocks only after the checkpoint passes.
-8. Validated independent and applied work creates Demonstrated Evidence automatically.
+8. Validated projects, capstones, and Skills Labs create Demonstrated Evidence automatically; routine lesson work remains in mastery progress.
+
+
+## Demonstrated Evidence policy
+
+Routine instruction, recognition checks, guided practice, independent lesson steps, and lesson mastery remain part of Academy progress and skill mastery. They do not create employer-facing Demonstrated Evidence records.
+
+Automatic Academy evidence is reserved for validated substantial work:
+
+- integrated projects;
+- capstones;
+- Skills Labs;
+- equivalent applied submissions explicitly marked as evidence-producing.
+
+A completed project may demonstrate several skills internally, but Job Readiness displays one consolidated evidence entry for the project rather than one entry for every lesson or skill.
 
 ## Content versioning
 

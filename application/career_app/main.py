@@ -4547,9 +4547,10 @@ class CareerAccelerator(QMainWindow):
         evidence_card.setMinimumHeight(380)
         evidence_help = QLabel(
             (
-                "Add proof you could show or explain to an employer: "
-                "a completed query, dashboard, course deliverable, "
-                "work example, certification, or portfolio artifact."
+                "Add substantial proof you could show or explain to an employer: "
+                "a validated project, capstone, lab, dashboard, notebook, report, "
+                "certification, or meaningful work example. Routine lessons and "
+                "practice checks stay in skill progress instead."
             )
         )
         evidence_help.setObjectName("Muted")
@@ -7826,11 +7827,22 @@ class CareerAccelerator(QMainWindow):
             self.state,
         )
 
+        interview_stats = analytics.interview_practice_progress(self.conn)
         for key, value in data.items():
+            extra = ""
+            if key == "Interview Practice":
+                extra = (
+                    f"{interview_stats['sql_completed']}/{interview_stats['sql_target']} SQL questions • "
+                    f"{interview_stats['interview_tasks_completed']}/{interview_stats['interview_task_target']} rehearsals"
+                )
+                self.readiness_rings[key].setToolTip(
+                    "Interview Practice is based only on completed SQL interview questions "
+                    "and explicit interview rehearsals. General evidence does not increase this score."
+                )
             self.readiness_rings[key].set_value(
                 value,
                 f"{value}%",
-                "",
+                extra,
             )
 
         evidence = self.conn.execute(
@@ -7863,9 +7875,9 @@ class CareerAccelerator(QMainWindow):
                 )
         else:
             self.evidence_list.addItem(
-                "No evidence logged yet.\n"
-                "Add portfolio, coursework, SQL practice, "
-                "certifications, or work examples."
+                "No demonstrated evidence logged yet.\n"
+                "Complete a substantial project, capstone, lab, portfolio artifact, "
+                "certification, or work example."
             )
 
         recommendations = coach.recommendations(

@@ -1,3 +1,15 @@
+# v10.11.0 — Roadmap, Evidence, and Interview-Metric Cleanup
+
+- Audited the legacy 12-week sprint roadmap and archived static tasks already owned by Google, Accelerator Academy, SQL Practice, Applied Labs, or Portfolio tracks.
+- Preserved removed task history in `roadmap_task_archive` while excluding those rows from current sprint totals and recommendations.
+- Retained only weekly retrospectives plus focused interview, job-readiness, portfolio-polish, résumé, LinkedIn, application, and program-review milestones.
+- Added clear descriptions, definitions of done, and guided starter documents for every retained roadmap task.
+- Upgraded Task Workspaces to display the task brief and completion criteria and to seed new workspaces from the task-specific starter file.
+- Removed routine Academy lesson and mastery completions from Demonstrated Evidence.
+- Limited automatic Academy evidence to validated projects, capstones, and labs, with one employer-facing evidence row per substantial submission.
+- Replaced the inflated Interview Practice formula with a score based only on completed SQL interview questions and explicit interview rehearsals.
+- Added transparent Interview Practice progress text and removed DataCamp wording from weekly guidance.
+
 # Changelog
 
 
