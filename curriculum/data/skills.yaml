@@ -1,0 +1,46 @@
+skills:
+  sql.table_structure:
+    title: Tables, rows, and columns
+    category: SQL Foundations
+  sql.data_types:
+    title: SQL data types
+    category: SQL Foundations
+  sql.select_basics:
+    title: Basic SELECT queries
+    category: SQL Foundations
+  sql.column_selection:
+    title: Column selection
+    category: SQL Foundations
+  sql.aliases:
+    title: Column aliases
+    category: SQL Foundations
+  sql.distinct:
+    title: Removing duplicates with DISTINCT
+    category: SQL Foundations
+  sql.limit:
+    title: Limiting result sets
+    category: SQL Foundations
+  sql.where:
+    title: Filtering with WHERE
+    category: SQL Foundations
+  sql.comparison_operators:
+    title: Comparison operators
+    category: SQL Foundations
+  sql.boolean_logic:
+    title: Boolean filtering logic
+    category: SQL Foundations
+  sql.null_filtering:
+    title: NULL filtering
+    category: SQL Foundations
+  sql.order_by:
+    title: Sorting with ORDER BY
+    category: SQL Foundations
+  sql.clause_composition:
+    title: Combining foundation clauses
+    category: SQL Foundations
+  analysis.queue_prioritization:
+    title: Operational queue prioritization
+    category: Business Analysis
+  communication.concise_findings:
+    title: Concise analytical findings
+    category: Communication

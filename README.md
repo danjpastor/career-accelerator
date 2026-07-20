@@ -24,7 +24,27 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.0.16 includes:
+Version 10.3.0 includes:
+
+### Accelerator Academy Experience and Curriculum Rewrite
+
+- A complete visual rebuild using the established Learning → Exercises and Applied Labs design language.
+- Reusable course cards, split workspaces, line-numbered SQL editors, polished result tables, internal scrolling, responsive breakpoints, and consistent action controls.
+- Six integrated Academy sections: Learning Paths, Courses, Practice, Skills Lab, Assessments, and Demonstrated Evidence.
+- A comprehensive Query Foundations pilot with five expanded lessons, approximately 190 minutes of instruction and lesson practice, and 26 original activities.
+- Structured activity briefs with business context, available tables, requirements, expected output, skills practiced, progressive hints, validation feedback, and post-completion explanations.
+- A seven-question independent checkpoint and a 60-minute Customer Support Queue Analysis Skills Lab.
+- Content-version reconciliation that preserves answers and valid activity progress while enforcing newly introduced mastery requirements.
+- Robust unordered LIMIT validation for valid result subsets and deterministic checkpoint validation.
+- All instructional wording, scenarios, datasets, questions, solutions, and applied work remain original.
+
+### Accelerator Academy Phase 2A and 2B foundation
+
+- A built-in, program-neutral curriculum engine with external versioned content packages.
+- Four-state lesson progress, prerequisite-aware recommendations, checkpoints, and evidence-producing mastery.
+- Existing Google Certificate, DataCamp, Exercise Packs, SQL Companion, Applied Labs, portfolio, and learner progress remain unchanged.
+- See `documentation/ACCELERATOR_ACADEMY.md` for the permanent package and authoring architecture.
+
 - A cleaned repository root containing only the launcher, shortcut creator, requirements file, and README as visible files
 - Application source and brand assets consolidated under `application/`
 - Project documentation consolidated under `documentation/`

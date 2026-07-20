@@ -1,0 +1,8 @@
+subscriber_id,plan_name,region,monthly_fee,status
+S001,Standard,South,29.0,Active
+S002,Premium,West,59.0,Active
+S003,Standard,South,29.0,Trial
+S004,Basic,East,15.0,Cancelled
+S005,Premium,South,59.0,Paused
+S006,Team,North,99.0,Active
+S007,Basic,South,15.0,Active

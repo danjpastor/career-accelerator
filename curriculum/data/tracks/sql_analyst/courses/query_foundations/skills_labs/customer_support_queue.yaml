@@ -1,0 +1,147 @@
+lab_id: customer_support_queue
+title: Customer Support Queue Analysis
+order: 1
+description: Turn an unresolved support queue into a validated action list and communicate the operational risks that deserve attention.
+estimated_minutes: 60
+requires:
+- sql.select_basics
+- sql.column_selection
+- sql.where
+- sql.boolean_logic
+- sql.order_by
+- sql.clause_composition
+teaches:
+- analysis.queue_prioritization
+- communication.concise_findings
+dataset_id: sql_foundations
+prompt: Create an oldest-first queue of unresolved High or Urgent tickets and document what the support manager should act on.
+brief_markdown: '# Customer Support Queue Analysis
+
+
+  > **Business brief:** You are supporting the morning operations review for a customer-support organization. The Support Operations Manager needs a reproducible queue of unresolved critical tickets and a concise explanation of the workload risks visible in the data.
+
+
+  ## Stakeholder request
+
+
+  Create an action list that includes only unresolved tickets with `High` or `Urgent` priority. The manager wants the oldest tickets first so that aging work is visible immediately.
+
+
+  ## Available data
+
+
+  The `support_tickets` table contains one row per ticket. Important fields include ticket identifiers, customer identifiers, priority, status, intake channel, assigned team, opened date, resolution duration, and satisfaction score.
+
+
+  ## Required analysis
+
+
+  1. Define unresolved work as `Open` or `Pending`.
+
+  2. Define critical priority as `High` or `Urgent`.
+
+  3. Return enough context for the manager to identify the customer, owner, channel, and ticket age.
+
+  4. Sort the queue from oldest to newest.
+
+  5. Review the result for workload concentration, aging, ownership, and missing data.
+
+
+  ## Communication standard
+
+
+  Write at least three concise findings. Each finding should state an observation supported by the result and explain why it matters operationally. Avoid unsupported recommendations or conclusions that require data not present in the table.
+
+
+  ## Submission package
+
+
+  Your validated SQL and written findings are saved as an Academy artifact. Passing work is added to Demonstrated Evidence as proof of operational SQL analysis and stakeholder communication.
+
+
+  ## Data-quality review
+
+
+  Before finalizing the artifact, inspect whether unresolved tickets have blank ownership, missing dates, or values that conflict with the queue definition. Record limitations instead of silently treating missing values as normal. A strong analyst separates what the query proves from what would require another field, business rule, or stakeholder clarification.
+
+
+  ## Definition of done
+
+
+  The work is complete only when the result population, selected columns, ordering, written findings, and saved artifact all satisfy the acceptance criteria. Re-run the query after every meaningful edit so the written interpretation always refers to the latest result.
+
+  '
+deliverables:
+- Validated SQL query
+- Prioritized ticket result set
+- At least three concise findings
+- Saved submission artifact
+- Demonstrated Evidence record
+acceptance_criteria:
+- The SQL returns only Open or Pending tickets.
+- The SQL returns only High or Urgent priorities.
+- The result contains ticket_id, customer_id, priority, status, assigned_team, channel, and opened_date.
+- Rows are ordered by opened_date ascending.
+- At least three non-empty findings are included.
+- Findings distinguish observations from recommendations.
+reflection_questions:
+- Which assigned team owns the largest share of the critical queue?
+- Which ticket has waited the longest, and what additional context would you request before escalating it?
+- What missing fields limit the strength of your conclusions?
+- How would the queue definition change if the stakeholder considered Medium priority part of the escalation population?
+rubric:
+  sql_accuracy: 40% — correct population, columns, and ordering
+  validation: 20% — result checked against every acceptance criterion
+  findings: 25% — concise, evidence-based observations
+  professionalism: 15% — readable SQL and stakeholder-ready wording
+activity:
+  activity_id: support_queue_lab_query
+  title: Build the priority queue
+  type: mastery
+  runtime: sql
+  prompt: Return ticket_id, customer_id, priority, status, assigned_team, channel, and opened_date for unresolved High or Urgent tickets. Sort oldest first.
+  starter: 'SELECT
+
+    FROM support_tickets
+
+    WHERE '
+  solution: "SELECT ticket_id, customer_id, priority, status, assigned_team, channel, opened_date\nFROM support_tickets\nWHERE status IN ('Open', 'Pending')\n  AND priority IN ('High', 'Urgent')\nORDER BY opened_date ASC;"
+  hints:
+  - Define unresolved statuses and critical priorities as separate accepted sets.
+  - Connect the two sets with AND, then sort opened_date ascending.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: "SELECT ticket_id, customer_id, priority, status, assigned_team, channel, opened_date\nFROM support_tickets\nWHERE status IN ('Open', 'Pending')\n  AND priority IN ('High', 'Urgent')\nORDER BY opened_date ASC;"
+    required_patterns:
+    - status\s+IN\s*\(
+    - priority\s+IN\s*\(
+    - \bAND\b
+    - ORDER\s+BY\s+opened_date\s+ASC
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 20
+  presentation:
+    scenario: Customer Support morning operations review
+    introduction: The Support Operations Manager needs a dependable action queue before the daily staffing meeting. The queue must isolate unresolved critical work, preserve enough context for assignment decisions, and place the longest-waiting tickets first.
+    task: Create the validated priority queue and write stakeholder-ready findings.
+    table: support_tickets
+    requirements:
+    - Include Open and Pending tickets only.
+    - Include High and Urgent priorities only.
+    - Return the seven required columns.
+    - Sort oldest opened_date first.
+    expected_output: 5 ordered rows and 7 columns.
+    skills_practiced:
+    - query composition
+    - queue prioritization
+    - business communication
+    after_correct: The final artifact combines a reproducible SQL population definition with concise interpretation for an operational stakeholder.
+    common_errors: []
+evidence:
+  job_competency: Operational queue analysis and stakeholder-ready findings

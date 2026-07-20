@@ -1,0 +1,6 @@
+path_id: data_analytics
+title: Data Analytics Pathway
+order: 1
+description: A prerequisite-aware path from core querying through applied analysis and job-ready evidence.
+tracks:
+- ../../tracks/sql_analyst/track.yaml

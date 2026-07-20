@@ -1,0 +1,7 @@
+sku,item_name,category,units_on_hand,reorder_level,discontinued
+I001,USB Hub,Electronics,7,10,False
+I002,Packing Tape,Shipping,20,12,False
+I003,Label Roll,Shipping,5,5,False
+I004,Legacy Adapter,Electronics,2,8,True
+I005,Desk Mat,Office,11,15,False
+I006,Storage Crate,Warehouse,35,10,False

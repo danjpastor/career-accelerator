@@ -422,6 +422,14 @@ def factory_reset(conn, start_date):
         "track_events",
         "track_state",
         "skill_state",
+        "academy_skill_evidence",
+        "academy_submissions",
+        "academy_assessment_attempts",
+        "academy_activity_progress",
+        "academy_lesson_progress",
+        "academy_enrollments",
+        "academy_packages",
+        "external_learning_history",
     ]
 
     with conn:

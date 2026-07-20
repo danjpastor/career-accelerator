@@ -74,6 +74,7 @@ from career_app.ui.widgets import (
     SidebarMetricCard, SoftPanel, StatRow, TaskRow, make_card_scrollable
 )
 
+from career_app.ui.academy import AcceleratorAcademyWidget
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
 
@@ -81,6 +82,7 @@ NAV = [
     ("🏠 Dashboard", 0),
     ("🚀 Adaptive Planner", 1),
     ("📚 Learning", 2),
+    (" Accelerator Academy", 12),
     ("📁 Portfolio Workspace", 3),
     ("💻 SQL Companion", 4),
     ("⏱️ Study Session", 5),
@@ -452,6 +454,7 @@ class CareerAccelerator(QMainWindow):
             self.publish_page,
             self.settings_page,
             self.task_workspaces_page,
+            self.academy_page,
         ]
         for builder in builders:
             self.stack.addWidget(builder())
@@ -705,6 +708,9 @@ class CareerAccelerator(QMainWindow):
 
     def navigate(self, index):
         self.stack.setCurrentIndex(index)
+        if index == 12 and hasattr(self, "academy_widget"):
+            self.academy_widget.refresh_all()
+            self.academy_widget.open_recommendation()
         for button in self.nav_buttons:
             button.setChecked(False)
         label_map = {
@@ -720,6 +726,7 @@ class CareerAccelerator(QMainWindow):
             9: "Publish & Git",
             10: "Settings",
             11: "Task Workspaces",
+            12: "Accelerator Academy",
         }
         target = label_map.get(index)
         if target:
@@ -981,6 +988,10 @@ class CareerAccelerator(QMainWindow):
                 self.clear_layout(item.layout())
 
     # ---------- Dashboard ----------
+    def academy_page(self):
+        self.academy_widget = AcceleratorAcademyWidget(self.conn, ROOT, self)
+        return self.academy_widget
+
     def dashboard_page(self):
         page = ResponsiveScrollPage()
         page.setSizePolicy(

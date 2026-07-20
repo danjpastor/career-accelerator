@@ -1,0 +1,9 @@
+order_id,customer_id,order_date,region,order_total,status
+O301,C201,2026-06-01,East,145.0,Completed
+O302,C202,2026-06-02,West,89.0,Completed
+O303,C203,2026-06-03,South,210.0,Processing
+O304,C204,2026-06-04,West,175.0,Completed
+O305,C205,2026-06-05,North,35.0,Cancelled
+O306,C206,2026-06-06,East,120.0,Completed
+O307,C207,2026-06-07,South,99.0,Completed
+O308,C208,2026-06-08,West,250.0,Completed

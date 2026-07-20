@@ -1,0 +1,16 @@
+datasets:
+- dataset_id: sql_foundations
+  title: SQL Foundations Practice Dataset
+  tables:
+  - name: products
+    csv: products.csv
+  - name: employees
+    csv: employees.csv
+  - name: subscriptions
+    csv: subscriptions.csv
+  - name: support_tickets
+    csv: support_tickets.csv
+  - name: orders
+    csv: orders.csv
+  - name: inventory
+    csv: inventory.csv

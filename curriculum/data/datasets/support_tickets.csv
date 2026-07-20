@@ -1,0 +1,11 @@
+ticket_id,customer_id,priority,status,channel,assigned_team,opened_date,resolution_hours,satisfaction_score
+T1001,C201,High,Open,Email,Billing,2026-06-28,,
+T1002,C202,Low,Closed,Chat,General,2026-07-01,4.5,5
+T1003,C203,Urgent,Pending,Phone,Technical,2026-06-25,,
+T1004,C204,Medium,Open,Web,General,2026-07-07,,
+T1005,C205,High,Closed,Email,Technical,2026-06-20,18.0,4
+T1006,C206,Urgent,Open,Phone,Billing,2026-06-22,,
+T1007,C207,High,Pending,Chat,Technical,2026-07-02,,
+T1008,C208,Low,Open,Email,General,2026-07-10,,
+T1009,C209,Medium,Closed,Web,Billing,2026-06-29,9.0,3
+T1010,C210,High,Open,Phone,Technical,2026-07-04,,

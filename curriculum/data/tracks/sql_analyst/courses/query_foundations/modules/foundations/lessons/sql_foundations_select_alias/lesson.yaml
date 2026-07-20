@@ -1,0 +1,236 @@
+lesson_id: sql_foundations_select_alias
+title: Selecting Columns and Using Aliases
+order: 2
+difficulty: beginner
+description: Shape readable result sets with explicit columns and stakeholder-friendly aliases.
+estimated_minutes: 35
+content: lesson.md
+objectives:
+- Choose only the columns required by a question.
+- Control result-column order.
+- Create clear aliases with AS.
+- Explain why aliases do not modify the source table.
+key_takeaways:
+- Explicit columns make saved queries safer.
+- Aliases describe the result without changing the source.
+- Readable names should preserve business meaning.
+teaches:
+- sql.column_selection
+- sql.aliases
+requires:
+- sql.select_basics
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: select_projection_recognition
+  title: Recognize projection
+  type: recognition
+  runtime: recognition
+  prompt: Which query operation changes which columns appear while keeping all source rows?
+  answer_options:
+  - Selecting an explicit column list
+  - Filtering with WHERE
+  - Sorting with ORDER BY
+  - Removing duplicates with DISTINCT
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Selecting an explicit column list
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Reporting design review
+    introduction: A teammate is describing how a query changes the shape of a result.
+    task: Identify the operation that controls result columns.
+    table: products
+    requirements:
+    - Choose the option that affects columns rather than rows.
+    expected_output: One selected answer.
+    skills_practiced:
+    - projection
+    - result shape
+    after_correct: An explicit SELECT list projects the requested columns while leaving row eligibility unchanged.
+    common_errors: []
+- activity_id: select_guided
+  title: Build a compact product catalog
+  type: guided
+  runtime: sql
+  prompt: Return product_id, product_name, and unit_price from products.
+  starter: "SELECT\n    -- choose the catalog columns\nFROM products;"
+  solution: 'SELECT product_id, product_name, unit_price
+
+    FROM products;'
+  hints:
+  - Begin with product_id so each row stays identifiable.
+  - Separate product_id, product_name, and unit_price with commas.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT product_id, product_name, unit_price
+
+      FROM products;'
+    required_patterns:
+    - product_id
+    - product_name
+    - unit_price
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Merchandising catalog extract
+    introduction: The merchandising team needs a concise product reference without category or active-status fields.
+    task: Create a three-column catalog view.
+    table: products
+    requirements:
+    - Return exactly product_id, product_name, and unit_price.
+    - Keep the columns in the requested order.
+    expected_output: 7 rows and 3 columns.
+    skills_practiced:
+    - SELECT
+    - column order
+    after_correct: The explicit list documents the output schema and keeps every product identifiable.
+    common_errors: []
+- activity_id: alias_guided
+  title: Rename order_total for reporting
+  type: guided
+  runtime: sql
+  prompt: Return order_id and order_total renamed as order_value from orders.
+  starter: 'SELECT order_id, order_total
+
+    FROM orders;'
+  solution: 'SELECT order_id, order_total AS order_value
+
+    FROM orders;'
+  hints:
+  - Keep order_id unchanged.
+  - Place AS order_value immediately after order_total.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT order_id, order_total AS order_value
+
+      FROM orders;'
+    required_patterns:
+    - order_total\s+AS\s+order_value
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Finance handoff
+    introduction: A finance dashboard uses the business term order value instead of the source name order_total.
+    task: Return the identifier and rename the measure in the result.
+    table: orders
+    requirements:
+    - Return order_id first.
+    - Alias order_total as order_value.
+    - Do not rename the source table.
+    expected_output: 8 rows with headings order_id and order_value.
+    skills_practiced:
+    - aliases
+    - business naming
+    after_correct: AS changes only the result heading, giving downstream readers a clearer label.
+    common_errors: []
+- activity_id: alias_debug
+  title: Repair an incomplete alias
+  type: debugging
+  runtime: sql
+  prompt: Repair the query so monthly_fee is returned as recurring_revenue.
+  starter: 'SELECT subscriber_id, monthly_fee AS
+
+    FROM subscriptions;'
+  solution: 'SELECT subscriber_id, monthly_fee AS recurring_revenue
+
+    FROM subscriptions;'
+  hints:
+  - AS must be followed by the new result-column name.
+  - Use recurring_revenue as the alias.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT subscriber_id, monthly_fee AS recurring_revenue
+
+      FROM subscriptions;'
+    required_patterns:
+    - monthly_fee\s+AS\s+recurring_revenue
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Subscription report QA
+    introduction: A saved query fails because its alias expression is unfinished.
+    task: Complete the alias without changing the requested fields.
+    table: subscriptions
+    requirements:
+    - Return subscriber_id and monthly_fee.
+    - Name the second result column recurring_revenue.
+    expected_output: 7 rows and 2 columns.
+    skills_practiced:
+    - debugging
+    - AS syntax
+    after_correct: An alias expression needs both the source expression and a complete result name.
+    common_errors: []
+- activity_id: alias_mastery
+  title: Create an account-plan view
+  type: mastery
+  runtime: sql
+  prompt: Return subscriber_id as account_id and plan_name as subscription_plan from subscriptions.
+  starter: 'SELECT
+
+    FROM subscriptions;'
+  solution: 'SELECT subscriber_id AS account_id, plan_name AS subscription_plan
+
+    FROM subscriptions;'
+  hints:
+  - Alias each selected source column separately.
+  - Use a comma between the two aliased expressions.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT subscriber_id AS account_id, plan_name AS subscription_plan
+
+      FROM subscriptions;'
+    required_patterns:
+    - subscriber_id\s+AS\s+account_id
+    - plan_name\s+AS\s+subscription_plan
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 8
+  presentation:
+    scenario: Customer-success export
+    introduction: Customer Success needs a clean two-column account-and-plan export for a workflow tool.
+    task: Create the requested result with stakeholder-friendly headings.
+    table: subscriptions
+    requirements:
+    - Return exactly two columns.
+    - Alias subscriber_id as account_id.
+    - Alias plan_name as subscription_plan.
+    expected_output: 7 rows with headings account_id and subscription_plan.
+    skills_practiced:
+    - independent SELECT
+    - multiple aliases
+    after_correct: The result is concise, readable, and stable because both source fields are explicitly selected
+      and clearly renamed.
+    common_errors: []

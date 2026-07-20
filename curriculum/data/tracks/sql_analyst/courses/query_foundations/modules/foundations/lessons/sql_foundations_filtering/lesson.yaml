@@ -1,0 +1,361 @@
+lesson_id: sql_foundations_filtering
+title: Filtering, Boolean Logic, and NULL
+order: 4
+difficulty: beginner
+description: Turn business language into precise row filters and handle missing values correctly.
+estimated_minutes: 50
+content: lesson.md
+objectives:
+- Filter text and numeric values with WHERE.
+- Choose inclusive and exclusive comparison operators.
+- Combine conditions with AND, OR, IN, and parentheses.
+- Test missing values with IS NULL and IS NOT NULL.
+key_takeaways:
+- Translate each business condition separately before combining them.
+- Parentheses make mixed Boolean logic explicit.
+- NULL requires IS NULL or IS NOT NULL.
+teaches:
+- sql.where
+- sql.comparison_operators
+- sql.boolean_logic
+- sql.null_filtering
+requires:
+- sql.select_basics
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: filter_operator_recognition
+  title: Choose the correct boundary operator
+  type: recognition
+  runtime: recognition
+  prompt: A request says to include subscriptions with a monthly fee of at least 29. Which condition matches?
+  answer_options:
+  - monthly_fee >= 29
+  - monthly_fee > 29
+  - monthly_fee = 29
+  - monthly_fee <= 29
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: monthly_fee >= 29
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Pricing-segment definition
+    introduction: A stakeholder uses the phrase at least, which determines whether the boundary value is included.
+    task: Choose the comparison that includes 29 and all larger values.
+    table: subscriptions
+    requirements:
+    - Translate the phrase at least exactly.
+    expected_output: One selected answer.
+    skills_practiced:
+    - comparison operators
+    - boundaries
+    after_correct: Greater than or equal to includes the threshold itself.
+    common_errors: []
+- activity_id: filter_text_guided
+  title: Find active subscriptions
+  type: guided
+  runtime: sql
+  prompt: Return subscriber_id, plan_name, and status for subscriptions whose status is Active.
+  starter: 'SELECT subscriber_id, plan_name, status
+
+    FROM subscriptions
+
+    WHERE '
+  solution: 'SELECT subscriber_id, plan_name, status
+
+    FROM subscriptions
+
+    WHERE status = ''Active'';'
+  hints:
+  - Compare status to a quoted text value.
+  - Use status = 'Active'.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT subscriber_id, plan_name, status
+
+      FROM subscriptions
+
+      WHERE status = ''Active'';'
+    required_patterns:
+    - status\s*=\s*'Active'
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Customer-success outreach
+    introduction: Customer Success is preparing a list of currently active accounts.
+    task: Filter the subscription table to Active rows only.
+    table: subscriptions
+    requirements:
+    - Return subscriber_id, plan_name, and status.
+    - Match the exact status value 'Active'.
+    expected_output: 4 rows and 3 columns.
+    skills_practiced:
+    - WHERE
+    - text comparison
+    after_correct: The WHERE clause limits the result to rows whose status exactly matches the requested category.
+    common_errors: []
+- activity_id: filter_threshold
+  title: Apply an inclusive fee threshold
+  type: independent
+  runtime: sql
+  prompt: Return subscriber_id, plan_name, and monthly_fee for subscriptions with monthly_fee at least 29.
+  starter: 'SELECT subscriber_id, plan_name, monthly_fee
+
+    FROM subscriptions
+
+    WHERE '
+  solution: 'SELECT subscriber_id, plan_name, monthly_fee
+
+    FROM subscriptions
+
+    WHERE monthly_fee >= 29;'
+  hints:
+  - At least includes the boundary.
+  - Use >= 29.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT subscriber_id, plan_name, monthly_fee
+
+      FROM subscriptions
+
+      WHERE monthly_fee >= 29;'
+    required_patterns:
+    - monthly_fee\s*>=\s*29
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Revenue-tier analysis
+    introduction: The growth team defines a higher-value tier that begins at a monthly fee of 29.
+    task: Return every subscription that meets or exceeds the threshold.
+    table: subscriptions
+    requirements:
+    - Return the three requested columns.
+    - Include subscriptions priced exactly at 29.
+    expected_output: 5 rows and 3 columns.
+    skills_practiced:
+    - numeric filtering
+    - inclusive thresholds
+    after_correct: Using >= preserves the business boundary instead of excluding Standard plans priced at 29.
+    common_errors: []
+- activity_id: filter_and_guided
+  title: Find low-stock active inventory
+  type: guided
+  runtime: sql
+  prompt: Return sku, item_name, units_on_hand, and reorder_level where the item is not discontinued and units_on_hand
+    is below reorder_level.
+  starter: 'SELECT sku, item_name, units_on_hand, reorder_level
+
+    FROM inventory
+
+    WHERE '
+  solution: "SELECT sku, item_name, units_on_hand, reorder_level\nFROM inventory\nWHERE discontinued = false\n \
+    \ AND units_on_hand < reorder_level;"
+  hints:
+  - Both business rules must be true.
+  - Compare units_on_hand directly with reorder_level.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: "SELECT sku, item_name, units_on_hand, reorder_level\nFROM inventory\nWHERE discontinued = false\n\
+      \  AND units_on_hand < reorder_level;"
+    required_patterns:
+    - discontinued\s*=\s*false
+    - units_on_hand\s*<\s*reorder_level
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Replenishment review
+    introduction: Operations needs items that are still sold and currently below their configured reorder threshold.
+    task: Combine the active-item rule with the stock comparison.
+    table: inventory
+    requirements:
+    - Exclude discontinued items.
+    - Keep rows where units_on_hand is less than reorder_level.
+    - Use AND because both rules are required.
+    expected_output: 2 rows and 4 columns.
+    skills_practiced:
+    - AND
+    - column-to-column comparison
+    - Boolean values
+    after_correct: The query compares two columns on each row and requires both stock and lifecycle conditions to
+      be true.
+    common_errors: []
+- activity_id: filter_parentheses_transfer
+  title: Protect mixed Boolean logic
+  type: transfer
+  runtime: sql
+  prompt: Return ticket_id, status, priority, and assigned_team for Open or Pending tickets that are assigned to
+    Technical.
+  starter: 'SELECT ticket_id, status, priority, assigned_team
+
+    FROM support_tickets
+
+    WHERE '
+  solution: "SELECT ticket_id, status, priority, assigned_team\nFROM support_tickets\nWHERE (status = 'Open' OR\
+    \ status = 'Pending')\n  AND assigned_team = 'Technical';"
+  hints:
+  - Group the two accepted statuses together.
+  - Apply the Technical-team condition to the entire status group.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: "SELECT ticket_id, status, priority, assigned_team\nFROM support_tickets\nWHERE (status = 'Open'\
+      \ OR status = 'Pending')\n  AND assigned_team = 'Technical';"
+    required_patterns:
+    - \(\s*status\s*=\s*\'Open\'\s+OR\s+status\s*=\s*\'Pending\'\s*\)
+    - assigned_team\s*=\s*\'Technical\'
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Technical-support workload
+    introduction: The support manager wants all unresolved work owned by the Technical team, regardless of whether
+      it is Open or Pending.
+    task: Translate the mixed OR-and-AND business rule safely.
+    table: support_tickets
+    requirements:
+    - Accept Open or Pending statuses.
+    - Require assigned_team to equal Technical.
+    - Use parentheses around the OR group.
+    expected_output: 3 rows and 4 columns.
+    skills_practiced:
+    - OR
+    - AND
+    - parentheses
+    after_correct: Parentheses ensure the Technical-team rule applies to both unresolved statuses.
+    common_errors: []
+- activity_id: filter_null_debug
+  title: Repair a NULL comparison
+  type: debugging
+  runtime: sql
+  prompt: Repair the query so it returns ticket_id and satisfaction_score for tickets with no satisfaction score.
+  starter: 'SELECT ticket_id, satisfaction_score
+
+    FROM support_tickets
+
+    WHERE satisfaction_score = NULL;'
+  solution: 'SELECT ticket_id, satisfaction_score
+
+    FROM support_tickets
+
+    WHERE satisfaction_score IS NULL;'
+  hints:
+  - NULL is tested with IS, not =.
+  - Replace = NULL with IS NULL.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT ticket_id, satisfaction_score
+
+      FROM support_tickets
+
+      WHERE satisfaction_score IS NULL;'
+    required_patterns:
+    - IS\s+NULL
+    forbidden_patterns:
+    - =\s*NULL
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Survey-completion audit
+    introduction: The support analytics team needs tickets whose post-resolution survey has no recorded score.
+    task: Correct the missing-value test.
+    table: support_tickets
+    requirements:
+    - Return ticket_id and satisfaction_score.
+    - Use the SQL operator intended for missing values.
+    expected_output: 7 rows and 2 columns.
+    skills_practiced:
+    - 'NULL'
+    - debugging
+    after_correct: IS NULL evaluates missingness directly; equality comparisons with NULL do not return true.
+    common_errors: []
+- activity_id: filter_mastery
+  title: Prioritize unresolved critical tickets
+  type: mastery
+  runtime: sql
+  prompt: Return ticket_id, customer_id, priority, status, and assigned_team for Open or Pending tickets whose priority
+    is High or Urgent.
+  starter: 'SELECT
+
+    FROM support_tickets
+
+    WHERE '
+  solution: "SELECT ticket_id, customer_id, priority, status, assigned_team\nFROM support_tickets\nWHERE status\
+    \ IN ('Open', 'Pending')\n  AND priority IN ('High', 'Urgent');"
+  hints:
+  - Create one accepted set for status and one for priority.
+  - Connect the two groups with AND.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: "SELECT ticket_id, customer_id, priority, status, assigned_team\nFROM support_tickets\nWHERE\
+      \ status IN ('Open', 'Pending')\n  AND priority IN ('High', 'Urgent');"
+    required_patterns:
+    - status\s+IN\s*\(
+    - priority\s+IN\s*\(
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 10
+  presentation:
+    scenario: Morning escalation queue
+    introduction: Support leadership needs a clean list of unresolved tickets that meet either critical-priority
+      category.
+    task: Build the full independent filter.
+    table: support_tickets
+    requirements:
+    - Return exactly the five requested columns.
+    - Accept Open and Pending.
+    - Accept High and Urgent.
+    - Require both the status group and priority group.
+    expected_output: 5 rows and 5 columns.
+    skills_practiced:
+    - IN
+    - AND
+    - business-rule translation
+    after_correct: The query decomposes the request into two accepted sets and combines them with AND, matching
+      the stakeholder rule exactly.
+    common_errors: []

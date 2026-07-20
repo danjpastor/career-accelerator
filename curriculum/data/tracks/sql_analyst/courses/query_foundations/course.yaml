@@ -1,0 +1,18 @@
+course_id: query_foundations
+title: Query Foundations
+order: 1
+description: Learn to inspect relational tables, shape readable results, explore categories, filter business populations,
+  and produce decision-ready ordered queries.
+estimated_minutes: 225
+outcomes:
+- Identify table grain and analyst-facing data types.
+- Create explicit result schemas with readable aliases.
+- Explore categorical values with DISTINCT and controlled previews.
+- Translate business rules into correct Boolean filters.
+- Build top-N and operational queue queries with valid clause order.
+modules:
+- modules/foundations/module.yaml
+assessments:
+- assessments/foundations_checkpoint.yaml
+skills_labs:
+- skills_labs/customer_support_queue.yaml

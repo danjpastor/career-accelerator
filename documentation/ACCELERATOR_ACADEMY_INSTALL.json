@@ -1,0 +1,8 @@
+{
+  "patch": "accelerator-academy-v10.3.0",
+  "target_version": "10.3.0",
+  "baseline_version": "10.2.0",
+  "installed_at": "2026-07-19T19:40:59",
+  "backup_root": "patch_backups\\accelerator-academy-v10.3.0-<timestamp>",
+  "source_layout": "application\\career_app"
+}

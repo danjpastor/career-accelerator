@@ -1,8 +1,0 @@
-employee_id,employee_name,manager_id,department_id
-101,Mia,,1
-102,Noah,101,1
-103,Olivia,101,2
-104,Liam,103,2
-105,Ava,103,2
-106,Ethan,,3
-107,Zoe,106,3

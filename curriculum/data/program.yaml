@@ -1,0 +1,15 @@
+program_id: data_career_accelerator
+schema_version: 1
+content_version: 1.1.0
+brand:
+  family_name: Career Accelerator
+  program_name: Data
+  application_name: Data Career Accelerator
+learning:
+  system_name: Accelerator Academy
+  pathway_name: Data Analytics Pathway
+  learner_noun: analyst
+  evidence_label: Demonstrated Evidence
+  skills_lab_label: Skills Lab
+paths:
+- paths/data_analytics/path.yaml
