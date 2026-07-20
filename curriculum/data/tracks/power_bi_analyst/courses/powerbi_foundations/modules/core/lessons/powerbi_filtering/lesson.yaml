@@ -1,0 +1,130 @@
+lesson_id: powerbi_filtering
+title: Filtering and Interaction
+order: 4
+difficulty: beginner
+description: Build practical fluency with filtering and interaction.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of filtering and interaction.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Filtering and Interaction supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.filters
+requires:
+- powerbi.visuals
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_filtering_step_1
+  title: 'Practice 1: Filtering and Interaction'
+  type: recognition
+  runtime: recognition
+  prompt: What does a slicer provide?
+  answer_options:
+  - A visible report control for filtering
+  - A new source table
+  - A relationship key
+  - A data type conversion
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A visible report control for filtering
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What does a slicer provide?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Filtering and Interaction
+    after_correct: You identified the core idea behind filtering and interaction.
+    common_errors: []
+  instruction:
+    title: Filtering and Interaction
+    objective: Build a practical understanding of filtering and interaction.
+    action_label: Choose the best answer
+    body: Slicers expose selected filter fields directly to the report user.
+  required_for_completion: true
+- activity_id: powerbi_filtering_step_2
+  title: 'Practice 2: Filtering and Interaction'
+  type: recognition
+  runtime: recognition
+  prompt: Why test cross-filter interactions?
+  answer_options:
+  - To confirm selecting one visual affects others as intended
+  - To increase file size
+  - To replace measures
+  - To rename tables
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To confirm selecting one visual affects others as intended
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why test cross-filter interactions?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Filtering and Interaction
+    after_correct: You identified the core idea behind filtering and interaction.
+    common_errors: []
+  instruction:
+    title: Filtering and Interaction
+    objective: Build a practical understanding of filtering and interaction.
+    action_label: Choose the best answer
+    body: Default interactions are not always appropriate. Test each important selection path.
+  required_for_completion: true
+- activity_id: powerbi_filtering_step_3
+  title: 'Practice 3: Filtering and Interaction'
+  type: mastery
+  runtime: recognition
+  prompt: What is the safest filter design?
+  answer_options:
+  - Make active filters visible and easy to reset
+  - Hide every filter state
+  - Use identical colors for selected and unselected values
+  - Depend on memory
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Make active filters visible and easy to reset
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What is the safest filter design?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Filtering and Interaction
+    after_correct: You identified the core idea behind filtering and interaction.
+    common_errors: []
+  instruction:
+    title: Filtering and Interaction
+    objective: Build a practical understanding of filtering and interaction.
+    action_label: Choose the best answer
+    body: Users should understand the current report context and have an obvious way to return to a baseline view.
+  required_for_completion: true

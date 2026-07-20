@@ -497,11 +497,10 @@ class CourseCallout(QFrame):
         icon, accent, background, border = self.STYLES.get(kind, self.STYLES["note"])
         self.setObjectName("CourseCallout")
         self.setStyleSheet(
-            f"QFrame#CourseCallout {{background:{background};border:1px solid {border};"
-            "border-radius:10px;}"
+            "QFrame#CourseCallout {background:transparent;border:none;}"
         )
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setContentsMargins(0, 6, 0, 6)
         layout.setSpacing(10)
         icon_label = QLabel(icon)
         icon_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
@@ -874,8 +873,7 @@ class CoursePageWidget(QWidget):
                 QSizePolicy.Policy.Preferred,
             )
             subtitle_label.setStyleSheet(
-                "color:#bec7d7;background:#141c2b;border:1px solid #344159;"
-                "border-radius:12px;padding:4px 10px;font-size:9.5pt;"
+                "color:#bec7d7;background:transparent;border:none;padding:0;font-size:9.5pt;"
             )
             self._responsive_pills.append(subtitle_label)
             title_column.addWidget(subtitle_label, 0, Qt.AlignmentFlag.AlignLeft)
@@ -930,8 +928,8 @@ class CoursePageWidget(QWidget):
             QSizePolicy.Policy.Preferred,
         )
         label.setStyleSheet(
-            "color:#D0B2FF;background:#151c2c;border:1px solid #4b3f76;"
-            "border-radius:7px;padding:5px 9px;font-size:9.5pt;font-weight:650;"
+            "color:#D0B2FF;background:transparent;border:none;padding:0;"
+            "font-size:9.5pt;font-weight:650;"
         )
         self._responsive_pills.append(label)
         target.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft)

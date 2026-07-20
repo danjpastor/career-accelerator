@@ -1,0 +1,130 @@
+lesson_id: pandas_transforming
+title: Transforming DataFrames
+order: 1
+difficulty: beginner
+description: Build practical fluency with transforming dataframes.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of transforming dataframes.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Transforming DataFrames supports a reliable, explainable analytics workflow.
+teaches:
+- python_pandas
+requires:
+- python.numpy
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: pandas_transforming_step_1
+  title: 'Practice 1: Transforming DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: How do you select one column named revenue?
+  answer_options:
+  - df['revenue']
+  - df(revenue)
+  - df->revenue
+  - SELECT revenue
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: df['revenue']
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: How do you select one column named revenue?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Transforming DataFrames
+    after_correct: You identified the core idea behind transforming dataframes.
+    common_errors: []
+  instruction:
+    title: Transforming DataFrames
+    objective: Build a practical understanding of transforming dataframes.
+    action_label: Choose the best answer
+    body: Bracket selection returns a Series for one named column.
+  required_for_completion: true
+- activity_id: pandas_transforming_step_2
+  title: 'Practice 2: Transforming DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: What does a Boolean mask do?
+  answer_options:
+  - Keeps rows where a condition is True
+  - Renames every column
+  - Creates a package
+  - Publishes a dashboard
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Keeps rows where a condition is True
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What does a Boolean mask do?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Transforming DataFrames
+    after_correct: You identified the core idea behind transforming dataframes.
+    common_errors: []
+  instruction:
+    title: Transforming DataFrames
+    objective: Build a practical understanding of transforming dataframes.
+    action_label: Choose the best answer
+    body: Boolean filtering translates a row-level business rule into True and False values.
+  required_for_completion: true
+- activity_id: pandas_transforming_step_3
+  title: 'Practice 3: Transforming DataFrames'
+  type: mastery
+  runtime: recognition
+  prompt: Why create a new derived column explicitly?
+  answer_options:
+  - It documents the calculation and makes it reusable downstream
+  - It always changes the source file
+  - It removes the need for validation
+  - It hides the formula
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It documents the calculation and makes it reusable downstream
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why create a new derived column explicitly?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Transforming DataFrames
+    after_correct: You identified the core idea behind transforming dataframes.
+    common_errors: []
+  instruction:
+    title: Transforming DataFrames
+    objective: Build a practical understanding of transforming dataframes.
+    action_label: Choose the best answer
+    body: A named derived field gives later steps a stable, reviewable result.
+  required_for_completion: true

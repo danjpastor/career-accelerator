@@ -1,0 +1,130 @@
+lesson_id: powerbi_defining_tables
+title: Defining Tables
+order: 1
+difficulty: beginner
+description: Build practical fluency with defining tables.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of defining tables.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Defining Tables supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.tables
+requires:
+- powerbi.filters
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_defining_tables_step_1
+  title: 'Practice 1: Defining Tables'
+  type: recognition
+  runtime: recognition
+  prompt: Which table usually stores measurable business events?
+  answer_options:
+  - Fact table
+  - Color table
+  - Tooltip page
+  - Bookmark table
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Fact table
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which table usually stores measurable business events?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Defining Tables
+    after_correct: You identified the core idea behind defining tables.
+    common_errors: []
+  instruction:
+    title: Defining Tables
+    objective: Build a practical understanding of defining tables.
+    action_label: Choose the best answer
+    body: Fact tables record events at a declared grain, while dimensions provide descriptive context.
+  required_for_completion: true
+- activity_id: powerbi_defining_tables_step_2
+  title: 'Practice 2: Defining Tables'
+  type: recognition
+  runtime: recognition
+  prompt: What must be stated for every fact table?
+  answer_options:
+  - Its grain
+  - Its font
+  - Its report page color
+  - Its bookmark name
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Its grain
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What must be stated for every fact table?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Defining Tables
+    after_correct: You identified the core idea behind defining tables.
+    common_errors: []
+  instruction:
+    title: Defining Tables
+    objective: Build a practical understanding of defining tables.
+    action_label: Choose the best answer
+    body: Grain defines what one row represents and prevents ambiguous measures.
+  required_for_completion: true
+- activity_id: powerbi_defining_tables_step_3
+  title: 'Practice 3: Defining Tables'
+  type: mastery
+  runtime: recognition
+  prompt: Which field belongs naturally in a customer dimension?
+  answer_options:
+  - Customer segment
+  - Order line amount
+  - Daily sales total
+  - Inventory transaction count
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Customer segment
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which field belongs naturally in a customer dimension?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Defining Tables
+    after_correct: You identified the core idea behind defining tables.
+    common_errors: []
+  instruction:
+    title: Defining Tables
+    objective: Build a practical understanding of defining tables.
+    action_label: Choose the best answer
+    body: Dimensions contain descriptive attributes used to group and filter facts.
+  required_for_completion: true

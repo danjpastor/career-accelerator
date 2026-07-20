@@ -79,6 +79,16 @@ def _mapping(value: Any, field: str, source: Path) -> dict[str, Any]:
     return dict(value)
 
 
+def _declared_tables(activity: ActivityDefinition) -> tuple[str, ...]:
+    presentation = dict(activity.presentation)
+    value = presentation.get("tables", presentation.get("table"))
+    if isinstance(value, str):
+        return tuple(item.strip() for item in value.split(",") if item.strip())
+    if isinstance(value, (list, tuple)):
+        return tuple(str(item).strip() for item in value if str(item).strip())
+    return ()
+
+
 def _activity(raw: dict[str, Any], source: Path) -> ActivityDefinition:
     try:
         kind = ActivityType(str(raw["type"]).strip().lower())
@@ -103,6 +113,8 @@ def _activity(raw: dict[str, Any], source: Path) -> ActivityDefinition:
         difficulty=str(raw.get("difficulty") or "beginner").strip(),
         answer_options=_tuple_strings(raw.get("answer_options", []), "answer_options", source),
         presentation=_mapping(raw.get("presentation"), "presentation", source),
+        instruction=_mapping(raw.get("instruction"), "instruction", source),
+        required_for_completion=bool(raw.get("required_for_completion", True)),
         estimated_minutes=max(1, int(raw.get("estimated_minutes", 5))),
     )
 
@@ -215,6 +227,7 @@ def _track(path: Path) -> TrackDefinition:
         order=int(raw.get("order", 0)),
         description=str(raw.get("description") or "").strip(),
         courses=tuple(sorted((_course(_safe_ref(path.parent, ref)) for ref in raw.get("courses", [])), key=lambda x: x.order)),
+        navigation_title=str(raw.get("navigation_title") or "").strip(),
     )
 
 
@@ -315,4 +328,30 @@ def load_catalog(root: str | Path) -> CurriculumCatalog:
     for lab in catalog.skills_labs():
         if lab.dataset_id not in catalog.datasets:
             raise CurriculumError(f"Unknown dataset {lab.dataset_id!r} in Skills Lab {lab.lab_id}")
+
+    all_activities = [activity for lesson in catalog.lessons() for activity in lesson.activities]
+    all_activities.extend(activity for assessment in catalog.assessments() for activity in assessment.activities)
+    all_activities.extend(lab.activity for lab in catalog.skills_labs())
+    for activity in all_activities:
+        if activity.runtime != "sql":
+            continue
+        dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
+        dataset = catalog.datasets.get(dataset_id)
+        if dataset is None:
+            raise CurriculumError(
+                f"Unknown dataset {dataset_id!r} in SQL activity {activity.activity_id}"
+            )
+        declared_tables = _declared_tables(activity)
+        if not declared_tables:
+            raise CurriculumError(
+                f"SQL activity {activity.activity_id} must declare presentation.table or presentation.tables "
+                "so the learner can see the available schema."
+            )
+        known_tables = {table.name for table in dataset.tables}
+        unknown_tables = set(declared_tables) - known_tables
+        if unknown_tables:
+            raise CurriculumError(
+                f"Unknown table reference(s) in {activity.activity_id}: "
+                + ", ".join(sorted(unknown_tables))
+            )
     return catalog

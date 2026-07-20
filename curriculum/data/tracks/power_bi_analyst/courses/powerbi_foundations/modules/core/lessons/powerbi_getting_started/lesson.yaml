@@ -1,0 +1,132 @@
+lesson_id: powerbi_getting_started
+title: Getting Started with Power BI
+order: 1
+difficulty: beginner
+description: Build practical fluency with getting started with power bi.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of getting started with power bi.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Getting Started with Power BI supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.interface
+requires:
+- sql.window_functions
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_getting_started_step_1
+  title: 'Practice 1: Getting Started with Power BI'
+  type: recognition
+  runtime: recognition
+  prompt: Which view is used to arrange report visuals?
+  answer_options:
+  - Report view
+  - Model view
+  - Data source settings
+  - Power Query only
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Report view
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which view is used to arrange report visuals?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Getting Started with Power BI
+    after_correct: You identified the core idea behind getting started with power bi.
+    common_errors: []
+  instruction:
+    title: Getting Started with Power BI
+    objective: Build a practical understanding of getting started with power bi.
+    action_label: Choose the best answer
+    body: Power BI separates report design, data inspection, model relationships, and query transformations into
+      distinct work areas. Choose the view that matches the action you need to perform.
+  required_for_completion: true
+- activity_id: powerbi_getting_started_step_2
+  title: 'Practice 2: Getting Started with Power BI'
+  type: recognition
+  runtime: recognition
+  prompt: What should you confirm immediately after importing a table?
+  answer_options:
+  - Column names, row count, and data types
+  - Only the report theme
+  - Only the file name
+  - Nothing until publishing
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Column names, row count, and data types
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What should you confirm immediately after importing a table?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Getting Started with Power BI
+    after_correct: You identified the core idea behind getting started with power bi.
+    common_errors: []
+  instruction:
+    title: Getting Started with Power BI
+    objective: Build a practical understanding of getting started with power bi.
+    action_label: Choose the best answer
+    body: A quick source check catches missing columns, unexpected row counts, and incorrect types before they spread
+      into measures and visuals.
+  required_for_completion: true
+- activity_id: powerbi_getting_started_step_3
+  title: 'Practice 3: Getting Started with Power BI'
+  type: mastery
+  runtime: recognition
+  prompt: Which sequence is the safest starting workflow?
+  answer_options:
+  - Connect, inspect, transform, model, measure, visualize, validate
+  - Visualize first, then inspect
+  - Publish before modeling
+  - Create measures before loading data
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Connect, inspect, transform, model, measure, visualize, validate
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which sequence is the safest starting workflow?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Getting Started with Power BI
+    after_correct: You identified the core idea behind getting started with power bi.
+    common_errors: []
+  instruction:
+    title: Getting Started with Power BI
+    objective: Build a practical understanding of getting started with power bi.
+    action_label: Choose the best answer
+    body: A reliable workflow moves from source understanding toward presentation, with validation at every stage.
+  required_for_completion: true

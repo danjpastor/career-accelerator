@@ -1,0 +1,9 @@
+module_id: aggregations_transformations_core
+title: Aggregations and Transformation
+order: 1
+description: Work through aggregations and transformation one focused, interactive step at a time.
+lessons:
+- lessons/sql_aggregations/lesson.yaml
+- lessons/sql_transformations/lesson.yaml
+- lessons/sql_advanced_filtering/lesson.yaml
+- lessons/sql_conditional_metrics/lesson.yaml

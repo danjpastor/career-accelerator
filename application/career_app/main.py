@@ -82,7 +82,7 @@ NAV = [
     ("🏠 Dashboard", 0),
     ("🚀 Adaptive Planner", 1),
     ("📚 Learning", 2),
-    (" Accelerator Academy", 12),
+    ("🎓 Accelerator Academy", 12),
     ("📁 Portfolio Workspace", 3),
     ("💻 SQL Companion", 4),
     ("⏱️ Study Session", 5),
@@ -545,7 +545,7 @@ class CareerAccelerator(QMainWindow):
         # existing responsive layout rules intact.
         logo = QLabel()
         logo.setObjectName("BrandLogo")
-        logo.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        logo.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
         logo.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Fixed,
@@ -2326,7 +2326,7 @@ class CareerAccelerator(QMainWindow):
         self.learning_overview_cards = []
         learning_tracks = [
             ("🎓 Google Certificate", "Google"),
-            ("📘 DataCamp", "DataCamp"),
+            ("🎓 Accelerator Academy", "Academy"),
             ("💻 SQL Practice", "SQL"),
             ("📊 Power BI", "Power BI"),
             ("🐍 Python", "Python"),
@@ -6169,11 +6169,6 @@ class CareerAccelerator(QMainWindow):
             or self.state["current_week"]
         )
 
-        if "datacamp" in lower_label:
-            if "sql" in lower_label:
-                return "DataCamp • Introduction to SQL"
-            return "DataCamp"
-
         current_google_match = re.match(
             r"Continue Google Course (\d+), "
             r"Module (\d+)$",
@@ -6236,7 +6231,7 @@ class CareerAccelerator(QMainWindow):
             (
                 "Keep Moving",
                 "Continue the current course",
-                "Continue DataCamp",
+                "Continue Accelerator Academy",
                 [],
                 "Advance the project",
             ),
@@ -6398,7 +6393,7 @@ class CareerAccelerator(QMainWindow):
 
         focus_title_icons = {
             "Google Certificate": "🎓",
-            "DataCamp": "📘",
+            "Accelerator Academy": "🎓",
             "Learning": "🎓",
             "SQL Practice": "💻",
             "DuckDB Practice": "🦆",
@@ -6434,8 +6429,8 @@ class CareerAccelerator(QMainWindow):
                         "google": (
                             "Google Certificate"
                         ),
-                        "datacamp": (
-                            "DataCamp"
+                        "academy": (
+                            "Accelerator Academy"
                         ),
                         "sql": (
                             "SQL Practice"
@@ -7360,7 +7355,10 @@ class CareerAccelerator(QMainWindow):
         )
 
         google = track_data["google"]
-        datacamp = track_data["datacamp"]
+        academy = track_data.get("academy", {
+            "metadata": {}, "weekly_completed": 0, "weekly_target": 2,
+            "status": "Active", "task_label": None,
+        })
         sql = track_data["sql"]
         portfolio = track_data["portfolio"]
         applied = track_data["applied"]
@@ -7377,22 +7375,16 @@ class CareerAccelerator(QMainWindow):
             f"{google_meta.get('pace_status', 'On pace')}"
         )
 
-        data_course = datacamp["metadata"].get(
-            "course",
-            "Learning path",
+        academy_title = academy["metadata"].get(
+            "title",
+            academy.get("task_label") or "Resume your guided learning path",
         )
-        data_lesson = datacamp["metadata"].get(
-            "lesson",
-            "Track complete",
-        )
-        datacamp_detail = (
-            f"{data_lesson} • "
-            f"Today "
-            f"{datacamp['metadata'].get('today_completed', 0)} / "
-            f"{datacamp['metadata'].get('today_target', 0)} • "
-            f"Week "
-            f"{datacamp['weekly_completed']} / "
-            f"{datacamp['weekly_target']}"
+        academy_detail = (
+            f"{academy_title} • "
+            f"Today {academy['metadata'].get('today_completed', 0)} / "
+            f"{academy['metadata'].get('today_target', 1)} • "
+            f"Week {academy.get('weekly_completed', 0)} / "
+            f"{academy.get('weekly_target', 2)}"
         )
 
         sql_count = self.conn.execute(
@@ -7493,9 +7485,9 @@ class CareerAccelerator(QMainWindow):
                 f"Course {self.state['google_course']}",
                 google_detail,
             ),
-            "DataCamp": (
-                data_course,
-                datacamp_detail,
+            "Academy": (
+                "Guided learning",
+                academy_detail,
             ),
             "SQL": (
                 f"{sql_count}/{self.state['sql_target']}",
@@ -8005,7 +7997,7 @@ class CareerAccelerator(QMainWindow):
             f"{len(learned)} learned • "
             f"{len(progress)} in progress • "
             f"{len(locked)} locked • "
-            "Updated automatically from Google, DataCamp, DuckDB, and SQL Companion."
+            "Updated automatically from Google, Accelerator Academy, DuckDB, and SQL Companion."
         )
         self.skills_tabs.setTabText(0, f"Learned ({len(learned)})")
         self.skills_tabs.setTabText(1, f"In Progress ({len(progress)})")
@@ -9051,7 +9043,7 @@ class CareerAccelerator(QMainWindow):
             self.workspace_task_list.setCurrentRow(0)
         self.workspace_task_summary.setText(
             f"{len(rows)} task(s) • Documents are created only when opened • "
-            "Google Certificate and DataCamp work stays in Learning and "
+            "Google Certificate and Accelerator Academy work stays in Learning and "
             "Study Sessions rather than Task Workspaces."
         )
 
@@ -10292,7 +10284,7 @@ class CareerAccelerator(QMainWindow):
             (
                 "Keep Moving",
                 "Continue the current course",
-                "Continue DataCamp",
+                "Continue Accelerator Academy",
                 [],
                 "Advance the project",
             ),

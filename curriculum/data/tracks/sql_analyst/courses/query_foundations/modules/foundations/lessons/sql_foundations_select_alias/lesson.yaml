@@ -54,6 +54,48 @@ activities:
     - result shape
     after_correct: An explicit SELECT list projects the requested columns while leaving row eligibility unchanged.
     common_errors: []
+  instruction:
+    title: Understand projection
+    objective: Recognize the operation that changes result columns without filtering rows.
+    action_label: Choose the operation
+    body: 'In relational terminology, choosing columns is called **projection**. Projection changes the shape of
+      the result horizontally: it controls which attributes appear. It does not determine which records qualify.
+
+
+      ```sql
+
+      SELECT account_id, plan_name
+
+      FROM subscriptions;
+
+      ```
+
+
+      If the source contains seven rows and no filter is present, the result still contains seven rows. It simply
+      contains fewer columns.
+
+
+      This differs from **filtering**, which changes the result vertically by keeping only rows that satisfy a condition.
+      Later, both operations can be combined:
+
+
+      ```sql
+
+      SELECT account_id, plan_name
+
+      FROM subscriptions
+
+      WHERE status = ''Active'';
+
+      ```
+
+
+      Here, `SELECT` projects columns and `WHERE` filters rows.
+
+
+      The question asks specifically about changing which columns appear while retaining all source rows. Choose
+      the operation that describes that behavior.'
+  required_for_completion: true
 - activity_id: select_guided
   title: Build a compact product catalog
   type: guided
@@ -98,6 +140,42 @@ activities:
     - column order
     after_correct: The explicit list documents the output schema and keeps every product identifiable.
     common_errors: []
+  instruction:
+    title: Design the result for its reader
+    objective: Select a compact, stakeholder-ready set of fields.
+    action_label: Build the catalog view
+    body: 'Most business questions do not need every field in a table. A focused result is easier to inspect, export,
+      explain, and validate.
+
+
+      When choosing a column order, consider how a reader will scan the result:
+
+
+      1. Put the stable identifier first.
+
+      2. Follow it with the readable name or description.
+
+      3. Place the measure or status that answers the question after the context fields.
+
+
+      For example:
+
+
+      ```sql
+
+      SELECT service_id, service_name, monthly_cost
+
+      FROM service_catalog;
+
+      ```
+
+
+      The identifier supports traceability, the name supports interpretation, and the measure supports comparison.
+
+
+      The product table contains more fields than the catalog view needs. Return exactly `product_id`, `product_name`,
+      and `unit_price` in that order. Do not add a filter, because the request covers every product.'
+  required_for_completion: true
 - activity_id: alias_guided
   title: Rename order_total for reporting
   type: guided
@@ -143,6 +221,19 @@ activities:
     - business naming
     after_correct: AS changes only the result heading, giving downstream readers a clearer label.
     common_errors: []
+  instruction:
+    title: Rename result columns with AS
+    objective: Use an alias to make a source field clearer to a report reader.
+    action_label: Add the reporting alias
+    body: "An alias changes a column heading in the query result without renaming the source column.\n\n```sql\n\
+      SELECT annual_value AS contract_value\nFROM contracts;\n```\n\nThe table still contains `annual_value`; only\
+      \ the displayed heading becomes `contract_value`. Aliases are useful when a source name is technical, abbreviated,\
+      \ or too vague for the audience.\n\nUse the explicit `AS` keyword while learning. Some SQL dialects allow\
+      \ a space alone, but `AS` makes the intention unmistakable and reduces confusion during review.\n\nAliases\
+      \ apply to individual expressions, so the comma belongs after the complete expression:\n\n```sql\nSELECT order_id,\n\
+      \       order_total AS order_value\nFROM orders;\n```\n\nComplete the query so the monetary field appears\
+      \ under the report-friendly heading `order_value`. Keep `order_id` unchanged."
+  required_for_completion: true
 - activity_id: alias_debug
   title: Repair an incomplete alias
   type: debugging
@@ -187,6 +278,41 @@ activities:
     - AS syntax
     after_correct: An alias expression needs both the source expression and a complete result name.
     common_errors: []
+  instruction:
+    title: Treat an alias as a complete expression
+    objective: Repair an alias that is missing its result name.
+    action_label: Fix the alias
+    body: 'Each item in a `SELECT` list must be a complete expression. When you use `AS`, the database expects a
+      result name immediately after it.
+
+
+      ```sql
+
+      SELECT monthly_fee AS recurring_revenue
+
+      FROM subscriptions;
+
+      ```
+
+
+      A dangling `AS` is incomplete, just as a comma with no following column is incomplete. When an alias query
+      fails, inspect the expression from left to right:
+
+
+      - Source expression: `monthly_fee`
+
+      - Alias keyword: `AS`
+
+      - Result heading: `recurring_revenue`
+
+
+      The alias should be a valid, readable identifier. Avoid punctuation and unnecessary spaces unless the dialect
+      and reporting need explicitly require quoted aliases.
+
+
+      Repair the starter query by supplying the requested alias. Do not rename the source field elsewhere or remove
+      the other selected columns.'
+  required_for_completion: true
 - activity_id: alias_mastery
   title: Create an account-plan view
   type: mastery
@@ -234,3 +360,16 @@ activities:
     after_correct: The result is concise, readable, and stable because both source fields are explicitly selected
       and clearly renamed.
     common_errors: []
+  instruction:
+    title: Create a reader-friendly two-column view
+    objective: Independently select and alias multiple fields.
+    action_label: Build the account-plan view
+    body: "A strong result set balances source traceability with reader-friendly headings. You can alias more than\
+      \ one selected field:\n\n```sql\nSELECT member_id AS account_id,\n       membership_tier AS plan_name\nFROM\
+      \ memberships;\n```\n\nEach alias applies only to the expression directly before it. Commas still separate\
+      \ the complete expressions.\n\nBefore writing, translate the request into a small output contract:\n\n- First\
+      \ result column: source `subscriber_id`, displayed as `account_id`\n- Second result column: source `plan_name`,\
+      \ displayed as `subscription_plan`\n- Source table: `subscriptions`\n- Rows: all subscriptions\n\nThis is\
+      \ the lesson’s independent mastery step. Build the query without copying a previous solution. If you view\
+      \ the full solution, you can still practice, but you must pass a later unassisted attempt to demonstrate mastery."
+  required_for_completion: true

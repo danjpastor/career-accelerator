@@ -1,0 +1,131 @@
+lesson_id: powerbi_transforming_data
+title: Transforming Data
+order: 2
+difficulty: beginner
+description: Build practical fluency with transforming data.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of transforming data.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Transforming Data supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.power_query
+requires:
+- powerbi.interface
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_transforming_data_step_1
+  title: 'Practice 1: Transforming Data'
+  type: recognition
+  runtime: recognition
+  prompt: Where should repeatable source-cleaning steps usually live?
+  answer_options:
+  - Power Query
+  - A text box on the report
+  - The visual title
+  - A bookmark
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Power Query
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Where should repeatable source-cleaning steps usually live?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Transforming Data
+    after_correct: You identified the core idea behind transforming data.
+    common_errors: []
+  instruction:
+    title: Transforming Data
+    objective: Build a practical understanding of transforming data.
+    action_label: Choose the best answer
+    body: Power Query records repeatable transformation steps before data reaches the model.
+  required_for_completion: true
+- activity_id: powerbi_transforming_data_step_2
+  title: 'Practice 2: Transforming Data'
+  type: recognition
+  runtime: recognition
+  prompt: What is the best action for a numeric column imported as text?
+  answer_options:
+  - Change its type deliberately and review conversion errors
+  - Leave it as text forever
+  - Hide the column
+  - Create a pie chart
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Change its type deliberately and review conversion errors
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What is the best action for a numeric column imported as text?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Transforming Data
+    after_correct: You identified the core idea behind transforming data.
+    common_errors: []
+  instruction:
+    title: Transforming Data
+    objective: Build a practical understanding of transforming data.
+    action_label: Choose the best answer
+    body: Types affect sorting, aggregation, relationships, and DAX. Correct them close to the source and inspect
+      errors.
+  required_for_completion: true
+- activity_id: powerbi_transforming_data_step_3
+  title: 'Practice 3: Transforming Data'
+  type: mastery
+  runtime: recognition
+  prompt: Why keep transformation steps focused and named?
+  answer_options:
+  - They make refresh behavior easier to audit and maintain
+  - They make files larger
+  - They remove the need for validation
+  - They replace relationships
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: They make refresh behavior easier to audit and maintain
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why keep transformation steps focused and named?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Transforming Data
+    after_correct: You identified the core idea behind transforming data.
+    common_errors: []
+  instruction:
+    title: Transforming Data
+    objective: Build a practical understanding of transforming data.
+    action_label: Choose the best answer
+    body: Clear step names and focused operations make the refresh pipeline understandable to another analyst.
+  required_for_completion: true

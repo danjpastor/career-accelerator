@@ -1,0 +1,130 @@
+lesson_id: python_lists
+title: Python Lists
+order: 2
+difficulty: beginner
+description: Build practical fluency with python lists.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of python lists.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Python Lists supports a reliable, explainable analytics workflow.
+teaches:
+- python.lists
+requires:
+- python.basics
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: python_lists_step_1
+  title: 'Practice 1: Python Lists'
+  type: recognition
+  runtime: recognition
+  prompt: Which index accesses the first list item?
+  answer_options:
+  - '0'
+  - '1'
+  - '-2'
+  - first
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: '0'
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which index accesses the first list item?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Python Lists
+    after_correct: You identified the core idea behind python lists.
+    common_errors: []
+  instruction:
+    title: Python Lists
+    objective: Build a practical understanding of python lists.
+    action_label: Choose the best answer
+    body: Python sequences use zero-based indexing.
+  required_for_completion: true
+- activity_id: python_lists_step_2
+  title: 'Practice 2: Python Lists'
+  type: recognition
+  runtime: recognition
+  prompt: What does values[-1] return?
+  answer_options:
+  - The last item
+  - The first item
+  - Every item
+  - An error in all cases
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The last item
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What does values[-1] return?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Python Lists
+    after_correct: You identified the core idea behind python lists.
+    common_errors: []
+  instruction:
+    title: Python Lists
+    objective: Build a practical understanding of python lists.
+    action_label: Choose the best answer
+    body: Negative indexes count backward from the end of a sequence.
+  required_for_completion: true
+- activity_id: python_lists_step_3
+  title: 'Practice 3: Python Lists'
+  type: mastery
+  runtime: recognition
+  prompt: Which operation adds one item to the end of a list?
+  answer_options:
+  - append
+  - groupby
+  - merge
+  - astype
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: append
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which operation adds one item to the end of a list?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Python Lists
+    after_correct: You identified the core idea behind python lists.
+    common_errors: []
+  instruction:
+    title: Python Lists
+    objective: Build a practical understanding of python lists.
+    action_label: Choose the best answer
+    body: List methods change or inspect a collection of ordered values.
+  required_for_completion: true

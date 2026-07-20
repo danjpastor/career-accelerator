@@ -1,0 +1,130 @@
+lesson_id: powerbi_star_schema
+title: Star and Snowflake Schemas
+order: 4
+difficulty: beginner
+description: Build practical fluency with star and snowflake schemas.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of star and snowflake schemas.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Star and Snowflake Schemas supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.star_schema
+requires:
+- powerbi.dimensional_modeling
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_star_schema_step_1
+  title: 'Practice 1: Star and Snowflake Schemas'
+  type: recognition
+  runtime: recognition
+  prompt: What defines a star schema?
+  answer_options:
+  - A central fact connected directly to descriptive dimensions
+  - Every table connected to every other table
+  - Only one table
+  - No measures
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A central fact connected directly to descriptive dimensions
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What defines a star schema?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Star and Snowflake Schemas
+    after_correct: You identified the core idea behind star and snowflake schemas.
+    common_errors: []
+  instruction:
+    title: Star and Snowflake Schemas
+    objective: Build a practical understanding of star and snowflake schemas.
+    action_label: Choose the best answer
+    body: A star schema creates clear filter paths from dimensions into facts.
+  required_for_completion: true
+- activity_id: powerbi_star_schema_step_2
+  title: 'Practice 2: Star and Snowflake Schemas'
+  type: recognition
+  runtime: recognition
+  prompt: Why is a simple star often preferred for reporting?
+  answer_options:
+  - It is easier to understand, filter, and maintain
+  - It always has more tables
+  - It removes the need for data quality
+  - It prevents all mistakes
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It is easier to understand, filter, and maintain
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why is a simple star often preferred for reporting?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Star and Snowflake Schemas
+    after_correct: You identified the core idea behind star and snowflake schemas.
+    common_errors: []
+  instruction:
+    title: Star and Snowflake Schemas
+    objective: Build a practical understanding of star and snowflake schemas.
+    action_label: Choose the best answer
+    body: A straightforward model reduces ambiguity for report authors and reviewers.
+  required_for_completion: true
+- activity_id: powerbi_star_schema_step_3
+  title: 'Practice 3: Star and Snowflake Schemas'
+  type: mastery
+  runtime: recognition
+  prompt: When can snowflaking be reasonable?
+  answer_options:
+  - When a dimension has reusable normalized subdimensions and the added complexity is justified
+  - Whenever a report needs color
+  - Only for CSV files
+  - Never
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: When a dimension has reusable normalized subdimensions and the added complexity is justified
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: When can snowflaking be reasonable?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Star and Snowflake Schemas
+    after_correct: You identified the core idea behind star and snowflake schemas.
+    common_errors: []
+  instruction:
+    title: Star and Snowflake Schemas
+    objective: Build a practical understanding of star and snowflake schemas.
+    action_label: Choose the best answer
+    body: Normalize only when the maintenance or reuse benefit outweighs a more complex model.
+  required_for_completion: true

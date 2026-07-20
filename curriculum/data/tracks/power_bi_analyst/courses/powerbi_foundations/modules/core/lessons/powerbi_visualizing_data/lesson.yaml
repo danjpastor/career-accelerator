@@ -1,0 +1,130 @@
+lesson_id: powerbi_visualizing_data
+title: Visualizing Data
+order: 3
+difficulty: beginner
+description: Build practical fluency with visualizing data.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of visualizing data.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Visualizing Data supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.visuals
+requires:
+- powerbi.power_query
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_visualizing_data_step_1
+  title: 'Practice 1: Visualizing Data'
+  type: recognition
+  runtime: recognition
+  prompt: Which visual is generally strongest for a trend over time?
+  answer_options:
+  - Line chart
+  - Pie chart
+  - Single card
+  - Slicer
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Line chart
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which visual is generally strongest for a trend over time?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Visualizing Data
+    after_correct: You identified the core idea behind visualizing data.
+    common_errors: []
+  instruction:
+    title: Visualizing Data
+    objective: Build a practical understanding of visualizing data.
+    action_label: Choose the best answer
+    body: Choose a visual based on the analytical question. Lines emphasize change over an ordered time axis.
+  required_for_completion: true
+- activity_id: powerbi_visualizing_data_step_2
+  title: 'Practice 2: Visualizing Data'
+  type: recognition
+  runtime: recognition
+  prompt: When is a card appropriate?
+  answer_options:
+  - For one high-priority summary metric
+  - For twenty categories
+  - For row-level validation
+  - For a relationship diagram
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: For one high-priority summary metric
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: When is a card appropriate?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Visualizing Data
+    after_correct: You identified the core idea behind visualizing data.
+    common_errors: []
+  instruction:
+    title: Visualizing Data
+    objective: Build a practical understanding of visualizing data.
+    action_label: Choose the best answer
+    body: Cards work best when a single number deserves immediate attention and its definition is clear.
+  required_for_completion: true
+- activity_id: powerbi_visualizing_data_step_3
+  title: 'Practice 3: Visualizing Data'
+  type: mastery
+  runtime: recognition
+  prompt: What should determine visual formatting decisions?
+  answer_options:
+  - Readability, hierarchy, and the stakeholder question
+  - Decoration alone
+  - The maximum number of colors
+  - Default settings only
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Readability, hierarchy, and the stakeholder question
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What should determine visual formatting decisions?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Visualizing Data
+    after_correct: You identified the core idea behind visualizing data.
+    common_errors: []
+  instruction:
+    title: Visualizing Data
+    objective: Build a practical understanding of visualizing data.
+    action_label: Choose the best answer
+    body: Formatting should guide attention and make comparison easy rather than add visual noise.
+  required_for_completion: true

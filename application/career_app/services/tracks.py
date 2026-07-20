@@ -31,13 +31,22 @@ TRACK_CONFIG = {
         "sort_band": -400000,
         "role": "Primary",
     },
-    "datacamp": {
-        "display_name": "DataCamp",
+    "academy": {
+        "display_name": "Accelerator Academy",
         "category": "Learning",
-        "destination": 2,
+        "destination": 12,
         "priority": 1,
         "sort_band": -300000,
         "role": "Supplemental",
+    },
+    # Retained only for historical event mapping and legacy undo support.
+    "datacamp": {
+        "display_name": "External Learning History",
+        "category": "Learning",
+        "destination": 2,
+        "priority": 9,
+        "sort_band": -900000,
+        "role": "Historical",
     },
     "sql": {
         "display_name": "SQL Practice",
@@ -67,7 +76,6 @@ TRACK_CONFIG = {
 
 TRACK_ORDER = (
     "google",
-    "datacamp",
     "sql",
     "portfolio",
     "applied",
@@ -1032,13 +1040,6 @@ def adaptive_targets(
         ),
     )
 
-    datacamp_target = (
-        2
-        if hours >= 14
-        else 1
-        if hours >= 6
-        else 0
-    )
     sql_target = (
         3
         if hours >= 16
@@ -1078,18 +1079,11 @@ def adaptive_targets(
             "allocation_percent": 67,
             "allocation_minutes": google_minutes,
         },
-        "datacamp": {
-            "weekly_target": datacamp_target,
-            "allocation_percent": 10,
-            "allocation_minutes": int(
-                hours * 60 * 0.10
-            ),
-        },
         "sql": {
             "weekly_target": sql_target,
-            "allocation_percent": 8,
+            "allocation_percent": 13,
             "allocation_minutes": int(
-                hours * 60 * 0.08
+                hours * 60 * 0.13
             ),
         },
         "portfolio": {
@@ -1101,9 +1095,9 @@ def adaptive_targets(
         },
         "applied": {
             "weekly_target": applied_target,
-            "allocation_percent": 8,
+            "allocation_percent": 13,
             "allocation_minutes": int(
-                hours * 60 * 0.08
+                hours * 60 * 0.13
             ),
         },
     }
@@ -2473,43 +2467,18 @@ def applied_lab_readiness(
         for skill_key in missing_skill_keys
     )
 
-    datacamp = _state_row(
-        conn,
-        "datacamp",
-    )
-    datacamp_position = (
-        int(datacamp["position"])
-        if datacamp is not None
-        else 0
-    )
-
     if (
         number == 1
-        and "power_bi_foundations"
-        not in unlocked
-        and datacamp_position < 13
-        and int(
-            state["google_course"]
-        ) < 6
+        and "power_bi_foundations" not in unlocked
+        and int(state["google_course"]) < 6
     ):
         missing.append(
-            (
-                "Begin Power BI instruction "
-                "or reach Google Course 6"
-            )
+            "Begin Accelerator Academy Power BI Foundations or reach Google Course 6"
         )
 
-    if (
-        number == 8
-        and "python_pandas"
-        not in unlocked
-        and datacamp_position < 21
-    ):
+    if number == 8 and "python_pandas" not in unlocked:
         missing.append(
-            (
-                "Begin the DataCamp Python "
-                "or pandas curriculum"
-            )
+            "Begin Accelerator Academy Python or pandas foundations"
         )
 
     if (
@@ -3341,7 +3310,6 @@ def initialize(conn, state):
             int(state["google_course"]),
             int(state["google_module"]),
         ),
-        "datacamp": (0, 0),
         "sql": (
             len(_completed_sql(conn)),
             0,
@@ -3452,11 +3420,6 @@ def sync_all(conn, state):
         "google": _google_target(
             state,
             pace["google"],
-        ),
-        "datacamp": _datacamp_target(
-            conn,
-            state,
-            pace["datacamp"],
         ),
         "sql": _sql_target(
             conn,
@@ -4506,6 +4469,12 @@ def task_detail(conn, task_id):
             if aligned_course
             else "Supports certificate progress"
         )
+    elif track_key == "academy":
+        specific_work = metadata.get(
+            "title",
+            "Continue your next Academy lesson",
+        )
+        context = "Built-in guided learning"
     elif track_key == "sql":
         specific_work = metadata.get(
             "title",
@@ -5348,6 +5317,27 @@ def snapshot(conn, state):
                 active["source_label"]
                 if active else None
             ),
+        }
+
+    academy_row = _state_row(conn, "academy")
+    if academy_row is not None:
+        try:
+            academy_metadata = json.loads(academy_row["metadata"] or "{}")
+        except (TypeError, ValueError, json.JSONDecodeError):
+            academy_metadata = {}
+        academy_active = _active_link(conn, "academy")
+        result["academy"] = {
+            "track_key": "academy",
+            "display_name": academy_row["display_name"],
+            "position": int(academy_row["position"]),
+            "subposition": int(academy_row["subposition"]),
+            "weekly_target": int(academy_row["weekly_target"]),
+            "weekly_completed": int(academy_metadata.get("weekly_completed", 0)),
+            "status": academy_row["status"],
+            "metadata": academy_metadata,
+            "task_id": int(academy_active["task_id"]) if academy_active else None,
+            "task_label": academy_active["label"] if academy_active else None,
+            "source_label": academy_active["source_label"] if academy_active else None,
         }
 
     return result

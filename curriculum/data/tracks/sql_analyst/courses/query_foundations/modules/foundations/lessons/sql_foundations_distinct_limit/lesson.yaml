@@ -52,8 +52,49 @@ activities:
     skills_practiced:
     - DISTINCT
     - unique combinations
-    after_correct: DISTINCT evaluates the complete selected combination, so a region may appear with more than one status.
+    after_correct: DISTINCT evaluates the complete selected combination, so a region may appear with more than one
+      status.
     common_errors: []
+  instruction:
+    title: Apply DISTINCT to the complete selected row
+    objective: Predict how DISTINCT behaves with more than one selected column.
+    action_label: Interpret the result
+    body: '`DISTINCT` removes repeated combinations from a query result. With one selected column, it returns one
+      row per unique value:
+
+
+      ```sql
+
+      SELECT DISTINCT region
+
+      FROM orders;
+
+      ```
+
+
+      With two selected columns, SQL evaluates the pair:
+
+
+      ```sql
+
+      SELECT DISTINCT region, status
+
+      FROM orders;
+
+      ```
+
+
+      If `West` occurs with both `Completed` and `Pending`, both combinations remain. `DISTINCT` does not force
+      the first column to appear only once, and it does not remove records from the source table.
+
+
+      This distinction matters during profiling. A single-column query helps inspect the domain of one field. A
+      multi-column query helps inspect which combinations actually occur.
+
+
+      Predict the result of the two-column query by focusing on the complete selected row rather than either column
+      in isolation.'
+  required_for_completion: true
 - activity_id: distinct_guided
   title: List unique order regions
   type: guided
@@ -98,6 +139,34 @@ activities:
     - categorical profiling
     after_correct: The query reveals the field domain without implying that repeated regions were bad source records.
     common_errors: []
+  instruction:
+    title: Profile a categorical field
+    objective: Return one row for each different category value.
+    action_label: List the unique regions
+    body: 'Analysts often begin exploring a categorical column by listing its unique values. This reveals the field’s
+      domain and can expose inconsistent labels such as `West`, `WEST`, and `west`.
+
+
+      ```sql
+
+      SELECT DISTINCT request_status
+
+      FROM service_requests;
+
+      ```
+
+
+      `DISTINCT` appears immediately after `SELECT`. The query changes only the result; repeated values remain in
+      the source data because they may represent valid, separate records.
+
+
+      A unique-value check answers “Which categories are present?” It does not answer “How many records are in each
+      category?” Counting categories comes later with aggregation.
+
+
+      Use the `orders` table to return only the distinct `region` values. Keep the result to one column and do not
+      add a limit, because the stakeholder wants the complete domain.'
+  required_for_completion: true
 - activity_id: distinct_limit_independent
   title: Preview unique support channels
   type: independent
@@ -146,8 +215,40 @@ activities:
     skills_practiced:
     - DISTINCT
     - LIMIT
-    after_correct: The result is a controlled domain preview. It does not rank channels or count how often they occur. Because no ORDER BY clause is present, SQL does not promise which four valid channels appear.
+    after_correct: The result is a controlled domain preview. It does not rank channels or count how often they
+      occur. Because no ORDER BY clause is present, SQL does not promise which four valid channels appear.
     common_errors: []
+  instruction:
+    title: Create a controlled domain preview
+    objective: Combine DISTINCT and LIMIT without implying a ranking.
+    action_label: Preview the channels
+    body: '`LIMIT` caps how many rows a query returns. It is useful for checking syntax, previewing a table, or
+      keeping an exploratory result manageable.
+
+
+      ```sql
+
+      SELECT DISTINCT carrier_name
+
+      FROM shipments
+
+      LIMIT 4;
+
+      ```
+
+
+      This query returns no more than four unique carriers. Because it has no `ORDER BY`, the database does not
+      promise which four valid values will appear. The result is a preview—not the most common, newest, or most
+      important values.
+
+
+      Clause placement matters: `LIMIT` appears after the source and any other result-shaping clauses. `DISTINCT`
+      belongs directly after `SELECT`.
+
+
+      Build a one-column preview of unique support channels and cap it at four rows. Do not describe the result
+      as ranked or representative.'
+  required_for_completion: true
 - activity_id: distinct_limit_mastery
   title: Create a location preview
   type: mastery
@@ -196,5 +297,39 @@ activities:
     skills_practiced:
     - independent DISTINCT
     - LIMIT
-    after_correct: The query produces a concise location-domain preview while preserving the source data. The three valid locations are an unordered preview, not a ranked list.
+    after_correct: The query produces a concise location-domain preview while preserving the source data. The three
+      valid locations are an unordered preview, not a ranked list.
     common_errors: []
+  instruction:
+    title: Independently combine uniqueness and a row cap
+    objective: Produce a small unique-value preview from a new table.
+    action_label: Create the location preview
+    body: 'You now need to transfer the same pattern to a different dataset. The required structure is:
+
+
+      ```sql
+
+      SELECT DISTINCT selected_column
+
+      FROM source_table
+
+      LIMIT number_of_rows;
+
+      ```
+
+
+      Before writing, verify the output contract:
+
+
+      - One result column
+
+      - Repeated values removed
+
+      - No more than three rows
+
+      - No ranking claim because no sort is requested
+
+
+      The source field is `location` and the table is `employees`. Write the complete query from the minimal starter.
+      This is the mastery step, so a successful unassisted attempt is required before the next lesson can unlock.'
+  required_for_completion: true

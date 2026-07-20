@@ -1,46 +1,73 @@
 # Accelerator Academy
 
-Accelerator Academy is Career Accelerator's built-in, program-neutral learning platform. The shared engine remains independent of any career program; program names, pathways, course content, datasets, skills, prerequisites, assessment rules, and evidence metadata are supplied through external curriculum packages under `curriculum/`.
+Accelerator Academy is Career Accelerator's built-in, program-neutral learning platform. The engine remains independent of any career program; program names, pathways, curriculum, datasets, skills, prerequisites, assessments, projects, and evidence metadata are supplied through external packages under `curriculum/`.
 
-## User-facing hierarchy
+## Learner-facing experience
+
+Academy presents one coherent learning path:
 
 ```text
-Accelerator Academy
-├── Learning Paths
-├── Courses
-├── Practice
-├── Skills Lab
-├── Assessments
-└── Demonstrated Evidence
+Resume Learning
+    ↓
+Focused concept + immediate action
+    ↓
+Run, choose, complete, debug, or apply
+    ↓
+Validation and explanation
+    ↓
+Continue to the next step
+    ↓
+Course checkpoint
+    ↓
+Applied project
+    ↓
+Demonstrated Evidence
 ```
+
+Courses, modules, practice, assessments, Skills Labs, and evidence remain internal curriculum types. They are not separate learner destinations. The Academy page contains:
+
+- a persistent roadmap showing the ordered journey;
+- one recommended current step;
+- Back and Continue navigation;
+- prerequisite and sequential locks;
+- one interactive lesson player;
+- checkpoint questions integrated into the roadmap;
+- an applied project integrated as the final course milestone.
+
+Every lesson step must contain an interactive action. Passive reading-only steps are not permitted.
+
+Learner-facing copy should sound direct, supportive, and conversational. Interface text should explain the next action in plain language—for example, “Complete the lesson to move on!”—instead of describing internal state-machine behavior.
 
 ## Experience standard
 
 Academy uses the same visual and interaction language as Learning → Exercises and Applied Labs:
 
 - floating midnight-navy cards and the shared purple/magenta palette;
-- fixed outer workspaces with scrolling delegated to lesson, activity, list, editor, and result regions;
-- responsive horizontal/vertical split layouts;
-- shared `CoursePageWidget`, `SqlCodeEditor`, `FeedbackLabel`, result-table styling, buttons, dropdowns, and status treatments;
-- lesson navigation and activity progress on the left;
-- Learn and Practice panels in the primary workspace;
-- Applied Lab-style business briefs, submissions, rubrics, findings, and validation for Skills Lab work.
-
-A curriculum renderer may not introduce program-specific naming or provider-specific behavior into these generic components.
+- transparent explanatory text and callouts that sit naturally on the parent card instead of adding unnecessary nested backdrops;
+- fixed outer workspaces with scrolling delegated to cards, editors, lists, and results;
+- responsive horizontal and vertical split layouts;
+- shared `CoursePageWidget`, `SqlCodeEditor`, `FeedbackLabel`, result tables, buttons, and status treatments;
+- focused concept instruction beside the active interaction;
+- business context, available data, requirements, expected output, hints, validation, and post-completion explanation;
+- Applied Lab-style project briefs, findings, validation, artifacts, and evidence.
 
 ## Phase 2A engine
 
 The generic engine lives in `application/career_app/academy/` and supplies:
 
-- immutable program, path, track, course, module, lesson, activity, assessment, Skills Lab, dataset, and progress models;
+- immutable program, path, track, course, module, lesson, activity, assessment, project, dataset, and progress models;
 - safe YAML loading with identifier validation, duplicate detection, unknown-skill validation, package-boundary checks, and deterministic content hashes;
-- additive SQLite persistence for packages, enrollments, four-state lesson progress, activity attempts, assessments, evidence, submissions, and provider-neutral external learning history;
-- prerequisite-aware recommendations for instruction, guided practice, independent mastery, assessments, and Skills Labs;
-- trusted validators, beginning with recognition and isolated read-only DuckDB query validation;
-- projection of strong Academy work into existing Demonstrated Evidence and skill-inventory surfaces;
-- one active Academy action routed through the existing adaptive planner.
+- additive SQLite persistence for packages, enrollments, lesson/activity progress, assessment drafts and attempts, evidence, submissions, and provider-neutral external learning history;
+- prerequisite-aware and sequence-aware recommendations;
+- trusted declarative validators, beginning with recognition and isolated read-only DuckDB validation;
+- projection of strong work into the existing Demonstrated Evidence and skill-inventory surfaces;
+- one current Academy action routed through the adaptive planner.
 
-The four lesson states are `Not Started`, `Learning`, `Practiced`, and `Mastered`. Opening content can only produce `Learning`. Declared guided requirements produce `Practiced`. `Mastered` requires all current independent mastery requirements to pass without solution assistance on the successful attempt.
+The four lesson states remain `Not Started`, `Learning`, `Practiced`, and `Mastered`:
+
+- **Learning:** the lesson has been opened or a step has begun.
+- **Practiced:** every required non-mastery interactive step has passed.
+- **Mastered:** the practice sequence and designated mastery step have passed, with the mastery attempt completed without viewing the full solution.
 
 ## Curriculum package layout
 
@@ -50,10 +77,7 @@ curriculum/
     ├── program.yaml
     ├── skills.yaml
     ├── datasets/
-    │   ├── datasets.yaml
-    │   └── *.csv
     ├── paths/
-    │   └── <path_id>/path.yaml
     └── tracks/
         └── <track_id>/
             ├── track.yaml
@@ -65,7 +89,7 @@ curriculum/
                     └── skills_labs/
 ```
 
-Package references may resolve only inside their curriculum package. Python code is never executed from curriculum folders. Trusted validators remain in `application/career_app/academy/validators/`; content packages provide declarative validation settings.
+Package references may resolve only inside their curriculum package. Curriculum folders cannot execute Python. Trusted validators remain under `application/career_app/academy/validators/`.
 
 ## Program-neutral configuration
 
@@ -83,51 +107,86 @@ learning:
   skills_lab_label: Skills Lab
 ```
 
-A future edition can provide a different package without changing the engine, planner adapter, progress repository, validators, or Academy layouts.
+A future edition can provide different configuration and content without changing the engine, planner adapter, progress repository, validators, or generic Academy layouts.
 
-## Permanent lesson contract
+## Interactive step contract
 
-Each lesson declares stable identifiers, description, estimated time, objectives, prerequisites, skills taught, original Markdown instruction, key takeaways, activities, practice/mastery requirements, and passing rules.
+Each lesson activity is rendered as one sequential learning step and may declare:
 
-Each activity may declare:
+```yaml
+instruction:
+  title: Begin with the unit of analysis
+  objective: Identify what one row represents before analysis.
+  action_label: Identify the grain
+  body: |
+    Original concept instruction, examples, common mistakes, and context.
 
-- recognition, guided, independent, debugging, transfer, or mastery type;
-- scenario and business introduction;
-- available table and task;
-- explicit requirements and expected output;
-- skills practiced and estimated time;
-- starter work, progressive hints, solution, and validator configuration;
-- post-completion explanation and common-error guidance;
-- practice, mastery, and evidence eligibility.
+required_for_completion: true
+presentation:
+  scenario: Support operations orientation
+  introduction: Why the action matters in this scenario.
+  task: The exact interactive action.
+  requirements:
+    - Explicit completion requirement
+  expected_output: A verifiable output description.
+  skills_practiced:
+    - table grain
+```
 
-Worked examples must differ from paired practice in dataset or scenario, business question, output requirement, and final answer. High-level interactive-learning patterns may inform pacing, but Academy wording, examples, datasets, exercises, solutions, sequence, and teaching material must remain original.
+Supported step interactions currently include recognition, guided SQL, independent SQL, debugging, transfer, and mastery. Future runtimes can add Python, command-line, configuration, or artifact interactions while preserving the same sequential contract.
+
+Worked examples must differ from their paired action in dataset or scenario, business question, output requirement, and final answer. High-level interactive-learning principles may inform pacing, but wording, examples, datasets, questions, solutions, sequence, and teaching material must remain original.
+
+
+## Unified workspace contract
+
+The active learner screen uses two functional areas:
+
+- **Lesson & Practice:** focused instruction, worked examples, scenario, task, requirements, expected output, skills, and the exact schema for every referenced table.
+- **Editor & Output:** only the active SQL editor or answer control, validation feedback, explanation, and output results.
+
+Run Query, Check Answer, Show Hint, View Solution, Back, and Continue share one workflow row. The footer is divided into two responsive regions synchronized to the live lesson/editor splitter: Back and the completion requirement remain on the lesson side, while the active interaction controls and Continue remain on the editor side. SQL steps display a vertical editor/output splitter; recognition steps replace that workspace with one uninterrupted answer surface so no empty editor/output divider remains. Track and course labels are supplied by curriculum configuration so additional SQL, Python, visualization, statistics, or communication courses can be added without changing the generic UI. The path-progress area displays course and lesson milestone circles connected by status-aware progress rails. Lesson headers in the pathway card use distinct tints for current, complete, in-progress, available, and locked states.
+
+## SQL table-schema requirement
+
+Every SQL activity must declare the table or tables used by the question:
+
+```yaml
+presentation:
+  table: support_tickets
+  # or
+  tables:
+    - orders
+    - customers
+```
+
+The package loader rejects missing or unknown table references. Academy loads the same CSV data through DuckDB that the query runtime uses and displays DuckDB's inferred column names and data types before the learner writes a query. This requirement applies to lesson steps, checkpoint questions, and applied projects.
+
+## Sequence and gating rules
+
+1. A lesson must satisfy its declared skill prerequisites.
+2. Within a lesson, every earlier required step must pass before a later step unlocks.
+3. Continue remains disabled until the current action passes.
+4. Viewing a solution does not overwrite learner work.
+5. A solution-assisted mastery attempt must be passed again independently.
+6. The checkpoint unlocks only after required lesson skills are mastered.
+7. The applied project unlocks only after the checkpoint passes.
+8. Validated independent and applied work creates Demonstrated Evidence automatically.
 
 ## Content versioning
 
-`schema_version` describes the package format. `content_version` describes a curriculum release. Package hashes are stored in `academy_packages`. Stable lesson and activity IDs preserve compatible work. When a new content version changes current requirements, the reconciliation step preserves answers and passed activities but recalculates the lesson state against the new contract. This prevents old mastery from bypassing newly required independent work.
+`schema_version` describes the package format. `content_version` describes a curriculum release. Stable lesson and activity IDs preserve compatible work. When requirements change, reconciliation preserves answers and passed activities but recalculates lesson state against the current contract.
 
-## Query Foundations v1.1 pilot
+## Built-in curriculum v1.4
 
-The production pilot contains:
+The built-in path now contains:
 
-- five comprehensive lessons;
-- 26 original lesson activities using all approved activity types;
-- approximately 190 minutes of lesson instruction and practice;
-- one seven-question, 80%-passing checkpoint;
-- one 60-minute Customer Support Queue Analysis Skills Lab;
-- prerequisite-aware adaptive recommendations;
-- saved SQL and written-findings artifacts;
-- automatic Demonstrated Evidence and skill-state integration.
+- eight courses across SQL, Power BI, Python, and pandas;
+- 31 lessons and 112 required interactive steps, checkpoint questions, and applied projects;
+- the complete Query Foundations checkpoint and Customer Support Queue Analysis project;
+- 26 additional original lessons covering the remaining topics previously assigned through DataCamp;
+- visible schemas for every SQL task;
+- persistent answers, prerequisite-aware course sequencing, and automatic next-step routing;
+- saved artifacts and automatic Demonstrated Evidence integration.
 
-DataCamp remains unchanged in Phase 2A and 2B. Provider-history mapping and replacement of required SQL quotas belong to Phase 2C.
-
-## Adding another program edition
-
-1. Create a top-level curriculum package.
-2. Define brand and learning labels in `program.yaml`.
-3. Define a stable skill graph.
-4. Add paths, tracks, courses, modules, lessons, assessments, datasets, and Skills Labs.
-5. Use an existing trusted runtime or add a program-neutral validator to the engine.
-6. Run package, official-solution, progress, prerequisite, UI-construction, and installer tests before distribution.
-
-Do not place career-specific course names, learner nouns, or provider names inside the generic engine.
+DataCamp is no longer an active recommendation source or weekly requirement. Existing completions remain preserved as provider-neutral External Learning History. Accelerator Academy now supplies the built-in replacement sequence.

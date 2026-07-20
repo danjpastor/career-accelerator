@@ -24,25 +24,73 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.3.0 includes:
+Version 10.8.0 includes:
 
-### Accelerator Academy Experience and Curriculum Rewrite
+### Accelerator Academy Replaces Required DataCamp Tasks
 
-- A complete visual rebuild using the established Learning → Exercises and Applied Labs design language.
-- Reusable course cards, split workspaces, line-numbered SQL editors, polished result tables, internal scrolling, responsive breakpoints, and consistent action controls.
-- Six integrated Academy sections: Learning Paths, Courses, Practice, Skills Lab, Assessments, and Demonstrated Evidence.
-- A comprehensive Query Foundations pilot with five expanded lessons, approximately 190 minutes of instruction and lesson practice, and 26 original activities.
-- Structured activity briefs with business context, available tables, requirements, expected output, skills practiced, progressive hints, validation feedback, and post-completion explanations.
-- A seven-question independent checkpoint and a 60-minute Customer Support Queue Analysis Skills Lab.
-- Content-version reconciliation that preserves answers and valid activity progress while enforcing newly introduced mastery requirements.
-- Robust unordered LIMIT validation for valid result subsets and deterministic checkpoint validation.
-- All instructional wording, scenarios, datasets, questions, solutions, and applied work remain original.
+- Removed DataCamp from daily recommendations, adaptive-task generation, weekly quotas, and frozen focus plans.
+- Preserved completed DataCamp records as provider-neutral external learning history.
+- Made Accelerator Academy the built-in supplemental learning source, with plain task titles and an Accelerator Academy metadata label.
+- Added 26 original interactive lessons covering the remaining SQL, Power BI, Python, and pandas topics previously assigned through DataCamp.
+- Expanded the Academy roadmap to 8 courses, 31 lessons, and 112 interactive lesson/checkpoint/project steps.
+- Kept the unified flow course-aware so each course is completed before its checkpoint, project, or next course.
+
+### Learning Workspace Polish
+
+- Fixed tinted roadmap headers so track, course, and lesson cards reserve their own space without overlapping nearby steps.
+- Removed the background treatment behind the lesson-completion message.
+- Removed pill-like backdrops from explanatory subtitle and subheader text shared by Academy, Exercises, and Applied Labs.
+- Preserved the existing SQL editor/output layout, divider-aware footer controls, connected progress markers, and multiple-choice workspace collapse.
+
+### Accelerator Academy Visual and Voice Polish
+
+- Expanded lesson workflow buttons to use all available editor-side footer space until they reach their full comfortable size.
+- Added explicit tinted card backgrounds and borders to SQL track, course, lesson, checkpoint, and applied-project headings in the left learning pathway.
+- Filled the course-to-Lesson-1 milestone rail as soon as the learner enters the course.
+- Added a graduation-cap emoji to Accelerator Academy in the main sidebar and centered the Data Career Accelerator logo horizontally.
+- Rewrote Academy navigation, progress, completion, checkpoint, project, and activity labels with warmer, more conversational language.
+- Preserved the unified sequential flow, multiple-choice workspace collapse, schemas, mastery, evidence, and all existing learner work.
+
+### Accelerator Academy Final Layout Polish
+
+- Aligned the bottom workflow controls to the live lesson/editor divider.
+- Kept Back and the completion requirement on the lesson side and all action buttons plus Continue on the editor side.
+- Removed the editor/output divider entirely for multiple-choice steps.
+- Added connected progress rails between course and lesson milestone circles.
+- Added stronger status-aware tinted backgrounds to lesson headers in the pathway card.
+
+
+### Accelerator Academy Workspace and Curriculum Context Refinement
+
+- Moved each step's scenario, task, requirements, expected output, skills, and table schema into the main Lesson & Practice panel.
+- Reserved the right workspace for the SQL editor, recognition choices, validation feedback, and output results.
+- Moved Run Query, Check Answer, Show Hint, and View Solution into the same workflow row as Back and Continue.
+- Added program-configured track headers such as SQL and course headers such as Query Foundations to the learning roadmap.
+- Added course and lesson milestone circles to the path-progress area, including current, complete, available, and locked states.
+- Added DuckDB-inferred table schemas to every lesson, checkpoint question, and applied project that asks the learner to query data.
+- Added curriculum validation that rejects SQL activities without a declared, valid table reference.
+- Curriculum content version 1.3.0 preserves existing answers and progress while adding the new presentation and schema contract.
+
+### Accelerator Academy Unified Learning Flow
+
+- One learner-facing **Learn** journey instead of separate Learning Paths, Courses, Practice, Skills Lab, Assessments, and Evidence destinations.
+- A persistent path roadmap with one-click Resume Learning, prerequisite locks, current-step highlighting, and automatic next-step routing.
+- Twenty-six sequential lesson steps that interleave focused instruction with an immediate required action.
+- Every lesson screen includes an interactive element: choose, run, complete, debug, transfer, or independently solve.
+- Continue remains locked until the current interactive step passes; future steps cannot be skipped.
+- Compact concept instruction, worked examples, task context, progressive hints, result validation, and post-completion explanations share one screen.
+- Checkpoint questions and the applied project appear naturally after the lessons in the same roadmap and navigation flow.
+- The applied project is formally gated by a passed course checkpoint.
+- Assessment drafts, lesson answers, project work, and the learner's current target persist between sessions.
+- Multiple-choice steps use visible answer cards rather than a generic dropdown.
+- Curriculum content version 1.2.0 preserves compatible answers while re-evaluating the newly required sequential completion contract.
+- Course, module, practice, assessment, project, and evidence types remain available internally without fragmenting the learner experience.
 
 ### Accelerator Academy Phase 2A and 2B foundation
 
 - A built-in, program-neutral curriculum engine with external versioned content packages.
 - Four-state lesson progress, prerequisite-aware recommendations, checkpoints, and evidence-producing mastery.
-- Existing Google Certificate, DataCamp, Exercise Packs, SQL Companion, Applied Labs, portfolio, and learner progress remain unchanged.
+- Existing Google Certificate, external-learning history, Exercise Packs, SQL Companion, Applied Labs, portfolio, and learner progress remain preserved.
 - See `documentation/ACCELERATOR_ACADEMY.md` for the permanent package and authoring architecture.
 
 - A cleaned repository root containing only the launcher, shortcut creator, requirements file, and README as visible files

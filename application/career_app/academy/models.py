@@ -48,6 +48,8 @@ class ActivityDefinition:
     difficulty: str = "beginner"
     answer_options: tuple[str, ...] = ()
     presentation: Mapping[str, Any] = field(default_factory=dict)
+    instruction: Mapping[str, Any] = field(default_factory=dict)
+    required_for_completion: bool = True
     estimated_minutes: int = 5
 
 
@@ -130,6 +132,7 @@ class TrackDefinition:
     order: int
     description: str
     courses: tuple[CourseDefinition, ...]
+    navigation_title: str = ""
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from datetime import date, datetime
 from pathlib import Path
@@ -32,7 +33,90 @@ class AcademyService:
         self.recommendations = RecommendationEngine(self.index, self.progress)
         self._register_package()
         self._seed_progress()
+        self._retire_datacamp_recommendations()
         self.sync_planner_task()
+
+
+    def _retire_datacamp_recommendations(self) -> None:
+        """Keep legacy completion history but remove DataCamp from active planning.
+
+        DataCamp events and state remain available as external-learning history.
+        Only generated adaptive tasks and daily-focus assignments are retired.
+        """
+        try:
+            linked_rows = self.conn.execute(
+                "SELECT task_id FROM track_tasks WHERE LOWER(track_key)='datacamp'"
+            ).fetchall()
+            task_ids = {int(row[0]) for row in linked_rows}
+            generated_rows = self.conn.execute(
+                """SELECT id FROM sprint_tasks
+                   WHERE completed=0 AND sort_order<0
+                     AND LOWER(label) LIKE '%datacamp%'"""
+            ).fetchall()
+            task_ids.update(int(row[0]) for row in generated_rows)
+
+            removed_focus = self.conn.execute(
+                """DELETE FROM daily_focus
+                   WHERE LOWER(COALESCE(track_key,''))='datacamp'
+                      OR LOWER(COALESCE(source_key,''))='roadmap:datacamp'
+                      OR LOWER(COALESCE(title,'')) LIKE '%datacamp%'"""
+            ).rowcount
+
+            # Today's focus is derived data.  A snapshot created before the
+            # Academy migration can otherwise stay frozen with an empty second
+            # learning slot after DataCamp is removed.  Regenerate untouched
+            # snapshots so Academy can take the replacement slot immediately.
+            focus_date = date.today().isoformat()
+            focus_rows = self.conn.execute(
+                """SELECT track_key,source_key,completed_at
+                   FROM daily_focus WHERE focus_date=?""",
+                (focus_date,),
+            ).fetchall()
+            has_academy = any(
+                str(row[0] or "").lower() == self.TRACK_KEY
+                or str(row[1] or "").lower() == f"roadmap:{self.TRACK_KEY}"
+                for row in focus_rows
+            )
+            has_completed_focus = any(row[2] for row in focus_rows)
+            if removed_focus or (focus_rows and not has_academy and not has_completed_focus):
+                self.conn.execute("DELETE FROM daily_focus WHERE focus_date=?", (focus_date,))
+
+            self.conn.execute("DELETE FROM track_tasks WHERE LOWER(track_key)='datacamp'")
+            if task_ids:
+                placeholders = ",".join("?" for _ in task_ids)
+                values = tuple(sorted(task_ids))
+                self.conn.execute(
+                    f"DELETE FROM task_metadata WHERE task_id IN ({placeholders})", values
+                )
+                self.conn.execute(
+                    f"DELETE FROM sprint_tasks WHERE id IN ({placeholders})", values
+                )
+
+            row = self.conn.execute(
+                "SELECT metadata FROM track_state WHERE track_key='datacamp'"
+            ).fetchone()
+            if row is not None:
+                try:
+                    metadata = json.loads(row[0] or "{}")
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    metadata = {}
+                metadata.update(
+                    {
+                        "active_recommendations": False,
+                        "replacement_track": self.TRACK_KEY,
+                        "history_preserved": True,
+                    }
+                )
+                self.conn.execute(
+                    """UPDATE track_state
+                       SET weekly_target=0,status='External History',metadata=?,
+                           updated_at=CURRENT_TIMESTAMP
+                       WHERE track_key='datacamp'""",
+                    (json.dumps(metadata),),
+                )
+            self.conn.commit()
+        except sqlite3.OperationalError:
+            self.conn.rollback()
 
     @property
     def labels(self) -> dict[str, str]:
@@ -94,6 +178,71 @@ class AcademyService:
     def lesson_unlocked(self, lesson_id: str) -> tuple[bool, tuple[str, ...]]:
         return self.recommendations.lesson_unlocked(self.index.lesson(lesson_id))
 
+    def activity_unlocked(
+        self,
+        lesson_id: str,
+        activity_id: str,
+    ) -> tuple[bool, str | None]:
+        location = self.index.lesson(lesson_id)
+        activity = next(
+            (item for item in location.lesson.activities if item.activity_id == activity_id),
+            None,
+        )
+        if activity is None:
+            return False, "Unknown lesson step."
+        return self.recommendations.activity_unlocked(location, activity)
+
+    def activity_passed(self, lesson_id: str, activity_id: str) -> bool:
+        row = self.progress.activity_row(lesson_id, activity_id)
+        return bool(row and row["state"] == "Passed")
+
+    def activity_complete(self, lesson_id: str, activity: ActivityDefinition) -> bool:
+        row = self.progress.activity_row(lesson_id, activity.activity_id)
+        if not row or row["state"] != "Passed":
+            return False
+        if activity.required_for_mastery and row["last_attempt_solution_assisted"]:
+            return False
+        return True
+
+    def assessment_passed(self, assessment_id: str) -> bool:
+        return self.recommendations.assessment_passed(assessment_id)
+
+    def assessment_unlocked(self, assessment: AssessmentDefinition) -> tuple[bool, tuple[str, ...]]:
+        missing = self._missing_skills(assessment.requires)
+        return not missing, missing
+
+    def skills_lab_unlocked(self, lab: SkillsLabDefinition) -> tuple[bool, tuple[str, ...]]:
+        missing = list(self._missing_skills(lab.requires))
+        for course in self.catalog.courses():
+            if lab not in course.skills_labs:
+                continue
+            for assessment in course.assessments:
+                if not self.assessment_passed(assessment.assessment_id):
+                    missing.append(f"checkpoint:{assessment.title}")
+        return not missing, tuple(missing)
+
+    def remember_target(self, target_key: str) -> None:
+        program = self.catalog.program
+        if not program.paths:
+            return
+        self.conn.execute(
+            """UPDATE academy_enrollments SET last_target_key=?
+               WHERE program_id=? AND path_id=?""",
+            (target_key, program.program_id, program.paths[0].path_id),
+        )
+        self.conn.commit()
+
+    def last_target(self) -> str | None:
+        program = self.catalog.program
+        if not program.paths:
+            return None
+        row = self.conn.execute(
+            """SELECT last_target_key FROM academy_enrollments
+               WHERE program_id=? AND path_id=?""",
+            (program.program_id, program.paths[0].path_id),
+        ).fetchone()
+        return str(row[0]) if row and row[0] else None
+
     def validate_activity(
         self,
         lesson: LessonDefinition,
@@ -119,9 +268,113 @@ class AcademyService:
 
     def run_activity(self, activity: ActivityDefinition, answer: str) -> ValidationResult:
         if activity.runtime != "sql":
-            return ValidationResult(False, "Run Query is available for SQL activities.")
+            return ValidationResult(False, "Run is available for executable activities.")
         dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
         return SqlValidator(self.catalog.datasets[dataset_id]).execute(answer)
+
+    def activity_table_schemas(
+        self,
+        activity: ActivityDefinition,
+    ) -> tuple[tuple[str, tuple[tuple[str, str], ...]], ...]:
+        """Return schemas for the tables referenced by a learning action.
+
+        Curriculum authors normally declare ``presentation.table`` or
+        ``presentation.tables``. A conservative text lookup is retained as a
+        fallback for older packages so updated application code can still show
+        useful schemas without breaking saved curriculum.
+        """
+        dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
+        dataset = self.catalog.datasets.get(dataset_id)
+        if dataset is None:
+            return ()
+        presentation = dict(activity.presentation)
+        declared = presentation.get("tables", presentation.get("table"))
+        if isinstance(declared, str):
+            requested = [item.strip() for item in declared.split(",") if item.strip()]
+        elif isinstance(declared, (list, tuple)):
+            requested = [str(item).strip() for item in declared if str(item).strip()]
+        else:
+            requested = []
+        known = {table.name for table in dataset.tables}
+        requested = [name for name in requested if name in known]
+        if not requested:
+            searchable = " \n".join(
+                (
+                    activity.prompt,
+                    activity.starter,
+                    activity.solution,
+                    str(presentation),
+                    str(activity.instruction),
+                )
+            )
+            requested = [
+                table.name
+                for table in dataset.tables
+                if re.search(rf"(?<![A-Za-z0-9_]){re.escape(table.name)}(?![A-Za-z0-9_])", searchable)
+            ]
+        if not requested and len(dataset.tables) == 1:
+            requested = [dataset.tables[0].name]
+        validator = SqlValidator(dataset)
+        return tuple((name, validator.table_schema(name)) for name in dict.fromkeys(requested))
+
+    def save_assessment_draft(
+        self,
+        assessment_id: str,
+        activity_id: str,
+        answer: str,
+        validation: dict[str, Any] | None = None,
+    ) -> None:
+        self.conn.execute(
+            """INSERT INTO academy_assessment_drafts
+               (assessment_id,activity_id,answer_text,validation_json,updated_at)
+               VALUES(?,?,?,?,CURRENT_TIMESTAMP)
+               ON CONFLICT(assessment_id,activity_id) DO UPDATE SET
+                   answer_text=excluded.answer_text,
+                   validation_json=excluded.validation_json,
+                   updated_at=CURRENT_TIMESTAMP""",
+            (
+                assessment_id,
+                activity_id,
+                answer,
+                json.dumps(validation or {}, sort_keys=True, default=str),
+            ),
+        )
+        self.conn.commit()
+
+    def assessment_drafts(self, assessment_id: str) -> dict[str, str]:
+        rows = self.conn.execute(
+            """SELECT activity_id,answer_text FROM academy_assessment_drafts
+               WHERE assessment_id=?""",
+            (assessment_id,),
+        ).fetchall()
+        return {str(row["activity_id"]): str(row["answer_text"] or "") for row in rows}
+
+    def validate_assessment_activity(
+        self,
+        assessment: AssessmentDefinition,
+        activity: ActivityDefinition,
+        answer: str,
+    ) -> ValidationResult:
+        unlocked, missing = self.assessment_unlocked(assessment)
+        if not unlocked:
+            return ValidationResult(False, "Prerequisites not yet mastered: " + ", ".join(missing))
+        if activity.runtime == "recognition":
+            result = validate_recognition(answer, dict(activity.validator))
+        elif activity.runtime == "sql":
+            dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
+            result = SqlValidator(self.catalog.datasets[dataset_id]).validate(
+                answer,
+                dict(activity.validator),
+            )
+        else:
+            result = ValidationResult(False, f"Unsupported activity runtime: {activity.runtime}")
+        self.save_assessment_draft(
+            assessment.assessment_id,
+            activity.activity_id,
+            answer,
+            result.as_dict(),
+        )
+        return result
 
     def reveal_hint(self, lesson_id: str, activity: ActivityDefinition) -> tuple[int, str]:
         return self.progress.reveal_hint(lesson_id, activity)
@@ -138,6 +391,8 @@ class AcademyService:
         assessment: AssessmentDefinition,
         answers: dict[str, str],
     ) -> dict[str, Any]:
+        if not answers:
+            answers = self.assessment_drafts(assessment.assessment_id)
         missing = self._missing_skills(assessment.requires)
         if missing:
             return {
@@ -180,7 +435,17 @@ class AcademyService:
             ),
         )
         self.conn.commit()
-        return {"passed": passed, "score": score, "results": results}
+        self.sync_planner_task()
+        return {
+            "passed": passed,
+            "score": score,
+            "results": results,
+            "feedback": (
+                "Checkpoint passed. The applied project is now unlocked."
+                if passed
+                else "Checkpoint not yet passed. Review the missed questions and submit another attempt."
+            ),
+        }
 
 
     def save_skills_lab_progress(
@@ -199,15 +464,19 @@ class AcademyService:
         sql: str,
         notes: str,
     ) -> ValidationResult:
-        missing = self._missing_skills(lab.requires)
-        if missing:
-            return ValidationResult(False, "Prerequisites not yet mastered: " + ", ".join(missing))
+        unlocked, missing = self.skills_lab_unlocked(lab)
+        if not unlocked:
+            readable = [
+                item.split(":", 1)[1] if item.startswith("checkpoint:") else item
+                for item in missing
+            ]
+            return ValidationResult(False, "Complete these prerequisites first: " + ", ".join(readable))
         validator = SqlValidator(self.catalog.datasets[lab.dataset_id])
         result = validator.validate(sql, dict(lab.activity.validator))
         if result.passed and len([line for line in notes.splitlines() if line.strip()]) < 3:
             result = ValidationResult(
                 False,
-                "The SQL is correct. Add at least three concise findings before submitting the Skills Lab.",
+                "The submitted work is correct. Add at least three concise findings before submitting the project.",
                 result.columns,
                 result.rows,
                 result.details,
@@ -292,7 +561,7 @@ class AcademyService:
                 difficulty=activity.difficulty,
                 dataset=str(activity.validator.get("dataset_id") or ""),
                 submission_path=None,
-                job_competency="Independent SQL problem solving",
+                job_competency="Independent problem solving",
                 notes="Validated independent work completed without viewing the full solution.",
                 metadata={"lesson_id": lesson.lesson_id, "activity_type": activity.activity_type.value},
             )
@@ -447,7 +716,25 @@ class AcademyService:
             existing = self.conn.execute(
                 "SELECT task_id FROM track_tasks WHERE track_key=?", (self.TRACK_KEY,)
             ).fetchone()
-            label = f"[{system_name}] {recommendation.title}"
+            label = recommendation.title
+            planner_metadata = {
+                "provider": "internal",
+                "program_id": self.catalog.program.program_id,
+                "title": recommendation.title,
+                "target_key": recommendation.target_key,
+                "estimated_minutes": recommendation.estimated_minutes,
+                "today_target": 1,
+                "today_completed": 0,
+                "weekly_target": 2,
+                "weekly_completed": 0,
+                "pace_status": "Ready when you are",
+                "alignment": "Built-in Accelerator Academy learning",
+            }
+            self.conn.execute(
+                """UPDATE track_state SET metadata=?,updated_at=CURRENT_TIMESTAMP
+                   WHERE track_key=?""",
+                (json.dumps(planner_metadata), self.TRACK_KEY),
+            )
             if existing:
                 task_id = int(existing[0])
                 self.conn.execute(
@@ -458,7 +745,7 @@ class AcademyService:
                     """UPDATE task_metadata SET status='Not Started',priority=2,
                        estimated_minutes=?,energy='Normal',destination=?,category=?,
                        prerequisite_state='Ready',prerequisite_reason=NULL WHERE task_id=?""",
-                    (recommendation.estimated_minutes, self.DESTINATION_INDEX, system_name, task_id),
+                    (recommendation.estimated_minutes, self.DESTINATION_INDEX, "Learning", task_id),
                 )
                 self.conn.execute(
                     """UPDATE track_tasks SET target_key=?,source_label=?,updated_at=CURRENT_TIMESTAMP
@@ -481,7 +768,7 @@ class AcademyService:
                     """INSERT INTO task_metadata
                        (task_id,status,priority,estimated_minutes,energy,destination,category,prerequisite_state,prerequisite_reason)
                        VALUES(?,'Not Started',2,?,'Normal',?,?,'Ready',NULL)""",
-                    (task_id, recommendation.estimated_minutes, self.DESTINATION_INDEX, system_name),
+                    (task_id, recommendation.estimated_minutes, self.DESTINATION_INDEX, "Learning"),
                 )
                 self.conn.execute(
                     """INSERT INTO track_tasks(track_key,task_id,target_key,source_label)

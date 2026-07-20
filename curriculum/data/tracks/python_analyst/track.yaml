@@ -1,0 +1,9 @@
+track_id: python_analyst
+title: Python for Data Analysts
+navigation_title: Python
+order: 3
+description: Build the Python and pandas foundation needed to inspect, transform, summarize, and communicate analyst
+  data.
+courses:
+- courses/python_foundations/course.yaml
+- courses/pandas_foundations/course.yaml

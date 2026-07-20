@@ -44,3 +44,84 @@ skills:
   communication.concise_findings:
     title: Concise analytical findings
     category: Communication
+  sql.aggregations:
+    title: Aggregate functions and grouped metrics
+    category: SQL Metrics
+  sql.transformations:
+    title: CASE expressions and type conversion
+    category: SQL Transformation
+  sql.advanced_filtering:
+    title: Advanced SQL filtering patterns
+    category: SQL Filtering
+  sql.conditional_aggregation:
+    title: Conditional business metrics
+    category: SQL Metrics
+  sql.set_operations:
+    title: UNION and set operations
+    category: SQL Joins
+  sql.joins:
+    title: Joining related tables
+    category: SQL Joins
+  sql.case_logic:
+    title: Business rules with CASE
+    category: SQL Transformation
+  sql.subqueries:
+    title: Subqueries
+    category: Advanced SQL
+  sql.ctes_correlated:
+    title: CTEs and correlated queries
+    category: Advanced SQL
+  sql.window_functions:
+    title: Window functions
+    category: Advanced SQL
+  powerbi.interface:
+    title: Power BI interface and workflow
+    category: Power BI
+  powerbi.power_query:
+    title: Power Query transformations
+    category: Power BI
+  powerbi.visuals:
+    title: Power BI visual selection
+    category: Power BI
+  powerbi.filters:
+    title: Power BI filters and interactions
+    category: Power BI
+  powerbi.tables:
+    title: Fact and dimension table roles
+    category: Power BI Modeling
+  powerbi.shaping:
+    title: Model-ready table shaping
+    category: Power BI Modeling
+  powerbi.dimensional_modeling:
+    title: Dimensional modeling
+    category: Power BI Modeling
+  powerbi.star_schema:
+    title: Star and snowflake schemas
+    category: Power BI Modeling
+  python.basics:
+    title: Python values, variables, and expressions
+    category: Python
+  python.lists:
+    title: Python lists and indexing
+    category: Python
+  python.functions_packages:
+    title: Python functions and packages
+    category: Python
+  python.numpy:
+    title: NumPy arrays and vectorized operations
+    category: Python
+  python_pandas:
+    title: Transforming pandas DataFrames
+    category: Python and pandas
+  pandas.aggregation:
+    title: Aggregating pandas DataFrames
+    category: Python and pandas
+  pandas.indexing:
+    title: Slicing and indexing pandas data
+    category: Python and pandas
+  pandas.visualization:
+    title: Creating and visualizing DataFrames
+    category: Python and pandas
+  power_bi_foundations:
+    title: Power BI foundations
+    category: Power BI

@@ -1,0 +1,9 @@
+module_id: powerbi_modeling_core
+title: Data Modeling in Power BI
+order: 1
+description: Work through data modeling in power bi one focused, interactive step at a time.
+lessons:
+- lessons/powerbi_defining_tables/lesson.yaml
+- lessons/powerbi_shaping_tables/lesson.yaml
+- lessons/powerbi_dimensional_modeling/lesson.yaml
+- lessons/powerbi_star_schema/lesson.yaml

@@ -1,0 +1,130 @@
+lesson_id: pandas_indexing
+title: Slicing and Indexing DataFrames
+order: 3
+difficulty: beginner
+description: Build practical fluency with slicing and indexing dataframes.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of slicing and indexing dataframes.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Slicing and Indexing DataFrames supports a reliable, explainable analytics workflow.
+teaches:
+- pandas.indexing
+requires:
+- pandas.aggregation
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: pandas_indexing_step_1
+  title: 'Practice 1: Slicing and Indexing DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: Which indexer selects by label?
+  answer_options:
+  - loc
+  - iloc
+  - append
+  - plot
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: loc
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which indexer selects by label?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Slicing and Indexing DataFrames
+    after_correct: You identified the core idea behind slicing and indexing dataframes.
+    common_errors: []
+  instruction:
+    title: Slicing and Indexing DataFrames
+    objective: Build a practical understanding of slicing and indexing dataframes.
+    action_label: Choose the best answer
+    body: '`loc` selects rows and columns using labels or Boolean conditions.'
+  required_for_completion: true
+- activity_id: pandas_indexing_step_2
+  title: 'Practice 2: Slicing and Indexing DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: Which indexer selects by integer position?
+  answer_options:
+  - iloc
+  - loc
+  - merge
+  - astype
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: iloc
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which indexer selects by integer position?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Slicing and Indexing DataFrames
+    after_correct: You identified the core idea behind slicing and indexing dataframes.
+    common_errors: []
+  instruction:
+    title: Slicing and Indexing DataFrames
+    objective: Build a practical understanding of slicing and indexing dataframes.
+    action_label: Choose the best answer
+    body: '`iloc` uses zero-based row and column positions.'
+  required_for_completion: true
+- activity_id: pandas_indexing_step_3
+  title: 'Practice 3: Slicing and Indexing DataFrames'
+  type: mastery
+  runtime: recognition
+  prompt: Why reset an index after filtering in some workflows?
+  answer_options:
+  - To create a clean sequential index when the old labels no longer help
+  - To delete every column
+  - To convert numbers to text
+  - To aggregate automatically
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To create a clean sequential index when the old labels no longer help
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why reset an index after filtering in some workflows?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Slicing and Indexing DataFrames
+    after_correct: You identified the core idea behind slicing and indexing dataframes.
+    common_errors: []
+  instruction:
+    title: Slicing and Indexing DataFrames
+    objective: Build a practical understanding of slicing and indexing dataframes.
+    action_label: Choose the best answer
+    body: Keep the original index when it has analytical meaning; reset it when a simple row sequence is clearer.
+  required_for_completion: true

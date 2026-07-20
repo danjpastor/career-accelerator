@@ -1,0 +1,130 @@
+lesson_id: python_basics
+title: Python Basics
+order: 1
+difficulty: beginner
+description: Build practical fluency with python basics.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of python basics.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Python Basics supports a reliable, explainable analytics workflow.
+teaches:
+- python.basics
+requires:
+- powerbi.star_schema
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: python_basics_step_1
+  title: 'Practice 1: Python Basics'
+  type: recognition
+  runtime: recognition
+  prompt: Which statement assigns the value 10 to revenue?
+  answer_options:
+  - revenue = 10
+  - 10 = revenue
+  - revenue == 10
+  - assign revenue 10
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: revenue = 10
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which statement assigns the value 10 to revenue?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Python Basics
+    after_correct: You identified the core idea behind python basics.
+    common_errors: []
+  instruction:
+    title: Python Basics
+    objective: Build a practical understanding of python basics.
+    action_label: Choose the best answer
+    body: Python uses `=` for assignment and `==` for comparison.
+  required_for_completion: true
+- activity_id: python_basics_step_2
+  title: 'Practice 2: Python Basics'
+  type: recognition
+  runtime: recognition
+  prompt: What does type(3.5) report?
+  answer_options:
+  - float
+  - int
+  - str
+  - list
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: float
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What does type(3.5) report?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Python Basics
+    after_correct: You identified the core idea behind python basics.
+    common_errors: []
+  instruction:
+    title: Python Basics
+    objective: Build a practical understanding of python basics.
+    action_label: Choose the best answer
+    body: A float represents a number with a decimal component.
+  required_for_completion: true
+- activity_id: python_basics_step_3
+  title: 'Practice 3: Python Basics'
+  type: mastery
+  runtime: recognition
+  prompt: Why use clear variable names?
+  answer_options:
+  - They make analysis logic easier to review and maintain
+  - They make code execute twice
+  - They replace comments in every case
+  - They hide errors
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: They make analysis logic easier to review and maintain
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why use clear variable names?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Python Basics
+    after_correct: You identified the core idea behind python basics.
+    common_errors: []
+  instruction:
+    title: Python Basics
+    objective: Build a practical understanding of python basics.
+    action_label: Choose the best answer
+    body: Names should communicate the business meaning of a value.
+  required_for_completion: true

@@ -1,0 +1,130 @@
+lesson_id: powerbi_dimensional_modeling
+title: Dimensional Modeling
+order: 3
+difficulty: beginner
+description: Build practical fluency with dimensional modeling.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of dimensional modeling.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Dimensional Modeling supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.dimensional_modeling
+requires:
+- powerbi.shaping
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_dimensional_modeling_step_1
+  title: 'Practice 1: Dimensional Modeling'
+  type: recognition
+  runtime: recognition
+  prompt: What relationship is most common from a dimension to a fact?
+  answer_options:
+  - One-to-many
+  - Many-to-many by default
+  - No relationship
+  - One-to-one for every table
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: One-to-many
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What relationship is most common from a dimension to a fact?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Dimensional Modeling
+    after_correct: You identified the core idea behind dimensional modeling.
+    common_errors: []
+  instruction:
+    title: Dimensional Modeling
+    objective: Build a practical understanding of dimensional modeling.
+    action_label: Choose the best answer
+    body: A unique dimension key relates to many fact rows.
+  required_for_completion: true
+- activity_id: powerbi_dimensional_modeling_step_2
+  title: 'Practice 2: Dimensional Modeling'
+  type: recognition
+  runtime: recognition
+  prompt: Why use a dedicated date dimension?
+  answer_options:
+  - To support consistent time filtering and time intelligence
+  - To store report colors
+  - To replace every source date
+  - To hide measures
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To support consistent time filtering and time intelligence
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why use a dedicated date dimension?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Dimensional Modeling
+    after_correct: You identified the core idea behind dimensional modeling.
+    common_errors: []
+  instruction:
+    title: Dimensional Modeling
+    objective: Build a practical understanding of dimensional modeling.
+    action_label: Choose the best answer
+    body: A complete date table provides stable calendar attributes and one shared time filter path.
+  required_for_completion: true
+- activity_id: powerbi_dimensional_modeling_step_3
+  title: 'Practice 3: Dimensional Modeling'
+  type: mastery
+  runtime: recognition
+  prompt: What should you check before creating a one-side relationship?
+  answer_options:
+  - The key is unique and nonblank
+  - The visual theme
+  - The report title
+  - The number of bookmarks
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The key is unique and nonblank
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What should you check before creating a one-side relationship?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Dimensional Modeling
+    after_correct: You identified the core idea behind dimensional modeling.
+    common_errors: []
+  instruction:
+    title: Dimensional Modeling
+    objective: Build a practical understanding of dimensional modeling.
+    action_label: Choose the best answer
+    body: Duplicate or blank keys on the one side can invalidate the relationship design.
+  required_for_completion: true

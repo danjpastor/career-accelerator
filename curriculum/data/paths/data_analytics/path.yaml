@@ -4,3 +4,5 @@ order: 1
 description: A prerequisite-aware path from core querying through applied analysis and job-ready evidence.
 tracks:
 - ../../tracks/sql_analyst/track.yaml
+- ../../tracks/power_bi_analyst/track.yaml
+- ../../tracks/python_analyst/track.yaml

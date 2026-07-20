@@ -1,0 +1,131 @@
+lesson_id: powerbi_shaping_tables
+title: Shaping Tables
+order: 2
+difficulty: beginner
+description: Build practical fluency with shaping tables.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of shaping tables.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Shaping Tables supports a reliable, explainable analytics workflow.
+teaches:
+- powerbi.shaping
+requires:
+- powerbi.tables
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: powerbi_shaping_tables_step_1
+  title: 'Practice 1: Shaping Tables'
+  type: recognition
+  runtime: recognition
+  prompt: When should a wide repeated-month table usually be unpivoted?
+  answer_options:
+  - When month names are columns and should become row values
+  - When it already has one date column
+  - When it has no data
+  - Only after publishing
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: When month names are columns and should become row values
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: When should a wide repeated-month table usually be unpivoted?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Shaping Tables
+    after_correct: You identified the core idea behind shaping tables.
+    common_errors: []
+  instruction:
+    title: Shaping Tables
+    objective: Build a practical understanding of shaping tables.
+    action_label: Choose the best answer
+    body: Unpivoting converts repeated columns into a consistent attribute-value structure that models and visuals
+      can use.
+  required_for_completion: true
+- activity_id: powerbi_shaping_tables_step_2
+  title: 'Practice 2: Shaping Tables'
+  type: recognition
+  runtime: recognition
+  prompt: Why remove unused high-cardinality columns?
+  answer_options:
+  - To simplify the model and reduce memory pressure
+  - To add more colors
+  - To create ambiguity
+  - To replace validation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To simplify the model and reduce memory pressure
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why remove unused high-cardinality columns?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Shaping Tables
+    after_correct: You identified the core idea behind shaping tables.
+    common_errors: []
+  instruction:
+    title: Shaping Tables
+    objective: Build a practical understanding of shaping tables.
+    action_label: Choose the best answer
+    body: Only load fields that support relationships, measures, filters, or required detail.
+  required_for_completion: true
+- activity_id: powerbi_shaping_tables_step_3
+  title: 'Practice 3: Shaping Tables'
+  type: mastery
+  runtime: recognition
+  prompt: What is the best place to standardize category labels?
+  answer_options:
+  - A repeatable transformation step before modeling
+  - Inside every visual title
+  - In a screenshot
+  - After export only
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A repeatable transformation step before modeling
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What is the best place to standardize category labels?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Shaping Tables
+    after_correct: You identified the core idea behind shaping tables.
+    common_errors: []
+  instruction:
+    title: Shaping Tables
+    objective: Build a practical understanding of shaping tables.
+    action_label: Choose the best answer
+    body: Standardizing categories upstream prevents fragmented filter values and inconsistent totals.
+  required_for_completion: true

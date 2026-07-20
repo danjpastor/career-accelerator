@@ -1,0 +1,9 @@
+module_id: pandas_foundations_core
+title: pandas Foundations
+order: 1
+description: Work through pandas foundations one focused, interactive step at a time.
+lessons:
+- lessons/pandas_transforming/lesson.yaml
+- lessons/pandas_aggregating/lesson.yaml
+- lessons/pandas_indexing/lesson.yaml
+- lessons/pandas_visualization/lesson.yaml

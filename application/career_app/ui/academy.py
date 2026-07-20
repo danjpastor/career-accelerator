@@ -1,27 +1,30 @@
 from __future__ import annotations
 
+import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QSettings, Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QRectF, QSize
+from PySide6.QtGui import QColor, QBrush, QPainter, QPen, QFontMetrics
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QBoxLayout,
     QButtonGroup,
     QComboBox,
     QFrame,
-    QGridLayout,
     QHBoxLayout,
     QHeaderView,
     QLabel,
     QListWidget,
     QListWidgetItem,
-    QLayout,
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QRadioButton,
     QScrollArea,
     QSizePolicy,
+    QSpacerItem,
     QSplitter,
     QStackedWidget,
     QTableWidget,
@@ -31,7 +34,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from career_app.academy import AcademyService, ProgressState
+from career_app.academy import AcademyService
 from career_app.academy.models import (
     ActivityDefinition,
     AssessmentDefinition,
@@ -41,35 +44,165 @@ from career_app.academy.models import (
 from career_app.theme import COLORS
 from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
 from career_app.ui.exercise_packs import FeedbackLabel
-from career_app.ui.widgets import Card, make_card_scrollable
+from career_app.ui.widgets import Card
 
 
-_SECTION_NAMES = (
-    "Learning Paths",
-    "Courses",
-    "Practice",
-    "Skills Lab",
-    "Assessments",
-    "Demonstrated Evidence",
-)
+@dataclass(frozen=True)
+class JourneyNode:
+    target_key: str
+    kind: str
+    title: str
+    subtitle: str
+    lesson_id: str | None = None
+    activity_id: str | None = None
+    assessment_id: str | None = None
+    lab_id: str | None = None
+    track_id: str | None = None
+    track_title: str = ""
+    course_id: str | None = None
+    course_title: str = ""
+    course_order: int = 0
 
-_STATE_ICONS = {
-    ProgressState.NOT_STARTED.value: "○",
-    ProgressState.LEARNING.value: "◔",
-    ProgressState.PRACTICED.value: "◐",
-    ProgressState.MASTERED.value: "✓",
-}
 
-_ACTIVITY_ICONS = {
-    "Not Started": "○",
-    "In Progress": "◔",
-    "Needs Review": "△",
-    "Passed": "✓",
-}
+@dataclass(frozen=True)
+class Milestone:
+    key: str
+    short_label: str
+    title: str
+    kind: str
+    state: str
+
+
+class AcademyMilestoneBar(QWidget):
+    """Scrollable course/lesson milestone line used above the Academy player."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._milestones: tuple[Milestone, ...] = ()
+        self.setMinimumHeight(72)
+        self.setMaximumHeight(82)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+    def set_milestones(self, milestones: tuple[Milestone, ...]) -> None:
+        self._milestones = milestones
+        self.setMinimumWidth(max(620, 126 * max(1, len(milestones))))
+        self.updateGeometry()
+        self.update()
+
+    def paintEvent(self, event) -> None:  # noqa: N802 - Qt API
+        super().paintEvent(event)
+        if not self._milestones:
+            return
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        count = len(self._milestones)
+        left = 34.0
+        right = max(left, float(self.width()) - 34.0)
+        y = 22.0
+        spacing = 0.0 if count <= 1 else (right - left) / (count - 1)
+        positions = [left + spacing * index for index in range(count)]
+
+        # Draw each connector as a real progress segment between milestone
+        # circles.  The muted rail always remains visible while completed and
+        # current segments receive the same Academy accent treatment as the
+        # associated markers.
+        for index in range(max(0, count - 1)):
+            current = self._milestones[index]
+            following = self._milestones[index + 1]
+            current_radius = 10.0 if current.kind == "course" else 8.0
+            following_radius = 10.0 if following.kind == "course" else 8.0
+            segment_left = positions[index] + current_radius + 3.0
+            segment_right = positions[index + 1] - following_radius - 3.0
+            if segment_right <= segment_left:
+                continue
+
+            rail_pen = QPen(QColor("#31415F"), 5)
+            rail_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+            painter.setPen(rail_pen)
+            painter.drawLine(int(segment_left), int(y), int(segment_right), int(y))
+
+            progress = 0.0
+            progress_color = QColor("#7652D6")
+            # Once a course has been opened, the rail from its course marker
+            # to Lesson 1 should read as entered rather than half-finished.
+            # This makes the visual path match the learner's actual position:
+            # the course introduction has been read and Lesson 1 is underway.
+            if (
+                current.kind == "course"
+                and following.kind == "lesson"
+                and current.state in {"complete", "current", "in_progress"}
+                and following.state != "locked"
+            ):
+                progress = 1.0
+                progress_color = QColor(
+                    "#7652D6" if current.state == "complete" else "#E044D5"
+                )
+            elif current.state == "complete" and following.state in {
+                "complete",
+                "current",
+                "in_progress",
+            }:
+                progress = 1.0
+            elif current.state in {"current", "in_progress"}:
+                progress = 0.5
+                progress_color = QColor("#E044D5")
+            if progress:
+                progress_pen = QPen(progress_color, 5)
+                progress_pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+                painter.setPen(progress_pen)
+                progress_right = segment_left + (segment_right - segment_left) * progress
+                painter.drawLine(int(segment_left), int(y), int(progress_right), int(y))
+
+        metrics = QFontMetrics(painter.font())
+        for index, milestone in enumerate(self._milestones):
+            x = positions[index]
+            radius = 10.0 if milestone.kind == "course" else 8.0
+            fill = {
+                "complete": QColor("#7652D6"),
+                "current": QColor("#E044D5"),
+                "in_progress": QColor("#3D6CA8"),
+                "locked": QColor("#11192A"),
+                "ready": QColor("#1A2440"),
+            }.get(milestone.state, QColor("#1A2440"))
+            border = QColor("#DFA8FF") if milestone.state == "current" else QColor("#8E73C7")
+            if milestone.state == "complete":
+                border = QColor("#BCE7CA")
+            if milestone.state == "locked":
+                border = QColor("#43506A")
+            painter.setPen(QPen(border, 2))
+            painter.setBrush(fill)
+            painter.drawEllipse(QRectF(x - radius, y - radius, radius * 2, radius * 2))
+            if milestone.state == "complete":
+                painter.setPen(QColor("#FFFFFF"))
+                painter.drawText(QRectF(x - radius, y - radius - 1, radius * 2, radius * 2), Qt.AlignmentFlag.AlignCenter, "✓")
+            else:
+                painter.setPen(QColor("#FFFFFF" if milestone.state != "locked" else "#78859A"))
+                painter.drawText(QRectF(x - radius, y - radius - 1, radius * 2, radius * 2), Qt.AlignmentFlag.AlignCenter, milestone.short_label)
+            label_width = max(82, int(spacing) - 10) if count > 1 else self.width() - 20
+            title = metrics.elidedText(milestone.title, Qt.TextElideMode.ElideRight, label_width)
+            painter.setPen(QColor("#DCE4F3" if milestone.state != "locked" else "#78859A"))
+            painter.drawText(
+                QRectF(x - label_width / 2, 38, label_width, 28),
+                Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop,
+                title,
+            )
+        painter.end()
 
 
 class AcceleratorAcademyWidget(QWidget):
-    """Polished, program-neutral Academy workspace backed by external content."""
+    """Unified, sequential Academy experience.
+
+    Domain concepts such as courses, practice, assessments, Skills Labs, and
+    evidence remain available to the engine, but the learner sees one ordered
+    journey.  Every lesson screen pairs a concise instructional block with an
+    action that must be attempted and passed before Continue unlocks.
+    """
+
+    OVERVIEW_PAGE = 0
+    LESSON_PAGE = 1
+    ASSESSMENT_PAGE = 2
+    LAB_PAGE = 3
+    COMPLETE_PAGE = 4
 
     def __init__(self, conn, repository_root: str | Path, parent=None):
         super().__init__(parent)
@@ -77,642 +210,599 @@ class AcceleratorAcademyWidget(QWidget):
         self.repository_root = Path(repository_root)
         self.service = AcademyService(conn, self.repository_root)
         self.catalog = self.service.catalog
-        self.settings = QSettings("DanjPastor", "Career Accelerator")
 
-        self._practice_lesson: LessonDefinition | None = None
-        self._practice_activity: ActivityDefinition | None = None
+        self._nodes: list[JourneyNode] = []
+        self._current_target: str | None = None
+        self._current_lesson: LessonDefinition | None = None
+        self._current_activity: ActivityDefinition | None = None
         self._assessment: AssessmentDefinition | None = None
         self._assessment_activity: ActivityDefinition | None = None
         self._assessment_answers: dict[str, str] = {}
-        self._active_section = 0
+        self._lab: SkillsLabDefinition | None = None
+        self._building_roadmap = False
         self._responsive_mode: str | None = None
-        self._building_lists = False
 
         self._build_ui()
         self.refresh_all()
-        self.open_recommendation()
+        QTimer.singleShot(0, self.open_recommendation)
 
-    # ------------------------------------------------------------------ UI
+    # ------------------------------------------------------------------ shell
     def _build_ui(self) -> None:
         outer = QVBoxLayout(self)
         outer.setContentsMargins(24, 16, 24, 16)
         outer.setSpacing(10)
 
-        heading_row = QHBoxLayout()
-        heading_row.setSpacing(16)
+        heading = QHBoxLayout()
+        heading.setSpacing(14)
         heading_text = QVBoxLayout()
-        heading_text.setSpacing(3)
-        system_name = self.service.labels.get("system_name", "Accelerator Academy")
-        title = QLabel(system_name)
+        heading_text.setSpacing(2)
+        title = QLabel(self.service.labels.get("system_name", "Accelerator Academy"))
         title.setObjectName("PageTitle")
         subtitle = QLabel(
-            "Build durable, job-ready capability through comprehensive instruction, original practice, "
-            "independent assessment, and applied evidence."
+            "Learn a little, try it right away, and keep moving through one guided path."
         )
         subtitle.setObjectName("Muted")
         subtitle.setWordWrap(True)
         heading_text.addWidget(title)
         heading_text.addWidget(subtitle)
-        heading_row.addLayout(heading_text, 1)
+        heading.addLayout(heading_text, 1)
 
-        recommendation_card = QFrame()
-        recommendation_card.setObjectName("AcademyRecommendation")
-        recommendation_card.setStyleSheet(
-            "QFrame#AcademyRecommendation {background:#171D31;border:1px solid #4B3F76;"
-            "border-radius:11px;}"
-        )
-        recommendation_layout = QVBoxLayout(recommendation_card)
-        recommendation_layout.setContentsMargins(12, 8, 12, 8)
-        recommendation_layout.setSpacing(2)
-        recommendation_caption = QLabel("RECOMMENDED NEXT")
-        recommendation_caption.setStyleSheet(
-            "color:#BFA7F5;font-size:8pt;font-weight:700;"
-        )
-        self.recommendation_label = QLabel("Preparing your next step…")
-        self.recommendation_label.setWordWrap(True)
-        self.recommendation_label.setStyleSheet(
-            "color:#FFFFFF;font-size:9.5pt;font-weight:650;"
-        )
-        recommendation_layout.addWidget(recommendation_caption)
-        recommendation_layout.addWidget(self.recommendation_label)
-        recommendation_card.setMaximumWidth(430)
-        heading_row.addWidget(recommendation_card)
-        outer.addLayout(heading_row)
+        self.overview_button = QPushButton("Path Overview")
+        self.overview_button.setObjectName("Secondary")
+        self.overview_button.clicked.connect(self.show_overview)
+        heading.addWidget(self.overview_button)
+        self.resume_button = QPushButton("Resume Learning  →")
+        self.resume_button.setObjectName("Primary")
+        self.resume_button.clicked.connect(self.open_recommendation)
+        heading.addWidget(self.resume_button)
+        outer.addLayout(heading)
 
         progress_host = QFrame()
         progress_host.setObjectName("AcademyProgressHost")
         progress_host.setStyleSheet(
             "QFrame#AcademyProgressHost {background:#11192A;border:1px solid #263754;border-radius:9px;}"
         )
-        progress_layout = QHBoxLayout(progress_host)
-        progress_layout.setContentsMargins(12, 7, 12, 7)
-        progress_layout.setSpacing(10)
-        self.progress_summary = QLabel("0 of 0 lessons mastered")
+        progress_layout = QVBoxLayout(progress_host)
+        progress_layout.setContentsMargins(12, 8, 12, 6)
+        progress_layout.setSpacing(4)
+        progress_row = QHBoxLayout()
+        progress_row.setSpacing(10)
+        self.progress_summary = QLabel("Getting your path ready…")
         self.progress_summary.setObjectName("Muted")
-        progress_layout.addWidget(self.progress_summary)
+        progress_row.addWidget(self.progress_summary)
         self.overall_progress = QProgressBar()
         self.overall_progress.setRange(0, 100)
         self.overall_progress.setTextVisible(False)
         self.overall_progress.setMaximumHeight(8)
-        progress_layout.addWidget(self.overall_progress, 1)
+        progress_row.addWidget(self.overall_progress, 1)
         self.progress_percent = QLabel("0%")
         self.progress_percent.setStyleSheet("font-weight:700;color:#FFFFFF;")
-        progress_layout.addWidget(self.progress_percent)
+        progress_row.addWidget(self.progress_percent)
+        progress_layout.addLayout(progress_row)
+
+        milestone_scroll = QScrollArea()
+        milestone_scroll.setWidgetResizable(True)
+        milestone_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        milestone_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        milestone_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        milestone_scroll.setMaximumHeight(78)
+        milestone_scroll.setStyleSheet(
+            "QScrollArea {background:transparent;border:none;}"
+            "QScrollBar:horizontal {height:5px;background:transparent;}"
+            "QScrollBar::handle:horizontal {background:#31415F;border-radius:2px;min-width:40px;}"
+        )
+        self.milestone_bar = AcademyMilestoneBar()
+        milestone_scroll.setWidget(self.milestone_bar)
+        progress_layout.addWidget(milestone_scroll)
         outer.addWidget(progress_host)
 
-        self.section_nav = QWidget()
-        self.section_nav.setObjectName("AcademySectionNav")
-        self.section_nav_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, self.section_nav)
-        self.section_nav_layout.setContentsMargins(0, 0, 0, 0)
-        self.section_nav_layout.setSpacing(8)
-        self.section_group = QButtonGroup(self.section_nav)
-        self.section_group.setExclusive(True)
-        self.section_buttons: list[QPushButton] = []
-        for index, label in enumerate(_SECTION_NAMES):
-            button = QPushButton(label)
-            button.setObjectName("AcademySectionButton")
-            button.setCheckable(True)
-            button.setCursor(Qt.CursorShape.PointingHandCursor)
-            button.clicked.connect(
-                lambda checked=False, target=index: self._set_section(target) if checked else None
-            )
-            self.section_group.addButton(button, index)
-            self.section_buttons.append(button)
-            self.section_nav_layout.addWidget(button)
-        self.section_nav_layout.addStretch(1)
-        self.section_buttons[0].setChecked(True)
-        self.section_nav.setStyleSheet(
-            f"""
-            QWidget#AcademySectionNav {{background:transparent;border:none;}}
-            QPushButton#AcademySectionButton {{
-                background:{COLORS['panel']};color:{COLORS['muted']};
-                border:1px solid {COLORS['border']};border-radius:10px;
-                padding:8px 13px;min-height:20px;font-weight:600;
-            }}
-            QPushButton#AcademySectionButton:hover {{
-                background:{COLORS['panel_hover']};color:white;border-color:{COLORS['purple_soft']};
-            }}
-            QPushButton#AcademySectionButton:checked {{
-                background:qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                    stop:0 {COLORS['magenta']},stop:1 {COLORS['purple']});
-                color:white;border-color:#C07BFF;font-weight:700;
-            }}
-            """
-        )
-        outer.addWidget(self.section_nav)
-
-        self.section_stack = QStackedWidget()
-        self.section_stack.setMinimumWidth(0)
-        self.section_stack.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
-        self.section_stack.addWidget(self._build_paths_page())
-        self.section_stack.addWidget(self._build_courses_page())
-        self.section_stack.addWidget(self._build_practice_page())
-        self.section_stack.addWidget(self._build_lab_page())
-        self.section_stack.addWidget(self._build_assessment_page())
-        self.section_stack.addWidget(self._build_evidence_page())
-        outer.addWidget(self.section_stack, 1)
+        self.body_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.body_splitter.setChildrenCollapsible(False)
+        self.body_splitter.setHandleWidth(5)
+        self.body_splitter.addWidget(self._build_roadmap())
+        self.content_stack = QStackedWidget()
+        self.content_stack.setMinimumWidth(0)
+        self.content_stack.addWidget(self._build_overview_page())
+        self.content_stack.addWidget(self._build_lesson_page())
+        self.content_stack.addWidget(self._build_assessment_page())
+        self.content_stack.addWidget(self._build_lab_page())
+        self.content_stack.addWidget(self._build_complete_page())
+        self.body_splitter.addWidget(self.content_stack)
+        self.body_splitter.setStretchFactor(0, 1)
+        self.body_splitter.setStretchFactor(1, 3)
+        outer.addWidget(self.body_splitter, 1)
         QTimer.singleShot(0, self._restore_splitters)
 
-    def _build_paths_page(self) -> QWidget:
-        page = QWidget()
-        layout = QVBoxLayout(page)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
-
+    def _build_roadmap(self) -> QWidget:
+        card = Card("Your Learning Path", "Everything you need appears in one clear sequence.")
+        card.setMinimumWidth(275)
+        card.setMaximumWidth(420)
         path = self.catalog.program.paths[0]
-        summary = Card(path.title, path.description)
-        summary.layout.setContentsMargins(16, 14, 16, 14)
-        self.path_status = QLabel()
-        self.path_status.setWordWrap(True)
-        self.path_status.setStyleSheet(
-            "background:#151E31;border:1px solid #33435F;border-radius:8px;padding:8px;color:#DCE4F3;"
+        self.path_name = QLabel(path.title)
+        self.path_name.setStyleSheet("font-size:13pt;font-weight:700;color:#FFFFFF;")
+        self.path_name.setWordWrap(True)
+        card.layout.addWidget(self.path_name)
+        self.roadmap_progress = QProgressBar()
+        self.roadmap_progress.setRange(0, 100)
+        self.roadmap_progress.setTextVisible(False)
+        self.roadmap_progress.setMaximumHeight(8)
+        card.layout.addWidget(self.roadmap_progress)
+        self.roadmap_list = QListWidget()
+        self.roadmap_list.setWordWrap(True)
+        self.roadmap_list.setSpacing(5)
+        self.roadmap_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.roadmap_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.roadmap_list.currentItemChanged.connect(self._roadmap_selected)
+        self.roadmap_list.setStyleSheet(
+            f"""
+            QListWidget {{background:{COLORS.get('surface_alt', '#111D31')};
+                border:1px solid {COLORS.get('border', '#263754')};border-radius:9px;padding:5px;}}
+            QListWidget::item {{padding:8px 8px;border-radius:7px;color:#D7E0EF;}}
+            QListWidget::item:hover {{background:#182640;color:#FFFFFF;}}
+            QListWidget::item:selected {{background:#30234C;color:#FFFFFF;border:1px solid #7652B5;}}
+            """
         )
-        summary.layout.addWidget(self.path_status)
-        layout.addWidget(summary)
+        card.layout.addWidget(self.roadmap_list, 1)
+        self.roadmap_status = QLabel()
+        self.roadmap_status.setWordWrap(True)
+        self.roadmap_status.setObjectName("Muted")
+        card.layout.addWidget(self.roadmap_status)
+        return card
 
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setChildrenCollapsible(False)
-        self.path_splitter = splitter
-
-        sequence = Card("Learning Path", "Complete lessons in prerequisite order. Mastery unlocks the next step.")
-        self.path_lesson_list = QListWidget()
-        self._style_learning_list(self.path_lesson_list)
-        self.path_lesson_list.currentItemChanged.connect(self._show_path_lesson)
-        sequence.layout.addWidget(self.path_lesson_list, 1)
-        splitter.addWidget(sequence)
-
-        detail = Card("Path Detail")
-        self.path_lesson_view = CoursePageWidget()
-        self.path_lesson_view.set_navigation(next_title=None, show_back=False)
-        detail.layout.setContentsMargins(8, 8, 8, 8)
-        detail.layout.addWidget(self.path_lesson_view, 1)
-        self.path_open_button = QPushButton("Open Lesson in Practice")
-        self.path_open_button.setObjectName("Primary")
-        self.path_open_button.clicked.connect(self._open_selected_path_lesson)
-        detail.layout.addWidget(self.path_open_button)
-        splitter.addWidget(detail)
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
-        layout.addWidget(splitter, 1)
-        return page
-
-    def _build_courses_page(self) -> QWidget:
+    # --------------------------------------------------------------- overview
+    def _build_overview_page(self) -> QWidget:
         page = QWidget()
-        layout = QVBoxLayout(page)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        root = QVBoxLayout(page)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(10)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setStyleSheet("QScrollArea {background:transparent;border:none;}")
         content = QWidget()
-        content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(0, 0, 8, 8)
-        content_layout.setSpacing(10)
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(0, 0, 8, 8)
+        layout.setSpacing(10)
 
-        for course in self.catalog.courses():
-            card = Card(course.title, course.description)
-            card.layout.setContentsMargins(18, 16, 18, 16)
-            metrics = QHBoxLayout()
-            lesson_count = sum(len(module.lessons) for module in course.modules)
-            activity_count = sum(len(lesson.activities) for module in course.modules for lesson in module.lessons)
-            for text in (
-                f"{lesson_count} lessons",
-                f"{activity_count} practice activities",
-                f"{course.estimated_minutes} minutes",
-                f"{len(course.assessments)} checkpoint",
-                f"{len(course.skills_labs)} Skills Lab",
-            ):
-                pill = QLabel(text)
-                pill.setStyleSheet(
-                    "background:#1A2440;border:1px solid #3A4970;border-radius:10px;"
-                    "padding:4px 9px;color:#DCE4F3;font-size:9pt;font-weight:600;"
-                )
-                metrics.addWidget(pill)
-            metrics.addStretch()
-            card.layout.addLayout(metrics)
+        path = self.catalog.program.paths[0]
+        courses = self.catalog.courses()
+        assessments = self.catalog.assessments()
+        skills_labs = self.catalog.skills_labs()
+        hero = Card(path.title, path.description)
+        hero.layout.setContentsMargins(20, 18, 20, 18)
+        metrics = QHBoxLayout()
+        total_steps = sum(len(lesson.activities) for lesson in self.catalog.lessons())
+        for text in (
+            f"{len(courses)} courses",
+            f"{len(self.catalog.lessons())} lessons",
+            f"{total_steps} interactive steps",
+            f"{len(assessments)} checkpoint" + ("s" if len(assessments) != 1 else ""),
+            f"{len(skills_labs)} applied project" + ("s" if len(skills_labs) != 1 else ""),
+        ):
+            pill = QLabel(text)
+            pill.setStyleSheet(
+                "background:#1A2440;border:1px solid #3A4970;border-radius:10px;"
+                "padding:4px 9px;color:#DCE4F3;font-size:9pt;font-weight:600;"
+            )
+            metrics.addWidget(pill)
+        metrics.addStretch(1)
+        hero.layout.addLayout(metrics)
+        self.overview_next_title = QLabel("Finding your next step…")
+        self.overview_next_title.setStyleSheet("font-size:17pt;font-weight:750;color:#FFFFFF;")
+        self.overview_next_title.setWordWrap(True)
+        hero.layout.addWidget(self.overview_next_title)
+        self.overview_next_reason = QLabel()
+        self.overview_next_reason.setObjectName("Muted")
+        self.overview_next_reason.setWordWrap(True)
+        hero.layout.addWidget(self.overview_next_reason)
+        start = QPushButton("Resume Learning  →")
+        start.setObjectName("Primary")
+        start.clicked.connect(self.open_recommendation)
+        hero.layout.addWidget(start, 0, Qt.AlignmentFlag.AlignLeft)
+        layout.addWidget(hero)
 
-            if course.outcomes:
-                outcomes = QLabel("COURSE OUTCOMES")
-                outcomes.setStyleSheet("color:#A8B4C8;font-size:8.5pt;font-weight:700;")
-                card.layout.addWidget(outcomes)
-                outcome_text = QLabel("\n".join(f"✓  {item}" for item in course.outcomes))
-                outcome_text.setWordWrap(True)
-                outcome_text.setStyleSheet("color:#D8E1F0;line-height:1.35;")
-                card.layout.addWidget(outcome_text)
+        sequence = Card("How the path works", "Learn, practice, and projects all stay in the same flow.")
+        flow = QLabel(
+            "Learn a focused concept  →  Try it immediately  →  Check your work  →  Continue  →  "
+            "Complete the checkpoint  →  Finish the applied project"
+        )
+        flow.setWordWrap(True)
+        flow.setStyleSheet(
+            "background:#151E31;border:1px solid #33435F;border-radius:9px;padding:12px;"
+            "color:#E8EDF8;font-size:11pt;font-weight:650;"
+        )
+        sequence.layout.addWidget(flow)
+        rule = QLabel(
+            "Every step gives you something to try. Finish the activity, check your work, and the next step will open."
+        )
+        rule.setWordWrap(True)
+        rule.setObjectName("Muted")
+        sequence.layout.addWidget(rule)
+        layout.addWidget(sequence)
 
-            for module in course.modules:
-                module_frame = QFrame()
-                module_frame.setStyleSheet(
-                    "QFrame {background:#111D31;border:1px solid #263754;border-radius:9px;}"
-                )
-                module_layout = QVBoxLayout(module_frame)
-                module_layout.setContentsMargins(12, 10, 12, 10)
-                module_title = QLabel(module.title)
-                module_title.setObjectName("SectionTitle")
-                module_layout.addWidget(module_title)
-                if module.description:
-                    description = QLabel(module.description)
-                    description.setObjectName("Muted")
-                    description.setWordWrap(True)
-                    module_layout.addWidget(description)
-                for lesson in module.lessons:
-                    row = QFrame()
-                    row.setStyleSheet("QFrame {background:transparent;border:none;}")
-                    row_layout = QHBoxLayout(row)
-                    row_layout.setContentsMargins(4, 5, 4, 5)
-                    state = self.service.progress.lesson_state(lesson.lesson_id).value
-                    icon = QLabel(_STATE_ICONS.get(state, "○"))
-                    icon.setStyleSheet("color:#B679FF;font-size:13pt;font-weight:700;")
-                    row_layout.addWidget(icon)
-                    text = QLabel(f"{lesson.order}. {lesson.title}")
-                    text.setWordWrap(True)
-                    text.setStyleSheet("font-weight:650;color:#FFFFFF;")
-                    row_layout.addWidget(text, 1)
-                    meta = QLabel(f"{len(lesson.activities)} activities • {lesson.estimated_minutes} min • {state}")
-                    meta.setObjectName("Muted")
-                    row_layout.addWidget(meta)
-                    open_button = QPushButton("Open")
-                    open_button.setObjectName("Secondary")
-                    open_button.clicked.connect(
-                        lambda checked=False, lesson_id=lesson.lesson_id: self.open_lesson(lesson_id)
-                    )
-                    row_layout.addWidget(open_button)
-                    module_layout.addWidget(row)
-                card.layout.addWidget(module_frame)
-            content_layout.addWidget(card)
-        content_layout.addStretch(1)
+        outcomes = Card("What you will be able to do")
+        path_outcomes = [item for course in courses for item in course.outcomes]
+        outcomes_text = QLabel("\n".join(f"✓  {item}" for item in path_outcomes[:8]))
+        outcomes_text.setWordWrap(True)
+        outcomes_text.setStyleSheet("color:#D8E1F0;line-height:1.4;")
+        outcomes.layout.addWidget(outcomes_text)
+        layout.addWidget(outcomes)
+
+        self.recent_card = Card("Recent progress")
+        self.recent_progress = QLabel()
+        self.recent_progress.setWordWrap(True)
+        self.recent_progress.setObjectName("Muted")
+        self.recent_card.layout.addWidget(self.recent_progress)
+        layout.addWidget(self.recent_card)
+        layout.addStretch(1)
         scroll.setWidget(content)
-        layout.addWidget(scroll, 1)
+        root.addWidget(scroll, 1)
         return page
 
-    def _build_practice_page(self) -> QWidget:
+    # ------------------------------------------------------------- lesson page
+    def _build_lesson_page(self) -> QWidget:
         page = QWidget()
         root = QVBoxLayout(page)
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(10)
 
         toolbar = Card()
-        toolbar.layout.setContentsMargins(10, 7, 10, 7)
-        row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.practice_toolbar_row = row
-        row.setSpacing(8)
-        self.practice_breadcrumb = QLabel("Accelerator Academy  ›  Query Foundations")
-        self.practice_breadcrumb.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
-        row.addWidget(self.practice_breadcrumb, 1)
-        lesson_label = QLabel("Lesson")
-        lesson_label.setObjectName("Muted")
-        row.addWidget(lesson_label)
-        self.practice_lesson_combo = QComboBox()
-        self.practice_lesson_combo.setMinimumWidth(210)
-        for lesson in self.catalog.lessons():
-            self.practice_lesson_combo.addItem(lesson.title, lesson.lesson_id)
-        self.practice_lesson_combo.currentIndexChanged.connect(self._practice_lesson_changed)
-        row.addWidget(self.practice_lesson_combo)
+        toolbar.layout.setContentsMargins(11, 7, 11, 7)
+        row = QHBoxLayout()
+        self.lesson_breadcrumb = QLabel()
+        self.lesson_breadcrumb.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
+        self.lesson_breadcrumb.setWordWrap(True)
+        row.addWidget(self.lesson_breadcrumb, 1)
+        self.lesson_step_pill = QLabel()
+        self.lesson_step_pill.setStyleSheet(
+            "background:#1A2440;border:1px solid #4A5C84;border-radius:10px;padding:4px 9px;font-weight:700;"
+        )
+        row.addWidget(self.lesson_step_pill)
         toolbar.layout.addLayout(row)
         root.addWidget(toolbar)
 
-        outer_splitter = QSplitter(Qt.Horizontal)
-        outer_splitter.setChildrenCollapsible(False)
-        outer_splitter.setHandleWidth(5)
-        self.practice_outer_splitter = outer_splitter
+        self.lesson_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.lesson_splitter.setChildrenCollapsible(False)
+        self.lesson_splitter.setHandleWidth(5)
 
-        library = Card("Course Progress", "Use the lesson sequence and activity states to choose your next step.")
-        library.setMinimumWidth(270)
-        library.setMaximumWidth(410)
-        self.lesson_progress_text = QLabel("0%")
-        self.lesson_progress_text.setStyleSheet("font-size:20pt;font-weight:700;color:#FFFFFF;")
-        library.layout.addWidget(self.lesson_progress_text)
-        self.lesson_progress_bar = QProgressBar()
-        self.lesson_progress_bar.setRange(0, 100)
-        self.lesson_progress_bar.setTextVisible(False)
-        self.lesson_progress_bar.setMaximumHeight(8)
-        library.layout.addWidget(self.lesson_progress_bar)
-        lesson_caption = QLabel("LESSONS")
-        lesson_caption.setStyleSheet("color:#A8B4C8;font-size:8.5pt;font-weight:700;")
-        library.layout.addWidget(lesson_caption)
-        self.practice_lesson_list = QListWidget()
-        self._style_learning_list(self.practice_lesson_list)
-        self.practice_lesson_list.currentItemChanged.connect(self._practice_lesson_list_changed)
-        library.layout.addWidget(self.practice_lesson_list, 2)
-        activity_caption = QLabel("PRACTICE ACTIVITIES")
-        activity_caption.setStyleSheet("color:#A8B4C8;font-size:8.5pt;font-weight:700;")
-        library.layout.addWidget(activity_caption)
-        self.practice_activity_list = QListWidget()
-        self._style_learning_list(self.practice_activity_list)
-        self.practice_activity_list.currentItemChanged.connect(self._practice_activity_list_changed)
-        library.layout.addWidget(self.practice_activity_list, 3)
-        outer_splitter.addWidget(library)
+        learn = Card("Lesson & Practice")
+        learn.layout.setContentsMargins(8, 8, 8, 8)
+        self.step_learn_view = CoursePageWidget()
+        self.step_learn_view.set_navigation(next_title=None, show_back=False)
+        learn.layout.addWidget(self.step_learn_view, 1)
+        self.lesson_splitter.addWidget(learn)
 
-        workspace = QSplitter(Qt.Horizontal)
-        workspace.setChildrenCollapsible(False)
-        workspace.setHandleWidth(5)
-        self.practice_workspace_splitter = workspace
+        self.step_workspace_card = Card()
+        self.step_workspace_card.setMinimumWidth(380)
+        self.step_workspace_card.layout.setContentsMargins(8, 8, 8, 8)
+        self.step_workspace_title = QLabel("SQL Editor & Output")
+        self.step_workspace_title.setObjectName("CardTitle")
+        self.step_workspace_title.setWordWrap(True)
+        self.step_workspace_card.layout.addWidget(self.step_workspace_title)
+        workspace_body = QWidget()
+        workspace_layout = QVBoxLayout(workspace_body)
+        workspace_layout.setContentsMargins(4, 4, 4, 4)
+        workspace_layout.setSpacing(8)
 
-        learn_card = Card("Learn")
-        learn_card.layout.setContentsMargins(8, 8, 8, 8)
-        self.practice_learn_view = CoursePageWidget()
-        self.practice_learn_view.set_navigation(next_title=None, show_back=False)
-        learn_card.layout.addWidget(self.practice_learn_view, 1)
-        workspace.addWidget(learn_card)
+        self.step_sql = SqlCodeEditor()
+        self.step_sql.setMinimumHeight(230)
+        self.step_sql.setPlaceholderText("Write your SQL here…")
 
-        practice_card = Card("Practice")
-        practice_card.layout.setContentsMargins(8, 8, 8, 8)
-        practice_body = QWidget()
-        practice_body_layout = QVBoxLayout(practice_body)
-        practice_body_layout.setContentsMargins(4, 4, 4, 4)
-        practice_body_layout.setSpacing(8)
+        self.lesson_work_splitter = QSplitter(Qt.Orientation.Vertical)
+        self.lesson_work_splitter.setChildrenCollapsible(False)
+        self.lesson_work_splitter.setHandleWidth(5)
+        self.lesson_work_splitter.addWidget(self.step_sql)
 
-        selector_row = QHBoxLayout()
-        selector_label = QLabel("Practice question")
-        selector_label.setObjectName("Muted")
-        selector_row.addWidget(selector_label)
-        self.practice_activity_combo = QComboBox()
-        self.practice_activity_combo.currentIndexChanged.connect(self._practice_activity_changed)
-        selector_row.addWidget(self.practice_activity_combo, 1)
-        practice_body_layout.addLayout(selector_row)
-
-        self.practice_lock = QLabel()
-        self.practice_lock.setWordWrap(True)
-        self.practice_lock.setStyleSheet(
-            "background:#111D31;border:1px solid #263754;border-radius:8px;padding:7px;color:#C7D1E2;"
-        )
-        practice_body_layout.addWidget(self.practice_lock)
-
-        self.practice_brief = CoursePageWidget()
-        self.practice_brief.set_navigation(next_title=None, show_back=False)
-        self.practice_brief.setMinimumHeight(240)
-        self.practice_brief.setMaximumHeight(330)
-        practice_body_layout.addWidget(self.practice_brief)
-
-        self.practice_input_stack = QStackedWidget()
-        self.practice_sql = SqlCodeEditor()
-        self.practice_sql.setMinimumHeight(210)
-        self.practice_sql.setPlaceholderText("Write your SQL here…")
-        self.practice_choice_host = QWidget()
-        choice_layout = QVBoxLayout(self.practice_choice_host)
-        choice_layout.setContentsMargins(0, 4, 0, 4)
-        choice_layout.addWidget(QLabel("Choose the best answer"))
-        self.practice_choice = QComboBox()
-        self.practice_choice.setMinimumHeight(38)
-        choice_layout.addWidget(self.practice_choice)
-        choice_layout.addStretch(1)
-        self.practice_input_stack.addWidget(self.practice_sql)
-        self.practice_input_stack.addWidget(self.practice_choice_host)
-        practice_body_layout.addWidget(self.practice_input_stack, 1)
-
-        action_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.practice_action_row = action_row
-        self.practice_run = QPushButton("▶ Run Query")
-        self.practice_run.setObjectName("Secondary")
-        self.practice_run.clicked.connect(self._run_practice)
-        self.practice_check = QPushButton("✓ Submit Solution")
-        self.practice_check.setObjectName("Primary")
-        self.practice_check.clicked.connect(self._check_practice)
-        self.practice_hint = QPushButton("💡 Show Hint")
-        self.practice_hint.setObjectName("Secondary")
-        self.practice_hint.clicked.connect(self._show_practice_hint)
-        self.practice_solution = QPushButton("View Solution")
-        self.practice_solution.setObjectName("Secondary")
-        self.practice_solution.clicked.connect(self._show_practice_solution)
-        for button in (self.practice_run, self.practice_check, self.practice_hint, self.practice_solution):
-            action_row.addWidget(button)
-        action_row.addStretch(1)
-        practice_body_layout.addLayout(action_row)
-
-        self.practice_feedback = FeedbackLabel()
-        practice_body_layout.addWidget(self.practice_feedback)
-        self.practice_explanation = QLabel()
-        self.practice_explanation.setWordWrap(True)
-        self.practice_explanation.setStyleSheet(
+        self.step_output_host = QWidget()
+        output_layout = QVBoxLayout(self.step_output_host)
+        output_layout.setContentsMargins(0, 0, 0, 0)
+        output_layout.setSpacing(7)
+        self.step_output_label = QLabel("Output")
+        self.step_output_label.setStyleSheet("font-size:10pt;font-weight:700;color:#FFFFFF;")
+        output_layout.addWidget(self.step_output_label)
+        self.step_feedback = FeedbackLabel()
+        output_layout.addWidget(self.step_feedback)
+        self.step_explanation = QLabel()
+        self.step_explanation.setWordWrap(True)
+        self.step_explanation.setStyleSheet(
             "background:#14233B;border:1px solid #52627F;border-radius:8px;padding:9px;color:#E7ECF8;"
         )
-        self.practice_explanation.hide()
-        practice_body_layout.addWidget(self.practice_explanation)
+        self.step_explanation.hide()
+        output_layout.addWidget(self.step_explanation)
+        self.step_results = self._result_table()
+        self.step_results.setMinimumHeight(150)
+        output_layout.addWidget(self.step_results, 1)
+        self.lesson_work_splitter.addWidget(self.step_output_host)
+        self.lesson_work_splitter.setStretchFactor(0, 5)
+        self.lesson_work_splitter.setStretchFactor(1, 4)
 
-        self.practice_results = self._result_table()
-        self.practice_results.setMinimumHeight(135)
-        practice_body_layout.addWidget(self.practice_results, 1)
+        self.step_choice_host = QWidget()
+        choice_layout = QVBoxLayout(self.step_choice_host)
+        choice_layout.setContentsMargins(0, 4, 0, 4)
+        choice_help = QLabel("Choose the answer that makes the most sense, then check your work.")
+        choice_help.setObjectName("Muted")
+        choice_help.setWordWrap(True)
+        choice_layout.addWidget(choice_help)
+        self.step_choice_options = QVBoxLayout()
+        self.step_choice_options.setSpacing(7)
+        choice_layout.addLayout(self.step_choice_options)
+        self.step_choice_group = QButtonGroup(self.step_choice_host)
+        self.step_choice_group.setExclusive(True)
+        self.step_choice_feedback = FeedbackLabel()
+        choice_layout.addWidget(self.step_choice_feedback)
+        self.step_choice_explanation = QLabel()
+        self.step_choice_explanation.setWordWrap(True)
+        self.step_choice_explanation.setStyleSheet(
+            "background:#14233B;border:1px solid #52627F;border-radius:8px;padding:9px;color:#E7ECF8;"
+        )
+        self.step_choice_explanation.hide()
+        choice_layout.addWidget(self.step_choice_explanation)
+        choice_layout.addStretch(1)
 
-        practice_scroll = QScrollArea()
-        practice_scroll.setWidgetResizable(True)
-        practice_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        practice_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        practice_scroll.setStyleSheet("QScrollArea {background:transparent;border:none;}")
-        practice_scroll.setWidget(practice_body)
-        practice_card.layout.addWidget(practice_scroll, 1)
-        workspace.addWidget(practice_card)
-        workspace.setStretchFactor(0, 47)
-        workspace.setStretchFactor(1, 53)
-        outer_splitter.addWidget(workspace)
-        outer_splitter.setStretchFactor(0, 1)
-        outer_splitter.setStretchFactor(1, 3)
-        root.addWidget(outer_splitter, 1)
+        # SQL steps use an editor/output splitter. Recognition steps use a
+        # single uninterrupted answer surface so an empty editor/output divider
+        # never persists when neither SQL pane is present.
+        self.step_workspace_stack = QStackedWidget()
+        self.step_workspace_stack.addWidget(self.lesson_work_splitter)
+        self.step_workspace_stack.addWidget(self.step_choice_host)
+        workspace_layout.addWidget(self.step_workspace_stack, 1)
+        self.step_workspace_card.layout.addWidget(workspace_body, 1)
+        self.lesson_splitter.addWidget(self.step_workspace_card)
+        self.lesson_splitter.setStretchFactor(0, 55)
+        self.lesson_splitter.setStretchFactor(1, 45)
+        root.addWidget(self.lesson_splitter, 1)
+
+        footer = Card()
+        footer.layout.setContentsMargins(10, 7, 10, 7)
+        self.lesson_footer_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.lesson_footer_splitter.setChildrenCollapsible(False)
+        self.lesson_footer_splitter.setHandleWidth(0)
+
+        self.lesson_footer_left = QWidget()
+        self.lesson_footer_left.setMinimumWidth(0)
+        self.lesson_left_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.lesson_left_row.setContentsMargins(0, 0, 8, 0)
+        self.lesson_left_row.setSpacing(8)
+        self.lesson_footer_left.setLayout(self.lesson_left_row)
+        self.lesson_back = QPushButton("← Back")
+        self.lesson_back.setObjectName("Secondary")
+        self.lesson_back.clicked.connect(self._open_previous_node)
+        self.lesson_nav_status = QLabel("Complete the lesson to move on!")
+        self.lesson_nav_status.setObjectName("Muted")
+        self.lesson_nav_status.setStyleSheet(
+            "color:#AEB9CC;background:transparent;border:none;padding:0;margin:0;"
+        )
+        self.lesson_nav_status.setWordWrap(True)
+        self.lesson_nav_status.setMinimumWidth(0)
+        self.lesson_left_row.addWidget(self.lesson_back)
+        self.lesson_left_row.addWidget(self.lesson_nav_status, 1)
+
+        self.lesson_footer_right = QWidget()
+        self.lesson_footer_right.setMinimumWidth(0)
+        self.lesson_action_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.lesson_action_row.setContentsMargins(8, 0, 0, 0)
+        self.lesson_action_row.setSpacing(7)
+        self.lesson_footer_right.setLayout(self.lesson_action_row)
+        self.step_run = QPushButton("▶ Run Query")
+        self.step_run.setObjectName("Secondary")
+        self.step_run.clicked.connect(self._run_lesson_step)
+        self.step_check = QPushButton("✓ Check Answer")
+        self.step_check.setObjectName("Primary")
+        self.step_check.clicked.connect(self._check_lesson_step)
+        self.step_hint = QPushButton("💡 Show Hint")
+        self.step_hint.setObjectName("Secondary")
+        self.step_hint.clicked.connect(self._show_step_hint)
+        self.step_solution = QPushButton("View Solution")
+        self.step_solution.setObjectName("Secondary")
+        self.step_solution.clicked.connect(self._show_step_solution)
+        self.lesson_continue = QPushButton("Continue  →")
+        self.lesson_continue.setObjectName("Primary")
+        self.lesson_continue.clicked.connect(self._open_next_node)
+        for button in (
+            self.step_run,
+            self.step_check,
+            self.step_hint,
+            self.step_solution,
+            self.lesson_continue,
+        ):
+            button.setMinimumWidth(0)
+            button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.lesson_action_spacer = QSpacerItem(
+            0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+        )
+        self.lesson_action_row.addItem(self.lesson_action_spacer)
+        for button in (
+            self.step_run,
+            self.step_check,
+            self.step_hint,
+            self.step_solution,
+        ):
+            self.lesson_action_row.addWidget(button)
+        self.lesson_action_row.addWidget(self.lesson_continue)
+
+        self.lesson_footer_splitter.addWidget(self.lesson_footer_left)
+        self.lesson_footer_splitter.addWidget(self.lesson_footer_right)
+        self.lesson_footer_splitter.setStretchFactor(0, 55)
+        self.lesson_footer_splitter.setStretchFactor(1, 45)
+        footer.layout.addWidget(self.lesson_footer_splitter)
+        self.lesson_splitter.splitterMoved.connect(self._sync_lesson_footer_splitter)
+        root.addWidget(footer)
         return page
 
-    def _build_lab_page(self) -> QWidget:
-        page = QWidget()
-        outer = QVBoxLayout(page)
-        outer.setContentsMargins(0, 0, 0, 0)
-        outer.setSpacing(10)
-
-        toolbar = Card()
-        toolbar.layout.setContentsMargins(10, 7, 10, 7)
-        row = QHBoxLayout()
-        row.addWidget(QLabel("Accelerator Academy  ›  Skills Lab"), 1)
-        self.lab_status_combo = QComboBox()
-        self.lab_status_combo.addItems(("Not Started", "In Progress", "Completed"))
-        self.lab_status_combo.setMinimumWidth(130)
-        toolbar.layout.addLayout(row)
-        outer.addWidget(toolbar)
-
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setChildrenCollapsible(False)
-        splitter.setHandleWidth(5)
-        self.lab_splitter = splitter
-
-        library = Card("Skills Lab", "Apply the course concepts in a stakeholder-facing assignment.")
-        library.setMinimumWidth(270)
-        library.setMaximumWidth(420)
-        self.lab_list = QListWidget()
-        self._style_learning_list(self.lab_list)
-        for lab in self.catalog.skills_labs():
-            item = QListWidgetItem(f"◆  {lab.title}\n{lab.estimated_minutes} minutes • Applied challenge")
-            item.setData(Qt.ItemDataRole.UserRole, lab.lab_id)
-            self.lab_list.addItem(item)
-        self.lab_list.currentItemChanged.connect(self._lab_selected)
-        library.layout.addWidget(self.lab_list, 1)
-        self.lab_lock = QLabel()
-        self.lab_lock.setWordWrap(True)
-        self.lab_lock.setStyleSheet(
-            "background:#111D31;border:1px solid #263754;border-radius:8px;padding:8px;color:#D4DCEC;"
-        )
-        library.layout.addWidget(self.lab_lock)
-        splitter.addWidget(library)
-
-        workspace = Card("Learn")
-        workspace.layout.setContentsMargins(8, 8, 8, 8)
-        self.lab_learn_view = CoursePageWidget()
-        # The Skills Lab embeds editors and result tables beneath substantial
-        # course material. Enforce the course page's natural minimum height so
-        # the internal scroll area expands instead of compressing headings.
-        self.lab_learn_view.page_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
-        self.lab_practice_panel = QWidget()
-        lab_practice_layout = QVBoxLayout(self.lab_practice_panel)
-        lab_practice_layout.setContentsMargins(0, 4, 0, 0)
-        lab_practice_layout.setSpacing(9)
-
-        sql_frame = QFrame()
-        sql_frame.setStyleSheet("QFrame {background:#111D31;border:1px solid #263754;border-radius:9px;}")
-        sql_layout = QVBoxLayout(sql_frame)
-        sql_layout.setContentsMargins(12, 10, 12, 10)
-        sql_title = QLabel("SQL Submission")
-        sql_title.setObjectName("SectionTitle")
-        sql_layout.addWidget(sql_title)
-        self.lab_sql = SqlCodeEditor()
-        self.lab_sql.setMinimumHeight(220)
-        sql_layout.addWidget(self.lab_sql)
-        lab_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.lab_action_row = lab_actions
-        self.lab_run = QPushButton("▶ Run SQL")
-        self.lab_run.setObjectName("Secondary")
-        self.lab_run.clicked.connect(self._run_lab)
-        self.lab_submit = QPushButton("✓ Validate Lab")
-        self.lab_submit.setObjectName("Primary")
-        self.lab_submit.clicked.connect(self._submit_lab)
-        lab_actions.addWidget(self.lab_run)
-        lab_actions.addWidget(self.lab_submit)
-        lab_actions.addStretch(1)
-        sql_layout.addLayout(lab_actions)
-        self.lab_feedback = FeedbackLabel()
-        sql_layout.addWidget(self.lab_feedback)
-        self.lab_results = self._result_table()
-        self.lab_results.setMinimumHeight(140)
-        sql_layout.addWidget(self.lab_results)
-        lab_practice_layout.addWidget(sql_frame)
-
-        evidence_frame = QFrame()
-        evidence_frame.setStyleSheet("QFrame {background:#111D31;border:1px solid #263754;border-radius:9px;}")
-        evidence_layout = QVBoxLayout(evidence_frame)
-        evidence_layout.setContentsMargins(12, 10, 12, 10)
-        findings_title = QLabel("Findings and Evidence Notes")
-        findings_title.setObjectName("SectionTitle")
-        evidence_layout.addWidget(findings_title)
-        findings_help = QLabel(
-            "Write at least three concise findings. State the observation, cite what the result shows, and explain why it matters."
-        )
-        findings_help.setObjectName("Muted")
-        findings_help.setWordWrap(True)
-        evidence_layout.addWidget(findings_help)
-        self.lab_notes = QTextEdit()
-        self.lab_notes.setMinimumHeight(130)
-        self.lab_notes.setPlaceholderText(
-            "1. Observation and evidence…\n2. Observation and evidence…\n3. Observation and evidence…"
-        )
-        evidence_layout.addWidget(self.lab_notes)
-        lab_practice_layout.addWidget(evidence_frame)
-
-        self.lab_learn_view.set_embedded_widget(self.lab_practice_panel)
-        self.lab_learn_view.set_header_controls(self.lab_status_combo)
-        self.lab_learn_view.header_actions_host.setStyleSheet("background:transparent;border:none;")
-        self.lab_learn_view.header_actions_host.setMaximumHeight(42)
-        self.lab_learn_view.header_actions_host.setSizePolicy(
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed
-        )
-        self.lab_save = QPushButton("Save Progress")
-        self.lab_save.setObjectName("Secondary")
-        self.lab_save.clicked.connect(self._save_lab_progress)
-        self.lab_complete = QPushButton("Mark Complete")
-        self.lab_complete.setObjectName("Primary")
-        self.lab_complete.clicked.connect(self._submit_lab)
-        self.lab_learn_view.set_footer_controls(self.lab_save, self.lab_complete)
-        self.lab_learn_view.set_navigation(next_title=None, show_back=False)
-        workspace.layout.addWidget(self.lab_learn_view, 1)
-        splitter.addWidget(workspace)
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
-        outer.addWidget(splitter, 1)
-        return page
-
+    # ---------------------------------------------------------- assessment page
     def _build_assessment_page(self) -> QWidget:
         page = QWidget()
-        outer = QVBoxLayout(page)
-        outer.setContentsMargins(0, 0, 0, 0)
-        outer.setSpacing(10)
+        root = QVBoxLayout(page)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(10)
 
-        assessment = self.catalog.assessments()[0]
-        self._assessment = assessment
-        intro = Card(assessment.title, assessment.description)
-        intro.layout.setContentsMargins(16, 12, 16, 12)
-        intro_row = QHBoxLayout()
-        self.assessment_lock = QLabel()
-        self.assessment_lock.setWordWrap(True)
-        intro_row.addWidget(self.assessment_lock, 1)
-        pass_pill = QLabel(f"Pass: {round(assessment.passing_score * 100)}%")
-        pass_pill.setStyleSheet(
-            "background:#1A2440;border:1px solid #3A4970;border-radius:10px;padding:4px 9px;font-weight:700;"
+        toolbar = Card()
+        toolbar.layout.setContentsMargins(11, 7, 11, 7)
+        row = QHBoxLayout()
+        self.assessment_breadcrumb = QLabel()
+        self.assessment_breadcrumb.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
+        row.addWidget(self.assessment_breadcrumb, 1)
+        self.assessment_step_pill = QLabel()
+        self.assessment_step_pill.setStyleSheet(
+            "background:#1A2440;border:1px solid #4A5C84;border-radius:10px;padding:4px 9px;font-weight:700;"
         )
-        intro_row.addWidget(pass_pill)
-        time_pill = QLabel(f"{assessment.estimated_minutes} minutes")
-        time_pill.setStyleSheet(
-            "background:#1A2440;border:1px solid #3A4970;border-radius:10px;padding:4px 9px;font-weight:700;"
+        row.addWidget(self.assessment_step_pill)
+        toolbar.layout.addLayout(row)
+        root.addWidget(toolbar)
+
+        self.assessment_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.assessment_splitter.setChildrenCollapsible(False)
+        self.assessment_splitter.setHandleWidth(5)
+        overview = Card("Checkpoint")
+        overview.layout.setContentsMargins(8, 8, 8, 8)
+        self.assessment_brief = CoursePageWidget()
+        self.assessment_brief.set_navigation(next_title=None, show_back=False)
+        overview.layout.addWidget(self.assessment_brief, 1)
+        self.assessment_splitter.addWidget(overview)
+
+        work = Card("Your Answer")
+        work.layout.setContentsMargins(8, 8, 8, 8)
+        work_body = QWidget()
+        work_layout = QVBoxLayout(work_body)
+        work_layout.setContentsMargins(4, 4, 4, 4)
+        work_layout.setSpacing(8)
+        self.assessment_sql = SqlCodeEditor()
+        self.assessment_sql.setMinimumHeight(260)
+        self.assessment_sql.setPlaceholderText("Write the checkpoint query…")
+        work_layout.addWidget(self.assessment_sql, 1)
+        self.assessment_action_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.assessment_run = QPushButton("▶ Run Query")
+        self.assessment_run.setObjectName("Secondary")
+        self.assessment_run.clicked.connect(self._run_assessment_query)
+        self.assessment_save = QPushButton("Save Answer")
+        self.assessment_save.setObjectName("Secondary")
+        self.assessment_save.clicked.connect(self._save_assessment_answer)
+        self.assessment_submit = QPushButton("Submit Checkpoint")
+        self.assessment_submit.setObjectName("Primary")
+        self.assessment_submit.clicked.connect(self._submit_assessment)
+        self.assessment_action_row.addWidget(self.assessment_run)
+        self.assessment_action_row.addWidget(self.assessment_save)
+        self.assessment_action_row.addStretch(1)
+        self.assessment_action_row.addWidget(self.assessment_submit)
+        work_layout.addLayout(self.assessment_action_row)
+        self.assessment_feedback = FeedbackLabel()
+        work_layout.addWidget(self.assessment_feedback)
+        self.assessment_results = self._result_table()
+        self.assessment_results.setMinimumHeight(150)
+        work_layout.addWidget(self.assessment_results, 1)
+        work_scroll = QScrollArea()
+        work_scroll.setWidgetResizable(True)
+        work_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        work_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        work_scroll.setStyleSheet("QScrollArea {background:transparent;border:none;}")
+        work_scroll.setWidget(work_body)
+        work.layout.addWidget(work_scroll, 1)
+        self.assessment_splitter.addWidget(work)
+        self.assessment_splitter.setStretchFactor(0, 43)
+        self.assessment_splitter.setStretchFactor(1, 57)
+        root.addWidget(self.assessment_splitter, 1)
+
+        footer = Card()
+        footer.layout.setContentsMargins(10, 7, 10, 7)
+        self.assessment_nav_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        back = QPushButton("← Back")
+        back.setObjectName("Secondary")
+        back.clicked.connect(self._open_previous_node)
+        self.assessment_nav_status = QLabel()
+        self.assessment_nav_status.setObjectName("Muted")
+        self.assessment_nav_status.setWordWrap(True)
+        self.assessment_continue = QPushButton("Save & Continue  →")
+        self.assessment_continue.setObjectName("Primary")
+        self.assessment_continue.clicked.connect(self._assessment_continue_clicked)
+        self.assessment_nav_row.addWidget(back)
+        self.assessment_nav_row.addWidget(self.assessment_nav_status, 1)
+        self.assessment_nav_row.addWidget(self.assessment_continue)
+        footer.layout.addLayout(self.assessment_nav_row)
+        root.addWidget(footer)
+        return page
+
+    # --------------------------------------------------------------- lab page
+    def _build_lab_page(self) -> QWidget:
+        page = QWidget()
+        root = QVBoxLayout(page)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(10)
+
+        toolbar = Card()
+        toolbar.layout.setContentsMargins(11, 7, 11, 7)
+        row = QHBoxLayout()
+        self.lab_breadcrumb = QLabel("Accelerator Academy  ›  Applied Project")
+        self.lab_breadcrumb.setStyleSheet("color:#B8C4D8;font-size:9.5pt;")
+        row.addWidget(self.lab_breadcrumb, 1)
+        self.lab_status_pill = QLabel("Not Started")
+        self.lab_status_pill.setStyleSheet(
+            "background:#1A2440;border:1px solid #4A5C84;border-radius:10px;padding:4px 9px;font-weight:700;"
         )
-        intro_row.addWidget(time_pill)
-        intro.layout.addLayout(intro_row)
-        outer.addWidget(intro)
+        row.addWidget(self.lab_status_pill)
+        toolbar.layout.addLayout(row)
+        root.addWidget(toolbar)
 
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setChildrenCollapsible(False)
-        self.assessment_splitter = splitter
-        question_card = Card("Checkpoint Questions")
-        self.assessment_question_list = QListWidget()
-        self._style_learning_list(self.assessment_question_list)
-        for index, activity in enumerate(assessment.activities, start=1):
-            item = QListWidgetItem(f"{index}. {activity.title}")
-            item.setData(Qt.ItemDataRole.UserRole, activity.activity_id)
-            self.assessment_question_list.addItem(item)
-        self.assessment_question_list.currentItemChanged.connect(self._assessment_question_selected)
-        question_card.layout.addWidget(self.assessment_question_list, 1)
-        self.assessment_progress = QProgressBar()
-        self.assessment_progress.setRange(0, len(assessment.activities))
-        self.assessment_progress.setFormat("%v of %m answered")
-        question_card.layout.addWidget(self.assessment_progress)
-        splitter.addWidget(question_card)
+        self.lab_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.lab_splitter.setChildrenCollapsible(False)
+        self.lab_splitter.setHandleWidth(5)
+        brief_card = Card("Project Brief")
+        brief_card.layout.setContentsMargins(8, 8, 8, 8)
+        self.lab_brief = CoursePageWidget()
+        self.lab_brief.set_navigation(next_title=None, show_back=False)
+        brief_card.layout.addWidget(self.lab_brief, 1)
+        self.lab_splitter.addWidget(brief_card)
 
-        work_card = Card("Assessment")
+        work_card = Card("Build and Submit")
         work_card.layout.setContentsMargins(8, 8, 8, 8)
         body = QWidget()
         body_layout = QVBoxLayout(body)
         body_layout.setContentsMargins(4, 4, 4, 4)
-        body_layout.setSpacing(8)
-        self.assessment_brief = CoursePageWidget()
-        self.assessment_brief.page_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
-        self.assessment_brief.set_navigation(next_title=None, show_back=False)
-        self.assessment_brief.setMinimumHeight(220)
-        self.assessment_brief.setMaximumHeight(300)
-        body_layout.addWidget(self.assessment_brief)
-        self.assessment_sql = SqlCodeEditor()
-        self.assessment_sql.setMinimumHeight(230)
-        body_layout.addWidget(self.assessment_sql, 1)
-        assessment_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.assessment_action_row = assessment_actions
-        self.assessment_save = QPushButton("Save Answer")
-        self.assessment_save.setObjectName("Secondary")
-        self.assessment_save.clicked.connect(self._save_assessment_answer)
-        self.assessment_next = QPushButton("Next Question  →")
-        self.assessment_next.setObjectName("Secondary")
-        self.assessment_next.clicked.connect(self._next_assessment_question)
-        self.assessment_submit = QPushButton("Submit Checkpoint")
-        self.assessment_submit.setObjectName("Primary")
-        self.assessment_submit.clicked.connect(self._submit_assessment)
-        assessment_actions.addWidget(self.assessment_save)
-        assessment_actions.addWidget(self.assessment_next)
-        assessment_actions.addStretch(1)
-        assessment_actions.addWidget(self.assessment_submit)
-        body_layout.addLayout(assessment_actions)
-        self.assessment_feedback = FeedbackLabel()
-        body_layout.addWidget(self.assessment_feedback)
+        body_layout.setSpacing(9)
+        self.lab_work_title = QLabel("Analysis Submission")
+        self.lab_work_title.setObjectName("SectionTitle")
+        body_layout.addWidget(self.lab_work_title)
+        self.lab_sql = SqlCodeEditor()
+        self.lab_sql.setMinimumHeight(230)
+        self.lab_sql.setPlaceholderText("Build the project query…")
+        body_layout.addWidget(self.lab_sql)
+        findings_title = QLabel("Findings")
+        findings_title.setObjectName("SectionTitle")
+        body_layout.addWidget(findings_title)
+        findings_help = QLabel(
+            "Write at least three concise findings. Connect each observation to the query result and its business meaning."
+        )
+        findings_help.setObjectName("Muted")
+        findings_help.setWordWrap(True)
+        body_layout.addWidget(findings_help)
+        self.lab_notes = QTextEdit()
+        self.lab_notes.setMinimumHeight(130)
+        self.lab_notes.setPlaceholderText(
+            "1. Observation, supporting result, and why it matters…\n"
+            "2. Observation, supporting result, and why it matters…\n"
+            "3. Observation, supporting result, and why it matters…"
+        )
+        body_layout.addWidget(self.lab_notes)
+        self.lab_action_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.lab_run = QPushButton("▶ Run Work")
+        self.lab_run.setObjectName("Secondary")
+        self.lab_run.clicked.connect(self._run_lab)
+        self.lab_save = QPushButton("Save Progress")
+        self.lab_save.setObjectName("Secondary")
+        self.lab_save.clicked.connect(self._save_lab)
+        self.lab_submit = QPushButton("✓ Validate Project")
+        self.lab_submit.setObjectName("Primary")
+        self.lab_submit.clicked.connect(self._submit_lab)
+        self.lab_action_row.addWidget(self.lab_run)
+        self.lab_action_row.addWidget(self.lab_save)
+        self.lab_action_row.addStretch(1)
+        self.lab_action_row.addWidget(self.lab_submit)
+        body_layout.addLayout(self.lab_action_row)
+        self.lab_feedback = FeedbackLabel()
+        body_layout.addWidget(self.lab_feedback)
+        self.lab_results = self._result_table()
+        self.lab_results.setMinimumHeight(140)
+        body_layout.addWidget(self.lab_results)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -720,534 +810,840 @@ class AcceleratorAcademyWidget(QWidget):
         scroll.setStyleSheet("QScrollArea {background:transparent;border:none;}")
         scroll.setWidget(body)
         work_card.layout.addWidget(scroll, 1)
-        splitter.addWidget(work_card)
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
-        outer.addWidget(splitter, 1)
+        self.lab_splitter.addWidget(work_card)
+        self.lab_splitter.setStretchFactor(0, 43)
+        self.lab_splitter.setStretchFactor(1, 57)
+        root.addWidget(self.lab_splitter, 1)
+
+        footer = Card()
+        footer.layout.setContentsMargins(10, 7, 10, 7)
+        self.lab_nav_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        back = QPushButton("← Back")
+        back.setObjectName("Secondary")
+        back.clicked.connect(self._open_previous_node)
+        self.lab_nav_status = QLabel("Finish the project to wrap up the course!")
+        self.lab_nav_status.setObjectName("Muted")
+        self.lab_nav_status.setWordWrap(True)
+        self.lab_continue = QPushButton("Finish Course  →")
+        self.lab_continue.setObjectName("Primary")
+        self.lab_continue.setEnabled(False)
+        self.lab_continue.clicked.connect(self._open_next_node)
+        self.lab_nav_row.addWidget(back)
+        self.lab_nav_row.addWidget(self.lab_nav_status, 1)
+        self.lab_nav_row.addWidget(self.lab_continue)
+        footer.layout.addLayout(self.lab_nav_row)
+        root.addWidget(footer)
         return page
 
-    def _build_evidence_page(self) -> QWidget:
+    # ---------------------------------------------------------- completion page
+    def _build_complete_page(self) -> QWidget:
         page = QWidget()
-        outer = QVBoxLayout(page)
-        outer.setContentsMargins(0, 0, 0, 0)
-        outer.setSpacing(10)
-        summary = Card(
-            self.service.labels.get("evidence_label", "Demonstrated Evidence"),
-            "Validated independent work and Skills Lab artifacts appear here as proof of job-relevant capability.",
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(10)
+        path_title = self.catalog.program.paths[0].title
+        card = Card(
+            f"{path_title} Complete",
+            "You made it through every lesson, checkpoint, and applied project in this learning path.",
         )
-        self.evidence_summary = QLabel()
-        self.evidence_summary.setWordWrap(True)
-        self.evidence_summary.setStyleSheet("font-size:16pt;font-weight:700;color:#FFFFFF;")
-        summary.layout.addWidget(self.evidence_summary)
-        outer.addWidget(summary)
-        card = Card("Validated Academy Evidence")
-        self.evidence_table = QTableWidget()
-        self.evidence_table.setColumnCount(7)
-        self.evidence_table.setHorizontalHeaderLabels(
-            ["Skill", "Source", "Difficulty", "Dataset", "Competency", "Artifact", "Completed"]
+        card.layout.setContentsMargins(24, 24, 24, 24)
+        badge = QLabel("✓")
+        badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        badge.setStyleSheet(
+            "font-size:42pt;font-weight:800;color:#FFFFFF;background:#42276D;"
+            "border:2px solid #A66BFF;border-radius:42px;min-width:84px;min-height:84px;max-width:84px;max-height:84px;"
         )
-        self.evidence_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.evidence_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.evidence_table.setAlternatingRowColors(True)
-        self.evidence_table.setShowGrid(False)
-        self.evidence_table.verticalHeader().setVisible(False)
-        self.evidence_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        self.evidence_table.horizontalHeader().setStretchLastSection(True)
-        self.evidence_table.setStyleSheet(self._table_style())
-        card.layout.addWidget(self.evidence_table, 1)
-        outer.addWidget(card, 1)
+        card.layout.addWidget(badge, 0, Qt.AlignmentFlag.AlignHCenter)
+        message = QLabel(
+            "Your strongest work is now part of Demonstrated Evidence. Review the path whenever you want to revisit a skill or inspect what you completed."
+        )
+        message.setWordWrap(True)
+        message.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        message.setStyleSheet("font-size:12pt;color:#DCE4F3;")
+        card.layout.addWidget(message)
+        review = QPushButton("Review Learning Path")
+        review.setObjectName("Secondary")
+        review.clicked.connect(self.show_overview)
+        card.layout.addWidget(review, 0, Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(card, 1)
         return page
 
-    # --------------------------------------------------------------- helpers
-    def _set_section(self, index: int) -> None:
-        index = max(0, min(self.section_stack.count() - 1, int(index)))
-        self._active_section = index
-        self.section_stack.setCurrentIndex(index)
-        button = self.section_group.button(index)
-        if button is not None:
-            button.setChecked(True)
-        if index == 2 and self._practice_lesson is None and self.catalog.lessons():
-            self.open_lesson(self.catalog.lessons()[0].lesson_id)
-        if index == 3 and self.lab_list.count() and self.lab_list.currentRow() < 0:
-            self.lab_list.setCurrentRow(0)
-        if index == 4 and self.assessment_question_list.count() and self.assessment_question_list.currentRow() < 0:
-            self.assessment_question_list.setCurrentRow(0)
-        if index == 5:
-            self._refresh_evidence()
+    # -------------------------------------------------------------- roadmap data
+    def _build_nodes(self) -> list[JourneyNode]:
+        nodes: list[JourneyNode] = []
+        for path in self.catalog.program.paths:
+            for track in path.tracks:
+                track_title = track.navigation_title or track.title
+                for course in track.courses:
+                    for module in course.modules:
+                        for lesson in module.lessons:
+                            for index, activity in enumerate(lesson.activities, start=1):
+                                nodes.append(
+                                    JourneyNode(
+                                        target_key=f"academy:activity:{lesson.lesson_id}:{activity.activity_id}",
+                                        kind="lesson_step",
+                                        title=activity.title,
+                                        subtitle=f"Lesson {lesson.order} • Step {index} of {len(lesson.activities)}",
+                                        lesson_id=lesson.lesson_id,
+                                        activity_id=activity.activity_id,
+                                        track_id=track.track_id,
+                                        track_title=track_title,
+                                        course_id=course.course_id,
+                                        course_title=course.title,
+                                        course_order=course.order,
+                                    )
+                                )
+                    for assessment in course.assessments:
+                        for index, activity in enumerate(assessment.activities, start=1):
+                            nodes.append(
+                                JourneyNode(
+                                    target_key=f"academy:assessment:{assessment.assessment_id}:{activity.activity_id}",
+                                    kind="assessment",
+                                    title=activity.title,
+                                    subtitle=f"Checkpoint • Question {index} of {len(assessment.activities)}",
+                                    assessment_id=assessment.assessment_id,
+                                    activity_id=activity.activity_id,
+                                    track_id=track.track_id,
+                                    track_title=track_title,
+                                    course_id=course.course_id,
+                                    course_title=course.title,
+                                    course_order=course.order,
+                                )
+                            )
+                    for lab in course.skills_labs:
+                        nodes.append(
+                            JourneyNode(
+                                target_key=f"academy:skills_lab:{lab.lab_id}",
+                                kind="skills_lab",
+                                title=lab.title,
+                                subtitle="Applied project • Demonstrated Evidence",
+                                lab_id=lab.lab_id,
+                                track_id=track.track_id,
+                                track_title=track_title,
+                                course_id=course.course_id,
+                                course_title=course.title,
+                                course_order=course.order,
+                            )
+                        )
+        return nodes
 
-    @staticmethod
-    def _style_learning_list(widget: QListWidget) -> None:
-        widget.setWordWrap(True)
-        widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        widget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-        widget.setSpacing(3)
-        widget.setAlternatingRowColors(False)
+    def _node_state(self, node: JourneyNode) -> tuple[str, bool, str | None]:
+        if node.kind == "lesson_step":
+            lesson = self.catalog.lesson(str(node.lesson_id))
+            activity = next(item for item in lesson.activities if item.activity_id == node.activity_id)
+            complete = self.service.activity_complete(lesson.lesson_id, activity)
+            unlocked, reason = self.service.activity_unlocked(lesson.lesson_id, activity.activity_id)
+            return ("Passed" if complete else "Ready" if unlocked else "Locked", unlocked, reason)
+        if node.kind == "assessment":
+            assessment = self.catalog.assessment(str(node.assessment_id))
+            unlocked, missing = self.service.assessment_unlocked(assessment)
+            passed = self.service.assessment_passed(assessment.assessment_id)
+            if passed:
+                return "Passed", True, None
+            answered = bool(self._assessment_answers.get(str(node.activity_id), "").strip())
+            return ("Answered" if answered else "Ready" if unlocked else "Locked", unlocked, ", ".join(missing) or None)
+        lab = self.catalog.skills_lab(str(node.lab_id))
+        unlocked, missing = self.service.skills_lab_unlocked(lab)
+        passed = self.service.recommendations.skills_lab_passed(lab.lab_id)
+        return ("Passed" if passed else "Ready" if unlocked else "Locked", unlocked, ", ".join(missing) or None)
 
-    @staticmethod
-    def _table_style() -> str:
-        return (
-            f"QTableWidget {{background:{COLORS.get('surface_alt', '#111A2C')};"
-            "alternate-background-color:#121F34;color:#FFFFFF;"
-            f"border:1px solid {COLORS.get('border', '#2B3656')};border-radius:8px;}}"
-            "QHeaderView::section {background:#1B2540;color:#FFFFFF;padding:7px;"
-            "border:none;border-right:1px solid #3a3d5e;font-weight:600;}"
+    def _add_roadmap_header(
+        self,
+        text: str,
+        *,
+        background: str,
+        foreground: str,
+        border: str,
+        height: int,
+    ) -> QListWidgetItem:
+        """Add a visibly tinted, non-interactive hierarchy heading."""
+
+        # The list item itself stays transparent; the custom frame owns the
+        # tint.  Giving the item an explicit height prevents the custom header
+        # from painting over the activity row that follows it on Windows.
+        item = QListWidgetItem("")
+        item.setFlags(Qt.ItemFlag.NoItemFlags)
+        item.setData(Qt.ItemDataRole.UserRole + 10, "roadmap_header")
+        item.setSizeHint(QSize(1, height + 8))
+        self.roadmap_list.addItem(item)
+
+        frame = QFrame()
+        frame.setMinimumHeight(height)
+        frame.setMaximumHeight(height)
+        frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        frame.setStyleSheet(
+            f"QFrame {{background:{background};border:1px solid {border};border-radius:7px;}}"
         )
+        layout = QVBoxLayout(frame)
+        layout.setContentsMargins(10, 7, 10, 7)
+        layout.setSpacing(1)
+        label = QLabel(text)
+        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        label.setStyleSheet(
+            f"color:{foreground};font-weight:750;font-size:9.5pt;background:transparent;border:none;padding:0;"
+        )
+        layout.addWidget(label, 1)
+        self.roadmap_list.setItemWidget(item, frame)
+        return item
 
-    def _result_table(self) -> QTableWidget:
-        table = QTableWidget()
-        table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        table.setAlternatingRowColors(True)
-        table.setShowGrid(False)
-        table.verticalHeader().setVisible(False)
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        table.horizontalHeader().setStretchLastSection(True)
-        table.setStyleSheet(self._table_style())
-        return table
+    def _refresh_roadmap(self) -> None:
+        current = self._current_target
+        self._nodes = self._build_nodes()
+        self._assessment_answers = {
+            **self._assessment_answers,
+            **(
+                self.service.assessment_drafts(self.catalog.assessments()[0].assessment_id)
+                if self.catalog.assessments()
+                else {}
+            ),
+        }
+        self._building_roadmap = True
+        self.roadmap_list.clear()
+        previous_track: str | None = None
+        previous_course: str | None = None
+        previous_section: str | None = None
+        previous_lesson: str | None = None
+        for node in self._nodes:
+            if node.track_id != previous_track:
+                self._add_roadmap_header(
+                    node.track_title.upper(),
+                    background="#2C1D48",
+                    foreground="#FFFFFF",
+                    border="#7652B5",
+                    height=44,
+                )
+                previous_track = node.track_id
+                previous_course = None
+                previous_section = None
+                previous_lesson = None
 
-    def _restore_splitters(self) -> None:
-        self.practice_outer_splitter.setSizes([330, 1040])
-        self.practice_workspace_splitter.setSizes([470, 530])
-        self.path_splitter.setSizes([360, 760])
-        self.lab_splitter.setSizes([350, 760])
-        self.assessment_splitter.setSizes([330, 780])
+            if node.course_id != previous_course:
+                self._add_roadmap_header(
+                    f"COURSE {node.course_order}\n{node.course_title}",
+                    background="#1B2741",
+                    foreground="#E6D8FF",
+                    border="#485B82",
+                    height=68,
+                )
+                previous_course = node.course_id
+                previous_section = None
+                previous_lesson = None
 
-    def resizeEvent(self, event) -> None:  # noqa: N802
-        super().resizeEvent(event)
-        width = max(0, event.size().width())
-        mode = "compact" if width < 900 else "medium" if width < 1220 else "wide"
-        if mode == self._responsive_mode:
+            if node.kind == "lesson_step" and node.lesson_id != previous_lesson:
+                lesson = self.catalog.lesson(str(node.lesson_id))
+                lesson_nodes = [
+                    item
+                    for item in self._nodes
+                    if item.kind == "lesson_step" and item.lesson_id == lesson.lesson_id
+                ]
+                lesson_states = [self._node_state(item)[0] for item in lesson_nodes]
+                lesson_complete = bool(lesson_states) and all(state == "Passed" for state in lesson_states)
+                lesson_current = any(item.target_key == current for item in lesson_nodes)
+                lesson_started = any(state == "Passed" for state in lesson_states)
+                lesson_ready = bool(lesson_nodes and self._node_state(lesson_nodes[0])[1])
+                if lesson_complete:
+                    lesson_background = QColor("#19302B")
+                    lesson_foreground = QColor("#C7F0D3")
+                elif lesson_current:
+                    lesson_background = QColor("#352454")
+                    lesson_foreground = QColor("#FFFFFF")
+                elif lesson_started:
+                    lesson_background = QColor("#202B49")
+                    lesson_foreground = QColor("#DCE7FF")
+                elif lesson_ready:
+                    lesson_background = QColor("#241C3B")
+                    lesson_foreground = QColor("#DCCBFF")
+                else:
+                    lesson_background = QColor("#141A29")
+                    lesson_foreground = QColor("#7F8CA3")
+                self._add_roadmap_header(
+                    f"LESSON {lesson.order}\n{lesson.title}",
+                    background=lesson_background.name(),
+                    foreground=lesson_foreground.name(),
+                    border="#7652B5" if lesson_current else "#33435F",
+                    height=68,
+                )
+                previous_lesson = node.lesson_id
+                previous_section = "lesson"
+            elif node.kind == "assessment" and previous_section != "assessment":
+                self._add_roadmap_header(
+                    "COURSE CHECKPOINT",
+                    background="#20213B",
+                    foreground="#D9C1FF",
+                    border="#594A7A",
+                    height=44,
+                )
+                previous_section = "assessment"
+                previous_lesson = None
+            elif node.kind == "skills_lab" and previous_section != "lab":
+                self._add_roadmap_header(
+                    "APPLIED PROJECT",
+                    background="#20213B",
+                    foreground="#D9C1FF",
+                    border="#594A7A",
+                    height=44,
+                )
+                previous_section = "lab"
+                previous_lesson = None
+
+            state, unlocked, _reason = self._node_state(node)
+            icon = {"Passed": "✓", "Answered": "◐", "Ready": "○", "Locked": "🔒"}.get(state, "○")
+            item = QListWidgetItem(f"{icon}  {node.title}\n    {node.subtitle}")
+            item.setData(Qt.ItemDataRole.UserRole, node.target_key)
+            item.setData(Qt.ItemDataRole.UserRole + 1, unlocked)
+            if state == "Passed":
+                item.setForeground(QBrush(QColor("#BCE7CA")))
+            elif state == "Locked":
+                item.setForeground(QBrush(QColor("#78859A")))
+            self.roadmap_list.addItem(item)
+            if node.target_key == current:
+                self.roadmap_list.setCurrentItem(item)
+        self._building_roadmap = False
+
+    def _roadmap_selected(self, current: QListWidgetItem | None, _previous) -> None:
+        if self._building_roadmap or current is None:
             return
-        self._responsive_mode = mode
-        self.section_nav_layout.setDirection(
-            QBoxLayout.Direction.TopToBottom if mode == "compact" else QBoxLayout.Direction.LeftToRight
-        )
-        self.practice_toolbar_row.setDirection(
-            QBoxLayout.Direction.TopToBottom if width < 760 else QBoxLayout.Direction.LeftToRight
-        )
-        for layout in (self.practice_action_row, self.lab_action_row, self.assessment_action_row):
-            layout.setDirection(
-                QBoxLayout.Direction.TopToBottom if width < 700 else QBoxLayout.Direction.LeftToRight
-            )
-        if mode == "compact":
-            self.practice_outer_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.practice_workspace_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.path_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.lab_splitter.setOrientation(Qt.Orientation.Vertical)
-            self.assessment_splitter.setOrientation(Qt.Orientation.Vertical)
-        else:
-            self.practice_outer_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.practice_workspace_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.path_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.lab_splitter.setOrientation(Qt.Orientation.Horizontal)
-            self.assessment_splitter.setOrientation(Qt.Orientation.Horizontal)
-            QTimer.singleShot(0, self._restore_splitters)
-
-    # --------------------------------------------------------------- refresh
-    def refresh_all(self) -> None:
-        summary = self.service.completion_summary()
-        total = max(1, summary["total"])
-        percent = round(100 * summary["mastered"] / total)
-        self.overall_progress.setValue(percent)
-        self.progress_percent.setText(f"{percent}%")
-        self.progress_summary.setText(
-            f"{summary['mastered']} of {summary['total']} lessons mastered • "
-            f"{summary['practiced']} practiced • {summary['learning']} learning"
-        )
-        self.path_status.setText(
-            f"Progress: {summary['mastered']}/{summary['total']} mastered. "
-            "Lessons unlock only after required skills are demonstrated through validated independent work."
-        )
-        recommendation = self.service.next_recommendation()
-        self.recommendation_label.setText(
-            recommendation.title if recommendation else "Path complete — review your evidence and continue applied work."
-        )
-        self._refresh_path_list()
-        self._refresh_practice_lists()
-        self._refresh_locks()
-        self._refresh_evidence()
-
-    def _refresh_path_list(self) -> None:
-        selected = self.path_lesson_list.currentItem()
-        selected_id = selected.data(Qt.ItemDataRole.UserRole) if selected else None
-        self.path_lesson_list.blockSignals(True)
-        self.path_lesson_list.clear()
-        for lesson in self.catalog.lessons():
-            state = self.service.progress.lesson_state(lesson.lesson_id).value
-            unlocked, _missing = self.service.lesson_unlocked(lesson.lesson_id)
-            icon = _STATE_ICONS.get(state, "○") if unlocked else "🔒"
-            item = QListWidgetItem(
-                f"{icon}  Lesson {lesson.order}: {lesson.title}\n"
-                f"{state} • {len(lesson.activities)} activities • {lesson.estimated_minutes} min"
-            )
-            item.setData(Qt.ItemDataRole.UserRole, lesson.lesson_id)
-            self.path_lesson_list.addItem(item)
-            if lesson.lesson_id == selected_id:
-                self.path_lesson_list.setCurrentItem(item)
-        self.path_lesson_list.blockSignals(False)
-        if self.path_lesson_list.currentRow() < 0 and self.path_lesson_list.count():
-            self.path_lesson_list.setCurrentRow(0)
-
-    def _refresh_practice_lists(self) -> None:
-        self._building_lists = True
-        try:
-            selected_lesson = self._practice_lesson.lesson_id if self._practice_lesson else None
-            self.practice_lesson_list.blockSignals(True)
-            self.practice_lesson_list.clear()
-            for lesson in self.catalog.lessons():
-                state = self.service.progress.lesson_state(lesson.lesson_id).value
-                unlocked, _missing = self.service.lesson_unlocked(lesson.lesson_id)
-                icon = _STATE_ICONS.get(state, "○") if unlocked else "🔒"
-                item = QListWidgetItem(f"{icon}  {lesson.order}. {lesson.title}\n{state}")
-                item.setData(Qt.ItemDataRole.UserRole, lesson.lesson_id)
-                self.practice_lesson_list.addItem(item)
-                if lesson.lesson_id == selected_lesson:
-                    self.practice_lesson_list.setCurrentItem(item)
-            self.practice_lesson_list.blockSignals(False)
-            if self._practice_lesson:
-                self._populate_activity_list(self._practice_lesson)
-                state = self.service.progress.lesson_state(self._practice_lesson.lesson_id).value
-                rank = ProgressState(state).rank
-                lesson_percent = round(100 * rank / 3)
-                self.lesson_progress_bar.setValue(lesson_percent)
-                self.lesson_progress_text.setText(f"{lesson_percent}% • {state}")
-        finally:
-            self._building_lists = False
-
-    def _populate_activity_list(self, lesson: LessonDefinition) -> None:
-        selected_activity = self._practice_activity.activity_id if self._practice_activity else None
-        self.practice_activity_list.blockSignals(True)
-        self.practice_activity_list.clear()
-        self.practice_activity_combo.blockSignals(True)
-        self.practice_activity_combo.clear()
-        for index, activity in enumerate(lesson.activities, start=1):
-            row = self.service.activity_progress(lesson.lesson_id, activity.activity_id)
-            state = row["state"] if row else "Not Started"
-            icon = _ACTIVITY_ICONS.get(state, "○")
-            item = QListWidgetItem(
-                f"{icon}  {index}. {activity.title}\n"
-                f"{activity.activity_type.value.title()} • {activity.estimated_minutes} min • {state}"
-            )
-            item.setData(Qt.ItemDataRole.UserRole, activity.activity_id)
-            self.practice_activity_list.addItem(item)
-            self.practice_activity_combo.addItem(activity.title, activity.activity_id)
-            if activity.activity_id == selected_activity:
-                self.practice_activity_list.setCurrentItem(item)
-                self.practice_activity_combo.setCurrentIndex(index - 1)
-        self.practice_activity_combo.blockSignals(False)
-        self.practice_activity_list.blockSignals(False)
-
-    # --------------------------------------------------------------- routing
-    def open_recommendation(self) -> None:
-        recommendation = self.service.next_recommendation()
-        if recommendation is None:
+        target = current.data(Qt.ItemDataRole.UserRole)
+        if not target:
             return
-        parts = recommendation.target_key.split(":")
-        if len(parts) >= 3 and parts[1] == "lesson":
-            self.open_lesson(parts[2])
-        elif len(parts) >= 4 and parts[1] == "activity":
-            self.open_lesson(parts[2], parts[3])
-        elif len(parts) >= 3 and parts[1] == "assessment":
-            self._set_section(4)
-        elif len(parts) >= 3 and parts[1] == "skills_lab":
-            self._set_section(3)
-
-    def open_lesson(self, lesson_id: str, activity_id: str | None = None) -> None:
-        unlocked, missing = self.service.lesson_unlocked(lesson_id)
-        if not unlocked:
+        if not bool(current.data(Qt.ItemDataRole.UserRole + 1)):
+            node = self._node(str(target))
+            _state, _unlocked, reason = self._node_state(node)
             QMessageBox.information(
                 self,
-                "Lesson Locked",
-                "Master these skills first:\n\n" + "\n".join(f"• {item}" for item in missing),
+                "Step Locked",
+                reason or "Finish the earlier lesson steps first, then come back to this one.",
             )
+            self._select_current_roadmap_item()
             return
-        self.service.open_lesson(lesson_id)
-        lesson = self.catalog.lesson(lesson_id)
-        self._practice_lesson = lesson
-        lesson_index = self.practice_lesson_combo.findData(lesson_id)
-        if lesson_index >= 0:
-            self.practice_lesson_combo.blockSignals(True)
-            self.practice_lesson_combo.setCurrentIndex(lesson_index)
-            self.practice_lesson_combo.blockSignals(False)
-        self._render_lesson(lesson)
-        self._populate_activity_list(lesson)
-        target_activity = activity_id or (lesson.activities[0].activity_id if lesson.activities else None)
-        if target_activity:
-            self._select_activity(target_activity)
-        self._set_section(2)
+        self.open_target(str(target))
+
+    def _select_current_roadmap_item(self) -> None:
+        if not self._current_target:
+            return
+        self.roadmap_list.blockSignals(True)
+        for index in range(self.roadmap_list.count()):
+            item = self.roadmap_list.item(index)
+            if item.data(Qt.ItemDataRole.UserRole) == self._current_target:
+                self.roadmap_list.setCurrentItem(item)
+                self.roadmap_list.scrollToItem(item)
+                break
+        self.roadmap_list.blockSignals(False)
+
+    def _node(self, target_key: str) -> JourneyNode:
+        for node in self._nodes or self._build_nodes():
+            if node.target_key == target_key:
+                return node
+        raise KeyError(f"Unknown Academy target: {target_key}")
+
+    # --------------------------------------------------------------- navigation
+    def show_overview(self) -> None:
+        self._save_current_work()
+        self.content_stack.setCurrentIndex(self.OVERVIEW_PAGE)
+        self._current_target = None
+        self.roadmap_list.clearSelection()
         self.refresh_all()
 
-    def _practice_lesson_changed(self) -> None:
-        if self._building_lists:
+    def open_recommendation(self) -> None:
+        self._save_current_work()
+        recommendation = self.service.next_recommendation()
+        if recommendation is None:
+            self.content_stack.setCurrentIndex(self.COMPLETE_PAGE)
+            self._current_target = self._nodes[-1].target_key if self._nodes else None
+            self.refresh_all()
             return
-        lesson_id = self.practice_lesson_combo.currentData()
-        if lesson_id:
-            self.open_lesson(str(lesson_id))
+        target = recommendation.target_key
+        if recommendation.kind == "assessment":
+            assessment = self.catalog.assessment(target.split(":")[2])
+            drafts = self.service.assessment_drafts(assessment.assessment_id)
+            activity = next(
+                (item for item in assessment.activities if not drafts.get(item.activity_id, "").strip()),
+                assessment.activities[0],
+            )
+            target = f"academy:assessment:{assessment.assessment_id}:{activity.activity_id}"
+        self.open_target(target)
 
-    def _practice_lesson_list_changed(self, current: QListWidgetItem | None, _previous) -> None:
-        if self._building_lists or current is None:
+    def open_target(self, target_key: str) -> None:
+        self._save_current_work()
+        self._nodes = self._build_nodes()
+        node = self._node(target_key)
+        state, unlocked, reason = self._node_state(node)
+        if not unlocked and state != "Passed":
+            QMessageBox.information(self, "Step Locked", reason or "Finish the earlier lesson steps first, then come back to this one.")
             return
-        lesson_id = current.data(Qt.ItemDataRole.UserRole)
-        if lesson_id and (self._practice_lesson is None or lesson_id != self._practice_lesson.lesson_id):
-            self.open_lesson(str(lesson_id))
+        self._current_target = node.target_key
+        self.service.remember_target(node.target_key)
+        if node.kind == "lesson_step":
+            self._open_lesson_node(node)
+        elif node.kind == "assessment":
+            self._open_assessment_node(node)
+        else:
+            self._open_lab_node(node)
+        self.refresh_all()
+        self._select_current_roadmap_item()
 
-    def _practice_activity_list_changed(self, current: QListWidgetItem | None, _previous) -> None:
-        if self._building_lists or current is None:
-            return
-        activity_id = current.data(Qt.ItemDataRole.UserRole)
-        if activity_id:
-            self._select_activity(str(activity_id))
-
-    def _practice_activity_changed(self) -> None:
-        if self._building_lists:
-            return
-        activity_id = self.practice_activity_combo.currentData()
-        if activity_id:
-            self._select_activity(str(activity_id))
-
-    def _select_activity(self, activity_id: str) -> None:
-        self._save_current_practice()
-        if self._practice_lesson is None:
-            return
+    def open_lesson(self, lesson_id: str, activity_id: str | None = None) -> None:
+        """Compatibility route used by existing planner/navigation code."""
+        lesson = self.catalog.lesson(lesson_id)
         activity = next(
-            (item for item in self._practice_lesson.activities if item.activity_id == activity_id),
+            (item for item in lesson.activities if item.activity_id == activity_id),
             None,
         )
         if activity is None:
-            return
-        self._practice_activity = activity
-        combo_index = self.practice_activity_combo.findData(activity_id)
-        if combo_index >= 0 and combo_index != self.practice_activity_combo.currentIndex():
-            self.practice_activity_combo.blockSignals(True)
-            self.practice_activity_combo.setCurrentIndex(combo_index)
-            self.practice_activity_combo.blockSignals(False)
-        for index in range(self.practice_activity_list.count()):
-            item = self.practice_activity_list.item(index)
-            if item.data(Qt.ItemDataRole.UserRole) == activity_id:
-                self.practice_activity_list.blockSignals(True)
-                self.practice_activity_list.setCurrentItem(item)
-                self.practice_activity_list.blockSignals(False)
-                break
-        self._render_activity(activity)
-
-    # --------------------------------------------------------------- render
-    def _render_lesson(self, lesson: LessonDefinition) -> None:
-        objectives = "\n".join(f"- {item}" for item in lesson.objectives)
-        takeaways = "\n".join(f"- {item}" for item in lesson.key_takeaways)
-        markdown = lesson.content_markdown
-        if objectives and "## Learning objectives" not in markdown:
-            markdown = markdown.replace(
-                "\n## ", f"\n## Learning objectives\n{objectives}\n\n## ", 1
+            activity = next(
+                (item for item in lesson.activities if not self.service.activity_complete(lesson_id, item)),
+                lesson.activities[0],
             )
-        if takeaways:
-            markdown += f"\n\n## Key takeaways\n{takeaways}\n"
-        subtitle = f"Beginner • {lesson.estimated_minutes} minutes • {len(lesson.activities)} practice activities"
-        self.practice_learn_view.set_markdown(
-            markdown,
-            eyebrow="QUERY FOUNDATIONS",
-            subtitle=subtitle,
+        self.open_target(f"academy:activity:{lesson_id}:{activity.activity_id}")
+
+    def _open_previous_node(self) -> None:
+        if not self._current_target:
+            self.show_overview()
+            return
+        self._save_current_work()
+        keys = [node.target_key for node in self._nodes]
+        index = keys.index(self._current_target)
+        if index <= 0:
+            self.show_overview()
+        else:
+            self.open_target(keys[index - 1])
+
+    def _open_next_node(self) -> None:
+        if not self._current_target:
+            self.open_recommendation()
+            return
+        self._save_current_work()
+        keys = [node.target_key for node in self._nodes]
+        index = keys.index(self._current_target)
+        if index >= len(keys) - 1:
+            self.content_stack.setCurrentIndex(self.COMPLETE_PAGE)
+            self.refresh_all()
+            return
+        self.open_target(keys[index + 1])
+
+    # -------------------------------------------------------------- lesson flow
+    def _open_lesson_node(self, node: JourneyNode) -> None:
+        lesson = self.catalog.lesson(str(node.lesson_id))
+        activity = next(item for item in lesson.activities if item.activity_id == node.activity_id)
+        self.service.open_lesson(lesson.lesson_id)
+        self._current_lesson = lesson
+        self._current_activity = activity
+        self.content_stack.setCurrentIndex(self.LESSON_PAGE)
+        step_index = lesson.activities.index(activity) + 1
+        self.lesson_breadcrumb.setText(
+            f"Accelerator Academy  ›  {node.track_title}  ›  {node.course_title}  ›  "
+            f"Lesson {lesson.order}: {lesson.title}"
+        )
+        self.lesson_step_pill.setText(f"Step {step_index} of {len(lesson.activities)}")
+        instruction = dict(activity.instruction)
+        title = str(instruction.get("title") or activity.title)
+        objective = str(instruction.get("objective") or "Learn the concept, then apply it immediately.")
+        body = str(instruction.get("body") or lesson.content_markdown)
+        learn_markdown = (
+            f"# {title}\n\n"
+            f"> **Step goal:** {objective}\n\n"
+            f"{body}\n\n"
+            "---\n\n"
+            f"{self._activity_markdown(activity, embedded=True)}"
+        )
+        self.step_learn_view.set_markdown(
+            learn_markdown,
+            eyebrow=f"LESSON {lesson.order} • {activity.activity_type.value.upper()}",
+            subtitle=(
+                f"About {activity.estimated_minutes} minutes • "
+                f"{activity.difficulty.title()} interactive step"
+            ),
             bookmarked=False,
         )
-        self.practice_learn_view.set_navigation(next_title=None, show_back=False)
-        self.practice_breadcrumb.setText(f"Accelerator Academy  ›  Query Foundations  ›  {lesson.title}")
-
-    def _activity_markdown(self, activity: ActivityDefinition) -> str:
-        p = dict(activity.presentation)
-        scenario = str(p.get("scenario") or "Practice scenario")
-        introduction = str(p.get("introduction") or "Apply the lesson concept to the following task.")
-        task = str(p.get("task") or activity.prompt)
-        table = str(p.get("table") or activity.validator.get("dataset_id") or "Provided dataset")
-        requirements = p.get("requirements") or []
-        expected_output = str(p.get("expected_output") or "Return the requested result.")
-        skills = p.get("skills_practiced") or []
-        common_errors = p.get("common_errors") or []
-        requirement_text = "\n".join(f"- {item}" for item in requirements) or "- Follow the task exactly."
-        skill_text = ", ".join(f"`{item}`" for item in skills) or activity.activity_type.value.title()
-        error_text = ""
-        if common_errors:
-            error_text = "\n\n## Common mistakes to avoid\n" + "\n".join(f"- {item}" for item in common_errors)
-        return (
-            f"# {activity.title}\n\n"
-            f"> **Scenario:** {scenario}\n\n"
-            f"{introduction}\n\n"
-            f"## Available data\n`{table}`\n\n"
-            f"## Your task\n> {task}\n\n"
-            f"## Requirements\n{requirement_text}\n\n"
-            f"### Expected output\n{expected_output}\n\n"
-            f"### Skills practiced\n{skill_text}"
-            f"{error_text}\n"
-        )
-
-    def _render_activity(self, activity: ActivityDefinition) -> None:
-        self.practice_brief.set_markdown(
-            self._activity_markdown(activity),
-            eyebrow=activity.activity_type.value.upper(),
-            subtitle=f"{activity.difficulty.title()} • About {activity.estimated_minutes} minutes",
-            bookmarked=False,
-        )
-        self.practice_brief.set_navigation(next_title=None, show_back=False)
-        row = self.service.activity_progress(self._practice_lesson.lesson_id, activity.activity_id)
+        self.step_learn_view.set_navigation(next_title=None, show_back=False)
+        row = self.service.activity_progress(lesson.lesson_id, activity.activity_id)
         answer = str(row["answer_text"] or "") if row else ""
         if not answer:
             answer = activity.starter
         recognition = activity.runtime == "recognition"
-        self.practice_input_stack.setCurrentIndex(1 if recognition else 0)
-        self.practice_choice.blockSignals(True)
-        self.practice_choice.clear()
+        self.step_workspace_title.setText("Answer & Feedback" if recognition else "SQL Editor & Output")
+        self.step_workspace_stack.setCurrentIndex(1 if recognition else 0)
+        for button in self.step_choice_group.buttons():
+            self.step_choice_group.removeButton(button)
+            button.setParent(None)
+            button.deleteLater()
         if recognition:
-            self.practice_choice.addItem("Select an answer…")
-            self.practice_choice.addItems(activity.answer_options)
-            if answer:
-                index = self.practice_choice.findText(answer)
-                if index >= 0:
-                    self.practice_choice.setCurrentIndex(index)
-        self.practice_choice.blockSignals(False)
+            for option in activity.answer_options:
+                button = QRadioButton(option)
+                button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+                button.setStyleSheet(
+                    "QRadioButton {background:#111D31;border:1px solid #31415F;border-radius:8px;"
+                    "padding:9px 10px;color:#E4EAF5;}"
+                    "QRadioButton:hover {background:#182640;border-color:#7652B5;}"
+                    "QRadioButton:checked {background:#30234C;border-color:#A66BFF;color:#FFFFFF;}"
+                )
+                if option == answer:
+                    button.setChecked(True)
+                self.step_choice_group.addButton(button)
+                self.step_choice_options.addWidget(button)
         if not recognition:
-            self.practice_sql.blockSignals(True)
-            self.practice_sql.setPlainText(answer)
-            self.practice_sql.blockSignals(False)
-        unlocked, missing = self.service.lesson_unlocked(self._practice_lesson.lesson_id)
-        self.practice_lock.setText(
-            "✓ Prerequisites satisfied • Your answer is saved when you switch activities."
-            if unlocked
-            else "🔒 Locked • Master first: " + ", ".join(missing)
-        )
-        self.practice_run.setVisible(not recognition)
-        self.practice_run.setEnabled(unlocked and not recognition)
-        for button in (self.practice_check, self.practice_hint, self.practice_solution):
-            button.setEnabled(unlocked)
-        state = row["state"] if row else "Not Started"
-        self.practice_feedback.setText(f"Current status: {state}")
-        self.practice_explanation.hide()
-        self._show_result(self.practice_results, (), ())
+            self.step_sql.blockSignals(True)
+            self.step_sql.setPlainText(answer)
+            self.step_sql.blockSignals(False)
+        self.step_run.setVisible(not recognition)
+        self.step_solution.setVisible(True)
+        self.step_feedback.setText("")
+        self.step_choice_feedback.setText("")
+        self.step_explanation.hide()
+        self.step_choice_explanation.hide()
+        self._show_result(self.step_results, (), ())
+        self._refresh_lesson_navigation()
+        QTimer.singleShot(0, self._sync_lesson_footer_splitter)
 
-    # --------------------------------------------------------------- practice
-    def _practice_answer(self) -> str:
-        if self._practice_activity and self._practice_activity.runtime == "recognition":
-            text = self.practice_choice.currentText()
-            return "" if text == "Select an answer…" else text
-        return self.practice_sql.toPlainText()
+    def _lesson_answer(self) -> str:
+        if self._current_activity is None:
+            return ""
+        if self._current_activity.runtime == "recognition":
+            button = self.step_choice_group.checkedButton()
+            return button.text() if button is not None else ""
+        return self.step_sql.toPlainText()
 
-    def _save_current_practice(self) -> None:
-        if self._practice_lesson is None or self._practice_activity is None:
+    def _active_step_feedback(self) -> FeedbackLabel:
+        if self._current_activity is not None and self._current_activity.runtime == "recognition":
+            return self.step_choice_feedback
+        return self.step_feedback
+
+    def _active_step_explanation(self) -> QLabel:
+        if self._current_activity is not None and self._current_activity.runtime == "recognition":
+            return self.step_choice_explanation
+        return self.step_explanation
+
+    def _sync_lesson_footer_splitter(self, *_args) -> None:
+        """Keep footer controls aligned with the lesson/editor divider."""
+
+        if not hasattr(self, "lesson_footer_splitter"):
             return
-        answer = self._practice_answer()
-        if answer.strip():
+        if self.lesson_splitter.orientation() != Qt.Orientation.Horizontal:
+            return
+        sizes = self.lesson_splitter.sizes()
+        if len(sizes) != 2 or sum(sizes) <= 0:
+            return
+        available = max(1, self.lesson_footer_splitter.width())
+        left = round(available * sizes[0] / sum(sizes))
+        self._fit_lesson_action_buttons(max(1, available - left))
+        self.lesson_footer_splitter.setSizes([left, max(1, available - left)])
+
+    def _fit_lesson_action_buttons(self, available_width: int) -> None:
+        """Use all editor-side footer space until each control reaches full size."""
+
+        checkpoint_next = self.lesson_continue.text().startswith("Continue to Checkpoint")
+        label_sets = (
+            {
+                self.step_run: "▶ Run Query",
+                self.step_check: "✓ Check Answer",
+                self.step_hint: "💡 Show Hint",
+                self.step_solution: "View Solution",
+                self.lesson_continue: "Continue to Checkpoint  →" if checkpoint_next else "Continue  →",
+            },
+            {
+                self.step_run: "▶ Run",
+                self.step_check: "✓ Check",
+                self.step_hint: "💡 Hint",
+                self.step_solution: "Solution",
+                self.lesson_continue: "Checkpoint  →" if checkpoint_next else "Continue  →",
+            },
+            {
+                self.step_run: "Run",
+                self.step_check: "Check",
+                self.step_hint: "Hint",
+                self.step_solution: "Answer",
+                self.lesson_continue: "Next  →",
+            },
+        )
+        visible_buttons = [
+            button
+            for button in (
+                self.step_run,
+                self.step_check,
+                self.step_hint,
+                self.step_solution,
+                self.lesson_continue,
+            )
+            if button.isVisible()
+        ]
+        if not visible_buttons:
+            return
+
+        spacing = 7 if available_width >= 560 else 5 if available_width >= 430 else 3
+        self.lesson_action_row.setSpacing(spacing)
+        layout_margins = 12
+        budget = max(1, available_width - layout_margins - spacing * (len(visible_buttons) - 1))
+
+        def text_width(button: QPushButton, text: str, padding: int) -> int:
+            return button.fontMetrics().horizontalAdvance(text) + padding
+
+        labels = label_sets[-1]
+        for candidate in label_sets:
+            required = sum(text_width(button, candidate[button], 18) for button in visible_buttons)
+            if required <= budget:
+                labels = candidate
+                break
+
+        minimums = {
+            button: max(48, text_width(button, labels[button], 14))
+            for button in visible_buttons
+        }
+        maximums = {
+            button: max(minimums[button], text_width(button, labels[button], 34))
+            for button in visible_buttons
+        }
+        widths = dict(minimums)
+        extra = max(0, budget - sum(widths.values()))
+
+        # Grow every visible button together. This keeps the footer balanced
+        # and consumes the complete editor-side width until all controls reach
+        # their comfortable full size. Any space left after that becomes the
+        # right-alignment spacer.
+        while extra > 0:
+            growable = [button for button in visible_buttons if widths[button] < maximums[button]]
+            if not growable:
+                break
+            share = max(1, extra // len(growable))
+            used = 0
+            for button in growable:
+                growth = min(share, maximums[button] - widths[button], extra - used)
+                widths[button] += growth
+                used += growth
+                if used >= extra:
+                    break
+            if used <= 0:
+                break
+            extra -= used
+
+        self.lesson_action_spacer.changeSize(
+            max(0, extra),
+            0,
+            QSizePolicy.Policy.Fixed if extra <= 0 else QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Minimum,
+        )
+        self.lesson_action_row.invalidate()
+        for button in visible_buttons:
+            button.setText(labels[button])
+            button.setFixedWidth(widths[button])
+
+    def _save_current_lesson_answer(self) -> None:
+        if self._current_lesson is None or self._current_activity is None:
+            return
+        answer = self._lesson_answer()
+        if answer or self._current_activity.starter:
             self.service.progress.save_answer(
-                self._practice_lesson.lesson_id,
-                self._practice_activity,
+                self._current_lesson.lesson_id,
+                self._current_activity,
                 answer,
             )
 
-    def _run_practice(self) -> None:
-        if self._practice_activity is None:
+    def _run_lesson_step(self) -> None:
+        if self._current_activity is None:
             return
-        result = self.service.run_activity(self._practice_activity, self._practice_answer())
-        prefix = "✅ " if result.passed else "❌ "
-        self.practice_feedback.setText(prefix + result.feedback)
-        self._show_result(self.practice_results, result.columns, result.rows)
+        result = self.service.run_activity(self._current_activity, self._lesson_answer())
+        self._active_step_feedback().setText(("✅ " if result.passed else "❌ ") + result.feedback)
+        self._show_result(self.step_results, result.columns, result.rows)
         if not result.passed:
-            self.practice_sql.navigate_to_error(result.feedback)
+            self.step_sql.navigate_to_error(result.feedback)
 
-    def _check_practice(self) -> None:
-        if self._practice_lesson is None or self._practice_activity is None:
+    def _check_lesson_step(self) -> None:
+        if self._current_lesson is None or self._current_activity is None:
             return
         result = self.service.validate_activity(
-            self._practice_lesson,
-            self._practice_activity,
-            self._practice_answer(),
+            self._current_lesson,
+            self._current_activity,
+            self._lesson_answer(),
         )
-        prefix = "✅ " if result.passed else "❌ "
-        self.practice_feedback.setText(prefix + result.feedback)
-        self._show_result(self.practice_results, result.columns, result.rows)
+        self._active_step_feedback().setText(("✅ " if result.passed else "❌ ") + result.feedback)
+        if self._current_activity.runtime == "sql":
+            self._show_result(self.step_results, result.columns, result.rows)
         if result.passed:
-            explanation = str(self._practice_activity.presentation.get("after_correct") or "")
+            explanation = str(self._current_activity.presentation.get("after_correct") or "")
             if explanation:
-                self.practice_explanation.setText("Why this works\n\n" + explanation)
-                self.practice_explanation.show()
-        else:
-            self.practice_sql.navigate_to_error(result.feedback)
+                active_explanation = self._active_step_explanation()
+                active_explanation.setText("Why this works\n\n" + explanation)
+                active_explanation.show()
+        elif self._current_activity.runtime == "sql":
+            self.step_sql.navigate_to_error(result.feedback)
         self.refresh_all()
-        self._render_activity(self._practice_activity)
-        if result.passed:
-            explanation = str(self._practice_activity.presentation.get("after_correct") or "")
-            if explanation:
-                self.practice_explanation.setText("Why this works\n\n" + explanation)
-                self.practice_explanation.show()
-            self.practice_feedback.setText("✅ " + result.feedback)
-            self._show_result(self.practice_results, result.columns, result.rows)
+        self._refresh_lesson_navigation()
 
-    def _show_practice_hint(self) -> None:
-        if self._practice_lesson is None or self._practice_activity is None:
+    def _show_step_hint(self) -> None:
+        if self._current_lesson is None or self._current_activity is None:
             return
-        level, hint = self.service.reveal_hint(
-            self._practice_lesson.lesson_id,
-            self._practice_activity,
-        )
-        self.practice_feedback.setText(f"💡 Hint {level}: {hint}")
+        level, hint = self.service.reveal_hint(self._current_lesson.lesson_id, self._current_activity)
+        self._active_step_feedback().setText(f"💡 Hint {level}: {hint}")
 
-    def _show_practice_solution(self) -> None:
-        if self._practice_lesson is None or self._practice_activity is None:
+    def _show_step_solution(self) -> None:
+        if self._current_lesson is None or self._current_activity is None:
             return
-        solution = self.service.reveal_solution(
-            self._practice_lesson.lesson_id,
-            self._practice_activity,
-        )
+        solution = self.service.reveal_solution(self._current_lesson.lesson_id, self._current_activity)
         dialog = QMessageBox(self)
         dialog.setWindowTitle("Official Solution")
         dialog.setIcon(QMessageBox.Icon.Information)
         dialog.setText(
-            "The full solution is shown below. Your editor has not been overwritten. "
-            "This attempt cannot grant mastery after the solution is viewed."
+            "The solution is shown for study and will not replace your work. "
+            "To earn mastery, give it another try without the full solution open."
         )
         dialog.setDetailedText(solution)
         dialog.exec()
-        self.practice_feedback.setText(
-            "💡 Solution viewed. Study the structure, close the solution, and rebuild the query independently."
+        self._active_step_feedback().setText(
+            "Take a look, then rebuild the answer yourself. You’ll need a clean pass before moving on."
+        )
+        self.refresh_all()
+        self._refresh_lesson_navigation()
+
+    def _refresh_lesson_navigation(self) -> None:
+        if self._current_lesson is None or self._current_activity is None:
+            return
+        complete = self.service.activity_complete(self._current_lesson.lesson_id, self._current_activity)
+        self.lesson_continue.setEnabled(complete)
+        self.lesson_nav_status.setText(
+            "✓ Nice work! Continue when you’re ready."
+            if complete
+            else "Complete the lesson to move on!"
+        )
+        keys = [node.target_key for node in self._nodes]
+        if self._current_target in keys:
+            index = keys.index(self._current_target)
+            self.lesson_back.setText("Path Overview" if index == 0 else "← Back")
+            self.lesson_continue.setText("Continue to Checkpoint  →" if index + 1 < len(self._nodes) and self._nodes[index + 1].kind == "assessment" else "Continue  →")
+        QTimer.singleShot(0, self._sync_lesson_footer_splitter)
+
+    # ----------------------------------------------------------- assessment flow
+    def _open_assessment_node(self, node: JourneyNode) -> None:
+        assessment = self.catalog.assessment(str(node.assessment_id))
+        activity = next(item for item in assessment.activities if item.activity_id == node.activity_id)
+        self._assessment = assessment
+        self._assessment_activity = activity
+        self._assessment_answers = {
+            **self.service.assessment_drafts(assessment.assessment_id),
+            **self._assessment_answers,
+        }
+        self.content_stack.setCurrentIndex(self.ASSESSMENT_PAGE)
+        index = assessment.activities.index(activity) + 1
+        self.assessment_breadcrumb.setText(f"Accelerator Academy  ›  {assessment.title}")
+        self.assessment_step_pill.setText(f"Question {index} of {len(assessment.activities)}")
+        instructions = "\n".join(f"- {item}" for item in assessment.instructions)
+        markdown = (
+            f"# {activity.title}\n\n"
+            f"> **Checkpoint question {index}:** Complete this independently. Hints and solutions are unavailable.\n\n"
+            f"{assessment.description}\n\n"
+            f"## Instructions\n{instructions}\n\n"
+            f"## Your task\n{activity.prompt}\n\n"
+            f"## Requirements\n"
+            + "\n".join(f"- {item}" for item in activity.presentation.get("requirements", []))
+            + f"\n\n### Expected output\n{activity.presentation.get('expected_output', 'Return the requested result.')}"
+        )
+        self.assessment_brief.set_markdown(
+            markdown,
+            eyebrow="COURSE CHECKPOINT",
+            subtitle=f"Pass score: {round(assessment.passing_score * 100)}% • {assessment.estimated_minutes} minutes total",
+            bookmarked=False,
+        )
+        self.assessment_brief.set_navigation(next_title=None, show_back=False)
+        answer = self._assessment_answers.get(activity.activity_id, activity.starter)
+        self.assessment_sql.setPlainText(answer)
+        self.assessment_feedback.setText("")
+        self._show_result(self.assessment_results, (), ())
+        self._refresh_assessment_navigation()
+
+    def _save_assessment_answer(self, silent: bool = False) -> bool:
+        if self._assessment is None or self._assessment_activity is None:
+            return False
+        answer = self.assessment_sql.toPlainText()
+        self._assessment_answers[self._assessment_activity.activity_id] = answer
+        self.service.save_assessment_draft(
+            self._assessment.assessment_id,
+            self._assessment_activity.activity_id,
+            answer,
+        )
+        if not silent:
+            self.assessment_feedback.setText("Saved! You can come back and change this answer before you submit.")
+        self.refresh_all()
+        return bool(answer.strip())
+
+    def _run_assessment_query(self) -> None:
+        if self._assessment_activity is None:
+            return
+        result = self.service.run_activity(self._assessment_activity, self.assessment_sql.toPlainText())
+        self.assessment_feedback.setText(("✅ Query ran. " if result.passed else "❌ ") + result.feedback)
+        self._show_result(self.assessment_results, result.columns, result.rows)
+        if not result.passed:
+            self.assessment_sql.navigate_to_error(result.feedback)
+
+    def _assessment_continue_clicked(self) -> None:
+        if not self._save_assessment_answer(silent=True):
+            self.assessment_feedback.setText("Add an answer before moving to the next checkpoint question.")
+            return
+        if self._assessment is None or self._assessment_activity is None:
+            return
+        index = self._assessment.activities.index(self._assessment_activity)
+        if index == len(self._assessment.activities) - 1:
+            self._submit_assessment()
+        else:
+            self._open_next_node()
+
+    def _submit_assessment(self) -> None:
+        if self._assessment is None:
+            return
+        self._save_assessment_answer(silent=True)
+        answers = self.service.assessment_drafts(self._assessment.assessment_id)
+        missing = [item.title for item in self._assessment.activities if not answers.get(item.activity_id, "").strip()]
+        if missing:
+            self.assessment_feedback.setText(
+                "A few questions still need answers: " + ", ".join(missing)
+            )
+            return
+        result = self.service.validate_assessment(self._assessment, answers)
+        score = round(float(result.get("score", 0.0)) * 100)
+        if result.get("passed"):
+            self.assessment_feedback.setText(f"✅ You passed with {score}%! Your applied project is ready.")
+            QMessageBox.information(
+                self,
+                "Checkpoint Passed",
+                f"Score: {score}%\n\nGreat job—your applied project is ready.",
+            )
+            self.refresh_all()
+            lab = self.catalog.skills_labs()[0]
+            self.open_target(f"academy:skills_lab:{lab.lab_id}")
+            return
+        failed_ids = [key for key, value in result.get("results", {}).items() if not value.get("passed")]
+        failed_titles = [
+            item.title for item in self._assessment.activities if item.activity_id in failed_ids
+        ]
+        self.assessment_feedback.setText(
+            f"You scored {score}%. Take another look at: " + ", ".join(failed_titles)
+        )
+        QMessageBox.information(
+            self,
+            "Checkpoint Needs Review",
+            f"Score: {score}%\n\nReview the questions you missed, make a few changes, and try again.",
         )
         self.refresh_all()
 
-    # ---------------------------------------------------------------- paths
-    def _show_path_lesson(self, current: QListWidgetItem | None, _previous) -> None:
-        if current is None:
+    def _refresh_assessment_navigation(self) -> None:
+        if self._assessment is None or self._assessment_activity is None:
             return
-        lesson_id = current.data(Qt.ItemDataRole.UserRole)
-        lesson = self.catalog.lesson(str(lesson_id))
-        state = self.service.progress.lesson_state(lesson.lesson_id).value
-        unlocked, missing = self.service.lesson_unlocked(lesson.lesson_id)
-        objectives = "\n".join(f"- {item}" for item in lesson.objectives)
-        markdown = (
-            f"# {lesson.title}\n\n"
-            f"> **Current state:** {state}\n\n"
-            f"{lesson.description}\n\n"
-            f"## Learning objectives\n{objectives}\n\n"
-            f"## Practice structure\n"
-            f"This lesson contains {len(lesson.activities)} activities across recognition, guided, independent, "
-            f"debugging, transfer, or mastery formats.\n\n"
-            f"## Unlock status\n"
-            + ("Ready to begin." if unlocked else "Master first: " + ", ".join(missing))
+        index = self._assessment.activities.index(self._assessment_activity)
+        answered = sum(
+            bool(self._assessment_answers.get(item.activity_id, "").strip())
+            for item in self._assessment.activities
         )
-        self.path_lesson_view.set_markdown(
-            markdown,
-            eyebrow="LEARNING PATH",
-            subtitle=f"Lesson {lesson.order} • {lesson.estimated_minutes} minutes",
-            bookmarked=False,
+        self.assessment_nav_status.setText(
+            f"{answered} of {len(self._assessment.activities)} answers saved. "
+            "We’ll score everything when you submit the checkpoint."
         )
-        self.path_lesson_view.set_navigation(next_title=None, show_back=False)
-        self.path_open_button.setEnabled(unlocked)
+        last = index == len(self._assessment.activities) - 1
+        self.assessment_continue.setText("Submit Checkpoint" if last else "Save & Continue  →")
+        self.assessment_submit.setVisible(not last)
 
-    def _open_selected_path_lesson(self) -> None:
-        item = self.path_lesson_list.currentItem()
-        if item is not None:
-            self.open_lesson(str(item.data(Qt.ItemDataRole.UserRole)))
-
-    # ------------------------------------------------------------------ lab
-    def _lab_selected(self, current: QListWidgetItem | None, _previous) -> None:
-        if current is None:
-            return
-        lab = self.catalog.skills_lab(str(current.data(Qt.ItemDataRole.UserRole)))
-        self._render_lab(lab)
-
-    def _render_lab(self, lab: SkillsLabDefinition) -> None:
+    # ---------------------------------------------------------------- lab flow
+    def _open_lab_node(self, node: JourneyNode) -> None:
+        lab = self.catalog.skills_lab(str(node.lab_id))
+        self._lab = lab
+        self.content_stack.setCurrentIndex(self.LAB_PAGE)
         markdown = lab.brief_markdown or f"# {lab.title}\n\n{lab.description}\n\n## Your task\n{lab.prompt}"
         if lab.deliverables:
             markdown += "\n\n## Required deliverables\n" + "\n".join(f"- {item}" for item in lab.deliverables)
@@ -1259,183 +1655,327 @@ class AcceleratorAcademyWidget(QWidget):
             )
         if lab.reflection_questions:
             markdown += "\n\n## Reflection questions\n" + "\n".join(f"- {item}" for item in lab.reflection_questions)
-        self.lab_learn_view.set_markdown(
+        self.lab_brief.set_markdown(
             markdown,
-            eyebrow="SKILLS LAB",
-            subtitle=f"Applied challenge • About {lab.estimated_minutes} minutes",
+            eyebrow="APPLIED PROJECT",
+            subtitle=f"Final course milestone • About {lab.estimated_minutes} minutes",
             bookmarked=False,
         )
-        self.lab_learn_view.set_navigation(next_title=None, show_back=False)
+        self.lab_brief.set_navigation(next_title=None, show_back=False)
+        runtime_label = lab.activity.runtime.upper() if lab.activity.runtime else "WORK"
+        self.lab_work_title.setText(f"{runtime_label} Submission")
+        self.lab_run.setText("▶ Run Query" if lab.activity.runtime == "sql" else "▶ Run Work")
+        self.lab_sql.setPlaceholderText(
+            "Build the project query…" if lab.activity.runtime == "sql" else "Complete the project work…"
+        )
         row = self.conn.execute(
-            "SELECT answer_text,notes,validation_status FROM academy_submissions WHERE item_type='skills_lab' AND item_id=? ORDER BY submission_id DESC LIMIT 1",
+            """SELECT answer_text,notes,validation_status FROM academy_submissions
+               WHERE item_type='skills_lab' AND item_id=? ORDER BY submission_id DESC LIMIT 1""",
             (lab.lab_id,),
         ).fetchone()
         self.lab_sql.setPlainText(str(row["answer_text"] or lab.activity.starter) if row else lab.activity.starter)
         self.lab_notes.setPlainText(str(row["notes"] or "") if row else "")
-        if row and row["validation_status"] == "Passed":
-            self.lab_status_combo.setCurrentText("Completed")
-        elif row:
-            self.lab_status_combo.setCurrentText("In Progress")
-        else:
-            self.lab_status_combo.setCurrentText("Not Started")
-        self._refresh_locks()
+        passed = bool(row and row["validation_status"] == "Passed")
+        self.lab_status_pill.setText("Completed" if passed else "In Progress" if row else "Not Started")
+        self.lab_feedback.setText("")
+        self._show_result(self.lab_results, (), ())
+        self.lab_continue.setEnabled(passed)
+        self.lab_nav_status.setText(
+            "✓ Project complete! Finish the course when you’re ready."
+            if passed
+            else "Run your work, write at least three clear findings, then check the project."
+        )
 
     def _run_lab(self) -> None:
-        lab = self.catalog.skills_labs()[0]
-        result = self.service.run_activity(lab.activity, self.lab_sql.toPlainText())
+        if self._lab is None:
+            return
+        result = self.service.run_activity(self._lab.activity, self.lab_sql.toPlainText())
         self.lab_feedback.setText(("✅ " if result.passed else "❌ ") + result.feedback)
         self._show_result(self.lab_results, result.columns, result.rows)
 
-    def _save_lab_progress(self) -> None:
-        lab = self.catalog.skills_labs()[0]
+    def _save_lab(self, silent: bool = False) -> None:
+        if self._lab is None:
+            return
         self.service.save_skills_lab_progress(
-            lab,
+            self._lab,
             self.lab_sql.toPlainText(),
             self.lab_notes.toPlainText(),
         )
-        self.lab_status_combo.setCurrentText("In Progress")
-        self.lab_feedback.setText("Progress saved. Validate the lab when the SQL and findings are ready.")
+        self.lab_status_pill.setText("In Progress")
+        if not silent:
+            self.lab_feedback.setText("Project saved!")
+        self.refresh_all()
 
     def _submit_lab(self) -> None:
-        lab = self.catalog.skills_labs()[0]
+        if self._lab is None:
+            return
         result = self.service.validate_skills_lab(
-            lab,
+            self._lab,
             self.lab_sql.toPlainText(),
             self.lab_notes.toPlainText(),
         )
         self.lab_feedback.setText(("✅ " if result.passed else "❌ ") + result.feedback)
+        self._show_result(self.lab_results, result.columns, result.rows)
         if result.passed:
-            self.lab_status_combo.setCurrentText("Completed")
+            self.lab_status_pill.setText("Completed")
+            self.lab_continue.setEnabled(True)
+            self.lab_nav_status.setText("✓ Project complete! Your work was added to Demonstrated Evidence.")
             QMessageBox.information(
                 self,
-                "Skills Lab Complete",
-                "The validated SQL and written findings were saved and added to Demonstrated Evidence.",
+                "Project Complete",
+                "Your work and findings are saved, and the finished project is now part of Demonstrated Evidence.",
             )
         else:
-            self.lab_status_combo.setCurrentText("In Progress")
+            self.lab_status_pill.setText("In Progress")
         self.refresh_all()
 
-    # ------------------------------------------------------------- assessment
-    def _assessment_question_selected(self, current: QListWidgetItem | None, _previous) -> None:
-        self._save_assessment_answer(silent=True)
-        if current is None or self._assessment is None:
-            return
-        activity_id = str(current.data(Qt.ItemDataRole.UserRole))
-        activity = next((item for item in self._assessment.activities if item.activity_id == activity_id), None)
-        if activity is None:
-            return
-        self._assessment_activity = activity
-        self.assessment_brief.set_markdown(
-            self._activity_markdown(activity),
-            eyebrow="CHECKPOINT",
-            subtitle=f"Question {self.assessment_question_list.currentRow() + 1} of {len(self._assessment.activities)}",
-            bookmarked=False,
+    # -------------------------------------------------------------- common data
+    def _save_current_work(self) -> None:
+        if self.content_stack.currentIndex() == self.LESSON_PAGE:
+            self._save_current_lesson_answer()
+        elif self.content_stack.currentIndex() == self.ASSESSMENT_PAGE:
+            self._save_assessment_answer(silent=True)
+        elif self.content_stack.currentIndex() == self.LAB_PAGE and self._lab is not None:
+            if self.lab_sql.toPlainText().strip() or self.lab_notes.toPlainText().strip():
+                self._save_lab(silent=True)
+
+    def _progress_milestones(self) -> tuple[Milestone, ...]:
+        node_states = {node.target_key: self._node_state(node)[0] for node in self._nodes}
+        current_node = next(
+            (node for node in self._nodes if node.target_key == self._current_target),
+            None,
         )
-        self.assessment_brief.set_navigation(next_title=None, show_back=False)
-        self.assessment_sql.setPlainText(self._assessment_answers.get(activity.activity_id, activity.starter))
-        self.assessment_feedback.setText("")
+        milestones: list[Milestone] = []
+        for path in self.catalog.program.paths:
+            for track in path.tracks:
+                for course in track.courses:
+                    course_nodes = [node for node in self._nodes if node.course_id == course.course_id]
+                    course_passed = bool(course_nodes) and all(
+                        node_states.get(node.target_key) == "Passed" for node in course_nodes
+                    )
+                    course_started = any(
+                        node_states.get(node.target_key) in {"Passed", "Answered"}
+                        for node in course_nodes
+                    )
+                    course_current = bool(current_node and current_node.course_id == course.course_id)
+                    course_state = (
+                        "complete"
+                        if course_passed
+                        else "current"
+                        if course_current
+                        else "in_progress"
+                        if course_started
+                        else "ready"
+                    )
+                    milestones.append(
+                        Milestone(
+                            key=f"course:{course.course_id}",
+                            short_label=f"C{course.order}",
+                            title=f"Course {course.order}",
+                            kind="course",
+                            state=course_state,
+                        )
+                    )
+                    for module in course.modules:
+                        for lesson in module.lessons:
+                            lesson_nodes = [
+                                node
+                                for node in course_nodes
+                                if node.kind == "lesson_step" and node.lesson_id == lesson.lesson_id
+                            ]
+                            lesson_passed = bool(lesson_nodes) and all(
+                                node_states.get(node.target_key) == "Passed" for node in lesson_nodes
+                            )
+                            lesson_started = any(
+                                node_states.get(node.target_key) == "Passed" for node in lesson_nodes
+                            )
+                            lesson_current = bool(
+                                current_node
+                                and current_node.kind == "lesson_step"
+                                and current_node.lesson_id == lesson.lesson_id
+                            )
+                            first_unlocked = bool(
+                                lesson_nodes
+                                and self._node_state(lesson_nodes[0])[1]
+                            )
+                            lesson_state = (
+                                "complete"
+                                if lesson_passed
+                                else "current"
+                                if lesson_current
+                                else "in_progress"
+                                if lesson_started
+                                else "ready"
+                                if first_unlocked
+                                else "locked"
+                            )
+                            milestones.append(
+                                Milestone(
+                                    key=f"lesson:{lesson.lesson_id}",
+                                    short_label=f"L{lesson.order}",
+                                    title=f"Lesson {lesson.order}",
+                                    kind="lesson",
+                                    state=lesson_state,
+                                )
+                            )
+        return tuple(milestones)
 
-    def _save_assessment_answer(self, silent: bool = False) -> None:
-        if self._assessment_activity is None:
-            return
-        self._assessment_answers[self._assessment_activity.activity_id] = self.assessment_sql.toPlainText()
-        self.assessment_progress.setValue(sum(bool(value.strip()) for value in self._assessment_answers.values()))
-        self._refresh_assessment_question_labels()
-        if not silent:
-            self.assessment_feedback.setText("Answer saved for this checkpoint attempt.")
+    def refresh_all(self) -> None:
+        self._assessment_answers = {
+            **(
+                self.service.assessment_drafts(self.catalog.assessments()[0].assessment_id)
+                if self.catalog.assessments()
+                else {}
+            ),
+            **self._assessment_answers,
+        }
+        self._refresh_roadmap()
+        completed = 0
+        for node in self._nodes:
+            state, _unlocked, _reason = self._node_state(node)
+            completed += state == "Passed"
+        total = max(1, len(self._nodes))
+        percent = round(100 * completed / total)
+        self.overall_progress.setValue(percent)
+        self.roadmap_progress.setValue(percent)
+        self.progress_percent.setText(f"{percent}%")
+        self.progress_summary.setText(f"{completed} of {len(self._nodes)} steps finished")
+        self.milestone_bar.set_milestones(self._progress_milestones())
+        recommendation = self.service.next_recommendation()
+        self.overview_next_title.setText(
+            recommendation.title if recommendation else f"{self.catalog.program.paths[0].title} complete"
+        )
+        self.overview_next_reason.setText(
+            recommendation.reason if recommendation else "Take a look at what you completed, or continue when the next module is ready."
+        )
+        evidence_count = len(self.service.evidence_rows())
+        summary = self.service.completion_summary()
+        self.recent_progress.setText(
+            f"{summary['mastered']} lessons mastered • {summary['practiced']} lessons practiced • "
+            f"{evidence_count} pieces of validated Academy evidence"
+        )
+        self.roadmap_status.setText(
+            "Up next: " + (recommendation.title if recommendation else "Path complete")
+        )
+        if self._current_lesson and self._current_activity:
+            self._refresh_lesson_navigation()
+        if self._assessment and self._assessment_activity:
+            self._refresh_assessment_navigation()
+        self._select_current_roadmap_item()
 
-    def _refresh_assessment_question_labels(self) -> None:
-        if self._assessment is None:
-            return
-        for index, activity in enumerate(self._assessment.activities):
-            answered = bool(self._assessment_answers.get(activity.activity_id, "").strip())
-            self.assessment_question_list.item(index).setText(
-                f"{'✓' if answered else '○'}  {index + 1}. {activity.title}"
+    def _schema_markdown(self, activity: ActivityDefinition) -> str:
+        schemas = self.service.activity_table_schemas(activity)
+        if not schemas:
+            return (
+                "### Table schema\n"
+                "> We couldn’t load the table details for this step. Please report the lesson so it can be fixed."
             )
-
-    def _next_assessment_question(self) -> None:
-        self._save_assessment_answer(silent=True)
-        current = self.assessment_question_list.currentRow()
-        if current < self.assessment_question_list.count() - 1:
-            self.assessment_question_list.setCurrentRow(current + 1)
-
-    def _submit_assessment(self) -> None:
-        if self._assessment is None:
-            return
-        self._save_assessment_answer(silent=True)
-        result = self.service.validate_assessment(self._assessment, self._assessment_answers)
-        percent = round(100 * result["score"])
-        if result.get("feedback"):
-            text = "❌ " + str(result["feedback"])
-        elif result["passed"]:
-            text = f"✅ Checkpoint passed • Score: {percent}%. The Skills Lab is now available."
-        else:
-            failed = [
-                activity.title
-                for activity in self._assessment.activities
-                if not result["results"].get(activity.activity_id, {}).get("passed")
-            ]
-            text = f"❌ Checkpoint needs review • Score: {percent}%. Review: " + ", ".join(failed)
-        self.assessment_feedback.setText(text)
-        self.service.sync_planner_task()
-        self.refresh_all()
-
-    # --------------------------------------------------------------- evidence
-    def _refresh_evidence(self) -> None:
-        rows = self.service.evidence_rows()
-        self.evidence_summary.setText(f"{len(rows)} validated Academy evidence record(s)")
-        self.evidence_table.setRowCount(len(rows))
-        for row_index, row in enumerate(rows):
-            values = [
-                row["skill_key"],
-                row["source_type"],
-                row["difficulty"] or "",
-                row["dataset"] or "",
-                row["job_competency"] or "",
-                row["submission_path"] or "",
-                row["demonstrated_at"] or "",
-            ]
-            for column, value in enumerate(values):
-                item = QTableWidgetItem(str(value))
-                item.setToolTip(str(value))
-                self.evidence_table.setItem(row_index, column, item)
-
-    def _refresh_locks(self) -> None:
-        mastered = self.service.progress.mastered_skills()
-        if self._assessment is not None:
-            missing = [skill for skill in self._assessment.requires if skill not in mastered]
-            ready = not missing
-            self.assessment_submit.setEnabled(ready)
-            self.assessment_sql.setEnabled(ready)
-            self.assessment_lock.setText(
-                "✓ Checkpoint unlocked. Complete all questions independently."
-                if ready
-                else "🔒 Locked • Master first: " + ", ".join(missing)
+        sections: list[str] = []
+        for table_name, columns in schemas:
+            rows = "\n".join(f"| `{name}` | `{data_type}` |" for name, data_type in columns)
+            sections.append(
+                f"### Table schema: `{table_name}`\n"
+                "| Column | Data type |\n"
+                "|---|---|\n"
+                f"{rows}"
             )
-        if self.catalog.skills_labs():
-            lab = self.catalog.skills_labs()[0]
-            missing = [skill for skill in lab.requires if skill not in mastered]
-            ready = not missing
-            for widget in (self.lab_sql, self.lab_notes, self.lab_run, self.lab_submit, self.lab_complete):
-                widget.setEnabled(ready)
-            self.lab_lock.setText(
-                "✓ Skills Lab unlocked. Validate the query and submit at least three findings."
-                if ready
-                else "🔒 Locked • Master first: " + ", ".join(missing)
-            )
+        return "\n\n".join(sections)
+
+    def _activity_markdown(self, activity: ActivityDefinition, *, embedded: bool = False) -> str:
+        presentation = dict(activity.presentation)
+        scenario = str(presentation.get("scenario") or "Practice scenario")
+        introduction = str(presentation.get("introduction") or "Use what you just learned to work through the task below.")
+        task = str(presentation.get("task") or activity.prompt)
+        requirements = presentation.get("requirements") or []
+        expected = str(presentation.get("expected_output") or "Your result should match the requested shape and values.")
+        skills = presentation.get("skills_practiced") or []
+        requirement_text = "\n".join(f"- {item}" for item in requirements) or "- Follow the task and check your result."
+        skill_text = ", ".join(f"`{item}`" for item in skills) or activity.activity_type.value.title()
+        heading = f"## Your turn: {activity.title}" if embedded else f"# {activity.title}"
+        return (
+            f"{heading}\n\n"
+            f"> **Scenario:** {scenario}\n\n"
+            f"{introduction}\n\n"
+            f"{self._schema_markdown(activity)}\n\n"
+            f"### Your turn\n> **Task:** {task}\n\n"
+            f"### What to include\n{requirement_text}\n\n"
+            f"### What you should see\n{expected}\n\n"
+            f"### You’re practicing\n{skill_text}"
+        )
+
+    @staticmethod
+    def _result_table() -> QTableWidget:
+        table = QTableWidget()
+        table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        table.setAlternatingRowColors(True)
+        table.setShowGrid(False)
+        table.verticalHeader().setVisible(False)
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        table.horizontalHeader().setStretchLastSection(True)
+        table.setStyleSheet(
+            f"QTableWidget {{background:{COLORS.get('surface_alt', '#111A2C')};"
+            "alternate-background-color:#121F34;color:#FFFFFF;"
+            f"border:1px solid {COLORS.get('border', '#2B3656')};border-radius:8px;}}"
+            "QHeaderView::section {background:#1B2540;color:#FFFFFF;padding:7px;"
+            "border:none;border-right:1px solid #3a3d5e;font-weight:600;}"
+        )
+        return table
 
     @staticmethod
     def _show_result(table: QTableWidget, columns, rows) -> None:
+        columns = tuple(columns or ())
+        rows = tuple(rows or ())
         table.clear()
         table.setColumnCount(len(columns))
         table.setHorizontalHeaderLabels([str(item) for item in columns])
-        preview = list(rows)[:200]
-        table.setRowCount(len(preview))
-        for row_index, row in enumerate(preview):
-            for column, value in enumerate(row):
-                table.setItem(
-                    row_index,
-                    column,
-                    QTableWidgetItem("NULL" if value is None else str(value)),
-                )
-        table.resizeColumnsToContents()
+        table.setRowCount(len(rows))
+        for row_index, row in enumerate(rows):
+            for column_index, value in enumerate(row):
+                table.setItem(row_index, column_index, QTableWidgetItem("NULL" if value is None else str(value)))
+        if columns:
+            table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+            table.horizontalHeader().setStretchLastSection(True)
+
+    def _restore_splitters(self) -> None:
+        self.body_splitter.setSizes([330, 1080])
+        self.lesson_splitter.setSizes([620, 500])
+        self.lesson_work_splitter.setSizes([330, 270])
+        self.assessment_splitter.setSizes([460, 610])
+        self.lab_splitter.setSizes([460, 610])
+        QTimer.singleShot(0, self._sync_lesson_footer_splitter)
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
+        super().resizeEvent(event)
+        width = max(0, event.size().width())
+        mode = "compact" if width < 900 else "medium" if width < 1220 else "wide"
+        if mode == self._responsive_mode:
+            return
+        self._responsive_mode = mode
+        compact = mode == "compact"
+        self.body_splitter.setOrientation(
+            Qt.Orientation.Vertical if compact else Qt.Orientation.Horizontal
+        )
+        for splitter in (self.lesson_splitter, self.assessment_splitter, self.lab_splitter):
+            splitter.setOrientation(
+                Qt.Orientation.Vertical if width < 1120 else Qt.Orientation.Horizontal
+            )
+        self.lesson_footer_splitter.setOrientation(
+            Qt.Orientation.Vertical if width < 1120 else Qt.Orientation.Horizontal
+        )
+        for layout in (
+            self.lesson_left_row,
+            self.lesson_action_row,
+            self.assessment_action_row,
+            self.assessment_nav_row,
+            self.lab_action_row,
+            self.lab_nav_row,
+        ):
+            layout.setDirection(
+                QBoxLayout.Direction.TopToBottom if width < 760 else QBoxLayout.Direction.LeftToRight
+            )
+        if compact:
+            self.roadmap_list.parentWidget().setMaximumHeight(300)
+        else:
+            self.roadmap_list.parentWidget().setMaximumHeight(16777215)
+            QTimer.singleShot(0, self._restore_splitters)
+        QTimer.singleShot(0, self._sync_lesson_footer_splitter)

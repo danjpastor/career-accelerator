@@ -1,0 +1,161 @@
+lesson_id: sql_conditional_metrics
+title: Conditional Business Metrics
+order: 4
+difficulty: intermediate
+description: Calculate business-specific measures without losing the intended result grain.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain conditional business metrics.
+- Apply conditional business metrics to an analyst request.
+key_takeaways:
+- Calculate business-specific measures without losing the intended result grain.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.conditional_aggregation
+requires:
+- sql.advanced_filtering
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: cond_metric_recognition
+  title: Recognize conditional aggregation
+  type: recognition
+  runtime: recognition
+  prompt: Which pattern counts only rows that meet a condition while keeping one summary row?
+  answer_options:
+  - SUM(CASE WHEN condition THEN 1 ELSE 0 END)
+  - ORDER BY condition
+  - DISTINCT condition
+  - LIMIT condition
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: SUM(CASE WHEN condition THEN 1 ELSE 0 END)
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which pattern counts only rows that meet a condition while keeping one summary row?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Count conditions inside an aggregate
+    after_correct: You identified the core idea behind count conditions inside an aggregate.
+    common_errors: []
+  instruction:
+    title: Count conditions inside an aggregate
+    objective: Build a practical understanding of count conditions inside an aggregate.
+    action_label: Choose the best answer
+    body: Conditional aggregation combines `CASE` with an aggregate so multiple business measures can be calculated
+      in one grouped result.
+  required_for_completion: true
+- activity_id: cond_metric_guided
+  title: Count completed orders
+  type: guided
+  runtime: sql
+  prompt: Return completed_orders and total_orders in one row.
+  starter: 'SELECT
+
+    FROM orders;'
+  solution: SELECT SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, COUNT(*) AS total_orders
+    FROM orders;
+  hints:
+  - Focus on conditional aggregation.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, COUNT(*) AS
+      total_orders FROM orders;
+    required_patterns:
+    - SUM\s*\(\s*CASE
+    - COUNT\s*\(
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return completed_orders and total_orders in one row.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - conditional aggregation
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Calculate related KPIs together
+    objective: Use conditional aggregation in a realistic analyst query.
+    action_label: Write and validate the query
+    body: A `CASE` expression can return 1 for qualifying rows and 0 for all others. Summing those values produces
+      a conditional count.
+  required_for_completion: true
+- activity_id: cond_metric_mastery
+  title: Count unresolved tickets by team
+  type: mastery
+  runtime: sql
+  prompt: Return assigned_team and unresolved_tickets for Open or Pending tickets, grouped and sorted by assigned_team.
+  starter: 'SELECT assigned_team,
+
+    FROM support_tickets
+
+    GROUP BY assigned_team
+
+    ORDER BY assigned_team;'
+  solution: SELECT assigned_team, SUM(CASE WHEN status IN ('Open', 'Pending') THEN 1 ELSE 0 END) AS unresolved_tickets
+    FROM support_tickets GROUP BY assigned_team ORDER BY assigned_team;
+  hints:
+  - Focus on conditional grouped metrics.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT assigned_team, SUM(CASE WHEN status IN ('Open', 'Pending') THEN 1 ELSE 0 END) AS unresolved_tickets
+      FROM support_tickets GROUP BY assigned_team ORDER BY assigned_team;
+    required_patterns:
+    - SUM\s*\(\s*CASE
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 9
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return assigned_team and unresolved_tickets for Open or Pending tickets, grouped and sorted by assigned_team.
+    tables:
+    - support_tickets
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - conditional grouped metrics
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Build an operational workload metric
+    objective: Use conditional grouped metrics in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Define the team as the result grain and count only tickets that remain unresolved.
+  required_for_completion: true

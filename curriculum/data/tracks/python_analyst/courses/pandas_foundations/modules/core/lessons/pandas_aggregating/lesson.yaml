@@ -1,0 +1,130 @@
+lesson_id: pandas_aggregating
+title: Aggregating DataFrames
+order: 2
+difficulty: beginner
+description: Build practical fluency with aggregating dataframes.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of aggregating dataframes.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Aggregating DataFrames supports a reliable, explainable analytics workflow.
+teaches:
+- pandas.aggregation
+requires:
+- python_pandas
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: pandas_aggregating_step_1
+  title: 'Practice 1: Aggregating DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: Which method groups rows before aggregation?
+  answer_options:
+  - groupby
+  - merge
+  - plot
+  - rename
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: groupby
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which method groups rows before aggregation?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Aggregating DataFrames
+    after_correct: You identified the core idea behind aggregating dataframes.
+    common_errors: []
+  instruction:
+    title: Aggregating DataFrames
+    objective: Build a practical understanding of aggregating dataframes.
+    action_label: Choose the best answer
+    body: '`groupby` defines the result grain before one or more measures are calculated.'
+  required_for_completion: true
+- activity_id: pandas_aggregating_step_2
+  title: 'Practice 2: Aggregating DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: Why use named aggregations?
+  answer_options:
+  - They make output column meanings explicit
+  - They remove all groups
+  - They change row order randomly
+  - They avoid importing pandas
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: They make output column meanings explicit
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why use named aggregations?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Aggregating DataFrames
+    after_correct: You identified the core idea behind aggregating dataframes.
+    common_errors: []
+  instruction:
+    title: Aggregating DataFrames
+    objective: Build a practical understanding of aggregating dataframes.
+    action_label: Choose the best answer
+    body: Named aggregations create stakeholder-ready result headings in one operation.
+  required_for_completion: true
+- activity_id: pandas_aggregating_step_3
+  title: 'Practice 3: Aggregating DataFrames'
+  type: mastery
+  runtime: recognition
+  prompt: What should you validate after aggregation?
+  answer_options:
+  - Group count, totals, and the intended grain
+  - Only the font
+  - Only the file size
+  - Nothing
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Group count, totals, and the intended grain
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What should you validate after aggregation?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Aggregating DataFrames
+    after_correct: You identified the core idea behind aggregating dataframes.
+    common_errors: []
+  instruction:
+    title: Aggregating DataFrames
+    objective: Build a practical understanding of aggregating dataframes.
+    action_label: Choose the best answer
+    body: Compare summaries with source-level control totals and expected categories.
+  required_for_completion: true

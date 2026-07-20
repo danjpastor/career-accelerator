@@ -67,8 +67,13 @@ class ProgressRepository:
                 "SELECT * FROM academy_activity_progress WHERE lesson_id=?", (lesson.lesson_id,)
             ).fetchall()
         }
-        practice_required = [a for a in lesson.activities if a.required_for_practice]
-        mastery_required = [a for a in lesson.activities if a.required_for_mastery]
+        # In the unified Academy player every curriculum step contains an
+        # interaction.  A learner therefore completes the lesson sequence by
+        # passing every step marked ``required_for_completion`` rather than by
+        # skipping directly to one guided and one mastery activity.
+        completion_required = [a for a in lesson.activities if a.required_for_completion]
+        practice_required = [a for a in completion_required if not a.required_for_mastery]
+        mastery_required = [a for a in completion_required if a.required_for_mastery]
         practiced = bool(practice_required) and all(
             rows.get(a.activity_id) is not None and rows[a.activity_id]["state"] == "Passed"
             for a in practice_required

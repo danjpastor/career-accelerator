@@ -1,0 +1,130 @@
+lesson_id: python_numpy
+title: NumPy Arrays
+order: 4
+difficulty: beginner
+description: Build practical fluency with numpy arrays.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of numpy arrays.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- NumPy Arrays supports a reliable, explainable analytics workflow.
+teaches:
+- python.numpy
+requires:
+- python.functions_packages
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: python_numpy_step_1
+  title: 'Practice 1: NumPy Arrays'
+  type: recognition
+  runtime: recognition
+  prompt: What is a major advantage of a NumPy array?
+  answer_options:
+  - Vectorized numeric operations
+  - Automatic SQL joins
+  - Built-in dashboard publishing
+  - Unlimited mixed object types
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Vectorized numeric operations
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What is a major advantage of a NumPy array?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - NumPy Arrays
+    after_correct: You identified the core idea behind numpy arrays.
+    common_errors: []
+  instruction:
+    title: NumPy Arrays
+    objective: Build a practical understanding of numpy arrays.
+    action_label: Choose the best answer
+    body: NumPy performs array operations efficiently without writing a Python loop for every element.
+  required_for_completion: true
+- activity_id: python_numpy_step_2
+  title: 'Practice 2: NumPy Arrays'
+  type: recognition
+  runtime: recognition
+  prompt: What does array.shape describe?
+  answer_options:
+  - The dimensions of the array
+  - The chart color
+  - The package version only
+  - The final value
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The dimensions of the array
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What does array.shape describe?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - NumPy Arrays
+    after_correct: You identified the core idea behind numpy arrays.
+    common_errors: []
+  instruction:
+    title: NumPy Arrays
+    objective: Build a practical understanding of numpy arrays.
+    action_label: Choose the best answer
+    body: Shape reports the length of each array axis.
+  required_for_completion: true
+- activity_id: python_numpy_step_3
+  title: 'Practice 3: NumPy Arrays'
+  type: mastery
+  runtime: recognition
+  prompt: Why inspect dtype?
+  answer_options:
+  - It determines how values are stored and which operations are valid
+  - It renames the array
+  - It creates a report page
+  - It removes missing values automatically
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It determines how values are stored and which operations are valid
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why inspect dtype?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - NumPy Arrays
+    after_correct: You identified the core idea behind numpy arrays.
+    common_errors: []
+  instruction:
+    title: NumPy Arrays
+    objective: Build a practical understanding of numpy arrays.
+    action_label: Choose the best answer
+    body: Unexpected types can produce incorrect comparisons, memory use, or calculations.
+  required_for_completion: true

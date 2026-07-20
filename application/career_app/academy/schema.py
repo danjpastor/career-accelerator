@@ -74,6 +74,15 @@ CREATE TABLE IF NOT EXISTS academy_assessment_attempts (
     UNIQUE(assessment_id, attempt_number)
 );
 
+CREATE TABLE IF NOT EXISTS academy_assessment_drafts (
+    assessment_id TEXT NOT NULL,
+    activity_id TEXT NOT NULL,
+    answer_text TEXT NOT NULL DEFAULT '',
+    validation_json TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (assessment_id, activity_id)
+);
+
 CREATE TABLE IF NOT EXISTS academy_skill_evidence (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     program_id TEXT NOT NULL,
@@ -138,6 +147,9 @@ def _ensure_columns(conn: sqlite3.Connection) -> None:
     additions = {
         "academy_activity_progress": [
             ("last_attempt_solution_assisted", "INTEGER NOT NULL DEFAULT 0"),
+        ],
+        "academy_enrollments": [
+            ("last_target_key", "TEXT"),
         ],
     }
     for table, columns in additions.items():

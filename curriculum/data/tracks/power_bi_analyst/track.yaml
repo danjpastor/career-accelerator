@@ -1,0 +1,9 @@
+track_id: power_bi_analyst
+title: Power BI for Data Analysts
+navigation_title: Power BI
+order: 2
+description: Learn the Power BI workflow from source checks and transformations through clear visuals and reliable
+  data models.
+courses:
+- courses/powerbi_foundations/course.yaml
+- courses/powerbi_modeling/course.yaml

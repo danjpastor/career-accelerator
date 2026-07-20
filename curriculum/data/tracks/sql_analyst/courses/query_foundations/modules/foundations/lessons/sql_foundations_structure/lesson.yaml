@@ -57,6 +57,30 @@ activities:
     - rows
     after_correct: The ticket_id uniquely labels each row, so one row represents one support ticket.
     common_errors: []
+  instruction:
+    title: Begin with the unit of analysis
+    objective: Identify what one row represents before counting, filtering, or summarizing a table.
+    action_label: Identify the grain
+    body: 'A table is useful only when you understand its **grain**: the exact thing or event represented by one
+      row. Grain is also called the *unit of analysis*. Before writing SQL, finish the sentence: “One row represents
+      one ____.”
+
+
+      A support-ticket table may contain one row per ticket, while a ticket-message table may contain many rows
+      for the same ticket. Counting rows in the first table counts tickets; counting rows in the second counts messages.
+      Both tables may contain a `ticket_id`, but they answer different questions.
+
+
+      Use identifiers and repeated values as clues. If `ticket_id` is unique on every row, one row probably represents
+      one ticket. A `customer_id` may repeat because a customer can open several tickets.
+
+
+      **Worked example:** In a table containing `order_id`, `customer_id`, `order_date`, and `order_total`, a unique
+      `order_id` suggests one row per order. The repeated `customer_id` does not change the grain.
+
+
+      Now inspect the support-ticket context and choose the statement that precisely describes one row.'
+  required_for_completion: true
 - activity_id: structure_type_recognition
   title: Choose the appropriate data type
   type: recognition
@@ -90,6 +114,37 @@ activities:
     - numeric measures
     after_correct: Order totals are decimal measures because analysts add, average, and compare them.
     common_errors: []
+  instruction:
+    title: Classify values by how they behave
+    objective: Distinguish identifiers, categories, measures, dates, and logical values.
+    action_label: Classify the field
+    body: 'A data type is more than the way a value looks. It describes what operations make sense for that value.
+
+
+      - **Text** stores labels, names, categories, and many identifiers.
+
+      - **Integer** stores whole-number quantities.
+
+      - **Decimal** stores measurements that can include fractions.
+
+      - **Date or timestamp** stores calendar values.
+
+      - **Boolean** stores true/false states.
+
+      - **NULL** represents missing or unknown information.
+
+
+      An identifier such as `00124` contains digits but should usually remain text. Adding customer IDs would have
+      no business meaning, and leading zeroes may be significant. A value such as `order_total`, however, is a measure:
+      analysts compare it, sum it, and calculate averages.
+
+
+      **Try this mental test:** Ask whether arithmetic on the field would produce a useful business result. Adding
+      order totals is meaningful. Adding order IDs is not.
+
+
+      Choose the description that best matches how `order_total` should be used in analysis.'
+  required_for_completion: true
 - activity_id: structure_guided
   title: Select inventory identifiers
   type: guided
@@ -139,6 +194,47 @@ activities:
     common_errors:
     - Forgetting a comma between selected columns.
     - Using a column name that does not exist.
+  instruction:
+    title: Build a focused SELECT list
+    objective: Return only the columns needed for a specific question.
+    action_label: Complete the query
+    body: 'A basic SQL query has two essential parts:
+
+
+      ```sql
+
+      SELECT column_name
+
+      FROM table_name;
+
+      ```
+
+
+      `SELECT` controls the columns in the result. `FROM` identifies the source table. To return several columns,
+      list them in the order the reader should see them and separate them with commas.
+
+
+      ```sql
+
+      SELECT shipment_id, carrier_name, shipped_date
+
+      FROM shipments;
+
+      ```
+
+
+      This operation does not delete other columns or change the source table. It creates a new result set containing
+      only the requested fields. Explicit column lists are usually clearer than `SELECT *` because they document
+      the intended output and remain stable when a table gains new fields.
+
+
+      For identifiers and labels, a practical order is often: identifier first, readable name second, category or
+      status after that.
+
+
+      The starter query already names the `inventory` table. Replace the comment with exactly the three requested
+      columns, separated by commas.'
+  required_for_completion: true
 - activity_id: structure_debug
   title: Repair a column-list error
   type: debugging
@@ -186,3 +282,49 @@ activities:
     common_errors:
     - Removing a requested column.
     - Adding commas after SELECT or before FROM.
+  instruction:
+    title: Use punctuation to separate expressions
+    objective: Diagnose and repair a malformed column list.
+    action_label: Repair and run the query
+    body: 'Whitespace helps people read SQL, but it does not separate expressions in a `SELECT` list. Commas do
+      that work.
+
+
+      This is valid:
+
+
+      ```sql
+
+      SELECT employee_id, full_name, department
+
+      FROM employees;
+
+      ```
+
+
+      This is not a three-column list:
+
+
+      ```sql
+
+      SELECT employee_id full_name department
+
+      FROM employees;
+
+      ```
+
+
+      Without commas, the database may interpret adjacent words as aliases or report a syntax error. When debugging
+      a selected-column list, check three things:
+
+
+      1. Every requested column is present.
+
+      2. A comma appears between expressions, but not before `FROM`.
+
+      3. Each column name exists in the source table.
+
+
+      Do not “fix” the query by removing requested columns or replacing the list with `*`. Preserve the requested
+      output and repair only the punctuation.'
+  required_for_completion: true

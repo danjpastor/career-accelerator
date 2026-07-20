@@ -1,0 +1,155 @@
+lesson_id: sql_aggregations
+title: Aggregating Business Data
+order: 1
+difficulty: intermediate
+description: Summarize operational data at the correct business grain.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain aggregating business data.
+- Apply aggregating business data to an analyst request.
+key_takeaways:
+- Summarize operational data at the correct business grain.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.aggregations
+requires:
+- sql.clause_composition
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: agg_recognition
+  title: Choose the grouped metric pattern
+  type: recognition
+  runtime: recognition
+  prompt: Which clause creates one result row per region?
+  answer_options:
+  - GROUP BY region
+  - ORDER BY region
+  - WHERE region
+  - LIMIT region
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: GROUP BY region
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which clause creates one result row per region?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Group rows before reporting metrics
+    after_correct: You identified the core idea behind group rows before reporting metrics.
+    common_errors: []
+  instruction:
+    title: Group rows before reporting metrics
+    objective: Build a practical understanding of group rows before reporting metrics.
+    action_label: Choose the best answer
+    body: Aggregate functions summarize many source rows. `GROUP BY` defines the grain of the result, such as one
+      row per region or status.
+  required_for_completion: true
+- activity_id: agg_guided
+  title: Count orders by region
+  type: guided
+  runtime: sql
+  prompt: Return each region and its order count, sorted by region.
+  starter: 'SELECT region, COUNT(*) AS order_count
+
+    FROM orders
+
+    -- group and sort the result'
+  solution: SELECT region, COUNT(*) AS order_count FROM orders GROUP BY region ORDER BY region;
+  hints:
+  - Focus on GROUP BY and COUNT.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT region, COUNT(*) AS order_count FROM orders GROUP BY region ORDER BY region;
+    required_patterns:
+    - COUNT\s*\(
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return each region and its order count, sorted by region.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - GROUP BY and COUNT
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Build one row per business group
+    objective: Use GROUP BY and COUNT in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Use `COUNT(*)` to count rows and `GROUP BY` to define one result row per region.
+  required_for_completion: true
+- activity_id: agg_mastery
+  title: Compare average order value by status
+  type: mastery
+  runtime: sql
+  prompt: Return each status and the average order_total rounded to two decimals, sorted by status.
+  starter: 'SELECT
+
+    FROM orders;'
+  solution: SELECT status, ROUND(AVG(order_total), 2) AS avg_order_value FROM orders GROUP BY status ORDER BY status;
+  hints:
+  - Focus on AVG and grouped metrics.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT status, ROUND(AVG(order_total), 2) AS avg_order_value FROM orders GROUP BY status ORDER
+      BY status;
+    required_patterns:
+    - AVG\s*\(
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 9
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return each status and the average order_total rounded to two decimals, sorted by status.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - AVG and grouped metrics
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Create a stakeholder-ready grouped measure
+    objective: Use AVG and grouped metrics in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Choose the reporting grain first, then calculate the average inside each group.
+  required_for_completion: true

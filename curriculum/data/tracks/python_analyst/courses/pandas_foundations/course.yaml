@@ -1,0 +1,12 @@
+course_id: pandas_foundations
+title: pandas Foundations
+order: 2
+description: Use pandas to reshape, summarize, select, and visualize tabular data in a repeatable analysis workflow.
+estimated_minutes: 72
+outcomes:
+- Explain the purpose of each core concept in an analyst workflow.
+- Apply the concepts through short, interactive decisions and independent checks.
+modules:
+- modules/core/module.yaml
+assessments: []
+skills_labs: []

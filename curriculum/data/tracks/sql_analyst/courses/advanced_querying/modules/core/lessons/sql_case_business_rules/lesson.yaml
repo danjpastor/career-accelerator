@@ -1,0 +1,161 @@
+lesson_id: sql_case_business_rules
+title: Business Rules with CASE
+order: 1
+difficulty: intermediate
+description: Translate ordered business rules into transparent query logic.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain business rules with case.
+- Apply business rules with case to an analyst request.
+key_takeaways:
+- Translate ordered business rules into transparent query logic.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.case_logic
+requires:
+- sql.joins
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: case_recognition
+  title: Order CASE conditions safely
+  type: recognition
+  runtime: recognition
+  prompt: When CASE conditions overlap, which condition should normally appear first?
+  answer_options:
+  - The most specific condition
+  - The broadest condition
+  - The ELSE result
+  - The column alias
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The most specific condition
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: When CASE conditions overlap, which condition should normally appear first?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Turn policy into ordered logic
+    after_correct: You identified the core idea behind turn policy into ordered logic.
+    common_errors: []
+  instruction:
+    title: Turn policy into ordered logic
+    objective: Build a practical understanding of turn policy into ordered logic.
+    action_label: Choose the best answer
+    body: '`CASE` evaluates conditions from top to bottom. Place more specific rules before broader rules so they
+      are not shadowed.'
+  required_for_completion: true
+- activity_id: case_guided
+  title: Label order workflow status
+  type: guided
+  runtime: sql
+  prompt: 'Return order_id and a workflow_label: ''Done'' for Completed, ''Active'' for Processing, otherwise ''Review''.
+    Sort by order_id.'
+  starter: "SELECT order_id,\n       CASE\n       END AS workflow_label\nFROM orders\nORDER BY order_id;"
+  solution: SELECT order_id, CASE WHEN status = 'Completed' THEN 'Done' WHEN status = 'Processing' THEN 'Active'
+    ELSE 'Review' END AS workflow_label FROM orders ORDER BY order_id;
+  hints:
+  - Focus on searched CASE.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, CASE WHEN status = 'Completed' THEN 'Done' WHEN status = 'Processing' THEN
+      'Active' ELSE 'Review' END AS workflow_label FROM orders ORDER BY order_id;
+    required_patterns:
+    - CASE\s+WHEN
+    - ELSE
+    - END\s+AS
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: 'Return order_id and a workflow_label: ''Done'' for Completed, ''Active'' for Processing, otherwise ''Review''.
+      Sort by order_id.'
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - searched CASE
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Translate workflow rules into result labels
+    objective: Use searched CASE in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Write each business rule as a `WHEN` condition and keep a clear fallback in `ELSE`.
+  required_for_completion: true
+- activity_id: case_mastery
+  title: Assign ticket response tiers
+  type: mastery
+  runtime: sql
+  prompt: 'Return ticket_id and response_tier: ''Immediate'' for Urgent, ''Same Day'' for High, otherwise ''Standard''.
+    Sort by ticket_id.'
+  starter: 'SELECT ticket_id,
+
+    FROM support_tickets
+
+    ORDER BY ticket_id;'
+  solution: SELECT ticket_id, CASE WHEN priority = 'Urgent' THEN 'Immediate' WHEN priority = 'High' THEN 'Same Day'
+    ELSE 'Standard' END AS response_tier FROM support_tickets ORDER BY ticket_id;
+  hints:
+  - Focus on ordered CASE rules.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT ticket_id, CASE WHEN priority = 'Urgent' THEN 'Immediate' WHEN priority = 'High' THEN
+      'Same Day' ELSE 'Standard' END AS response_tier FROM support_tickets ORDER BY ticket_id;
+    required_patterns:
+    - CASE\s+WHEN
+    - END\s+AS
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 9
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: 'Return ticket_id and response_tier: ''Immediate'' for Urgent, ''Same Day'' for High, otherwise ''Standard''.
+      Sort by ticket_id.'
+    tables:
+    - support_tickets
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - ordered CASE rules
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Encode a service policy
+    objective: Use ordered CASE rules in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Order the highest-priority condition first and provide a complete fallback.
+  required_for_completion: true

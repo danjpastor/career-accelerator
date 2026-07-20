@@ -55,6 +55,32 @@ activities:
     - ASC
     after_correct: Ascending date order moves earlier calendar values to the top.
     common_errors: []
+  instruction:
+    title: Match sort direction to business language
+    objective: Choose ascending or descending order for a date request.
+    action_label: Choose the sort clause
+    body: 'A query result has no guaranteed business order unless it includes `ORDER BY`.
+
+
+      For dates:
+
+
+      - `ASC` usually means oldest to newest.
+
+      - `DESC` usually means newest to oldest.
+
+
+      For numbers, ascending means lowest to highest and descending means highest to lowest. For text, ascending
+      generally means A–Z.
+
+
+      Translate the stakeholder’s words directly. “Oldest opened first” means the earliest date should appear at
+      the top, so the date must be sorted ascending.
+
+
+      Choose the clause that places the oldest `opened_date` values first. Do not confuse “oldest” with “largest”
+      or assume descending is always more important.'
+  required_for_completion: true
 - activity_id: sort_guided
   title: Rank products by price
   type: guided
@@ -105,6 +131,35 @@ activities:
     - DESC
     after_correct: Descending numeric order places the largest price at the top.
     common_errors: []
+  instruction:
+    title: Rank a measure with ORDER BY
+    objective: Sort a numeric field from highest to lowest.
+    action_label: Rank the product prices
+    body: '`ORDER BY` sorts the result after the qualifying rows and selected expressions have been defined.
+
+
+      ```sql
+
+      SELECT service_name, monthly_cost
+
+      FROM services
+
+      ORDER BY monthly_cost DESC;
+
+      ```
+
+
+      `DESC` puts the largest values first. `ASC` is the default, but writing the direction explicitly makes the
+      query easier to review.
+
+
+      Sorting changes presentation order; it does not modify the table. If two rows share the same price, their
+      relative order may remain unspecified unless you add a second sort key.
+
+
+      Complete the product query so the highest `unit_price` appears first. Keep the result to the requested two
+      columns.'
+  required_for_completion: true
 - activity_id: sort_multiple_keys
   title: Sort subscriptions by region and fee
   type: independent
@@ -157,6 +212,39 @@ activities:
     after_correct: SQL groups equal region values through the first key and ranks fees within those groups through
       the second.
     common_errors: []
+  instruction:
+    title: Use left-to-right sort priority
+    objective: Group rows by one field and rank them within each group.
+    action_label: Apply both sort keys
+    body: 'Multiple sort keys are evaluated from left to right:
+
+
+      ```sql
+
+      ORDER BY region ASC, annual_value DESC
+
+      ```
+
+
+      SQL first arranges rows by region. Only among rows with the same region does it apply the second key, ranking
+      annual value from highest to lowest.
+
+
+      This pattern is common in stakeholder reports: group by a familiar category, then prioritize the most important
+      records inside each category.
+
+
+      The requested order is:
+
+
+      1. `region` alphabetically A–Z.
+
+      2. Within each region, `monthly_fee` highest to lowest.
+
+
+      Write both expressions in one `ORDER BY` clause, separated by a comma. Reversing the keys would answer a different
+      question.'
+  required_for_completion: true
 - activity_id: combine_top_orders
   title: Build a top-order report
   type: transfer
@@ -223,6 +311,45 @@ activities:
     after_correct: Filtering defines the eligible population, sorting identifies the largest values, and LIMIT returns
       the requested top three.
     common_errors: []
+  instruction:
+    title: Build a true top-N query
+    objective: Combine filtering, sorting, and limiting in the correct order.
+    action_label: Create the top-order report
+    body: 'A top-N business question requires three separate decisions:
+
+
+      1. **Eligibility:** Which rows belong in the population?
+
+      2. **Ranking:** Which measure determines the top records?
+
+      3. **Quantity:** How many ranked rows should be returned?
+
+
+      The foundation clause order is:
+
+
+      ```sql
+
+      SELECT ...
+
+      FROM ...
+
+      WHERE ...
+
+      ORDER BY ...
+
+      LIMIT ...;
+
+      ```
+
+
+      For this report, only `Completed` orders are eligible. Rank those orders by `order_total` descending, then
+      keep the first three. If you apply `LIMIT` without sorting, you get an arbitrary preview rather than the largest
+      orders.
+
+
+      Build the complete report one clause at a time and run it to confirm the highest value appears first.'
+  required_for_completion: true
 - activity_id: combine_debug_clause_order
   title: Repair clause order
   type: debugging
@@ -280,6 +407,44 @@ activities:
     - debugging
     after_correct: SQL requires WHERE before ORDER BY because filtering is defined before result ordering.
     common_errors: []
+  instruction:
+    title: Repair structural clause order
+    objective: Place filtering before sorting in a foundation query.
+    action_label: Reorder the clauses
+    body: 'SQL clauses follow a grammar; they cannot be rearranged freely. In a foundation query, use:
+
+
+      ```sql
+
+      SELECT ...
+
+      FROM ...
+
+      WHERE ...
+
+      ORDER BY ...;
+
+      ```
+
+
+      The starter places `ORDER BY` before `WHERE`, so the database encounters a filter where the grammar no longer
+      permits one.
+
+
+      When debugging clause order, avoid rewriting the whole query. Identify each clause’s job, then place it in
+      the standard sequence:
+
+
+      - `FROM` identifies the source.
+
+      - `WHERE` defines eligible rows.
+
+      - `ORDER BY` arranges the resulting rows.
+
+
+      Move the existing status condition above the existing sort clause. Preserve the selected columns and descending
+      fee order.'
+  required_for_completion: true
 - activity_id: sort_mastery
   title: Prioritize the oldest unresolved tickets
   type: mastery
@@ -345,3 +510,44 @@ activities:
     after_correct: The query defines the unresolved population, places the oldest work first, and limits the result
       to a manageable action list.
     common_errors: []
+  instruction:
+    title: Create an operational priority list
+    objective: Independently combine alternatives, chronological sorting, and a limit.
+    action_label: Build the oldest-ticket queue
+    body: 'Operational queues often combine several foundation concepts. Translate the request into a query plan
+      before typing:
+
+
+      - Population: tickets whose status is `Open` or `Pending`
+
+      - Output: the five requested columns
+
+      - Priority order: oldest `opened_date` first
+
+      - Result size: no more than five rows
+
+
+      A correct structure is:
+
+
+      ```sql
+
+      SELECT ...
+
+      FROM ...
+
+      WHERE ...
+
+      ORDER BY ... ASC
+
+      LIMIT 5;
+
+      ```
+
+
+      Use parentheses or `IN` to express the two accepted statuses. Ascending date order places the oldest unresolved
+      work first. Add the limit only after the order is defined.
+
+
+      This is the final lesson mastery step. Pass it without using the full solution to unlock the course checkpoint.'
+  required_for_completion: true

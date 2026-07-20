@@ -1,0 +1,130 @@
+lesson_id: pandas_visualization
+title: Creating and Visualizing DataFrames
+order: 4
+difficulty: beginner
+description: Build practical fluency with creating and visualizing dataframes.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of creating and visualizing dataframes.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Creating and Visualizing DataFrames supports a reliable, explainable analytics workflow.
+teaches:
+- pandas.visualization
+requires:
+- pandas.indexing
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: pandas_visualization_step_1
+  title: 'Practice 1: Creating and Visualizing DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: What is the safest way to build a DataFrame from records?
+  answer_options:
+  - Use consistently named fields for each record
+  - Mix unrelated shapes without checking
+  - Rely on column order only
+  - Skip type inspection
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Use consistently named fields for each record
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What is the safest way to build a DataFrame from records?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Creating and Visualizing DataFrames
+    after_correct: You identified the core idea behind creating and visualizing dataframes.
+    common_errors: []
+  instruction:
+    title: Creating and Visualizing DataFrames
+    objective: Build a practical understanding of creating and visualizing dataframes.
+    action_label: Choose the best answer
+    body: Consistent record keys become predictable DataFrame columns.
+  required_for_completion: true
+- activity_id: pandas_visualization_step_2
+  title: 'Practice 2: Creating and Visualizing DataFrames'
+  type: recognition
+  runtime: recognition
+  prompt: Which chart is usually strongest for a continuous distribution?
+  answer_options:
+  - Histogram
+  - Pie chart
+  - Single KPI card
+  - Relationship diagram
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Histogram
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which chart is usually strongest for a continuous distribution?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Creating and Visualizing DataFrames
+    after_correct: You identified the core idea behind creating and visualizing dataframes.
+    common_errors: []
+  instruction:
+    title: Creating and Visualizing DataFrames
+    objective: Build a practical understanding of creating and visualizing dataframes.
+    action_label: Choose the best answer
+    body: Histograms show how numeric observations are distributed across ranges.
+  required_for_completion: true
+- activity_id: pandas_visualization_step_3
+  title: 'Practice 3: Creating and Visualizing DataFrames'
+  type: mastery
+  runtime: recognition
+  prompt: What should happen before sharing a chart?
+  answer_options:
+  - Validate the underlying data and label the chart clearly
+  - Remove every axis label
+  - Use as many colors as possible
+  - Hide the metric definition
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Validate the underlying data and label the chart clearly
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What should happen before sharing a chart?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Creating and Visualizing DataFrames
+    after_correct: You identified the core idea behind creating and visualizing dataframes.
+    common_errors: []
+  instruction:
+    title: Creating and Visualizing DataFrames
+    objective: Build a practical understanding of creating and visualizing dataframes.
+    action_label: Choose the best answer
+    body: A chart is only trustworthy when its data, aggregation, and labels are correct.
+  required_for_completion: true

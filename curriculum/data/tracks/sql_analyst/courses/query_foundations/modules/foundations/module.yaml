@@ -1,8 +1,7 @@
 module_id: foundations
 title: Query Foundations
 order: 1
-description: A five-lesson foundation in table structure, result design, exploration, filtering, and ordered business
-  queries.
+description: Work through query foundations one focused, interactive step at a time.
 lessons:
 - lessons/sql_foundations_structure/lesson.yaml
 - lessons/sql_foundations_select_alias/lesson.yaml

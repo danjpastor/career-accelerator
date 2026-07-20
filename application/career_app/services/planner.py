@@ -63,7 +63,7 @@ def infer(label):
             "google",
             "course",
             "module",
-            "datacamp",
+            "academy",
             "lesson",
             "quiz",
         )
@@ -351,6 +351,8 @@ def available(conn, week):
 
     eligible = []
     for row in rows:
+        if str(row["track_key"] or "").lower() == "datacamp" or "datacamp" in str(row["label"] or "").lower():
+            continue
         task_week = int(row["week"])
         current_week_task = (
             task_week == week
@@ -682,7 +684,8 @@ def _carryover_tasks(conn, focus_date, current_week):
             carryover_note="Missed yesterday",
         )
         for row in rows
-        if _task_allowed_today(
+        if str(row["label"] or "").lower().find("datacamp") < 0
+        and _task_allowed_today(
             label=row["label"],
             category=(
                 row["category"]
@@ -723,9 +726,9 @@ def _track_metadata(conn, track_key):
 
 
 def _roadmap_fallbacks(conn, state):
-    datacamp_meta = _track_metadata(
+    academy_meta = _track_metadata(
         conn,
-        "datacamp",
+        "academy",
     )
     sql_meta = _track_metadata(
         conn,
@@ -736,20 +739,9 @@ def _roadmap_fallbacks(conn, state):
         "portfolio",
     )
 
-    datacamp_course = datacamp_meta.get(
-        "course",
-        "Current DataCamp course",
-    )
-    datacamp_chapter = datacamp_meta.get(
-        "chapter",
-        datacamp_meta.get(
-            "lesson",
-            "next assigned chapter",
-        ),
-    )
-    datacamp_detail = (
-        f"{datacamp_course} — "
-        f"{datacamp_chapter}"
+    academy_detail = academy_meta.get(
+        "title",
+        "Continue your next Accelerator Academy lesson",
     )
 
     sql_detail = sql_meta.get(
@@ -781,22 +773,19 @@ def _roadmap_fallbacks(conn, state):
         },
         {
             "task_id": None,
-            "label": datacamp_detail,
+            "label": academy_detail,
             "category": "Learning",
             "status": "Roadmap",
             "priority": 1,
-            "estimated_minutes": int(
-                datacamp_meta.get(
-                    "estimated_minutes",
-                    45,
-                )
-            ),
-            "destination": 2,
+            "estimated_minutes": int(academy_meta.get("estimated_minutes", 30)),
+            "destination": 12,
             "carryover": False,
             "roadmap_fallback": True,
-            "source_key": "roadmap:datacamp",
-            "display_title": "DataCamp",
-            "detail": datacamp_detail,
+            "source_key": "roadmap:academy",
+            "track_key": "academy",
+            "target_key": academy_meta.get("target_key"),
+            "display_title": "Accelerator Academy",
+            "detail": academy_detail,
         },
         {
             "task_id": None,
@@ -924,7 +913,7 @@ def _focus_track_rank(conn, item):
         if link:
             return {
                 "google": 0,
-                "datacamp": 1,
+                "academy": 1,
                 "sql": 2,
                 "portfolio": 3,
                 "applied": 4,
@@ -935,7 +924,7 @@ def _focus_track_rank(conn, item):
     )
     if source_key == "roadmap:google":
         return 0
-    if source_key == "roadmap:datacamp":
+    if source_key == "roadmap:academy":
         return 1
     if source_key == "roadmap:sql":
         return 2
@@ -1428,7 +1417,7 @@ def _stored_focus_plan(
 
     display_titles = {
         "google": "Google Certificate",
-        "datacamp": "DataCamp",
+        "academy": "Accelerator Academy",
         "sql": "SQL Practice",
         "portfolio": "Portfolio Project",
         "applied": "Applied Labs",
@@ -1436,6 +1425,8 @@ def _stored_focus_plan(
 
     result = []
     for row in rows:
+        if str(row["track_key"] or "").lower() == "datacamp" or "datacamp" in str(row["title"] or "").lower():
+            continue
         source_key = str(
             row["source_key"]
             or ""
@@ -1546,13 +1537,15 @@ def _today_completion_evidence(
 
     category_map = {
         "google": "Learning",
-        "datacamp": "Learning",
+        "academy": "Learning",
         "sql": "SQL",
         "portfolio": "Portfolio",
         "applied": "Learning",
     }
 
     for row in event_rows:
+        if str(row["track_key"] or "").lower() == "datacamp":
+            continue
         identity = (
             f"{row['track_key']}:"
             f"{row['event_key']}"
@@ -1706,7 +1699,7 @@ def _empty_plan_is_complete(
 
     for track_key in (
         "google",
-        "datacamp",
+        "academy",
         "sql",
         "portfolio",
     ):
@@ -2555,7 +2548,7 @@ def tomorrow_preview(
                         "google": (
                             "Google Certificate"
                         ),
-                        "datacamp": "DataCamp",
+                        "academy": "Accelerator Academy",
                         "sql": "SQL Practice",
                         "portfolio": (
                             "Portfolio Project"

@@ -61,6 +61,26 @@ class SqlValidator:
     def __init__(self, dataset: DatasetDefinition):
         self.dataset = dataset
 
+    def table_schema(self, table_name: str) -> tuple[tuple[str, str], ...]:
+        """Return the DuckDB-inferred schema for one curriculum table.
+
+        The same CSV loader used by the exercise runtime is used here so the
+        learner sees the exact column names and data types available to their
+        query.
+        """
+        table = next((item for item in self.dataset.tables if item.name == table_name), None)
+        if table is None:
+            raise SqlValidationError(f"Unknown table {table_name!r} in dataset {self.dataset.dataset_id!r}.")
+        if not _IDENTIFIER.fullmatch(table.name):
+            raise SqlValidationError(f"Unsafe table name: {table.name}")
+        try:
+            with duckdb.connect(":memory:") as conn:
+                _load_dataset(conn, self.dataset)
+                rows = conn.execute(f'PRAGMA table_info("{table.name}")').fetchall()
+            return tuple((str(row[1]), str(row[2])) for row in rows)
+        except duckdb.Error as exc:
+            raise SqlValidationError(str(exc)) from exc
+
     def execute(self, sql: str) -> ValidationResult:
         try:
             query = _safe_query(sql)

@@ -1,0 +1,9 @@
+module_id: powerbi_foundations_core
+title: Power BI Foundations
+order: 1
+description: Work through power bi foundations one focused, interactive step at a time.
+lessons:
+- lessons/powerbi_getting_started/lesson.yaml
+- lessons/powerbi_transforming_data/lesson.yaml
+- lessons/powerbi_visualizing_data/lesson.yaml
+- lessons/powerbi_filtering/lesson.yaml

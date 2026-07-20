@@ -1,0 +1,9 @@
+module_id: python_foundations_core
+title: Python Foundations
+order: 1
+description: Work through python foundations one focused, interactive step at a time.
+lessons:
+- lessons/python_basics/lesson.yaml
+- lessons/python_lists/lesson.yaml
+- lessons/python_functions_packages/lesson.yaml
+- lessons/python_numpy/lesson.yaml

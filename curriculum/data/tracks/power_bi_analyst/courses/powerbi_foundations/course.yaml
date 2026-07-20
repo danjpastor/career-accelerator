@@ -1,0 +1,13 @@
+course_id: powerbi_foundations
+title: Power BI Foundations
+order: 1
+description: 'Learn the Power BI workflow: inspect imported data, shape it deliberately, build clear visuals, and
+  test report interactions.'
+estimated_minutes: 72
+outcomes:
+- Explain the purpose of each core concept in an analyst workflow.
+- Apply the concepts through short, interactive decisions and independent checks.
+modules:
+- modules/core/module.yaml
+assessments: []
+skills_labs: []

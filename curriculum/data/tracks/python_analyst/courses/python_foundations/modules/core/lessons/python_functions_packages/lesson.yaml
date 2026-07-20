@@ -1,0 +1,130 @@
+lesson_id: python_functions_packages
+title: Functions and Packages
+order: 3
+difficulty: beginner
+description: Build practical fluency with functions and packages.
+estimated_minutes: 15
+content: lesson.md
+objectives:
+- Explain the purpose of functions and packages.
+- Choose an appropriate action in a realistic analyst workflow.
+key_takeaways:
+- Functions and Packages supports a reliable, explainable analytics workflow.
+teaches:
+- python.functions_packages
+requires:
+- python.lists
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: python_functions_packages_step_1
+  title: 'Practice 1: Functions and Packages'
+  type: recognition
+  runtime: recognition
+  prompt: What is the main value of a function?
+  answer_options:
+  - Reusable named logic with clear inputs and outputs
+  - Automatic chart formatting
+  - A replacement for data
+  - A database relationship
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Reusable named logic with clear inputs and outputs
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What is the main value of a function?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Functions and Packages
+    after_correct: You identified the core idea behind functions and packages.
+    common_errors: []
+  instruction:
+    title: Functions and Packages
+    objective: Build a practical understanding of functions and packages.
+    action_label: Choose the best answer
+    body: Functions reduce repetition and make an analysis workflow testable.
+  required_for_completion: true
+- activity_id: python_functions_packages_step_2
+  title: 'Practice 2: Functions and Packages'
+  type: recognition
+  runtime: recognition
+  prompt: Which keyword sends a result back to the caller?
+  answer_options:
+  - return
+  - import
+  - for
+  - class
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: return
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which keyword sends a result back to the caller?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Functions and Packages
+    after_correct: You identified the core idea behind functions and packages.
+    common_errors: []
+  instruction:
+    title: Functions and Packages
+    objective: Build a practical understanding of functions and packages.
+    action_label: Choose the best answer
+    body: '`return` makes a function result available to the calling code.'
+  required_for_completion: true
+- activity_id: python_functions_packages_step_3
+  title: 'Practice 3: Functions and Packages'
+  type: mastery
+  runtime: recognition
+  prompt: Why import a package with a conventional alias?
+  answer_options:
+  - It keeps code concise and recognizable to other analysts
+  - It changes the package source
+  - It prevents all errors
+  - It removes dependencies
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It keeps code concise and recognizable to other analysts
+  required_for_practice: true
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Why import a package with a conventional alias?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Functions and Packages
+    after_correct: You identified the core idea behind functions and packages.
+    common_errors: []
+  instruction:
+    title: Functions and Packages
+    objective: Build a practical understanding of functions and packages.
+    action_label: Choose the best answer
+    body: Aliases such as `pd` for pandas follow widely understood conventions.
+  required_for_completion: true

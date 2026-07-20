@@ -1,0 +1,160 @@
+lesson_id: sql_ctes_correlated
+title: Correlated Queries and CTEs
+order: 3
+difficulty: intermediate
+description: Structure multi-step SQL and calculate row-specific group benchmarks.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain correlated queries and ctes.
+- Apply correlated queries and ctes to an analyst request.
+key_takeaways:
+- Structure multi-step SQL and calculate row-specific group benchmarks.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.ctes_correlated
+requires:
+- sql.subqueries
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: cte_recognition
+  title: Choose a readable query stage
+  type: recognition
+  runtime: recognition
+  prompt: Which keyword introduces a named common table expression?
+  answer_options:
+  - WITH
+  - HAVING
+  - LIMIT
+  - CAST
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: WITH
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which keyword introduces a named common table expression?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Organize multi-step logic
+    after_correct: You identified the core idea behind organize multi-step logic.
+    common_errors: []
+  instruction:
+    title: Organize multi-step logic
+    objective: Build a practical understanding of organize multi-step logic.
+    action_label: Choose the best answer
+    body: A CTE names an intermediate result so later query stages can read like a sequence of analytical steps.
+  required_for_completion: true
+- activity_id: cte_guided
+  title: Summarize regional order totals
+  type: guided
+  runtime: sql
+  prompt: Use a CTE named regional_orders to calculate total_order_value by region, then return it sorted by region.
+  starter: "WITH regional_orders AS (\n    -- build the regional summary\n)\nSELECT *\nFROM regional_orders\nORDER\
+    \ BY region;"
+  solution: WITH regional_orders AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY region)
+    SELECT region, total_order_value FROM regional_orders ORDER BY region;
+  hints:
+  - Focus on CTE.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: WITH regional_orders AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP
+      BY region) SELECT region, total_order_value FROM regional_orders ORDER BY region;
+    required_patterns:
+    - ^\s*WITH\b
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 8
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Use a CTE named regional_orders to calculate total_order_value by region, then return it sorted by region.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - CTE
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Name an analytical stage
+    objective: Use CTE in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Keep the aggregation inside the CTE and make the final query responsible for presentation order.
+  required_for_completion: true
+- activity_id: cte_mastery
+  title: Find orders above their regional average
+  type: mastery
+  runtime: sql
+  prompt: Return order_id, region, and order_total when an order is above the average for its own region. Sort by
+    order_id.
+  starter: 'SELECT o.order_id, o.region, o.order_total
+
+    FROM orders AS o
+
+    WHERE o.order_total > (
+
+    );'
+  solution: SELECT o.order_id, o.region, o.order_total FROM orders AS o WHERE o.order_total > (SELECT AVG(o2.order_total)
+    FROM orders AS o2 WHERE o2.region = o.region) ORDER BY o.order_id;
+  hints:
+  - Focus on correlated subquery.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT o.order_id, o.region, o.order_total FROM orders AS o WHERE o.order_total > (SELECT AVG(o2.order_total)
+      FROM orders AS o2 WHERE o2.region = o.region) ORDER BY o.order_id;
+    required_patterns:
+    - SELECT\s+AVG
+    - o2\.region\s*=\s*o\.region
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 10
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return order_id, region, and order_total when an order is above the average for its own region. Sort by
+      order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - correlated subquery
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Compare each row with its own group
+    objective: Use correlated subquery in a realistic analyst query.
+    action_label: Write and validate the query
+    body: The inner query references the outer row region, so the benchmark changes for each order.
+  required_for_completion: true

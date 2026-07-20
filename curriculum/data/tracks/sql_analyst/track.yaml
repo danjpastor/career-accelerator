@@ -1,6 +1,10 @@
 track_id: sql_analyst
 title: SQL for Data Analysts
+navigation_title: SQL
 order: 1
 description: Build reliable SQL skills through instruction, guided practice, independent mastery, and applied work.
 courses:
 - courses/query_foundations/course.yaml
+- courses/aggregations_transformations/course.yaml
+- courses/joining_combining/course.yaml
+- courses/advanced_querying/course.yaml

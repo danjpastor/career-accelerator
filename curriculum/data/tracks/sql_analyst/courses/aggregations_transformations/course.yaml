@@ -1,0 +1,12 @@
+course_id: aggregations_transformations
+title: Aggregations and Transformation
+order: 2
+description: Turn detailed rows into useful business metrics, categories, and decision-ready summaries.
+estimated_minutes: 112
+outcomes:
+- Explain the purpose of each core concept in an analyst workflow.
+- Apply the concepts through short, interactive decisions and independent checks.
+modules:
+- modules/core/module.yaml
+assessments: []
+skills_labs: []

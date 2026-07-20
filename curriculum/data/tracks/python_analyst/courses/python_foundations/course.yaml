@@ -1,0 +1,13 @@
+course_id: python_foundations
+title: Python Foundations
+order: 1
+description: Learn the Python building blocks analysts use to store values, work with collections, reuse logic,
+  and calculate efficiently.
+estimated_minutes: 72
+outcomes:
+- Explain the purpose of each core concept in an analyst workflow.
+- Apply the concepts through short, interactive decisions and independent checks.
+modules:
+- modules/core/module.yaml
+assessments: []
+skills_labs: []

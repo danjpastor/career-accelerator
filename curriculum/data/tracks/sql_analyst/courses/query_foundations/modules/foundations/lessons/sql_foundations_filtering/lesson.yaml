@@ -56,6 +56,37 @@ activities:
     - boundaries
     after_correct: Greater than or equal to includes the threshold itself.
     common_errors: []
+  instruction:
+    title: Translate boundary words exactly
+    objective: Choose a comparison operator that includes the requested threshold.
+    action_label: Choose the boundary condition
+    body: 'Small wording differences create different populations. Translate the stakeholder’s boundary language
+      before writing the rest of a filter.
+
+
+      | Wording | Operator |
+
+      |---|---|
+
+      | more than 29 | `> 29` |
+
+      | at least 29 | `>= 29` |
+
+      | less than 29 | `< 29` |
+
+      | no more than 29 | `<= 29` |
+
+
+      “At least” includes the threshold itself. A subscription with a monthly fee of exactly 29 must qualify. Using
+      `>` would incorrectly exclude it.
+
+
+      A reliable habit is to test the boundary value mentally: “Should 29 be returned?” If yes, the equality component
+      must be present.
+
+
+      Select the condition that includes 29 and every larger monthly fee.'
+  required_for_completion: true
 - activity_id: filter_text_guided
   title: Find active subscriptions
   type: guided
@@ -106,6 +137,36 @@ activities:
     - text comparison
     after_correct: The WHERE clause limits the result to rows whose status exactly matches the requested category.
     common_errors: []
+  instruction:
+    title: Filter rows with WHERE
+    objective: Keep only records whose text category matches a requested value.
+    action_label: Complete the status filter
+    body: '`WHERE` controls which source rows qualify for the result.
+
+
+      ```sql
+
+      SELECT request_id, status
+
+      FROM requests
+
+      WHERE status = ''Open'';
+
+      ```
+
+
+      Text values are normally enclosed in single quotes. The column name is not quoted in this beginner pattern.
+      Equality compares each row’s value to the requested category.
+
+
+      `SELECT` and `WHERE` have different jobs: `SELECT` chooses result columns, while `WHERE` chooses result rows.
+      A field used in the filter does not have to appear in the output, although including it can make validation
+      easier.
+
+
+      Complete the query so it keeps only rows whose `status` is exactly `Active`. Preserve the requested three-column
+      result.'
+  required_for_completion: true
 - activity_id: filter_threshold
   title: Apply an inclusive fee threshold
   type: independent
@@ -156,6 +217,40 @@ activities:
     - inclusive thresholds
     after_correct: Using >= preserves the business boundary instead of excluding Standard plans priced at 29.
     common_errors: []
+  instruction:
+    title: Apply an inclusive numeric threshold
+    objective: Use a numeric comparison to define an eligible population.
+    action_label: Write the threshold filter
+    body: 'Numeric conditions do not use quotes around the number:
+
+
+      ```sql
+
+      WHERE requested_amount >= 5000
+
+      ```
+
+
+      The operator must match the business wording. “At least 29” means the boundary is included, so the correct
+      comparison is `>= 29`.
+
+
+      When validating a threshold query, check three sample cases:
+
+
+      - A value below the boundary should be excluded.
+
+      - A value exactly on the boundary should be included.
+
+      - A value above the boundary should be included.
+
+
+      This simple test catches many off-by-one or wrong-operator errors.
+
+
+      Write the full query for subscriptions whose `monthly_fee` is at least 29. Return the requested identifier,
+      plan, and fee fields so the stakeholder can verify the qualifying values.'
+  required_for_completion: true
 - activity_id: filter_and_guided
   title: Find low-stock active inventory
   type: guided
@@ -206,6 +301,18 @@ activities:
     after_correct: The query compares two columns on each row and requires both stock and lifecycle conditions to
       be true.
     common_errors: []
+  instruction:
+    title: Require multiple conditions with AND
+    objective: Return rows only when every stated business condition is true.
+    action_label: Build the combined filter
+    body: "`AND` connects conditions that must all be true for a row to qualify.\n\n```sql\nWHERE active = TRUE\n\
+      \  AND units_on_hand < reorder_level\n```\n\nThe second condition compares two columns from the same row.\
+      \ That is different from comparing a column to a fixed value: each item’s stock is evaluated against its own\
+      \ reorder threshold.\n\nTranslate the business request into separate statements before combining them:\n\n\
+      1. The item is not discontinued.\n2. Units on hand are below that item’s reorder level.\n\nIf either statement\
+      \ is false, the row should be excluded. Use the table’s actual Boolean representation shown by the starter\
+      \ and data. Return the fields requested for operational follow-up."
+  required_for_completion: true
 - activity_id: filter_parentheses_transfer
   title: Protect mixed Boolean logic
   type: transfer
@@ -256,6 +363,19 @@ activities:
     - parentheses
     after_correct: Parentheses ensure the Technical-team rule applies to both unresolved statuses.
     common_errors: []
+  instruction:
+    title: Protect mixed AND/OR logic with parentheses
+    objective: Group alternatives before applying a condition that must affect all of them.
+    action_label: Group the ticket logic
+    body: "SQL evaluates `AND` before `OR`. That can make an ungrouped query return records outside the intended\
+      \ population.\n\nThe request “Open or Pending tickets assigned to Technical” contains two logical groups:\n\
+      \n1. Status may be `Open` **or** `Pending`.\n2. Every qualifying ticket must be assigned to `Technical`.\n\
+      \nExpress the alternatives as one parenthesized unit:\n\n```sql\nWHERE (status = 'Open' OR status = 'Pending')\n\
+      \  AND assigned_team = 'Technical'\n```\n\nWithout parentheses, the team condition may apply only to the second\
+      \ status. Parentheses are valuable even when you know precedence rules because they make the business intent\
+      \ visible to reviewers.\n\nBuild the requested four-column result and verify that no ticket from another team\
+      \ appears."
+  required_for_completion: true
 - activity_id: filter_null_debug
   title: Repair a NULL comparison
   type: debugging
@@ -307,6 +427,34 @@ activities:
     - debugging
     after_correct: IS NULL evaluates missingness directly; equality comparisons with NULL do not return true.
     common_errors: []
+  instruction:
+    title: Test missing values with IS NULL
+    objective: Repair a filter that incorrectly compares NULL with equality.
+    action_label: Repair the NULL test
+    body: '`NULL` represents missing or unknown information. It is not equal to a normal value, and it is not even
+      compared with `= NULL`.
+
+
+      Use:
+
+
+      ```sql
+
+      WHERE satisfaction_score IS NULL
+
+      ```
+
+
+      Use `IS NOT NULL` when the request needs known values.
+
+
+      A missing satisfaction score does not necessarily mean zero. It may mean the survey was not completed or the
+      ticket is unresolved. Preserving that distinction prevents misleading analysis.
+
+
+      The starter query uses an invalid equality comparison. Replace only the NULL test so the result returns tickets
+      with no recorded satisfaction score. Keep the requested output columns unchanged.'
+  required_for_completion: true
 - activity_id: filter_mastery
   title: Prioritize unresolved critical tickets
   type: mastery
@@ -359,3 +507,15 @@ activities:
     after_correct: The query decomposes the request into two accepted sets and combines them with AND, matching
       the stakeholder rule exactly.
     common_errors: []
+  instruction:
+    title: Translate a multi-part business rule
+    objective: Independently combine two sets of alternatives with AND.
+    action_label: Build the priority queue
+    body: "Complex filters become manageable when you translate each business condition separately.\n\nThe requested\
+      \ population has two groups:\n\n- Unresolved status: `Open` or `Pending`\n- Critical priority: `High` or `Urgent`\n\
+      \nA row must satisfy one value from the first group **and** one value from the second group. You may express\
+      \ each alternative group with parenthesized `OR` conditions or with `IN`:\n\n```sql\nWHERE status IN ('Open',\
+      \ 'Pending')\n  AND priority IN ('High', 'Urgent')\n```\n\nBoth forms can be valid if they return the exact\
+      \ requested result. Keep the output columns in the specified order and do not accidentally include `Closed`\
+      \ tickets.\n\nThis is the lesson’s mastery step. Solve it independently to unlock the sorting lesson."
+  required_for_completion: true
