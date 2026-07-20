@@ -1,0 +1,201 @@
+assessment_id: intermediate_sql_checkpoint
+title: Intermediate SQL Checkpoint
+order: 1
+description: Complete the independent questions without opening full solutions.
+estimated_minutes: 30
+requires:
+- sql.conditional_aggregation
+passing_score: 0.8
+instructions:
+- Complete each question independently.
+- Run SQL when useful, then check each answer.
+- A score of 80% or higher passes the checkpoint.
+activities:
+- activity_id: int_cp_1_question
+  title: Group order totals
+  type: mastery
+  runtime: sql
+  prompt: Return region and total_order_value, sorted by region.
+  starter: ''
+  solution: SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY region ORDER BY region;
+  hints:
+  - Start from the requested result grain, then apply group order totals.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY region ORDER BY region;
+    required_patterns:
+    - SUM\s*\(
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return region and total_order_value, sorted by region.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - group order totals
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Group order totals
+    objective: Apply group order totals to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **group order totals** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: int_cp_2_question
+  title: Create a price band
+  type: mastery
+  runtime: sql
+  prompt: 'Return product_id and price_band: Premium for unit_price >= 25, otherwise Standard. Sort by product_id.'
+  starter: ''
+  solution: SELECT product_id, CASE WHEN unit_price >= 25 THEN 'Premium' ELSE 'Standard' END AS price_band FROM
+    products ORDER BY product_id;
+  hints:
+  - Start from the requested result grain, then apply create a price band.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT product_id, CASE WHEN unit_price >= 25 THEN 'Premium' ELSE 'Standard' END AS price_band
+      FROM products ORDER BY product_id;
+    required_patterns:
+    - CASE\s+WHEN
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: 'Return product_id and price_band: Premium for unit_price >= 25, otherwise Standard. Sort by product_id.'
+    tables:
+    - products
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - create a price band
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Create a price band
+    objective: Apply create a price band to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **create a price band** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: int_cp_3_question
+  title: Filter the service queue
+  type: mastery
+  runtime: sql
+  prompt: Return ticket_id for Open or Pending High/Urgent tickets, sorted by ticket_id.
+  starter: ''
+  solution: SELECT ticket_id FROM support_tickets WHERE status IN ('Open','Pending') AND priority IN ('High','Urgent')
+    ORDER BY ticket_id;
+  hints:
+  - Start from the requested result grain, then apply filter the service queue.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT ticket_id FROM support_tickets WHERE status IN ('Open','Pending') AND priority IN ('High','Urgent')
+      ORDER BY ticket_id;
+    required_patterns:
+    - \bAND\b
+    - \bIN\b
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return ticket_id for Open or Pending High/Urgent tickets, sorted by ticket_id.
+    tables:
+    - support_tickets
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - filter the service queue
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Filter the service queue
+    objective: Apply filter the service queue to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **filter the service queue** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: int_cp_4_question
+  title: Calculate conditional revenue
+  type: mastery
+  runtime: sql
+  prompt: Return region and completed_value using conditional SUM, sorted by region.
+  starter: ''
+  solution: SELECT region, SUM(CASE WHEN status = 'Completed' THEN order_total ELSE 0 END) AS completed_value FROM
+    orders GROUP BY region ORDER BY region;
+  hints:
+  - Start from the requested result grain, then apply calculate conditional revenue.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT region, SUM(CASE WHEN status = 'Completed' THEN order_total ELSE 0 END) AS completed_value
+      FROM orders GROUP BY region ORDER BY region;
+    required_patterns:
+    - SUM\s*\(\s*CASE
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return region and completed_value using conditional SUM, sorted by region.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - calculate conditional revenue
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Calculate conditional revenue
+    objective: Apply calculate conditional revenue to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **calculate conditional revenue** inside a complete analyst query. Start by
+      identifying the result grain—what one row should represent—then select only the fields and calculations needed
+      to answer the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

@@ -1,0 +1,14 @@
+course_id: joining_data_in_sql
+title: Joining Data in SQL
+order: 3
+description: Combine row sets vertically and related tables horizontally.
+estimated_minutes: 260
+outcomes:
+- Apply every chapter through interactive decisions and SQL practice.
+- Validate results and explain how the query supports an analyst decision.
+modules:
+- modules/combining_vertically/module.yaml
+- modules/combining_horizontally/module.yaml
+assessments:
+- assessments/joining_data_checkpoint.yaml
+skills_labs: []

@@ -1,0 +1,139 @@
+lesson_id: database_views
+title: Views and Materialized Views
+order: 1
+difficulty: intermediate
+description: Use saved query definitions to simplify access while understanding refresh behavior.
+estimated_minutes: 18
+content: lesson.md
+objectives:
+- Explain views and materialized views.
+- Choose appropriate analyst and database decisions involving views and materialized views.
+key_takeaways:
+- Use saved query definitions to simplify access while understanding refresh behavior.
+- Choose designs based on workload, grain, integrity, and maintainability.
+teaches:
+- database.views
+requires:
+- database.schemas_normalization
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: database_views_1_recognition
+  title: 'Views and Materialized Views: decision 1'
+  type: recognition
+  runtime: recognition
+  prompt: What does a standard view normally store?
+  answer_options:
+  - A query definition
+  - A separate permanent copy of every result row
+  - A password
+  - A CSV path only
+  hints:
+  - Focus on how views and materialized views changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: A query definition
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: What does a standard view normally store?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - views and materialized views
+    after_correct: You correctly applied views and materialized views to the decision.
+    common_errors: []
+  instruction:
+    title: 'Views and Materialized Views: decision 1'
+    objective: Use views and materialized views in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_views_2_recognition
+  title: 'Views and Materialized Views: decision 2'
+  type: recognition
+  runtime: recognition
+  prompt: Why might a team use a materialized view?
+  answer_options:
+  - To cache an expensive result that can be refreshed
+  - To remove all source tables
+  - To avoid permissions entirely
+  - To replace every index
+  hints:
+  - Focus on how views and materialized views changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: To cache an expensive result that can be refreshed
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Why might a team use a materialized view?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - views and materialized views
+    after_correct: You correctly applied views and materialized views to the decision.
+    common_errors: []
+  instruction:
+    title: 'Views and Materialized Views: decision 2'
+    objective: Use views and materialized views in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_views_3_mastery
+  title: 'Views and Materialized Views: decision 3'
+  type: mastery
+  runtime: recognition
+  prompt: What should happen when a materialized view must reflect new source data?
+  answer_options:
+  - Refresh it according to the required freshness policy
+  - Rename every column
+  - Drop the source database
+  - Convert it to a text file
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Refresh it according to the required freshness policy
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: What should happen when a materialized view must reflect new source data?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - views and materialized views
+    after_correct: You correctly applied views and materialized views to the decision.
+    common_errors: []
+  instruction:
+    title: 'Views and Materialized Views: decision 3'
+    objective: Use views and materialized views in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true

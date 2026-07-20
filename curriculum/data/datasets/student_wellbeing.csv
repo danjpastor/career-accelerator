@@ -1,0 +1,9 @@
+student_id,program_level,stay_months,language_score,social_support_score,depression_score,anxiety_score,wellbeing_index
+ST01,Undergraduate,3,82,71,14,16,68
+ST02,Graduate,8,91,63,18,19,61
+ST03,Undergraduate,14,76,80,10,11,76
+ST04,Graduate,5,88,58,21,22,55
+ST05,Undergraduate,10,84,69,15,17,66
+ST06,Graduate,18,93,77,9,10,79
+ST07,Undergraduate,20,79,74,12,13,73
+ST08,Graduate,11,86,65,17,18,63

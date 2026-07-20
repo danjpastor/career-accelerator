@@ -1,0 +1,7 @@
+region,month_start,sales_target
+East,2026-05-01,4500
+East,2026-06-01,5000
+West,2026-05-01,4700
+West,2026-06-01,4800
+South,2026-05-01,4000
+South,2026-06-01,4300

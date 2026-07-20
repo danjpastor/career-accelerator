@@ -1,0 +1,13 @@
+course_id: introduction_to_sql
+title: Introduction to SQL
+order: 1
+description: Build a reliable mental model of relational tables and write clear foundation queries.
+estimated_minutes: 240
+outcomes:
+- Apply every chapter through interactive decisions and SQL practice.
+- Validate results and explain how the query supports an analyst decision.
+modules:
+- modules/introduction_to_sql/module.yaml
+assessments:
+- assessments/introduction_checkpoint.yaml
+skills_labs: []

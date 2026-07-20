@@ -1,0 +1,150 @@
+lesson_id: sql_set_operations
+title: Stacking Rows with UNION
+order: 1
+difficulty: intermediate
+description: Combine compatible query results vertically.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain combining results with union.
+- Apply combining results with union to an analyst request.
+key_takeaways:
+- Combine compatible query results vertically.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.set_operations
+requires:
+- sql.conditional_aggregation
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: union_recognition
+  title: Choose a set operation
+  type: recognition
+  runtime: recognition
+  prompt: Which operator combines compatible result sets and removes duplicate rows?
+  answer_options:
+  - UNION
+  - LEFT JOIN
+  - GROUP BY
+  - CASE
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: UNION
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which operator combines compatible result sets and removes duplicate rows?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Stack compatible results
+    after_correct: You identified the core idea behind stack compatible results.
+    common_errors: []
+  instruction:
+    title: Stack compatible results
+    objective: Build a practical understanding of stack compatible results.
+    action_label: Choose the best answer
+    body: '`UNION` combines rows from two compatible queries and removes duplicates. `UNION ALL` keeps every row.'
+  required_for_completion: true
+- activity_id: union_guided
+  title: Create a shared region list
+  type: guided
+  runtime: sql
+  prompt: Return one alphabetical list of regions appearing in orders or subscriptions.
+  starter: 'SELECT region FROM orders
+
+    -- combine with subscription regions'
+  solution: SELECT region FROM orders UNION SELECT region FROM subscriptions ORDER BY region;
+  hints:
+  - Focus on UNION.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT region FROM orders UNION SELECT region FROM subscriptions ORDER BY region;
+    required_patterns:
+    - \bUNION\b
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return one alphabetical list of regions appearing in orders or subscriptions.
+    tables:
+    - orders
+    - subscriptions
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - UNION
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Combine compatible result sets
+    objective: Use UNION in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Both queries must return the same number of columns with compatible meanings. Add `ORDER BY` after the
+      final query.
+  required_for_completion: true
+- activity_id: union_mastery
+  title: Combine customer identifiers
+  type: mastery
+  runtime: sql
+  prompt: Return one sorted list of customer_id values found in orders or support_tickets.
+  starter: SELECT customer_id FROM orders;
+  solution: SELECT customer_id FROM orders UNION SELECT customer_id FROM support_tickets ORDER BY customer_id;
+  hints:
+  - Focus on UNION.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT customer_id FROM orders UNION SELECT customer_id FROM support_tickets ORDER BY customer_id;
+    required_patterns:
+    - \bUNION\b
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 9
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return one sorted list of customer_id values found in orders or support_tickets.
+    tables:
+    - orders
+    - support_tickets
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - UNION
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Create a deduplicated cross-source identifier list
+    objective: Use UNION in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Use the same column meaning on both sides of the set operation.
+  required_for_completion: true

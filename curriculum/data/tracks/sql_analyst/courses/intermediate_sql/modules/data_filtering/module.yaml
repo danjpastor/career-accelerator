@@ -1,0 +1,8 @@
+module_id: data_filtering
+title: Data Filtering
+order: 3
+description: Build precise row populations with basic and complex conditions.
+lessons:
+- lessons/sql_advanced_filtering/lesson.yaml
+- lessons/sql_multiple_conditions/lesson.yaml
+- lessons/sql_complex_filters/lesson.yaml

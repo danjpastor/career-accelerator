@@ -1,0 +1,105 @@
+lab_id: community_impact_analysis
+title: Bonus Project — Impact Analysis of GoodThought NGO Initiatives
+order: 1
+description: Combine program, funding, and outcome tables to summarize long-running community initiatives.
+estimated_minutes: 90
+requires:
+- database.management
+teaches:
+- analysis.community_impact
+dataset_id: sql_foundations
+prompt: Return program_area, region, project_count, total_funding, total_people_reached, and cost_per_person. Join
+  the three NGO tables, aggregate by program_area and region, round cost_per_person to 2 decimals, and sort by program_area
+  and region.
+brief_markdown: '# Bonus Project — Impact Analysis of GoodThought NGO Initiatives
+
+
+  A nonprofit strategy team needs a reproducible view of funding and reach across its program portfolio. Combine
+  project, funding, and outcome tables, calculate interpretable metrics, and write careful findings. The dataset,
+  question, wording, and solution are original to Accelerator Academy.'
+deliverables:
+- Validated SQL query
+- Result table
+- At least three concise findings
+- Saved submission artifact
+- Demonstrated Evidence record
+acceptance_criteria:
+- The query returns the required population and metrics.
+- The result is grouped and ordered as requested.
+- At least three findings are supported by the output.
+- The final SQL is readable and reproducible.
+reflection_questions:
+- What is the strongest pattern in the result?
+- Which conclusion would require additional data?
+- What data-quality limitation should the stakeholder know?
+rubric:
+  sql_accuracy: 40%
+  validation: 20%
+  findings: 25%
+  professionalism: 15%
+activity:
+  activity_id: community_impact_analysis_query
+  title: Build the analysis query
+  type: mastery
+  runtime: sql
+  prompt: Return program_area, region, project_count, total_funding, total_people_reached, and cost_per_person.
+    Join the three NGO tables, aggregate by program_area and region, round cost_per_person to 2 decimals, and sort
+    by program_area and region.
+  starter: 'SELECT
+
+    FROM '
+  solution: SELECT p.program_area, p.region, COUNT(DISTINCT p.project_id) AS project_count, SUM(f.amount_usd) AS
+    total_funding, SUM(o.people_reached) AS total_people_reached, ROUND(SUM(f.amount_usd) / NULLIF(SUM(o.people_reached),
+    0), 2) AS cost_per_person FROM ngo_projects p LEFT JOIN ngo_funding f ON p.project_id = f.project_id LEFT JOIN
+    ngo_outcomes o ON p.project_id = o.project_id GROUP BY p.program_area, p.region ORDER BY p.program_area, p.region;
+  hints:
+  - Start from the requested result grain, then apply integrated SQL analysis.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT p.program_area, p.region, COUNT(DISTINCT p.project_id) AS project_count, SUM(f.amount_usd)
+      AS total_funding, SUM(o.people_reached) AS total_people_reached, ROUND(SUM(f.amount_usd) / NULLIF(SUM(o.people_reached),
+      0), 2) AS cost_per_person FROM ngo_projects p LEFT JOIN ngo_funding f ON p.project_id = f.project_id LEFT
+      JOIN ngo_outcomes o ON p.project_id = o.project_id GROUP BY p.program_area, p.region ORDER BY p.program_area,
+      p.region;
+    required_patterns:
+    - LEFT\s+JOIN
+    - COUNT\s*\(\s*DISTINCT
+    - NULLIF
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 25
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return program_area, region, project_count, total_funding, total_people_reached, and cost_per_person.
+      Join the three NGO tables, aggregate by program_area and region, round cost_per_person to 2 decimals, and
+      sort by program_area and region.
+    tables:
+    - ngo_projects
+    - ngo_funding
+    - ngo_outcomes
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: One row per program-area and region combination.
+    skills_practiced:
+    - integrated SQL analysis
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Build the analysis query
+    objective: Apply integrated SQL analysis to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **integrated SQL analysis** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+evidence:
+  job_competency: Multi-table impact analysis and stakeholder communication

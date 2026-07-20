@@ -14,3 +14,19 @@ datasets:
     csv: orders.csv
   - name: inventory
     csv: inventory.csv
+  - name: customers
+    csv: customers.csv
+  - name: order_items
+    csv: order_items.csv
+  - name: monthly_sales
+    csv: monthly_sales.csv
+  - name: monthly_targets
+    csv: monthly_targets.csv
+  - name: student_wellbeing
+    csv: student_wellbeing.csv
+  - name: ngo_projects
+    csv: ngo_projects.csv
+  - name: ngo_funding
+    csv: ngo_funding.csv
+  - name: ngo_outcomes
+    csv: ngo_outcomes.csv

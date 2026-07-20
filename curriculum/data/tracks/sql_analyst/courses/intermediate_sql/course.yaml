@@ -1,0 +1,17 @@
+course_id: intermediate_sql
+title: Intermediate SQL
+order: 2
+description: Summarize, transform, filter, and categorize data for analyst work.
+estimated_minutes: 410
+outcomes:
+- Apply every chapter through interactive decisions and SQL practice.
+- Validate results and explain how the query supports an analyst decision.
+modules:
+- modules/data_aggregation/module.yaml
+- modules/data_transformation/module.yaml
+- modules/data_filtering/module.yaml
+- modules/conditional_operations/module.yaml
+assessments:
+- assessments/intermediate_sql_checkpoint.yaml
+skills_labs:
+- skills_labs/student_wellbeing_analysis.yaml

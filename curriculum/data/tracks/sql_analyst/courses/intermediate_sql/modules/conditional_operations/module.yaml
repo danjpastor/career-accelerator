@@ -1,0 +1,7 @@
+module_id: conditional_operations
+title: Conditional Operations
+order: 4
+description: Use CASE for transformation and conditional metrics.
+lessons:
+- lessons/sql_conditional_transform/lesson.yaml
+- lessons/sql_conditional_metrics/lesson.yaml

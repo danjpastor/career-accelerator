@@ -1,0 +1,159 @@
+assessment_id: joining_data_checkpoint
+title: Joining Data in SQL Checkpoint
+order: 1
+description: Complete the independent questions without opening full solutions.
+estimated_minutes: 30
+requires:
+- sql.multi_column_join
+passing_score: 0.8
+instructions:
+- Complete each question independently.
+- Run SQL when useful, then check each answer.
+- A score of 80% or higher passes the checkpoint.
+activities:
+- activity_id: join_cp_1_question
+  title: Join orders to customers
+  type: mastery
+  runtime: sql
+  prompt: Return order_id and customer_name, sorted by order_id.
+  starter: ''
+  solution: SELECT o.order_id, c.customer_name FROM orders o INNER JOIN customers c ON o.customer_id = c.customer_id
+    ORDER BY o.order_id;
+  hints:
+  - Start from the requested result grain, then apply join orders to customers.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT o.order_id, c.customer_name FROM orders o INNER JOIN customers c ON o.customer_id = c.customer_id
+      ORDER BY o.order_id;
+    required_patterns:
+    - INNER\s+JOIN
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return order_id and customer_name, sorted by order_id.
+    tables:
+    - orders
+    - customers
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - join orders to customers
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Join orders to customers
+    objective: Apply join orders to customers to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **join orders to customers** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: join_cp_2_question
+  title: Preserve the product catalog
+  type: mastery
+  runtime: sql
+  prompt: Return product_id, product_name, and quantity for every product using a LEFT JOIN to order_items. Sort
+    by product_id.
+  starter: ''
+  solution: SELECT p.product_id, p.product_name, oi.quantity FROM products p LEFT JOIN order_items oi ON p.product_id
+    = oi.product_id ORDER BY p.product_id;
+  hints:
+  - Start from the requested result grain, then apply preserve the product catalog.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT p.product_id, p.product_name, oi.quantity FROM products p LEFT JOIN order_items oi ON
+      p.product_id = oi.product_id ORDER BY p.product_id;
+    required_patterns:
+    - LEFT\s+JOIN
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return product_id, product_name, and quantity for every product using a LEFT JOIN to order_items. Sort
+      by product_id.
+    tables:
+    - products
+    - order_items
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - preserve the product catalog
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Preserve the product catalog
+    objective: Apply preserve the product catalog to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **preserve the product catalog** inside a complete analyst query. Start by
+      identifying the result grain—what one row should represent—then select only the fields and calculations needed
+      to answer the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: join_cp_3_question
+  title: Join monthly targets
+  type: mastery
+  runtime: sql
+  prompt: Return region, month_start, sales_target using both key fields, sorted by region and month_start.
+  starter: ''
+  solution: SELECT s.region, s.month_start, t.sales_target FROM monthly_sales s JOIN monthly_targets t ON s.region=t.region
+    AND s.month_start=t.month_start ORDER BY s.region,s.month_start;
+  hints:
+  - Start from the requested result grain, then apply join monthly targets.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT s.region, s.month_start, t.sales_target FROM monthly_sales s JOIN monthly_targets t ON
+      s.region=t.region AND s.month_start=t.month_start ORDER BY s.region,s.month_start;
+    required_patterns:
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return region, month_start, sales_target using both key fields, sorted by region and month_start.
+    tables:
+    - monthly_sales
+    - monthly_targets
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - join monthly targets
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Join monthly targets
+    objective: Apply join monthly targets to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **join monthly targets** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

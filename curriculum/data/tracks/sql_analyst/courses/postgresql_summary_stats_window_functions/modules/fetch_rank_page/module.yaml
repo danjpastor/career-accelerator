@@ -1,0 +1,6 @@
+module_id: fetch_rank_page
+title: Fetching, Ranking, and Paging
+order: 2
+description: Use offset, ranking, and paging functions.
+lessons:
+- lessons/sql_window_fetch_rank/lesson.yaml

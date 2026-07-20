@@ -1,0 +1,330 @@
+lesson_id: sql_foundations_structure
+title: Meet Databases & SQL
+order: 1
+difficulty: beginner
+description: Learn how relational tables are structured and how to identify the correct unit of analysis before
+  querying.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Define the grain of a table in plain language.
+- Distinguish rows, columns, cells, and tables.
+- Recognize common analyst-facing data types.
+- Write a basic SELECT query with multiple columns.
+key_takeaways:
+- Always identify what one row represents before analysis.
+- IDs may contain digits but still behave as text labels.
+- Selecting columns changes the result shape, not the source data.
+teaches:
+- sql.table_structure
+- sql.data_types
+- sql.select_basics
+requires: []
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: structure_grain_recognition
+  title: Identify the row grain
+  type: recognition
+  runtime: recognition
+  prompt: In the support_tickets table, what does one row represent?
+  answer_options:
+  - One support ticket
+  - One customer
+  - One assigned team
+  - One calendar day
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: One support ticket
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Support operations orientation
+    introduction: Before answering questions about workload, the operations team needs a shared definition of what
+      one record means.
+    task: Identify the grain of the support_tickets table.
+    table: support_tickets
+    requirements:
+    - Choose the statement that describes exactly one row.
+    - Do not describe a customer or a department unless the table has one row per that entity.
+    expected_output: One selected answer.
+    skills_practiced:
+    - table grain
+    - rows
+    after_correct: The ticket_id uniquely labels each row, so one row represents one support ticket.
+    common_errors: []
+  instruction:
+    title: Begin with the unit of analysis
+    objective: Identify what one row represents before counting, filtering, or summarizing a table.
+    action_label: Identify the grain
+    body: 'A table is useful only when you understand its **grain**: the exact thing or event represented by one
+      row. Grain is also called the *unit of analysis*. Before writing SQL, finish the sentence: “One row represents
+      one ____.”
+
+
+      A support-ticket table may contain one row per ticket, while a ticket-message table may contain many rows
+      for the same ticket. Counting rows in the first table counts tickets; counting rows in the second counts messages.
+      Both tables may contain a `ticket_id`, but they answer different questions.
+
+
+      Use identifiers and repeated values as clues. If `ticket_id` is unique on every row, one row probably represents
+      one ticket. A `customer_id` may repeat because a customer can open several tickets.
+
+
+      **Worked example:** In a table containing `order_id`, `customer_id`, `order_date`, and `order_total`, a unique
+      `order_id` suggests one row per order. The repeated `customer_id` does not change the grain.
+
+
+      Now inspect the support-ticket context and choose the statement that precisely describes one row.'
+  required_for_completion: true
+- activity_id: structure_type_recognition
+  title: Choose the appropriate data type
+  type: recognition
+  runtime: recognition
+  prompt: Which description best fits the order_total column in orders?
+  answer_options:
+  - A decimal measurement used in calculations
+  - A text identifier
+  - A Boolean flag
+  - A calendar date
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A decimal measurement used in calculations
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Order-system data review
+    introduction: The reporting team is documenting how each field should be interpreted before building metrics.
+    task: Classify the business meaning of order_total.
+    table: orders
+    requirements:
+    - Focus on how the value will be used.
+    - Choose the type that supports arithmetic.
+    expected_output: One selected answer.
+    skills_practiced:
+    - data types
+    - numeric measures
+    after_correct: Order totals are decimal measures because analysts add, average, and compare them.
+    common_errors: []
+  instruction:
+    title: Classify values by how they behave
+    objective: Distinguish identifiers, categories, measures, dates, and logical values.
+    action_label: Classify the field
+    body: 'A data type is more than the way a value looks. It describes what operations make sense for that value.
+
+
+      - **Text** stores labels, names, categories, and many identifiers.
+
+      - **Integer** stores whole-number quantities.
+
+      - **Decimal** stores measurements that can include fractions.
+
+      - **Date or timestamp** stores calendar values.
+
+      - **Boolean** stores true/false states.
+
+      - **NULL** represents missing or unknown information.
+
+
+      An identifier such as `00124` contains digits but should usually remain text. Adding customer IDs would have
+      no business meaning, and leading zeroes may be significant. A value such as `order_total`, however, is a measure:
+      analysts compare it, sum it, and calculate averages.
+
+
+      **Try this mental test:** Ask whether arithmetic on the field would produce a useful business result. Adding
+      order totals is meaningful. Adding order IDs is not.
+
+
+      Choose the description that best matches how `order_total` should be used in analysis.'
+  required_for_completion: true
+- activity_id: structure_guided
+  title: Select inventory identifiers
+  type: guided
+  runtime: sql
+  prompt: Return sku, item_name, and category from inventory.
+  starter: "SELECT\n    -- add the three requested columns\nFROM inventory;"
+  solution: 'SELECT sku, item_name, category
+
+    FROM inventory;'
+  hints:
+  - List the three column names after SELECT.
+  - Separate each selected column with a comma.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT sku, item_name, category
+
+      FROM inventory;'
+    required_patterns:
+    - \bsku\b
+    - \bitem_name\b
+    - \bcategory\b
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 6
+  presentation:
+    scenario: Inventory catalog review
+    introduction: A new operations analyst is creating a compact catalog view before checking stock levels.
+    task: Return the product identifier, readable item name, and category for every inventory record.
+    table: inventory
+    requirements:
+    - Return exactly three columns.
+    - Keep the source row order.
+    - Do not filter any rows.
+    expected_output: '6 rows and 3 columns: sku, item_name, category.'
+    skills_practiced:
+    - SELECT
+    - column lists
+    - FROM
+    after_correct: The query uses an explicit column list, which keeps the result focused and documents the intended
+      schema.
+    common_errors:
+    - Forgetting a comma between selected columns.
+    - Using a column name that does not exist.
+  instruction:
+    title: Build a focused SELECT list
+    objective: Return only the columns needed for a specific question.
+    action_label: Complete the query
+    body: 'A basic SQL query has two essential parts:
+
+
+      ```sql
+
+      SELECT column_name
+
+      FROM table_name;
+
+      ```
+
+
+      `SELECT` controls the columns in the result. `FROM` identifies the source table. To return several columns,
+      list them in the order the reader should see them and separate them with commas.
+
+
+      ```sql
+
+      SELECT shipment_id, carrier_name, shipped_date
+
+      FROM shipments;
+
+      ```
+
+
+      This operation does not delete other columns or change the source table. It creates a new result set containing
+      only the requested fields. Explicit column lists are usually clearer than `SELECT *` because they document
+      the intended output and remain stable when a table gains new fields.
+
+
+      For identifiers and labels, a practical order is often: identifier first, readable name second, category or
+      status after that.
+
+
+      The starter query already names the `inventory` table. Replace the comment with exactly the three requested
+      columns, separated by commas.'
+  required_for_completion: true
+- activity_id: structure_debug
+  title: Repair a column-list error
+  type: debugging
+  runtime: sql
+  prompt: The starter query is missing punctuation. Repair it so it returns employee_id, full_name, and department.
+  starter: 'SELECT employee_id full_name department
+
+    FROM employees;'
+  solution: 'SELECT employee_id, full_name, department
+
+    FROM employees;'
+  hints:
+  - Each selected field needs a separator.
+  - Add commas after employee_id and full_name.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT employee_id, full_name, department
+
+      FROM employees;'
+    required_patterns:
+    - employee_id\s*,\s*full_name\s*,\s*department
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Employee directory extract
+    introduction: Human Resources needs a three-column directory, but the draft query does not parse.
+    task: Correct the selected column list without changing the requested output.
+    table: employees
+    requirements:
+    - Return employee_id, full_name, and department.
+    - Use the existing employees table.
+    - Do not add extra columns.
+    expected_output: 5 rows and 3 columns.
+    skills_practiced:
+    - debugging
+    - SELECT syntax
+    after_correct: Commas separate expressions in a SELECT list. SQL whitespace does not replace punctuation.
+    common_errors:
+    - Removing a requested column.
+    - Adding commas after SELECT or before FROM.
+  instruction:
+    title: Use punctuation to separate expressions
+    objective: Diagnose and repair a malformed column list.
+    action_label: Repair and run the query
+    body: 'Whitespace helps people read SQL, but it does not separate expressions in a `SELECT` list. Commas do
+      that work.
+
+
+      This is valid:
+
+
+      ```sql
+
+      SELECT employee_id, full_name, department
+
+      FROM employees;
+
+      ```
+
+
+      This is not a three-column list:
+
+
+      ```sql
+
+      SELECT employee_id full_name department
+
+      FROM employees;
+
+      ```
+
+
+      Without commas, the database may interpret adjacent words as aliases or report a syntax error. When debugging
+      a selected-column list, check three things:
+
+
+      1. Every requested column is present.
+
+      2. A comma appears between expressions, but not before `FROM`.
+
+      3. Each column name exists in the source table.
+
+
+      Do not “fix” the query by removing requested columns or replacing the list with `*`. Preserve the requested
+      output and repair only the punctuation.'
+  required_for_completion: true

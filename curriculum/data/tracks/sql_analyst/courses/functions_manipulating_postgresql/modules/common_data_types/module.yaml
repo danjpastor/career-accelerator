@@ -1,0 +1,6 @@
+module_id: common_data_types
+title: Overview of Common Data Types
+order: 1
+description: Work with text, numeric, date/time, interval, and collection concepts.
+lessons:
+- lessons/sql_postgres_data_types/lesson.yaml

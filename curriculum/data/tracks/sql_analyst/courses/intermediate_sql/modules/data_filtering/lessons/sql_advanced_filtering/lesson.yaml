@@ -1,0 +1,166 @@
+lesson_id: sql_advanced_filtering
+title: Basic Filtering
+order: 1
+difficulty: intermediate
+description: Build readable filters for multi-part business rules.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain advanced filtering patterns.
+- Apply advanced filtering patterns to an analyst request.
+key_takeaways:
+- Build readable filters for multi-part business rules.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.advanced_filtering
+requires:
+- sql.transformations
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: filter_adv_recognition
+  title: Choose a membership filter
+  type: recognition
+  runtime: recognition
+  prompt: Which operator is clearest for matching several known category values?
+  answer_options:
+  - IN
+  - AS
+  - GROUP BY
+  - UNION
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: IN
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: Which operator is clearest for matching several known category values?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Express business rules clearly
+    after_correct: You identified the core idea behind express business rules clearly.
+    common_errors: []
+  instruction:
+    title: Express business rules clearly
+    objective: Build a practical understanding of express business rules clearly.
+    action_label: Choose the best answer
+    body: '`IN` is useful when a field may match one of several explicit values. Combine conditions with parentheses
+      when `AND` and `OR` appear together.'
+  required_for_completion: true
+- activity_id: filter_adv_guided
+  title: Find high-value East and West orders
+  type: guided
+  runtime: sql
+  prompt: Return order_id, region, and order_total for East or West orders worth at least 100. Sort by order_id.
+  starter: 'SELECT order_id, region, order_total
+
+    FROM orders
+
+    WHERE
+
+    ORDER BY order_id;'
+  solution: SELECT order_id, region, order_total FROM orders WHERE region IN ('East', 'West') AND order_total >=
+    100 ORDER BY order_id;
+  hints:
+  - Focus on IN and compound filters.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, region, order_total FROM orders WHERE region IN ('East', 'West') AND order_total
+      >= 100 ORDER BY order_id;
+    required_patterns:
+    - \bIN\s*\(
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return order_id, region, and order_total for East or West orders worth at least 100. Sort by order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - IN and compound filters
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Translate a multi-part request
+    objective: Use IN and compound filters in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Separate the category condition from the numeric threshold, then connect them with `AND`.
+  required_for_completion: true
+- activity_id: filter_adv_mastery
+  title: Filter urgent non-email tickets
+  type: mastery
+  runtime: sql
+  prompt: Return ticket_id, priority, and channel for High or Urgent tickets whose channel is not Email. Sort by
+    ticket_id.
+  starter: 'SELECT ticket_id, priority, channel
+
+    FROM support_tickets
+
+    WHERE
+
+    ORDER BY ticket_id;'
+  solution: SELECT ticket_id, priority, channel FROM support_tickets WHERE channel <> 'Email' AND priority IN ('High',
+    'Urgent') ORDER BY ticket_id;
+  hints:
+  - Focus on compound filters.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT ticket_id, priority, channel FROM support_tickets WHERE channel <> 'Email' AND priority
+      IN ('High', 'Urgent') ORDER BY ticket_id;
+    required_patterns:
+    - <>
+    - \bIN\s*\(
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 9
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return ticket_id, priority, and channel for High or Urgent tickets whose channel is not Email. Sort by
+      ticket_id.
+    tables:
+    - support_tickets
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - compound filters
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Combine exclusion and membership rules
+    objective: Use compound filters in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Use one condition to exclude Email and another to keep the requested priorities.
+  required_for_completion: true

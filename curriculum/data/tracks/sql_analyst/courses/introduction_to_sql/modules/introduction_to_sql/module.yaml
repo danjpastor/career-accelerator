@@ -1,0 +1,10 @@
+module_id: introduction_to_sql
+title: Introduction to SQL
+order: 1
+description: Meet relational data, write foundational queries, and shape readable results.
+lessons:
+- lessons/sql_foundations_structure/lesson.yaml
+- lessons/sql_foundations_select_alias/lesson.yaml
+- lessons/sql_foundations_distinct_limit/lesson.yaml
+- lessons/sql_foundations_filtering/lesson.yaml
+- lessons/sql_foundations_sort_combine/lesson.yaml

@@ -1,0 +1,6 @@
+module_id: window_function_foundations
+title: Introduction to Window Functions
+order: 1
+description: Compare windows with grouped queries and use OVER, ORDER BY, and PARTITION BY.
+lessons:
+- lessons/sql_window_basics_deep/lesson.yaml

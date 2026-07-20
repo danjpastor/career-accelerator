@@ -1,0 +1,132 @@
+assessment_id: database_design_checkpoint
+title: Database Design Checkpoint
+order: 1
+description: Complete the independent questions without opening full solutions.
+estimated_minutes: 30
+requires:
+- database.management
+passing_score: 0.8
+instructions:
+- Complete each question independently.
+- Run SQL when useful, then check each answer.
+- A score of 80% or higher passes the checkpoint.
+activities:
+- activity_id: db_cp_1_mastery
+  title: Choose an analytical model
+  type: mastery
+  runtime: recognition
+  prompt: A BI team needs fast slicing of sales by customer, product, and date. Which design is usually a strong
+    starting point?
+  answer_options:
+  - A star schema
+  - A single unstructured text field
+  - No keys
+  - A user-role table only
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A star schema
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: A BI team needs fast slicing of sales by customer, product, and date. Which design is usually a strong
+      starting point?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - dimensional modeling
+    after_correct: You correctly applied dimensional modeling to the decision.
+    common_errors: []
+  instruction:
+    title: Choose an analytical model
+    objective: Use dimensional modeling in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **dimensional modeling** to make database work more accurate, readable, and useful. Read
+      the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: db_cp_2_mastery
+  title: Choose a reusable interface
+  type: mastery
+  runtime: recognition
+  prompt: Several analysts need the same governed query logic without copying SQL. What should the database provide?
+  answer_options:
+  - A view
+  - A screenshot
+  - A local note
+  - A random temporary table
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A view
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Several analysts need the same governed query logic without copying SQL. What should the database provide?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - database views
+    after_correct: You correctly applied database views to the decision.
+    common_errors: []
+  instruction:
+    title: Choose a reusable interface
+    objective: Use database views in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **database views** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check
+      is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: db_cp_3_mastery
+  title: Choose an access policy
+  type: mastery
+  runtime: recognition
+  prompt: A reporting user only needs SELECT access to approved views. Which policy fits?
+  answer_options:
+  - Grant only SELECT on the approved views
+  - Make the user a database owner
+  - Grant DELETE on every table
+  - Disable authentication
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Grant only SELECT on the approved views
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: A reporting user only needs SELECT access to approved views. Which policy fits?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - least privilege
+    after_correct: You correctly applied least privilege to the decision.
+    common_errors: []
+  instruction:
+    title: Choose an access policy
+    objective: Use least privilege in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **least privilege** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check
+      is intentionally short so you can test the idea immediately.
+  required_for_completion: true

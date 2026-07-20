@@ -1,0 +1,6 @@
+module_id: search_extensions
+title: Full-Text Search and PostgreSQL Extensions
+order: 4
+description: Recognize full-text search, user-defined functions, extensions, and string similarity use cases.
+lessons:
+- lessons/sql_search_extensions/lesson.yaml

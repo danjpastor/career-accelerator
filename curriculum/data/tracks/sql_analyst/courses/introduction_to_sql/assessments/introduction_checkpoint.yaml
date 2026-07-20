@@ -1,0 +1,365 @@
+assessment_id: query_foundations_checkpoint
+title: Introduction to SQL Checkpoint
+order: 1
+description: Check your ability to retrieve, filter, sort, limit, and label relational data.
+estimated_minutes: 30
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled during the checkpoint.
+- Your answers are saved when you move between questions.
+- A score of 80% or higher passes the checkpoint.
+- After submission, review feedback by skill area and retry any weak concepts.
+requires:
+- sql.select_basics
+- sql.column_selection
+- sql.aliases
+- sql.distinct
+- sql.limit
+- sql.where
+- sql.boolean_logic
+- sql.null_filtering
+- sql.order_by
+passing_score: 0.8
+activities:
+- activity_id: checkpoint_select_alias
+  title: Selection and aliasing
+  type: mastery
+  runtime: sql
+  prompt: Return product_name as item and category from products.
+  starter: 'SELECT
+
+    FROM products;'
+  solution: 'SELECT product_name AS item, category
+
+    FROM products;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT product_name AS item, category
+
+      FROM products;'
+    required_patterns:
+    - product_name\s+AS\s+item
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Checkpoint scenario
+    introduction: Demonstrate that you can shape a result and rename a field without guidance.
+    task: Return the requested product fields.
+    table: products
+    requirements:
+    - Alias product_name as item.
+    - Keep category unchanged.
+    expected_output: 7 rows and 2 columns.
+    skills_practiced:
+    - SELECT
+    - aliases
+    after_correct: The result uses a clear explicit schema.
+    common_errors: []
+- activity_id: checkpoint_distinct_limit
+  title: Unique values and limits
+  type: mastery
+  runtime: sql
+  prompt: Return up to three unique plan_name values from subscriptions.
+  starter: 'SELECT
+
+    FROM subscriptions;'
+  solution: 'SELECT DISTINCT plan_name
+
+    FROM subscriptions
+
+    ORDER BY plan_name
+
+    LIMIT 3;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT DISTINCT plan_name
+
+      FROM subscriptions
+
+      ORDER BY plan_name
+
+      LIMIT 3;'
+    required_patterns:
+    - \bDISTINCT\b
+    - \bORDER\s+BY\b
+    - LIMIT\s+3
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Checkpoint scenario
+    introduction: Demonstrate controlled categorical exploration.
+    task: Return a limited unique plan list.
+    table: subscriptions
+    requirements:
+    - Return only plan_name.
+    - Use DISTINCT.
+    - Limit to three rows.
+    - Sort plan names alphabetically before limiting the result.
+    expected_output: At most 3 rows.
+    skills_practiced:
+    - DISTINCT
+    - LIMIT
+    after_correct: The result is a de-duplicated preview.
+    common_errors: []
+- activity_id: checkpoint_threshold
+  title: Inclusive filtering
+  type: mastery
+  runtime: sql
+  prompt: Return sku and units_on_hand for inventory with units_on_hand at most 10.
+  starter: 'SELECT sku, units_on_hand
+
+    FROM inventory
+
+    WHERE '
+  solution: 'SELECT sku, units_on_hand
+
+    FROM inventory
+
+    WHERE units_on_hand <= 10;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT sku, units_on_hand
+
+      FROM inventory
+
+      WHERE units_on_hand <= 10;'
+    required_patterns:
+    - units_on_hand\s*<=\s*10
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Checkpoint scenario
+    introduction: Translate an inclusive upper boundary.
+    task: Return low-stock records at or below ten units.
+    table: inventory
+    requirements:
+    - Use an inclusive comparison.
+    - Return only sku and units_on_hand.
+    expected_output: 3 rows and 2 columns.
+    skills_practiced:
+    - WHERE
+    - comparison boundaries
+    after_correct: The condition includes the boundary value ten.
+    common_errors: []
+- activity_id: checkpoint_null
+  title: Missing-value filtering
+  type: mastery
+  runtime: sql
+  prompt: Return ticket_id and resolution_hours for tickets with no resolution_hours.
+  starter: 'SELECT ticket_id, resolution_hours
+
+    FROM support_tickets
+
+    WHERE '
+  solution: 'SELECT ticket_id, resolution_hours
+
+    FROM support_tickets
+
+    WHERE resolution_hours IS NULL;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT ticket_id, resolution_hours
+
+      FROM support_tickets
+
+      WHERE resolution_hours IS NULL;'
+    required_patterns:
+    - IS\s+NULL
+    forbidden_patterns:
+    - =\s*NULL
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Checkpoint scenario
+    introduction: Identify unresolved records through missing resolution duration.
+    task: Filter rows with missing resolution_hours.
+    table: support_tickets
+    requirements:
+    - Use the SQL missing-value operator.
+    expected_output: 7 rows and 2 columns.
+    skills_practiced:
+    - 'NULL'
+    after_correct: IS NULL tests missingness correctly.
+    common_errors: []
+- activity_id: checkpoint_boolean
+  title: Boolean population logic
+  type: mastery
+  runtime: sql
+  prompt: Return ticket_id, priority, and status for Open or Pending tickets with Urgent priority.
+  starter: 'SELECT ticket_id, priority, status
+
+    FROM support_tickets
+
+    WHERE '
+  solution: "SELECT ticket_id, priority, status\nFROM support_tickets\nWHERE status IN ('Open', 'Pending')\n  AND\
+    \ priority = 'Urgent';"
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: "SELECT ticket_id, priority, status\nFROM support_tickets\nWHERE status IN ('Open', 'Pending')\n\
+      \  AND priority = 'Urgent';"
+    required_patterns:
+    - status\s+IN\s*\(
+    - priority\s*=\s*'Urgent'
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: false
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Checkpoint scenario
+    introduction: Combine an accepted status set with one required priority.
+    task: Build the unresolved urgent-ticket population.
+    table: support_tickets
+    requirements:
+    - Accept Open and Pending.
+    - Require Urgent priority.
+    expected_output: 2 rows and 3 columns.
+    skills_practiced:
+    - IN
+    - AND
+    after_correct: The query applies the priority rule to the complete unresolved set.
+    common_errors: []
+- activity_id: checkpoint_multi_sort
+  title: Multiple sort keys
+  type: mastery
+  runtime: sql
+  prompt: Return department, full_name, and hire_date from employees. Sort department A–Z, then hire_date newest
+    first.
+  starter: 'SELECT department, full_name, hire_date
+
+    FROM employees
+
+    '
+  solution: 'SELECT department, full_name, hire_date
+
+    FROM employees
+
+    ORDER BY department ASC, hire_date DESC;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT department, full_name, hire_date
+
+      FROM employees
+
+      ORDER BY department ASC, hire_date DESC;'
+    required_patterns:
+    - ORDER\s+BY\s+department\s+ASC\s*,\s*hire_date\s+DESC
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Checkpoint scenario
+    introduction: Apply a primary grouping sort and a secondary recency sort.
+    task: Order the employee result by two keys.
+    table: employees
+    requirements:
+    - Sort department ascending first.
+    - Sort hire_date descending second.
+    expected_output: 5 ordered rows.
+    skills_practiced:
+    - ORDER BY
+    - multiple keys
+    after_correct: The leftmost key establishes department groups.
+    common_errors: []
+- activity_id: checkpoint_composition
+  title: Complete business query
+  type: mastery
+  runtime: sql
+  prompt: Return order_id and order_total for Completed orders, highest total first, limited to three rows.
+  starter: 'SELECT order_id, order_total
+
+    FROM orders
+
+    '
+  solution: 'SELECT order_id, order_total
+
+    FROM orders
+
+    WHERE status = ''Completed''
+
+    ORDER BY order_total DESC
+
+    LIMIT 3;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT order_id, order_total
+
+      FROM orders
+
+      WHERE status = ''Completed''
+
+      ORDER BY order_total DESC
+
+      LIMIT 3;'
+    required_patterns:
+    - status\s*=\s*'Completed'
+    - ORDER\s+BY\s+order_total\s+DESC
+    - LIMIT\s+3
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 5
+  presentation:
+    scenario: Checkpoint scenario
+    introduction: Demonstrate the complete foundation workflow.
+    task: Return the top three completed orders.
+    table: orders
+    requirements:
+    - Filter, sort, and limit in valid order.
+    expected_output: 3 ordered rows.
+    skills_practiced:
+    - WHERE
+    - ORDER BY
+    - LIMIT
+    after_correct: The eligible population is defined before ranking and limiting.
+    common_errors: []

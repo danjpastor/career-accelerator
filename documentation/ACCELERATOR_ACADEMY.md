@@ -178,16 +178,46 @@ The package loader rejects missing or unknown table references. Academy loads th
 
 `schema_version` describes the package format. `content_version` describes a curriculum release. Stable lesson and activity IDs preserve compatible work. When requirements change, reconciliation preserves answers and passed activities but recalculates lesson state against the current contract.
 
-## Built-in curriculum v1.4
+## Built-in curriculum v1.5
 
-The built-in path now contains:
+The SQL track now uses this seven-course sequence:
 
-- eight courses across SQL, Power BI, Python, and pandas;
-- 31 lessons and 112 required interactive steps, checkpoint questions, and applied projects;
-- the complete Query Foundations checkpoint and Customer Support Queue Analysis project;
-- 26 additional original lessons covering the remaining topics previously assigned through DataCamp;
-- visible schemas for every SQL task;
-- persistent answers, prerequisite-aware course sequencing, and automatic next-step routing;
-- saved artifacts and automatic Demonstrated Evidence integration.
+1. **Introduction to SQL**
+   - Introduction to SQL
+2. **Intermediate SQL**
+   - Data Aggregation
+   - Data Transformation
+   - Data Filtering
+   - Conditional Operations
+3. **Joining Data in SQL**
+   - Combining Data Vertically
+   - Combining Data Horizontally
+4. **Data Manipulation in SQL**
+   - We'll Take the CASE
+   - Short and Simple Subqueries
+   - Correlated Queries, Nested Queries, and Common Table Expressions
+   - Window Functions
+5. **PostgreSQL Summary Stats and Window Functions**
+   - Introduction to Window Functions
+   - Fetching, Ranking, and Paging
+   - Aggregate Window Functions and Frames
+   - Beyond Window Functions
+6. **Functions for Manipulating Data in PostgreSQL**
+   - Overview of Common Data Types
+   - Working with DATE/TIME Functions and Operators
+   - Parsing and Manipulating Text
+   - Full-Text Search and PostgreSQL Extensions
+7. **Database Design**
+   - Processing, Storing, and Organizing Data
+   - Database Schemas and Normalization
+   - Database Views
+   - Database Management
 
-DataCamp is no longer an active recommendation source or weekly requirement. Existing completions remain preserved as provider-neutral External Learning History. Accelerator Academy now supplies the built-in replacement sequence.
+The SQL sequence contains 35 lessons, seven course checkpoints, and two integrated bonus projects:
+
+- **Bonus Project — Analyzing Students' Mental Health** after Intermediate SQL;
+- **Bonus Project — Impact Analysis of GoodThought NGO Initiatives** after Database Design.
+
+The public course and chapter taxonomy is used only as a coverage and organization benchmark. Accelerator Academy supplies original lesson explanations, examples, datasets, questions, SQL, validators, solutions, project briefs, and evidence requirements. Existing compatible learner work is preserved through stable lesson and activity identifiers and content-version reconciliation.
+
+The complete built-in Academy path now contains 193 interactive lesson, checkpoint, and project nodes across SQL, Power BI, Python, and pandas. DataCamp remains excluded from active recommendations and weekly requirements; historical completions remain preserved as External Learning History.

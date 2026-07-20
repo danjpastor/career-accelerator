@@ -1,0 +1,204 @@
+assessment_id: data_manipulation_checkpoint
+title: Data Manipulation in SQL Checkpoint
+order: 1
+description: Complete the independent questions without opening full solutions.
+estimated_minutes: 30
+requires:
+- sql.window_functions
+passing_score: 0.8
+instructions:
+- Complete each question independently.
+- Run SQL when useful, then check each answer.
+- A score of 80% or higher passes the checkpoint.
+activities:
+- activity_id: manip_cp_1_question
+  title: Classify order workflow
+  type: mastery
+  runtime: sql
+  prompt: 'Return order_id and workflow: Done for Completed, Active for Processing, otherwise Review. Sort by order_id.'
+  starter: ''
+  solution: SELECT order_id, CASE WHEN status='Completed' THEN 'Done' WHEN status='Processing' THEN 'Active' ELSE
+    'Review' END AS workflow FROM orders ORDER BY order_id;
+  hints:
+  - Start from the requested result grain, then apply classify order workflow.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, CASE WHEN status='Completed' THEN 'Done' WHEN status='Processing' THEN 'Active'
+      ELSE 'Review' END AS workflow FROM orders ORDER BY order_id;
+    required_patterns:
+    - CASE\s+WHEN
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: 'Return order_id and workflow: Done for Completed, Active for Processing, otherwise Review. Sort by order_id.'
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - classify order workflow
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Classify order workflow
+    objective: Apply classify order workflow to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **classify order workflow** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: manip_cp_2_question
+  title: Find above-average orders
+  type: mastery
+  runtime: sql
+  prompt: Return order_id and order_total for orders above the overall average, sorted by order_id.
+  starter: ''
+  solution: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders) ORDER
+    BY order_id;
+  hints:
+  - Start from the requested result grain, then apply find above-average orders.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders)
+      ORDER BY order_id;
+    required_patterns:
+    - SELECT\s+AVG
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return order_id and order_total for orders above the overall average, sorted by order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - find above-average orders
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Find above-average orders
+    objective: Apply find above-average orders to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **find above-average orders** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: manip_cp_3_question
+  title: Build a CTE summary
+  type: mastery
+  runtime: sql
+  prompt: Use a CTE to return region and total_order_value, sorted by region.
+  starter: ''
+  solution: WITH regional AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY region)
+    SELECT region, total_order_value FROM regional ORDER BY region;
+  hints:
+  - Start from the requested result grain, then apply build a cte summary.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: WITH regional AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY
+      region) SELECT region, total_order_value FROM regional ORDER BY region;
+    required_patterns:
+    - ^WITH
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Use a CTE to return region and total_order_value, sorted by region.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - build a cte summary
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Build a CTE summary
+    objective: Apply build a cte summary to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **build a cte summary** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: manip_cp_4_question
+  title: Rank orders by value
+  type: mastery
+  runtime: sql
+  prompt: Return order_id, order_total, and value_rank using RANK ordered by order_total descending. Sort by value_rank
+    and order_id.
+  starter: ''
+  solution: SELECT order_id, order_total, RANK() OVER (ORDER BY order_total DESC) AS value_rank FROM orders ORDER
+    BY value_rank, order_id;
+  hints:
+  - Start from the requested result grain, then apply rank orders by value.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, order_total, RANK() OVER (ORDER BY order_total DESC) AS value_rank FROM orders
+      ORDER BY value_rank, order_id;
+    required_patterns:
+    - RANK\s*\(\s*\)\s+OVER
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return order_id, order_total, and value_rank using RANK ordered by order_total descending. Sort by value_rank
+      and order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - rank orders by value
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Rank orders by value
+    objective: Apply rank orders by value to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **rank orders by value** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

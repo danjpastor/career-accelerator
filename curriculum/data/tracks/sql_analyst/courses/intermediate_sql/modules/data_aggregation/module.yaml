@@ -1,0 +1,8 @@
+module_id: data_aggregation
+title: Data Aggregation
+order: 1
+description: Create summary values and grouped business metrics.
+lessons:
+- lessons/sql_aggregations/lesson.yaml
+- lessons/sql_grouping_single/lesson.yaml
+- lessons/sql_grouping_multiple/lesson.yaml

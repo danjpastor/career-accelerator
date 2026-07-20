@@ -1,0 +1,6 @@
+module_id: combining_vertically
+title: Combining Data Vertically
+order: 1
+description: Stack compatible row sets into one result.
+lessons:
+- lessons/sql_set_operations/lesson.yaml

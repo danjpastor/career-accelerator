@@ -125,3 +125,72 @@ skills:
   power_bi_foundations:
     title: Power BI foundations
     category: Power BI
+  sql.grouping_single:
+    title: Grouping by one category
+    category: SQL Metrics
+  sql.grouping_multiple:
+    title: Grouping by multiple dimensions
+    category: SQL Metrics
+  sql.complex_transformations:
+    title: Arithmetic and derived metrics
+    category: SQL Transformation
+  sql.multiple_conditions:
+    title: Filtering with multiple conditions
+    category: SQL Filtering
+  sql.complex_filters:
+    title: Pattern, range, and set filters
+    category: SQL Filtering
+  sql.conditional_transform:
+    title: Conditional transformation with CASE
+    category: SQL Transformation
+  sql.set_theory:
+    title: UNION ALL, INTERSECT, and EXCEPT
+    category: SQL Joins
+  sql.left_join:
+    title: Preserving base rows with LEFT JOIN
+    category: SQL Joins
+  sql.multi_column_join:
+    title: Joining on composite keys
+    category: SQL Joins
+  sql.window_basics:
+    title: Window function foundations
+    category: Advanced SQL
+  sql.window_ranking:
+    title: Fetching, ranking, and paging
+    category: Advanced SQL
+  sql.window_frames:
+    title: Aggregate windows and frames
+    category: Advanced SQL
+  sql.window_extensions:
+    title: Pivoting and subtotal patterns
+    category: Advanced SQL
+  sql.postgres_types:
+    title: PostgreSQL-oriented data types
+    category: SQL Functions
+  sql.date_time_functions:
+    title: Date and time functions
+    category: SQL Functions
+  sql.text_functions:
+    title: Text parsing and manipulation
+    category: SQL Functions
+  sql.search_extensions:
+    title: Search, similarity, and extensions
+    category: SQL Functions
+  database.processing_models:
+    title: OLTP, OLAP, and dimensional storage
+    category: Database Design
+  database.schemas_normalization:
+    title: Schemas and normalization
+    category: Database Design
+  database.views:
+    title: Views and materialized views
+    category: Database Design
+  database.management:
+    title: Roles, partitioning, integration, and DBMS selection
+    category: Database Design
+  analysis.student_wellbeing:
+    title: Student wellbeing exploratory analysis
+    category: Applied SQL
+  analysis.community_impact:
+    title: Community-program impact analysis
+    category: Applied SQL

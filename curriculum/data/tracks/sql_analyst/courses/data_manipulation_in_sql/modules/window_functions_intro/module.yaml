@@ -1,0 +1,6 @@
+module_id: window_functions_intro
+title: Window Functions
+order: 4
+description: Introduce analytical windows without collapsing detail rows.
+lessons:
+- lessons/sql_window_functions/lesson.yaml

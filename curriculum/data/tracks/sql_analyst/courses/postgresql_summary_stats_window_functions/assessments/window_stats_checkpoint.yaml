@@ -1,0 +1,152 @@
+assessment_id: window_stats_checkpoint
+title: PostgreSQL Summary Stats and Window Functions Checkpoint
+order: 1
+description: Complete the independent questions without opening full solutions.
+estimated_minutes: 30
+requires:
+- sql.window_extensions
+passing_score: 0.8
+instructions:
+- Complete each question independently.
+- Run SQL when useful, then check each answer.
+- A score of 80% or higher passes the checkpoint.
+activities:
+- activity_id: win_cp_1_question
+  title: Add a row number
+  type: mastery
+  runtime: sql
+  prompt: Return order_id and row_num ordered by order_date.
+  starter: ''
+  solution: SELECT order_id, ROW_NUMBER() OVER (ORDER BY order_date) AS row_num FROM orders ORDER BY row_num;
+  hints:
+  - Start from the requested result grain, then apply add a row number.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, ROW_NUMBER() OVER (ORDER BY order_date) AS row_num FROM orders ORDER BY row_num;
+    required_patterns:
+    - ROW_NUMBER
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return order_id and row_num ordered by order_date.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - add a row number
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Add a row number
+    objective: Apply add a row number to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **add a row number** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: win_cp_2_question
+  title: Fetch prior sales
+  type: mastery
+  runtime: sql
+  prompt: Return region, month_start, and prior_sales with LAG, sorted by region and month_start.
+  starter: ''
+  solution: SELECT region, month_start, LAG(sales_total) OVER (PARTITION BY region ORDER BY month_start) AS prior_sales
+    FROM monthly_sales ORDER BY region, month_start;
+  hints:
+  - Start from the requested result grain, then apply fetch prior sales.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT region, month_start, LAG(sales_total) OVER (PARTITION BY region ORDER BY month_start)
+      AS prior_sales FROM monthly_sales ORDER BY region, month_start;
+    required_patterns:
+    - LAG\s*\(
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return region, month_start, and prior_sales with LAG, sorted by region and month_start.
+    tables:
+    - monthly_sales
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - fetch prior sales
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Fetch prior sales
+    objective: Apply fetch prior sales to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **fetch prior sales** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: win_cp_3_question
+  title: Build a running total
+  type: mastery
+  runtime: sql
+  prompt: Return region, month_start, and running_sales, sorted by region and month_start.
+  starter: ''
+  solution: SELECT region, month_start, SUM(sales_total) OVER (PARTITION BY region ORDER BY month_start ROWS BETWEEN
+    UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sales FROM monthly_sales ORDER BY region, month_start;
+  hints:
+  - Start from the requested result grain, then apply build a running total.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT region, month_start, SUM(sales_total) OVER (PARTITION BY region ORDER BY month_start
+      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_sales FROM monthly_sales ORDER BY region, month_start;
+    required_patterns:
+    - UNBOUNDED\s+PRECEDING
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return region, month_start, and running_sales, sorted by region and month_start.
+    tables:
+    - monthly_sales
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - build a running total
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Build a running total
+    objective: Apply build a running total to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **build a running total** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

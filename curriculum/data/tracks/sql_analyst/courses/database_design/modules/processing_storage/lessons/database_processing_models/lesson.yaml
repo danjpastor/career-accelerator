@@ -1,0 +1,139 @@
+lesson_id: database_processing_models
+title: Processing, Storage, and Data Models
+order: 1
+difficulty: intermediate
+description: Choose structures that fit operational transactions or analytical reporting.
+estimated_minutes: 18
+content: lesson.md
+objectives:
+- Explain processing, storage, and data models.
+- Choose appropriate analyst and database decisions involving processing, storage, and data models.
+key_takeaways:
+- Choose structures that fit operational transactions or analytical reporting.
+- Choose designs based on workload, grain, integrity, and maintainability.
+teaches:
+- database.processing_models
+requires:
+- sql.search_extensions
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: database_processing_models_1_recognition
+  title: 'Processing, Storage, and Data Models: decision 1'
+  type: recognition
+  runtime: recognition
+  prompt: Which workload is optimized for frequent small inserts and updates to current records?
+  answer_options:
+  - OLTP
+  - OLAP
+  - A static PDF
+  - A chart legend
+  hints:
+  - Focus on how processing, storage, and data models changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: OLTP
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which workload is optimized for frequent small inserts and updates to current records?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - processing, storage, and data models
+    after_correct: You correctly applied processing, storage, and data models to the decision.
+    common_errors: []
+  instruction:
+    title: 'Processing, Storage, and Data Models: decision 1'
+    objective: Use processing, storage, and data models in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and
+      useful. Read the situation, identify what the result must preserve, and then choose the option that best matches
+      that goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_processing_models_2_recognition
+  title: 'Processing, Storage, and Data Models: decision 2'
+  type: recognition
+  runtime: recognition
+  prompt: In a sales model, which table typically stores order-line events and numeric measures?
+  answer_options:
+  - Fact table
+  - Date dimension only
+  - Role table
+  - View definition
+  hints:
+  - Focus on how processing, storage, and data models changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: Fact table
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: In a sales model, which table typically stores order-line events and numeric measures?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - processing, storage, and data models
+    after_correct: You correctly applied processing, storage, and data models to the decision.
+    common_errors: []
+  instruction:
+    title: 'Processing, Storage, and Data Models: decision 2'
+    objective: Use processing, storage, and data models in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and
+      useful. Read the situation, identify what the result must preserve, and then choose the option that best matches
+      that goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_processing_models_3_mastery
+  title: 'Processing, Storage, and Data Models: decision 3'
+  type: mastery
+  runtime: recognition
+  prompt: Which model usually places measures in a central fact table connected to descriptive dimensions?
+  answer_options:
+  - Dimensional model
+  - Unstructured text file only
+  - Single spreadsheet cell
+  - User role hierarchy
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Dimensional model
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which model usually places measures in a central fact table connected to descriptive dimensions?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - processing, storage, and data models
+    after_correct: You correctly applied processing, storage, and data models to the decision.
+    common_errors: []
+  instruction:
+    title: 'Processing, Storage, and Data Models: decision 3'
+    objective: Use processing, storage, and data models in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and
+      useful. Read the situation, identify what the result must preserve, and then choose the option that best matches
+      that goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true

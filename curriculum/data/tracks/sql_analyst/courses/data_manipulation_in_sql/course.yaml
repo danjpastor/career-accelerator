@@ -1,0 +1,16 @@
+course_id: data_manipulation_in_sql
+title: Data Manipulation in SQL
+order: 4
+description: Build complex analyst queries with CASE, subqueries, CTEs, and introductory windows.
+estimated_minutes: 300
+outcomes:
+- Apply every chapter through interactive decisions and SQL practice.
+- Validate results and explain how the query supports an analyst decision.
+modules:
+- modules/case_operations/module.yaml
+- modules/short_subqueries/module.yaml
+- modules/correlated_ctes/module.yaml
+- modules/window_functions_intro/module.yaml
+assessments:
+- assessments/data_manipulation_checkpoint.yaml
+skills_labs: []

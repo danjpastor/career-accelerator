@@ -1,10 +1,14 @@
 track_id: sql_analyst
-title: SQL for Data Analysts
+title: SQL Fundamentals
 navigation_title: SQL
 order: 1
-description: Build reliable SQL skills through instruction, guided practice, independent mastery, and applied work.
+description: Build SQL fundamentals through seven structured courses, chapter-level practice, checkpoints, and original
+  bonus projects.
 courses:
-- courses/query_foundations/course.yaml
-- courses/aggregations_transformations/course.yaml
-- courses/joining_combining/course.yaml
-- courses/advanced_querying/course.yaml
+- courses/introduction_to_sql/course.yaml
+- courses/intermediate_sql/course.yaml
+- courses/joining_data_in_sql/course.yaml
+- courses/data_manipulation_in_sql/course.yaml
+- courses/postgresql_summary_stats_window_functions/course.yaml
+- courses/functions_manipulating_postgresql/course.yaml
+- courses/database_design/course.yaml

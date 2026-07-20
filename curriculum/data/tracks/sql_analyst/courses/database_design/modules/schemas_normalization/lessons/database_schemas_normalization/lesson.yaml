@@ -1,0 +1,139 @@
+lesson_id: database_schemas_normalization
+title: Schemas and Normalization
+order: 1
+difficulty: intermediate
+description: Balance integrity, duplication, readability, and analytical performance.
+estimated_minutes: 18
+content: lesson.md
+objectives:
+- Explain schemas and normalization.
+- Choose appropriate analyst and database decisions involving schemas and normalization.
+key_takeaways:
+- Balance integrity, duplication, readability, and analytical performance.
+- Choose designs based on workload, grain, integrity, and maintainability.
+teaches:
+- database.schemas_normalization
+requires:
+- database.processing_models
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: database_schemas_normalization_1_recognition
+  title: 'Schemas and Normalization: decision 1'
+  type: recognition
+  runtime: recognition
+  prompt: Which schema connects denormalized dimensions directly to a central fact table?
+  answer_options:
+  - Star schema
+  - Snowflake schema
+  - Document store
+  - Flat log only
+  hints:
+  - Focus on how schemas and normalization changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: Star schema
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which schema connects denormalized dimensions directly to a central fact table?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - schemas and normalization
+    after_correct: You correctly applied schemas and normalization to the decision.
+    common_errors: []
+  instruction:
+    title: 'Schemas and Normalization: decision 1'
+    objective: Use schemas and normalization in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_schemas_normalization_2_recognition
+  title: 'Schemas and Normalization: decision 2'
+  type: recognition
+  runtime: recognition
+  prompt: What is a primary goal of normalization?
+  answer_options:
+  - Reduce avoidable duplication and update anomalies
+  - Duplicate every value
+  - Remove all keys
+  - Prevent SELECT queries
+  hints:
+  - Focus on how schemas and normalization changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: Reduce avoidable duplication and update anomalies
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: What is a primary goal of normalization?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - schemas and normalization
+    after_correct: You correctly applied schemas and normalization to the decision.
+    common_errors: []
+  instruction:
+    title: 'Schemas and Normalization: decision 2'
+    objective: Use schemas and normalization in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_schemas_normalization_3_mastery
+  title: 'Schemas and Normalization: decision 3'
+  type: mastery
+  runtime: recognition
+  prompt: Which relationship should a foreign key enforce?
+  answer_options:
+  - A child value references an existing parent key
+  - Every number is positive
+  - Every table has the same row count
+  - Every column is text
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A child value references an existing parent key
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which relationship should a foreign key enforce?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - schemas and normalization
+    after_correct: You correctly applied schemas and normalization to the decision.
+    common_errors: []
+  instruction:
+    title: 'Schemas and Normalization: decision 3'
+    objective: Use schemas and normalization in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true

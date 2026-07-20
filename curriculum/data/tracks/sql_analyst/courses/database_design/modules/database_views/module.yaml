@@ -1,0 +1,6 @@
+module_id: database_views
+title: Database Views
+order: 3
+description: Create reusable query interfaces and distinguish standard from materialized views.
+lessons:
+- lessons/database_views/lesson.yaml

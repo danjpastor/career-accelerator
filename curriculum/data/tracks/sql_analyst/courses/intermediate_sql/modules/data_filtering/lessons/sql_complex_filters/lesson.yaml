@@ -1,0 +1,162 @@
+lesson_id: sql_complex_filters
+title: Complex Filtering
+order: 3
+difficulty: intermediate
+description: Use range, set, pattern, and missing-value filters together.
+estimated_minutes: 24
+content: lesson.md
+objectives:
+- Explain complex filtering.
+- Apply complex filtering to an analyst request.
+key_takeaways:
+- Use range, set, pattern, and missing-value filters together.
+- Validate the result rather than relying only on valid syntax.
+teaches:
+- sql.complex_filters
+requires:
+- sql.multiple_conditions
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: complex_filter_recognition
+  title: Choose a missing-value test
+  type: recognition
+  runtime: recognition
+  prompt: Which condition correctly finds missing satisfaction scores?
+  answer_options:
+  - satisfaction_score IS NULL
+  - satisfaction_score = NULL
+  - satisfaction_score = 0
+  - satisfaction_score LIKE NULL
+  hints:
+  - Focus on how NULL-aware filtering changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: satisfaction_score IS NULL
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which condition correctly finds missing satisfaction scores?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - NULL-aware filtering
+    after_correct: You correctly applied NULL-aware filtering to the decision.
+    common_errors: []
+  instruction:
+    title: Choose a missing-value test
+    objective: Use NULL-aware filtering in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **NULL-aware filtering** to make database work more accurate, readable, and useful. Read
+      the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: complex_filter_guided
+  title: Find midrange completed orders
+  type: guided
+  runtime: sql
+  prompt: Return order_id and order_total for Completed orders between 100 and 200 inclusive. Sort by order_total
+    descending.
+  starter: "SELECT order_id, order_total\nFROM orders\nWHERE status = 'Completed'\n  AND order_total BETWEEN 100\
+    \ AND 200\nORDER BY order_total DESC;"
+  solution: SELECT order_id, order_total FROM orders WHERE status = 'Completed' AND order_total BETWEEN 100 AND
+    200 ORDER BY order_total DESC;
+  hints:
+  - Identify where range filtering belongs in the query.
+  - Build the query one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, order_total FROM orders WHERE status = 'Completed' AND order_total BETWEEN
+      100 AND 200 ORDER BY order_total DESC;
+    required_patterns:
+    - BETWEEN\s+100\s+AND\s+200
+    - ORDER\s+BY\s+order_total\s+DESC
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return order_id and order_total for Completed orders between 100 and 200 inclusive. Sort by order_total
+      descending.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - range filtering
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Find midrange completed orders
+    objective: Apply range filtering to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **range filtering** inside a complete analyst query. Start by identifying the
+      result grain—what one row should represent—then select only the fields and calculations needed to answer the
+      request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: complex_filter_mastery
+  title: Find unresolved tickets without satisfaction data
+  type: mastery
+  runtime: sql
+  prompt: Return ticket_id, status, and satisfaction_score for unresolved tickets where satisfaction_score is missing.
+    Sort by ticket_id.
+  starter: "SELECT ticket_id, status, satisfaction_score\nFROM support_tickets\nWHERE \nORDER BY ticket_id;"
+  solution: SELECT ticket_id, status, satisfaction_score FROM support_tickets WHERE status IN ('Open', 'Pending')
+    AND satisfaction_score IS NULL ORDER BY ticket_id;
+  hints:
+  - Start from the requested result grain, then apply NULL-aware complex filters.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT ticket_id, status, satisfaction_score FROM support_tickets WHERE status IN ('Open', 'Pending')
+      AND satisfaction_score IS NULL ORDER BY ticket_id;
+    required_patterns:
+    - satisfaction_score\s+IS\s+NULL
+    - status\s+IN
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return ticket_id, status, and satisfaction_score for unresolved tickets where satisfaction_score is missing.
+      Sort by ticket_id.
+    tables:
+    - support_tickets
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - NULL-aware complex filters
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Find unresolved tickets without satisfaction data
+    objective: Apply NULL-aware complex filters to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **NULL-aware complex filters** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

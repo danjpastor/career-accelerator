@@ -1,0 +1,16 @@
+course_id: postgresql_summary_stats_window_functions
+title: PostgreSQL Summary Stats and Window Functions
+order: 5
+description: Develop advanced analytical windows and report-ready summary patterns.
+estimated_minutes: 300
+outcomes:
+- Apply every chapter through interactive decisions and SQL practice.
+- Validate results and explain how the query supports an analyst decision.
+modules:
+- modules/window_function_foundations/module.yaml
+- modules/fetch_rank_page/module.yaml
+- modules/aggregate_frames/module.yaml
+- modules/beyond_windows/module.yaml
+assessments:
+- assessments/window_stats_checkpoint.yaml
+skills_labs: []

@@ -1,0 +1,156 @@
+lesson_id: sql_complex_transformations
+title: Complex Transformations
+order: 2
+difficulty: intermediate
+description: Create calculated fields, percentages, and rounded metrics.
+estimated_minutes: 24
+content: lesson.md
+objectives:
+- Explain complex transformations.
+- Apply complex transformations to an analyst request.
+key_takeaways:
+- Create calculated fields, percentages, and rounded metrics.
+- Validate the result rather than relying only on valid syntax.
+teaches:
+- sql.complex_transformations
+requires:
+- sql.transformations
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: complex_transform_recognition
+  title: Protect a ratio
+  type: recognition
+  runtime: recognition
+  prompt: Which expression prevents division-by-zero errors when the denominator may be zero?
+  answer_options:
+  - numerator / NULLIF(denominator, 0)
+  - numerator / denominator
+  - NULLIF(numerator, denominator)
+  - denominator / numerator
+  hints:
+  - Focus on how safe ratio calculations changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: numerator / NULLIF(denominator, 0)
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which expression prevents division-by-zero errors when the denominator may be zero?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - safe ratio calculations
+    after_correct: You correctly applied safe ratio calculations to the decision.
+    common_errors: []
+  instruction:
+    title: Protect a ratio
+    objective: Use safe ratio calculations in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **safe ratio calculations** to make database work more accurate, readable, and useful. Read
+      the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: complex_transform_guided
+  title: Calculate discounted order totals
+  type: guided
+  runtime: sql
+  prompt: Return order_id and discounted_total equal to 90% of order_total, rounded to 2 decimals. Sort by order_id.
+  starter: "SELECT order_id,\n       ROUND(order_total * 0.90, 2) AS discounted_total\nFROM orders\nORDER BY order_id;"
+  solution: SELECT order_id, ROUND(order_total * 0.90, 2) AS discounted_total FROM orders ORDER BY order_id;
+  hints:
+  - Identify where calculated numeric fields belongs in the query.
+  - Build the query one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, ROUND(order_total * 0.90, 2) AS discounted_total FROM orders ORDER BY order_id;
+    required_patterns:
+    - ROUND\s*\(
+    - order_total\s*\*\s*0\.90
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return order_id and discounted_total equal to 90% of order_total, rounded to 2 decimals. Sort by order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - calculated numeric fields
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Calculate discounted order totals
+    objective: Apply calculated numeric fields to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **calculated numeric fields** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: complex_transform_mastery
+  title: Calculate annual subscription value
+  type: mastery
+  runtime: sql
+  prompt: Return subscriber_id and annual_value as monthly_fee multiplied by 12, rounded to 2 decimals. Sort by
+    subscriber_id.
+  starter: "SELECT subscriber_id,\n       \nFROM subscriptions\nORDER BY subscriber_id;"
+  solution: SELECT subscriber_id, ROUND(monthly_fee * 12, 2) AS annual_value FROM subscriptions ORDER BY subscriber_id;
+  hints:
+  - Start from the requested result grain, then apply derived business metrics.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT subscriber_id, ROUND(monthly_fee * 12, 2) AS annual_value FROM subscriptions ORDER BY
+      subscriber_id;
+    required_patterns:
+    - monthly_fee\s*\*\s*12
+    - AS\s+annual_value
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return subscriber_id and annual_value as monthly_fee multiplied by 12, rounded to 2 decimals. Sort by
+      subscriber_id.
+    tables:
+    - subscriptions
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - derived business metrics
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Calculate annual subscription value
+    objective: Apply derived business metrics to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **derived business metrics** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

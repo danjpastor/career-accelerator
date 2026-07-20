@@ -1,0 +1,166 @@
+lesson_id: sql_multi_column_join
+title: Joining on Multiple Columns
+order: 3
+difficulty: intermediate
+description: Use a composite key when one column is not sufficient to identify a match.
+estimated_minutes: 24
+content: lesson.md
+objectives:
+- Explain joining on multiple columns.
+- Apply joining on multiple columns to an analyst request.
+key_takeaways:
+- Use a composite key when one column is not sufficient to identify a match.
+- Validate the result rather than relying only on valid syntax.
+teaches:
+- sql.multi_column_join
+requires:
+- sql.joins
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: multi_join_recognition
+  title: Identify the composite key
+  type: recognition
+  runtime: recognition
+  prompt: Monthly sales and targets repeat each region. Which join key identifies one matching record?
+  answer_options:
+  - region and month_start
+  - region only
+  - month_start only
+  - sales_total and sales_target
+  hints:
+  - Focus on how composite join keys changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: region and month_start
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Monthly sales and targets repeat each region. Which join key identifies one matching record?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - composite join keys
+    after_correct: You correctly applied composite join keys to the decision.
+    common_errors: []
+  instruction:
+    title: Identify the composite key
+    objective: Use composite join keys in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **composite join keys** to make database work more accurate, readable, and useful. Read the
+      situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: multi_join_guided
+  title: Compare sales with targets
+  type: guided
+  runtime: sql
+  prompt: Return region, month_start, sales_total, and sales_target by joining monthly_sales to monthly_targets
+    on region and month_start. Sort by region and month_start.
+  starter: "SELECT s.region, s.month_start, s.sales_total, t.sales_target\nFROM monthly_sales AS s\nJOIN monthly_targets\
+    \ AS t\n  ON s.region = t.region\n AND s.month_start = t.month_start\nORDER BY s.region, s.month_start;"
+  solution: SELECT s.region, s.month_start, s.sales_total, t.sales_target FROM monthly_sales AS s INNER JOIN monthly_targets
+    AS t ON s.region = t.region AND s.month_start = t.month_start ORDER BY s.region, s.month_start;
+  hints:
+  - Identify where multi-column joins belongs in the query.
+  - Build the query one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT s.region, s.month_start, s.sales_total, t.sales_target FROM monthly_sales AS s INNER
+      JOIN monthly_targets AS t ON s.region = t.region AND s.month_start = t.month_start ORDER BY s.region, s.month_start;
+    required_patterns:
+    - JOIN\s+monthly_targets
+    - s\.region\s*=\s*t\.region
+    - s\.month_start\s*=\s*t\.month_start
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return region, month_start, sales_total, and sales_target by joining monthly_sales to monthly_targets
+      on region and month_start. Sort by region and month_start.
+    tables:
+    - monthly_sales
+    - monthly_targets
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - multi-column joins
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Compare sales with targets
+    objective: Apply multi-column joins to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **multi-column joins** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: multi_join_mastery
+  title: Calculate target variance
+  type: mastery
+  runtime: sql
+  prompt: Return region, month_start, and variance_to_target as sales_total - sales_target. Sort by region and month_start.
+  starter: "SELECT s.region, s.month_start,\n       \nFROM monthly_sales AS s\nJOIN monthly_targets AS t\n  ON \n\
+    ORDER BY s.region, s.month_start;"
+  solution: SELECT s.region, s.month_start, s.sales_total - t.sales_target AS variance_to_target FROM monthly_sales
+    AS s INNER JOIN monthly_targets AS t ON s.region = t.region AND s.month_start = t.month_start ORDER BY s.region,
+    s.month_start;
+  hints:
+  - Start from the requested result grain, then apply composite-key join metrics.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT s.region, s.month_start, s.sales_total - t.sales_target AS variance_to_target FROM monthly_sales
+      AS s INNER JOIN monthly_targets AS t ON s.region = t.region AND s.month_start = t.month_start ORDER BY s.region,
+      s.month_start;
+    required_patterns:
+    - sales_total\s*-\s*t\.sales_target
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return region, month_start, and variance_to_target as sales_total - sales_target. Sort by region and month_start.
+    tables:
+    - monthly_sales
+    - monthly_targets
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - composite-key join metrics
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Calculate target variance
+    objective: Apply composite-key join metrics to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **composite-key join metrics** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

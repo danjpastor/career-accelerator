@@ -1,0 +1,6 @@
+module_id: short_subqueries
+title: Short and Simple Subqueries
+order: 2
+description: Use scalar, list-returning, FROM, and SELECT subqueries.
+lessons:
+- lessons/sql_subqueries/lesson.yaml

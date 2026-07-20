@@ -1,0 +1,6 @@
+module_id: database_management
+title: Database Management
+order: 4
+description: Reason about roles, privileges, partitioning, integration, and DBMS fit.
+lessons:
+- lessons/database_management/lesson.yaml

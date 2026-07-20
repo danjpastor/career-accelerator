@@ -1,0 +1,6 @@
+module_id: schemas_normalization
+title: Database Schemas and Normalization
+order: 2
+description: Use star and snowflake schemas, keys, and normalization deliberately.
+lessons:
+- lessons/database_schemas_normalization/lesson.yaml

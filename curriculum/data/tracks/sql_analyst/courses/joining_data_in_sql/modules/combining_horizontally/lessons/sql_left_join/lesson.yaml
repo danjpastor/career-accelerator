@@ -1,0 +1,163 @@
+lesson_id: sql_left_join
+title: Keeping All Rows with LEFT JOIN
+order: 1
+difficulty: intermediate
+description: Enrich a base population without losing unmatched rows.
+estimated_minutes: 24
+content: lesson.md
+objectives:
+- Explain keeping all rows with left join.
+- Apply keeping all rows with left join to an analyst request.
+key_takeaways:
+- Enrich a base population without losing unmatched rows.
+- Validate the result rather than relying only on valid syntax.
+teaches:
+- sql.left_join
+requires:
+- sql.set_operations
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: left_join_recognition
+  title: Choose the preserved table
+  type: recognition
+  runtime: recognition
+  prompt: In a LEFT JOIN, which table keeps all of its rows?
+  answer_options:
+  - The table written before LEFT JOIN
+  - The table written after LEFT JOIN
+  - Both tables always
+  - Neither table
+  hints:
+  - Focus on how LEFT JOIN preservation changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: The table written before LEFT JOIN
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: In a LEFT JOIN, which table keeps all of its rows?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - LEFT JOIN preservation
+    after_correct: You correctly applied LEFT JOIN preservation to the decision.
+    common_errors: []
+  instruction:
+    title: Choose the preserved table
+    objective: Use LEFT JOIN preservation in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **LEFT JOIN preservation** to make database work more accurate, readable, and useful. Read
+      the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: left_join_guided
+  title: Keep every customer
+  type: guided
+  runtime: sql
+  prompt: Return customer_id, customer_name, and order_id for all customers, including customers without orders.
+    Sort by customer_id and order_id.
+  starter: "SELECT c.customer_id, c.customer_name, o.order_id\nFROM customers AS c\nLEFT JOIN orders AS o\n  ON\
+    \ c.customer_id = o.customer_id\nORDER BY c.customer_id, o.order_id;"
+  solution: SELECT c.customer_id, c.customer_name, o.order_id FROM customers AS c LEFT JOIN orders AS o ON c.customer_id
+    = o.customer_id ORDER BY c.customer_id, o.order_id;
+  hints:
+  - Identify where LEFT JOIN belongs in the query.
+  - Build the query one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT c.customer_id, c.customer_name, o.order_id FROM customers AS c LEFT JOIN orders AS o
+      ON c.customer_id = o.customer_id ORDER BY c.customer_id, o.order_id;
+    required_patterns:
+    - LEFT\s+JOIN
+    - ON\s+c\.customer_id\s*=\s*o\.customer_id
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return customer_id, customer_name, and order_id for all customers, including customers without orders.
+      Sort by customer_id and order_id.
+    tables:
+    - customers
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - LEFT JOIN
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Keep every customer
+    objective: Apply LEFT JOIN to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **LEFT JOIN** inside a complete analyst query. Start by identifying the result
+      grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: left_join_mastery
+  title: Find customers without orders
+  type: mastery
+  runtime: sql
+  prompt: Return customer_id and customer_name for customers with no matching order. Sort by customer_id.
+  starter: "SELECT c.customer_id, c.customer_name\nFROM customers AS c\nLEFT JOIN orders AS o\n  ON c.customer_id\
+    \ = o.customer_id\nWHERE \nORDER BY c.customer_id;"
+  solution: SELECT c.customer_id, c.customer_name FROM customers AS c LEFT JOIN orders AS o ON c.customer_id = o.customer_id
+    WHERE o.order_id IS NULL ORDER BY c.customer_id;
+  hints:
+  - Start from the requested result grain, then apply anti-join pattern.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT c.customer_id, c.customer_name FROM customers AS c LEFT JOIN orders AS o ON c.customer_id
+      = o.customer_id WHERE o.order_id IS NULL ORDER BY c.customer_id;
+    required_patterns:
+    - LEFT\s+JOIN
+    - o\.order_id\s+IS\s+NULL
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return customer_id and customer_name for customers with no matching order. Sort by customer_id.
+    tables:
+    - customers
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - anti-join pattern
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Find customers without orders
+    objective: Apply anti-join pattern to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **anti-join pattern** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

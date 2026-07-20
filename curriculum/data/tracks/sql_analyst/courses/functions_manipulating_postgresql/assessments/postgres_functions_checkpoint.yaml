@@ -1,0 +1,142 @@
+assessment_id: postgres_functions_checkpoint
+title: Functions for Manipulating Data in PostgreSQL Checkpoint
+order: 1
+description: Complete the independent questions without opening full solutions.
+estimated_minutes: 30
+requires:
+- sql.search_extensions
+passing_score: 0.8
+instructions:
+- Complete each question independently.
+- Run SQL when useful, then check each answer.
+- A score of 80% or higher passes the checkpoint.
+activities:
+- activity_id: func_cp_1_question
+  title: Extract order year
+  type: mastery
+  runtime: sql
+  prompt: Return order_id and order_year using EXTRACT, sorted by order_id.
+  starter: ''
+  solution: SELECT order_id, EXTRACT(YEAR FROM order_date) AS order_year FROM orders ORDER BY order_id;
+  hints:
+  - Start from the requested result grain, then apply extract order year.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, EXTRACT(YEAR FROM order_date) AS order_year FROM orders ORDER BY order_id;
+    required_patterns:
+    - EXTRACT\s*\(
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return order_id and order_year using EXTRACT, sorted by order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - extract order year
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Extract order year
+    objective: Apply extract order year to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **extract order year** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: func_cp_2_question
+  title: Standardize plan names
+  type: mastery
+  runtime: sql
+  prompt: Return subscriber_id and plan_name_upper using UPPER, sorted by subscriber_id.
+  starter: ''
+  solution: SELECT subscriber_id, UPPER(plan_name) AS plan_name_upper FROM subscriptions ORDER BY subscriber_id;
+  hints:
+  - Start from the requested result grain, then apply standardize plan names.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT subscriber_id, UPPER(plan_name) AS plan_name_upper FROM subscriptions ORDER BY subscriber_id;
+    required_patterns:
+    - UPPER\s*\(
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return subscriber_id and plan_name_upper using UPPER, sorted by subscriber_id.
+    tables:
+    - subscriptions
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - standardize plan names
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Standardize plan names
+    objective: Apply standardize plan names to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **standardize plan names** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: func_cp_3_mastery
+  title: Select a text-search tool
+  type: mastery
+  runtime: recognition
+  prompt: Which feature is intended for tokenized, relevance-aware document search?
+  answer_options:
+  - Full-text search
+  - SUM
+  - LIMIT
+  - A primary key only
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Full-text search
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which feature is intended for tokenized, relevance-aware document search?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - full-text search
+    after_correct: You correctly applied full-text search to the decision.
+    common_errors: []
+  instruction:
+    title: Select a text-search tool
+    objective: Use full-text search in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **full-text search** to make database work more accurate, readable, and useful. Read the
+      situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true

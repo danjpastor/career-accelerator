@@ -62,6 +62,9 @@ class JourneyNode:
     course_id: str | None = None
     course_title: str = ""
     course_order: int = 0
+    module_id: str | None = None
+    module_title: str = ""
+    module_order: int = 0
 
 
 @dataclass(frozen=True)
@@ -899,6 +902,9 @@ class AcceleratorAcademyWidget(QWidget):
                                         course_id=course.course_id,
                                         course_title=course.title,
                                         course_order=course.order,
+                                        module_id=module.module_id,
+                                        module_title=module.title,
+                                        module_order=module.order,
                                     )
                                 )
                     for assessment in course.assessments:
@@ -1171,6 +1177,7 @@ class AcceleratorAcademyWidget(QWidget):
             previous_track: str | None = None
             previous_course: str | None = None
             previous_section: str | None = None
+            previous_module: str | None = None
             previous_lesson: str | None = None
 
             for node in self._nodes:
@@ -1185,6 +1192,7 @@ class AcceleratorAcademyWidget(QWidget):
                     previous_track = node.track_id
                     previous_course = None
                     previous_section = None
+                    previous_module = None
                     previous_lesson = None
 
                 if node.course_id != previous_course:
@@ -1199,10 +1207,25 @@ class AcceleratorAcademyWidget(QWidget):
                     )
                     previous_course = node.course_id
                     previous_section = None
+                    previous_module = None
                     previous_lesson = None
 
                 if str(node.course_id) in self._course_collapsed:
                     continue
+
+                if node.kind == "lesson_step" and node.module_id != previous_module:
+                    chapter = self._add_roadmap_header(
+                        f"CHAPTER {node.module_order}  •  {node.module_title}",
+                        background="#17233A",
+                        foreground="#BFD0F4",
+                        border="#3A4D70",
+                        height=44,
+                        course_id=str(node.course_id),
+                    )
+                    chapter.setData(Qt.ItemDataRole.UserRole + 11, str(node.course_id))
+                    previous_module = node.module_id
+                    previous_section = None
+                    previous_lesson = None
 
                 if node.kind == "lesson_step" and node.lesson_id != previous_lesson:
                     lesson = self.catalog.lesson(str(node.lesson_id))
@@ -1257,6 +1280,7 @@ class AcceleratorAcademyWidget(QWidget):
                     )
                     header.setData(Qt.ItemDataRole.UserRole + 11, str(node.course_id))
                     previous_section = "assessment"
+                    previous_module = None
                     previous_lesson = None
                 elif node.kind == "skills_lab" and previous_section != "lab":
                     header = self._add_roadmap_header(
@@ -1269,6 +1293,7 @@ class AcceleratorAcademyWidget(QWidget):
                     )
                     header.setData(Qt.ItemDataRole.UserRole + 11, str(node.course_id))
                     previous_section = "lab"
+                    previous_module = None
                     previous_lesson = None
 
                 state, unlocked, _reason = self._node_state(node)
@@ -1432,6 +1457,7 @@ class AcceleratorAcademyWidget(QWidget):
         step_index = lesson.activities.index(activity) + 1
         self.lesson_breadcrumb.setText(
             f"Accelerator Academy  ›  {node.track_title}  ›  {node.course_title}  ›  "
+            f"Chapter {node.module_order}: {node.module_title}  ›  "
             f"Lesson {lesson.order}: {lesson.title}"
         )
         self.lesson_step_pill.setText(f"Step {step_index} of {len(lesson.activities)}")

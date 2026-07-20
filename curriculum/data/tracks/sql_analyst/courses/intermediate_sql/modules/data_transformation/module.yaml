@@ -1,0 +1,7 @@
+module_id: data_transformation
+title: Data Transformation
+order: 2
+description: Create useful fields from raw values and calculations.
+lessons:
+- lessons/sql_transformations/lesson.yaml
+- lessons/sql_complex_transformations/lesson.yaml

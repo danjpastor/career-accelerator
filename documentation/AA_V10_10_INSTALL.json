@@ -1,0 +1,8 @@
+{
+  "patch": "accelerator-academy-v10.10.0",
+  "installed_at": "2026-07-20T14:06:24",
+  "backup_root": "patch_backups\\v110-260720-140623",
+  "changed_file_count": 126,
+  "verified_file_count": 126,
+  "removed_path_count": 4
+}

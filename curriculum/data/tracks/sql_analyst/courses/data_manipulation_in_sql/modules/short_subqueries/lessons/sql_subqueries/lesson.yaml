@@ -1,0 +1,160 @@
+lesson_id: sql_subqueries
+title: Subqueries
+order: 1
+difficulty: intermediate
+description: Use nested queries to calculate benchmarks and eligible populations.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain subqueries.
+- Apply subqueries to an analyst request.
+key_takeaways:
+- Use nested queries to calculate benchmarks and eligible populations.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.subqueries
+requires:
+- sql.case_logic
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: subquery_recognition
+  title: Identify a scalar subquery
+  type: recognition
+  runtime: recognition
+  prompt: What must a scalar subquery return when used with a single comparison operator?
+  answer_options:
+  - One value
+  - Any number of columns
+  - A table name
+  - Only text
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: One value
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What must a scalar subquery return when used with a single comparison operator?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Use a query result inside another query
+    after_correct: You identified the core idea behind use a query result inside another query.
+    common_errors: []
+  instruction:
+    title: Use a query result inside another query
+    objective: Build a practical understanding of use a query result inside another query.
+    action_label: Choose the best answer
+    body: A scalar subquery returns one value, such as an overall average, that the outer query can compare against.
+  required_for_completion: true
+- activity_id: subquery_guided
+  title: Find above-average orders
+  type: guided
+  runtime: sql
+  prompt: Return order_id and order_total for orders above the overall average order_total. Sort by order_id.
+  starter: "SELECT order_id, order_total\nFROM orders\nWHERE order_total > (\n    -- calculate the overall average\n\
+    )\nORDER BY order_id;"
+  solution: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders) ORDER
+    BY order_id;
+  hints:
+  - Focus on scalar subquery.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders)
+      ORDER BY order_id;
+    required_patterns:
+    - WHERE.+\(\s*SELECT
+    - AVG\s*\(
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 8
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return order_id and order_total for orders above the overall average order_total. Sort by order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - scalar subquery
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Compare rows with a calculated benchmark
+    objective: Use scalar subquery in a realistic analyst query.
+    action_label: Write and validate the query
+    body: The inner query calculates one benchmark. The outer query uses it to filter individual rows.
+  required_for_completion: true
+- activity_id: subquery_mastery
+  title: Find customers with urgent tickets
+  type: mastery
+  runtime: sql
+  prompt: Return order_id and customer_id for orders placed by customers who have an Urgent support ticket. Sort
+    by order_id.
+  starter: 'SELECT order_id, customer_id
+
+    FROM orders
+
+    WHERE customer_id IN (
+
+    );'
+  solution: SELECT order_id, customer_id FROM orders WHERE customer_id IN (SELECT customer_id FROM support_tickets
+    WHERE priority = 'Urgent') ORDER BY order_id;
+  hints:
+  - Focus on list-returning subquery.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, customer_id FROM orders WHERE customer_id IN (SELECT customer_id FROM support_tickets
+      WHERE priority = 'Urgent') ORDER BY order_id;
+    required_patterns:
+    - \bIN\s*\(\s*SELECT
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 10
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return order_id and customer_id for orders placed by customers who have an Urgent support ticket. Sort
+      by order_id.
+    tables:
+    - orders
+    - support_tickets
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - list-returning subquery
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Filter one table using a related population
+    objective: Use list-returning subquery in a realistic analyst query.
+    action_label: Write and validate the query
+    body: The inner query returns the eligible customer IDs; the outer query returns matching orders.
+  required_for_completion: true

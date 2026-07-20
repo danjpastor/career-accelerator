@@ -1,0 +1,17 @@
+course_id: database_design
+title: Database Design
+order: 7
+description: Understand how databases process, organize, expose, and govern data.
+estimated_minutes: 300
+outcomes:
+- Apply every chapter through interactive decisions and SQL practice.
+- Validate results and explain how the query supports an analyst decision.
+modules:
+- modules/processing_storage/module.yaml
+- modules/schemas_normalization/module.yaml
+- modules/database_views/module.yaml
+- modules/database_management/module.yaml
+assessments:
+- assessments/database_design_checkpoint.yaml
+skills_labs:
+- skills_labs/community_impact_analysis.yaml

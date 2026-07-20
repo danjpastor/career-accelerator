@@ -1,0 +1,141 @@
+lesson_id: sql_search_extensions
+title: Full-Text Search and PostgreSQL Extensions
+order: 1
+difficulty: intermediate
+description: Understand when search indexes, extensions, user-defined functions, and similarity measures are appropriate.
+estimated_minutes: 18
+content: lesson.md
+objectives:
+- Explain full-text search and postgresql extensions.
+- Choose appropriate analyst and database decisions involving full-text search and postgresql extensions.
+key_takeaways:
+- Understand when search indexes, extensions, user-defined functions, and similarity measures are appropriate.
+- Choose designs based on workload, grain, integrity, and maintainability.
+teaches:
+- sql.search_extensions
+requires:
+- sql.text_functions
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: sql_search_extensions_1_recognition
+  title: 'Full-Text Search and PostgreSQL Extensions: decision 1'
+  type: recognition
+  runtime: recognition
+  prompt: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed
+    for that workload?
+  answer_options:
+  - Full-text search with an indexed document representation
+  - A simple ORDER BY only
+  - A numeric AVG
+  - A CROSS JOIN
+  hints:
+  - Focus on how full-text search and postgresql extensions changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: Full-text search with an indexed document representation
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed
+      for that workload?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - full-text search and postgresql extensions
+    after_correct: You correctly applied full-text search and postgresql extensions to the decision.
+    common_errors: []
+  instruction:
+    title: 'Full-Text Search and PostgreSQL Extensions: decision 1'
+    objective: Use full-text search and postgresql extensions in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable,
+      and useful. Read the situation, identify what the result must preserve, and then choose the option that best
+      matches that goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: sql_search_extensions_2_recognition
+  title: 'Full-Text Search and PostgreSQL Extensions: decision 2'
+  type: recognition
+  runtime: recognition
+  prompt: What is the main reason to review a database extension before enabling it?
+  answer_options:
+  - It adds capabilities and operational or security considerations
+  - Extensions always delete data
+  - Extensions only change colors
+  - Extensions replace every table
+  hints:
+  - Focus on how full-text search and postgresql extensions changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: It adds capabilities and operational or security considerations
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: What is the main reason to review a database extension before enabling it?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - full-text search and postgresql extensions
+    after_correct: You correctly applied full-text search and postgresql extensions to the decision.
+    common_errors: []
+  instruction:
+    title: 'Full-Text Search and PostgreSQL Extensions: decision 2'
+    objective: Use full-text search and postgresql extensions in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable,
+      and useful. Read the situation, identify what the result must preserve, and then choose the option that best
+      matches that goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: sql_search_extensions_3_mastery
+  title: 'Full-Text Search and PostgreSQL Extensions: decision 3'
+  type: mastery
+  runtime: recognition
+  prompt: Which measure describes the number of single-character edits needed to transform one string into another?
+  answer_options:
+  - Levenshtein distance
+  - Running total
+  - Cardinality
+  - Foreign key
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Levenshtein distance
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which measure describes the number of single-character edits needed to transform one string into another?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - full-text search and postgresql extensions
+    after_correct: You correctly applied full-text search and postgresql extensions to the decision.
+    common_errors: []
+  instruction:
+    title: 'Full-Text Search and PostgreSQL Extensions: decision 3'
+    objective: Use full-text search and postgresql extensions in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable,
+      and useful. Read the situation, identify what the result must preserve, and then choose the option that best
+      matches that goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true

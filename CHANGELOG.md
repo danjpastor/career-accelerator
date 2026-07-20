@@ -1,3 +1,16 @@
+# v10.10.0 — SQL Fundamentals Course and Chapter Reorganization
+
+- Reworked the Accelerator Academy SQL roadmap into seven courses following the requested SQL Fundamentals course order.
+- Added the complete public chapter hierarchy beneath each course and displayed chapter headers in the collapsible pathway list.
+- Expanded the SQL curriculum to 35 lessons with 193 total Academy journey nodes across all active tracks.
+- Added seven integrated course checkpoints.
+- Added Bonus Project — Analyzing Students' Mental Health after Intermediate SQL.
+- Added Bonus Project — Impact Analysis of GoodThought NGO Initiatives after Database Design.
+- Added original datasets for customer, order-item, monthly-performance, student-wellbeing, and community-impact analysis.
+- Preserved compatible progress by reusing stable lesson and activity identifiers where earlier Academy topics map to the new structure.
+- Kept all instructional text, examples, exercises, datasets, solutions, and project work original to Accelerator Academy.
+- Removed the four superseded SQL course-package folders after migrating their active content into the new seven-course structure.
+
 # v10.9.0 — Collapsible Academy Courses, Performance, and Weekly Sprint Rollover
 
 - Made every Accelerator Academy course header collapsible in the pathway list.

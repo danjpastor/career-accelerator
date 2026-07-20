@@ -1,0 +1,160 @@
+lesson_id: sql_multiple_conditions
+title: Multiple Conditions
+order: 2
+difficulty: intermediate
+description: Combine business criteria without changing their intended logic.
+estimated_minutes: 24
+content: lesson.md
+objectives:
+- Explain multiple conditions.
+- Apply multiple conditions to an analyst request.
+key_takeaways:
+- Combine business criteria without changing their intended logic.
+- Validate the result rather than relying only on valid syntax.
+teaches:
+- sql.multiple_conditions
+requires:
+- sql.advanced_filtering
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: multi_cond_recognition
+  title: Protect Boolean logic
+  type: recognition
+  runtime: recognition
+  prompt: Which technique makes mixed AND/OR logic explicit?
+  answer_options:
+  - Use parentheses around related conditions
+  - Add LIMIT
+  - Sort first
+  - Use DISTINCT
+  hints:
+  - Focus on how Boolean condition grouping changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: Use parentheses around related conditions
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which technique makes mixed AND/OR logic explicit?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Boolean condition grouping
+    after_correct: You correctly applied Boolean condition grouping to the decision.
+    common_errors: []
+  instruction:
+    title: Protect Boolean logic
+    objective: Use Boolean condition grouping in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **Boolean condition grouping** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: multi_cond_guided
+  title: Find unresolved critical tickets
+  type: guided
+  runtime: sql
+  prompt: Return ticket_id, priority, and status for Open or Pending tickets that are High or Urgent. Sort by ticket_id.
+  starter: "SELECT ticket_id, priority, status\nFROM support_tickets\nWHERE \nORDER BY ticket_id;"
+  solution: SELECT ticket_id, priority, status FROM support_tickets WHERE status IN ('Open', 'Pending') AND priority
+    IN ('High', 'Urgent') ORDER BY ticket_id;
+  hints:
+  - Identify where multiple filter conditions belongs in the query.
+  - Build the query one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT ticket_id, priority, status FROM support_tickets WHERE status IN ('Open', 'Pending')
+      AND priority IN ('High', 'Urgent') ORDER BY ticket_id;
+    required_patterns:
+    - status\s+IN
+    - priority\s+IN
+    - \bAND\b
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return ticket_id, priority, and status for Open or Pending tickets that are High or Urgent. Sort by ticket_id.
+    tables:
+    - support_tickets
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - multiple filter conditions
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Find unresolved critical tickets
+    objective: Apply multiple filter conditions to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **multiple filter conditions** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+- activity_id: multi_cond_mastery
+  title: Filter active higher-value subscriptions
+  type: mastery
+  runtime: sql
+  prompt: Return subscriber_id, plan_name, and monthly_fee for Active or Trial subscriptions costing at least 29.
+    Sort by subscriber_id.
+  starter: "SELECT subscriber_id, plan_name, monthly_fee\nFROM subscriptions\nWHERE \nORDER BY subscriber_id;"
+  solution: SELECT subscriber_id, plan_name, monthly_fee FROM subscriptions WHERE status IN ('Active', 'Trial')
+    AND monthly_fee >= 29 ORDER BY subscriber_id;
+  hints:
+  - Start from the requested result grain, then apply combined business filters.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT subscriber_id, plan_name, monthly_fee FROM subscriptions WHERE status IN ('Active', 'Trial')
+      AND monthly_fee >= 29 ORDER BY subscriber_id;
+    required_patterns:
+    - status\s+IN
+    - monthly_fee\s*>=\s*29
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 7
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Return subscriber_id, plan_name, and monthly_fee for Active or Trial subscriptions costing at least 29.
+      Sort by subscriber_id.
+    tables:
+    - subscriptions
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested rows and columns.
+    skills_practiced:
+    - combined business filters
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Filter active higher-value subscriptions
+    objective: Apply combined business filters to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **combined business filters** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true

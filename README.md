@@ -24,10 +24,23 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.9.0 includes:
-- Collapsible Academy course sections with the active course expanded by default
-- Faster Academy selection, roadmap refresh, and lesson manipulation through bulk progress snapshots
-- Monday-based sprint rollover with clear current-week progress labeling
+Version 10.10.0 includes:
+- A seven-course SQL Fundamentals roadmap organized by the requested course and chapter sequence
+- Thirty-five SQL lessons, seven course checkpoints, and two integrated bonus projects
+- Chapter headers inside each collapsible SQL course in the Academy pathway
+- Original Accelerator Academy instruction, datasets, exercises, solutions, and project work
+- Progress-preserving reuse of stable lesson and activity IDs where earlier Academy work maps cleanly
+
+### SQL Fundamentals Curriculum Reorganization
+
+- Reorganized the SQL track into Introduction to SQL, Intermediate SQL, Joining Data in SQL, Data Manipulation in SQL, PostgreSQL Summary Stats and Window Functions, Functions for Manipulating Data in PostgreSQL, and Database Design.
+- Added the full public chapter taxonomy beneath those courses and surfaced chapter headings in the learner roadmap.
+- Added seven integrated course checkpoints.
+- Added **Bonus Project — Analyzing Students' Mental Health** after Intermediate SQL.
+- Added **Bonus Project — Impact Analysis of GoodThought NGO Initiatives** after Database Design.
+- Kept all lesson explanations, examples, datasets, questions, validators, solutions, and project briefs original to Accelerator Academy.
+- Expanded the complete Academy journey to 193 interactive lesson, checkpoint, and project steps.
+- Removed superseded unreferenced SQL course packages so the repository contains only the active seven-course roadmap.
 
 
 ### Accelerator Academy Replaces Required DataCamp Tasks

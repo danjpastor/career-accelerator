@@ -1,0 +1,16 @@
+course_id: functions_manipulating_postgresql
+title: Functions for Manipulating Data in PostgreSQL
+order: 6
+description: Use common PostgreSQL-oriented types and functions while understanding dialect portability.
+estimated_minutes: 250
+outcomes:
+- Apply every chapter through interactive decisions and SQL practice.
+- Validate results and explain how the query supports an analyst decision.
+modules:
+- modules/common_data_types/module.yaml
+- modules/date_time_functions/module.yaml
+- modules/text_functions/module.yaml
+- modules/search_extensions/module.yaml
+assessments:
+- assessments/postgres_functions_checkpoint.yaml
+skills_labs: []

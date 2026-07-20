@@ -1,7 +1,0 @@
-module_id: joining_combining_core
-title: Joining and Combining Data
-order: 1
-description: Work through joining and combining data one focused, interactive step at a time.
-lessons:
-- lessons/sql_set_operations/lesson.yaml
-- lessons/sql_joins/lesson.yaml

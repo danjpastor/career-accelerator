@@ -1,0 +1,6 @@
+outcome_id,project_id,report_year,people_reached,completion_rate
+R01,P01,2015,8200,0.91
+R02,P02,2018,12500,0.87
+R03,P03,2020,9400,0.82
+R04,P04,2022,15700,0.94
+R05,P05,2024,18100,0.89

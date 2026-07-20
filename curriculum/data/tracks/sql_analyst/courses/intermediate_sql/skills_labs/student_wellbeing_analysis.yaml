@@ -1,0 +1,99 @@
+lab_id: student_wellbeing_analysis
+title: Bonus Project — Analyzing Students' Mental Health
+order: 1
+description: Explore how time in a program and study level relate to wellbeing indicators.
+estimated_minutes: 75
+requires:
+- sql.conditional_aggregation
+teaches:
+- analysis.student_wellbeing
+dataset_id: sql_foundations
+prompt: Group students by program_level and a stay_group (Under 6 months, 6-11 months, 12+ months). Return student_count,
+  average_wellbeing, and average_anxiety, rounded to 2 decimals. Sort by program_level and stay_group.
+brief_markdown: '# Bonus Project — Analyzing Students'' Mental Health
+
+
+  A student-support team wants an exploratory view of wellbeing indicators by study level and length of stay. Build
+  a reproducible grouped summary, then write careful findings that separate observed patterns from causal claims.
+  The dataset, question, wording, and solution are original to Accelerator Academy.'
+deliverables:
+- Validated SQL query
+- Result table
+- At least three concise findings
+- Saved submission artifact
+- Demonstrated Evidence record
+acceptance_criteria:
+- The query returns the required population and metrics.
+- The result is grouped and ordered as requested.
+- At least three findings are supported by the output.
+- The final SQL is readable and reproducible.
+reflection_questions:
+- What is the strongest pattern in the result?
+- Which conclusion would require additional data?
+- What data-quality limitation should the stakeholder know?
+rubric:
+  sql_accuracy: 40%
+  validation: 20%
+  findings: 25%
+  professionalism: 15%
+activity:
+  activity_id: student_wellbeing_analysis_query
+  title: Build the analysis query
+  type: mastery
+  runtime: sql
+  prompt: Group students by program_level and a stay_group (Under 6 months, 6-11 months, 12+ months). Return student_count,
+    average_wellbeing, and average_anxiety, rounded to 2 decimals. Sort by program_level and stay_group.
+  starter: 'SELECT
+
+    FROM '
+  solution: SELECT program_level, CASE WHEN stay_months < 6 THEN 'Under 6 months' WHEN stay_months < 12 THEN '6-11
+    months' ELSE '12+ months' END AS stay_group, COUNT(*) AS student_count, ROUND(AVG(wellbeing_index), 2) AS average_wellbeing,
+    ROUND(AVG(anxiety_score), 2) AS average_anxiety FROM student_wellbeing GROUP BY program_level, stay_group ORDER
+    BY program_level, stay_group;
+  hints:
+  - Start from the requested result grain, then apply integrated SQL analysis.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT program_level, CASE WHEN stay_months < 6 THEN 'Under 6 months' WHEN stay_months < 12
+      THEN '6-11 months' ELSE '12+ months' END AS stay_group, COUNT(*) AS student_count, ROUND(AVG(wellbeing_index),
+      2) AS average_wellbeing, ROUND(AVG(anxiety_score), 2) AS average_anxiety FROM student_wellbeing GROUP BY program_level,
+      stay_group ORDER BY program_level, stay_group;
+    required_patterns:
+    - CASE\s+WHEN
+    - COUNT\s*\(
+    - AVG\s*\(
+    - GROUP\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 25
+  presentation:
+    scenario: Original analyst practice request
+    introduction: Translate the business request into a focused, reviewable SQL result.
+    task: Group students by program_level and a stay_group (Under 6 months, 6-11 months, 12+ months). Return student_count,
+      average_wellbeing, and average_anxiety, rounded to 2 decimals. Sort by program_level and stay_group.
+    tables:
+    - student_wellbeing
+    requirements:
+    - Return the requested columns and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: One row per program-level and stay-group combination.
+    skills_practiced:
+    - integrated SQL analysis
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Build the analysis query
+    objective: Apply integrated SQL analysis to a realistic analyst request.
+    action_label: Write and validate the query
+    body: In this step, you will use **integrated SQL analysis** inside a complete analyst query. Start by identifying
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer
+      the request. Run the query, inspect the output, and check the answer when the result looks right.
+  required_for_completion: true
+evidence:
+  job_competency: Exploratory SQL analysis and responsible interpretation

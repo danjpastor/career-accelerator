@@ -1,0 +1,161 @@
+lesson_id: sql_window_functions
+title: Window Functions
+order: 1
+difficulty: intermediate
+description: Add rankings and cumulative measures while retaining row-level detail.
+estimated_minutes: 28
+content: lesson.md
+objectives:
+- Explain window functions.
+- Apply window functions to an analyst request.
+key_takeaways:
+- Add rankings and cumulative measures while retaining row-level detail.
+- Validate the result rather than relying only on query syntax.
+teaches:
+- sql.window_functions
+requires:
+- sql.ctes_correlated
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: window_recognition
+  title: Recognize a window calculation
+  type: recognition
+  runtime: recognition
+  prompt: What is the defining advantage of a window function over GROUP BY?
+  answer_options:
+  - It can calculate across related rows without collapsing them
+  - It removes every duplicate
+  - It always filters rows
+  - It renames source columns
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It can calculate across related rows without collapsing them
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick knowledge check
+    introduction: Use the idea you just reviewed to choose the strongest answer.
+    task: What is the defining advantage of a window function over GROUP BY?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - Calculate context while keeping detail rows
+    after_correct: You identified the core idea behind calculate context while keeping detail rows.
+    common_errors: []
+  instruction:
+    title: Calculate context while keeping detail rows
+    objective: Build a practical understanding of calculate context while keeping detail rows.
+    action_label: Choose the best answer
+    body: Window functions preserve row-level detail while adding rankings, running totals, or comparisons across
+      a defined window.
+  required_for_completion: true
+- activity_id: window_guided
+  title: Number orders within each region
+  type: guided
+  runtime: sql
+  prompt: Return order_id, region, order_total, and region_order_number using ROW_NUMBER ordered by order_total
+    descending within each region. Sort the final result by region and region_order_number.
+  starter: "SELECT order_id, region, order_total,\n       ROW_NUMBER() OVER (\n       ) AS region_order_number\n\
+    FROM orders;"
+  solution: SELECT order_id, region, order_total, ROW_NUMBER() OVER (PARTITION BY region ORDER BY order_total DESC)
+    AS region_order_number FROM orders ORDER BY region, region_order_number;
+  hints:
+  - Focus on ROW_NUMBER and PARTITION BY.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, region, order_total, ROW_NUMBER() OVER (PARTITION BY region ORDER BY order_total
+      DESC) AS region_order_number FROM orders ORDER BY region, region_order_number;
+    required_patterns:
+    - ROW_NUMBER\s*\(
+    - PARTITION\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 9
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return order_id, region, order_total, and region_order_number using ROW_NUMBER ordered by order_total
+      descending within each region. Sort the final result by region and region_order_number.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - ROW_NUMBER and PARTITION BY
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Rank rows inside business groups
+    objective: Use ROW_NUMBER and PARTITION BY in a realistic analyst query.
+    action_label: Write and validate the query
+    body: The window partition restarts the numbering for each region while the window order ranks larger orders
+      first.
+  required_for_completion: true
+- activity_id: window_mastery
+  title: Calculate a running order total
+  type: mastery
+  runtime: sql
+  prompt: Return order_id, order_date, order_total, and running_order_total ordered by order_date and order_id.
+  starter: 'SELECT order_id, order_date, order_total,
+
+    FROM orders
+
+    ORDER BY order_date, order_id;'
+  solution: SELECT order_id, order_date, order_total, SUM(order_total) OVER (ORDER BY order_date, order_id ROWS
+    BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_order_total FROM orders ORDER BY order_date, order_id;
+  hints:
+  - Focus on running totals.
+  - Build the result one clause at a time.
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: SELECT order_id, order_date, order_total, SUM(order_total) OVER (ORDER BY order_date, order_id
+      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_order_total FROM orders ORDER BY order_date,
+      order_id;
+    required_patterns:
+    - SUM\s*\(.+OVER
+    - ORDER\s+BY
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 11
+  presentation:
+    scenario: Analyst practice request
+    introduction: Translate the request into a clear, reviewable SQL result.
+    task: Return order_id, order_date, order_total, and running_order_total ordered by order_date and order_id.
+    tables:
+    - orders
+    requirements:
+    - Return the requested fields and metrics.
+    - Keep the result readable and deterministic.
+    expected_output: A validated result with the requested columns.
+    skills_practiced:
+    - running totals
+    after_correct: Your query returns the requested result and uses the intended SQL pattern.
+    common_errors: []
+  instruction:
+    title: Build a cumulative measure without losing detail
+    objective: Use running totals in a realistic analyst query.
+    action_label: Write and validate the query
+    body: Use an ordered window frame so each row includes every preceding order and the current order.
+  required_for_completion: true

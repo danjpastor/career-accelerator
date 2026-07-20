@@ -1,0 +1,139 @@
+lesson_id: database_management
+title: Database Management Decisions
+order: 1
+difficulty: intermediate
+description: Choose access, partitioning, integration, and platform strategies based on risk and workload.
+estimated_minutes: 18
+content: lesson.md
+objectives:
+- Explain database management decisions.
+- Choose appropriate analyst and database decisions involving database management decisions.
+key_takeaways:
+- Choose access, partitioning, integration, and platform strategies based on risk and workload.
+- Choose designs based on workload, grain, integrity, and maintainability.
+teaches:
+- database.management
+requires:
+- database.views
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: database_management_1_recognition
+  title: 'Database Management Decisions: decision 1'
+  type: recognition
+  runtime: recognition
+  prompt: Which principle grants users only the permissions needed for their work?
+  answer_options:
+  - Least privilege
+  - Full access by default
+  - No authentication
+  - Duplicate ownership
+  hints:
+  - Focus on how database management decisions changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: Least privilege
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which principle grants users only the permissions needed for their work?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - database management decisions
+    after_correct: You correctly applied database management decisions to the decision.
+    common_errors: []
+  instruction:
+    title: 'Database Management Decisions: decision 1'
+    objective: Use database management decisions in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_management_2_recognition
+  title: 'Database Management Decisions: decision 2'
+  type: recognition
+  runtime: recognition
+  prompt: Why partition a very large event table by date?
+  answer_options:
+  - To reduce the data scanned for date-bounded work and simplify maintenance
+  - To remove the date column
+  - To make every query use CROSS JOIN
+  - To eliminate backups
+  hints:
+  - Focus on how database management decisions changes the result or database behavior.
+  validator:
+    type: exact_answer
+    expected_answer: To reduce the data scanned for date-bounded work and simplify maintenance
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Why partition a very large event table by date?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - database management decisions
+    after_correct: You correctly applied database management decisions to the decision.
+    common_errors: []
+  instruction:
+    title: 'Database Management Decisions: decision 2'
+    objective: Use database management decisions in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
+- activity_id: database_management_3_mastery
+  title: 'Database Management Decisions: decision 3'
+  type: mastery
+  runtime: recognition
+  prompt: Which factor matters most when choosing a database platform?
+  answer_options:
+  - The workload, scale, consistency, skills, and operational requirements
+  - The logo color only
+  - The shortest product name
+  - Whether every field is text
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The workload, scale, consistency, skills, and operational requirements
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: Quick analyst decision
+    introduction: Use the concept from this step to choose the strongest answer.
+    task: Which factor matters most when choosing a database platform?
+    requirements:
+    - Choose one answer.
+    - Check your answer before continuing.
+    expected_output: One correct selection.
+    skills_practiced:
+    - database management decisions
+    after_correct: You correctly applied database management decisions to the decision.
+    common_errors: []
+  instruction:
+    title: 'Database Management Decisions: decision 3'
+    objective: Use database management decisions in a practical analyst decision.
+    action_label: Choose the best answer
+    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that
+      goal. This check is intentionally short so you can test the idea immediately.
+  required_for_completion: true
