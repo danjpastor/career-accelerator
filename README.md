@@ -24,7 +24,11 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.8.0 includes:
+Version 10.9.0 includes:
+- Collapsible Academy course sections with the active course expanded by default
+- Faster Academy selection, roadmap refresh, and lesson manipulation through bulk progress snapshots
+- Monday-based sprint rollover with clear current-week progress labeling
+
 
 ### Accelerator Academy Replaces Required DataCamp Tasks
 

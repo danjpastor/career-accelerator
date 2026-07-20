@@ -73,23 +73,49 @@ class RecommendationEngine:
 
     def next(self) -> AcademyRecommendation | None:
         mastered = self.progress.mastered_skills()
+        activity_rows = self.progress.activity_rows()
+        passed_assessments = {
+            str(row[0])
+            for row in self.progress.conn.execute(
+                """SELECT DISTINCT assessment_id
+                   FROM academy_assessment_attempts
+                   WHERE passed=1"""
+            ).fetchall()
+        }
+        passed_labs = {
+            str(row[0])
+            for row in self.progress.conn.execute(
+                """SELECT DISTINCT item_id
+                   FROM academy_submissions
+                   WHERE item_type='skills_lab'
+                     AND validation_status='Passed'"""
+            ).fetchall()
+        }
 
-        # The learner follows one coherent course sequence.  Finish the current
-        # course's lessons, checkpoint, and applied project before moving to the
-        # next course or track.
+        # Finish each course's lessons, checkpoint, and applied project before
+        # moving to the next course or track. All progress is read from the
+        # snapshots above, so a large curriculum does not generate one SQLite
+        # query per lesson step.
         for path in self.index.catalog.program.paths:
             for track in path.tracks:
                 for course in track.courses:
                     for module in course.modules:
                         for lesson in module.lessons:
                             location = self.index.lesson(lesson.lesson_id)
-                            unlocked, _missing = self.lesson_unlocked(location)
-                            if not unlocked:
+                            missing_lesson = tuple(
+                                skill for skill in lesson.requires
+                                if skill not in mastered
+                            )
+                            if missing_lesson:
                                 continue
-                            for step_index, activity in enumerate(lesson.activities, start=1):
+                            for step_index, activity in enumerate(
+                                lesson.activities, start=1
+                            ):
                                 if not activity.required_for_completion:
                                     continue
-                                row = self.progress.activity_row(lesson.lesson_id, activity.activity_id)
+                                row = activity_rows.get(
+                                    (lesson.lesson_id, activity.activity_id)
+                                )
                                 passed = bool(row and row["state"] == "Passed")
                                 mastery_assisted = bool(
                                     passed
@@ -101,7 +127,8 @@ class RecommendationEngine:
                                         kind="lesson_step",
                                         title=f"{lesson.title} — {activity.title}",
                                         target_key=(
-                                            f"academy:activity:{lesson.lesson_id}:{activity.activity_id}"
+                                            f"academy:activity:{lesson.lesson_id}:"
+                                            f"{activity.activity_id}"
                                         ),
                                         estimated_minutes=activity.estimated_minutes,
                                         reason=(
@@ -112,33 +139,40 @@ class RecommendationEngine:
                                         activity_id=activity.activity_id,
                                     )
 
-                    # Assessments are in the same journey and gate the applied
-                    # project for this course.
                     for assessment in course.assessments:
                         missing = tuple(
-                            skill for skill in assessment.requires if skill not in mastered
+                            skill for skill in assessment.requires
+                            if skill not in mastered
                         )
-                        if not missing and not self.assessment_passed(assessment.assessment_id):
+                        if (
+                            not missing
+                            and assessment.assessment_id not in passed_assessments
+                        ):
                             return AcademyRecommendation(
                                 kind="assessment",
                                 title=assessment.title,
-                                target_key=f"academy:assessment:{assessment.assessment_id}",
+                                target_key=(
+                                    f"academy:assessment:{assessment.assessment_id}"
+                                ),
                                 estimated_minutes=assessment.estimated_minutes,
-                                reason="Complete the next checkpoint in the learning path.",
+                                reason=(
+                                    "Complete the next checkpoint in the learning path."
+                                ),
                             )
 
                     all_assessments_passed = all(
-                        self.assessment_passed(item.assessment_id)
+                        item.assessment_id in passed_assessments
                         for item in course.assessments
                     )
                     for lab in course.skills_labs:
                         missing = tuple(
-                            skill for skill in lab.requires if skill not in mastered
+                            skill for skill in lab.requires
+                            if skill not in mastered
                         )
                         if (
                             all_assessments_passed
                             and not missing
-                            and not self.skills_lab_passed(lab.lab_id)
+                            and lab.lab_id not in passed_labs
                         ):
                             return AcademyRecommendation(
                                 kind="skills_lab",

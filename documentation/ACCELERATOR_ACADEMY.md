@@ -27,6 +27,7 @@ Demonstrated Evidence
 Courses, modules, practice, assessments, Skills Labs, and evidence remain internal curriculum types. They are not separate learner destinations. The Academy page contains:
 
 - a persistent roadmap showing the ordered journey;
+- collapsible course headers, with the active course expanded and future courses collapsed by default;
 - one recommended current step;
 - Back and Continue navigation;
 - prerequisite and sequential locks;
@@ -145,7 +146,7 @@ The active learner screen uses two functional areas:
 - **Lesson & Practice:** focused instruction, worked examples, scenario, task, requirements, expected output, skills, and the exact schema for every referenced table.
 - **Editor & Output:** only the active SQL editor or answer control, validation feedback, explanation, and output results.
 
-Run Query, Check Answer, Show Hint, View Solution, Back, and Continue share one workflow row. The footer is divided into two responsive regions synchronized to the live lesson/editor splitter: Back and the completion requirement remain on the lesson side, while the active interaction controls and Continue remain on the editor side. SQL steps display a vertical editor/output splitter; recognition steps replace that workspace with one uninterrupted answer surface so no empty editor/output divider remains. Track and course labels are supplied by curriculum configuration so additional SQL, Python, visualization, statistics, or communication courses can be added without changing the generic UI. The path-progress area displays course and lesson milestone circles connected by status-aware progress rails. Lesson headers in the pathway card use distinct tints for current, complete, in-progress, available, and locked states.
+Run Query, Check Answer, Show Hint, View Solution, Back, and Continue share one workflow row. The footer is divided into two responsive regions synchronized to the live lesson/editor splitter: Back and the completion requirement remain on the lesson side, while the active interaction controls and Continue remain on the editor side. SQL steps display a vertical editor/output splitter; recognition steps replace that workspace with one uninterrupted answer surface so no empty editor/output divider remains. Track and course labels are supplied by curriculum configuration so additional SQL, Python, visualization, statistics, or communication courses can be added without changing the generic UI. The path-progress area displays course and lesson milestone circles connected by status-aware progress rails. Lesson headers in the pathway card use distinct tints for current, complete, in-progress, available, and locked states. Roadmap state is loaded in bulk and the immutable journey structure is cached, so expanding courses and moving between steps does not perform one database query per curriculum node.
 
 ## SQL table-schema requirement
 

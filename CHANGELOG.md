@@ -1,3 +1,14 @@
+# v10.9.0 — Collapsible Academy Courses, Performance, and Weekly Sprint Rollover
+
+- Made every Accelerator Academy course header collapsible in the pathway list.
+- Kept the active course expanded while future courses begin collapsed.
+- Replaced per-node Academy database queries with bulk progress snapshots.
+- Cached the immutable Academy journey structure and rendered only expanded course rows.
+- Reduced Academy refresh time substantially for the current 112-step curriculum.
+- Made Sprint Progress explicitly identify the active roadmap week.
+- Added automatic Monday sprint advancement based on the configured program start date.
+- Preserved completed tasks and manual future-week advancement during rollover.
+
 # v10.8.0 — Accelerator Academy DataCamp Replacement and Roadmap Fixes
 
 - Removed DataCamp from active daily recommendations, adaptive tasks, weekly quotas, and frozen focus snapshots while preserving completed records as External Learning History.

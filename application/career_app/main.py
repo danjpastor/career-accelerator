@@ -24,7 +24,8 @@ from PySide6.QtWidgets import (
 
 from career_app import __version__
 from career_app.database import (
-    connect, ensure_default_state, factory_reset, save_setting, setting, state, update_state
+    connect, ensure_default_state, factory_reset, save_setting, setting, state,
+    sync_calendar_sprint_week, update_state,
 )
 from career_app.data.applied_exercises import (
     APPLIED_EXERCISES,
@@ -369,6 +370,7 @@ class CareerAccelerator(QMainWindow):
         self.conn = connect()
         ensure_default_state(self.conn, date.today().isoformat())
         self.migration_result = migrate(self.conn, ROOT)
+        self.sprint_rollover = sync_calendar_sprint_week(self.conn)
         planner.seed(self.conn)
         self.state = state(self.conn)
         planner.sync_google_course_progress(
@@ -1094,7 +1096,7 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_metrics_grid.setVerticalSpacing(10)
 
         self.rings = [
-            Ring("Sprint Progress", COLORS["purple"]),
+            Ring("Current Sprint", COLORS["purple"]),
             Ring("Google Certificate", COLORS["blue"]),
             Ring("SQL Progress", COLORS["green"]),
             Ring("Portfolio Progress", COLORS["orange"]),
@@ -6216,6 +6218,12 @@ class CareerAccelerator(QMainWindow):
         *,
         sync_tracks=True,
     ):
+        _old_week, _new_week, week_changed = sync_calendar_sprint_week(
+            self.conn
+        )
+        if week_changed:
+            self.state = state(self.conn)
+            sync_tracks = True
         if sync_tracks:
             tracks.sync_all(
                 self.conn,
@@ -6273,8 +6281,8 @@ class CareerAccelerator(QMainWindow):
         ring_values = [
             (
                 done / total * 100 if total else 0,
-                f"{done} / {total} tasks",
-                "●  On Track" if done else "○  Ready to start",
+                f"Week {week} • {done} / {total} tasks",
+                "●  Resets Monday" if total else "○  New sprint ready",
             ),
             (
                 (self.state["google_course"] - 1)

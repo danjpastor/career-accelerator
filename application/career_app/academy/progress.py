@@ -167,6 +167,15 @@ class ProgressRepository:
             (lesson_id, activity_id),
         ).fetchone()
 
+    def activity_rows(self) -> dict[tuple[str, str], sqlite3.Row]:
+        """Return all Academy activity progress in one indexed snapshot."""
+        return {
+            (str(row["lesson_id"]), str(row["activity_id"])): row
+            for row in self.conn.execute(
+                "SELECT * FROM academy_activity_progress"
+            ).fetchall()
+        }
+
     def save_answer(self, lesson_id: str, activity: ActivityDefinition, answer: str, notes: str = "") -> None:
         now = _now()
         self.conn.execute(

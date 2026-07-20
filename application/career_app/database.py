@@ -1,5 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
+from datetime import date, timedelta
 import sqlite3
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -363,6 +364,60 @@ def ensure_default_state(conn, start_date):
             (start_date,),
         )
         conn.commit()
+
+
+def calendar_sprint_week(start_date_value: str, reference: date | None = None) -> int:
+    """Return the Monday-based sprint number for a program start date.
+
+    The first sprint begins on the configured start date. Thereafter the active
+    sprint advances each Monday, so dashboard sprint progress begins a fresh
+    weekly task set without erasing earlier completion history.
+    """
+    current = reference or date.today()
+    try:
+        started = date.fromisoformat(str(start_date_value))
+    except (TypeError, ValueError):
+        started = current
+    if current <= started:
+        return 1
+
+    # The first rollover is the first Monday after the configured start date.
+    days_until_monday = (7 - started.weekday()) % 7
+    if days_until_monday == 0:
+        days_until_monday = 7
+    first_rollover = started + timedelta(days=days_until_monday)
+    if current < first_rollover:
+        return 1
+    return 2 + (current - first_rollover).days // 7
+
+
+def sync_calendar_sprint_week(conn, reference: date | None = None) -> tuple[int, int, bool]:
+    """Advance the active roadmap sprint on Monday when calendar time moves on.
+
+    Manual advancement is preserved: this function never moves the learner
+    backward. It only catches a stale current_week up to the calendar-derived
+    sprint, capped by total_weeks.
+    """
+    row = conn.execute(
+        "SELECT start_date,current_week,total_weeks FROM program_state WHERE id=1"
+    ).fetchone()
+    if row is None:
+        return 1, 1, False
+    old_week = max(1, int(row["current_week"]))
+    total_weeks = max(1, int(row["total_weeks"]))
+    calendar_week = min(
+        total_weeks,
+        calendar_sprint_week(str(row["start_date"]), reference),
+    )
+    new_week = max(old_week, calendar_week)
+    changed = new_week != old_week
+    if changed:
+        conn.execute(
+            "UPDATE program_state SET current_week=? WHERE id=1",
+            (new_week,),
+        )
+        conn.commit()
+    return old_week, new_week, changed
 
 def state(conn):
     return conn.execute("SELECT * FROM program_state WHERE id=1").fetchone()

@@ -221,7 +221,15 @@ class AcceleratorAcademyWidget(QWidget):
         self._lab: SkillsLabDefinition | None = None
         self._building_roadmap = False
         self._responsive_mode: str | None = None
+        self._node_state_cache: dict[str, tuple[str, bool, str | None]] = {}
+        self._course_collapsed: set[str] = set()
+        self._course_collapse_initialized = False
+        self._course_header_buttons: dict[str, QPushButton] = {}
 
+        # Journey structure is immutable for the lifetime of the widget. Build
+        # it once rather than recreating more than one hundred node objects on
+        # every answer, hint, resize, and navigation action.
+        self._nodes = self._build_nodes()
         self._build_ui()
         self.refresh_all()
         QTimer.singleShot(0, self.open_recommendation)
@@ -927,25 +935,131 @@ class AcceleratorAcademyWidget(QWidget):
                         )
         return nodes
 
+    def _prime_node_state_cache(self) -> None:
+        """Load all roadmap state with a small, fixed number of queries.
+
+        The earlier implementation asked SQLite about each roadmap node many
+        times while rebuilding the list. With the expanded curriculum that
+        became hundreds of synchronous queries whenever Academy was selected
+        or an answer changed. This snapshot keeps navigation responsive while
+        preserving the same prerequisite and mastery rules.
+        """
+
+        activity_rows = {
+            (str(row["lesson_id"]), str(row["activity_id"])): row
+            for row in self.conn.execute(
+                "SELECT * FROM academy_activity_progress"
+            ).fetchall()
+        }
+        mastered = self.service.progress.mastered_skills()
+        passed_assessments = {
+            str(row[0])
+            for row in self.conn.execute(
+                """SELECT DISTINCT assessment_id
+                   FROM academy_assessment_attempts
+                   WHERE passed=1"""
+            ).fetchall()
+        }
+        passed_labs = {
+            str(row[0])
+            for row in self.conn.execute(
+                """SELECT DISTINCT item_id
+                   FROM academy_submissions
+                   WHERE item_type='skills_lab'
+                     AND validation_status='Passed'"""
+            ).fetchall()
+        }
+
+        lab_course_assessments: dict[str, tuple[str, ...]] = {}
+        for course in self.catalog.courses():
+            assessment_ids = tuple(item.assessment_id for item in course.assessments)
+            for lab in course.skills_labs:
+                lab_course_assessments[lab.lab_id] = assessment_ids
+
+        cache: dict[str, tuple[str, bool, str | None]] = {}
+        for node in self._nodes:
+            if node.kind == "lesson_step":
+                lesson = self.catalog.lesson(str(node.lesson_id))
+                activity = next(
+                    item for item in lesson.activities
+                    if item.activity_id == node.activity_id
+                )
+                row = activity_rows.get((lesson.lesson_id, activity.activity_id))
+                passed = bool(row and row["state"] == "Passed")
+                complete = passed and not (
+                    activity.required_for_mastery
+                    and bool(row["last_attempt_solution_assisted"])
+                )
+                missing = tuple(skill for skill in lesson.requires if skill not in mastered)
+                unlocked = not missing
+                reason: str | None = None
+                if missing:
+                    reason = "Master first: " + ", ".join(missing)
+                else:
+                    for earlier in lesson.activities:
+                        if earlier.activity_id == activity.activity_id:
+                            break
+                        if not earlier.required_for_completion:
+                            continue
+                        earlier_row = activity_rows.get(
+                            (lesson.lesson_id, earlier.activity_id)
+                        )
+                        if earlier_row is None or earlier_row["state"] != "Passed":
+                            unlocked = False
+                            reason = f"Complete the earlier step: {earlier.title}"
+                            break
+                cache[node.target_key] = (
+                    "Passed" if complete else "Ready" if unlocked else "Locked",
+                    unlocked,
+                    reason,
+                )
+                continue
+
+            if node.kind == "assessment":
+                assessment = self.catalog.assessment(str(node.assessment_id))
+                if assessment.assessment_id in passed_assessments:
+                    cache[node.target_key] = ("Passed", True, None)
+                    continue
+                missing = tuple(skill for skill in assessment.requires if skill not in mastered)
+                unlocked = not missing
+                answered = bool(
+                    self._assessment_answers.get(str(node.activity_id), "").strip()
+                )
+                cache[node.target_key] = (
+                    "Answered" if answered else "Ready" if unlocked else "Locked",
+                    unlocked,
+                    ", ".join(missing) or None,
+                )
+                continue
+
+            lab = self.catalog.skills_lab(str(node.lab_id))
+            if lab.lab_id in passed_labs:
+                cache[node.target_key] = ("Passed", True, None)
+                continue
+            missing_items = [skill for skill in lab.requires if skill not in mastered]
+            for assessment_id in lab_course_assessments.get(lab.lab_id, ()):
+                if assessment_id not in passed_assessments:
+                    assessment = self.catalog.assessment(assessment_id)
+                    missing_items.append(f"checkpoint:{assessment.title}")
+            cache[node.target_key] = (
+                "Ready" if not missing_items else "Locked",
+                not missing_items,
+                ", ".join(missing_items) or None,
+            )
+
+        self._node_state_cache = cache
+
     def _node_state(self, node: JourneyNode) -> tuple[str, bool, str | None]:
-        if node.kind == "lesson_step":
-            lesson = self.catalog.lesson(str(node.lesson_id))
-            activity = next(item for item in lesson.activities if item.activity_id == node.activity_id)
-            complete = self.service.activity_complete(lesson.lesson_id, activity)
-            unlocked, reason = self.service.activity_unlocked(lesson.lesson_id, activity.activity_id)
-            return ("Passed" if complete else "Ready" if unlocked else "Locked", unlocked, reason)
-        if node.kind == "assessment":
-            assessment = self.catalog.assessment(str(node.assessment_id))
-            unlocked, missing = self.service.assessment_unlocked(assessment)
-            passed = self.service.assessment_passed(assessment.assessment_id)
-            if passed:
-                return "Passed", True, None
-            answered = bool(self._assessment_answers.get(str(node.activity_id), "").strip())
-            return ("Answered" if answered else "Ready" if unlocked else "Locked", unlocked, ", ".join(missing) or None)
-        lab = self.catalog.skills_lab(str(node.lab_id))
-        unlocked, missing = self.service.skills_lab_unlocked(lab)
-        passed = self.service.recommendations.skills_lab_passed(lab.lab_id)
-        return ("Passed" if passed else "Ready" if unlocked else "Locked", unlocked, ", ".join(missing) or None)
+        cached = self._node_state_cache.get(node.target_key)
+        if cached is not None:
+            return cached
+
+        # Defensive fallback for a route opened before the first full refresh.
+        self._prime_node_state_cache()
+        return self._node_state_cache.get(
+            node.target_key,
+            ("Locked", False, "This step is not available yet."),
+        )
 
     def _add_roadmap_header(
         self,
@@ -955,15 +1069,15 @@ class AcceleratorAcademyWidget(QWidget):
         foreground: str,
         border: str,
         height: int,
+        course_id: str | None = None,
+        collapsible: bool = False,
     ) -> QListWidgetItem:
-        """Add a visibly tinted, non-interactive hierarchy heading."""
+        """Add a tinted hierarchy heading, optionally as a course toggle."""
 
-        # The list item itself stays transparent; the custom frame owns the
-        # tint.  Giving the item an explicit height prevents the custom header
-        # from painting over the activity row that follows it on Windows.
         item = QListWidgetItem("")
         item.setFlags(Qt.ItemFlag.NoItemFlags)
-        item.setData(Qt.ItemDataRole.UserRole + 10, "roadmap_header")
+        item.setData(Qt.ItemDataRole.UserRole + 10, "course_header" if collapsible else "roadmap_header")
+        item.setData(Qt.ItemDataRole.UserRole + 11, course_id)
         item.setSizeHint(QSize(1, height + 8))
         self.roadmap_list.addItem(item)
 
@@ -975,131 +1089,213 @@ class AcceleratorAcademyWidget(QWidget):
             f"QFrame {{background:{background};border:1px solid {border};border-radius:7px;}}"
         )
         layout = QVBoxLayout(frame)
-        layout.setContentsMargins(10, 7, 10, 7)
+        layout.setContentsMargins(10, 6, 10, 6)
         layout.setSpacing(1)
-        label = QLabel(text)
-        label.setWordWrap(True)
-        label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        label.setStyleSheet(
-            f"color:{foreground};font-weight:750;font-size:9.5pt;background:transparent;border:none;padding:0;"
-        )
-        layout.addWidget(label, 1)
+
+        if collapsible and course_id:
+            collapsed = course_id in self._course_collapsed
+            button = QPushButton(("▸  " if collapsed else "▾  ") + text)
+            button.setCursor(Qt.CursorShape.PointingHandCursor)
+            button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            button.setStyleSheet(
+                f"QPushButton {{color:{foreground};font-weight:750;font-size:9.5pt;"
+                "background:transparent;border:none;padding:0;text-align:left;}"
+                "QPushButton:hover {color:#FFFFFF;}"
+            )
+            button.clicked.connect(
+                lambda _checked=False, key=course_id: self._toggle_course(key)
+            )
+            layout.addWidget(button, 1)
+            self._course_header_buttons[course_id] = button
+        else:
+            label = QLabel(text)
+            label.setWordWrap(True)
+            label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            label.setStyleSheet(
+                f"color:{foreground};font-weight:750;font-size:9.5pt;"
+                "background:transparent;border:none;padding:0;"
+            )
+            layout.addWidget(label, 1)
+
         self.roadmap_list.setItemWidget(item, frame)
         return item
 
-    def _refresh_roadmap(self) -> None:
-        current = self._current_target
-        self._nodes = self._build_nodes()
-        self._assessment_answers = {
-            **self._assessment_answers,
-            **(
-                self.service.assessment_drafts(self.catalog.assessments()[0].assessment_id)
-                if self.catalog.assessments()
-                else {}
-            ),
+    def _toggle_course(self, course_id: str) -> None:
+        if course_id in self._course_collapsed:
+            self._course_collapsed.remove(course_id)
+        else:
+            self._course_collapsed.add(course_id)
+        # Rebuilding only the visible rows is inexpensive because node state is
+        # already cached and collapsed courses do not create child widgets.
+        self._refresh_roadmap(recompute_states=False)
+        self._select_current_roadmap_item()
+
+    def _initialize_course_collapse(self) -> None:
+        if self._course_collapse_initialized:
+            return
+        active_course: str | None = None
+        if self._current_target:
+            try:
+                active_course = self._node(self._current_target).course_id
+            except KeyError:
+                active_course = None
+        if active_course is None:
+            for node in self._nodes:
+                state, unlocked, _reason = self._node_state(node)
+                if state != "Passed" and unlocked:
+                    active_course = node.course_id
+                    break
+        course_ids = {str(node.course_id) for node in self._nodes if node.course_id}
+        self._course_collapsed = {
+            course_id for course_id in course_ids if course_id != active_course
         }
+        self._course_collapse_initialized = True
+
+    def _refresh_roadmap(self, *, recompute_states: bool = True) -> None:
+        current = self._current_target
+        if recompute_states or not self._node_state_cache:
+            self._prime_node_state_cache()
+        self._initialize_course_collapse()
+
+        lesson_nodes_by_id: dict[str, list[JourneyNode]] = {}
+        for item in self._nodes:
+            if item.kind == "lesson_step" and item.lesson_id:
+                lesson_nodes_by_id.setdefault(str(item.lesson_id), []).append(item)
+
         self._building_roadmap = True
+        self._course_header_buttons.clear()
+        self.roadmap_list.blockSignals(True)
+        self.roadmap_list.setUpdatesEnabled(False)
         self.roadmap_list.clear()
-        previous_track: str | None = None
-        previous_course: str | None = None
-        previous_section: str | None = None
-        previous_lesson: str | None = None
-        for node in self._nodes:
-            if node.track_id != previous_track:
-                self._add_roadmap_header(
-                    node.track_title.upper(),
-                    background="#2C1D48",
-                    foreground="#FFFFFF",
-                    border="#7652B5",
-                    height=44,
-                )
-                previous_track = node.track_id
-                previous_course = None
-                previous_section = None
-                previous_lesson = None
+        try:
+            previous_track: str | None = None
+            previous_course: str | None = None
+            previous_section: str | None = None
+            previous_lesson: str | None = None
 
-            if node.course_id != previous_course:
-                self._add_roadmap_header(
-                    f"COURSE {node.course_order}\n{node.course_title}",
-                    background="#1B2741",
-                    foreground="#E6D8FF",
-                    border="#485B82",
-                    height=68,
-                )
-                previous_course = node.course_id
-                previous_section = None
-                previous_lesson = None
+            for node in self._nodes:
+                if node.track_id != previous_track:
+                    self._add_roadmap_header(
+                        node.track_title.upper(),
+                        background="#2C1D48",
+                        foreground="#FFFFFF",
+                        border="#7652B5",
+                        height=44,
+                    )
+                    previous_track = node.track_id
+                    previous_course = None
+                    previous_section = None
+                    previous_lesson = None
 
-            if node.kind == "lesson_step" and node.lesson_id != previous_lesson:
-                lesson = self.catalog.lesson(str(node.lesson_id))
-                lesson_nodes = [
-                    item
-                    for item in self._nodes
-                    if item.kind == "lesson_step" and item.lesson_id == lesson.lesson_id
-                ]
-                lesson_states = [self._node_state(item)[0] for item in lesson_nodes]
-                lesson_complete = bool(lesson_states) and all(state == "Passed" for state in lesson_states)
-                lesson_current = any(item.target_key == current for item in lesson_nodes)
-                lesson_started = any(state == "Passed" for state in lesson_states)
-                lesson_ready = bool(lesson_nodes and self._node_state(lesson_nodes[0])[1])
-                if lesson_complete:
-                    lesson_background = QColor("#19302B")
-                    lesson_foreground = QColor("#C7F0D3")
-                elif lesson_current:
-                    lesson_background = QColor("#352454")
-                    lesson_foreground = QColor("#FFFFFF")
-                elif lesson_started:
-                    lesson_background = QColor("#202B49")
-                    lesson_foreground = QColor("#DCE7FF")
-                elif lesson_ready:
-                    lesson_background = QColor("#241C3B")
-                    lesson_foreground = QColor("#DCCBFF")
-                else:
-                    lesson_background = QColor("#141A29")
-                    lesson_foreground = QColor("#7F8CA3")
-                self._add_roadmap_header(
-                    f"LESSON {lesson.order}\n{lesson.title}",
-                    background=lesson_background.name(),
-                    foreground=lesson_foreground.name(),
-                    border="#7652B5" if lesson_current else "#33435F",
-                    height=68,
-                )
-                previous_lesson = node.lesson_id
-                previous_section = "lesson"
-            elif node.kind == "assessment" and previous_section != "assessment":
-                self._add_roadmap_header(
-                    "COURSE CHECKPOINT",
-                    background="#20213B",
-                    foreground="#D9C1FF",
-                    border="#594A7A",
-                    height=44,
-                )
-                previous_section = "assessment"
-                previous_lesson = None
-            elif node.kind == "skills_lab" and previous_section != "lab":
-                self._add_roadmap_header(
-                    "APPLIED PROJECT",
-                    background="#20213B",
-                    foreground="#D9C1FF",
-                    border="#594A7A",
-                    height=44,
-                )
-                previous_section = "lab"
-                previous_lesson = None
+                if node.course_id != previous_course:
+                    self._add_roadmap_header(
+                        f"COURSE {node.course_order}  •  {node.course_title}",
+                        background="#1B2741",
+                        foreground="#E6D8FF",
+                        border="#485B82",
+                        height=52,
+                        course_id=str(node.course_id),
+                        collapsible=True,
+                    )
+                    previous_course = node.course_id
+                    previous_section = None
+                    previous_lesson = None
 
-            state, unlocked, _reason = self._node_state(node)
-            icon = {"Passed": "✓", "Answered": "◐", "Ready": "○", "Locked": "🔒"}.get(state, "○")
-            item = QListWidgetItem(f"{icon}  {node.title}\n    {node.subtitle}")
-            item.setData(Qt.ItemDataRole.UserRole, node.target_key)
-            item.setData(Qt.ItemDataRole.UserRole + 1, unlocked)
-            if state == "Passed":
-                item.setForeground(QBrush(QColor("#BCE7CA")))
-            elif state == "Locked":
-                item.setForeground(QBrush(QColor("#78859A")))
-            self.roadmap_list.addItem(item)
-            if node.target_key == current:
-                self.roadmap_list.setCurrentItem(item)
-        self._building_roadmap = False
+                if str(node.course_id) in self._course_collapsed:
+                    continue
+
+                if node.kind == "lesson_step" and node.lesson_id != previous_lesson:
+                    lesson = self.catalog.lesson(str(node.lesson_id))
+                    lesson_nodes = lesson_nodes_by_id.get(lesson.lesson_id, [])
+                    lesson_states = [self._node_state(item)[0] for item in lesson_nodes]
+                    lesson_complete = bool(lesson_states) and all(
+                        state == "Passed" for state in lesson_states
+                    )
+                    lesson_current = any(
+                        item.target_key == current for item in lesson_nodes
+                    )
+                    lesson_started = any(
+                        state in {"Passed", "Answered"} for state in lesson_states
+                    )
+                    lesson_ready = bool(
+                        lesson_nodes and self._node_state(lesson_nodes[0])[1]
+                    )
+                    if lesson_complete:
+                        lesson_background = QColor("#19302B")
+                        lesson_foreground = QColor("#C7F0D3")
+                    elif lesson_current:
+                        lesson_background = QColor("#352454")
+                        lesson_foreground = QColor("#FFFFFF")
+                    elif lesson_started:
+                        lesson_background = QColor("#202B49")
+                        lesson_foreground = QColor("#DCE7FF")
+                    elif lesson_ready:
+                        lesson_background = QColor("#241C3B")
+                        lesson_foreground = QColor("#DCCBFF")
+                    else:
+                        lesson_background = QColor("#141A29")
+                        lesson_foreground = QColor("#7F8CA3")
+                    header = self._add_roadmap_header(
+                        f"LESSON {lesson.order}\n{lesson.title}",
+                        background=lesson_background.name(),
+                        foreground=lesson_foreground.name(),
+                        border="#7652B5" if lesson_current else "#33435F",
+                        height=68,
+                        course_id=str(node.course_id),
+                    )
+                    header.setData(Qt.ItemDataRole.UserRole + 11, str(node.course_id))
+                    previous_lesson = node.lesson_id
+                    previous_section = "lesson"
+                elif node.kind == "assessment" and previous_section != "assessment":
+                    header = self._add_roadmap_header(
+                        "COURSE CHECKPOINT",
+                        background="#20213B",
+                        foreground="#D9C1FF",
+                        border="#594A7A",
+                        height=44,
+                        course_id=str(node.course_id),
+                    )
+                    header.setData(Qt.ItemDataRole.UserRole + 11, str(node.course_id))
+                    previous_section = "assessment"
+                    previous_lesson = None
+                elif node.kind == "skills_lab" and previous_section != "lab":
+                    header = self._add_roadmap_header(
+                        "APPLIED PROJECT",
+                        background="#20213B",
+                        foreground="#D9C1FF",
+                        border="#594A7A",
+                        height=44,
+                        course_id=str(node.course_id),
+                    )
+                    header.setData(Qt.ItemDataRole.UserRole + 11, str(node.course_id))
+                    previous_section = "lab"
+                    previous_lesson = None
+
+                state, unlocked, _reason = self._node_state(node)
+                icon = {
+                    "Passed": "✓",
+                    "Answered": "◐",
+                    "Ready": "○",
+                    "Locked": "🔒",
+                }.get(state, "○")
+                item = QListWidgetItem(
+                    f"{icon}  {node.title}\n    {node.subtitle}"
+                )
+                item.setData(Qt.ItemDataRole.UserRole, node.target_key)
+                item.setData(Qt.ItemDataRole.UserRole + 1, unlocked)
+                item.setData(Qt.ItemDataRole.UserRole + 11, str(node.course_id))
+                if state == "Passed":
+                    item.setForeground(QBrush(QColor("#BCE7CA")))
+                elif state == "Locked":
+                    item.setForeground(QBrush(QColor("#78859A")))
+                self.roadmap_list.addItem(item)
+                if node.target_key == current:
+                    self.roadmap_list.setCurrentItem(item)
+        finally:
+            self.roadmap_list.setUpdatesEnabled(True)
+            self.roadmap_list.blockSignals(False)
+            self._building_roadmap = False
+            self.roadmap_list.viewport().update()
 
     def _roadmap_selected(self, current: QListWidgetItem | None, _previous) -> None:
         if self._building_roadmap or current is None:
@@ -1166,13 +1362,16 @@ class AcceleratorAcademyWidget(QWidget):
 
     def open_target(self, target_key: str) -> None:
         self._save_current_work()
-        self._nodes = self._build_nodes()
         node = self._node(target_key)
+        if not self._node_state_cache:
+            self._prime_node_state_cache()
         state, unlocked, reason = self._node_state(node)
         if not unlocked and state != "Passed":
             QMessageBox.information(self, "Step Locked", reason or "Finish the earlier lesson steps first, then come back to this one.")
             return
         self._current_target = node.target_key
+        if node.course_id:
+            self._course_collapsed.discard(str(node.course_id))
         self.service.remember_target(node.target_key)
         if node.kind == "lesson_step":
             self._open_lesson_node(node)
