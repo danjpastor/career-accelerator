@@ -242,3 +242,13 @@
   task-specific, managed guides while preserving existing learner work.
 - Retained the specialized dynamic Validate Relationships guide.
 
+## 10.20.0 — Pathway and Portfolio Onboarding
+
+- Added locked first-run pathway selection with neutral Career Accelerator branding.
+- Enabled the Data Analytics pathway and added IT Support, Cybersecurity, and Software Engineering shells.
+- Added a ChatGPT portfolio setup export and validated `.career-portfolio.json` importer.
+- Added dynamic project names/directories while retaining the existing three-project catalog as a migration fallback.
+- Added automatic existing-user detection so established profiles are not prompted or overwritten.
+- Added a one-time guided application tour and Setup menu actions to restart it.
+- Added explicit portfolio replacement backups and a separate full first-run reset.
+- Added clean-repository packaging scripts for alternate branches and new users.

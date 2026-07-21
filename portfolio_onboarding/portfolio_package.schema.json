@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "career-accelerator://schemas/portfolio-package-1.0",
+  "title": "Career Accelerator Portfolio Project Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "package_type",
+    "schema_version",
+    "package_id",
+    "pathway_id",
+    "generated_at",
+    "generated_for",
+    "projects"
+  ],
+  "properties": {
+    "package_type": {
+      "const": "career_accelerator.portfolio_projects"
+    },
+    "schema_version": {
+      "const": "1.0"
+    },
+    "package_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 80
+    },
+    "pathway_id": {
+      "const": "data_analytics"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_for": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["display_name", "target_roles", "experience_summary"],
+      "properties": {
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 120},
+        "target_roles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "experience_summary": {"type": "string", "minLength": 20, "maxLength": 5000}
+      }
+    },
+    "projects": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/project"}
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 80
+    },
+    "stringList": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1,
+      "maxItems": 30
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_key",
+        "slug",
+        "title",
+        "summary",
+        "business_problem",
+        "stakeholders",
+        "decisions_supported",
+        "skills",
+        "tools",
+        "portfolio_story",
+        "stages",
+        "datasets",
+        "kpis",
+        "files"
+      ],
+      "properties": {
+        "project_key": {"$ref": "#/$defs/slug"},
+        "slug": {"$ref": "#/$defs/slug"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 180},
+        "summary": {"type": "string", "minLength": 20, "maxLength": 3000},
+        "business_problem": {"type": "string", "minLength": 30, "maxLength": 5000},
+        "stakeholders": {"$ref": "#/$defs/stringList"},
+        "decisions_supported": {"$ref": "#/$defs/stringList"},
+        "skills": {"$ref": "#/$defs/stringList"},
+        "tools": {"$ref": "#/$defs/stringList"},
+        "portfolio_story": {"type": "string", "minLength": 30, "maxLength": 5000},
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/stage"}
+        },
+        "datasets": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/dataset"}
+        },
+        "kpis": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/kpi"}
+        },
+        "files": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/file"}
+        }
+      }
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "milestones"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 100},
+        "milestones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/milestone"}
+        }
+      }
+    },
+    "milestone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "description", "definition_of_done", "estimated_minutes"],
+      "properties": {
+        "label": {"type": "string", "minLength": 1, "maxLength": 240},
+        "description": {"type": "string", "minLength": 10, "maxLength": 4000},
+        "definition_of_done": {"type": "string", "minLength": 5, "maxLength": 4000},
+        "estimated_minutes": {"type": "integer", "minimum": 10, "maximum": 4800},
+        "starter_path": {"type": "string", "maxLength": 260}
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset_id", "name", "description", "source_type", "tables"],
+      "properties": {
+        "dataset_id": {"$ref": "#/$defs/slug"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 160},
+        "description": {"type": "string", "minLength": 10},
+        "source_type": {"type": "string", "minLength": 1, "maxLength": 80},
+        "generation_notes": {"type": "string", "maxLength": 20000},
+        "tables": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/table"}
+        }
+      }
+    },
+    "table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["table_name", "grain", "columns"],
+      "properties": {
+        "table_name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+        "grain": {"type": "string", "minLength": 5, "maxLength": 500},
+        "row_count_target": {"type": ["integer", "null"], "minimum": 1},
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/column"}
+        }
+      }
+    },
+    "column": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "data_type", "description", "nullable"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+        "data_type": {"type": "string", "minLength": 1, "maxLength": 80},
+        "description": {"type": "string", "minLength": 3, "maxLength": 1000},
+        "nullable": {"type": "boolean"},
+        "key_role": {"type": "string", "maxLength": 80},
+        "example": {"type": "string", "maxLength": 500}
+      }
+    },
+    "kpi": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name", "definition"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "definition": {"type": "string", "minLength": 5},
+        "formula": {"type": "string"},
+        "decision_use": {"type": "string"}
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "content"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "content": {"type": "string"}
+      }
+    }
+  }
+}

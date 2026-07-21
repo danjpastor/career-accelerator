@@ -1,0 +1,30 @@
+{
+  "pathway_id": "data_analytics",
+  "display_name": "Data Analytics",
+  "short_name": "Data",
+  "description": "Analyze data, communicate findings, and build decision-support portfolios with spreadsheets, SQL, Python, and BI tools.",
+  "status": "available",
+  "enabled": true,
+  "brand": {
+    "application_name": "Data Career Accelerator",
+    "window_title": "Data Career Accelerator",
+    "logo_path": "data_career_accelerator_logo.png",
+    "horizontal_logo_path": "data_career_accelerator_horizontal.png",
+    "app_icon_path": "career_accelerator.ico",
+    "app_user_model_id": "DanielPastor.DataCareerAccelerator"
+  },
+  "learning": {
+    "system_name": "Accelerator Academy",
+    "learner_noun": "data professional",
+    "portfolio_noun": "analytics portfolio project",
+    "accent_label": "Data Analytics Pathway"
+  },
+  "track_shells": [
+    "Foundations and spreadsheets",
+    "SQL analysis",
+    "Analytics-focused Python",
+    "Business intelligence and dashboards",
+    "Portfolio delivery",
+    "Job readiness"
+  ]
+}

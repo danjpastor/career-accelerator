@@ -1,0 +1,30 @@
+{
+  "pathway_id": "software_engineering",
+  "display_name": "Software Engineering",
+  "short_name": "Software",
+  "description": "Build applications, APIs, tests, architecture, delivery workflows, and engineering portfolios.",
+  "status": "coming_soon",
+  "enabled": false,
+  "brand": {
+    "application_name": "Software Engineering Career Accelerator",
+    "window_title": "Software Engineering Career Accelerator",
+    "logo_path": "pathways/career_accelerator_horizontal.png",
+    "horizontal_logo_path": "pathways/career_accelerator_horizontal.png",
+    "app_icon_path": "pathways/career_accelerator_neutral.ico",
+    "app_user_model_id": "CareerAccelerator.SoftwareEngineering"
+  },
+  "learning": {
+    "system_name": "Accelerator Academy",
+    "learner_noun": "software engineer",
+    "portfolio_noun": "software project",
+    "accent_label": "Software Engineering Pathway"
+  },
+  "track_shells": [
+    "Programming foundations",
+    "Application development",
+    "APIs and data",
+    "Testing and quality",
+    "Engineering portfolio",
+    "Job readiness"
+  ]
+}

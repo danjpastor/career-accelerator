@@ -410,6 +410,17 @@ class PortfolioHubWidget(QWidget):
             QMessageBox.warning(self, "Could Not Set Active Project", str(exc))
 
     def refresh_all(self, *_args, **_kwargs):
+        has_projects = bool(PROJECT_NAMES)
+        self.project_combo.setEnabled(has_projects)
+        self.active_button.setEnabled(has_projects)
+        self.tabs.setEnabled(has_projects)
+        if not has_projects:
+            self._milestones = []
+            self._deliverables = []
+            self.status.setText("No portfolio projects have been imported yet. Use Setup → Portfolio Setup and Import to create them.")
+            if hasattr(self, "overview"):
+                self.overview.setPlainText("Your Portfolio Workspace is intentionally blank until personalized projects are imported.")
+            return
         try:
             project_id = self.project_id()
             self._milestones = portfolio_hub.milestone_rows(self.conn, project_id)

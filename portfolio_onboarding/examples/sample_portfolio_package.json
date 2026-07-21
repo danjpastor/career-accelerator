@@ -1,0 +1,84 @@
+{
+  "package_type": "career_accelerator.portfolio_projects",
+  "schema_version": "1.0",
+  "package_id": "sample-data-analytics-portfolio",
+  "pathway_id": "data_analytics",
+  "generated_at": "2026-07-21T12:00:00-04:00",
+  "generated_for": {
+    "display_name": "Sample Learner",
+    "target_roles": ["Junior Data Analyst"],
+    "experience_summary": "A sample operations professional transitioning into analytics with stakeholder communication and process-improvement experience."
+  },
+  "projects": [
+    {
+      "project_key": "support-operations",
+      "slug": "support-operations-intelligence",
+      "title": "Customer Support Operations Intelligence",
+      "summary": "Analyze a realistic support operation to improve service levels, staffing coverage, and customer outcomes.",
+      "business_problem": "Support leaders need reliable visibility into demand, response time, resolution quality, and staffing pressure so they can allocate coverage and improve customer outcomes.",
+      "stakeholders": ["Support Operations Manager", "Customer Success Director"],
+      "decisions_supported": ["Adjust staffing coverage", "Prioritize workflow improvements"],
+      "skills": ["SQL", "Data validation", "Dashboard design"],
+      "tools": ["DuckDB", "Power BI"],
+      "portfolio_story": "Demonstrates end-to-end analytics from business framing and data validation through stakeholder reporting and recommendations.",
+      "stages": [
+        {
+          "name": "Foundation",
+          "milestones": [
+            {
+              "label": "Validate source relationships",
+              "description": "Profile source tables, verify candidate keys, and test required many-to-one relationships before analysis.",
+              "definition_of_done": "A saved validation notebook documents duplicates, orphans, and join-cardinality findings.",
+              "estimated_minutes": 180,
+              "starter_path": "notebooks/validate_relationships.ipynb"
+            }
+          ]
+        }
+      ],
+      "datasets": [
+        {
+          "dataset_id": "support-operations",
+          "name": "Support Operations Dataset",
+          "description": "Synthetic ticket data representing a multi-channel customer support operation.",
+          "source_type": "synthetic",
+          "generation_notes": "Include realistic demand spikes, missing values, and duplicate ticket rows.",
+          "tables": [
+            {
+              "table_name": "tickets",
+              "grain": "One row per support ticket",
+              "row_count_target": 500,
+              "columns": [
+                {
+                  "name": "ticket_id",
+                  "data_type": "VARCHAR",
+                  "description": "Unique ticket identifier",
+                  "nullable": false,
+                  "key_role": "primary key",
+                  "example": "T-0001"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "kpis": [
+        {
+          "name": "Median resolution time",
+          "definition": "Median elapsed hours from ticket creation to resolution for resolved tickets.",
+          "formula": "MEDIAN(resolution_hours)",
+          "decision_use": "Evaluate whether staffing and workflow changes improve typical resolution performance."
+        }
+      ],
+      "files": [
+        {
+          "path": "data/raw/tickets.csv",
+          "content": "ticket_id,created_at,resolution_hours\nT-0001,2026-01-05 09:30:00,14.5\n"
+        },
+        {
+          "path": "notebooks/validate_relationships.ipynb",
+          "content": "{\"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 5}\n"
+        }
+      ]
+    }
+  ]
+}

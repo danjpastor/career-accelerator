@@ -1,14 +1,30 @@
-PROJECT_NAMES = {
+from career_app.onboarding.portfolio_catalog import (
+    load_project_catalog as _load_project_catalog,
+)
+
+_DEFAULT_PROJECT_NAMES = {
     1: "VFX Production Intelligence Dashboard",
     2: "Retail Operations Performance Dashboard",
     3: "Movie Industry Financial Analytics",
 }
 
-PROJECT_DIRS = {
+_DEFAULT_PROJECT_DIRS = {
     1: "project-01-vfx-production-intelligence",
     2: "project-02-retail-operations",
     3: "project-03-movie-industry-financial-analytics",
 }
+
+_project_catalog = _load_project_catalog()
+PROJECT_NAMES = (
+    dict(_project_catalog.names)
+    if _project_catalog.explicit
+    else dict(_DEFAULT_PROJECT_NAMES)
+)
+PROJECT_DIRS = (
+    dict(_project_catalog.directories)
+    if _project_catalog.explicit
+    else dict(_DEFAULT_PROJECT_DIRS)
+)
 
 PROJECT_STAGES = [
     "Overview", "Tasks", "Dataset", "SQL", "Python", "Power BI",

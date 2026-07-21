@@ -82,6 +82,7 @@ from career_app.ui.widgets import (
 )
 
 from career_app.ui.academy import AcceleratorAcademyWidget
+from career_app.ui.first_run import FirstRunCoordinator
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
 
@@ -374,6 +375,8 @@ class CareerAccelerator(QMainWindow):
     def __init__(self):
         super().__init__()
         self.conn = connect()
+        self.first_run = FirstRunCoordinator(self.conn, ROOT, ASSET_ROOT, __version__)
+        self.first_run.migrate_existing_profile_if_needed()
         ensure_default_state(self.conn, date.today().isoformat())
         self.migration_result = migrate(self.conn, ROOT)
         self.sprint_rollover = sync_calendar_sprint_week(self.conn)
@@ -388,6 +391,7 @@ class CareerAccelerator(QMainWindow):
             self.state,
         )
         self.state = state(self.conn)
+        self.first_run.finalize_initialization()
 
         self.elapsed_seconds = 0
         self.timer_state = "ready"
@@ -414,6 +418,7 @@ class CareerAccelerator(QMainWindow):
             except Exception:
                 pass
 
+        self.first_run.apply_branding(self)
         self.resize(1536, 1020)
         self.setMinimumSize(
             self.MINIMUM_WINDOW_WIDTH,
@@ -466,6 +471,7 @@ class CareerAccelerator(QMainWindow):
         ]
         for builder in builders:
             self.stack.addWidget(builder())
+        self.first_run.attach(self, self.stack, self.sidebar, self.nav_buttons)
 
         self.gradient_button_animator = GradientButtonAnimator(self, self)
 

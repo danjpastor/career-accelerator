@@ -1,0 +1,30 @@
+{
+  "pathway_id": "it_support",
+  "display_name": "IT Support",
+  "short_name": "IT",
+  "description": "Build troubleshooting, systems, documentation, networking, and service-delivery skills.",
+  "status": "coming_soon",
+  "enabled": false,
+  "brand": {
+    "application_name": "IT Career Accelerator",
+    "window_title": "IT Career Accelerator",
+    "logo_path": "pathways/career_accelerator_horizontal.png",
+    "horizontal_logo_path": "pathways/career_accelerator_horizontal.png",
+    "app_icon_path": "pathways/career_accelerator_neutral.ico",
+    "app_user_model_id": "CareerAccelerator.ITSupport"
+  },
+  "learning": {
+    "system_name": "Accelerator Academy",
+    "learner_noun": "IT professional",
+    "portfolio_noun": "IT support lab",
+    "accent_label": "IT Support Pathway"
+  },
+  "track_shells": [
+    "Technical support foundations",
+    "Operating systems",
+    "Networking",
+    "Systems administration",
+    "Troubleshooting labs",
+    "Job readiness"
+  ]
+}

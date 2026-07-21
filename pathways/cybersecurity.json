@@ -1,0 +1,30 @@
+{
+  "pathway_id": "cybersecurity",
+  "display_name": "Cybersecurity",
+  "short_name": "Cybersecurity",
+  "description": "Develop defensive security, risk, monitoring, incident-response, and security-documentation skills.",
+  "status": "coming_soon",
+  "enabled": false,
+  "brand": {
+    "application_name": "Cybersecurity Career Accelerator",
+    "window_title": "Cybersecurity Career Accelerator",
+    "logo_path": "pathways/career_accelerator_horizontal.png",
+    "horizontal_logo_path": "pathways/career_accelerator_horizontal.png",
+    "app_icon_path": "pathways/career_accelerator_neutral.ico",
+    "app_user_model_id": "CareerAccelerator.Cybersecurity"
+  },
+  "learning": {
+    "system_name": "Accelerator Academy",
+    "learner_noun": "cybersecurity professional",
+    "portfolio_noun": "defensive security project",
+    "accent_label": "Cybersecurity Pathway"
+  },
+  "track_shells": [
+    "Security foundations",
+    "Network defense",
+    "Threat detection",
+    "Incident response",
+    "Security labs",
+    "Job readiness"
+  ]
+}
