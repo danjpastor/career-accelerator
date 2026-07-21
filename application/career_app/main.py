@@ -56,7 +56,8 @@ from career_app.services import (
     sql_workspace,
     task_workspace,
     tracks,
-)
+
+        portfolio_evidence,)
 from career_app.services import exercise_packs
 from career_app.services.backup import create_backup, prune_backups_with_report
 from career_app.services.migration import migrate
@@ -6187,6 +6188,10 @@ class CareerAccelerator(QMainWindow):
             )
             self.state = state(self.conn)
 
+        portfolio_evidence.reconcile(
+            self.conn,
+            ROOT,
+        )
         newly_unlocked = self.sync_achievement_records()
 
         self.refresh_dashboard(
@@ -9406,6 +9411,12 @@ class CareerAccelerator(QMainWindow):
             (task_id,),
         ).fetchone()
 
+        portfolio_evidence.sync_task(
+            self.conn,
+            ROOT,
+            task_id=int(task_id),
+            completed=completed,
+        )
         tracks.record_portfolio_change(
             self.conn,
             project_id=(
@@ -9456,21 +9467,35 @@ class CareerAccelerator(QMainWindow):
             )
 
     def save_project_tasks(self):
+        evidence_changed = False
         for task_id, checkbox in self.project_task_checks:
+            completed = bool(checkbox.isChecked())
             self.conn.execute(
                 """UPDATE project_tasks
                    SET completed=?
                    WHERE id=?""",
                 (
-                    1 if checkbox.isChecked() else 0,
+                    1 if completed else 0,
                     task_id,
                 ),
             )
+            evidence_changed = (
+                portfolio_evidence.sync_task(
+                    self.conn,
+                    ROOT,
+                    task_id=int(task_id),
+                    completed=completed,
+                )
+                or evidence_changed
+            )
         self.conn.commit()
         self.refresh_after_project_task_change()
+        message = "Portfolio milestone states saved."
+        if evidence_changed:
+            message += " Demonstrated Evidence updated."
         self.statusBar().showMessage(
-            "Portfolio milestone states saved.",
-            2200,
+            message,
+            5200 if evidence_changed else 2200,
         )
 
     def save_project_note(self, section, widget):
