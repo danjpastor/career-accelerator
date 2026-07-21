@@ -8,7 +8,7 @@ import re
 
 from career_app.data.roadmap import PROJECT_DIRS, PROJECT_NAMES
 from career_app.data.portfolio_tasks import task_spec
-from career_app.services import project_data_workspace, task_workspace
+from career_app.services import portfolio_guides, project_data_workspace, task_workspace
 
 
 def _slug(value: str, limit: int = 72) -> str:
@@ -104,46 +104,99 @@ def starter_content(root: Path, row, data_plan=None) -> str:
                 plan,
                 str(row["label"]),
             )
+
+    starter_text = ""
     starter = _starter_path(root, row)
-    if starter is None or not starter.is_file():
-        return _fallback_template(row)
-    template = starter.read_text(encoding="utf-8")
+    if starter is not None and starter.is_file():
+        template = starter.read_text(encoding="utf-8")
+        project_id = int(row["project_id"])
+        starter_text = template.format(
+            project_id=project_id,
+            project_name=PROJECT_NAMES.get(
+                project_id,
+                f"Project {project_id}",
+            ),
+            project_dir=PROJECT_DIRS.get(
+                project_id,
+                "",
+            ),
+            label=str(row["label"]),
+            stage=str(row["stage"]),
+            date=date.today().isoformat(),
+        )
+
     project_id = int(row["project_id"])
-    return template.format(
-        project_id=project_id,
-        project_name=PROJECT_NAMES.get(project_id, f"Project {project_id}"),
-        project_dir=PROJECT_DIRS.get(project_id, ""),
+    return portfolio_guides.guide_markdown(
         label=str(row["label"]),
+        project_id=project_id,
+        project_name=PROJECT_NAMES.get(
+            project_id,
+            f"Project {project_id}",
+        ),
         stage=str(row["stage"]),
-        date=date.today().isoformat(),
+        description=str(
+            row["description"] or ""
+        ),
+        definition_of_done=str(
+            row["definition_of_done"] or ""
+        ),
+        estimated_minutes=int(
+            row["estimated_minutes"] or 45
+        ),
+        starter_text=starter_text,
     )
 
 
 def ensure_document(conn, root: Path, task_id: int) -> dict:
     row = project_task_record(conn, task_id)
     if row is None:
-        raise ValueError("The selected portfolio milestone no longer exists.")
+        raise ValueError(
+            "The selected portfolio milestone no longer exists."
+        )
+
     data_plan = _prepare_project_data(root, row)
     path = document_path(root, row)
     path.parent.mkdir(parents=True, exist_ok=True)
-    if not path.exists():
-        path.write_text(starter_content(root, row, data_plan), encoding="utf-8")
-    content = path.read_text(encoding="utf-8")
+
+    canonical = starter_content(
+        root,
+        row,
+        data_plan,
+    )
+
+    if path.exists():
+        content = path.read_text(encoding="utf-8")
+    else:
+        content = canonical
+
     if data_plan is not None:
-        upgraded = project_data_workspace.upgrade_relationship_guide(
-            root,
-            data_plan,
-            content,
+        upgraded = (
+            project_data_workspace
+            .upgrade_relationship_guide(
+                root,
+                data_plan,
+                content,
+            )
         )
-        if upgraded != content:
-            content = upgraded
-            path.write_text(content, encoding="utf-8")
+    else:
+        upgraded = portfolio_guides.upgrade_guide(
+            content,
+            canonical,
+        )
+
+    if not path.exists() or upgraded != content:
+        path.write_text(
+            upgraded,
+            encoding="utf-8",
+        )
+
     return {
         "task": row,
         "document_path": path,
-        "content": content,
+        "content": upgraded,
         "project_name": PROJECT_NAMES.get(
-            int(row["project_id"]), f"Project {int(row['project_id'])}"
+            int(row["project_id"]),
+            f"Project {int(row['project_id'])}",
         ),
         "data_workspace": data_plan,
     }

@@ -228,3 +228,17 @@
 - Preserved all existing learner databases, progress, submissions, backups, and external-learning history.
 
 # Changelog
+
+## 10.20.0 — Portfolio Workspace Command Center
+
+- Replaced generic Portfolio Workspace note tabs with Overview, Milestones,
+  Data Explorer, Workbench, Deliverables, and Evidence & Readiness.
+- Rendered each project's README as Markdown across the full Overview tab.
+- Added dynamic DuckDB schema, row-count, five-row preview, and relationship
+  inspection for every configured dataset table.
+- Added project-file inventory, deliverable detection, evidence readiness,
+  and task-guide coverage views.
+- Upgraded all non-relationship portfolio guides to detailed,
+  task-specific, managed guides while preserving existing learner work.
+- Retained the specialized dynamic Validate Relationships guide.
+

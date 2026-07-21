@@ -1,16 +1,16 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Finalize KPIs
+# Document assumptions
 
-**Project:** VFX Production Intelligence Dashboard  
-**Stage:** Discovery  
-**Estimated focused time:** about 60 minutes  
+**Project:** Retail Operations Performance Dashboard  
+**Stage:** Overview  
+**Estimated focused time:** about 35 minutes  
 **Guide updated:** 2026-07-21
 
 ## Purpose
 
-Define the small set of metrics that will show whether the business problem is improving. Each KPI needs an exact formula and interpretation.
+Record the assumptions required to interpret the data and analysis so reviewers can distinguish known facts from analyst judgment.
 
 This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
 
@@ -41,21 +41,18 @@ Explain how this task helps answer the approved business problem or reduces risk
 
 Create or update the appropriate project artifact. Expected locations include:
 
-- `documentation/kpi_definitions.md`
-- `documentation/kpis.md`
+- `documentation/assumptions.md`
 
 The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
 
 ## Detailed workflow
 
-1. Start from each approved stakeholder decision rather than from available columns.
-2. Define each KPI in plain business language.
-3. Write the exact numerator, denominator, aggregation, grain, filters, and time window.
-4. Identify the source table and required fields.
-5. Define null, zero, cancellation, and partial-period handling.
-6. Choose a target, benchmark, or comparison when one is justified.
-7. Write an independent validation rule for the final value.
-8. Flag metrics that cannot yet be calculated and name the missing requirement.
+1. List every place where the project relies on judgment or incomplete information.
+2. Explain why each assumption is necessary.
+3. Describe how the assumption affects metrics, filters, or recommendations.
+4. Test the assumption where the data allows.
+5. Rate the risk if the assumption is wrong.
+6. Identify the information needed to replace it with a verified fact.
 
 ## Questions to answer while working
 
@@ -98,56 +95,48 @@ When the technical work is complete, record:
 
 ## Definition of done
 
-Document each KPI with its business definition, formula, grain, filters, time window, data source, target or benchmark, and validation rule; flag any KPI that cannot yet be calculated.
+Document each assumption, why it was needed, its effect on the analysis, how it was tested where possible, and what would change if the assumption were wrong.
 
 ## Demonstrated skills
 
 Completing this milestone may support evidence for:
 
-- KPI definition
-- Metric governance
+- Analytical judgment
+- Risk documentation
 
 Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
 
 ## Next-step handoff
 
-Use governed KPI definitions in business questions, SQL, Python, and Power BI.
+Carry material assumptions into metric definitions, findings, and final limitations.
 
 ## Task-specific worksheet
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Finalize KPIs  
+**Milestone:** Document assumptions  
 **Started:** 2026-07-21
 
-## Instructions
+| ID | Assumption | Why needed | Evidence or test | Effect if wrong | Status |
+|---|---|---|---|---|---|
+| A-01 |  |  |  |  | Open / Supported / Rejected |
 
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
+## Categories to consider
 
-## KPI register
+- Date and reporting-period assumptions
+- Missing-value interpretation
+- Business-rule assumptions
+- Synthetic-data realism
+- KPI denominator and filter assumptions
+- Relationship and grain assumptions
+- Currency, units, time zone, and locale
 
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
+## Done check
 
-## For each KPI, answer
-
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
-
-## Review checklist
-
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.
+- [ ] Assumptions are separated from known facts.
+- [ ] Material assumptions include an impact statement.
+- [ ] Assumptions are tested where possible.
+- [ ] Rejected assumptions are reflected in the analysis.
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 
@@ -156,41 +145,3 @@ Define only metrics that directly support the approved business problem. A KPI i
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — KPI Definitions
-
-**Milestone:** Finalize KPIs  
-**Started:** 2026-07-21
-
-## Instructions
-
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
-
-## KPI register
-
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-
-## For each KPI, answer
-
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
-
-## Review checklist
-
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.

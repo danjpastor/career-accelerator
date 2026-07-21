@@ -1,16 +1,16 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Finalize KPIs
+# Define business problem
 
-**Project:** VFX Production Intelligence Dashboard  
+**Project:** Retail Operations Performance Dashboard  
 **Stage:** Discovery  
-**Estimated focused time:** about 60 minutes  
+**Estimated focused time:** about 40 minutes  
 **Guide updated:** 2026-07-21
 
 ## Purpose
 
-Define the small set of metrics that will show whether the business problem is improving. Each KPI needs an exact formula and interpretation.
+Define the decision this project should support, who needs the answer, and why the problem matters. Keep the scope narrow enough to solve with the planned data.
 
 This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
 
@@ -41,21 +41,19 @@ Explain how this task helps answer the approved business problem or reduces risk
 
 Create or update the appropriate project artifact. Expected locations include:
 
-- `documentation/kpi_definitions.md`
-- `documentation/kpis.md`
+- `documentation/business_problem.md`
 
 The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
 
 ## Detailed workflow
 
-1. Start from each approved stakeholder decision rather than from available columns.
-2. Define each KPI in plain business language.
-3. Write the exact numerator, denominator, aggregation, grain, filters, and time window.
-4. Identify the source table and required fields.
-5. Define null, zero, cancellation, and partial-period handling.
-6. Choose a target, benchmark, or comparison when one is justified.
-7. Write an independent validation rule for the final value.
-8. Flag metrics that cannot yet be calculated and name the missing requirement.
+1. Name the primary stakeholder and the specific decision they need to make.
+2. Describe the current pain point, cost, delay, risk, or missed opportunity.
+3. Write the analytical objective as a question that the project can answer.
+4. Define the in-scope population, process, and time period.
+5. List what is explicitly out of scope.
+6. Choose a measurable sign that the analysis was useful.
+7. Test the statement against the available or planned data.
 
 ## Questions to answer while working
 
@@ -98,56 +96,71 @@ When the technical work is complete, record:
 
 ## Definition of done
 
-Document each KPI with its business definition, formula, grain, filters, time window, data source, target or benchmark, and validation rule; flag any KPI that cannot yet be calculated.
+Save a one-paragraph problem statement that names the stakeholder, decision, current pain point, analytical objective, in-scope period, and a measurable sign of success.
 
 ## Demonstrated skills
 
 Completing this milestone may support evidence for:
 
-- KPI definition
-- Metric governance
+- Business problem framing
+- Stakeholder alignment
 
 Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
 
 ## Next-step handoff
 
-Use governed KPI definitions in business questions, SQL, Python, and Power BI.
+Use the approved problem to identify stakeholders, KPIs, and business questions.
 
 ## Task-specific worksheet
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Finalize KPIs  
+**Milestone:** Define business problem  
+**Stage:** Discovery  
 **Started:** 2026-07-21
 
-## Instructions
+## What you are doing
 
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
+Write the problem this analysis will solve. A strong problem statement names the person making the decision, the current pain point, the evidence they need, and the boundary of the analysis.
 
-## KPI register
+## Step 1 — Name the decision
 
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
+- Primary stakeholder:
+- Decision they need to make:
+- Why that decision matters now:
+- What happens if no action is taken:
 
-## For each KPI, answer
+## Step 2 — Define the analytical objective
 
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
+Complete this sentence:
+
+> This project will analyze ____________________ so that ____________________ can decide ____________________.
+
+## Step 3 — Set the scope
+
+- Time period:
+- Business unit, market, project type, or population included:
+- Explicitly out of scope:
+- Required level of detail (grain):
+
+## Step 4 — Define success
+
+- What measurable outcome would make the project useful?
+- What deliverable will support the decision?
+- How will you know the answer is credible?
+
+## Draft problem statement
+
+Write one clear paragraph here.
 
 ## Review checklist
 
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.
+- [ ] A specific stakeholder is named.
+- [ ] A real decision is named.
+- [ ] The analytical objective is measurable.
+- [ ] The scope is narrow enough for this project.
+- [ ] The planned data can reasonably answer the problem.
+- [ ] No solution is assumed before the analysis is complete.
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 
@@ -156,41 +169,3 @@ Define only metrics that directly support the approved business problem. A KPI i
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — KPI Definitions
-
-**Milestone:** Finalize KPIs  
-**Started:** 2026-07-21
-
-## Instructions
-
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
-
-## KPI register
-
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-
-## For each KPI, answer
-
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
-
-## Review checklist
-
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.

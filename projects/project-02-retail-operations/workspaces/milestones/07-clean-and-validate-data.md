@@ -1,16 +1,16 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Generate dataset
+# Clean and validate data
 
-**Project:** VFX Production Intelligence Dashboard  
+**Project:** Retail Operations Performance Dashboard  
 **Stage:** Dataset  
-**Estimated focused time:** about 75 minutes  
+**Estimated focused time:** about 120 minutes  
 **Guide updated:** 2026-07-21
 
 ## Purpose
 
-Obtain or create a dataset that can answer the project questions while preserving a clearly documented raw-data source.
+Profile the raw data, define reproducible cleaning rules, produce cleaned outputs, and prove that the cleaning did not create new errors.
 
 This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
 
@@ -41,20 +41,22 @@ Explain how this task helps answer the approved business problem or reduces risk
 
 Create or update the appropriate project artifact. Expected locations include:
 
-- `data/raw/`
-- `documentation/data_source_manifest.md`
+- `data/processed/`
+- `sql/cleaning/`
+- `notebooks/clean_data.ipynb`
 
 The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
 
 ## Detailed workflow
 
-1. Confirm whether the source is public, licensed, internal, or synthetic.
-2. Place untouched source files under `data/raw/`.
-3. Record provenance, generation method, retrieval date, and usage constraints.
-4. Create a source manifest with filenames, formats, row counts, and table grains.
-5. Verify required tables and fields against the business questions.
-6. Inspect representative rows without modifying the source.
-7. Record missing fields, coverage gaps, and planned mitigations.
+1. Profile row counts, nulls, duplicates, categories, ranges, and date logic.
+2. Create an issue log that separates errors from valid exceptions.
+3. Define a reproducible rule for each confirmed issue.
+4. Implement transformations in SQL or Python without editing raw sources.
+5. Write cleaned outputs to staging or processed locations.
+6. Repeat key, relationship, and business-rule checks on cleaned data.
+7. Compare before-and-after row counts and explain every difference.
+8. Preserve unresolved exceptions with an explicit downstream rule.
 
 ## Questions to answer while working
 
@@ -97,65 +99,65 @@ When the technical work is complete, record:
 
 ## Definition of done
 
-Place untouched source files in data/raw, record where they came from or how they were generated, confirm licensing or synthetic status, list row counts, and verify that the required tables and fields exist.
+Save the profiling results, cleaning rules, reproducible cleaning code, before-and-after row counts, validation checks, exception log, and cleaned files in data/processed or data/staging.
 
 ## Demonstrated skills
 
 Completing this milestone may support evidence for:
 
-- Data sourcing
-- Source documentation
+- Data cleaning
+- Quality assurance
 
 Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
 
 ## Next-step handoff
 
-Use the immutable raw sources for relationship validation and the data dictionary.
+Use validated processed data for schema loading, analysis, and dashboards.
 
 ## Task-specific worksheet
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Generate dataset  
+**Milestone:** Clean and validate data  
 **Started:** 2026-07-21
 
-## Source record
+## 1. Profile before cleaning
 
-- Source or generation method:
-- Download or generation date:
-- License or synthetic-data disclosure:
-- Original location:
-- Raw files stored under:
-- Files that must remain unchanged:
+Record for each table:
 
-## File manifest
+| Table | Rows | Duplicate keys | Missing required values | Invalid types | Invalid categories/ranges | Date issues |
+|---|---:|---:|---:|---:|---:|---:|
+|  |  |  |  |  |  |  |
 
-| File | Table represented | Rows | Columns | Date range | Notes |
-|---|---|---:|---:|---|---|
-|  |  |  |  |  |  |
+## 2. Cleaning rule register
 
-## Coverage check
+| Issue | Detection rule | Cleaning action | Why this action is valid | Rows affected | Reversible? |
+|---|---|---|---|---:|---|
+|  |  |  |  |  | Yes / No |
 
-| Required business question or KPI | Required table/fields | Available? | Gap or action needed |
-|---|---|---|---|
-|  |  | Yes / No / Partial |  |
+## 3. Required outputs
 
-## Initial inspection
+- Preserve original files under `data/raw/`.
+- Put intermediate files under `data/staging/`.
+- Put final analysis-ready files under `data/processed/`.
+- Save reproducible code in SQL or Python rather than editing cells manually.
 
-- Encoding and delimiter:
-- Header quality:
-- Obvious missing values:
-- Duplicate-file or duplicate-row risk:
-- Date and numeric parsing concerns:
-- Sensitive or private information:
+## 4. Validate after cleaning
 
-## Done check
+| Check | Before | After | Expected | Pass? | Notes |
+|---|---:|---:|---:|---|---|
+| Row count |  |  |  |  |  |
+| Unique primary keys |  |  |  |  |  |
+| Required values present |  |  |  |  |  |
+| Valid relationships |  |  |  |  |  |
 
-- [ ] Raw files are preserved unchanged.
-- [ ] Source and licensing/synthetic status are documented.
-- [ ] Row and column counts are recorded.
-- [ ] Required fields are confirmed.
-- [ ] Known gaps are documented before analysis begins.
+## Completion checklist
+
+- [ ] Every transformation is documented.
+- [ ] Raw files remain unchanged.
+- [ ] Processed files can be recreated from code.
+- [ ] Before-and-after validation is saved.
+- [ ] Unresolved issues are listed explicitly.
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 
@@ -164,50 +166,3 @@ The worksheet below is a planning aid. Complete the substantive work in the proj
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — Dataset Source and Intake
-
-**Milestone:** Generate dataset  
-**Started:** 2026-07-21
-
-## Source record
-
-- Source or generation method:
-- Download or generation date:
-- License or synthetic-data disclosure:
-- Original location:
-- Raw files stored under:
-- Files that must remain unchanged:
-
-## File manifest
-
-| File | Table represented | Rows | Columns | Date range | Notes |
-|---|---|---:|---:|---|---|
-|  |  |  |  |  |  |
-
-## Coverage check
-
-| Required business question or KPI | Required table/fields | Available? | Gap or action needed |
-|---|---|---|---|
-|  |  | Yes / No / Partial |  |
-
-## Initial inspection
-
-- Encoding and delimiter:
-- Header quality:
-- Obvious missing values:
-- Duplicate-file or duplicate-row risk:
-- Date and numeric parsing concerns:
-- Sensitive or private information:
-
-## Done check
-
-- [ ] Raw files are preserved unchanged.
-- [ ] Source and licensing/synthetic status are documented.
-- [ ] Row and column counts are recorded.
-- [ ] Required fields are confirmed.
-- [ ] Known gaps are documented before analysis begins.

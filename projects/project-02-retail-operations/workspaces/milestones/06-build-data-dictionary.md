@@ -1,16 +1,16 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Generate dataset
+# Build data dictionary
 
-**Project:** VFX Production Intelligence Dashboard  
+**Project:** Retail Operations Performance Dashboard  
 **Stage:** Dataset  
 **Estimated focused time:** about 75 minutes  
 **Guide updated:** 2026-07-21
 
 ## Purpose
 
-Obtain or create a dataset that can answer the project questions while preserving a clearly documented raw-data source.
+Create a field-level reference that explains what each column means and how it should be interpreted during cleaning, analysis, and reporting.
 
 This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
 
@@ -41,20 +41,20 @@ Explain how this task helps answer the approved business problem or reduces risk
 
 Create or update the appropriate project artifact. Expected locations include:
 
-- `data/raw/`
-- `documentation/data_source_manifest.md`
+- `documentation/data_dictionary.md`
+- `documentation/data_dictionary.csv`
 
 The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
 
 ## Detailed workflow
 
-1. Confirm whether the source is public, licensed, internal, or synthetic.
-2. Place untouched source files under `data/raw/`.
-3. Record provenance, generation method, retrieval date, and usage constraints.
-4. Create a source manifest with filenames, formats, row counts, and table grains.
-5. Verify required tables and fields against the business questions.
-6. Inspect representative rows without modifying the source.
-7. Record missing fields, coverage gaps, and planned mitigations.
+1. Inventory every retained field across all source and analytical tables.
+2. Record table grain and identify primary, foreign, derived, and sensitive fields.
+3. Describe business meaning rather than repeating the column name.
+4. Document type, unit, allowed values, range, null meaning, and source.
+5. Record transformations and authoritative source rules.
+6. Check that every KPI and business question can trace to documented fields.
+7. Review ambiguous fields with the project assumptions.
 
 ## Questions to answer while working
 
@@ -97,65 +97,54 @@ When the technical work is complete, record:
 
 ## Definition of done
 
-Place untouched source files in data/raw, record where they came from or how they were generated, confirm licensing or synthetic status, list row counts, and verify that the required tables and fields exist.
+Document every retained field with table, data type, business meaning, grain, allowed values or range, missing-value meaning, source, transformation notes, and whether it is a key or sensitive field.
 
 ## Demonstrated skills
 
 Completing this milestone may support evidence for:
 
-- Data sourcing
-- Source documentation
+- Data documentation
+- Metadata management
 
 Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
 
 ## Next-step handoff
 
-Use the immutable raw sources for relationship validation and the data dictionary.
+Use field definitions during cleaning, schema design, analysis, and dashboard modeling.
 
 ## Task-specific worksheet
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Generate dataset  
+**Milestone:** Build data dictionary  
 **Started:** 2026-07-21
 
-## Source record
+## Instructions
 
-- Source or generation method:
-- Download or generation date:
-- License or synthetic-data disclosure:
-- Original location:
-- Raw files stored under:
-- Files that must remain unchanged:
+Document the fields actually used by the project. Describe business meaning, not only the technical column name.
 
-## File manifest
+| Table | Field | Type | One row represents / grain | Business meaning | Key role | Allowed values or range | Missing-value meaning | Source | Transformation or validation notes |
+|---|---|---|---|---|---|---|---|---|---|
+|  |  |  |  |  | Primary / Foreign / None |  |  |  |  |
 
-| File | Table represented | Rows | Columns | Date range | Notes |
-|---|---|---:|---:|---|---|
-|  |  |  |  |  |  |
+## Table-level notes
 
-## Coverage check
+For each table document:
 
-| Required business question or KPI | Required table/fields | Available? | Gap or action needed |
-|---|---|---|---|
-|  |  | Yes / No / Partial |  |
-
-## Initial inspection
-
-- Encoding and delimiter:
-- Header quality:
-- Obvious missing values:
-- Duplicate-file or duplicate-row risk:
-- Date and numeric parsing concerns:
-- Sensitive or private information:
+- Table purpose:
+- One row represents:
+- Primary key:
+- Parent and child relationships:
+- Expected row count:
+- Important filters or exclusions:
 
 ## Done check
 
-- [ ] Raw files are preserved unchanged.
-- [ ] Source and licensing/synthetic status are documented.
-- [ ] Row and column counts are recorded.
-- [ ] Required fields are confirmed.
-- [ ] Known gaps are documented before analysis begins.
+- [ ] Every retained field is documented.
+- [ ] Keys and relationships are identified.
+- [ ] Categorical values and units are explained.
+- [ ] Missing values have an interpretation.
+- [ ] Transformations are traceable to cleaning code.
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 
@@ -164,50 +153,3 @@ The worksheet below is a planning aid. Complete the substantive work in the proj
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — Dataset Source and Intake
-
-**Milestone:** Generate dataset  
-**Started:** 2026-07-21
-
-## Source record
-
-- Source or generation method:
-- Download or generation date:
-- License or synthetic-data disclosure:
-- Original location:
-- Raw files stored under:
-- Files that must remain unchanged:
-
-## File manifest
-
-| File | Table represented | Rows | Columns | Date range | Notes |
-|---|---|---:|---:|---|---|
-|  |  |  |  |  |  |
-
-## Coverage check
-
-| Required business question or KPI | Required table/fields | Available? | Gap or action needed |
-|---|---|---|---|
-|  |  | Yes / No / Partial |  |
-
-## Initial inspection
-
-- Encoding and delimiter:
-- Header quality:
-- Obvious missing values:
-- Duplicate-file or duplicate-row risk:
-- Date and numeric parsing concerns:
-- Sensitive or private information:
-
-## Done check
-
-- [ ] Raw files are preserved unchanged.
-- [ ] Source and licensing/synthetic status are documented.
-- [ ] Row and column counts are recorded.
-- [ ] Required fields are confirmed.
-- [ ] Known gaps are documented before analysis begins.

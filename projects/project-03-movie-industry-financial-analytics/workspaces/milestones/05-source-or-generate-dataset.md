@@ -1,9 +1,9 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Generate dataset
+# Source or generate dataset
 
-**Project:** VFX Production Intelligence Dashboard  
+**Project:** Movie Industry Financial Analytics  
 **Stage:** Dataset  
 **Estimated focused time:** about 75 minutes  
 **Guide updated:** 2026-07-21
@@ -116,7 +116,7 @@ Use the immutable raw sources for relationship validation and the data dictionar
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Generate dataset  
+**Milestone:** Source or generate dataset  
 **Started:** 2026-07-21
 
 ## Source record
@@ -164,50 +164,3 @@ The worksheet below is a planning aid. Complete the substantive work in the proj
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — Dataset Source and Intake
-
-**Milestone:** Generate dataset  
-**Started:** 2026-07-21
-
-## Source record
-
-- Source or generation method:
-- Download or generation date:
-- License or synthetic-data disclosure:
-- Original location:
-- Raw files stored under:
-- Files that must remain unchanged:
-
-## File manifest
-
-| File | Table represented | Rows | Columns | Date range | Notes |
-|---|---|---:|---:|---|---|
-|  |  |  |  |  |  |
-
-## Coverage check
-
-| Required business question or KPI | Required table/fields | Available? | Gap or action needed |
-|---|---|---|---|
-|  |  | Yes / No / Partial |  |
-
-## Initial inspection
-
-- Encoding and delimiter:
-- Header quality:
-- Obvious missing values:
-- Duplicate-file or duplicate-row risk:
-- Date and numeric parsing concerns:
-- Sensitive or private information:
-
-## Done check
-
-- [ ] Raw files are preserved unchanged.
-- [ ] Source and licensing/synthetic status are documented.
-- [ ] Row and column counts are recorded.
-- [ ] Required fields are confirmed.
-- [ ] Known gaps are documented before analysis begins.

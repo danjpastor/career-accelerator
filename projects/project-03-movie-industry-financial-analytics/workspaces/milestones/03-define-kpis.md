@@ -1,9 +1,9 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Finalize KPIs
+# Define KPIs
 
-**Project:** VFX Production Intelligence Dashboard  
+**Project:** Movie Industry Financial Analytics  
 **Stage:** Discovery  
 **Estimated focused time:** about 60 minutes  
 **Guide updated:** 2026-07-21
@@ -117,7 +117,7 @@ Use governed KPI definitions in business questions, SQL, Python, and Power BI.
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Finalize KPIs  
+**Milestone:** Define KPIs  
 **Started:** 2026-07-21
 
 ## Instructions
@@ -156,41 +156,3 @@ Define only metrics that directly support the approved business problem. A KPI i
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — KPI Definitions
-
-**Milestone:** Finalize KPIs  
-**Started:** 2026-07-21
-
-## Instructions
-
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
-
-## KPI register
-
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-
-## For each KPI, answer
-
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
-
-## Review checklist
-
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.

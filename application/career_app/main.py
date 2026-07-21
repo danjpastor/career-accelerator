@@ -69,6 +69,7 @@ from career_app.ui.applied_labs import AppliedLabsWidget
 from career_app.ui.exercise_packs import ExercisePacksWidget, ExerciseSuggestionPanel
 from career_app.ui.task_workspace import TaskWorkspaceDialog
 from career_app.ui.portfolio_workspace import PortfolioTaskWorkspaceDialog
+from career_app.ui.portfolio_hub import PortfolioHubWidget
 from career_app.ui.responsive import (
     ResponsiveScrollPage, apply_content_row_metrics,
     apply_inline_style_scale, clear_layout_positions, reflow_grid,
@@ -3161,71 +3162,32 @@ class CareerAccelerator(QMainWindow):
 
     # ---------- Portfolio ----------
     def portfolio_page(self):
-        page, root = self.page(
-            "📁 Portfolio Workspace",
-            "A guided workspace for building evidence-quality analytics projects.",
+        # PORTFOLIO WORKSPACE COMMAND CENTER V10.20.0
+        self.portfolio_hub = PortfolioHubWidget(
+            self.conn,
+            ROOT,
+            self,
+            completion_callback=self.set_project_task_completed,
+            active_project_callback=self.set_active_project,
+            refresh_callback=lambda: self.refresh_all(
+                sync_tracks=False,
+            ),
         )
 
-        top = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.portfolio_top_layout = top
-        self.project_combo = QComboBox()
-        for project_id, name in PROJECT_NAMES.items():
-            self.project_combo.addItem(f"{project_id} — {name}", project_id)
-        self.project_combo.currentIndexChanged.connect(self.load_project)
-        top.addWidget(self.project_combo)
-        set_active = QPushButton("Set Active")
-        set_active.clicked.connect(self.set_active_project)
-        top.addWidget(set_active)
-        top.addStretch()
-        root.addLayout(top)
-
-        self.project_tabs = QTabWidget()
-        self.project_tabs.setMinimumWidth(0)
-        self.project_tabs.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Preferred,
-        )
-        root.addWidget(self.project_tabs, 1)
-
+        # Compatibility aliases for existing navigation and refresh code.
+        self.project_combo = self.portfolio_hub.project_combo
+        self.project_tabs = self.portfolio_hub.tabs
         self.project_task_checks = []
-        self.project_stage_widgets = {}
-        for stage in PROJECT_STAGES:
-            tab = QWidget()
-            tab_layout = QVBoxLayout(tab)
-            if stage in ("Overview", "Tasks"):
-                scroll = QScrollArea()
-                scroll.setWidgetResizable(True)
-                host = QWidget()
-                host_layout = QVBoxLayout(host)
-                scroll.setWidget(host)
-                tab_layout.addWidget(scroll)
-                self.project_stage_widgets[stage] = host_layout
-            else:
-                editor = QTextEdit()
-                editor.setPlaceholderText(f"Document the {stage} work for this project.")
-                tab_layout.addWidget(editor)
-                save = QPushButton(f"Save {stage}")
-                save.clicked.connect(
-                    lambda checked=False, section=stage, widget=editor:
-                    self.save_project_note(section, widget)
-                )
-                tab_layout.addWidget(save)
-                self.project_stage_widgets[stage] = editor
-            self.project_tabs.addTab(tab, stage)
 
-        save_tasks = QPushButton("Save Project Milestones")
-        save_tasks.setObjectName("Primary")
-        save_tasks.clicked.connect(self.save_project_tasks)
-        root.addWidget(save_tasks)
+        try:
+            self.portfolio_hub.select_project(
+                int(self.state["current_project"])
+            )
+        except Exception:
+            pass
 
-        def update_portfolio_layout(width):
-            set_box_direction(self.portfolio_top_layout, width < 620, 8)
-            self.project_tabs.setMinimumHeight(520 if width >= 700 else 620)
+        return self.portfolio_hub
 
-        self._register_page_responsive(page, update_portfolio_layout)
-        return page
-
-    # ---------- SQL ----------
     def sql_page(self):
         page, root = self.page(
             "💻 SQL Companion",
@@ -9376,111 +9338,10 @@ class CareerAccelerator(QMainWindow):
         )
         self.refresh_all()
 
-    def load_project(self):
-        project_id = int(self.project_combo.currentData() or 1)
-        self.project_task_checks = []
-
-        for stage in ("Overview", "Tasks"):
-            layout = self.project_stage_widgets[stage]
-            self.clear_layout(layout)
-
-        rows = self.conn.execute(
-            """SELECT id,stage,label,completed,description,
-                      definition_of_done,estimated_minutes
-               FROM project_tasks
-               WHERE project_id=? ORDER BY sort_order""",
-            (project_id,),
-        ).fetchall()
-
-        project_stage_colors = {
-            "Discovery": COLORS["blue"],
-            "Dataset": COLORS["cyan"],
-            "SQL": COLORS["purple"],
-            "Python": COLORS["green"],
-            "Power BI": COLORS["orange"],
-            "GitHub": COLORS["gold"],
-            "README": COLORS["blue"],
-            "Overview": COLORS["muted"],
-            "Tasks": COLORS["muted"],
-        }
-
-        guide_note = QLabel(
-            "Open Guide for step-by-step instructions, a clear definition of done, "
-            "and a project starter document. Your work is saved inside the project folder."
-        )
-        guide_note.setObjectName("Muted")
-        guide_note.setWordWrap(True)
-        self.project_stage_widgets["Tasks"].addWidget(guide_note)
-
-        for row in rows:
-            # Milestones belong in the dedicated checklist.  The Overview tab
-            # remains a clean project summary rather than a second partial task list.
-            target_stage = "Tasks"
-
-            task_row = TaskRow(
-                title=row["label"],
-                source=(
-                    f"Project milestone • {row['stage']} • "
-                    f"about {int(row['estimated_minutes'] or 45)} min"
-                ),
-                checked=bool(row["completed"]),
-                status_text=(
-                    "Completed"
-                    if row["completed"]
-                    else ""
-                ),
-                category_text=row["stage"],
-                category_color=project_stage_colors.get(
-                    row["stage"],
-                    COLORS["muted"],
-                ),
-                on_toggle=(
-                    lambda state, task_id=row["id"]:
-                    self.set_project_task_completed(
-                        task_id,
-                        state,
-                    )
-                ),
-                action_text="Guide",
-                on_action=(
-                    lambda checked=False, task_id=row["id"]:
-                    self.open_portfolio_task_workspace(task_id)
-                ),
-                completed=False,
-            )
-            task_row.title_label.setToolTip(
-                f"{row['description']}\n\nDone when: {row['definition_of_done']}"
-            )
-            self.project_stage_widgets[
-                target_stage
-            ].addWidget(task_row)
-            self.project_task_checks.append(
-                (row["id"], task_row.checkbox)
-            )
-
-        for stage in ("Overview", "Tasks"):
-            self.project_stage_widgets[stage].addStretch()
-
-        directory = ROOT / "projects" / PROJECT_DIRS[project_id]
-        readme = directory / "README.md"
-        overview_layout = self.project_stage_widgets["Overview"]
-        if readme.exists():
-            preview = QTextEdit()
-            preview.setReadOnly(True)
-            preview.setPlainText(readme.read_text(encoding="utf-8"))
-            overview_layout.insertWidget(0, preview)
-
-        notes = {
-            row["section"]: row["content"]
-            for row in self.conn.execute(
-                "SELECT section,content FROM project_notes WHERE project_id=?",
-                (project_id,),
-            ).fetchall()
-        }
-        for stage in PROJECT_STAGES:
-            widget = self.project_stage_widgets.get(stage)
-            if isinstance(widget, QTextEdit):
-                widget.setPlainText(notes.get(stage, ""))
+    def load_project(self, *_args):
+        hub = getattr(self, "portfolio_hub", None)
+        if hub is not None:
+            hub.refresh_all()
 
     def open_portfolio_task_workspace(self, task_id):
         try:
@@ -9501,12 +9362,35 @@ class CareerAccelerator(QMainWindow):
                 str(exc),
             )
 
-    def set_active_project(self):
+    def set_active_project(self, project_id=None):
+        if project_id is None:
+            hub = getattr(self, "portfolio_hub", None)
+            if hub is not None:
+                project_id = hub.project_id()
+            elif hasattr(self, "project_combo"):
+                project_id = int(
+                    self.project_combo.currentData() or 1
+                )
+            else:
+                project_id = int(
+                    self.state["current_project"]
+                )
+
+        project_id = int(project_id)
         update_state(
             self.conn,
-            current_project=int(self.project_combo.currentData()),
+            current_project=project_id,
         )
-        self.refresh_all()
+        self.state = state(self.conn)
+        tracks.sync_all(
+            self.conn,
+            self.state,
+        )
+        self.refresh_all(sync_tracks=False)
+        self.statusBar().showMessage(
+            f"Project {project_id} is now active.",
+            3200,
+        )
 
     def set_project_task_completed(
         self,

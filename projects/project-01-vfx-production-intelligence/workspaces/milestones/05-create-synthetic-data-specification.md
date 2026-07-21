@@ -1,16 +1,16 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Generate dataset
+# Create synthetic data specification
 
 **Project:** VFX Production Intelligence Dashboard  
-**Stage:** Dataset  
-**Estimated focused time:** about 75 minutes  
+**Stage:** Overview  
+**Estimated focused time:** about 90 minutes  
 **Guide updated:** 2026-07-21
 
 ## Purpose
 
-Obtain or create a dataset that can answer the project questions while preserving a clearly documented raw-data source.
+Specify the tables, fields, relationships, date range, row volumes, business rules, and intentional quality issues needed before generating synthetic data.
 
 This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
 
@@ -41,20 +41,20 @@ Explain how this task helps answer the approved business problem or reduces risk
 
 Create or update the appropriate project artifact. Expected locations include:
 
-- `data/raw/`
-- `documentation/data_source_manifest.md`
+- `documentation/synthetic_data_specification.md`
 
 The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
 
 ## Detailed workflow
 
-1. Confirm whether the source is public, licensed, internal, or synthetic.
-2. Place untouched source files under `data/raw/`.
-3. Record provenance, generation method, retrieval date, and usage constraints.
-4. Create a source manifest with filenames, formats, row counts, and table grains.
-5. Verify required tables and fields against the business questions.
-6. Inspect representative rows without modifying the source.
-7. Record missing fields, coverage gaps, and planned mitigations.
+1. Define one row's meaning for every table.
+2. Specify primary keys, foreign keys, and relationship cardinality.
+3. List each field with type, allowed range, null behavior, and business meaning.
+4. Set realistic row volumes and date coverage.
+5. Define distributions and correlations needed for realistic analysis.
+6. Specify business rules that must always hold.
+7. Add intentional data-quality issues that will exercise cleaning skills.
+8. Verify that the design can answer every approved business question.
 
 ## Questions to answer while working
 
@@ -97,65 +97,76 @@ When the technical work is complete, record:
 
 ## Definition of done
 
-Place untouched source files in data/raw, record where they came from or how they were generated, confirm licensing or synthetic status, list row counts, and verify that the required tables and fields exist.
+Complete the specification with table grains, primary and foreign keys, column definitions, realistic distributions, relationship rules, row counts, date range, and intentional errors; review it against every business question.
 
 ## Demonstrated skills
 
 Completing this milestone may support evidence for:
 
-- Data sourcing
-- Source documentation
+- Data specification
+- Data modeling
 
 Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
 
 ## Next-step handoff
 
-Use the immutable raw sources for relationship validation and the data dictionary.
+Use the approved specification to generate the raw dataset without changing the business rules.
 
 ## Task-specific worksheet
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Generate dataset  
+**Milestone:** Create synthetic data specification  
 **Started:** 2026-07-21
 
-## Source record
+## 1. Business coverage
 
-- Source or generation method:
-- Download or generation date:
-- License or synthetic-data disclosure:
-- Original location:
-- Raw files stored under:
-- Files that must remain unchanged:
+- Business problem supported:
+- Questions the data must answer:
+- Date range:
+- Expected scale:
 
-## File manifest
+## 2. Table plan
 
-| File | Table represented | Rows | Columns | Date range | Notes |
-|---|---|---:|---:|---|---|
+| Table | One row represents | Primary key | Expected rows | Parent tables | Purpose |
+|---|---|---|---:|---|---|
 |  |  |  |  |  |  |
 
-## Coverage check
+## 3. Relationship plan
 
-| Required business question or KPI | Required table/fields | Available? | Gap or action needed |
-|---|---|---|---|
-|  |  | Yes / No / Partial |  |
+| Parent table | Parent key | Child table | Foreign key | Expected relationship | Required? |
+|---|---|---|---|---|---|
+|  |  |  |  | One-to-many | Yes / No |
 
-## Initial inspection
+## 4. Field specification
 
-- Encoding and delimiter:
-- Header quality:
-- Obvious missing values:
-- Duplicate-file or duplicate-row risk:
-- Date and numeric parsing concerns:
-- Sensitive or private information:
+For each table, document:
 
-## Done check
+| Field | Type | Meaning | Allowed values/range | Missing allowed? | Generation rule |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
 
-- [ ] Raw files are preserved unchanged.
-- [ ] Source and licensing/synthetic status are documented.
-- [ ] Row and column counts are recorded.
-- [ ] Required fields are confirmed.
-- [ ] Known gaps are documented before analysis begins.
+## 5. Realistic behavior
+
+- Important distributions:
+- Seasonal or time patterns:
+- Correlations that should exist:
+- Business rules that must always hold:
+- Rare but valid exceptions:
+
+## 6. Intentional quality issues
+
+| Issue | Table/field | Approximate frequency | Reason included | Expected cleaning response |
+|---|---|---:|---|---|
+|  |  |  |  |  |
+
+## 7. Validation before generation
+
+- [ ] Every business question maps to required fields.
+- [ ] Every table has a clear grain and key.
+- [ ] Relationships are defined before rows are generated.
+- [ ] Row volumes are realistic for the project.
+- [ ] Intentional errors are documented and bounded.
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 
@@ -164,50 +175,3 @@ The worksheet below is a planning aid. Complete the substantive work in the proj
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — Dataset Source and Intake
-
-**Milestone:** Generate dataset  
-**Started:** 2026-07-21
-
-## Source record
-
-- Source or generation method:
-- Download or generation date:
-- License or synthetic-data disclosure:
-- Original location:
-- Raw files stored under:
-- Files that must remain unchanged:
-
-## File manifest
-
-| File | Table represented | Rows | Columns | Date range | Notes |
-|---|---|---:|---:|---|---|
-|  |  |  |  |  |  |
-
-## Coverage check
-
-| Required business question or KPI | Required table/fields | Available? | Gap or action needed |
-|---|---|---|---|
-|  |  | Yes / No / Partial |  |
-
-## Initial inspection
-
-- Encoding and delimiter:
-- Header quality:
-- Obvious missing values:
-- Duplicate-file or duplicate-row risk:
-- Date and numeric parsing concerns:
-- Sensitive or private information:
-
-## Done check
-
-- [ ] Raw files are preserved unchanged.
-- [ ] Source and licensing/synthetic status are documented.
-- [ ] Row and column counts are recorded.
-- [ ] Required fields are confirmed.
-- [ ] Known gaps are documented before analysis begins.

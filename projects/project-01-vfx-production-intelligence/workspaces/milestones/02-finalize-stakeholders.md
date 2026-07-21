@@ -1,16 +1,16 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Finalize KPIs
+# Finalize stakeholders
 
 **Project:** VFX Production Intelligence Dashboard  
 **Stage:** Discovery  
-**Estimated focused time:** about 60 minutes  
+**Estimated focused time:** about 35 minutes  
 **Guide updated:** 2026-07-21
 
 ## Purpose
 
-Define the small set of metrics that will show whether the business problem is improving. Each KPI needs an exact formula and interpretation.
+Identify the people who will use, influence, or be affected by the analysis so the project can prioritize the right questions and outputs.
 
 This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
 
@@ -41,21 +41,18 @@ Explain how this task helps answer the approved business problem or reduces risk
 
 Create or update the appropriate project artifact. Expected locations include:
 
-- `documentation/kpi_definitions.md`
-- `documentation/kpis.md`
+- `documentation/stakeholders.md`
 
 The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
 
 ## Detailed workflow
 
-1. Start from each approved stakeholder decision rather than from available columns.
-2. Define each KPI in plain business language.
-3. Write the exact numerator, denominator, aggregation, grain, filters, and time window.
-4. Identify the source table and required fields.
-5. Define null, zero, cancellation, and partial-period handling.
-6. Choose a target, benchmark, or comparison when one is justified.
-7. Write an independent validation rule for the final value.
-8. Flag metrics that cannot yet be calculated and name the missing requirement.
+1. List people who use, influence, provide, or are affected by the analysis.
+2. Record the decision, information need, and likely concern for each stakeholder.
+3. Identify the primary stakeholder and explain why that role has priority.
+4. Separate decision-makers from data owners and subject-matter experts.
+5. Record communication format and level of detail each stakeholder needs.
+6. Identify conflicts between stakeholder goals and how the project will handle them.
 
 ## Questions to answer while working
 
@@ -98,56 +95,61 @@ When the technical work is complete, record:
 
 ## Definition of done
 
-Document each KPI with its business definition, formula, grain, filters, time window, data source, target or benchmark, and validation rule; flag any KPI that cannot yet be calculated.
+Document at least three stakeholders, the decision each one makes, the information each needs, their likely concerns, and which stakeholder is primary.
 
 ## Demonstrated skills
 
 Completing this milestone may support evidence for:
 
-- KPI definition
-- Metric governance
+- Stakeholder analysis
+- Requirements gathering
 
 Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
 
 ## Next-step handoff
 
-Use governed KPI definitions in business questions, SQL, Python, and Power BI.
+Use stakeholder decisions to prioritize KPIs and output formats.
 
 ## Task-specific worksheet
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Finalize KPIs  
+**Milestone:** Finalize stakeholders  
 **Started:** 2026-07-21
 
-## Instructions
+## Why this matters
 
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
+Different stakeholders need different levels of detail. Use this map to decide which questions, metrics, and dashboard pages deserve priority.
 
-## KPI register
+## Primary stakeholder
 
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
+- Role or title:
+- Decision this person owns:
+- Questions they are likely to ask:
+- Most useful output format:
+- Main concern or risk:
 
-## For each KPI, answer
+## Stakeholder matrix
 
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
+| Stakeholder | Decision or responsibility | Information needed | Influence | Interest | Planned project output |
+|---|---|---|---|---|---|
+|  |  |  | High / Medium / Low | High / Medium / Low |  |
+|  |  |  |  |  |  |
+|  |  |  |  |  |  |
 
-## Review checklist
+## Communication notes
 
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.
+- Who needs an executive summary?
+- Who needs operational detail?
+- Who may challenge the data or methodology?
+- Who needs to approve recommendations?
+
+## Done check
+
+- [ ] At least three stakeholders are documented.
+- [ ] One primary stakeholder is identified.
+- [ ] Each stakeholder is connected to a decision.
+- [ ] The project outputs match the stakeholder needs.
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 
@@ -156,41 +158,3 @@ Define only metrics that directly support the approved business problem. A KPI i
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — KPI Definitions
-
-**Milestone:** Finalize KPIs  
-**Started:** 2026-07-21
-
-## Instructions
-
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
-
-## KPI register
-
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-
-## For each KPI, answer
-
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
-
-## Review checklist
-
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.

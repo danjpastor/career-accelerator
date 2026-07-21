@@ -1,16 +1,16 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
 <!-- Guide version: 3 -->
 
-# Finalize KPIs
+# Finalize business questions
 
-**Project:** VFX Production Intelligence Dashboard  
+**Project:** Movie Industry Financial Analytics  
 **Stage:** Discovery  
-**Estimated focused time:** about 60 minutes  
+**Estimated focused time:** about 50 minutes  
 **Guide updated:** 2026-07-21
 
 ## Purpose
 
-Define the small set of metrics that will show whether the business problem is improving. Each KPI needs an exact formula and interpretation.
+Turn the business problem into answerable analytical questions that guide the SQL, Python, and dashboard work instead of exploring the data without a purpose.
 
 This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
 
@@ -41,21 +41,19 @@ Explain how this task helps answer the approved business problem or reduces risk
 
 Create or update the appropriate project artifact. Expected locations include:
 
-- `documentation/kpi_definitions.md`
-- `documentation/kpis.md`
+- `documentation/business_questions.md`
 
 The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
 
 ## Detailed workflow
 
-1. Start from each approved stakeholder decision rather than from available columns.
-2. Define each KPI in plain business language.
-3. Write the exact numerator, denominator, aggregation, grain, filters, and time window.
-4. Identify the source table and required fields.
-5. Define null, zero, cancellation, and partial-period handling.
-6. Choose a target, benchmark, or comparison when one is justified.
-7. Write an independent validation rule for the final value.
-8. Flag metrics that cannot yet be calculated and name the missing requirement.
+1. Translate the business problem into 8–12 answerable questions.
+2. Identify the stakeholder decision supported by each question.
+3. Specify the metric, comparison, segment, period, and expected grain.
+4. Prioritize must-answer questions above exploratory questions.
+5. Map each question to planned SQL, Python, or dashboard output.
+6. Remove questions that are interesting but cannot change a decision.
+7. Review coverage against every approved KPI.
 
 ## Questions to answer while working
 
@@ -98,56 +96,66 @@ When the technical work is complete, record:
 
 ## Definition of done
 
-Document each KPI with its business definition, formula, grain, filters, time window, data source, target or benchmark, and validation rule; flag any KPI that cannot yet be calculated.
+Save 8–12 prioritized questions. Each question identifies the stakeholder decision it supports, the metric or comparison required, the expected grain, and the planned output.
 
 ## Demonstrated skills
 
 Completing this milestone may support evidence for:
 
-- KPI definition
-- Metric governance
+- Analytical question design
+- Scope management
 
 Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
 
 ## Next-step handoff
 
-Use governed KPI definitions in business questions, SQL, Python, and Power BI.
+Use the prioritized questions to verify the dataset design and plan analysis outputs.
 
 ## Task-specific worksheet
 
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
-**Milestone:** Finalize KPIs  
+**Milestone:** Finalize business questions  
 **Started:** 2026-07-21
 
 ## Instructions
 
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
+Write questions that can be answered with data and that support an actual decision. Avoid broad prompts such as “What insights can we find?”
 
-## KPI register
+## Question register
 
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
+| Priority | Business question | Stakeholder decision | Metric/comparison needed | Grain | Planned output | Data available? |
+|---:|---|---|---|---|---|---|
+| 1 |  |  |  |  |  | Yes / No / Partial |
+| 2 |  |  |  |  |  |  |
+| 3 |  |  |  |  |  |  |
 
-## For each KPI, answer
+## Quality test for each question
 
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
+- Specific: Is the subject and comparison clear?
+- Measurable: Can the answer be expressed with a metric, category, or validated finding?
+- Actionable: Could the stakeholder make a decision from the answer?
+- Relevant: Does it support the approved business problem?
+- Time-aware: Is the period or timing clear where needed?
 
-## Review checklist
+## Core scope
 
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.
+Select 8–12 questions for the main analysis. Place lower-priority ideas below.
+
+### Primary questions
+
+1. 
+2. 
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
+
+### Future or optional questions
+
+-
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 
@@ -156,41 +164,3 @@ Define only metrics that directly support the approved business problem. A KPI i
 ## Learner work and decisions
 
 - Add concise notes, decisions, unresolved questions, or links to the real project artifact.
-
-## Preserved content from the previous guide
-
-> The previous document is retained below so no learner work is lost. Move only useful decisions into the Learner work section when convenient.
-
-# VFX Production Intelligence Dashboard — KPI Definitions
-
-**Milestone:** Finalize KPIs  
-**Started:** 2026-07-21
-
-## Instructions
-
-Define only metrics that directly support the approved business problem. A KPI is not complete until another analyst could reproduce it from the definition below.
-
-## KPI register
-
-| KPI | Business question supported | Exact formula | Grain | Filters/exclusions | Time window | Source fields | Target/benchmark | Validation |
-|---|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-|  |  |  |  |  |  |  |  |  |
-
-## For each KPI, answer
-
-- What does a higher value mean?
-- What does a lower value mean?
-- Can the metric be double-counted?
-- What should happen when the denominator is zero?
-- Which date determines the reporting period?
-- Can the planned data calculate it reliably?
-
-## Review checklist
-
-- [ ] Every KPI has an exact formula.
-- [ ] Grain and date logic are stated.
-- [ ] Exclusions and null handling are stated.
-- [ ] A validation method is defined.
-- [ ] Unavailable KPIs are clearly flagged instead of invented.
