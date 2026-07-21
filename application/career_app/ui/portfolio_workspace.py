@@ -140,13 +140,10 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         self.data_workspace_status.setObjectName("Muted")
         self.data_workspace_status.setWordWrap(True)
         data_layout.addWidget(self.data_workspace_status, 1)
-        self.open_starter_button = QPushButton("Open Starter in VS Code")
+        self.open_starter_button = QPushButton("Open Notebook in VS Code")
         self.open_starter_button.setObjectName("Primary")
-        self.open_starter_button.clicked.connect(self.open_sql_starter)
+        self.open_starter_button.clicked.connect(self.open_relationship_notebook)
         data_layout.addWidget(self.open_starter_button)
-        self.open_findings_button = QPushButton("Open Findings")
-        self.open_findings_button.clicked.connect(self.open_findings)
-        data_layout.addWidget(self.open_findings_button)
         self.refresh_data_button = QPushButton("Refresh Project Data")
         self.refresh_data_button.clicked.connect(self.refresh_data_workspace)
         data_layout.addWidget(self.refresh_data_button)
@@ -258,14 +255,11 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         self.open_starter_button.setEnabled(
             bool(
                 plan.database_ready
-                and plan.starter_sql_path
-                and Path(plan.starter_sql_path).is_file()
+                and plan.notebook_path
+                and Path(plan.notebook_path).is_file()
                 and plan.workspace_path
                 and Path(plan.workspace_path).is_file()
             )
-        )
-        self.open_findings_button.setEnabled(
-            bool(plan.findings_path and Path(plan.findings_path).is_file())
         )
 
     def refresh_data_workspace(self):
@@ -287,23 +281,14 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Refresh Project Data", str(exc))
 
-    def open_sql_starter(self):
+    def open_relationship_notebook(self):
         try:
-            opened_with = portfolio_workspace.open_sql_starter(
+            opened_with = portfolio_workspace.open_relationship_notebook(
                 self.conn, self.root, self.task_id
             )
-            self.save_state.setText(f"Starter opened in {opened_with}")
+            self.save_state.setText(f"Notebook opened in {opened_with}")
         except Exception as exc:
-            QMessageBox.warning(self, "Could Not Open SQL Starter", str(exc))
-
-    def open_findings(self):
-        try:
-            portfolio_workspace.open_findings_document(
-                self.conn, self.root, self.task_id
-            )
-            self.save_state.setText("Findings document opened")
-        except Exception as exc:
-            QMessageBox.warning(self, "Could Not Open Findings", str(exc))
+            QMessageBox.warning(self, "Could Not Open Notebook", str(exc))
 
     def _changed(self):
         self._dirty = True

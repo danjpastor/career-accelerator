@@ -9,3 +9,8 @@
 - Deleted outdated generated file `sql/validation/04_relationship_consistency_checks.sql`.
 - Removed the empty legacy `sql/setup/` folder.
 
+## 2026-07-21T01:53:26
+
+- Deleted outdated generated file `sql/validation/validate_relationships.sql`.
+- Deleted outdated generated file `documentation/relationship_validation.md`.
+

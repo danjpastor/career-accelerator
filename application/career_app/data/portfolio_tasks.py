@@ -87,7 +87,7 @@ DATASET_SOURCE = _spec(
 VALIDATE_RELATIONSHIPS = _spec(
     "validate_relationships",
     "Confirm that the keys connecting the tables behave as intended. This means checking that primary keys are unique, foreign keys point to real parent rows, and joins do not unexpectedly lose or multiply records.",
-    "Complete the relationship matrix; run uniqueness, orphan-key, and join-cardinality checks for every planned relationship; investigate exceptions; save the validation SQL or notebook; and record whether each relationship is safe to use.",
+    "Complete the guided relationship-validation notebook; run uniqueness, orphan-key, and join-cardinality checks for every planned relationship; interpret every result; investigate exceptions; and record which relationships are safe to use.",
     "validate_relationships.md",
     75,
 )

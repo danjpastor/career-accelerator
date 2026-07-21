@@ -8,18 +8,15 @@
   ],
   "settings": {
     "files.associations": {
-      "*.sql": "sql"
+      "*.sql": "sql",
+      "*.ipynb": "jupyter-notebook"
     },
-    "duckdb.databases": [
-      {
-        "alias": "project",
-        "type": "file",
-        "path": "./data/working/project.duckdb",
-        "readOnly": false,
-        "attached": true
-      }
-    ],
-    "duckdb.defaultDatabase": "project",
+    "python.defaultInterpreterPath": "${workspaceFolder}/../../.venv/Scripts/python.exe",
     "duckdb.resultsLocation": "beside"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-toolsai.jupyter"
+    ]
   }
 }

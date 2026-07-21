@@ -177,21 +177,17 @@ def refresh_data_workspace(conn, root: Path, task_id: int) -> dict:
     }
 
 
-def open_sql_starter(conn, root: Path, task_id: int) -> str:
+def open_relationship_notebook(conn, root: Path, task_id: int) -> str:
     workspace = ensure_document(conn, root, task_id)
     plan = workspace.get("data_workspace")
     if plan is None:
-        raise ValueError("This milestone does not have a prepared SQL workspace.")
-    return project_data_workspace.open_starter_in_vscode(plan)
+        raise ValueError("This milestone does not have a prepared notebook workspace.")
+    return project_data_workspace.open_notebook_in_vscode(plan)
 
 
-def open_findings_document(conn, root: Path, task_id: int) -> str:
-    workspace = ensure_document(conn, root, task_id)
-    plan = workspace.get("data_workspace")
-    path = Path(plan.findings_path) if plan and plan.findings_path else None
-    if path is None or not path.is_file():
-        raise ValueError("The findings document is not ready. Refresh the project data first.")
-    return task_workspace.open_artifact(path, root=Path(root))
+# Compatibility alias for older UI actions.
+def open_sql_starter(conn, root: Path, task_id: int) -> str:
+    return open_relationship_notebook(conn, root, task_id)
 
 
 def project_data_files(conn, root: Path, task_id: int) -> dict:
@@ -200,8 +196,7 @@ def project_data_files(conn, root: Path, task_id: int) -> dict:
     if plan is None:
         return {}
     return {
-        "starter_sql": plan.starter_sql_path,
-        "findings": plan.findings_path,
+        "notebook": plan.notebook_path,
         "database": plan.database_path,
         "workspace": plan.workspace_path,
         "config": plan.config_path,

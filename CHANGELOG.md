@@ -1,3 +1,32 @@
+# v10.19.0 — Native SQL Portfolio Notebooks
+
+- Replaced Python-string query cells with native JupySQL `%%sql` cells.
+- Reduced the relationship-validation notebook to one collapsed setup cell, four focused SQL work sections, interpretation prompts, and a final conclusion.
+- Kept schemas, keys, and relationship maps in the Task Workspace Visual Guide instead of duplicating them in the notebook.
+- Continued using an isolated in-memory DuckDB session so the VS Code DuckDB extension can remain open without locking the notebook.
+- Added `jupysql` to the managed environment.
+- Added a v2-to-v3 notebook migration that copies recognized learner SQL into the new sections and archives notebooks containing work or outputs.
+- Preserved project data, source configuration, milestone state, learner files, Academy progress, task history, and both application databases.
+
+# v10.18.1 — Notebook DuckDB Lock Hotfix
+
+- Replaced the relationship-validation notebook's direct file connection with an isolated in-memory DuckDB session built from the project's configured raw sources.
+- Removed automatic `project.duckdb` attachment from the generated VS Code workspace to prevent Windows file-lock conflicts.
+- Added a targeted migration that repairs only the managed notebook setup cell while preserving learner queries, Markdown notes, and outputs.
+- Kept the prepared project database available for other project tools without making it a prerequisite for notebook execution.
+
+# v10.18.0 — Portfolio Validation Notebooks and SQL Submission Repair
+
+- Replaced the standalone relationship-validation SQL starter and separate findings document with one guided Jupyter notebook.
+- Kept the task instructions, table schemas, learner-written SQL, query output, interpretation, and final conclusion together in the notebook.
+- Prepared the project DuckDB connection and table-list cells automatically while leaving every real validation query for the learner to write.
+- Added project-specific uniqueness, orphan-key, join-cardinality, and consistency prompts generated from each project's source manifest.
+- Added **Open Notebook in VS Code** and generated a project workspace that recommends Jupyter and uses the repository Python environment.
+- Safely deleted untouched superseded generated SQL/findings files and archived edited managed copies during migration.
+- Added `ipykernel` to the managed environment so generated notebooks can run through VS Code without a separate manual kernel setup.
+- Fixed false “untouched starting template” errors for DataLemur submissions by evaluating executable SQL after comments are removed.
+- Preserved databases, project source files, learner-authored SQL, notebook work, Academy progress, task history, and evidence.
+
 # v10.17.0 — Portfolio SQL Workspace Simplification
 
 - Rebuilt portfolio relationship-validation tasks around one runnable SQL starter, one findings document, one project DuckDB database, and one generated VS Code workspace.

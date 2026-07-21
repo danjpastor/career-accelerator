@@ -9749,19 +9749,46 @@ class CareerAccelerator(QMainWindow):
 
     @staticmethod
     def _sql_submission_has_original_query(sql_text):
+        """Return True when the submission contains learner-written executable SQL.
+
+        Starter files intentionally contain guidance comments.  Earlier versions
+        searched those comments for phrases such as ``write and test your own
+        solution`` and could therefore reject a valid query that had been written
+        underneath the untouched instructions.  Completion should evaluate only
+        executable SQL, never the surrounding comments.
+        """
         sql_text = str(sql_text or "")
-        without_comments = re.sub(r"--[^\n]*|/\*.*?\*/", " ", sql_text, flags=re.S)
-        normalized = " ".join(without_comments.split())
-        if not re.match(r"^(?:SELECT|WITH)\b", normalized, re.IGNORECASE):
+        without_comments = re.sub(
+            r"--[^\n]*|/\*.*?\*/",
+            " ",
+            sql_text,
+            flags=re.S,
+        )
+        normalized = " ".join(without_comments.split()).strip()
+        if len(normalized) < 18:
             return False
+
+        # A file may begin with a harmless statement terminator or contain more
+        # than one statement.  Accept it when at least one executable statement
+        # starts with SELECT or WITH.
+        statements = [part.strip() for part in normalized.split(";") if part.strip()]
+        query_statements = [
+            statement
+            for statement in statements
+            if re.match(r"^(?:SELECT|WITH)\b", statement, re.IGNORECASE)
+        ]
+        if not query_statements:
+            return False
+
+        executable = " ".join(query_statements).casefold()
         placeholders = (
             "requested columns",
             "source table",
             "write your answer",
             "write and test your own solution",
+            "dca todo",
         )
-        lower = sql_text.casefold()
-        return len(normalized) >= 18 and not any(phrase in lower for phrase in placeholders)
+        return not any(phrase in executable for phrase in placeholders)
 
     def _persist_sql_submission(self, *, completed=False):
         title = self.sql_selected_title or self.sql_title.text().strip()

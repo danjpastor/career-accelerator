@@ -24,15 +24,16 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.17.0 includes:
-- A simplified project-neutral Portfolio SQL workspace
-- One guided but incomplete SQL starter per relationship-validation task
-- One project findings document and one prepared DuckDB database
-- A generated VS Code workspace that attaches and selects the project database
-- Direct **Open Starter in VS Code** and **Open Findings** actions
-- Automatic cleanup or archival of obsolete generated setup and validation files
-- Table schemas and relationship metadata without completed project queries
-- All v10.16.0 Academy counter, task synchronization, and Continue-button repairs
+Version 10.19.0 includes:
+- A minimal relationship-validation notebook with one collapsed setup cell
+- Native JupySQL `%%sql` cells instead of Python strings containing SQL
+- Query results directly beneath each learner-written SQL cell
+- Table schemas, key candidates, and relationship maps kept in the Visual Guide
+- An isolated in-memory DuckDB session that avoids VS Code file-lock conflicts
+- Safe migration of older managed notebooks, including SQL transfer and archival of prior outputs
+- Direct **Open Notebook in VS Code** routing to the exact generated `.ipynb` file
+- All v10.18.1 DataLemur submission and notebook lock fixes
+
 
 ### Guided Markdown and DataLemur workflow
 

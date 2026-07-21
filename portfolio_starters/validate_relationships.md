@@ -7,7 +7,7 @@
 
 Before joining project tables, confirm that their keys and row relationships behave as expected. A query can run without errors and still produce incorrect totals when a key is duplicated, a child row points to a missing parent, or a join multiplies records.
 
-The app prepares a project-specific DuckDB database and a guided SQL starter when this task opens. Use **Open Starter in VS Code** rather than creating setup scripts yourself.
+The app prepares a project-specific DuckDB database and a guided Jupyter notebook when this task opens. Use **Open Notebook in VS Code** rather than creating setup scripts or disconnected SQL files yourself.
 
 ## What you will check
 
@@ -19,18 +19,21 @@ The app prepares a project-specific DuckDB database and a guided SQL starter whe
 ## How to work
 
 - Review the table schemas and inferred relationships in the Visual Guide.
-- Open the generated starter SQL in VS Code.
-- Write the actual project queries in the blank TODO sections.
-- Run statements with the DuckDB extension already configured in the generated workspace.
-- Record results and conclusions in the generated findings document.
+- Open the generated notebook in VS Code.
+- Run the single collapsed setup cell once.
+- Write the actual project SQL directly in the native `%%sql` cells.
+- Inspect each result directly below its query.
+- Replace the interpretation prompts with your own findings and decisions.
+- Restart the kernel and run the notebook from top to bottom before finishing.
 
-The starter contains only small placeholder syntax examples. It does not provide the finished validation queries.
+The Visual Guide contains the table schemas and relationships. The notebook stays minimal and does not provide the finished validation queries.
 
 ## Definition of done
 
 - [ ] Every declared primary-key candidate was checked for duplicates.
 - [ ] Every required relationship was checked for missing parent records.
 - [ ] Join row counts were compared for relationships used in the analysis.
-- [ ] Any project-specific consistency checks were added.
-- [ ] Exceptions and decisions were documented.
-- [ ] The findings document states whether the relationships are safe to use.
+- [ ] Any project-specific consistency checks were considered.
+- [ ] Every result has a written interpretation.
+- [ ] The final conclusion states whether the relationships are safe to use.
+- [ ] The notebook runs from top to bottom in a fresh kernel.

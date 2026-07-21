@@ -1,0 +1,10 @@
+{
+  "patch": "data-career-accelerator-v10.18.0",
+  "installed_at": "2026-07-21T01:50:40",
+  "backup_root": "patch_backups\\v118-260721-015040",
+  "changed_file_count": 12,
+  "removed_file_count": 0,
+  "verified_file_count": 12,
+  "database_files_modified_by_installer": false,
+  "first_open_action": "Prepare a guided relationship-validation notebook and safely retire superseded generated SQL/findings files when the milestone is opened"
+}
