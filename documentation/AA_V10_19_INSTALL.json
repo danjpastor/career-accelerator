@@ -1,0 +1,10 @@
+{
+  "patch": "data-career-accelerator-v10.19.0",
+  "installed_at": "2026-07-21T02:41:08",
+  "backup_root": "patch_backups\\v119-260721-024108",
+  "changed_file_count": 8,
+  "removed_file_count": 0,
+  "verified_file_count": 8,
+  "database_files_modified_by_installer": false,
+  "first_open_action": "Upgrade the managed relationship-validation notebook to native %%sql cells when the milestone is opened"
+}

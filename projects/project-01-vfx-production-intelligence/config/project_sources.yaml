@@ -1,6 +1,6 @@
-version: 1
+version: 3
 generated_by: Data Career Accelerator
-generated_at: '2026-07-21T00:09:54'
+generated_at: '2026-07-21T02:44:09'
 schema: raw
 database: data/working/project.duckdb
 sources:
