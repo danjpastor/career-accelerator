@@ -6286,6 +6286,138 @@ class CareerAccelerator(QMainWindow):
             return f"Weekly Review • Week {week}"
         return f"Roadmap • Week {week}"
 
+    # BEGIN CURRENT SPRINT PROGRESS FIX
+    def _current_sprint_progress(self, week=None):
+        """Return completed and planned work for the live weekly sprint."""
+        sprint_week = int(
+            week
+            if week is not None
+            else self.state["current_week"]
+        )
+
+        today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+
+        completed_total = 0
+        planned_total = 0
+
+        try:
+            track_rows = self.conn.execute(
+                """
+                SELECT
+                    ts.track_key,
+                    ts.weekly_target,
+                    ts.status,
+                    COUNT(te.id) AS weekly_completed
+                FROM track_state AS ts
+                LEFT JOIN track_events AS te
+                    ON te.track_key = ts.track_key
+                   AND te.completed_date BETWEEN ? AND ?
+                GROUP BY
+                    ts.track_key,
+                    ts.weekly_target,
+                    ts.status
+                ORDER BY ts.track_key
+                """,
+                (
+                    week_start.isoformat(),
+                    week_end.isoformat(),
+                ),
+            ).fetchall()
+
+            known_track_keys = {
+                str(row["track_key"])
+                for row in track_rows
+            }
+
+            for row in track_rows:
+                completed = max(
+                    0,
+                    int(row["weekly_completed"] or 0),
+                )
+                target = max(
+                    0,
+                    int(row["weekly_target"] or 0),
+                )
+                status = str(row["status"] or "").casefold()
+
+                if (
+                    status in {"locked", "paused", "completed"}
+                    and completed == 0
+                ):
+                    target = 0
+
+                completed_total += completed
+                planned_total += max(target, completed)
+
+            event_only_rows = self.conn.execute(
+                """
+                SELECT
+                    track_key,
+                    COUNT(*) AS weekly_completed
+                FROM track_events
+                WHERE completed_date BETWEEN ? AND ?
+                GROUP BY track_key
+                """,
+                (
+                    week_start.isoformat(),
+                    week_end.isoformat(),
+                ),
+            ).fetchall()
+
+            for row in event_only_rows:
+                track_key = str(row["track_key"])
+                if track_key in known_track_keys:
+                    continue
+
+                completed = max(
+                    0,
+                    int(row["weekly_completed"] or 0),
+                )
+                completed_total += completed
+                planned_total += completed
+
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            standalone_rows = self.conn.execute(
+                """
+                SELECT s.completed
+                FROM sprint_tasks AS s
+                WHERE s.week = ?
+                  AND s.sort_order >= 0
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM track_tasks AS tt
+                      WHERE tt.task_id = s.id
+                  )
+                ORDER BY s.sort_order
+                """,
+                (sprint_week,),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            standalone_rows = self.conn.execute(
+                """
+                SELECT completed
+                FROM sprint_tasks
+                WHERE week = ?
+                  AND sort_order >= 0
+                ORDER BY sort_order
+                """,
+                (sprint_week,),
+            ).fetchall()
+
+        completed_total += sum(
+            int(row["completed"] or 0)
+            for row in standalone_rows
+        )
+        planned_total += len(standalone_rows)
+
+        return completed_total, planned_total
+    # END CURRENT SPRINT PROGRESS FIX
+
     def refresh_dashboard(
         self,
         *,
@@ -6318,19 +6450,7 @@ class CareerAccelerator(QMainWindow):
             ),
         )
 
-        tasks = self.conn.execute(
-            """SELECT s.id,s.label,s.completed,m.estimated_minutes,
-                      m.category,m.status
-               FROM sprint_tasks s
-               LEFT JOIN task_metadata m ON m.task_id=s.id
-               WHERE s.week=?
-               ORDER BY s.sort_order""",
-            (week,),
-        ).fetchall()
-
-        done = sum(int(row["completed"]) for row in tasks)
-        total = len(tasks)
-
+        done, total = self._current_sprint_progress(week)
         sql_count = (
             achievements.completed_sql_count(
                 self.conn
@@ -10436,11 +10556,7 @@ class CareerAccelerator(QMainWindow):
 
     def generate_summary(self):
         week = self.state["current_week"]
-        tasks = self.conn.execute(
-            "SELECT completed FROM sprint_tasks WHERE week=?", (week,)
-        ).fetchall()
-        done = sum(int(row["completed"]) for row in tasks)
-        total = len(tasks)
+        done, total = self._current_sprint_progress(week)
         hours = self.conn.execute(
             "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
         ).fetchone()[0]

@@ -24,8 +24,6 @@ The app prepares this project's DuckDB database in the background. You do not ne
 - Source configuration: `projects/project-01-vfx-production-intelligence/config/project_sources.yaml`
 - Status: **Ready — open the notebook in VS Code and run it with the project's Python environment.**
 
-> The relationship-validation notebook was upgraded to the clean v4 workflow. The previous notebook was archived at archive/portfolio-workspace-migration/20260721-113306/notebooks/validate_relationships.ipynb.
-
 Click **Open Notebook in VS Code**. Run the setup cell once, then write normal SQL directly in the `%%sql` cells. Query results appear beneath each cell. Use this Visual Guide for schemas, keys, and relationships.
 
 ### Available tables
