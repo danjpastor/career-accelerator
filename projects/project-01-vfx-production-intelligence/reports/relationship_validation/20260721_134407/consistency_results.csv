@@ -1,0 +1,10 @@
+check,issue_count,status
+Reviews with unresolved shot,35,ISSUE
+Reviews with unresolved project path,60,ISSUE
+Reviews with unresolved client path,377,ISSUE
+Time entries with unresolved shot,45,ISSUE
+Time entries with unresolved project path,109,ISSUE
+Time entries with unresolved client path,718,ISSUE
+Time entries with unresolved artist,33,ISSUE
+Time-entry project ID disagrees with shot,147,ISSUE
+Review project ID disagrees with shot,86,ISSUE

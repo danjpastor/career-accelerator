@@ -1,3 +1,17 @@
+# v10.19.2 — Guided Relationship Validation Workflow
+- Moved detailed relationship-validation instruction into the Markdown task guide.
+- Kept the Jupyter notebook clean and SQL-first: setup, queries, outputs, interpretations, and conclusion only.
+- Added the complete validation order: baseline grain, primary-key nulls and duplicates, foreign-key nulls and orphans, join cardinality, and project-specific checks.
+- Clarified that relationship validation documents issues but does not clean raw data.
+- Added safe migration for existing managed notebooks and task guides, with notebook archiving when learner work or outputs exist.
+
+# v10.19.1 — Dedicated Career Accelerator Notebook Kernel
+- Added JupySQL and IPykernel to the managed application environment.
+- Registered the repository `.venv` as `Python (Career Accelerator)` on every launch.
+- Generated relationship-validation notebooks now target the dedicated kernel automatically.
+- Existing notebooks receive a metadata-only kernel repair that preserves SQL, notes, and outputs.
+- Generated VS Code workspaces continue to use the repository `.venv` and now recommend both Python and Jupyter extensions.
+
 # v10.19.0 — Native SQL Portfolio Notebooks
 
 - Replaced Python-string query cells with native JupySQL `%%sql` cells.

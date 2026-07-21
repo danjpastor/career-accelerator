@@ -553,3 +553,9 @@ generic roadmap-task badges, and repeated completed task rows are collapsed.
 
 Existing duplicate achievement cards are removed automatically without
 changing task, SQL, portfolio, evidence, or completion data.
+## Dedicated Notebook Kernel
+
+The Windows launcher installs notebook dependencies into the repository `.venv`, registers that environment as **Python (Career Accelerator)**, and generated portfolio notebooks target that kernel automatically. This prevents notebooks from accidentally using a global Python installation that does not contain JupySQL or DuckDB.
+## Relationship Validation Workflow
+
+The Validate Relationships milestone uses a clean SQL-first Jupyter notebook and a separate detailed Markdown task guide. The guide explains table grain, primary- and foreign-key checks, join cardinality, result interpretation, and completion criteria; the notebook is reserved for executable SQL, outputs, interpretations, and the final decision. Validation records cleaning requirements but does not alter raw data.
