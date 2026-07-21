@@ -24,13 +24,15 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.15.0 includes:
-- A repaired Accelerator Academy mastery graph that derives prerequisites from completed lesson mastery rather than employer-facing Demonstrated Evidence
-- Reliable progression from **Write Your First SQL** into **Customize Query Results** (`DISTINCT` and `LIMIT`)
-- Explicit pathway-completion checks so Academy cannot announce completion while required lessons, checkpoints, or projects remain unfinished
-- Automatic repair of stale Academy lesson summaries and falsely completed adaptive tasks
-- Immediate restoration of the current Academy step in Today’s Focus when an older frozen assignment hid the newly unlocked lesson
-- All v10.14.0 readable Task Guide and exact DataLemur routing improvements
+Version 10.17.0 includes:
+- A simplified project-neutral Portfolio SQL workspace
+- One guided but incomplete SQL starter per relationship-validation task
+- One project findings document and one prepared DuckDB database
+- A generated VS Code workspace that attaches and selects the project database
+- Direct **Open Starter in VS Code** and **Open Findings** actions
+- Automatic cleanup or archival of obsolete generated setup and validation files
+- Table schemas and relationship metadata without completed project queries
+- All v10.16.0 Academy counter, task synchronization, and Continue-button repairs
 
 ### Guided Markdown and DataLemur workflow
 

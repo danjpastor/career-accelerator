@@ -996,7 +996,15 @@ class CareerAccelerator(QMainWindow):
     # ---------- Dashboard ----------
     def academy_page(self):
         self.academy_widget = AcceleratorAcademyWidget(self.conn, ROOT, self)
+        self.academy_widget.progressChanged.connect(self._academy_progress_changed)
         return self.academy_widget
+
+    def _academy_progress_changed(self):
+        """Refresh shared planner and Learning cards after an Academy action."""
+        self.state = state(self.conn)
+        if hasattr(self, "learning_cards"):
+            self.refresh_learning()
+        self.refresh_dashboard(sync_tracks=False)
 
     def dashboard_page(self):
         page = ResponsiveScrollPage()
@@ -2348,6 +2356,9 @@ class CareerAccelerator(QMainWindow):
             detail.setObjectName("Muted")
             detail.setWordWrap(True)
             button = QPushButton("Continue →")
+            button.clicked.connect(
+                lambda checked=False, track_key=key: self.continue_learning_track(track_key)
+            )
             card.layout.addWidget(value)
             card.layout.addWidget(detail)
             card.layout.addStretch()
@@ -2554,6 +2565,42 @@ class CareerAccelerator(QMainWindow):
         )
         self._register_page_responsive(page, update_learning_layout)
         return page
+    def continue_learning_track(self, track_key):
+        """Route every Learning Overview Continue button to real work."""
+        key = str(track_key or "").strip()
+        if key == "Academy" or key in {"Power BI", "Python", "Statistics"}:
+            self.navigate(12)
+            return
+        if key == "SQL":
+            self.navigate(4)
+            return
+        if key == "Portfolio":
+            self.navigate(3)
+            return
+        if key == "Applied Labs":
+            self.navigate(2)
+            if hasattr(self, "learning_tabs"):
+                self.learning_tabs.setCurrentIndex(1)
+            return
+        if key == "Google":
+            row = self.conn.execute(
+                """SELECT tt.task_id
+                   FROM track_tasks tt
+                   JOIN sprint_tasks s ON s.id=tt.task_id
+                   WHERE tt.track_key='google' AND s.completed=0
+                   LIMIT 1"""
+            ).fetchone()
+            if row is not None:
+                self.open_task_workspace(task_id=int(row["task_id"]))
+            else:
+                self.navigate(2)
+                self.statusBar().showMessage(
+                    "Your Google Certificate progress is tracked here. Update the course and module when you finish the next section.",
+                    6000,
+                )
+            return
+        self.navigate(2)
+
     # BEGIN EXERCISE PACKS
     def _applied_labs_changed(self):
         self.state = state(self.conn)
@@ -8235,6 +8282,11 @@ class CareerAccelerator(QMainWindow):
                 self.conn,
                 self.state,
             )
+            if result.get("track_key") == "academy" and hasattr(self, "academy_widget"):
+                self.academy_widget.service._reconcile_activity_events()
+                self.academy_widget.service._reconcile_today_focus_progress()
+                self.academy_widget.service.sync_planner_task()
+                self.state = state(self.conn)
             completion_message = result.get(
                 "message",
                 "Task completed.",

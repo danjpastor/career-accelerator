@@ -1,0 +1,10 @@
+{
+  "patch": "data-career-accelerator-v10.17.0",
+  "installed_at": "2026-07-21T01:06:57",
+  "backup_root": "patch_backups\\v117-260721-010656",
+  "changed_file_count": 10,
+  "removed_file_count": 1,
+  "verified_file_count": 10,
+  "database_files_modified_by_installer": false,
+  "first_open_action": "Prepare a project-neutral DuckDB database and guided VS Code SQL workspace when a relationship-validation milestone is opened"
+}

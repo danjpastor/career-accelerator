@@ -1,118 +1,244 @@
-# VFX Production Intelligence — Validate Table Relationships
+# VFX Production Intelligence Dashboard — Validate Table Relationships
 
-**Milestone:** Validate relationships  
-**Started:** 2026-07-20
+**Milestone:** Validate relationships
 
 ## What this task means
 
-The VFX data is split across clients, projects, artists, shots, time entries, and reviews. Before analyzing production performance, prove that these tables connect correctly. A query can run successfully and still produce wrong totals if a key is duplicated, missing, or joined at the wrong grain.
+Before using joins in your analysis, confirm that the tables connect the way you expect. A query can run successfully and still produce incorrect totals when IDs are duplicated, child records point to missing parents, or a join multiplies rows.
 
-## Expected VFX relationships
+<!-- DCA:PROJECT-DATA:START -->
+## Your SQL workspace is ready
 
-| Parent table | Unique parent key | Child table | Child foreign key | Expected relationship |
+The app prepares this project's DuckDB database in the background. You do not need to register CSV files, run setup SQL, or calculate file paths before starting.
+
+- Starter SQL: `projects/project-01-vfx-production-intelligence/sql/validation/validate_relationships.sql`
+- Findings document: `projects/project-01-vfx-production-intelligence/documentation/relationship_validation.md`
+- Project database: `projects/project-01-vfx-production-intelligence/data/working/project.duckdb`
+- VS Code workspace: `projects/project-01-vfx-production-intelligence/project-01-vfx-production-intelligence.code-workspace`
+- Source configuration: `projects/project-01-vfx-production-intelligence/config/project_sources.yaml`
+- Status: **Ready — open the starter in VS Code and run SQL with the DuckDB extension.**
+
+Click **Open Starter in VS Code**. The generated workspace automatically attaches the project database as `project` and selects it as the active DuckDB database. Use **Ctrl+Enter** to run SQL or the **Run** link above an individual statement.
+
+### Available tables
+
+| Raw source | SQL table | Primary-key candidate | Columns |
+|---|---|---|---:|
+| `data/raw/csv/raw_artists.csv` | `raw.artists` | `artist_id` | 12 |
+| `data/raw/csv/raw_clients.csv` | `raw.clients` | `client_id` | 10 |
+| `data/raw/csv/raw_projects.csv` | `raw.projects` | `project_id` | 16 |
+| `data/raw/csv/raw_reviews.csv` | `raw.reviews` | `review_id` | 12 |
+| `data/raw/csv/raw_shots.csv` | `raw.shots` | `shot_id` | 23 |
+| `data/raw/csv/raw_time_entries.csv` | `raw.time_entries` | `time_entry_id` | 11 |
+
+### Table schemas
+
+### `raw.artists`
+
+| Column | Data type |
+|---|---|
+| `artist_id` | `VARCHAR` |
+| `artist_name` | `VARCHAR` |
+| `department` | `VARCHAR` |
+| `role` | `VARCHAR` |
+| `seniority` | `VARCHAR` |
+| `location` | `VARCHAR` |
+| `weekly_capacity_hours` | `VARCHAR` |
+| `hourly_cost_usd` | `VARCHAR` |
+| `hire_date` | `DATE` |
+| `active_flag` | `VARCHAR` |
+| `manager_id` | `VARCHAR` |
+| `email` | `VARCHAR` |
+
+### `raw.clients`
+
+| Column | Data type |
+|---|---|
+| `client_id` | `VARCHAR` |
+| `client_name` | `VARCHAR` |
+| `client_type` | `VARCHAR` |
+| `region` | `VARCHAR` |
+| `contract_tier` | `VARCHAR` |
+| `revision_tendency_index` | `DOUBLE` |
+| `default_review_sla_hours` | `BIGINT` |
+| `active_flag` | `VARCHAR` |
+| `account_manager` | `VARCHAR` |
+| `notes` | `VARCHAR` |
+
+### `raw.projects`
+
+| Column | Data type |
+|---|---|
+| `project_id` | `VARCHAR` |
+| `client_id` | `VARCHAR` |
+| `project_name` | `VARCHAR` |
+| `project_type` | `VARCHAR` |
+| `start_date` | `VARCHAR` |
+| `target_delivery_date` | `DATE` |
+| `actual_delivery_date` | `VARCHAR` |
+| `status` | `VARCHAR` |
+| `priority` | `VARCHAR` |
+| `planned_shot_count` | `BIGINT` |
+| `budget_hours` | `VARCHAR` |
+| `producer` | `VARCHAR` |
+| `vfx_supervisor` | `VARCHAR` |
+| `fps` | `DOUBLE` |
+| `resolution` | `VARCHAR` |
+| `delivery_format` | `VARCHAR` |
+
+### `raw.reviews`
+
+| Column | Data type |
+|---|---|
+| `review_id` | `VARCHAR` |
+| `shot_id` | `VARCHAR` |
+| `project_id` | `VARCHAR` |
+| `review_date` | `VARCHAR` |
+| `review_round` | `VARCHAR` |
+| `review_type` | `VARCHAR` |
+| `feedback_source` | `VARCHAR` |
+| `outcome` | `VARCHAR` |
+| `note_category` | `VARCHAR` |
+| `response_hours` | `VARCHAR` |
+| `reviewer` | `VARCHAR` |
+| `notes` | `VARCHAR` |
+
+### `raw.shots`
+
+| Column | Data type |
+|---|---|
+| `shot_id` | `VARCHAR` |
+| `project_id` | `VARCHAR` |
+| `sequence_code` | `VARCHAR` |
+| `shot_name` | `VARCHAR` |
+| `department` | `VARCHAR` |
+| `assigned_artist_id` | `VARCHAR` |
+| `assigned_date` | `VARCHAR` |
+| `start_date` | `VARCHAR` |
+| `deadline` | `VARCHAR` |
+| `delivery_date` | `VARCHAR` |
+| `first_pass_date` | `VARCHAR` |
+| `final_approval_date` | `VARCHAR` |
+| `status` | `VARCHAR` |
+| `priority` | `VARCHAR` |
+| `complexity` | `VARCHAR` |
+| `estimated_hours` | `VARCHAR` |
+| `actual_hours` | `VARCHAR` |
+| `internal_revision_count` | `BIGINT` |
+| `client_revision_count` | `BIGINT` |
+| `revision_count_reported` | `BIGINT` |
+| `hold_days` | `BIGINT` |
+| `vendor_dependencies` | `VARCHAR` |
+| `notes` | `VARCHAR` |
+
+### `raw.time_entries`
+
+| Column | Data type |
+|---|---|
+| `time_entry_id` | `VARCHAR` |
+| `shot_id` | `VARCHAR` |
+| `project_id` | `VARCHAR` |
+| `artist_id` | `VARCHAR` |
+| `work_date` | `VARCHAR` |
+| `hours_logged` | `VARCHAR` |
+| `task_type` | `VARCHAR` |
+| `billable_flag` | `VARCHAR` |
+| `overtime_flag` | `VARCHAR` |
+| `source_system` | `VARCHAR` |
+| `comment` | `VARCHAR` |
+
+### Relationships to validate
+
+These relationships are inferred from matching ID columns. Confirm them against the project documentation before treating them as business rules.
+
+| Child table | Foreign key | Parent table | Parent key | Expected relationship |
 |---|---|---|---|---|
-| `raw_clients` | `client_id` | `raw_projects` | `client_id` | One client to many projects |
-| `raw_projects` | `project_id` | `raw_shots` | `project_id` | One project to many shots |
-| `raw_projects` | `project_id` | `raw_time_entries` | `project_id` | One project to many time entries |
-| `raw_projects` | `project_id` | `raw_reviews` | `project_id` | One project to many reviews |
-| `raw_artists` | `artist_id` | `raw_shots` | `assigned_artist_id` | One artist to many assigned shots |
-| `raw_artists` | `artist_id` | `raw_time_entries` | `artist_id` | One artist to many time entries |
-| `raw_shots` | `shot_id` | `raw_time_entries` | `shot_id` | One shot to many time entries |
-| `raw_shots` | `shot_id` | `raw_reviews` | `shot_id` | One shot to many reviews |
+| `raw.shots` | `assigned_artist_id` | `raw.artists` | `artist_id` | one-to-many |
+| `raw.time_entries` | `artist_id` | `raw.artists` | `artist_id` | one-to-many |
+| `raw.projects` | `client_id` | `raw.clients` | `client_id` | one-to-many |
+| `raw.reviews` | `project_id` | `raw.projects` | `project_id` | one-to-many |
+| `raw.shots` | `project_id` | `raw.projects` | `project_id` | one-to-many |
+| `raw.time_entries` | `project_id` | `raw.projects` | `project_id` | one-to-many |
+| `raw.reviews` | `shot_id` | `raw.shots` | `shot_id` | one-to-many |
+| `raw.time_entries` | `shot_id` | `raw.shots` | `shot_id` | one-to-many |
+<!-- DCA:PROJECT-DATA:END -->
 
-## Step 1 — Confirm primary keys are unique
+## How to complete the task
 
-Create `sql/validation/01_primary_key_checks.sql` and test:
+### 1. Open the starter SQL
 
-- `raw_clients.client_id`
-- `raw_projects.project_id`
-- `raw_artists.artist_id`
-- `raw_shots.shot_id`
-- `raw_time_entries.time_entry_id`
-- `raw_reviews.review_id`
+Click **Open Starter in VS Code**. The file contains the actual table schemas, relationship list, short syntax reminders, and blank TODO areas. It intentionally does not contain the finished project queries.
 
-Starter pattern:
+### 2. Check primary-key uniqueness
+
+For every table with a declared primary key, group by that identifier and count how many rows use it. Keep only identifiers whose count is greater than one.
+
+A basic pattern looks like this, using placeholder names:
 
 ```sql
-SELECT client_id, COUNT(*) AS row_count
-FROM raw_clients
-GROUP BY client_id
+SELECT example_id, COUNT(*) AS row_count
+FROM example_table
+GROUP BY example_id
 HAVING COUNT(*) > 1;
 ```
 
-Repeat for every key. Expected result: zero duplicate IDs unless the issue is intentionally documented in the synthetic source brief.
+Write the real checks yourself using the project tables listed above.
 
-## Step 2 — Find orphan foreign keys
+### 3. Check for orphaned foreign keys
 
-Create `sql/validation/02_orphan_key_checks.sql`.
+For each child-to-parent relationship, use a `LEFT JOIN` to keep every child row. Then identify child rows where the corresponding parent key is missing. The starter names the relationships but leaves the join SQL for you to write.
 
-Example: projects whose client does not exist.
+### 4. Check join cardinality
 
-```sql
-SELECT
-    p.client_id,
-    COUNT(*) AS orphan_projects
-FROM raw_projects AS p
-LEFT JOIN raw_clients AS c
-    ON p.client_id = c.client_id
-WHERE p.client_id IS NOT NULL
-  AND c.client_id IS NULL
-GROUP BY p.client_id;
-```
+Count the child table before the join and compare it with the joined result. A many-to-one lookup should normally preserve the child-row count. If the count grows, investigate duplicate parent keys or an incomplete join condition.
 
-Write equivalent checks for every relationship in the table above.
+### 5. Record what you found
 
-## Step 3 — Check duplicated relationship fields
+Open the findings document and record duplicate IDs, orphaned records, row-count changes, exceptions, and your final conclusion about whether each relationship is safe.
 
-Some child tables contain both `shot_id` and `project_id`. Confirm they agree with the project attached to the referenced shot.
+## Definition of done
 
-```sql
-SELECT
-    t.time_entry_id,
-    t.shot_id,
-    t.project_id AS time_entry_project,
-    s.project_id AS shot_project
-FROM raw_time_entries AS t
-JOIN raw_shots AS s
-    ON t.shot_id = s.shot_id
-WHERE t.project_id <> s.project_id;
-```
+- [ ] The project database opened successfully in the generated VS Code workspace.
+- [ ] Every declared primary-key candidate was checked for duplicates.
+- [ ] Every required relationship was checked for missing parent records.
+- [ ] Join row counts were compared for the relationships used in the analysis.
+- [ ] Project-specific consistency checks were added where needed.
+- [ ] The findings document contains results, exceptions, and a final conclusion.
 
-Run the same consistency check for `raw_reviews`.
 
-## Step 4 — Test join cardinality
+## Notes carried forward from the previous guide
 
-For each many-to-one lookup, compare the child row count before and after the join.
+Review these entries and move confirmed results into the new findings document.
 
-```sql
-SELECT COUNT(*) AS time_entry_rows
-FROM raw_time_entries;
-
-SELECT COUNT(*) AS joined_rows
-FROM raw_time_entries AS t
-LEFT JOIN raw_shots AS s
-    ON t.shot_id = s.shot_id;
-```
-
-If `joined_rows` is larger than `time_entry_rows`, the supposed parent key is not unique or the join condition is incomplete.
-
-## Step 5 — Record the results
-
+| Raw source | SQL table | Inferred primary key | Columns |
+| `data/raw/csv/raw_artists.csv` | `raw.artists` | `artist_id` | 12 |
+| `data/raw/csv/raw_clients.csv` | `raw.clients` | `client_id` | 10 |
+| `data/raw/csv/raw_projects.csv` | `raw.projects` | `project_id` | 16 |
+| `data/raw/csv/raw_reviews.csv` | `raw.reviews` | `review_id` | 12 |
+| `data/raw/csv/raw_shots.csv` | `raw.shots` | `shot_id` | 23 |
+| `data/raw/csv/raw_time_entries.csv` | `raw.time_entries` | `time_entry_id` | 11 |
+| Parent table | Parent key | Child table | Child key | Expected relationship |
+| `raw.artists` | `artist_id` | `raw.shots` | `assigned_artist_id` | one-to-many |
+| `raw.artists` | `artist_id` | `raw.time_entries` | `artist_id` | one-to-many |
+| `raw.clients` | `client_id` | `raw.projects` | `client_id` | one-to-many |
+| `raw.projects` | `project_id` | `raw.reviews` | `project_id` | one-to-many |
+| `raw.projects` | `project_id` | `raw.shots` | `project_id` | one-to-many |
+| `raw.projects` | `project_id` | `raw.time_entries` | `project_id` | one-to-many |
+| `raw.shots` | `shot_id` | `raw.reviews` | `shot_id` | one-to-many |
+| `raw.shots` | `shot_id` | `raw.time_entries` | `shot_id` | one-to-many |
+| Parent table | Unique parent key | Child table | Child foreign key | Expected relationship |
+| `raw.clients` | `client_id` | `raw.projects` | `client_id` | One client to many projects |
+| `raw.projects` | `project_id` | `raw.shots` | `project_id` | One project to many shots |
+| `raw.projects` | `project_id` | `raw.time_entries` | `project_id` | One project to many time entries |
+| `raw.projects` | `project_id` | `raw.reviews` | `project_id` | One project to many reviews |
+| `raw.artists` | `artist_id` | `raw.shots` | `assigned_artist_id` | One artist to many assigned shots |
+| `raw.artists` | `artist_id` | `raw.time_entries` | `artist_id` | One artist to many time entries |
+| `raw.shots` | `shot_id` | `raw.time_entries` | `shot_id` | One shot to many time entries |
+| `raw.shots` | `shot_id` | `raw.reviews` | `shot_id` | One shot to many reviews |
 | Relationship | Duplicate parent keys | Orphan child rows | Inconsistent project IDs | Rows multiplied? | Safe to use? | Action |
-|---|---:|---:|---:|---|---|---|
 | clients → projects |  |  | N/A |  |  |  |
 | projects → shots |  |  | N/A |  |  |  |
 | artists → shots |  |  | N/A |  |  |  |
 | artists → time entries |  |  | N/A |  |  |  |
 | shots → time entries |  |  |  |  |  |  |
 | shots → reviews |  |  |  |  |  |  |
-
-## Definition of done
-
-- [ ] All six primary keys were checked for duplicates.
-- [ ] Every relationship was checked for orphan keys.
-- [ ] Time-entry and review project IDs were compared with their referenced shot project.
-- [ ] Join row counts were compared before and after each many-to-one lookup.
-- [ ] Exceptions were classified as intentional source issues or errors to clean.
-- [ ] Validation SQL was saved under `sql/validation/`.
-- [ ] The completed results table was saved in this document.

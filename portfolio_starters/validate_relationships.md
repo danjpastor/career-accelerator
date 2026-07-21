@@ -3,74 +3,34 @@
 **Milestone:** {label}  
 **Started:** {date}
 
-## What “validate relationships” means
+## What this task means
 
-Tables are related when a key in one table points to a key in another. Before joining them, verify three things:
+Before joining project tables, confirm that their keys and row relationships behave as expected. A query can run without errors and still produce incorrect totals when a key is duplicated, a child row points to a missing parent, or a join multiplies records.
 
-1. **The parent key is unique.** A client ID or product ID that should identify one row must not appear more than once.
-2. **Every required foreign key has a parent.** A child row should not reference a client, product, project, or other parent that does not exist.
-3. **The join has the expected cardinality.** A one-to-many join may repeat the parent row, but it should not multiply child rows unexpectedly.
+The app prepares a project-specific DuckDB database and a guided SQL starter when this task opens. Use **Open Starter in VS Code** rather than creating setup scripts yourself.
 
-## Relationship matrix
+## What you will check
 
-| Parent table | Parent key | Child table | Foreign key | Expected cardinality | Required relationship? | Status |
-|---|---|---|---|---|---|---|
-|  |  |  |  | One-to-many | Yes / No | Not tested |
+1. Primary-key candidates are unique.
+2. Required foreign keys match a parent row.
+3. Many-to-one joins preserve the child-row count.
+4. Project-specific relationship rules remain consistent.
 
-## Check 1 — Primary-key uniqueness
+## How to work
 
-Run one query per parent key.
+- Review the table schemas and inferred relationships in the Visual Guide.
+- Open the generated starter SQL in VS Code.
+- Write the actual project queries in the blank TODO sections.
+- Run statements with the DuckDB extension already configured in the generated workspace.
+- Record results and conclusions in the generated findings document.
 
-```sql
-SELECT
-    parent_key,
-    COUNT(*) AS row_count
-FROM parent_table
-GROUP BY parent_key
-HAVING COUNT(*) > 1;
-```
+The starter contains only small placeholder syntax examples. It does not provide the finished validation queries.
 
-Expected result: zero rows for a key that should be unique.
+## Definition of done
 
-## Check 2 — Missing parent records
-
-```sql
-SELECT
-    c.foreign_key,
-    COUNT(*) AS orphan_rows
-FROM child_table AS c
-LEFT JOIN parent_table AS p
-    ON c.foreign_key = p.parent_key
-WHERE c.foreign_key IS NOT NULL
-  AND p.parent_key IS NULL
-GROUP BY c.foreign_key;
-```
-
-Expected result: zero rows when every foreign key is required to match.
-
-## Check 3 — Join multiplication
-
-```sql
-SELECT COUNT(*) AS child_rows
-FROM child_table;
-
-SELECT COUNT(*) AS joined_rows
-FROM child_table AS c
-LEFT JOIN parent_table AS p
-    ON c.foreign_key = p.parent_key;
-```
-
-For a valid many-to-one lookup, `joined_rows` should equal `child_rows`.
-
-## Validation log
-
-| Relationship | Parent duplicates | Orphan children | Child rows before join | Rows after join | Safe to use? | Resolution |
-|---|---:|---:|---:|---:|---|---|
-|  |  |  |  |  | Yes / No |  |
-
-## Deliverables
-
-- Save completed checks under `sql/validation/` or the project notebook folder.
-- Update the relationship matrix with results.
-- Document every exception and whether it is an error or a valid business case.
-- Do not mark this complete only because a join runs without an SQL error.
+- [ ] Every declared primary-key candidate was checked for duplicates.
+- [ ] Every required relationship was checked for missing parent records.
+- [ ] Join row counts were compared for relationships used in the analysis.
+- [ ] Any project-specific consistency checks were added.
+- [ ] Exceptions and decisions were documented.
+- [ ] The findings document states whether the relationships are safe to use.

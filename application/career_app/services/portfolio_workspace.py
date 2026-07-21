@@ -8,7 +8,7 @@ import re
 
 from career_app.data.roadmap import PROJECT_DIRS, PROJECT_NAMES
 from career_app.data.portfolio_tasks import task_spec
-from career_app.services import task_workspace
+from career_app.services import project_data_workspace, task_workspace
 
 
 def _slug(value: str, limit: int = 72) -> str:
@@ -34,6 +34,25 @@ def _project_dir(root: Path, project_id: int) -> Path:
     except KeyError as exc:
         raise ValueError(f"Unknown portfolio project: {project_id}") from exc
     return Path(root) / "projects" / dirname
+
+
+def _is_relationship_task(row) -> bool:
+    managed_key = str(row["managed_key"] or "") if "managed_key" in row.keys() else ""
+    return (
+        str(row["label"]).strip().casefold() == "validate relationships"
+        or managed_key.endswith("validate_relationships")
+    )
+
+
+def _prepare_project_data(root: Path, row, *, refresh: bool = False):
+    if not _is_relationship_task(row):
+        return None
+    return project_data_workspace.prepare_project_data_workspace(
+        root,
+        int(row["project_id"]),
+        refresh=refresh,
+        build=True,
+    )
 
 
 def document_path(root: Path, row) -> Path:
@@ -76,7 +95,15 @@ def _fallback_template(row) -> str:
     )
 
 
-def starter_content(root: Path, row) -> str:
+def starter_content(root: Path, row, data_plan=None) -> str:
+    if _is_relationship_task(row):
+        plan = data_plan or _prepare_project_data(root, row)
+        if plan is not None:
+            return project_data_workspace.relationship_guide_markdown(
+                root,
+                plan,
+                str(row["label"]),
+            )
     starter = _starter_path(root, row)
     if starter is None or not starter.is_file():
         return _fallback_template(row)
@@ -96,11 +123,21 @@ def ensure_document(conn, root: Path, task_id: int) -> dict:
     row = project_task_record(conn, task_id)
     if row is None:
         raise ValueError("The selected portfolio milestone no longer exists.")
+    data_plan = _prepare_project_data(root, row)
     path = document_path(root, row)
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
-        path.write_text(starter_content(root, row), encoding="utf-8")
+        path.write_text(starter_content(root, row, data_plan), encoding="utf-8")
     content = path.read_text(encoding="utf-8")
+    if data_plan is not None:
+        upgraded = project_data_workspace.upgrade_relationship_guide(
+            root,
+            data_plan,
+            content,
+        )
+        if upgraded != content:
+            content = upgraded
+            path.write_text(content, encoding="utf-8")
     return {
         "task": row,
         "document_path": path,
@@ -108,6 +145,66 @@ def ensure_document(conn, root: Path, task_id: int) -> dict:
         "project_name": PROJECT_NAMES.get(
             int(row["project_id"]), f"Project {int(row['project_id'])}"
         ),
+        "data_workspace": data_plan,
+    }
+
+
+def refresh_data_workspace(conn, root: Path, task_id: int) -> dict:
+    row = project_task_record(conn, task_id)
+    if row is None:
+        raise ValueError("The selected portfolio milestone no longer exists.")
+    if not _is_relationship_task(row):
+        raise ValueError("This milestone does not use the project data workspace.")
+    plan = _prepare_project_data(root, row, refresh=True)
+    path = document_path(root, row)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        content = path.read_text(encoding="utf-8")
+        content = project_data_workspace.upgrade_relationship_guide(root, plan, content)
+    else:
+        content = project_data_workspace.relationship_guide_markdown(
+            root, plan, str(row["label"])
+        )
+    path.write_text(content, encoding="utf-8")
+    return {
+        "task": row,
+        "document_path": path,
+        "content": content,
+        "project_name": PROJECT_NAMES.get(
+            int(row["project_id"]), f"Project {int(row['project_id'])}"
+        ),
+        "data_workspace": plan,
+    }
+
+
+def open_sql_starter(conn, root: Path, task_id: int) -> str:
+    workspace = ensure_document(conn, root, task_id)
+    plan = workspace.get("data_workspace")
+    if plan is None:
+        raise ValueError("This milestone does not have a prepared SQL workspace.")
+    return project_data_workspace.open_starter_in_vscode(plan)
+
+
+def open_findings_document(conn, root: Path, task_id: int) -> str:
+    workspace = ensure_document(conn, root, task_id)
+    plan = workspace.get("data_workspace")
+    path = Path(plan.findings_path) if plan and plan.findings_path else None
+    if path is None or not path.is_file():
+        raise ValueError("The findings document is not ready. Refresh the project data first.")
+    return task_workspace.open_artifact(path, root=Path(root))
+
+
+def project_data_files(conn, root: Path, task_id: int) -> dict:
+    workspace = ensure_document(conn, root, task_id)
+    plan = workspace.get("data_workspace")
+    if plan is None:
+        return {}
+    return {
+        "starter_sql": plan.starter_sql_path,
+        "findings": plan.findings_path,
+        "database": plan.database_path,
+        "workspace": plan.workspace_path,
+        "config": plan.config_path,
     }
 
 

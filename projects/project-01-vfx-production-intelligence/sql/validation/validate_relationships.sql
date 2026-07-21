@@ -1,0 +1,154 @@
+-- DCA Portfolio SQL Starter v2
+-- Project: VFX Production Intelligence Dashboard
+--
+-- This project database is attached automatically when you open the generated
+-- VS Code workspace. Run a statement with Ctrl+Enter, or use the Run CodeLens.
+-- Write the real project queries in the TODO sections below.
+-- The examples use placeholder names and are not the answers to this task.
+
+-- ============================================================
+-- AVAILABLE TABLES
+-- ============================================================
+-- raw.artists
+--   artist_id (VARCHAR) [primary key candidate]
+--   artist_name (VARCHAR)
+--   department (VARCHAR)
+--   role (VARCHAR)
+--   seniority (VARCHAR)
+--   location (VARCHAR)
+--   weekly_capacity_hours (VARCHAR)
+--   hourly_cost_usd (VARCHAR)
+--   hire_date (DATE)
+--   active_flag (VARCHAR)
+--   manager_id (VARCHAR)
+--   email (VARCHAR)
+
+-- raw.clients
+--   client_id (VARCHAR) [primary key candidate]
+--   client_name (VARCHAR)
+--   client_type (VARCHAR)
+--   region (VARCHAR)
+--   contract_tier (VARCHAR)
+--   revision_tendency_index (DOUBLE)
+--   default_review_sla_hours (BIGINT)
+--   active_flag (VARCHAR)
+--   account_manager (VARCHAR)
+--   notes (VARCHAR)
+
+-- raw.projects
+--   project_id (VARCHAR) [primary key candidate]
+--   client_id (VARCHAR)
+--   project_name (VARCHAR)
+--   project_type (VARCHAR)
+--   start_date (VARCHAR)
+--   target_delivery_date (DATE)
+--   actual_delivery_date (VARCHAR)
+--   status (VARCHAR)
+--   priority (VARCHAR)
+--   planned_shot_count (BIGINT)
+--   budget_hours (VARCHAR)
+--   producer (VARCHAR)
+--   vfx_supervisor (VARCHAR)
+--   fps (DOUBLE)
+--   resolution (VARCHAR)
+--   delivery_format (VARCHAR)
+
+-- raw.reviews
+--   review_id (VARCHAR) [primary key candidate]
+--   shot_id (VARCHAR)
+--   project_id (VARCHAR)
+--   review_date (VARCHAR)
+--   review_round (VARCHAR)
+--   review_type (VARCHAR)
+--   feedback_source (VARCHAR)
+--   outcome (VARCHAR)
+--   note_category (VARCHAR)
+--   response_hours (VARCHAR)
+--   reviewer (VARCHAR)
+--   notes (VARCHAR)
+
+-- raw.shots
+--   shot_id (VARCHAR) [primary key candidate]
+--   project_id (VARCHAR)
+--   sequence_code (VARCHAR)
+--   shot_name (VARCHAR)
+--   department (VARCHAR)
+--   assigned_artist_id (VARCHAR)
+--   assigned_date (VARCHAR)
+--   start_date (VARCHAR)
+--   deadline (VARCHAR)
+--   delivery_date (VARCHAR)
+--   first_pass_date (VARCHAR)
+--   final_approval_date (VARCHAR)
+--   status (VARCHAR)
+--   priority (VARCHAR)
+--   complexity (VARCHAR)
+--   estimated_hours (VARCHAR)
+--   actual_hours (VARCHAR)
+--   internal_revision_count (BIGINT)
+--   client_revision_count (BIGINT)
+--   revision_count_reported (BIGINT)
+--   hold_days (BIGINT)
+--   vendor_dependencies (VARCHAR)
+--   notes (VARCHAR)
+
+-- raw.time_entries
+--   time_entry_id (VARCHAR) [primary key candidate]
+--   shot_id (VARCHAR)
+--   project_id (VARCHAR)
+--   artist_id (VARCHAR)
+--   work_date (VARCHAR)
+--   hours_logged (VARCHAR)
+--   task_type (VARCHAR)
+--   billable_flag (VARCHAR)
+--   overtime_flag (VARCHAR)
+--   source_system (VARCHAR)
+--   comment (VARCHAR)
+
+-- ============================================================
+-- RELATIONSHIPS TO VALIDATE
+-- ============================================================
+-- raw.shots.assigned_artist_id -> raw.artists.artist_id
+-- raw.time_entries.artist_id -> raw.artists.artist_id
+-- raw.projects.client_id -> raw.clients.client_id
+-- raw.reviews.project_id -> raw.projects.project_id
+-- raw.shots.project_id -> raw.projects.project_id
+-- raw.time_entries.project_id -> raw.projects.project_id
+-- raw.reviews.shot_id -> raw.shots.shot_id
+-- raw.time_entries.shot_id -> raw.shots.shot_id
+
+-- ============================================================
+-- 1. CHECK PRIMARY-KEY UNIQUENESS
+-- ============================================================
+-- Goal: find identifiers that appear more than once.
+-- Basic syntax example only:
+--
+-- SELECT example_id, COUNT(*) AS row_count
+-- FROM example_table
+-- GROUP BY example_id
+-- HAVING COUNT(*) > 1;
+--
+-- TODO: Write a duplicate-key check for each declared primary key.
+
+
+-- ============================================================
+-- 2. CHECK FOR MISSING PARENT RECORDS
+-- ============================================================
+-- Goal: find child rows whose foreign key has no matching parent.
+-- Helpful concepts: LEFT JOIN, matching key columns, and IS NULL.
+-- TODO: Write one orphan-key check for each required relationship above.
+
+
+-- ============================================================
+-- 3. CHECK JOIN CARDINALITY
+-- ============================================================
+-- Goal: compare the child row count before and after a many-to-one join.
+-- Ask: did the join unexpectedly multiply rows?
+-- TODO: Compare row counts for each relationship you plan to use.
+
+
+-- ============================================================
+-- 4. ADD PROJECT-SPECIFIC CONSISTENCY CHECKS
+-- ============================================================
+-- Goal: test business rules that cannot be inferred from column names alone.
+-- TODO: Add any cross-table checks required by this project's data model.

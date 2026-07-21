@@ -1,3 +1,34 @@
+# v10.17.0 — Portfolio SQL Workspace Simplification
+
+- Rebuilt portfolio relationship-validation tasks around one runnable SQL starter, one findings document, one project DuckDB database, and one generated VS Code workspace.
+- Automatically attach each project database through workspace-scoped DuckDB settings and select it as the active database.
+- Added **Open Starter in VS Code** as the primary portfolio SQL action.
+- Removed learner-facing setup scripts and fragmented generated validation-query files.
+- Replaced completed project-specific query examples with table schemas, relationship metadata, small placeholder syntax patterns, and blank TODO sections.
+- Moved project source configuration to `config/project_sources.yaml` while safely migrating the previous location.
+- Added project-neutral source discovery, schema display, relationship inference, and data refresh behavior.
+- Added generated `documentation/relationship_validation.md` findings templates.
+- Delete untouched obsolete generated files; archive edited managed files before removing them.
+- Removed the obsolete VFX-only relationship starter and project-specific task override.
+- Preserved learner-created SQL, Markdown, source data, databases, milestone state, and other portfolio work.
+
+# v10.16.0 — Project Data Workspaces and Academy Sync
+
+- Added a project-neutral raw-data workspace generator for portfolio relationship-validation milestones.
+- Discover CSV, Parquet, JSON, JSONL, and NDJSON sources beneath each project’s `data/raw/` folder, or load an editable `data/project_sources.yaml` manifest.
+- Generate a reusable DuckDB database, portable source-registration SQL, primary-key checks, orphan-key checks, join-cardinality checks, and a project-specific validation guide.
+- Replaced invalid filename-as-table examples such as `raw_clients` with registered schema-qualified views such as `raw.clients`.
+- Added **Refresh Data Setup**, **Open Setup SQL**, and **Open Project Database** controls to the guided portfolio milestone workspace.
+- Made source discovery, table naming, key inference, and relationship inference work from project configuration rather than hardcoded VFX tables.
+- Rebuilt Academy Today/Week counters from passed interactive activities instead of static zero values.
+- Preserved each completed Academy focus assignment before advancing to the next recommended step, preventing a new lesson from appearing already completed.
+- Archived completed Academy adaptive tasks and created a fresh task for the next activity instead of reusing one task row indefinitely.
+- Kept routine Academy progress separate from employer-facing Demonstrated Evidence.
+- Connected every Learning Overview **Continue** button to its actual workspace.
+- Added live Academy progress notifications so the Learning Dashboard and Dashboard refresh immediately after a checked answer.
+- Hardened Academy **Continue** navigation against stale roadmap targets and unresolved prerequisite transitions.
+- Preserved databases, learner answers, portfolio files, generated source manifests, task history, and Demonstrated Evidence.
+
 # v10.15.0 — Academy Progression and Today’s Focus Repair
 
 - Separated internal Academy skill mastery from employer-facing Demonstrated Evidence.

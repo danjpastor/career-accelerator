@@ -1,0 +1,25 @@
+{
+  "dcaManaged": true,
+  "folders": [
+    {
+      "name": "VFX Production Intelligence Dashboard",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.sql": "sql"
+    },
+    "duckdb.databases": [
+      {
+        "alias": "project",
+        "type": "file",
+        "path": "./data/working/project.duckdb",
+        "readOnly": false,
+        "attached": true
+      }
+    ],
+    "duckdb.defaultDatabase": "project",
+    "duckdb.resultsLocation": "beside"
+  }
+}

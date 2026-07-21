@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import Qt, QTimer, QRectF, QSize
+from PySide6.QtCore import Qt, QTimer, QRectF, QSize, Signal
 from PySide6.QtGui import QColor, QBrush, QPainter, QPen, QFontMetrics
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -193,6 +193,8 @@ class AcademyMilestoneBar(QWidget):
 
 
 class AcceleratorAcademyWidget(QWidget):
+    progressChanged = Signal()
+
     """Unified, sequential Academy experience.
 
     Domain concepts such as courses, practice, assessments, Skills Labs, and
@@ -1448,12 +1450,28 @@ class AcceleratorAcademyWidget(QWidget):
             return
         self._save_current_work()
         keys = [node.target_key for node in self._nodes]
+        if self._current_target not in keys:
+            self.refresh_all()
+            self.open_recommendation()
+            return
         index = keys.index(self._current_target)
         if index >= len(keys) - 1:
-            self.content_stack.setCurrentIndex(self.COMPLETE_PAGE)
+            if self.service.path_complete():
+                self.content_stack.setCurrentIndex(self.COMPLETE_PAGE)
+            else:
+                self.open_recommendation()
             self.refresh_all()
             return
-        self.open_target(keys[index + 1])
+        next_target = keys[index + 1]
+        _state, unlocked, _reason = self._node_state(self._node(next_target))
+        if not unlocked:
+            recommendation = self.service.next_recommendation()
+            if recommendation is not None:
+                self.open_target(recommendation.target_key)
+            else:
+                self.refresh_all()
+            return
+        self.open_target(next_target)
 
     # -------------------------------------------------------------- lesson flow
     def _open_lesson_node(self, node: JourneyNode) -> None:
@@ -1702,6 +1720,7 @@ class AcceleratorAcademyWidget(QWidget):
             self.step_sql.navigate_to_error(result.feedback)
         self.refresh_all()
         self._refresh_lesson_navigation()
+        self.progressChanged.emit()
 
     def _show_step_hint(self) -> None:
         if self._current_lesson is None or self._current_activity is None:

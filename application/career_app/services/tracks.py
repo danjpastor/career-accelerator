@@ -4526,6 +4526,45 @@ def task_detail(conn, task_id):
             "Continue your next Academy lesson",
         )
         context = "Built-in guided learning"
+    elif track_key == "academy":
+        target_key = str(link["target_key"] or "")
+        parts = target_key.split(":", 3)
+        if len(parts) != 4 or parts[:2] != ["academy", "activity"]:
+            raise ValueError(
+                "The Academy task target could not be identified. Open Accelerator Academy and resume the recommended lesson."
+            )
+        lesson_id, activity_id = parts[2], parts[3]
+        progress_row = conn.execute(
+            """SELECT state,last_attempt_solution_assisted
+               FROM academy_activity_progress
+               WHERE lesson_id=? AND activity_id=?""",
+            (lesson_id, activity_id),
+        ).fetchone()
+        if progress_row is None or str(progress_row["state"] or "") != "Passed":
+            raise ValueError(
+                "Complete and pass this interactive Academy step before marking the task complete."
+            )
+        _record_event(
+            conn,
+            "academy",
+            target_key,
+            label,
+            metadata={
+                "lesson_id": lesson_id,
+                "activity_id": activity_id,
+                "target_key": target_key,
+                "task_id": int(task_id),
+            },
+        )
+        conn.execute(
+            """UPDATE daily_focus SET completed_at=COALESCE(completed_at,CURRENT_TIMESTAMP)
+               WHERE focus_date=? AND target_key=?
+                 AND (LOWER(COALESCE(track_key,''))='academy'
+                      OR LOWER(COALESCE(source_key,''))='roadmap:academy')""",
+            (date.today().isoformat(), target_key),
+        )
+        message = f"Accelerator Academy completed: {label}"
+
     elif track_key == "sql":
         specific_work = metadata.get(
             "title",

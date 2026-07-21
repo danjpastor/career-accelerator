@@ -339,15 +339,7 @@ EXACT_TASK_SPECS: dict[str, PortfolioTaskSpec] = {
 }
 
 
-PROJECT_OVERRIDES: dict[tuple[int, str], PortfolioTaskSpec] = {
-    (1, "Validate relationships"): _spec(
-        "vfx_validate_relationships",
-        "Verify that the VFX production tables connect correctly before analysis. Check that each client, project, shot, artist, time entry, and review uses valid keys and that joining the tables does not unexpectedly duplicate or remove records.",
-        "Complete the prefilled VFX relationship matrix; test client→project, project→shot, artist→time entry, shot→time entry, and shot→review links; run primary-key uniqueness and orphan-key SQL; compare row counts before and after joins; investigate exceptions; and save the completed guide plus validation queries under sql/validation.",
-        "vfx_validate_relationships.md",
-        90,
-    ),
-}
+PROJECT_OVERRIDES: dict[tuple[int, str], PortfolioTaskSpec] = {}
 
 
 def task_spec(label: str, project_id: int | None = None) -> PortfolioTaskSpec | None:

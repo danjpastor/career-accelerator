@@ -118,18 +118,40 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         root_layout.addLayout(guide)
 
         path_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        path_row.addWidget(QLabel("Starter document"))
+        path_row.addWidget(QLabel("Task guide"))
         self.path_field = QLineEdit(str(self.document_path))
         self.path_field.setReadOnly(True)
         self.path_field.setStyleSheet(path_field_stylesheet())
         path_row.addWidget(self.path_field, 1)
-        open_external = QPushButton("Open Externally")
+        open_external = QPushButton("Open Guide Externally")
         open_external.clicked.connect(self.open_external)
         path_row.addWidget(open_external)
-        open_folder = QPushButton("Open Folder")
+        open_folder = QPushButton("Open Project Folder")
         open_folder.clicked.connect(self.open_folder)
         path_row.addWidget(open_folder)
         root_layout.addLayout(path_row)
+
+        self.data_workspace = self.workspace.get("data_workspace")
+        self.data_workspace_row = QWidget()
+        data_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, self.data_workspace_row)
+        data_layout.setContentsMargins(0, 0, 0, 0)
+        data_layout.setSpacing(8)
+        self.data_workspace_status = QLabel()
+        self.data_workspace_status.setObjectName("Muted")
+        self.data_workspace_status.setWordWrap(True)
+        data_layout.addWidget(self.data_workspace_status, 1)
+        self.open_starter_button = QPushButton("Open Starter in VS Code")
+        self.open_starter_button.setObjectName("Primary")
+        self.open_starter_button.clicked.connect(self.open_sql_starter)
+        data_layout.addWidget(self.open_starter_button)
+        self.open_findings_button = QPushButton("Open Findings")
+        self.open_findings_button.clicked.connect(self.open_findings)
+        data_layout.addWidget(self.open_findings_button)
+        self.refresh_data_button = QPushButton("Refresh Project Data")
+        self.refresh_data_button.clicked.connect(self.refresh_data_workspace)
+        data_layout.addWidget(self.refresh_data_button)
+        root_layout.addWidget(self.data_workspace_row)
+        self._refresh_data_workspace_status()
 
         self.document_views = QTabWidget()
         self.document_views.setMinimumWidth(0)
@@ -223,6 +245,66 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         self._refresh_guide_references()
         self.document_views.setCurrentIndex(0)
 
+    def _refresh_data_workspace_status(self):
+        plan = getattr(self, "data_workspace", None)
+        self.data_workspace_row.setVisible(plan is not None)
+        if plan is None:
+            return
+        from career_app.services import project_data_workspace
+
+        self.data_workspace_status.setText(
+            "Portfolio SQL workspace: " + project_data_workspace.plan_summary(plan)
+        )
+        self.open_starter_button.setEnabled(
+            bool(
+                plan.database_ready
+                and plan.starter_sql_path
+                and Path(plan.starter_sql_path).is_file()
+                and plan.workspace_path
+                and Path(plan.workspace_path).is_file()
+            )
+        )
+        self.open_findings_button.setEnabled(
+            bool(plan.findings_path and Path(plan.findings_path).is_file())
+        )
+
+    def refresh_data_workspace(self):
+        try:
+            updated = portfolio_workspace.refresh_data_workspace(
+                self.conn, self.root, self.task_id
+            )
+            self.workspace = updated
+            self.data_workspace = updated.get("data_workspace")
+            self.document_path = updated["document_path"]
+            self.path_field.setText(str(self.document_path))
+            self.editor.blockSignals(True)
+            self.editor.setPlainText(updated["content"])
+            self.editor.blockSignals(False)
+            self._dirty = False
+            self.save_state.setText("Project data refreshed")
+            self._update_markdown_preview()
+            self._refresh_data_workspace_status()
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Refresh Project Data", str(exc))
+
+    def open_sql_starter(self):
+        try:
+            opened_with = portfolio_workspace.open_sql_starter(
+                self.conn, self.root, self.task_id
+            )
+            self.save_state.setText(f"Starter opened in {opened_with}")
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open SQL Starter", str(exc))
+
+    def open_findings(self):
+        try:
+            portfolio_workspace.open_findings_document(
+                self.conn, self.root, self.task_id
+            )
+            self.save_state.setText("Findings document opened")
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Findings", str(exc))
+
     def _changed(self):
         self._dirty = True
         self.save_state.setText("Unsaved changes")
@@ -243,6 +325,10 @@ class PortfolioTaskWorkspaceDialog(QDialog):
 
     def _refresh_guide_references(self):
         if not hasattr(self, "reference_list"):
+            return
+        if getattr(self, "data_workspace", None) is not None:
+            self.reference_list.clear()
+            self.guide_setup.setVisible(False)
             return
         checked = set()
         for index in range(self.reference_list.count()):

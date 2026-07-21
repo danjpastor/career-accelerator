@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -38,8 +38,158 @@ class AcademyService:
         self._register_package()
         self._seed_progress()
         self.progress.reconcile_lessons(self.catalog.lessons())
+        # Academy activity rows are the source of truth. Rebuild the adaptive
+        # completion ledger and today's focus state from those rows before the
+        # next recommendation is exposed to the legacy planner.
+        self._reconcile_activity_events()
+        self._reconcile_today_focus_progress()
         self._retire_datacamp_recommendations()
         self.sync_planner_task()
+
+
+    @staticmethod
+    def _activity_target_key(lesson_id: str, activity_id: str) -> str:
+        return f"academy:activity:{lesson_id}:{activity_id}"
+
+    def _activity_definition(self, lesson_id: str, activity_id: str):
+        try:
+            lesson = self.catalog.lesson(str(lesson_id))
+        except Exception:
+            return None, None
+        activity = next(
+            (item for item in lesson.activities if item.activity_id == str(activity_id)),
+            None,
+        )
+        return lesson, activity
+
+    def _activity_row_complete(self, lesson, activity, row) -> bool:
+        if lesson is None or activity is None or row is None:
+            return False
+        if str(row["state"] or "") != "Passed":
+            return False
+        if activity.required_for_mastery and bool(row["last_attempt_solution_assisted"]):
+            return False
+        return True
+
+    def _insert_activity_event(self, lesson, activity, row) -> None:
+        """Record one adaptive completion for a passed Academy action.
+
+        The event ledger powers Today/Week counters. It is intentionally
+        separate from Demonstrated Evidence, which remains limited to projects,
+        capstones, and labs.
+        """
+        if not activity.required_for_completion:
+            return
+        if not self._activity_row_complete(lesson, activity, row):
+            return
+        passed_at = str(row["passed_at"] or row["updated_at"] or "")
+        completed_date = passed_at[:10] if len(passed_at) >= 10 else date.today().isoformat()
+        target_key = self._activity_target_key(lesson.lesson_id, activity.activity_id)
+        metadata = {
+            "lesson_id": lesson.lesson_id,
+            "activity_id": activity.activity_id,
+            "target_key": target_key,
+            "task_kind": "lesson_step",
+        }
+        self.conn.execute(
+            """INSERT OR IGNORE INTO track_events
+               (track_key,event_key,event_type,item_label,completed_date,metadata)
+               VALUES('academy',?,'Completed',?,?,?)""",
+            (
+                target_key,
+                f"{lesson.title} — {activity.title}",
+                completed_date,
+                json.dumps(metadata, sort_keys=True),
+            ),
+        )
+
+    def _reconcile_activity_events(self) -> None:
+        """Backfill missing Academy counters from durable passed activities."""
+        try:
+            rows = self.progress.activity_rows()
+            for location in self.index.ordered_lessons():
+                for activity in location.lesson.activities:
+                    row = rows.get((location.lesson.lesson_id, activity.activity_id))
+                    self._insert_activity_event(location.lesson, activity, row)
+            self.conn.commit()
+        except sqlite3.OperationalError:
+            # Standalone curriculum tests may omit legacy adaptive tables.
+            self.conn.rollback()
+
+    def _target_is_complete(self, target_key: str) -> bool:
+        parts = str(target_key or "").split(":", 3)
+        if len(parts) != 4 or parts[:2] != ["academy", "activity"]:
+            return False
+        lesson, activity = self._activity_definition(parts[2], parts[3])
+        if lesson is None or activity is None:
+            return False
+        row = self.progress.activity_row(lesson.lesson_id, activity.activity_id)
+        return self._activity_row_complete(lesson, activity, row)
+
+    def _reconcile_today_focus_progress(self) -> None:
+        """Freeze completed Academy focus rows before the reusable task advances."""
+        try:
+            today = date.today().isoformat()
+            rows = self.conn.execute(
+                """SELECT id,target_key FROM daily_focus
+                   WHERE focus_date=? AND completed_at IS NULL
+                     AND (LOWER(COALESCE(track_key,''))='academy'
+                          OR LOWER(COALESCE(source_key,''))='roadmap:academy')""",
+                (today,),
+            ).fetchall()
+            for row in rows:
+                if self._target_is_complete(str(row["target_key"] or "")):
+                    self.conn.execute(
+                        "UPDATE daily_focus SET completed_at=CURRENT_TIMESTAMP WHERE id=?",
+                        (int(row["id"]),),
+                    )
+            self.conn.commit()
+        except sqlite3.OperationalError:
+            self.conn.rollback()
+
+    def _adaptive_progress(self, weekly_target: int = 2) -> dict[str, int | str | bool]:
+        today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        try:
+            today_completed = int(
+                self.conn.execute(
+                    """SELECT COUNT(*) FROM track_events
+                       WHERE track_key='academy' AND completed_date=?""",
+                    (today.isoformat(),),
+                ).fetchone()[0]
+            )
+            weekly_completed = int(
+                self.conn.execute(
+                    """SELECT COUNT(*) FROM track_events
+                       WHERE track_key='academy' AND completed_date BETWEEN ? AND ?""",
+                    (week_start.isoformat(), week_end.isoformat()),
+                ).fetchone()[0]
+            )
+        except sqlite3.OperationalError:
+            today_completed = 0
+            weekly_completed = 0
+        weekly_target = max(0, int(weekly_target or 0))
+        today_target = (
+            1
+            if weekly_target > 0 and (weekly_completed < weekly_target or today_completed > 0)
+            else 0
+        )
+        daily_complete = today_target == 0 or today_completed >= today_target
+        weekly_complete = weekly_target > 0 and weekly_completed >= weekly_target
+        return {
+            "today_target": today_target,
+            "today_completed": today_completed,
+            "weekly_target": weekly_target,
+            "weekly_completed": weekly_completed,
+            "daily_goal_complete": daily_complete,
+            "weekly_goal_complete": weekly_complete,
+            "pace_status": (
+                "Weekly goal complete" if weekly_complete
+                else "Daily goal complete" if daily_complete
+                else "Ready when you are"
+            ),
+        }
 
 
     def _retire_datacamp_recommendations(self) -> None:
@@ -269,6 +419,12 @@ class AcademyService:
         else:
             result = ValidationResult(False, f"Unsupported activity runtime: {activity.runtime}")
         state = self.progress.record_validation(lesson, activity, answer, result.as_dict())
+        # Record adaptive progress from the authoritative activity row. This is
+        # not employer-facing evidence; it only powers Today/Week counters and
+        # freezes the matching daily-focus assignment before the task advances.
+        current_row = self.progress.activity_row(lesson.lesson_id, activity.activity_id)
+        self._insert_activity_event(lesson, activity, current_row)
+        self._reconcile_today_focus_progress()
         # Lesson and checkpoint progress demonstrate learning, but only
         # substantial Academy projects, capstones, and labs belong in the
         # employer-facing Demonstrated Evidence collection.
@@ -794,16 +950,38 @@ class AcademyService:
                 self.conn.execute("SELECT current_week FROM program_state WHERE id=1").fetchone()[0]
             )
             system_name = self.labels.get("system_name", "Learning System")
+            existing_state = self.conn.execute(
+                "SELECT weekly_target FROM track_state WHERE track_key=?",
+                (self.TRACK_KEY,),
+            ).fetchone()
+            weekly_target = int(existing_state[0]) if existing_state is not None else 2
+            adaptive = self._adaptive_progress(weekly_target)
+            initial_metadata = {
+                "provider": "internal",
+                "program_id": self.catalog.program.program_id,
+                **adaptive,
+            }
+            status = (
+                "Weekly Complete" if adaptive["weekly_goal_complete"]
+                else "Daily Complete" if adaptive["daily_goal_complete"]
+                else "Active"
+            )
             self.conn.execute(
                 """INSERT INTO track_state(track_key,display_name,position,subposition,weekly_target,status,metadata)
-                   VALUES(?,?,0,0,2,'Active',?)
+                   VALUES(?,?,0,0,?,?,?)
                    ON CONFLICT(track_key) DO UPDATE SET
                        display_name=excluded.display_name,
                        weekly_target=excluded.weekly_target,
-                       status='Active',
+                       status=excluded.status,
                        metadata=excluded.metadata,
                        updated_at=CURRENT_TIMESTAMP""",
-                (self.TRACK_KEY, system_name, json.dumps({"provider": "internal", "program_id": self.catalog.program.program_id})),
+                (
+                    self.TRACK_KEY,
+                    system_name,
+                    int(adaptive["weekly_target"]),
+                    status,
+                    json.dumps(initial_metadata),
+                ),
             )
             if recommendation is None and self.path_complete():
                 existing = self.conn.execute(
@@ -831,8 +1009,30 @@ class AcademyService:
                 self.conn.commit()
                 return
             existing = self.conn.execute(
-                "SELECT task_id FROM track_tasks WHERE track_key=?", (self.TRACK_KEY,)
+                "SELECT task_id,target_key FROM track_tasks WHERE track_key=?",
+                (self.TRACK_KEY,),
             ).fetchone()
+            if (
+                existing is not None
+                and str(existing["target_key"] or "") != recommendation.target_key
+                and self._target_is_complete(str(existing["target_key"] or ""))
+            ):
+                completed_task_id = int(existing["task_id"])
+                self.conn.execute(
+                    "UPDATE sprint_tasks SET completed=1 WHERE id=?",
+                    (completed_task_id,),
+                )
+                self.conn.execute(
+                    """UPDATE task_metadata
+                       SET status='Completed',deferred_until=NULL
+                       WHERE task_id=?""",
+                    (completed_task_id,),
+                )
+                self.conn.execute(
+                    "DELETE FROM track_tasks WHERE track_key=?",
+                    (self.TRACK_KEY,),
+                )
+                existing = None
             label = recommendation.title
             planner_metadata = {
                 "provider": "internal",
@@ -840,11 +1040,7 @@ class AcademyService:
                 "title": recommendation.title,
                 "target_key": recommendation.target_key,
                 "estimated_minutes": recommendation.estimated_minutes,
-                "today_target": 1,
-                "today_completed": 0,
-                "weekly_target": 2,
-                "weekly_completed": 0,
-                "pace_status": "Ready when you are",
+                **adaptive,
                 "alignment": "Built-in Accelerator Academy learning",
             }
             self.conn.execute(
@@ -892,11 +1088,22 @@ class AcademyService:
                        VALUES(?,?,?,?)""",
                     (self.TRACK_KEY, task_id, recommendation.target_key, system_name),
                 )
-            self._sync_today_academy_focus(
-                task_id=task_id,
-                recommendation=recommendation,
-                current_week=current_week,
-            )
+            if not adaptive["daily_goal_complete"]:
+                self._sync_today_academy_focus(
+                    task_id=task_id,
+                    recommendation=recommendation,
+                    current_week=current_week,
+                )
+            else:
+                # Remove only unfinished auto-generated Academy rows. Completed
+                # rows stay frozen with the lesson title the learner actually did.
+                self.conn.execute(
+                    """DELETE FROM daily_focus
+                       WHERE focus_date=? AND completed_at IS NULL AND is_extra=0
+                         AND (LOWER(COALESCE(track_key,''))='academy'
+                              OR LOWER(COALESCE(source_key,''))='roadmap:academy')""",
+                    (date.today().isoformat(),),
+                )
             self.conn.commit()
         except (sqlite3.OperationalError, TypeError, IndexError):
             # Standalone engine tests and future editions may not include the legacy planner tables.

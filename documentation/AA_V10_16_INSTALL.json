@@ -1,0 +1,9 @@
+{
+  "patch": "data-career-accelerator-v10.16.0",
+  "installed_at": "2026-07-21T00:09:18",
+  "backup_root": "patch_backups\\v116-260721-000918",
+  "changed_file_count": 12,
+  "verified_file_count": 12,
+  "database_files_modified_by_installer": false,
+  "first_launch_action": "Reconcile Academy adaptive events and generate project data workspaces when relationship-validation milestones are opened"
+}
