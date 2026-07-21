@@ -1370,8 +1370,17 @@ class AcceleratorAcademyWidget(QWidget):
         self._save_current_work()
         recommendation = self.service.next_recommendation()
         if recommendation is None:
-            self.content_stack.setCurrentIndex(self.COMPLETE_PAGE)
-            self._current_target = self._nodes[-1].target_key if self._nodes else None
+            if self.service.path_complete():
+                self.content_stack.setCurrentIndex(self.COMPLETE_PAGE)
+                self._current_target = self._nodes[-1].target_key if self._nodes else None
+            else:
+                self.content_stack.setCurrentIndex(self.OVERVIEW_PAGE)
+                QMessageBox.information(
+                    self,
+                    "Progress Needs Attention",
+                    "Your pathway is still in progress, but Academy could not identify the next step. "
+                    "Your work has been preserved. Reopen Academy to refresh the learning path.",
+                )
             self.refresh_all()
             return
         target = recommendation.target_key
@@ -2067,11 +2076,24 @@ class AcceleratorAcademyWidget(QWidget):
         self.progress_summary.setText(f"{completed} of {len(self._nodes)} steps finished")
         self.milestone_bar.set_milestones(self._progress_milestones())
         recommendation = self.service.next_recommendation()
+        path_complete = self.service.path_complete()
         self.overview_next_title.setText(
-            recommendation.title if recommendation else f"{self.catalog.program.paths[0].title} complete"
+            recommendation.title
+            if recommendation
+            else (
+                f"{self.catalog.program.paths[0].title} complete"
+                if path_complete
+                else "Your next step is being refreshed"
+            )
         )
         self.overview_next_reason.setText(
-            recommendation.reason if recommendation else "Take a look at what you completed, or continue when the next module is ready."
+            recommendation.reason
+            if recommendation
+            else (
+                "Take a look at what you completed, or revisit any lesson whenever you want."
+                if path_complete
+                else "Your work is safe. Academy will keep the pathway active until every required step is complete."
+            )
         )
         evidence_count = len(self.service.evidence_rows())
         summary = self.service.completion_summary()
@@ -2080,7 +2102,12 @@ class AcceleratorAcademyWidget(QWidget):
             f"{evidence_count} pieces of validated Academy evidence"
         )
         self.roadmap_status.setText(
-            "Up next: " + (recommendation.title if recommendation else "Path complete")
+            "Up next: "
+            + (
+                recommendation.title
+                if recommendation
+                else "Path complete" if path_complete else "Refreshing progress"
+            )
         )
         if self._current_lesson and self._current_activity:
             self._refresh_lesson_navigation()

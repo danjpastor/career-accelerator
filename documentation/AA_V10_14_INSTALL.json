@@ -1,0 +1,8 @@
+{
+  "patch": "data-career-accelerator-v10.14.0",
+  "installed_at": "2026-07-20T18:30:53",
+  "backup_root": "patch_backups\\v114-260720-183053",
+  "changed_file_count": 11,
+  "verified_file_count": 11,
+  "database_files_modified_by_installer": false
+}

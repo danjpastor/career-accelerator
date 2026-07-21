@@ -29,10 +29,15 @@ class AcademyService:
         ensure_academy_schema(conn)
         self.catalog = load_catalog(self.curriculum_root)
         self.index = CatalogIndex(self.catalog)
-        self.progress = ProgressRepository(conn, self.catalog.program.content_version)
+        self.progress = ProgressRepository(
+            conn,
+            self.catalog.program.content_version,
+            {lesson.lesson_id: lesson.teaches for lesson in self.catalog.lessons()},
+        )
         self.recommendations = RecommendationEngine(self.index, self.progress)
         self._register_package()
         self._seed_progress()
+        self.progress.reconcile_lessons(self.catalog.lessons())
         self._retire_datacamp_recommendations()
         self.sync_planner_task()
 
@@ -168,6 +173,11 @@ class AcademyService:
 
     def next_recommendation(self) -> AcademyRecommendation | None:
         return self.recommendations.next()
+
+    def path_complete(self) -> bool:
+        """Return completion from required progress, never from task availability."""
+
+        return self.recommendations.is_complete()
 
     def open_lesson(self, lesson_id: str):
         return self.progress.open_lesson(lesson_id)
@@ -674,6 +684,108 @@ class AcademyService:
             "mastered": sum(row["state"] == "Mastered" for row in rows),
         }
 
+    def _sync_today_academy_focus(
+        self,
+        *,
+        task_id: int,
+        recommendation: AcademyRecommendation,
+        current_week: int,
+    ) -> None:
+        """Keep today's Academy assignment aligned with the live next step.
+
+        Academy reuses one adaptive task row. A completed or stale frozen focus
+        row can therefore hide the newly unlocked lesson. This repair updates an
+        active Academy row in place or appends the new step when today's prior
+        Academy assignment is already complete. No focus plan is created when the
+        learner has not opened/generated today's plan yet.
+        """
+
+        focus_date = date.today().isoformat()
+        try:
+            total_rows = int(
+                self.conn.execute(
+                    "SELECT COUNT(*) FROM daily_focus WHERE focus_date=?",
+                    (focus_date,),
+                ).fetchone()[0]
+            )
+            if total_rows <= 0:
+                return
+            rows = self.conn.execute(
+                """SELECT id,target_key,completed_at,position
+                   FROM daily_focus
+                   WHERE focus_date=?
+                     AND (LOWER(COALESCE(track_key,''))=?
+                          OR LOWER(COALESCE(source_key,''))=?)
+                   ORDER BY position""",
+                (focus_date, self.TRACK_KEY, f"roadmap:{self.TRACK_KEY}"),
+            ).fetchall()
+            for row in rows:
+                if (
+                    not row["completed_at"]
+                    and str(row["target_key"] or "") == recommendation.target_key
+                ):
+                    self.conn.execute(
+                        """UPDATE daily_focus
+                           SET task_id=?,title=?,estimated_minutes=?,track_key=?,
+                               target_key=?,source_key=?,category='Learning'
+                           WHERE id=?""",
+                        (
+                            task_id,
+                            recommendation.title,
+                            recommendation.estimated_minutes,
+                            self.TRACK_KEY,
+                            recommendation.target_key,
+                            f"roadmap:{self.TRACK_KEY}",
+                            int(row["id"]),
+                        ),
+                    )
+                    return
+            active = next((row for row in rows if not row["completed_at"]), None)
+            if active is not None:
+                self.conn.execute(
+                    """UPDATE daily_focus
+                       SET task_id=?,title=?,estimated_minutes=?,track_key=?,
+                           target_key=?,source_key=?,category='Learning'
+                       WHERE id=?""",
+                    (
+                        task_id,
+                        recommendation.title,
+                        recommendation.estimated_minutes,
+                        self.TRACK_KEY,
+                        recommendation.target_key,
+                        f"roadmap:{self.TRACK_KEY}",
+                        int(active["id"]),
+                    ),
+                )
+                return
+            position = int(
+                self.conn.execute(
+                    """SELECT COALESCE(MAX(position),0)+1
+                       FROM daily_focus WHERE focus_date=?""",
+                    (focus_date,),
+                ).fetchone()[0]
+            )
+            self.conn.execute(
+                """INSERT INTO daily_focus
+                   (focus_date,week,position,task_id,source_key,category,title,
+                    estimated_minutes,track_key,target_key,is_extra,completed_at)
+                   VALUES(?,?,?,?,?,'Learning',?,?,?,?,0,NULL)""",
+                (
+                    focus_date,
+                    current_week,
+                    position,
+                    task_id,
+                    f"roadmap:{self.TRACK_KEY}",
+                    recommendation.title,
+                    recommendation.estimated_minutes,
+                    self.TRACK_KEY,
+                    recommendation.target_key,
+                ),
+            )
+        except sqlite3.OperationalError:
+            # Standalone engine tests may not include the legacy planner tables.
+            return
+
     def sync_planner_task(self) -> None:
         """Expose the next prerequisite-ready Academy action to the existing planner."""
         recommendation = self.next_recommendation()
@@ -693,7 +805,7 @@ class AcademyService:
                        updated_at=CURRENT_TIMESTAMP""",
                 (self.TRACK_KEY, system_name, json.dumps({"provider": "internal", "program_id": self.catalog.program.program_id})),
             )
-            if recommendation is None:
+            if recommendation is None and self.path_complete():
                 existing = self.conn.execute(
                     "SELECT task_id FROM track_tasks WHERE track_key=?", (self.TRACK_KEY,)
                 ).fetchone()
@@ -707,6 +819,13 @@ class AcademyService:
                     )
                 self.conn.execute(
                     "UPDATE track_state SET status='Completed',updated_at=CURRENT_TIMESTAMP WHERE track_key=?",
+                    (self.TRACK_KEY,),
+                )
+                self.conn.commit()
+                return
+            if recommendation is None:
+                self.conn.execute(
+                    "UPDATE track_state SET status='Active',updated_at=CURRENT_TIMESTAMP WHERE track_key=?",
                     (self.TRACK_KEY,),
                 )
                 self.conn.commit()
@@ -773,6 +892,11 @@ class AcademyService:
                        VALUES(?,?,?,?)""",
                     (self.TRACK_KEY, task_id, recommendation.target_key, system_name),
                 )
+            self._sync_today_academy_focus(
+                task_id=task_id,
+                recommendation=recommendation,
+                current_week=current_week,
+            )
             self.conn.commit()
         except (sqlite3.OperationalError, TypeError, IndexError):
             # Standalone engine tests and future editions may not include the legacy planner tables.

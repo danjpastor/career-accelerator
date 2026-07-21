@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from datetime import datetime
-from typing import Any
+from typing import Any, Iterable, Mapping
 
 from .models import ActivityDefinition, LessonDefinition, ProgressState
 from .schema import ensure_academy_schema
@@ -14,9 +14,18 @@ def _now() -> str:
 
 
 class ProgressRepository:
-    def __init__(self, conn: sqlite3.Connection, content_version: str):
+    def __init__(
+        self,
+        conn: sqlite3.Connection,
+        content_version: str,
+        lesson_teaches: Mapping[str, Iterable[str]] | None = None,
+    ):
         self.conn = conn
         self.content_version = content_version
+        self.lesson_teaches = {
+            str(lesson_id): tuple(str(skill) for skill in skills)
+            for lesson_id, skills in (lesson_teaches or {}).items()
+        }
         ensure_academy_schema(conn)
 
     def seed_lesson(
@@ -297,9 +306,39 @@ class ProgressRepository:
         )
         return target
 
+    def reconcile_lessons(self, lessons: Iterable[LessonDefinition]) -> None:
+        """Repair lesson summary states from their authoritative activity rows.
+
+        Lesson state is cached for fast rendering, while activity validation rows are
+        the durable source of truth. Recomputing during Academy startup repairs old
+        builds that saved the individual passes but failed before updating the lesson
+        summary or planner task.
+        """
+
+        for lesson in lessons:
+            self._recompute_lesson(lesson)
+        self.conn.commit()
+
     def mastered_skills(self) -> set[str]:
-        rows = self.conn.execute(
+        """Return prerequisite mastery without treating employer evidence as progress.
+
+        Demonstrated Evidence intentionally contains only projects, capstones, and
+        labs. Lesson prerequisites therefore derive from mastered lesson state, not
+        from the employer-facing evidence collection. Project skill evidence is still
+        included because a validated project can legitimately demonstrate a skill.
+        """
+
+        mastered: set[str] = set()
+        lesson_rows = self.conn.execute(
+            """SELECT lesson_id FROM academy_lesson_progress
+               WHERE state='Mastered'"""
+        ).fetchall()
+        for row in lesson_rows:
+            mastered.update(self.lesson_teaches.get(str(row[0]), ()))
+
+        evidence_rows = self.conn.execute(
             """SELECT DISTINCT skill_key FROM academy_skill_evidence
                WHERE validation_status IN ('passed','mastered')"""
         ).fetchall()
-        return {row[0] for row in rows}
+        mastered.update(str(row[0]) for row in evidence_rows if row[0])
+        return mastered

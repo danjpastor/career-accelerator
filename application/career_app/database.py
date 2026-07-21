@@ -122,6 +122,11 @@ CREATE TABLE IF NOT EXISTS project_tasks (
     stage TEXT NOT NULL DEFAULT 'Overview',
     label TEXT NOT NULL,
     completed INTEGER NOT NULL DEFAULT 0,
+    description TEXT NOT NULL DEFAULT '',
+    definition_of_done TEXT NOT NULL DEFAULT '',
+    starter_path TEXT,
+    estimated_minutes INTEGER NOT NULL DEFAULT 45,
+    managed_key TEXT,
     UNIQUE(project_id, sort_order)
 );
 
@@ -326,6 +331,11 @@ def _ensure_columns(conn):
         ],
         "project_tasks": [
             ("stage", "TEXT NOT NULL DEFAULT 'Overview'"),
+            ("description", "TEXT NOT NULL DEFAULT ''"),
+            ("definition_of_done", "TEXT NOT NULL DEFAULT ''"),
+            ("starter_path", "TEXT"),
+            ("estimated_minutes", "INTEGER NOT NULL DEFAULT 45"),
+            ("managed_key", "TEXT"),
         ],
         "study_sessions": [
             ("notes", "TEXT"),

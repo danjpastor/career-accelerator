@@ -1,0 +1,9 @@
+{
+  "patch": "data-career-accelerator-v10.15.0",
+  "installed_at": "2026-07-20T23:14:09",
+  "backup_root": "patch_backups\\v115-260720-231409",
+  "changed_file_count": 8,
+  "verified_file_count": 8,
+  "database_files_modified_by_installer": false,
+  "first_launch_action": "Reconcile Academy lesson mastery and active planner target"
+}

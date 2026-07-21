@@ -17,7 +17,7 @@ from career_app.data.applied_exercises import (
 from career_app.data.duckdb_exercises import (
     exercise_number_for_label as duckdb_number_for_label,
 )
-from career_app.data.roadmap import PROJECT_DIRS
+from career_app.data.roadmap import PROJECT_DIRS, SQL_COMPANION
 from career_app.services import (
     applied_workspace,
     duckdb_workspace,
@@ -160,6 +160,198 @@ def is_external_learning_task(row) -> bool:
         label=label,
     )
 
+
+
+
+_GUIDE_FILE_SUFFIXES = {
+    ".csv",
+    ".db",
+    ".duckdb",
+    ".json",
+    ".md",
+    ".pbix",
+    ".py",
+    ".sql",
+    ".txt",
+    ".xlsx",
+    ".yaml",
+    ".yml",
+}
+_ROOT_RELATIVE_PREFIXES = {
+    "career",
+    "curriculum",
+    "data",
+    "documentation",
+    "practice",
+    "projects",
+    "resources",
+    "weeks",
+    "workspaces",
+}
+
+
+def sql_problem_title(row) -> str | None:
+    """Return the DataLemur catalog title linked to a task, when present."""
+    if row is None:
+        return None
+    keys = set(row.keys())
+    track_key = str(row["track_key"] or "") if "track_key" in keys else ""
+    target_key = str(row["target_key"] or "") if "target_key" in keys else ""
+    label = str(row["label"] or "") if "label" in keys else ""
+    catalog_titles = [str(entry[0]) for entry in SQL_COMPANION]
+    if track_key.casefold() == "sql" and target_key.casefold().startswith("problem:"):
+        direct = target_key.split(":", 1)[1].strip()
+        if direct in catalog_titles:
+            return direct
+    normalized_label = re.sub(r"[^a-z0-9]+", " ", label.casefold()).strip()
+    for title in catalog_titles:
+        normalized_title = re.sub(r"[^a-z0-9]+", " ", title.casefold()).strip()
+        if normalized_title and normalized_title in normalized_label:
+            return title
+    return None
+
+
+def _workspace_creation_base(root: Path, document_path: Path) -> Path:
+    root = Path(root).resolve()
+    document_path = Path(document_path).resolve()
+    projects_root = (root / "projects").resolve()
+    try:
+        relative = document_path.relative_to(projects_root)
+    except ValueError:
+        return document_path.parent
+    if not relative.parts:
+        return projects_root
+    return projects_root / relative.parts[0]
+
+
+def _path_like_guide_token(token: str) -> tuple[str, bool] | None:
+    value = str(token or "").strip().strip('"\'')
+    if not value or "\n" in value or len(value) > 220:
+        return None
+    value = value.replace("\\", "/")
+    if value.startswith(("http://", "https://", "mailto:")):
+        return None
+    if value.startswith(("SELECT ", "FROM ", "WHERE ", "JOIN ")):
+        return None
+    is_directory = value.endswith("/")
+    candidate = value.rstrip("/")
+    if not candidate or candidate.startswith(("/", "~")):
+        return None
+    path = Path(candidate)
+    if any(part in {"", ".", ".."} for part in path.parts):
+        return None
+    suffix = path.suffix.casefold()
+    if not is_directory and suffix not in _GUIDE_FILE_SUFFIXES:
+        return None
+    return candidate, is_directory
+
+
+def _starter_from_nearby_fence(content: str, start: int, suffix: str) -> str | None:
+    if suffix.casefold() not in {".sql", ".py", ".json", ".yaml", ".yml", ".txt", ".csv"}:
+        return None
+    remainder = content[start : start + 2400]
+    next_heading = re.search(r"\n#{1,6}\s", remainder)
+    fence = re.search(r"```[^\n]*\n(.*?)\n```", remainder, flags=re.S)
+    if fence is None:
+        return None
+    if next_heading is not None and fence.start() > next_heading.start():
+        return None
+    starter = fence.group(1).strip()
+    return starter + "\n" if starter else None
+
+
+def guide_referenced_paths(
+    root: Path,
+    document_path: Path,
+    content: str,
+) -> list[dict]:
+    """Extract safe file/folder references from a Markdown task guide."""
+    root = Path(root).resolve()
+    document_path = Path(document_path).resolve()
+    base = _workspace_creation_base(root, document_path).resolve()
+    results: list[dict] = []
+    seen: set[str] = set()
+    for match in re.finditer(r"`([^`\n]+)`", str(content or "")):
+        parsed = _path_like_guide_token(match.group(1))
+        if parsed is None:
+            continue
+        relative_value, is_directory = parsed
+        relative_path = Path(relative_value)
+        if relative_path.parts and relative_path.parts[0].casefold() in _ROOT_RELATIVE_PREFIXES:
+            resolved = (root / relative_path).resolve()
+        else:
+            resolved = (base / relative_path).resolve()
+        if resolved != root and root not in resolved.parents:
+            continue
+        key = str(resolved).casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        starter = None
+        if not is_directory:
+            starter = _starter_from_nearby_fence(
+                str(content or ""),
+                match.end(),
+                resolved.suffix,
+            )
+        results.append(
+            {
+                "reference": relative_value + ("/" if is_directory else ""),
+                "resolved_path": resolved,
+                "display_path": _relative(root, resolved),
+                "is_directory": is_directory,
+                "exists": resolved.exists(),
+                "starter_content": starter,
+                "base_path": base,
+            }
+        )
+    return results
+
+
+def create_guide_reference(
+    root: Path,
+    document_path: Path,
+    reference: str,
+    *,
+    is_directory: bool,
+    starter_content: str | None = None,
+) -> Path:
+    """Create one guide-declared path without allowing writes outside the repo."""
+    root = Path(root).resolve()
+    base = _workspace_creation_base(root, Path(document_path)).resolve()
+    value = str(reference or "").strip().replace("\\", "/").rstrip("/")
+    parsed = _path_like_guide_token(value + ("/" if is_directory else ""))
+    if parsed is None:
+        raise ValueError("The selected guide path is not a supported project file or folder.")
+    relative_path = Path(parsed[0])
+    if relative_path.parts and relative_path.parts[0].casefold() in _ROOT_RELATIVE_PREFIXES:
+        destination = (root / relative_path).resolve()
+    else:
+        destination = (base / relative_path).resolve()
+    if destination != root and root not in destination.parents:
+        raise ValueError("The selected guide path would be outside the repository.")
+    if is_directory:
+        destination.mkdir(parents=True, exist_ok=True)
+        return destination
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if not destination.exists():
+        content = starter_content
+        if content is None:
+            if destination.suffix.casefold() == ".sql":
+                content = (
+                    "-- Starter file created from the linked task guide.\n"
+                    "-- Follow the guide, replace placeholders, and save your validation results.\n"
+                )
+            elif destination.suffix.casefold() == ".py":
+                content = (
+                    '"""Starter file created from the linked task guide."""\n\n'
+                )
+            elif destination.suffix.casefold() == ".md":
+                content = f"# {destination.stem.replace('_', ' ').replace('-', ' ').title()}\n\n"
+            else:
+                content = ""
+        destination.write_text(str(content), encoding="utf-8")
+    return destination
 
 def workspace_supported(row) -> bool:
     return row is not None and not is_external_learning_task(row)

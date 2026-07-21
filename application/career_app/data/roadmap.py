@@ -274,6 +274,26 @@ DATACAMP_TRACK = [
     ),
 ]
 
+DATALEMUR_PROBLEM_URLS = {
+    "Histogram of Tweets": "https://datalemur.com/questions/sql-histogram-tweets",
+    "Data Science Skills": "https://datalemur.com/questions/matching-skills",
+    "Page With No Likes": "https://datalemur.com/questions/sql-page-with-no-likes",
+    "Laptop vs. Mobile Viewership": "https://datalemur.com/questions/laptop-mobile-viewership",
+    "Duplicate Job Listings": "https://datalemur.com/questions/duplicate-job-listings",
+    "Teams Power Users": "https://datalemur.com/questions/teams-power-users",
+    "Pharmacy Analytics Part 1": "https://datalemur.com/questions/top-profitable-drugs",
+    "Signup Activation Rate": "https://datalemur.com/questions/signup-confirmation-rate",
+    "User's Third Transaction": "https://datalemur.com/questions/sql-third-transaction",
+    "Second Highest Salary": "https://datalemur.com/questions/sql-second-highest-salary",
+    "Top Three Salaries": "https://datalemur.com/questions/sql-top-three-salaries",
+    "Tweets' Rolling Averages": "https://datalemur.com/questions/rolling-average-tweets",
+    "Odd and Even Measurements": "https://datalemur.com/questions/odd-even-measurements",
+    "User Shopping Sprees": "https://datalemur.com/questions/amazon-shopping-spree",
+    "Supercloud Customer": "https://datalemur.com/questions/supercloud-customer",
+    "Second Day Confirmation": "https://datalemur.com/questions/second-day-confirmation",
+}
+
+
 SQL_COMPANION = [
     ("Histogram of Tweets", "Easy", "Multi-step Aggregation", "COUNT, GROUP BY, subquery or CTE", 6, 30),
     ("Data Science Skills", "Easy", "Aggregation", "GROUP BY, HAVING", 1, 20),

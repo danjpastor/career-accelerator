@@ -24,169 +24,19 @@ create-desktop-shortcut.vbs
 
 ## Current Desktop Client
 
-Version 10.11.0 includes:
-- A cleaned weekly roadmap containing only cross-track review, interview, job-readiness, and application tasks
-- Automatic archival of historical static tasks already owned by Google, Accelerator Academy, SQL Practice, Applied Labs, or Portfolio tracks
-- Clear task briefs, definitions of done, and guided starter documents for every retained roadmap task
-- Demonstrated Evidence limited to substantial Academy projects, capstones, and labs rather than routine lesson completions
-- Interview Practice based only on completed SQL interview questions and explicit interview rehearsals
+Version 10.15.0 includes:
+- A repaired Accelerator Academy mastery graph that derives prerequisites from completed lesson mastery rather than employer-facing Demonstrated Evidence
+- Reliable progression from **Write Your First SQL** into **Customize Query Results** (`DISTINCT` and `LIMIT`)
+- Explicit pathway-completion checks so Academy cannot announce completion while required lessons, checkpoints, or projects remain unfinished
+- Automatic repair of stale Academy lesson summaries and falsely completed adaptive tasks
+- Immediate restoration of the current Academy step in Today’s Focus when an older frozen assignment hid the newly unlocked lesson
+- All v10.14.0 readable Task Guide and exact DataLemur routing improvements
 
-### Roadmap and Evidence Cleanup
+### Guided Markdown and DataLemur workflow
 
-- Replaced the legacy 12-week static task list with dedicated adaptive tracks plus a small curated set of cross-track milestones.
-- Archived removed rows in `roadmap_task_archive` so historical context is preserved without inflating current sprint progress.
-- Removed duplicated DataCamp, Google, Academy, SQL, DuckDB, Applied Lab, and portfolio execution tasks from the active roadmap.
-- Added task descriptions, completion criteria, and purpose-built Markdown starter files for retrospectives, interview practice, résumé work, LinkedIn, STAR stories, application tracking, application batches, follow-ups, and the 90-day retrospective.
-- Removed Academy lesson and lesson-mastery rows from Demonstrated Evidence.
-- Kept one employer-facing evidence entry per validated Academy project, capstone, or lab while retaining skill-level detail internally.
-- Recalculated Interview Practice from explicit practice only, with transparent SQL-question and rehearsal targets.
+Task and portfolio guides open in the rendered **Visual Guide** tab. Fenced SQL, Python, JSON, YAML, text, and other code blocks display in readable code boxes with line numbers, while path references remain easy to distinguish from surrounding text.
 
-
-### SQL Fundamentals Curriculum Reorganization
-
-- Reorganized the SQL track into Introduction to SQL, Intermediate SQL, Joining Data in SQL, Data Manipulation in SQL, PostgreSQL Summary Stats and Window Functions, Functions for Manipulating Data in PostgreSQL, and Database Design.
-- Added the full public chapter taxonomy beneath those courses and surfaced chapter headings in the learner roadmap.
-- Added seven integrated course checkpoints.
-- Added **Bonus Project — Analyzing Students' Mental Health** after Intermediate SQL.
-- Added **Bonus Project — Impact Analysis of GoodThought NGO Initiatives** after Database Design.
-- Kept all lesson explanations, examples, datasets, questions, validators, solutions, and project briefs original to Accelerator Academy.
-- Expanded the complete Academy journey to 193 interactive lesson, checkpoint, and project steps.
-- Removed superseded unreferenced SQL course packages so the repository contains only the active seven-course roadmap.
-
-
-### Accelerator Academy Replaces Required DataCamp Tasks
-
-- Removed DataCamp from daily recommendations, adaptive-task generation, weekly quotas, and frozen focus plans.
-- Preserved completed DataCamp records as provider-neutral external learning history.
-- Made Accelerator Academy the built-in supplemental learning source, with plain task titles and an Accelerator Academy metadata label.
-- Added 26 original interactive lessons covering the remaining SQL, Power BI, Python, and pandas topics previously assigned through DataCamp.
-- Expanded the Academy roadmap to 8 courses, 31 lessons, and 112 interactive lesson/checkpoint/project steps.
-- Kept the unified flow course-aware so each course is completed before its checkpoint, project, or next course.
-
-### Learning Workspace Polish
-
-- Fixed tinted roadmap headers so track, course, and lesson cards reserve their own space without overlapping nearby steps.
-- Removed the background treatment behind the lesson-completion message.
-- Removed pill-like backdrops from explanatory subtitle and subheader text shared by Academy, Exercises, and Applied Labs.
-- Preserved the existing SQL editor/output layout, divider-aware footer controls, connected progress markers, and multiple-choice workspace collapse.
-
-### Accelerator Academy Visual and Voice Polish
-
-- Expanded lesson workflow buttons to use all available editor-side footer space until they reach their full comfortable size.
-- Added explicit tinted card backgrounds and borders to SQL track, course, lesson, checkpoint, and applied-project headings in the left learning pathway.
-- Filled the course-to-Lesson-1 milestone rail as soon as the learner enters the course.
-- Added a graduation-cap emoji to Accelerator Academy in the main sidebar and centered the Data Career Accelerator logo horizontally.
-- Rewrote Academy navigation, progress, completion, checkpoint, project, and activity labels with warmer, more conversational language.
-- Preserved the unified sequential flow, multiple-choice workspace collapse, schemas, mastery, evidence, and all existing learner work.
-
-### Accelerator Academy Final Layout Polish
-
-- Aligned the bottom workflow controls to the live lesson/editor divider.
-- Kept Back and the completion requirement on the lesson side and all action buttons plus Continue on the editor side.
-- Removed the editor/output divider entirely for multiple-choice steps.
-- Added connected progress rails between course and lesson milestone circles.
-- Added stronger status-aware tinted backgrounds to lesson headers in the pathway card.
-
-
-### Accelerator Academy Workspace and Curriculum Context Refinement
-
-- Moved each step's scenario, task, requirements, expected output, skills, and table schema into the main Lesson & Practice panel.
-- Reserved the right workspace for the SQL editor, recognition choices, validation feedback, and output results.
-- Moved Run Query, Check Answer, Show Hint, and View Solution into the same workflow row as Back and Continue.
-- Added program-configured track headers such as SQL and course headers such as Query Foundations to the learning roadmap.
-- Added course and lesson milestone circles to the path-progress area, including current, complete, available, and locked states.
-- Added DuckDB-inferred table schemas to every lesson, checkpoint question, and applied project that asks the learner to query data.
-- Added curriculum validation that rejects SQL activities without a declared, valid table reference.
-- Curriculum content version 1.3.0 preserves existing answers and progress while adding the new presentation and schema contract.
-
-### Accelerator Academy Unified Learning Flow
-
-- One learner-facing **Learn** journey instead of separate Learning Paths, Courses, Practice, Skills Lab, Assessments, and Evidence destinations.
-- A persistent path roadmap with one-click Resume Learning, prerequisite locks, current-step highlighting, and automatic next-step routing.
-- Twenty-six sequential lesson steps that interleave focused instruction with an immediate required action.
-- Every lesson screen includes an interactive element: choose, run, complete, debug, transfer, or independently solve.
-- Continue remains locked until the current interactive step passes; future steps cannot be skipped.
-- Compact concept instruction, worked examples, task context, progressive hints, result validation, and post-completion explanations share one screen.
-- Checkpoint questions and the applied project appear naturally after the lessons in the same roadmap and navigation flow.
-- The applied project is formally gated by a passed course checkpoint.
-- Assessment drafts, lesson answers, project work, and the learner's current target persist between sessions.
-- Multiple-choice steps use visible answer cards rather than a generic dropdown.
-- Curriculum content version 1.2.0 preserves compatible answers while re-evaluating the newly required sequential completion contract.
-- Course, module, practice, assessment, project, and evidence types remain available internally without fragmenting the learner experience.
-
-### Accelerator Academy Phase 2A and 2B foundation
-
-- A built-in, program-neutral curriculum engine with external versioned content packages.
-- Four-state lesson progress, prerequisite-aware recommendations, checkpoints, and evidence-producing mastery.
-- Existing Google Certificate, external-learning history, Exercise Packs, SQL Companion, Applied Labs, portfolio, and learner progress remain preserved.
-- See `documentation/ACCELERATOR_ACADEMY.md` for the permanent package and authoring architecture.
-
-- A cleaned repository root containing only the launcher, shortcut creator, requirements file, and README as visible files
-- Application source and brand assets consolidated under `application/`
-- Project documentation consolidated under `documentation/`
-- Progress snapshots published into `documentation/` instead of cluttering the repository root
-- Updated launcher, shortcut, database, asset, and project-root path handling with no functional changes
-- Seamlessly faded encouragement-card rocket artwork clipped to the card's rounded geometry
-- Slow animated gradients on visible primary-action buttons, paused while the app is inactive
-- Larger responsive sidebar brand lockup
-- Dashboard encouragement-card rocket artwork
-- Gradient optional-practice recommendation card
-
-- the Data Career Accelerator rebrand using the approved horizontal DATA logo,
-- a shared midnight-navy, electric-violet, magenta, coral-orange, accent-blue, and white visual system,
-- gradient primary actions, rebranded navigation states, cards, forms, tables, editors, scrollbars, and learning workspaces,
-- the approved Data program/app icon in the window, launcher, shortcuts, and sidebar,
-- unchanged functional behavior, page routing, responsive breakpoints, card geometry, database structure, and progress data,
-
-- Automatically removes false Google Course 5 Module 5/6 completion events created by older builds.
-- Recalculates the current weekly Google quota after removing invalid completion credit.
-- Clears and regenerates today's frozen focus snapshot when invalid certificate progress is repaired.
-- Preserves learner notes and study-session history while removing only the invalid generated task links.
-- Keeps the corrected checkpoint at Course 6, Module 1 after valid completion of Course 5 Module 4.
-- Text-bearing rows now scale with the Settings interface-size control, including task rows, focus rows, sidebar metrics, list items, tree items, tables, form fields, dropdowns, and buttons.
-- Explicit fixed-height controls are raised only as needed by their live font metrics, preventing vertical clipping at 110% and 120% while leaving card geometry tied to the window.
-- The Growth Over Time period selector dynamically reserves enough width for its label, padding, and arrow button at every interface scale.
-- A persistent text and button size slider that leaves responsive card geometry unchanged.
-- A single-line Dashboard greeting including its emoji.
-- A tighter Study Session log form with top-packed fields and reduced unused gaps.
-
-- rounded Learning Dashboard navigation buttons for Learning Overview, Applied Labs, and Exercises,
-- removal of the remaining native tab-strip divider beneath the Learning header,
-- a borderless Learning workspace whose Exercise Pack cards float directly on the page without an extra square pane frame,
-- a redesigned Study Session page with a compact Live Timer and Recent Sessions stacked in the left column and the internally scrollable Log Session card on the right,
-- rounded modern scrollbars and dropdowns with clean hover, focus, popup, and chevron states across the application,
-- repository cleanup rules for both `patch_backup/` and `patch_backups/`,
-- fixed outer layouts for Learning, SQL Companion, Study Session, Applications, and Weekly Summary, with overflow delegated to the individual cards, lists, tables, and editors that need it,
-- vertically scrollable Available Data tables that wrap complete schema column lists instead of truncating them with ellipses,
-- lesson examples that teach each SQL concept with a different scenario and dataset from the linked practice question,
-- a shared editor state for each lesson-question pair so toggling between Learn and Practice never clears the learner's SQL, notes, hints, or validation state,
-- a visible **Submit Solution** action plus a functional **Mark Complete** workflow that validates the active answer before completion,
-- a streamlined Exercise Pack header with one top **Select Pack** control and no duplicate pack list beneath the selected pack title,
-- vertically safe Dashboard action buttons at every responsive density,
-- a flexible sidebar whose navigation links use the available height,
-- a Settings control to rebuild today’s adaptive focus snapshot without erasing progress,
-- Fluid Dashboard row heights that consume spare vertical space inside the cards instead of creating large blank bands between card rows
-- Tightly wrapped Dashboard section containers with consistent 5–10 px row spacing at every supported desktop size
-- A no-scroll front page that keeps every Dashboard card plus the full sidebar visible from the supported 900×620 minimum through the 1536×1020 reference size
-- Height-aware comfortable, compact, and ultra-compact Dashboard density modes for cards, typography, spacing, charts, rings, timers, rows, and secondary details
-- Dynamically centered circular progress and Study Session graphics that no longer clip their values or captions vertically
-- Correctly sized rounded lesson subtitle pills in Applied Labs, Exercise Packs, and DuckDB Exercises
-- Safe course-header rebuilding without the temporary ghost pill/backdrop behind the main lesson label
-- A full application-wide responsive polish pass with seamless wide, medium, and compact layouts
-- Dynamic card sizing, text wrapping, typography scaling, sidebar sizing, and scroll-safe long-form workspaces
-- Fixed-shell Exercise Pack and DuckDB workspaces whose navigation, Learn, Practice, editors, tables, and results scroll internally as needed
-- Lesson-driven Exercise Packs where every lesson loads one or more practice questions for the concept just taught
-- Answer-safe SQL starting templates that never auto-fill lesson examples or official solutions
-- Functional Run Query, Check Answer, progressive Exercise Hint, and separate View Solution workflows
-- A shared line-numbered SQL editor across Exercise Packs, DuckDB Exercises, Applied Labs, and Interview Problems
-- SQL syntax highlighting, current-line emphasis, DuckDB error-line highlighting, and cursor navigation
-- Exact Dashboard and roadmap routing to assigned DuckDB Exercises and Interview Problems
-- In-app Interview Problem submissions with saved learner SQL, notes, completion validation, and Demonstrated Evidence
-- Completed Today’s Focus rows that remain visible but muted, struck through, and non-actionable
-- Content-deduplicated SQLite backups with newest, daily, and weekly retention
-- Live storage totals plus backup cleanup and data-folder controls in Settings
-- Existing adaptive planning, portfolio, study, job-readiness, application, achievement, and tracking features
-
+DataLemur tasks still route first into SQL Companion. From the selected problem workspace, **Open on DataLemur ↗** opens that problem's exact official page in the default browser. Local SQL, notes, mastery, and completion remain managed by Career Accelerator.
 
 ## Installable Exercise Packs
 

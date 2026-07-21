@@ -1,3 +1,46 @@
+# v10.15.0 — Academy Progression and Today’s Focus Repair
+
+- Separated internal Academy skill mastery from employer-facing Demonstrated Evidence.
+- Derived prerequisite skills from lessons whose required interactive steps and unassisted mastery activity are complete.
+- Reconciled cached lesson states from authoritative activity progress when Academy starts.
+- Fixed the false pathway-complete banner caused by an empty lesson-evidence table.
+- Fixed **Customize Query Results** (`DISTINCT` and `LIMIT`) remaining locked after mastering **Write Your First SQL**.
+- Prevented the recommendation engine from skipping a blocked lesson and moving to later course material.
+- Marked the Academy track complete only after every required lesson step, checkpoint, and project has passed.
+- Repaired falsely completed Academy planner tasks and restored the current Academy step to Today’s Focus without deleting completed history.
+- Preserved all answers, hints, attempts, lesson progress, projects, evidence, databases, and external-learning history.
+
+# v10.14.0 — Readable Task Guides and Exact DataLemur Links
+
+- Added an **Open on DataLemur ↗** control to SQL Companion's interview-problem workspace.
+- Mapped every SQL Companion catalog problem to its exact official DataLemur question page.
+- Kept Task Workspace routing local: Today’s Focus and Adaptive Planner open the exact problem in SQL Companion first, then the learner chooses when to open DataLemur in the browser.
+- Replaced plain rendered code with high-contrast, line-numbered code boxes in Task and Portfolio Visual Guides.
+- Improved inline code, file-path, URL, guide-document path, and Raw Markdown readability with larger monospace typography and stronger contrast.
+- Preserved all local submissions, notes, mastery, completion state, task workspaces, portfolio files, Academy progress, and databases.
+
+# v10.13.0 — Guided Task Workbench and SQL Completion Repair
+
+- Made rendered Markdown the default view in both general Task Workspaces and Portfolio Milestone workspaces.
+- Added a separate Raw Markdown tab with autosave and live preview refresh.
+- Added safe guide-reference detection and one-click creation of selected or all missing files and folders.
+- Kept all created paths inside the repository and prevented existing learner files from being overwritten.
+- Added exact DataLemur-to-SQL-Companion routing from the task workspace.
+- Added descriptive briefs and definitions of done to generated SQL interview tasks.
+- Fixed the `task_metadata.description` NOT NULL failure that occurred when completing Teams Power Users and generating the next SQL task.
+- Preserved saved SQL paths, notes, mastery, and completion data during SQL task advancement.
+- Required a saved, non-template SQL submission before dashboard or Task Workspace completion can finish a SQL interview task.
+- Preserved databases, portfolio milestone states, Academy progress, evidence, submissions, and user-authored files.
+
+# v10.12.0 — Guided Portfolio Milestones
+
+- Added detailed descriptions, definitions of done, time estimates, and managed starter documents to all portfolio milestones across all three projects.
+- Added a Guide button and dedicated Portfolio Milestone workspace with autosave, external editing, folder access, and completion controls.
+- Added project-aware starter generation under each project’s `workspaces/milestones/` directory without overwriting existing learner work.
+- Added a comprehensive VFX relationship-validation guide covering key uniqueness, orphan foreign keys, cross-table project consistency, and join-cardinality checks.
+- Routed adaptive Portfolio tasks and planner actions directly to the matching guided milestone.
+- Preserved all existing project completion states, notes, datasets, submissions, databases, Academy progress, and Demonstrated Evidence.
+
 # v10.11.0 — Roadmap, Evidence, and Interview-Metric Cleanup
 
 - Audited the legacy 12-week sprint roadmap and archived static tasks already owned by Google, Accelerator Academy, SQL Practice, Applied Labs, or Portfolio tracks.

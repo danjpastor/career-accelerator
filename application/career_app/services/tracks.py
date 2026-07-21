@@ -1364,6 +1364,10 @@ def _ensure_task(
     energy=None,
     destination=None,
     category=None,
+    description=None,
+    definition_of_done=None,
+    starter_path=None,
+    managed_key=None,
 ):
     config = TRACK_CONFIG[
         track_key
@@ -1440,6 +1444,10 @@ def _ensure_task(
                    END,
                    destination=?,
                    category=?,
+                   description=COALESCE(?,description),
+                   definition_of_done=COALESCE(?,definition_of_done),
+                   starter_path=COALESCE(?,starter_path),
+                   managed_key=COALESCE(?,managed_key),
                    prerequisite_state=CASE
                        WHEN status='Blocked'
                        THEN prerequisite_state
@@ -1454,6 +1462,10 @@ def _ensure_task(
             (
                 effective_destination,
                 effective_category,
+                description,
+                definition_of_done,
+                starter_path,
+                managed_key,
                 task_id,
             ),
         )
@@ -1528,9 +1540,13 @@ def _ensure_task(
                estimated_minutes,energy,
                destination,category,
                prerequisite_state,
-               prerequisite_reason
+               prerequisite_reason,
+               description,
+               definition_of_done,
+               starter_path,
+               managed_key
            )
-           VALUES(?,?,?,?,?,?,?,?,?)
+           VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
            ON CONFLICT(task_id)
            DO UPDATE SET
                status='In Progress',
@@ -1541,7 +1557,17 @@ def _ensure_task(
                destination=excluded.destination,
                category=excluded.category,
                prerequisite_state='Ready',
-               prerequisite_reason=NULL""",
+               prerequisite_reason=NULL,
+               description=CASE
+                   WHEN TRIM(excluded.description)<>'' THEN excluded.description
+                   ELSE task_metadata.description
+               END,
+               definition_of_done=CASE
+                   WHEN TRIM(excluded.definition_of_done)<>'' THEN excluded.definition_of_done
+                   ELSE task_metadata.definition_of_done
+               END,
+               starter_path=COALESCE(excluded.starter_path,task_metadata.starter_path),
+               managed_key=COALESCE(excluded.managed_key,task_metadata.managed_key)""",
         (
             task_id,
             "In Progress",
@@ -1552,6 +1578,10 @@ def _ensure_task(
             effective_category,
             "Ready",
             None,
+            "" if description is None else str(description),
+            "" if definition_of_done is None else str(definition_of_done),
+            starter_path,
+            managed_key,
         ),
     )
 
@@ -2122,6 +2152,17 @@ def _sql_target(
             "required_skills": sorted(
                 required
             ),
+            "description": (
+                f"Open {title} in SQL Companion, write and save your own SQL "
+                "solution, then mark the problem complete. Use the notes area "
+                "to record your approach, checks, or anything you want to review."
+            ),
+            "definition_of_done": (
+                "A non-template SQL query is saved for the problem, the SQL "
+                "practice record is marked Completed, and the linked roadmap "
+                "task advances to the next eligible interview problem."
+            ),
+            "managed_key": f"sql-problem:{title}",
         }
         metadata.update(pace)
 
@@ -2198,7 +2239,8 @@ def _portfolio_target(
         int(state["current_project"]),
     )
     row = conn.execute(
-        """SELECT id,sort_order,stage,label
+        """SELECT id,sort_order,stage,label,description,
+                  definition_of_done,starter_path,estimated_minutes
            FROM project_tasks
            WHERE project_id=?
              AND completed=0
@@ -2243,6 +2285,11 @@ def _portfolio_target(
             required
         ),
         "missing_skills": missing_names,
+        "description": str(row["description"] or ""),
+        "definition_of_done": str(row["definition_of_done"] or ""),
+        "starter_path": str(row["starter_path"] or ""),
+        "estimated_minutes": int(row["estimated_minutes"] or 45),
+        "managed_key": f"portfolio:{project_id}:{int(row['id'])}",
     }
     metadata.update(pace)
 
@@ -2273,7 +2320,7 @@ def _portfolio_target(
             f"Portfolio • Project "
             f"{project_id} • {row['stage']}"
         ),
-        "estimate": 45,
+        "estimate": int(row["estimated_minutes"] or 45),
         "position": completed,
         "subposition": int(
             row["sort_order"]
@@ -3594,6 +3641,10 @@ def sync_all(conn, state):
             category=target.get(
                 "category"
             ),
+            description=target.get("metadata", {}).get("description"),
+            definition_of_done=target.get("metadata", {}).get("definition_of_done"),
+            starter_path=target.get("metadata", {}).get("starter_path"),
+            managed_key=target.get("metadata", {}).get("managed_key"),
         )
 
     _sync_sprint_prerequisites(

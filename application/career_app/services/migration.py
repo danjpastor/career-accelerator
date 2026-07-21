@@ -6,6 +6,7 @@ from pathlib import Path
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 from career_app.data.roadmap_tasks import task_key, task_spec
+from career_app.data.portfolio_tasks import task_spec as portfolio_task_spec
 
 CHECKBOX = re.compile(r"^\s*-\s+\[([ xX])\]\s+(.+?)\s*$")
 
@@ -363,6 +364,80 @@ def _ensure_applied_exercise_tasks(conn):
             )
     return {'added':added,'updated':updated}
 
+def _sync_portfolio_task_guidance(conn) -> dict:
+    """Attach durable guidance metadata to every portfolio milestone."""
+    rows = conn.execute(
+        """SELECT id,project_id,label,description,definition_of_done,
+                  starter_path,estimated_minutes,managed_key
+           FROM project_tasks
+           ORDER BY project_id,sort_order"""
+    ).fetchall()
+    updated = 0
+    missing = []
+    for row in rows:
+        spec = portfolio_task_spec(row["label"], int(row["project_id"]))
+        if spec is None:
+            missing.append(str(row["label"]))
+            continue
+        values = (
+            spec.description,
+            spec.definition_of_done,
+            spec.starter_path,
+            int(spec.estimated_minutes),
+            spec.key,
+            int(row["id"]),
+        )
+        current = (
+            str(row["description"] or ""),
+            str(row["definition_of_done"] or ""),
+            str(row["starter_path"] or ""),
+            int(row["estimated_minutes"] or 45),
+            str(row["managed_key"] or ""),
+        )
+        desired = values[:-1]
+        if current != desired:
+            conn.execute(
+                """UPDATE project_tasks
+                   SET description=?,definition_of_done=?,starter_path=?,
+                       estimated_minutes=?,managed_key=?
+                   WHERE id=?""",
+                values,
+            )
+            updated += 1
+
+        linked = conn.execute(
+            """SELECT tt.task_id,m.estimated_minutes
+               FROM track_tasks tt
+               JOIN task_metadata m ON m.task_id=tt.task_id
+               WHERE tt.track_key='portfolio'
+                 AND tt.linked_entity_id=?""",
+            (int(row["id"]),),
+        ).fetchone()
+        if linked is not None:
+            conn.execute(
+                """UPDATE task_metadata
+                   SET description=?,definition_of_done=?,starter_path=?,managed_key=?,
+                       estimated_minutes=CASE
+                           WHEN estimated_minutes=45 THEN ?
+                           ELSE estimated_minutes
+                       END
+                   WHERE task_id=?""",
+                (
+                    spec.description,
+                    spec.definition_of_done,
+                    spec.starter_path,
+                    f"portfolio:{int(row['project_id'])}:{int(row['id'])}",
+                    int(spec.estimated_minutes),
+                    int(linked["task_id"]),
+                ),
+            )
+    return {
+        "updated": updated,
+        "missing": sorted(set(missing)),
+        "total": len(rows),
+    }
+
+
 def migrate(conn, root: Path):
     sprint_count = 0
     project_count = 0
@@ -403,6 +478,7 @@ def migrate(conn, root: Path):
     # 36 historical static sprint rows would immediately duplicate that track.
     applied_tasks = {"added": 0, "updated": 0}
     roadmap_cleanup = _clean_legacy_roadmap_tasks(conn)
+    portfolio_guidance = _sync_portfolio_task_guidance(conn)
     evidence_cleanup = _clean_academy_evidence(conn)
 
     from career_app.services import task_workspace
@@ -425,6 +501,8 @@ def migrate(conn, root: Path):
         "roadmap_tasks_archived": roadmap_cleanup["archived"],
         "roadmap_tasks_retained": roadmap_cleanup["retained"],
         "roadmap_tasks_updated": roadmap_cleanup["updated"],
+        "portfolio_tasks_guided": portfolio_guidance["updated"],
+        "portfolio_tasks_missing_guidance": portfolio_guidance["missing"],
         "academy_evidence_removed": (
             evidence_cleanup["academy_rows_removed"]
             + evidence_cleanup["main_rows_removed"]

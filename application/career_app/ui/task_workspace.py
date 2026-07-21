@@ -16,11 +16,13 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QListWidgetItem,
     QMessageBox,
     QPushButton,
     QSizePolicy,
     QSpinBox,
     QTabWidget,
+    QTextBrowser,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -32,6 +34,9 @@ from career_app.services import (
     tracks,
 )
 from career_app.theme import stylesheet
+from career_app.ui.markdown_preview import (
+    path_field_stylesheet, raw_markdown_stylesheet, render_markdown_html,
+)
 
 
 class TaskWorkspaceDialog(QDialog):
@@ -48,6 +53,7 @@ class TaskWorkspaceDialog(QDialog):
         refresh_callback=None,
         start_session_callback=None,
         edit_task_callback=None,
+        open_sql_problem_callback=None,
     ):
         super().__init__(parent)
         self.conn = conn
@@ -57,6 +63,7 @@ class TaskWorkspaceDialog(QDialog):
         self.refresh_callback = refresh_callback
         self.start_session_callback = start_session_callback
         self.edit_task_callback = edit_task_callback
+        self.open_sql_problem_callback = open_sql_problem_callback
         self._loading = False
         self._dirty = False
 
@@ -99,6 +106,16 @@ class TaskWorkspaceDialog(QDialog):
         self.summary.setWordWrap(True)
         root_layout.addWidget(self.summary)
 
+        context_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self._responsive_rows.append(context_actions)
+        self.sql_problem_button = QPushButton("Open in SQL Companion")
+        self.sql_problem_button.setObjectName("Primary")
+        self.sql_problem_button.clicked.connect(self.open_sql_problem)
+        self.sql_problem_button.setVisible(False)
+        context_actions.addWidget(self.sql_problem_button)
+        context_actions.addStretch()
+        root_layout.addLayout(context_actions)
+
         self.tabs = QTabWidget()
         self.tabs.setMinimumWidth(0)
         self.tabs.setSizePolicy(
@@ -125,7 +142,13 @@ class TaskWorkspaceDialog(QDialog):
         self.autosave_timer.setInterval(1400)
         self.autosave_timer.timeout.connect(self.save_document)
 
+        self.preview_timer = QTimer(self)
+        self.preview_timer.setSingleShot(True)
+        self.preview_timer.setInterval(180)
+        self.preview_timer.timeout.connect(self._update_markdown_preview)
+
         self._load_workspace()
+        self.document_views.setCurrentIndex(0)
 
     def _document_tab(self):
         tab = QWidget()
@@ -135,22 +158,73 @@ class TaskWorkspaceDialog(QDialog):
 
         path_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self._responsive_rows.append(path_row)
-        path_row.addWidget(QLabel("Document"))
+        path_row.addWidget(QLabel("Guide document"))
         self.path_label = QLineEdit()
         self.path_label.setReadOnly(True)
+        self.path_label.setStyleSheet(path_field_stylesheet())
         path_row.addWidget(self.path_label, 1)
         layout.addLayout(path_row)
 
+        self.document_views = QTabWidget()
+        self.document_views.setMinimumWidth(0)
+
+        self.preview = QTextBrowser()
+        self.preview.setOpenExternalLinks(True)
+        self.preview.setPlaceholderText("The rendered task guide will appear here.")
+        self.document_views.addTab(self.preview, "Visual Guide")
+
         self.editor = QTextEdit()
+        self.editor.setStyleSheet(raw_markdown_stylesheet())
         self.editor.setPlaceholderText(
-            "Write notes, a reflection, a retrospective, or a study plan here."
+            "Edit the raw Markdown for this task guide and your work notes here."
         )
         self.editor.textChanged.connect(self._document_changed)
-        layout.addWidget(self.editor, 1)
+        self.document_views.addTab(self.editor, "Raw Markdown")
+        layout.addWidget(self.document_views, 1)
+
+        self.guide_setup = QWidget()
+        setup_layout = QVBoxLayout(self.guide_setup)
+        setup_layout.setContentsMargins(0, 2, 0, 0)
+        setup_layout.setSpacing(6)
+        setup_title = QLabel("Set up files and folders from this guide")
+        setup_title.setObjectName("SectionTitle")
+        setup_layout.addWidget(setup_title)
+        self.reference_help = QLabel(
+            "Select the items you need, then create them in the correct project folder."
+        )
+        self.reference_help.setObjectName("Muted")
+        self.reference_help.setWordWrap(True)
+        setup_layout.addWidget(self.reference_help)
+        self.reference_list = QListWidget()
+        self.reference_list.setWordWrap(True)
+        self.reference_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.reference_list.setMaximumHeight(150)
+        setup_layout.addWidget(self.reference_list)
+
+        setup_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self._responsive_rows.append(setup_buttons)
+        create_selected = QPushButton("Create Selected")
+        create_selected.setObjectName("Primary")
+        create_selected.clicked.connect(self.create_selected_references)
+        create_all = QPushButton("Create All Missing")
+        create_all.clicked.connect(self.create_all_references)
+        open_selected = QPushButton("Open Selected")
+        open_selected.clicked.connect(self.open_selected_reference)
+        open_base = QPushButton("Open Project Folder")
+        open_base.clicked.connect(self.open_reference_base)
+        setup_buttons.addWidget(create_selected)
+        setup_buttons.addWidget(create_all)
+        setup_buttons.addWidget(open_selected)
+        setup_buttons.addWidget(open_base)
+        setup_buttons.addStretch()
+        setup_layout.addLayout(setup_buttons)
+        layout.addWidget(self.guide_setup)
 
         buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self._responsive_rows.append(buttons)
-        save_button = QPushButton("Save")
+        save_button = QPushButton("Save Markdown")
         save_button.setObjectName("Primary")
         save_button.clicked.connect(self.save_document)
         reload_button = QPushButton("Reload From File")
@@ -350,7 +424,11 @@ class TaskWorkspaceDialog(QDialog):
                 current_project=int(self.program_state["current_project"]),
             )
             self.path_label.setText(str(self.workspace["document_path"]))
+            self.editor.blockSignals(True)
             self.editor.setPlainText(self.workspace["content"])
+            self.editor.blockSignals(False)
+            self._update_markdown_preview()
+            self._refresh_guide_references()
             self.scheduled_edit.setText(self.workspace["scheduled_for"] or "")
             self.summary.setText(
                 f"{self.workspace['workspace_type_label']} • "
@@ -363,6 +441,14 @@ class TaskWorkspaceDialog(QDialog):
             )
 
             task = self.workspace["task"]
+            problem_title = workspace_service.sql_problem_title(task)
+            self.sql_problem_button.setVisible(bool(problem_title))
+            self.sql_problem_button.setText(
+                f"Open {problem_title} in SQL Companion"
+                if problem_title
+                else "Open in SQL Companion"
+            )
+            self.sql_problem_button.setProperty("problem_title", problem_title or "")
             if task is not None and self.workspace["is_current"]:
                 self.task_id = int(task["id"])
                 self.info_week.setText(f"Week {task['week']}")
@@ -412,7 +498,159 @@ class TaskWorkspaceDialog(QDialog):
             return
         self._dirty = True
         self.save_state.setText("Autosaving…")
+        self.preview_timer.start()
         self.autosave_timer.start()
+
+    def _update_markdown_preview(self):
+        content = self.editor.toPlainText()
+        self.preview.setHtml(render_markdown_html(content))
+        if not self._loading:
+            self._refresh_guide_references()
+
+    def _guide_reference_rows(self):
+        return workspace_service.guide_referenced_paths(
+            self.root,
+            self.workspace["document_path"],
+            self.editor.toPlainText(),
+        )
+
+    def _refresh_guide_references(self):
+        if not hasattr(self, "reference_list"):
+            return
+        checked = set()
+        for index in range(self.reference_list.count()):
+            item = self.reference_list.item(index)
+            data = item.data(Qt.ItemDataRole.UserRole) or {}
+            if item.checkState() == Qt.CheckState.Checked:
+                checked.add(str(data.get("display_path", "")))
+        rows = self._guide_reference_rows()
+        self.reference_list.clear()
+        for row in rows:
+            kind = "Folder" if row["is_directory"] else "File"
+            prefix = "✓" if row["exists"] else "○"
+            item = QListWidgetItem(
+                f"{prefix} {row['display_path']}  •  {kind}"
+                + ("  •  Already exists" if row["exists"] else "")
+            )
+            item.setData(Qt.ItemDataRole.UserRole, row)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            should_check = (
+                not row["exists"]
+                and (not checked or row["display_path"] in checked)
+            )
+            item.setCheckState(
+                Qt.CheckState.Checked if should_check else Qt.CheckState.Unchecked
+            )
+            self.reference_list.addItem(item)
+        self.guide_setup.setVisible(bool(rows))
+        if rows:
+            base = rows[0]["base_path"]
+            try:
+                base_text = base.relative_to(self.root).as_posix()
+            except ValueError:
+                base_text = str(base)
+            self.reference_help.setText(
+                "These paths were found in the guide. New relative paths will be "
+                f"created under {base_text}. Existing work is never overwritten."
+            )
+
+    def _create_reference_rows(self, rows):
+        created = []
+        for row in rows:
+            if row.get("exists"):
+                continue
+            path = workspace_service.create_guide_reference(
+                self.root,
+                self.workspace["document_path"],
+                row["reference"],
+                is_directory=bool(row["is_directory"]),
+                starter_content=row.get("starter_content"),
+            )
+            created.append(path)
+        self._refresh_guide_references()
+        if created:
+            self.save_state.setText(
+                f"Created {len(created)} guide item{'s' if len(created) != 1 else ''}"
+            )
+        else:
+            self.save_state.setText("Everything selected already exists")
+
+    def create_selected_references(self):
+        rows = []
+        for index in range(self.reference_list.count()):
+            item = self.reference_list.item(index)
+            if item.checkState() == Qt.CheckState.Checked:
+                data = item.data(Qt.ItemDataRole.UserRole)
+                if data:
+                    rows.append(data)
+        if not rows:
+            QMessageBox.information(
+                self,
+                "Nothing Selected",
+                "Select one or more missing files or folders first.",
+            )
+            return
+        try:
+            self._create_reference_rows(rows)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Create Guide Items", str(exc))
+
+    def create_all_references(self):
+        try:
+            self._create_reference_rows(
+                [row for row in self._guide_reference_rows() if not row["exists"]]
+            )
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Create Guide Items", str(exc))
+
+    def open_selected_reference(self):
+        item = self.reference_list.currentItem()
+        if item is None:
+            QMessageBox.information(
+                self,
+                "Select a File or Folder",
+                "Choose an item from the setup list first.",
+            )
+            return
+        row = item.data(Qt.ItemDataRole.UserRole) or {}
+        path = row.get("resolved_path")
+        if path is None or not Path(path).exists():
+            QMessageBox.information(
+                self,
+                "Create This Item First",
+                "Create the selected file or folder before opening it.",
+            )
+            return
+        try:
+            workspace_service.open_artifact(path, root=self.root)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Item", str(exc))
+
+    def open_reference_base(self):
+        rows = self._guide_reference_rows()
+        base = rows[0]["base_path"] if rows else Path(self.workspace["document_path"]).parent
+        try:
+            workspace_service.open_artifact(base, root=self.root)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Project Folder", str(exc))
+
+    def open_sql_problem(self):
+        if self.task_id is None or not self.open_sql_problem_callback:
+            return
+        self.save_document()
+        try:
+            opened = bool(self.open_sql_problem_callback(int(self.task_id)))
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open SQL Companion", str(exc))
+            return
+        if not opened:
+            QMessageBox.warning(
+                self,
+                "Problem Not Found",
+                "The linked DataLemur problem could not be matched in SQL Companion.",
+            )
+            return
+        self.accept()
 
     def save_document(self):
         if self._loading:
@@ -430,6 +668,7 @@ class TaskWorkspaceDialog(QDialog):
             QMessageBox.warning(self, "Could Not Save Workspace", str(exc))
             return
         self._dirty = False
+        self._update_markdown_preview()
         self.save_state.setText("Saved")
 
     def reload_document(self):

@@ -71,6 +71,100 @@ class RecommendationEngine:
             ).fetchone()
         )
 
+
+    def is_complete(self) -> bool:
+        """Return True only when every required journey node has passed.
+
+        A missing recommendation is not itself proof of completion: it can also
+        indicate a broken prerequisite chain. This explicit check prevents the UI
+        and planner from announcing a finished pathway while unfinished work remains.
+        """
+
+        activity_rows = self.progress.activity_rows()
+        for location in self.index.ordered_lessons():
+            for activity in location.lesson.activities:
+                if not activity.required_for_completion:
+                    continue
+                row = activity_rows.get(
+                    (location.lesson.lesson_id, activity.activity_id)
+                )
+                if row is None or row["state"] != "Passed":
+                    return False
+                if (
+                    activity.required_for_mastery
+                    and bool(row["last_attempt_solution_assisted"])
+                ):
+                    return False
+
+        for course in self.index.catalog.courses():
+            for assessment in course.assessments:
+                if not self.assessment_passed(assessment.assessment_id):
+                    return False
+            for lab in course.skills_labs:
+                if not self.skills_lab_passed(lab.lab_id):
+                    return False
+        return True
+
+    def _lesson_step_recommendation(
+        self,
+        location: LessonLocation,
+        activity: ActivityDefinition,
+        step_index: int,
+        *,
+        reason: str | None = None,
+    ) -> AcademyRecommendation:
+        return AcademyRecommendation(
+            kind="lesson_step",
+            title=f"{location.lesson.title} — {activity.title}",
+            target_key=(
+                f"academy:activity:{location.lesson.lesson_id}:"
+                f"{activity.activity_id}"
+            ),
+            estimated_minutes=activity.estimated_minutes,
+            reason=(
+                reason
+                or f"Continue lesson step {step_index} of "
+                f"{len(location.lesson.activities)}."
+            ),
+            lesson_id=location.lesson.lesson_id,
+            activity_id=activity.activity_id,
+        )
+
+    def _prerequisite_recommendation(
+        self,
+        missing_skills: tuple[str, ...],
+        activity_rows: dict[tuple[str, str], object],
+    ) -> AcademyRecommendation | None:
+        """Return unfinished work that teaches a missing prerequisite."""
+
+        for missing_skill in missing_skills:
+            for producer in self.index.ordered_lessons():
+                if missing_skill not in producer.lesson.teaches:
+                    continue
+                for step_index, activity in enumerate(
+                    producer.lesson.activities, start=1
+                ):
+                    if not activity.required_for_completion:
+                        continue
+                    row = activity_rows.get(
+                        (producer.lesson.lesson_id, activity.activity_id)
+                    )
+                    complete = bool(row and row["state"] == "Passed") and not (
+                        activity.required_for_mastery
+                        and bool(row["last_attempt_solution_assisted"])
+                    )
+                    if not complete:
+                        return self._lesson_step_recommendation(
+                            producer,
+                            activity,
+                            step_index,
+                            reason=(
+                                f"Finish this lesson to unlock the next skill: "
+                                f"{missing_skill}."
+                            ),
+                        )
+        return None
+
     def next(self) -> AcademyRecommendation | None:
         mastered = self.progress.mastered_skills()
         activity_rows = self.progress.activity_rows()
@@ -107,7 +201,29 @@ class RecommendationEngine:
                                 if skill not in mastered
                             )
                             if missing_lesson:
-                                continue
+                                prerequisite = self._prerequisite_recommendation(
+                                    missing_lesson, activity_rows
+                                )
+                                if prerequisite is not None:
+                                    return prerequisite
+                                # Do not skip ahead to a later lesson when the
+                                # current sequence has an unresolved prerequisite.
+                                first_required = next(
+                                    (
+                                        item for item in lesson.activities
+                                        if item.required_for_completion
+                                    ),
+                                    lesson.activities[0],
+                                )
+                                return self._lesson_step_recommendation(
+                                    location,
+                                    first_required,
+                                    1,
+                                    reason=(
+                                        "This lesson is waiting on prerequisite mastery: "
+                                        + ", ".join(missing_lesson)
+                                    ),
+                                )
                             for step_index, activity in enumerate(
                                 lesson.activities, start=1
                             ):
@@ -123,20 +239,8 @@ class RecommendationEngine:
                                     and row["last_attempt_solution_assisted"]
                                 )
                                 if not passed or mastery_assisted:
-                                    return AcademyRecommendation(
-                                        kind="lesson_step",
-                                        title=f"{lesson.title} — {activity.title}",
-                                        target_key=(
-                                            f"academy:activity:{lesson.lesson_id}:"
-                                            f"{activity.activity_id}"
-                                        ),
-                                        estimated_minutes=activity.estimated_minutes,
-                                        reason=(
-                                            f"Continue lesson step {step_index} of "
-                                            f"{len(lesson.activities)}."
-                                        ),
-                                        lesson_id=lesson.lesson_id,
-                                        activity_id=activity.activity_id,
+                                    return self._lesson_step_recommendation(
+                                        location, activity, step_index
                                     )
 
                     for assessment in course.assessments:
@@ -184,4 +288,88 @@ class RecommendationEngine:
                                     "evidence-producing project."
                                 ),
                             )
+        # ``None`` is reserved for a genuinely finished pathway. If the
+        # curriculum is incomplete but no prerequisite-ready node was found, keep
+        # the path active and direct the learner to the first unfinished step.
+        if not self.is_complete():
+            for location in self.index.ordered_lessons():
+                for step_index, activity in enumerate(
+                    location.lesson.activities, start=1
+                ):
+                    if not activity.required_for_completion:
+                        continue
+                    row = activity_rows.get(
+                        (location.lesson.lesson_id, activity.activity_id)
+                    )
+                    complete = bool(row and row["state"] == "Passed") and not (
+                        activity.required_for_mastery
+                        and bool(row["last_attempt_solution_assisted"])
+                    )
+                    if complete:
+                        continue
+                    missing = tuple(
+                        skill for skill in location.lesson.requires
+                        if skill not in mastered
+                    )
+                    reason = (
+                        "Review the prerequisite path before continuing: "
+                        + ", ".join(missing)
+                        if missing
+                        else f"Continue lesson step {step_index} of "
+                        f"{len(location.lesson.activities)}."
+                    )
+                    return self._lesson_step_recommendation(
+                        location, activity, step_index, reason=reason
+                    )
+
+            for course in self.index.catalog.courses():
+                for assessment in course.assessments:
+                    if self.assessment_passed(assessment.assessment_id):
+                        continue
+                    missing = tuple(
+                        skill for skill in assessment.requires
+                        if skill not in mastered
+                    )
+                    prerequisite = self._prerequisite_recommendation(
+                        missing, activity_rows
+                    )
+                    if prerequisite is not None:
+                        return prerequisite
+                    return AcademyRecommendation(
+                        kind="assessment",
+                        title=assessment.title,
+                        target_key=f"academy:assessment:{assessment.assessment_id}",
+                        estimated_minutes=assessment.estimated_minutes,
+                        reason=(
+                            "Review the prerequisite path before starting this checkpoint: "
+                            + ", ".join(missing)
+                            if missing
+                            else "Complete the next checkpoint in the learning path."
+                        ),
+                    )
+
+                for lab in course.skills_labs:
+                    if self.skills_lab_passed(lab.lab_id):
+                        continue
+                    missing = tuple(
+                        skill for skill in lab.requires
+                        if skill not in mastered
+                    )
+                    prerequisite = self._prerequisite_recommendation(
+                        missing, activity_rows
+                    )
+                    if prerequisite is not None:
+                        return prerequisite
+                    return AcademyRecommendation(
+                        kind="skills_lab",
+                        title=lab.title,
+                        target_key=f"academy:skills_lab:{lab.lab_id}",
+                        estimated_minutes=lab.estimated_minutes,
+                        reason=(
+                            "Review the prerequisite path before starting this project: "
+                            + ", ".join(missing)
+                            if missing
+                            else "Complete the next applied project in the learning path."
+                        ),
+                    )
         return None

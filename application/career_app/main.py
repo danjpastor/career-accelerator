@@ -10,9 +10,11 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from PySide6.QtCore import (
-    QEasingCurve, QEvent, QObject, QPropertyAnimation, Qt, QTimer, Signal
+    QEasingCurve, QEvent, QObject, QPropertyAnimation, QUrl, Qt, QTimer, Signal
 )
-from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPixmap
+from PySide6.QtGui import (
+    QAction, QColor, QDesktopServices, QIcon, QKeySequence, QPixmap,
+)
 from PySide6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QComboBox, QDialog, QFormLayout,
     QInputDialog,
@@ -39,8 +41,8 @@ from career_app.data.duckdb_exercises import (
     exercise_source,
 )
 from career_app.data.roadmap import (
-    DATACAMP_TRACK, PROJECT_DIRS, PROJECT_NAMES, PROJECT_STAGES,
-    SQL_COMPANION, WEEKLY_GUIDANCE
+    DATACAMP_TRACK, DATALEMUR_PROBLEM_URLS, PROJECT_DIRS, PROJECT_NAMES,
+    PROJECT_STAGES, SQL_COMPANION, WEEKLY_GUIDANCE
 )
 from career_app.services import (
     achievements,
@@ -49,6 +51,7 @@ from career_app.services import (
     coach,
     planner,
     duckdb_workspace,
+    portfolio_workspace,
     session_guard,
     sql_workspace,
     task_workspace,
@@ -64,6 +67,7 @@ from career_app.ui.course_ui import SqlCodeEditor
 from career_app.ui.applied_labs import AppliedLabsWidget
 from career_app.ui.exercise_packs import ExercisePacksWidget, ExerciseSuggestionPanel
 from career_app.ui.task_workspace import TaskWorkspaceDialog
+from career_app.ui.portfolio_workspace import PortfolioTaskWorkspaceDialog
 from career_app.ui.responsive import (
     ResponsiveScrollPage, apply_content_row_metrics,
     apply_inline_style_scale, clear_layout_positions, reflow_grid,
@@ -3309,6 +3313,19 @@ class CareerAccelerator(QMainWindow):
 
         buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.sql_problem_buttons = buttons
+        self.sql_external_button = QPushButton(
+            "Open on DataLemur ↗"
+        )
+        self.sql_external_button.setObjectName(
+            "Secondary"
+        )
+        self.sql_external_button.setToolTip(
+            "Open the selected problem's exact DataLemur page in your browser."
+        )
+        self.sql_external_button.setEnabled(False)
+        self.sql_external_button.clicked.connect(
+            self.open_sql_problem_url
+        )
         self.sql_save_button = QPushButton(
             "Save Submission"
         )
@@ -3338,6 +3355,9 @@ class CareerAccelerator(QMainWindow):
         )
         self.sql_solution_button.clicked.connect(
             self.open_sql_solution
+        )
+        buttons.addWidget(
+            self.sql_external_button
         )
         buttons.addWidget(
             self.sql_save_button
@@ -8157,6 +8177,37 @@ class CareerAccelerator(QMainWindow):
             "Task completed."
         )
         try:
+            task_link = tracks.task_track(self.conn, int(task_id))
+            if task_link is not None and str(task_link["track_key"]).casefold() == "sql":
+                title = str(task_link["target_key"] or "").split("problem:", 1)[-1].strip()
+                practice = self.conn.execute(
+                    """SELECT solution_path,status
+                       FROM sql_practice
+                       WHERE platform='DataLemur' AND title=?""",
+                    (title,),
+                ).fetchone()
+                saved_value = str(practice["solution_path"] or "").strip() if practice else ""
+                saved_path = Path(saved_value) if saved_value else None
+                if saved_path is not None and not saved_path.is_absolute():
+                    saved_path = ROOT / saved_path
+                if saved_path is None or not saved_path.is_file():
+                    raise ValueError(
+                        f"Save your {title} SQL submission in SQL Companion before "
+                        "marking this task complete. Open the task workspace and use "
+                        "the SQL Companion button to continue."
+                    )
+                try:
+                    saved_sql = saved_path.read_text(encoding="utf-8")
+                except OSError as exc:
+                    raise ValueError(
+                        f"The saved SQL submission could not be read: {saved_path}"
+                    ) from exc
+                if not self._sql_submission_has_original_query(saved_sql):
+                    raise ValueError(
+                        f"The saved {title} file still looks like the starter template. "
+                        "Write and save your own query in SQL Companion first."
+                    )
+
             result = tracks.complete_track_task(
                 self.conn,
                 task_id,
@@ -8390,7 +8441,18 @@ class CareerAccelerator(QMainWindow):
         )
         self.conn.commit()
         if row:
-            self.navigate(int(row["destination"]))
+            portfolio_link = self.conn.execute(
+                """SELECT linked_entity_id
+                   FROM track_tasks
+                   WHERE task_id=? AND track_key='portfolio'""",
+                (int(task_id),),
+            ).fetchone()
+            if portfolio_link is not None and portfolio_link["linked_entity_id"] is not None:
+                self.open_portfolio_task_workspace(
+                    int(portfolio_link["linked_entity_id"])
+                )
+            else:
+                self.navigate(int(row["destination"]))
 
     def continue_highest_impact(self):
         rows = planner.available(self.conn, self.state["current_week"])
@@ -8902,10 +8964,36 @@ class CareerAccelerator(QMainWindow):
             session_guard.restore(self, session_snapshot)
 
     def open_task_workspace(self, *, task_id=None, workspace_key=None):
-        # BEGIN SQL LEARNING TASK ROUTING
-        if task_id is not None and self._route_sql_learning_task(task_id):
-            return
-        # END SQL LEARNING TASK ROUTING
+        if task_id is not None:
+            portfolio_link = self.conn.execute(
+                """SELECT linked_entity_id
+                   FROM track_tasks
+                   WHERE task_id=? AND track_key='portfolio'""",
+                (int(task_id),),
+            ).fetchone()
+            if portfolio_link is not None and portfolio_link["linked_entity_id"] is not None:
+                self.open_portfolio_task_workspace(
+                    int(portfolio_link["linked_entity_id"])
+                )
+                return
+        # Guided DuckDB tasks still open directly in their native workspace.
+        # DataLemur interview tasks open the Task Workspace first, where a
+        # prominent button routes to the exact SQL Companion problem.
+        if task_id is not None:
+            try:
+                sql_task_row = task_workspace.task_record(self.conn, int(task_id))
+                sql_task_label = (
+                    str(sql_task_row["label"] or "")
+                    if sql_task_row is not None
+                    else ""
+                )
+            except Exception:
+                sql_task_label = ""
+            if (
+                duckdb_exercise_number_for_label(sql_task_label) is not None
+                and self._route_sql_learning_task(task_id)
+            ):
+                return
         if task_id is None and workspace_key is None:
             self.statusBar().showMessage("Select a task first.", 3200)
             return
@@ -8921,6 +9009,7 @@ class CareerAccelerator(QMainWindow):
                 refresh_callback=lambda: self.refresh_all(sync_tracks=False),
                 start_session_callback=self.start_session_for_task,
                 edit_task_callback=self.edit_task,
+                open_sql_problem_callback=self._route_sql_learning_task,
             )
             dialog.exec()
             self.refresh_all(sync_tracks=False)
@@ -9119,7 +9208,9 @@ class CareerAccelerator(QMainWindow):
             self.clear_layout(layout)
 
         rows = self.conn.execute(
-            """SELECT id,stage,label,completed FROM project_tasks
+            """SELECT id,stage,label,completed,description,
+                      definition_of_done,estimated_minutes
+               FROM project_tasks
                WHERE project_id=? ORDER BY sort_order""",
             (project_id,),
         ).fetchall()
@@ -9136,21 +9227,24 @@ class CareerAccelerator(QMainWindow):
             "Tasks": COLORS["muted"],
         }
 
+        guide_note = QLabel(
+            "Open Guide for step-by-step instructions, a clear definition of done, "
+            "and a project starter document. Your work is saved inside the project folder."
+        )
+        guide_note.setObjectName("Muted")
+        guide_note.setWordWrap(True)
+        self.project_stage_widgets["Tasks"].addWidget(guide_note)
+
         for row in rows:
-            target_stage = (
-                row["stage"]
-                if row["stage"]
-                in self.project_stage_widgets
-                else "Tasks"
-            )
-            if target_stage not in ("Overview", "Tasks"):
-                target_stage = "Tasks"
+            # Milestones belong in the dedicated checklist.  The Overview tab
+            # remains a clean project summary rather than a second partial task list.
+            target_stage = "Tasks"
 
             task_row = TaskRow(
                 title=row["label"],
                 source=(
-                    f"Project milestone • "
-                    f"{row['stage']}"
+                    f"Project milestone • {row['stage']} • "
+                    f"about {int(row['estimated_minutes'] or 45)} min"
                 ),
                 checked=bool(row["completed"]),
                 status_text=(
@@ -9170,6 +9264,15 @@ class CareerAccelerator(QMainWindow):
                         state,
                     )
                 ),
+                action_text="Guide",
+                on_action=(
+                    lambda checked=False, task_id=row["id"]:
+                    self.open_portfolio_task_workspace(task_id)
+                ),
+                completed=False,
+            )
+            task_row.title_label.setToolTip(
+                f"{row['description']}\n\nDone when: {row['definition_of_done']}"
             )
             self.project_stage_widgets[
                 target_stage
@@ -9202,6 +9305,25 @@ class CareerAccelerator(QMainWindow):
             if isinstance(widget, QTextEdit):
                 widget.setPlainText(notes.get(stage, ""))
 
+    def open_portfolio_task_workspace(self, task_id):
+        try:
+            dialog = PortfolioTaskWorkspaceDialog(
+                self,
+                conn=self.conn,
+                root=ROOT,
+                task_id=int(task_id),
+                completion_callback=self.set_project_task_completed,
+                refresh_callback=lambda: self.refresh_all(sync_tracks=False),
+            )
+            dialog.exec()
+            self.refresh_all(sync_tracks=False)
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Open Portfolio Guide",
+                str(exc),
+            )
+
     def set_active_project(self):
         update_state(
             self.conn,
@@ -9215,8 +9337,9 @@ class CareerAccelerator(QMainWindow):
         state_value,
     ):
         completed = (
-            int(state_value)
-            == Qt.Checked.value
+            bool(state_value)
+            if isinstance(state_value, bool)
+            else int(state_value) == Qt.Checked.value
         )
         self.conn.execute(
             """UPDATE project_tasks
@@ -9225,7 +9348,7 @@ class CareerAccelerator(QMainWindow):
             (1 if completed else 0, task_id),
         )
         task_row = self.conn.execute(
-            """SELECT label
+            """SELECT project_id,label
                FROM project_tasks
                WHERE id=?""",
             (task_id,),
@@ -9233,9 +9356,11 @@ class CareerAccelerator(QMainWindow):
 
         tracks.record_portfolio_change(
             self.conn,
-            project_id=self.state[
-                "current_project"
-            ],
+            project_id=(
+                int(task_row["project_id"])
+                if task_row is not None
+                else int(self.state["current_project"])
+            ),
             project_task_id=task_id,
             label=(
                 task_row["label"]
@@ -9346,6 +9471,10 @@ class CareerAccelerator(QMainWindow):
         self.sql_complete_button.setText(
             "Mark Complete"
         )
+        self.sql_external_button.setEnabled(False)
+        self.sql_external_button.setToolTip(
+            "Select a DataLemur problem first."
+        )
         self.set_sql_workspace_enabled(
             False
         )
@@ -9393,6 +9522,13 @@ class CareerAccelerator(QMainWindow):
         )
 
         self.sql_selected_title = title
+        problem_url = DATALEMUR_PROBLEM_URLS.get(title, "")
+        self.sql_external_button.setEnabled(bool(problem_url))
+        self.sql_external_button.setToolTip(
+            problem_url
+            if problem_url
+            else "No DataLemur page is configured for this problem."
+        )
         self.sql_title.setText(match[0])
         self.sql_difficulty.setText(match[1])
         self.sql_topic.setText(match[2])
@@ -9490,6 +9626,31 @@ class CareerAccelerator(QMainWindow):
         self.set_sql_workspace_enabled(
             completed or readiness["ready"]
         )
+
+    def open_sql_problem_url(self):
+        title = self.sql_selected_title or self.sql_title.text().strip()
+        if not title:
+            QMessageBox.information(
+                self,
+                "Select a Problem",
+                "Choose a DataLemur problem from Today's SQL first.",
+            )
+            return
+        url = DATALEMUR_PROBLEM_URLS.get(title)
+        if not url:
+            QMessageBox.warning(
+                self,
+                "DataLemur Page Unavailable",
+                "No external DataLemur page is configured for this problem.",
+            )
+            return
+        if not QDesktopServices.openUrl(QUrl(url)):
+            QMessageBox.warning(
+                self,
+                "Could Not Open DataLemur",
+                "Your browser could not open the problem page. "
+                f"Copy this address instead:\n{url}",
+            )
 
     def ensure_current_sql_solution(self):
         title = (
