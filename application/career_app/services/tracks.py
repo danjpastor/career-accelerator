@@ -11,6 +11,7 @@ from career_app.data.applied_exercises import (
     exercise_number_for_label as applied_exercise_number_for_label,
 )
 from career_app.services import achievements as achievement_service
+from career_app.services import completion_contract
 from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
     exercise_for_label,
@@ -3391,6 +3392,7 @@ def initialize(conn, state):
 
 
 def sync_all(conn, state):
+    state = completion_contract.prepare_state(conn, state)
     state = normalize_google_checkpoint(conn, state)
     repair_track_links(conn)
     initialize(conn, state)
@@ -3418,8 +3420,10 @@ def sync_all(conn, state):
             "locked"
         )
     )
-    allocations = adaptive_targets(
+    allocations = completion_contract.deadline_allocations(
+        conn,
         state,
+        adaptive_targets(state, portfolio_ready=portfolio_ready),
         portfolio_ready=portfolio_ready,
     )
 

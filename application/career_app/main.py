@@ -83,6 +83,8 @@ from career_app.ui.widgets import (
 
 from career_app.ui.academy import AcceleratorAcademyWidget
 from career_app.ui.first_run import FirstRunCoordinator
+from career_app.ui.notifications import OverlayNotifier
+from career_app.services import completion_contract
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
 
@@ -375,6 +377,7 @@ class CareerAccelerator(QMainWindow):
     def __init__(self):
         super().__init__()
         self.conn = connect()
+        self._overlay_notifier = OverlayNotifier(self)
         self.first_run = FirstRunCoordinator(self.conn, ROOT, ASSET_ROOT, __version__)
         self.first_run.migrate_existing_profile_if_needed()
         ensure_default_state(self.conn, date.today().isoformat())
@@ -392,6 +395,9 @@ class CareerAccelerator(QMainWindow):
         )
         self.state = state(self.conn)
         self.first_run.finalize_initialization()
+        self.state = completion_contract.prepare_state(self.conn, self.state)
+        tracks.sync_all(self.conn, self.state)
+        self.state = state(self.conn)
 
         self.elapsed_seconds = 0
         self.timer_state = "ready"
@@ -413,7 +419,7 @@ class CareerAccelerator(QMainWindow):
             try:
                 import ctypes
                 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                    "DanielPastor.DataCareerAccelerator"
+                    "CareerAccelerator.Application"
                 )
             except Exception:
                 pass
@@ -874,7 +880,7 @@ class CareerAccelerator(QMainWindow):
         QTimer.singleShot(0, self._apply_responsive_shell)
 
     def _update_sidebar_brand_logo(self):
-        """Scale the approved horizontal brand lockup inside the live sidebar."""
+        # Scale the approved horizontal lockup without changing its aspect ratio.
         label = getattr(self, "sidebar_logo", None)
         source = getattr(self, "_sidebar_logo_source", None)
         if label is None or source is None or source.isNull():
@@ -883,15 +889,22 @@ class CareerAccelerator(QMainWindow):
         sidebar_width = self.sidebar.maximumWidth() if hasattr(self, "sidebar") else 224
         available_width = max(96, sidebar_width - margins.left() - margins.right())
         target_height = max(30, int(getattr(self, "_sidebar_brand_height", 58)))
-        scaled = source.scaled(
-            available_width,
+        label.setScaledContents(False)
+        label.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        scaled = source.scaledToHeight(
             target_height,
-            Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )
+        if scaled.width() > available_width:
+            scaled = source.scaledToWidth(
+                available_width,
+                Qt.TransformationMode.SmoothTransformation,
+            )
         label.setPixmap(scaled)
         label.setFixedHeight(target_height)
-        label.setToolTip("Data Career Accelerator")
+        label.setMinimumWidth(0)
+        label.setToolTip(self.windowTitle().split(" v", 1)[0])
         label.updateGeometry()
 
     def _apply_sidebar_density(self, height):
@@ -2602,7 +2615,7 @@ class CareerAccelerator(QMainWindow):
                 self.open_task_workspace(task_id=int(row["task_id"]))
             else:
                 self.navigate(2)
-                self.statusBar().showMessage(
+                self._notify(
                     "Your Google Certificate progress is tracked here. Update the course and module when you finish the next section.",
                     6000,
                 )
@@ -2664,7 +2677,7 @@ class CareerAccelerator(QMainWindow):
         self.refresh_all(
             sync_tracks=False
         )
-        self.statusBar().showMessage(
+        self._notify(
             (
                 "Applied Labs branch set to "
                 f"{branch}."
@@ -2935,7 +2948,7 @@ class CareerAccelerator(QMainWindow):
     def open_applied_reference(self, kind):
         number = self.applied_selected_number
         if number is None:
-            self.statusBar().showMessage("Select an applied lab first.", 3200)
+            self._notify("Select an applied lab first.", 3200)
             return
         path = applied_workspace.paths(ROOT, number).get(kind)
         try:
@@ -2943,12 +2956,12 @@ class CareerAccelerator(QMainWindow):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Open Lab File", str(exc))
             return
-        self.statusBar().showMessage(f"Opened {path.name} in {editor}.", 4200)
+        self._notify(f"Opened {path.name} in {editor}.", 4200)
 
     def open_applied_datasets(self):
         number = self.applied_selected_number
         if number is None:
-            self.statusBar().showMessage("Select an applied lab first.", 3200)
+            self._notify("Select an applied lab first.", 3200)
             return
         path = applied_workspace.paths(ROOT, number)["datasets"]
         try:
@@ -2956,12 +2969,12 @@ class CareerAccelerator(QMainWindow):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Open Dataset Folder", str(exc))
             return
-        self.statusBar().showMessage(f"Opened the dataset folder in {app_name}.", 4200)
+        self._notify(f"Opened the dataset folder in {app_name}.", 4200)
 
     def open_applied_submission(self):
         number = self.applied_selected_number
         if number is None:
-            self.statusBar().showMessage("Select an applied lab first.", 3200)
+            self._notify("Select an applied lab first.", 3200)
             return
         try:
             path, created = applied_workspace.ensure_submission(ROOT, number)
@@ -2978,14 +2991,14 @@ class CareerAccelerator(QMainWindow):
         self.applied_status.setCurrentText(status)
         self.applied_submission_path.setText(str(path.relative_to(ROOT)).replace("\\", "/"))
         self.refresh_applied_exercises()
-        self.statusBar().showMessage(
+        self._notify(
             f"{'Created and opened' if created else 'Opened'} {path.name} in {editor}.", 5200
         )
 
     def save_applied_progress(self):
         number = self.applied_selected_number
         if number is None:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select an applied lab first.",
                 3200,
             )
@@ -3160,7 +3173,7 @@ class CareerAccelerator(QMainWindow):
             message += (
                 " Added to Demonstrated Evidence."
             )
-        self.statusBar().showMessage(
+        self._notify(
             message,
             6000,
         )
@@ -3664,7 +3677,7 @@ class CareerAccelerator(QMainWindow):
             self.navigate(4)
             self.sql_tabs.setCurrentWidget(self.duckdb_exercises_widget)
             self.duckdb_exercises_widget.select_exercise(int(duckdb_number))
-            self.statusBar().showMessage(
+            self._notify(
                 f'Opened DuckDB Exercise {int(duckdb_number):02d}.', 3200
             )
             return True
@@ -3713,7 +3726,7 @@ class CareerAccelerator(QMainWindow):
             self.sql_problem_list.setCurrentRow(target_row)
         else:
             self.prefill_sql(item)
-        self.statusBar().showMessage(
+        self._notify(
             f'Opened interview problem: {problem_title}.', 3200
         )
         return True
@@ -3919,7 +3932,7 @@ class CareerAccelerator(QMainWindow):
     ):
         number = self.duckdb_selected_number
         if number is None:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select a DuckDB exercise first.",
                 3200,
             )
@@ -3947,7 +3960,7 @@ class CareerAccelerator(QMainWindow):
             )
             return
 
-        self.statusBar().showMessage(
+        self._notify(
             f"Opened {path.name} in {editor_name}.",
             4200,
         )
@@ -3955,7 +3968,7 @@ class CareerAccelerator(QMainWindow):
     def open_duckdb_datasets(self):
         number = self.duckdb_selected_number
         if number is None:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select a DuckDB exercise first.",
                 3200,
             )
@@ -3979,7 +3992,7 @@ class CareerAccelerator(QMainWindow):
             )
             return
 
-        self.statusBar().showMessage(
+        self._notify(
             f"Opened the dataset folder in {app_name}.",
             4200,
         )
@@ -3987,7 +4000,7 @@ class CareerAccelerator(QMainWindow):
     def open_duckdb_submission(self):
         number = self.duckdb_selected_number
         if number is None:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select a DuckDB exercise first.",
                 3200,
             )
@@ -4048,7 +4061,7 @@ class CareerAccelerator(QMainWindow):
             if created
             else "Opened"
         )
-        self.statusBar().showMessage(
+        self._notify(
             f"{action} {path.name} in {editor_name}.",
             5200,
         )
@@ -4056,7 +4069,7 @@ class CareerAccelerator(QMainWindow):
     def save_duckdb_progress(self):
         number = self.duckdb_selected_number
         if number is None:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select a DuckDB exercise first.",
                 3200,
             )
@@ -4156,7 +4169,7 @@ class CareerAccelerator(QMainWindow):
             message += (
                 " Added to Demonstrated Evidence."
             )
-        self.statusBar().showMessage(
+        self._notify(
             message,
             6000,
         )
@@ -5203,17 +5216,15 @@ class CareerAccelerator(QMainWindow):
         reset_card.layout.setSpacing(9)
 
         reset_summary = QLabel(
-            "Reset returns the app to Week 1, Google Course 1, Module 1, "
-            "Portfolio Project 1, and today as the new start date. It clears "
-            "all tracked progress while preserving technical preferences and backups."
+            "Erase all learner-specific data and return Career Accelerator "
+            "to the neutral, locked Step 1 onboarding screen. A safety ZIP "
+            "is created outside the application folder first."
         )
         reset_summary.setObjectName("Muted")
         reset_summary.setWordWrap(True)
         reset_card.layout.addWidget(reset_summary)
 
-        self.reset_progress_button = QPushButton(
-            "🗑️ Reset All Progress"
-        )
+        self.reset_progress_button = QPushButton("Full First-Run Reset")
         self.reset_progress_button.setObjectName("Danger")
         self.reset_progress_button.setMinimumHeight(40)
         self.reset_progress_button.clicked.connect(
@@ -5390,13 +5401,13 @@ class CareerAccelerator(QMainWindow):
         hour = now.hour
 
         if 5 <= hour < 12:
-            greeting = "Good morning, Dan! 👋"
+            greeting = "Good morning! 👋"
         elif 12 <= hour < 17:
-            greeting = "Good afternoon, Dan! 👋"
+            greeting = "Good afternoon! 👋"
         elif 17 <= hour < 22:
-            greeting = "Good evening, Dan! 👋"
+            greeting = "Good evening! 👋"
         else:
-            greeting = "Working late, Dan? 🌙"
+            greeting = "Working late? 🌙"
 
         if hasattr(self, "dashboard_hero"):
             self.dashboard_hero.setText(greeting)
@@ -5425,7 +5436,7 @@ class CareerAccelerator(QMainWindow):
         encouragements = [
             (
                 "Small daily improvements lead to big results.",
-                "You've got this, Dan!",
+                "You've got this!",
             ),
             (
                 "Every focused session strengthens your analyst toolkit.",
@@ -5440,7 +5451,7 @@ class CareerAccelerator(QMainWindow):
                 "One strong step is enough for today.",
             ),
             (
-                "Your VFX experience is becoming analytical evidence.",
+                "Your previous experience is becoming career evidence.",
                 "Keep connecting your past work to your future role.",
             ),
             (
@@ -6182,7 +6193,7 @@ class CareerAccelerator(QMainWindow):
                 if len(newly_unlocked) > 1
                 else ""
             )
-            self.statusBar().showMessage(
+            self._notify(
                 f"🏆 Achievement unlocked: "
                 f"{newly_unlocked[0]}{extra}",
                 7000,
@@ -6521,7 +6532,7 @@ class CareerAccelerator(QMainWindow):
                 week,
                 guide,
                 self.state,
-                max_items=4,
+                max_items=5,
             )
         )
         focus_summary = (
@@ -6754,6 +6765,14 @@ class CareerAccelerator(QMainWindow):
                     self.open_task_workspace(
                         task_id=task_id
                     )
+                )
+
+            if not completed and not optional:
+
+                detail = completion_contract.focus_detail(
+
+                    self.conn, item, str(detail or ''), self.state
+
                 )
 
             focus_row = FocusRow(
@@ -7332,7 +7351,7 @@ class CareerAccelerator(QMainWindow):
         def undo_selected():
             item = history_list.currentItem()
             if item is None:
-                self.statusBar().showMessage(
+                self._notify(
                     "Select a completed item first.",
                     3200,
                 )
@@ -7397,7 +7416,7 @@ class CareerAccelerator(QMainWindow):
                 )
 
             dialog.accept()
-            self.statusBar().showMessage(
+            self._notify(
                 result["message"],
                 5200,
             )
@@ -7967,7 +7986,7 @@ class CareerAccelerator(QMainWindow):
     def open_selected_session_workspace(self):
         item = self.session_list.currentItem()
         if item is None:
-            self.statusBar().showMessage("Select a study session first.", 3200)
+            self._notify("Select a study session first.", 3200)
             return
         data = item.data(Qt.ItemDataRole.UserRole) or {}
         if data.get("workspace_key"):
@@ -7975,7 +7994,7 @@ class CareerAccelerator(QMainWindow):
         elif data.get("task_id"):
             self.open_task_workspace(task_id=int(data["task_id"]))
         else:
-            self.statusBar().showMessage(
+            self._notify(
                 "That session is not linked to a task workspace.",
                 4200,
             )
@@ -8417,13 +8436,13 @@ class CareerAccelerator(QMainWindow):
                 study_session_snapshot,
             )
 
-        self.statusBar().showMessage(
+        self._notify(
             completion_message,
             5200,
         )
 
         if result["handled"]:
-            self.statusBar().showMessage(
+            self._notify(
                 completion_message,
                 5200,
             )
@@ -8437,7 +8456,7 @@ class CareerAccelerator(QMainWindow):
             None,
         )
         if candidate is None:
-            self.statusBar().showMessage(
+            self._notify(
                 "No optional extra task is currently available.",
                 3600,
             )
@@ -8465,7 +8484,7 @@ class CareerAccelerator(QMainWindow):
         self.refresh_all(
             sync_tracks=False
         )
-        self.statusBar().showMessage(
+        self._notify(
             (
                 "Optional extra task started. "
                 "It does not change today's completed target "
@@ -8637,7 +8656,7 @@ class CareerAccelerator(QMainWindow):
             else self.selected_task_id(self.backlog_list)
         )
         if not task_id:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select a backlog task first.",
                 3200,
             )
@@ -8967,7 +8986,7 @@ class CareerAccelerator(QMainWindow):
                 session_snapshot,
             )
 
-        self.statusBar().showMessage(
+        self._notify(
             (
                 f"Saved task #{effective_task_id}: "
                 f"{selected_status} • "
@@ -9101,7 +9120,7 @@ class CareerAccelerator(QMainWindow):
             tracks.sync_all(self.conn, self.state)
             self.state = state(self.conn)
             self.refresh_all(sync_tracks=False)
-            self.statusBar().showMessage(
+            self._notify(
                 message + " Evidence and scheduling were updated.",
                 5600,
             )
@@ -9140,7 +9159,7 @@ class CareerAccelerator(QMainWindow):
             ):
                 return
         if task_id is None and workspace_key is None:
-            self.statusBar().showMessage("Select a task first.", 3200)
+            self._notify("Select a task first.", 3200)
             return
         try:
             dialog = TaskWorkspaceDialog(
@@ -9168,14 +9187,14 @@ class CareerAccelerator(QMainWindow):
     def open_plan_workspace(self):
         task_id = self.selected_task_id(self.plan_list)
         if task_id is None:
-            self.statusBar().showMessage("Select a planned task first.", 3200)
+            self._notify("Select a planned task first.", 3200)
             return
         self.open_task_workspace(task_id=task_id)
 
     def open_backlog_workspace(self):
         task_id = self.selected_task_id(self.backlog_list)
         if task_id is None:
-            self.statusBar().showMessage("Select a backlog task first.", 3200)
+            self._notify("Select a backlog task first.", 3200)
             return
         self.open_task_workspace(task_id=task_id)
 
@@ -9191,21 +9210,21 @@ class CareerAccelerator(QMainWindow):
     def open_selected_task_workspace(self):
         task_id = self.selected_workspace_task_id()
         if task_id is None:
-            self.statusBar().showMessage("Select a task first.", 3200)
+            self._notify("Select a task first.", 3200)
             return
         self.open_task_workspace(task_id=task_id)
 
     def edit_selected_workspace_task(self):
         task_id = self.selected_workspace_task_id()
         if task_id is None:
-            self.statusBar().showMessage("Select a task first.", 3200)
+            self._notify("Select a task first.", 3200)
             return
         self.edit_task(task_id)
 
     def start_selected_workspace_session(self):
         task_id = self.selected_workspace_task_id()
         if task_id is None:
-            self.statusBar().showMessage("Select a task first.", 3200)
+            self._notify("Select a task first.", 3200)
             return
         self.start_session_for_task(task_id)
 
@@ -9231,7 +9250,7 @@ class CareerAccelerator(QMainWindow):
         self.refresh_session_task_choices()
         self.navigate(5)
         self.start_study_timer()
-        self.statusBar().showMessage(
+        self._notify(
             "Study timer started and will be linked to the selected task when logged.",
             5200,
         )
@@ -9393,7 +9412,7 @@ class CareerAccelerator(QMainWindow):
             self.state,
         )
         self.refresh_all(sync_tracks=False)
-        self.statusBar().showMessage(
+        self._notify(
             f"Project {project_id} is now active.",
             3200,
         )
@@ -9448,7 +9467,7 @@ class CareerAccelerator(QMainWindow):
         )
         self.conn.commit()
 
-        self.statusBar().showMessage(
+        self._notify(
             (
                 "Portfolio milestone completed."
                 if completed
@@ -9470,7 +9489,7 @@ class CareerAccelerator(QMainWindow):
         self.refresh_readiness()
 
         if newly_unlocked:
-            self.statusBar().showMessage(
+            self._notify(
                 f"🏆 Achievement unlocked: "
                 f"{newly_unlocked[0]}",
                 5000,
@@ -9503,7 +9522,7 @@ class CareerAccelerator(QMainWindow):
         message = "Portfolio milestone states saved."
         if evidence_changed:
             message += " Demonstrated Evidence updated."
-        self.statusBar().showMessage(
+        self._notify(
             message,
             5200 if evidence_changed else 2200,
         )
@@ -9903,7 +9922,7 @@ class CareerAccelerator(QMainWindow):
     def save_sql_submission(self):
         title = self.sql_selected_title or self.sql_title.text().strip()
         if not title:
-            self.statusBar().showMessage("Select a SQL problem first.", 3200)
+            self._notify("Select a SQL problem first.", 3200)
             return
         readiness = tracks.sql_problem_readiness(self.conn, self.state, title)
         if not readiness["ready"] and not self.conn.execute(
@@ -9920,14 +9939,14 @@ class CareerAccelerator(QMainWindow):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Save Submission", str(exc))
             return
-        self.statusBar().showMessage(
+        self._notify(
             f"Saved {path.name} as {status}. Your submission remains editable.", 4200
         )
 
     def save_sql(self):
         title = self.sql_selected_title or self.sql_title.text().strip()
         if not title:
-            self.statusBar().showMessage("Select a SQL problem first.", 3200)
+            self._notify("Select a SQL problem first.", 3200)
             return
 
         readiness = tracks.sql_problem_readiness(self.conn, self.state, title)
@@ -9963,7 +9982,7 @@ class CareerAccelerator(QMainWindow):
         finally:
             session_guard.restore(self, study_session_snapshot)
 
-        self.statusBar().showMessage(
+        self._notify(
             completion_message
             + " Added to Demonstrated Evidence and selected the next eligible problem.",
             6000,
@@ -9975,7 +9994,7 @@ class CareerAccelerator(QMainWindow):
             or self.sql_title.text().strip()
         )
         if not title:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select a SQL problem first.",
                 3200,
             )
@@ -10008,7 +10027,7 @@ class CareerAccelerator(QMainWindow):
     def open_sql_solution(self):
         title = self.sql_selected_title or self.sql_title.text().strip()
         if not title:
-            self.statusBar().showMessage("Select a SQL problem first.", 3200)
+            self._notify("Select a SQL problem first.", 3200)
             return
         try:
             path, _status = self._persist_sql_submission(completed=False)
@@ -10016,7 +10035,7 @@ class CareerAccelerator(QMainWindow):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Open Submission", str(exc))
             return
-        self.statusBar().showMessage(
+        self._notify(
             f"Saved and opened {path.name} in {editor_name}.", 4200
         )
 
@@ -10092,7 +10111,7 @@ class CareerAccelerator(QMainWindow):
         self.timer_state = "running"
         self.timer.start(1000)
         self.update_timer_visuals(pulse=True)
-        self.statusBar().showMessage(
+        self._notify(
             "Study session started.",
             1800,
         )
@@ -10104,7 +10123,7 @@ class CareerAccelerator(QMainWindow):
         else:
             self.timer_state = "ready"
         self.update_timer_visuals(pulse=True)
-        self.statusBar().showMessage(
+        self._notify(
             "Study session paused.",
             1800,
         )
@@ -10137,7 +10156,7 @@ class CareerAccelerator(QMainWindow):
         self.elapsed_seconds = 0
         self.timer_state = "ready"
         self.update_timer_visuals(pulse=True)
-        self.statusBar().showMessage(
+        self._notify(
             "Study session reset.",
             1800,
         )
@@ -10148,7 +10167,7 @@ class CareerAccelerator(QMainWindow):
         self.session_hours.setText(
             f"{hours:.2f}"
         )
-        self.statusBar().showMessage(
+        self._notify(
             "Current timer value copied into the session log.",
             3500,
         )
@@ -10338,7 +10357,7 @@ class CareerAccelerator(QMainWindow):
         )
         self.conn.commit()
         self.refresh_readiness()
-        self.statusBar().showMessage(
+        self._notify(
             f"Evidence saved: {skill_text}",
             4200,
         )
@@ -10349,7 +10368,7 @@ class CareerAccelerator(QMainWindow):
     ):
         item = self.evidence_list.currentItem()
         if item is None:
-            self.statusBar().showMessage(
+            self._notify(
                 "Select an evidence item first.",
                 3200,
             )
@@ -10586,7 +10605,7 @@ class CareerAccelerator(QMainWindow):
                 week,
                 guide,
                 self.state,
-                max_items=4,
+                max_items=5,
             )
             self.refresh_dashboard(sync_tracks=False)
             self.refresh_planner()
@@ -10595,7 +10614,7 @@ class CareerAccelerator(QMainWindow):
                 f"item(s) generated for {report['focus_date']}."
             )
             self.settings_status.setText(message)
-            self.statusBar().showMessage(message, 7000)
+            self._notify(message, 7000)
             QMessageBox.information(
                 self,
                 "Snapshot Rebuilt",
@@ -10615,130 +10634,14 @@ class CareerAccelerator(QMainWindow):
                 ),
             )
 
-    def reset_progress_details(self):
-        return (
-            "This will permanently reset the active Data Career Accelerator profile.\\n\\n"
-            "The following progress will be cleared:\\n"
-            "• All roadmap and daily-focus completion\\n"
-            "• All portfolio milestones and saved project notes\\n"
-            "• All study sessions, hours, streaks, and productivity scores\\n"
-            "• All completed SQL problems and review dates\\n"
-            "• All achievements and weekly summaries\\n"
-            "• All applications, follow-up dates, and evidence records\\n"
-            "• All retrospective notes and progress dates\\n\\n"
-            "The application will restart at:\\n"
-            "• Week 1 of 12\\n"
-            "• Google Course 1, Module 1\\n"
-            "• Portfolio Project 1\\n"
-            "• 0 study hours and 0 completed tasks\\n"
-            f"• Start date: {date.today().isoformat()}\\n\\n"
-            "A safety database backup will be created first. "
-            "Autosave preferences, focus-goal preferences, and existing backup "
-            "files will be preserved."
-        )
+    def reset_progress_details(self) -> str:
+        return self.first_run.reset_summary_text()
 
-    def confirm_factory_reset(self):
-        first = QMessageBox.warning(
-            self,
-            "Reset All Progress — Confirmation 1 of 3",
-            self.reset_progress_details(),
-            (
-                QMessageBox.StandardButton.Yes
-                | QMessageBox.StandardButton.Cancel
-            ),
-            QMessageBox.StandardButton.Cancel,
-        )
-        if first != QMessageBox.StandardButton.Yes:
-            return
+    def confirm_factory_reset(self) -> None:
+        self.first_run.full_first_run_reset()
 
-        confirmation_text, accepted = QInputDialog.getText(
-            self,
-            "Reset All Progress — Confirmation 2 of 3",
-            "Type RESET ALL PROGRESS exactly to continue:",
-        )
-        if (
-            not accepted
-            or confirmation_text.strip()
-            != "RESET ALL PROGRESS"
-        ):
-            QMessageBox.information(
-                self,
-                "Reset Cancelled",
-                "The confirmation phrase did not match. No data was changed.",
-            )
-            return
-
-        final = QMessageBox.critical(
-            self,
-            "Reset All Progress — Final Confirmation",
-            (
-                "This is the final confirmation.\\n\\n"
-                "Data Career Accelerator will create a safety backup and then erase "
-                "all tracked progress listed in the previous warning. The active "
-                "profile will be rebuilt from the Course 1 starter roadmap.\\n\\n"
-                "Proceed with the irreversible reset?"
-            ),
-            (
-                QMessageBox.StandardButton.Reset
-                | QMessageBox.StandardButton.Cancel
-            ),
-            QMessageBox.StandardButton.Cancel,
-        )
-        if final != QMessageBox.StandardButton.Reset:
-            return
-
-        self.perform_factory_reset()
-
-    def perform_factory_reset(self):
-        self.timer.stop()
-        self.conn.commit()
-        backup_path = create_backup(ROOT)
-
-        try:
-            factory_reset(
-                self.conn,
-                date.today().isoformat(),
-            )
-            migrate_result = migrate(
-                self.conn,
-                ROOT,
-            )
-            planner.seed(self.conn)
-            planner.sync_google_course_progress(
-                self.conn,
-                1,
-            )
-            self.state = state(self.conn)
-            tracks.sync_all(
-                self.conn,
-                self.state,
-            )
-            self.elapsed_seconds = 0
-            self.timer_state = "ready"
-            self.update_timer_visuals()
-            self.refresh_all()
-            self.navigate(0)
-
-            QMessageBox.information(
-                self,
-                "Progress Reset Complete",
-                (
-                    "Data Career Accelerator has been reset to a clean starter profile.\\n\\n"
-                    f"Imported {migrate_result['sprint_tasks']} roadmap tasks and "
-                    f"{migrate_result['project_tasks']} portfolio milestones.\\n\\n"
-                    f"Safety backup:\\n{backup_path}"
-                ),
-            )
-        except Exception as error:
-            QMessageBox.critical(
-                self,
-                "Reset Failed",
-                (
-                    "The reset could not be completed. Your safety backup is available at:\\n"
-                    f"{backup_path}\\n\\nError: {error}"
-                ),
-            )
-            raise
+    def perform_factory_reset(self) -> None:
+        self.first_run.full_first_run_reset()
 
     @staticmethod
     def _format_bytes(value):
@@ -10825,9 +10728,14 @@ class CareerAccelerator(QMainWindow):
         )
         self.refresh_all()
 
+    def _notify(self, message, timeout_ms=3000):
+        notifier = getattr(self, '_overlay_notifier', None)
+        if notifier is not None:
+            notifier.show_message(str(message), int(timeout_ms or 3000))
+
     def autosave(self):
         create_backup(ROOT)
-        self.statusBar().showMessage("Autosave backup created.", 3000)
+        self._notify("Autosave backup created.", 3000)
 
     # ---------- Shortcuts / Command Palette ----------
     def setup_shortcuts(self):

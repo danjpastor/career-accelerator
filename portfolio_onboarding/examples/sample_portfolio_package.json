@@ -1,60 +1,131 @@
 {
   "package_type": "career_accelerator.portfolio_projects",
   "schema_version": "1.0",
-  "package_id": "sample-data-analytics-portfolio",
+  "package_id": "sample-integrated-data-analyst-portfolio",
   "pathway_id": "data_analytics",
   "generated_at": "2026-07-21T12:00:00-04:00",
   "generated_for": {
     "display_name": "Sample Learner",
-    "target_roles": ["Junior Data Analyst"],
-    "experience_summary": "A sample operations professional transitioning into analytics with stakeholder communication and process-improvement experience."
+    "target_roles": [
+      "Junior Data Analyst",
+      "Business Intelligence Analyst"
+    ],
+    "experience_summary": "Operations professional building an integrated data analytics portfolio with spreadsheet, SQL, Python, Power BI, and stakeholder communication evidence."
   },
   "projects": [
     {
-      "project_key": "support-operations",
-      "slug": "support-operations-intelligence",
-      "title": "Customer Support Operations Intelligence",
-      "summary": "Analyze a realistic support operation to improve service levels, staffing coverage, and customer outcomes.",
-      "business_problem": "Support leaders need reliable visibility into demand, response time, resolution quality, and staffing pressure so they can allocate coverage and improve customer outcomes.",
-      "stakeholders": ["Support Operations Manager", "Customer Success Director"],
-      "decisions_supported": ["Adjust staffing coverage", "Prioritize workflow improvements"],
-      "skills": ["SQL", "Data validation", "Dashboard design"],
-      "tools": ["DuckDB", "Power BI"],
-      "portfolio_story": "Demonstrates end-to-end analytics from business framing and data validation through stakeholder reporting and recommendations.",
+      "project_key": "analyst-project-1",
+      "slug": "analyst-project-1-intelligence",
+      "title": "Healthcare Operations Intelligence",
+      "summary": "Complete an end-to-end business analysis using spreadsheets, SQL, Python, Power BI, and reproducible documentation.",
+      "business_problem": "Operational leaders need a validated, reproducible analysis that converts messy source data into trustworthy measures, a decision-focused dashboard, and practical recommendations.",
+      "stakeholders": [
+        "Operations Manager",
+        "Business Intelligence Lead"
+      ],
+      "decisions_supported": [
+        "Prioritize operational improvements",
+        "Allocate staffing and resources"
+      ],
+      "skills": [
+        "Spreadsheet inspection",
+        "SQL data modeling",
+        "Python and pandas",
+        "Power Query and DAX",
+        "Stakeholder communication",
+        "GitHub reproducibility"
+      ],
+      "tools": [
+        "Excel",
+        "DuckDB SQL",
+        "Python",
+        "pandas",
+        "Power BI",
+        "GitHub"
+      ],
+      "portfolio_story": "Demonstrates an integrated analyst workflow from business framing and source inspection through SQL, Python, Power BI, recommendations, and reproducible delivery.",
       "stages": [
         {
-          "name": "Foundation",
+          "name": "End-to-end analyst delivery",
           "milestones": [
             {
-              "label": "Validate source relationships",
-              "description": "Profile source tables, verify candidate keys, and test required many-to-one relationships before analysis.",
-              "definition_of_done": "A saved validation notebook documents duplicates, orphans, and join-cardinality findings.",
-              "estimated_minutes": 180,
-              "starter_path": "notebooks/validate_relationships.ipynb"
+              "label": "Inspect source data",
+              "description": "Inspect source files in a spreadsheet and document grain, fields, missingness, and business assumptions.",
+              "definition_of_done": "A source-inspection log documents every table and issue.",
+              "estimated_minutes": 120
+            },
+            {
+              "label": "Validate and model with SQL",
+              "description": "Write DuckDB SQL to validate keys, relationships, ranges, and create an analysis-ready relational model.",
+              "definition_of_done": "Saved SQL validates every key and produces documented analysis tables.",
+              "estimated_minutes": 240,
+              "starter_path": "sql/starter_analysis.sql"
+            },
+            {
+              "label": "Prepare and analyze with Python",
+              "description": "Use Python and pandas for reproducible cleaning, exploratory analysis, and checks that complement the SQL workflow.",
+              "definition_of_done": "A reproducible Python script creates documented outputs without completing conclusions for the learner.",
+              "estimated_minutes": 240,
+              "starter_path": "python/starter_analysis.py"
+            },
+            {
+              "label": "Build the Power BI solution",
+              "description": "Use Power Query, a relational model, DAX measures, and accessible report pages to answer stakeholder decisions.",
+              "definition_of_done": "A documented Power BI model and dashboard answer the approved questions with tested measures.",
+              "estimated_minutes": 300,
+              "starter_path": "documentation/power_bi_dashboard_build_guide.md"
+            },
+            {
+              "label": "Communicate recommendations",
+              "description": "Translate findings into decision-focused recommendations, limitations, and implementation considerations.",
+              "definition_of_done": "A stakeholder brief separates evidence, assumptions, recommendations, and limitations.",
+              "estimated_minutes": 180
+            },
+            {
+              "label": "Publish reproducibly",
+              "description": "Finalize GitHub documentation, environment instructions, validation evidence, and a concise presentation.",
+              "definition_of_done": "A reviewer can reproduce the workflow and identify the learner's own work.",
+              "estimated_minutes": 180
             }
           ]
         }
       ],
       "datasets": [
         {
-          "dataset_id": "support-operations",
-          "name": "Support Operations Dataset",
-          "description": "Synthetic ticket data representing a multi-channel customer support operation.",
+          "dataset_id": "analyst-project-1-dataset",
+          "name": "Healthcare Operations Intelligence Dataset",
+          "description": "Synthetic operational records with intentional quality issues for realistic validation and analysis.",
           "source_type": "synthetic",
-          "generation_notes": "Include realistic demand spikes, missing values, and duplicate ticket rows.",
+          "generation_notes": "Include missing values, duplicate rows, and one orphaned foreign key.",
           "tables": [
             {
-              "table_name": "tickets",
-              "grain": "One row per support ticket",
+              "table_name": "events",
+              "grain": "One row per operational event",
               "row_count_target": 500,
               "columns": [
                 {
-                  "name": "ticket_id",
+                  "name": "event_id",
                   "data_type": "VARCHAR",
-                  "description": "Unique ticket identifier",
+                  "description": "Unique event identifier",
                   "nullable": false,
                   "key_role": "primary key",
-                  "example": "T-0001"
+                  "example": "E-0001"
+                },
+                {
+                  "name": "event_date",
+                  "data_type": "DATE",
+                  "description": "Event date",
+                  "nullable": false,
+                  "key_role": "",
+                  "example": "2026-01-05"
+                },
+                {
+                  "name": "measure_value",
+                  "data_type": "DOUBLE",
+                  "description": "Operational measure",
+                  "nullable": true,
+                  "key_role": "",
+                  "example": "14.5"
                 }
               ]
             }
@@ -63,20 +134,320 @@
       ],
       "kpis": [
         {
-          "name": "Median resolution time",
-          "definition": "Median elapsed hours from ticket creation to resolution for resolved tickets.",
-          "formula": "MEDIAN(resolution_hours)",
-          "decision_use": "Evaluate whether staffing and workflow changes improve typical resolution performance."
+          "name": "Operational performance rate",
+          "definition": "Validated completed events divided by eligible events at the selected reporting grain.",
+          "formula": "completed_events / eligible_events",
+          "decision_use": "Compare performance and prioritize operational review."
         }
       ],
       "files": [
         {
-          "path": "data/raw/tickets.csv",
-          "content": "ticket_id,created_at,resolution_hours\nT-0001,2026-01-05 09:30:00,14.5\n"
+          "path": "data/raw/events.csv",
+          "content": "event_id,event_date,measure_value\nE-0001,2026-01-05,14.5\n"
         },
         {
-          "path": "notebooks/validate_relationships.ipynb",
-          "content": "{\"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 5}\n"
+          "path": "sql/starter_analysis.sql",
+          "content": "-- Write validation and analysis SQL here.\n"
+        },
+        {
+          "path": "python/starter_analysis.py",
+          "content": "# Write reproducible pandas preparation and analysis here.\n"
+        },
+        {
+          "path": "documentation/power_bi_dashboard_build_guide.md",
+          "content": "# Power BI Build Guide\n\nDocument Power Query steps, relationships, DAX measures, report pages, and validation.\n"
+        }
+      ]
+    },
+    {
+      "project_key": "analyst-project-2",
+      "slug": "analyst-project-2-intelligence",
+      "title": "Workforce Capacity and Cost Intelligence",
+      "summary": "Complete an end-to-end business analysis using spreadsheets, SQL, Python, Power BI, and reproducible documentation.",
+      "business_problem": "Operational leaders need a validated, reproducible analysis that converts messy source data into trustworthy measures, a decision-focused dashboard, and practical recommendations.",
+      "stakeholders": [
+        "Operations Manager",
+        "Business Intelligence Lead"
+      ],
+      "decisions_supported": [
+        "Prioritize operational improvements",
+        "Allocate staffing and resources"
+      ],
+      "skills": [
+        "Spreadsheet inspection",
+        "SQL data modeling",
+        "Python and pandas",
+        "Power Query and DAX",
+        "Stakeholder communication",
+        "GitHub reproducibility"
+      ],
+      "tools": [
+        "Excel",
+        "DuckDB SQL",
+        "Python",
+        "pandas",
+        "Power BI",
+        "GitHub"
+      ],
+      "portfolio_story": "Demonstrates an integrated analyst workflow from business framing and source inspection through SQL, Python, Power BI, recommendations, and reproducible delivery.",
+      "stages": [
+        {
+          "name": "End-to-end analyst delivery",
+          "milestones": [
+            {
+              "label": "Inspect source data",
+              "description": "Inspect source files in a spreadsheet and document grain, fields, missingness, and business assumptions.",
+              "definition_of_done": "A source-inspection log documents every table and issue.",
+              "estimated_minutes": 120
+            },
+            {
+              "label": "Validate and model with SQL",
+              "description": "Write DuckDB SQL to validate keys, relationships, ranges, and create an analysis-ready relational model.",
+              "definition_of_done": "Saved SQL validates every key and produces documented analysis tables.",
+              "estimated_minutes": 240,
+              "starter_path": "sql/starter_analysis.sql"
+            },
+            {
+              "label": "Prepare and analyze with Python",
+              "description": "Use Python and pandas for reproducible cleaning, exploratory analysis, and checks that complement the SQL workflow.",
+              "definition_of_done": "A reproducible Python script creates documented outputs without completing conclusions for the learner.",
+              "estimated_minutes": 240,
+              "starter_path": "python/starter_analysis.py"
+            },
+            {
+              "label": "Build the Power BI solution",
+              "description": "Use Power Query, a relational model, DAX measures, and accessible report pages to answer stakeholder decisions.",
+              "definition_of_done": "A documented Power BI model and dashboard answer the approved questions with tested measures.",
+              "estimated_minutes": 300,
+              "starter_path": "documentation/power_bi_dashboard_build_guide.md"
+            },
+            {
+              "label": "Communicate recommendations",
+              "description": "Translate findings into decision-focused recommendations, limitations, and implementation considerations.",
+              "definition_of_done": "A stakeholder brief separates evidence, assumptions, recommendations, and limitations.",
+              "estimated_minutes": 180
+            },
+            {
+              "label": "Publish reproducibly",
+              "description": "Finalize GitHub documentation, environment instructions, validation evidence, and a concise presentation.",
+              "definition_of_done": "A reviewer can reproduce the workflow and identify the learner's own work.",
+              "estimated_minutes": 180
+            }
+          ]
+        }
+      ],
+      "datasets": [
+        {
+          "dataset_id": "analyst-project-2-dataset",
+          "name": "Workforce Capacity and Cost Intelligence Dataset",
+          "description": "Synthetic operational records with intentional quality issues for realistic validation and analysis.",
+          "source_type": "synthetic",
+          "generation_notes": "Include missing values, duplicate rows, and one orphaned foreign key.",
+          "tables": [
+            {
+              "table_name": "events",
+              "grain": "One row per operational event",
+              "row_count_target": 500,
+              "columns": [
+                {
+                  "name": "event_id",
+                  "data_type": "VARCHAR",
+                  "description": "Unique event identifier",
+                  "nullable": false,
+                  "key_role": "primary key",
+                  "example": "E-0001"
+                },
+                {
+                  "name": "event_date",
+                  "data_type": "DATE",
+                  "description": "Event date",
+                  "nullable": false,
+                  "key_role": "",
+                  "example": "2026-01-05"
+                },
+                {
+                  "name": "measure_value",
+                  "data_type": "DOUBLE",
+                  "description": "Operational measure",
+                  "nullable": true,
+                  "key_role": "",
+                  "example": "14.5"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "kpis": [
+        {
+          "name": "Operational performance rate",
+          "definition": "Validated completed events divided by eligible events at the selected reporting grain.",
+          "formula": "completed_events / eligible_events",
+          "decision_use": "Compare performance and prioritize operational review."
+        }
+      ],
+      "files": [
+        {
+          "path": "data/raw/events.csv",
+          "content": "event_id,event_date,measure_value\nE-0001,2026-01-05,14.5\n"
+        },
+        {
+          "path": "sql/starter_analysis.sql",
+          "content": "-- Write validation and analysis SQL here.\n"
+        },
+        {
+          "path": "python/starter_analysis.py",
+          "content": "# Write reproducible pandas preparation and analysis here.\n"
+        },
+        {
+          "path": "documentation/power_bi_dashboard_build_guide.md",
+          "content": "# Power BI Build Guide\n\nDocument Power Query steps, relationships, DAX measures, report pages, and validation.\n"
+        }
+      ]
+    },
+    {
+      "project_key": "analyst-project-3",
+      "slug": "analyst-project-3-intelligence",
+      "title": "Service Demand and Performance Intelligence",
+      "summary": "Complete an end-to-end business analysis using spreadsheets, SQL, Python, Power BI, and reproducible documentation.",
+      "business_problem": "Operational leaders need a validated, reproducible analysis that converts messy source data into trustworthy measures, a decision-focused dashboard, and practical recommendations.",
+      "stakeholders": [
+        "Operations Manager",
+        "Business Intelligence Lead"
+      ],
+      "decisions_supported": [
+        "Prioritize operational improvements",
+        "Allocate staffing and resources"
+      ],
+      "skills": [
+        "Spreadsheet inspection",
+        "SQL data modeling",
+        "Python and pandas",
+        "Power Query and DAX",
+        "Stakeholder communication",
+        "GitHub reproducibility"
+      ],
+      "tools": [
+        "Excel",
+        "DuckDB SQL",
+        "Python",
+        "pandas",
+        "Power BI",
+        "GitHub"
+      ],
+      "portfolio_story": "Demonstrates an integrated analyst workflow from business framing and source inspection through SQL, Python, Power BI, recommendations, and reproducible delivery.",
+      "stages": [
+        {
+          "name": "End-to-end analyst delivery",
+          "milestones": [
+            {
+              "label": "Inspect source data",
+              "description": "Inspect source files in a spreadsheet and document grain, fields, missingness, and business assumptions.",
+              "definition_of_done": "A source-inspection log documents every table and issue.",
+              "estimated_minutes": 120
+            },
+            {
+              "label": "Validate and model with SQL",
+              "description": "Write DuckDB SQL to validate keys, relationships, ranges, and create an analysis-ready relational model.",
+              "definition_of_done": "Saved SQL validates every key and produces documented analysis tables.",
+              "estimated_minutes": 240,
+              "starter_path": "sql/starter_analysis.sql"
+            },
+            {
+              "label": "Prepare and analyze with Python",
+              "description": "Use Python and pandas for reproducible cleaning, exploratory analysis, and checks that complement the SQL workflow.",
+              "definition_of_done": "A reproducible Python script creates documented outputs without completing conclusions for the learner.",
+              "estimated_minutes": 240,
+              "starter_path": "python/starter_analysis.py"
+            },
+            {
+              "label": "Build the Power BI solution",
+              "description": "Use Power Query, a relational model, DAX measures, and accessible report pages to answer stakeholder decisions.",
+              "definition_of_done": "A documented Power BI model and dashboard answer the approved questions with tested measures.",
+              "estimated_minutes": 300,
+              "starter_path": "documentation/power_bi_dashboard_build_guide.md"
+            },
+            {
+              "label": "Communicate recommendations",
+              "description": "Translate findings into decision-focused recommendations, limitations, and implementation considerations.",
+              "definition_of_done": "A stakeholder brief separates evidence, assumptions, recommendations, and limitations.",
+              "estimated_minutes": 180
+            },
+            {
+              "label": "Publish reproducibly",
+              "description": "Finalize GitHub documentation, environment instructions, validation evidence, and a concise presentation.",
+              "definition_of_done": "A reviewer can reproduce the workflow and identify the learner's own work.",
+              "estimated_minutes": 180
+            }
+          ]
+        }
+      ],
+      "datasets": [
+        {
+          "dataset_id": "analyst-project-3-dataset",
+          "name": "Service Demand and Performance Intelligence Dataset",
+          "description": "Synthetic operational records with intentional quality issues for realistic validation and analysis.",
+          "source_type": "synthetic",
+          "generation_notes": "Include missing values, duplicate rows, and one orphaned foreign key.",
+          "tables": [
+            {
+              "table_name": "events",
+              "grain": "One row per operational event",
+              "row_count_target": 500,
+              "columns": [
+                {
+                  "name": "event_id",
+                  "data_type": "VARCHAR",
+                  "description": "Unique event identifier",
+                  "nullable": false,
+                  "key_role": "primary key",
+                  "example": "E-0001"
+                },
+                {
+                  "name": "event_date",
+                  "data_type": "DATE",
+                  "description": "Event date",
+                  "nullable": false,
+                  "key_role": "",
+                  "example": "2026-01-05"
+                },
+                {
+                  "name": "measure_value",
+                  "data_type": "DOUBLE",
+                  "description": "Operational measure",
+                  "nullable": true,
+                  "key_role": "",
+                  "example": "14.5"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "kpis": [
+        {
+          "name": "Operational performance rate",
+          "definition": "Validated completed events divided by eligible events at the selected reporting grain.",
+          "formula": "completed_events / eligible_events",
+          "decision_use": "Compare performance and prioritize operational review."
+        }
+      ],
+      "files": [
+        {
+          "path": "data/raw/events.csv",
+          "content": "event_id,event_date,measure_value\nE-0001,2026-01-05,14.5\n"
+        },
+        {
+          "path": "sql/starter_analysis.sql",
+          "content": "-- Write validation and analysis SQL here.\n"
+        },
+        {
+          "path": "python/starter_analysis.py",
+          "content": "# Write reproducible pandas preparation and analysis here.\n"
+        },
+        {
+          "path": "documentation/power_bi_dashboard_build_guide.md",
+          "content": "# Power BI Build Guide\n\nDocument Power Query steps, relationships, DAX measures, report pages, and validation.\n"
         }
       ]
     }

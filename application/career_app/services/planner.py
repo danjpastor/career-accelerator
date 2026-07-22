@@ -29,6 +29,7 @@ DEFAULTS = {
 FOCUS_SLOT_ORDER = (
     "Learning",
     "Learning",
+    "Learning",
     "SQL",
     "Portfolio",
 )

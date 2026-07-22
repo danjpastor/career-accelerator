@@ -9,6 +9,8 @@ import sqlite3
 import tempfile
 import zipfile
 
+from .paths import ResetLayout, load_reset_layout
+
 
 @dataclass(frozen=True, slots=True)
 class ResetReport:
@@ -16,32 +18,33 @@ class ResetReport:
     database_tables_cleared: tuple[str, ...]
     removed_paths: tuple[str, ...]
     recreated_paths: tuple[str, ...]
+    runtime_databases_removed: tuple[str, ...]
+    reset_marker_path: Path
 
 
-PROJECTS_README = """# Portfolio Projects
+README_TEMPLATES: dict[str, str | None] = {
+    "portfolio": """# Portfolio Projects
 
 This folder is intentionally blank until a validated Career Accelerator portfolio package is imported during onboarding.
-"""
-
-CAREER_README = """# Career Materials
+""",
+    "career": """# Career Materials
 
 Use the pathway-specific onboarding and job-readiness tools to create resume, LinkedIn, interview, and application materials here.
-"""
-
-WORKSPACES_README = """# Task Workspaces
+""",
+    "workspaces": """# Task Workspaces
 
 Career Accelerator creates learner-owned task notes and generated workspaces here as work begins.
-"""
-
-DATALemur_README = """# DataLemur Solutions
+""",
+    "datalemur": """# DataLemur Solutions
 
 Career Accelerator creates one learner-owned SQL file per opened interview problem. This folder is intentionally blank after a full first-run reset.
-"""
-
-SUBMISSIONS_README = """# Learner Submissions
+""",
+    "submissions": """# Learner Submissions
 
 Career Accelerator creates learner-owned submissions here. Starter exercises, datasets, and validation guides remain in their separate folders.
-"""
+""",
+    "empty": None,
+}
 
 SQL_LOG_TEMPLATE = """# SQL Practice Log
 
@@ -49,73 +52,18 @@ Use Career Accelerator to track SQL practice and completed submissions.
 """
 
 
-# Entire directories whose contents are learner-owned or preference-specific.
-CLEAR_AND_RECREATE: tuple[tuple[str, str | None], ...] = (
-    ("projects", PROJECTS_README),
-    ("career", CAREER_README),
-    ("workspaces", WORKSPACES_README),
-    ("resources/sql/datalemur", DATALemur_README),
-    ("practice/duckdb/submissions", SUBMISSIONS_README),
-    ("practice/applied/submissions", SUBMISSIONS_README),
-    ("exercise_packs/installed", None),
-    ("archive", None),
-    ("backups", None),
-)
-
-# Runtime files that are safe to regenerate.
-REMOVE_FILES: tuple[str, ...] = (
-    "practice/duckdb/career_practice.duckdb",
-    "practice/duckdb/career_practice.duckdb.wal",
-    "practice/duckdb/career_practice.duckdb-shm",
-    "practice/duckdb/career_practice.duckdb-wal",
-    "documentation/PROGRESS_SNAPSHOT.md",
-    "PROGRESS_SNAPSHOT.md",
-)
-
-# Files created inside otherwise static weekly sprint folders.
-DYNAMIC_SUBMISSION_GLOBS: tuple[str, ...] = (
-    "practice/**/submissions",
-)
-
-WEEKLY_GENERATED_GLOBS: tuple[str, ...] = (
-    "weeks/week-*/RETROSPECTIVE.md",
-    "weeks/week-*/STUDY_PLAN.md",
-    "weeks/week-*/REFLECTION*.md",
-    "weeks/week-*/CAREER_TRANSITION_REFLECTION.md",
-    "weeks/week-*/artifacts/*",
-)
-
-# Personal paths included in the safety archive before deletion.
-BACKUP_PATHS: tuple[str, ...] = (
-    "projects",
-    "career",
-    "workspaces",
-    "resources/sql/datalemur",
-    "resources/sql/SQL_PRACTICE_LOG.md",
-    "practice/duckdb/submissions",
-    "practice/applied/submissions",
-    "practice/duckdb/career_practice.duckdb",
-    "exercise_packs/installed",
-    "weeks",
-    "data/portfolio_catalog.json",
-    "documentation/PROGRESS_SNAPSHOT.md",
-    "PROGRESS_SNAPSHOT.md",
-    "archive",
-    "backups",
-)
-
-
-def _safe_relative(root: Path, path: Path) -> str:
+def _lexical_relative(root: Path, path: Path) -> str:
     try:
-        return path.resolve().relative_to(root.resolve()).as_posix()
+        return path.absolute().relative_to(root.absolute()).as_posix()
     except ValueError:
         return str(path)
 
 
 def _remove_path(path: Path, removed: list[str], root: Path) -> None:
+    """Remove the configured entry itself; never follow a directory symlink."""
     if not path.exists() and not path.is_symlink():
         return
-    relative = _safe_relative(root, path)
+    relative = _lexical_relative(root, path)
     if path.is_dir() and not path.is_symlink():
         shutil.rmtree(path)
     else:
@@ -123,9 +71,10 @@ def _remove_path(path: Path, removed: list[str], root: Path) -> None:
     removed.append(relative)
 
 
-def _write_readme(directory: Path, content: str | None) -> list[Path]:
+def _write_scaffold(directory: Path, template_name: str | None) -> list[Path]:
     directory.mkdir(parents=True, exist_ok=True)
     created = [directory]
+    content = README_TEMPLATES.get(template_name or "empty")
     if content is not None:
         readme = directory / "README.md"
         readme.write_text(content.rstrip() + "\n", encoding="utf-8")
@@ -137,66 +86,79 @@ def _write_readme(directory: Path, content: str | None) -> list[Path]:
     return created
 
 
-def clean_personal_files(repo_root: Path) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    """Remove learner-specific files and rebuild only safe empty scaffolding."""
-    root = Path(repo_root).resolve()
+def _safe_glob(layout: ResetLayout, pattern: str, *, field: str):
+    for path in layout.glob(pattern, field=field):
+        # The glob is lexically rooted. Symlinks are removed as links and not traversed.
+        try:
+            path.absolute().relative_to(layout.root.absolute())
+        except ValueError as exc:
+            raise RuntimeError(f"Reset glob escaped the application root: {path}") from exc
+        yield path
+
+
+def clean_personal_files(
+    application_root: Path,
+    *,
+    manifest_path: Path | None = None,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Remove learner-specific files and rebuild only configured safe scaffolding."""
+    layout = load_reset_layout(application_root, manifest_path)
+    root = layout.root
     removed: list[str] = []
     recreated: list[str] = []
+    recreated_roots: set[Path] = set()
 
-    for relative, readme in CLEAR_AND_RECREATE:
-        target = root / relative
+    for index, item in enumerate(layout.mappings("clear_and_recreate")):
+        target = layout.path(str(item["path"]), field=f"clear_and_recreate[{index}].path")
         _remove_path(target, removed, root)
-        for created in _write_readme(target, readme):
-            recreated.append(_safe_relative(root, created))
+        template = str(item.get("template", "empty"))
+        if template not in README_TEMPLATES:
+            raise RuntimeError(f"Unknown reset scaffold template: {template}")
+        for created in _write_scaffold(target, template):
+            recreated.append(_lexical_relative(root, created))
+        recreated_roots.add(target.absolute())
 
-    # Keep expected subfolders available for future pathway-generated career material.
-    for relative in (
-        "career/resume",
-        "career/linkedin",
-        "career/interview",
-        "career/applications",
-        "workspaces/tasks",
-    ):
-        target = root / relative
+    for index, item in enumerate(layout.mappings("scaffold_directories")):
+        target = layout.path(str(item["path"]), field=f"scaffold_directories[{index}].path")
         target.mkdir(parents=True, exist_ok=True)
         keep = target / ".gitkeep"
         keep.write_text("", encoding="utf-8")
-        recreated.extend((_safe_relative(root, target), _safe_relative(root, keep)))
+        recreated.extend((_lexical_relative(root, target), _lexical_relative(root, keep)))
 
-    for relative in REMOVE_FILES:
-        _remove_path(root / relative, removed, root)
+    for index, relative in enumerate(layout.strings("remove_files")):
+        _remove_path(layout.path(relative, field=f"remove_files[{index}]"), removed, root)
 
-    fixed_submission_paths = {
-        (root / relative).resolve()
-        for relative, _ in CLEAR_AND_RECREATE
-        if relative.endswith("/submissions")
-    }
-    for pattern in DYNAMIC_SUBMISSION_GLOBS:
-        for directory in sorted(root.glob(pattern)):
-            if directory.resolve() in fixed_submission_paths:
-                continue
-            _remove_path(directory, removed, root)
-            for created in _write_readme(directory, SUBMISSIONS_README):
-                recreated.append(_safe_relative(root, created))
-
-    for pattern in WEEKLY_GENERATED_GLOBS:
-        for path in sorted(root.glob(pattern)):
-            if path.name == ".gitkeep":
-                continue
+    for index, pattern in enumerate(layout.strings("remove_globs")):
+        for path in sorted(_safe_glob(layout, pattern, field=f"remove_globs[{index}]")):
             _remove_path(path, removed, root)
 
-    sql_log = root / "resources" / "sql" / "SQL_PRACTICE_LOG.md"
+    # Generated submission directories can exist under future pathway-specific practice
+    # trees. Preserve static exercises/datasets and only rebuild the matched submission root.
+    for index, pattern in enumerate(layout.strings("generated_file_globs")):
+        for path in sorted(_safe_glob(layout, pattern, field=f"generated_file_globs[{index}]")):
+            if path.name == ".gitkeep":
+                continue
+            path_absolute = path.absolute()
+            if path_absolute in recreated_roots:
+                continue
+            is_submission_directory = path.is_dir() and path.name in {"submissions", "solutions"}
+            _remove_path(path, removed, root)
+            if is_submission_directory:
+                for created in _write_scaffold(path, "submissions"):
+                    recreated.append(_lexical_relative(root, created))
+
+    sql_log = layout.configured_path("sql_practice_log")
     sql_log.parent.mkdir(parents=True, exist_ok=True)
     sql_log.write_text(SQL_LOG_TEMPLATE, encoding="utf-8")
-    recreated.append(_safe_relative(root, sql_log))
+    recreated.append(_lexical_relative(root, sql_log))
 
-    catalog = root / "data" / "portfolio_catalog.json"
+    catalog = layout.configured_path("portfolio_catalog")
     catalog.parent.mkdir(parents=True, exist_ok=True)
     catalog.write_text(
         json.dumps(
             {
                 "schema_version": "1.0",
-                "generated_by": "Career Accelerator first-run reset",
+                "generated_by": "Career Accelerator full first-run reset",
                 "projects": [],
             },
             indent=2,
@@ -204,7 +166,7 @@ def clean_personal_files(repo_root: Path) -> tuple[tuple[str, ...], tuple[str, .
         + "\n",
         encoding="utf-8",
     )
-    recreated.append(_safe_relative(root, catalog))
+    recreated.append(_lexical_relative(root, catalog))
 
     return tuple(sorted(set(removed))), tuple(sorted(set(recreated)))
 
@@ -219,27 +181,46 @@ def _database_snapshot(conn: sqlite3.Connection, destination: Path) -> None:
         target.close()
 
 
+def _archive_path(zipped: zipfile.ZipFile, source: Path, root: Path, relative: str) -> None:
+    if not source.exists() and not source.is_symlink():
+        return
+    if source.is_symlink():
+        # Record the link target as text without reading outside the application root.
+        zipped.writestr(f"repository/{relative}.symlink.txt", str(source.readlink()))
+        return
+    if source.is_file():
+        zipped.write(source, f"repository/{relative}")
+        return
+    for path in sorted(source.rglob("*")):
+        if path.is_symlink():
+            link_relative = path.relative_to(root).as_posix()
+            zipped.writestr(f"repository/{link_relative}.symlink.txt", str(path.readlink()))
+        elif path.is_file():
+            zipped.write(path, f"repository/{path.relative_to(root).as_posix()}")
+
+
 def create_external_reset_backup(
     conn: sqlite3.Connection,
-    repo_root: Path,
+    application_root: Path,
     *,
     destination_directory: Path | None = None,
+    manifest_path: Path | None = None,
 ) -> Path:
-    """Create a safety archive outside the repository before destructive cleanup."""
-    root = Path(repo_root).resolve()
+    """Create a safety archive outside the application root before destructive cleanup."""
+    layout = load_reset_layout(application_root, manifest_path)
+    root = layout.root
+    default_name = str(layout.raw.get("external_backup_directory_name") or "Career-Accelerator-Reset-Backups")
     destination_root = (
         Path(destination_directory).expanduser().resolve()
         if destination_directory
-        else root.parent / "Career-Accelerator-Reset-Backups"
+        else root.parent / default_name
     )
     try:
         destination_root.relative_to(root)
     except ValueError:
         pass
     else:
-        raise ValueError(
-            "The full-reset backup destination must be outside the Career Accelerator repository."
-        )
+        raise ValueError("The full-reset backup destination must be outside the application root.")
     destination_root.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     archive = destination_root / f"Career-Accelerator-Pre-Reset-{stamp}.zip"
@@ -250,11 +231,12 @@ def create_external_reset_backup(
 
     with tempfile.TemporaryDirectory(prefix="career-accelerator-reset-") as temporary:
         temp_root = Path(temporary)
-        database_copy = temp_root / "data" / "career_accelerator.db"
+        database_copy = temp_root / "database" / "active_application_database.db"
         _database_snapshot(conn, database_copy)
         manifest = {
             "created_at": datetime.now().isoformat(timespec="seconds"),
-            "source_repository": str(root),
+            "source_application_root": str(root),
+            "reset_manifest": str(layout.manifest_path),
             "purpose": "Safety backup created immediately before a full first-run reset.",
         }
         (temp_root / "RESET_BACKUP_MANIFEST.json").write_text(
@@ -265,21 +247,14 @@ def create_external_reset_backup(
             for path in sorted(temp_root.rglob("*")):
                 if path.is_file():
                     zipped.write(path, path.relative_to(temp_root).as_posix())
-            for relative in BACKUP_PATHS:
-                source = root / relative
-                if not source.exists():
-                    continue
-                if source.is_file():
-                    zipped.write(source, f"repository/{relative}")
-                    continue
-                for path in sorted(source.rglob("*")):
-                    if path.is_file():
-                        zipped.write(path, f"repository/{path.relative_to(root).as_posix()}")
+            for index, relative in enumerate(layout.strings("backup_paths")):
+                source = layout.path(relative, field=f"backup_paths[{index}]")
+                _archive_path(zipped, source, root, relative)
     return archive
 
 
 def wipe_database(conn: sqlite3.Connection) -> tuple[str, ...]:
-    """Delete all application rows, including unknown future progress tables."""
+    """Delete all rows from every application table, including future progress tables."""
     conn.commit()
     conn.execute("PRAGMA foreign_keys=OFF")
     rows = conn.execute(
@@ -317,29 +292,95 @@ def wipe_database(conn: sqlite3.Connection) -> tuple[str, ...]:
     return tuple(tables)
 
 
+def _active_database_path(conn: sqlite3.Connection) -> Path | None:
+    try:
+        rows = conn.execute("PRAGMA database_list").fetchall()
+    except sqlite3.Error:
+        return None
+    for row in rows:
+        if str(row[1]) == "main" and str(row[2] or "").strip():
+            return Path(str(row[2])).expanduser().resolve()
+    return None
+
+
+def remove_runtime_databases(
+    conn: sqlite3.Connection,
+    layout: ResetLayout,
+) -> tuple[str, ...]:
+    """Remove configured secondary SQLite/DuckDB stores without deleting the open DB."""
+    active = _active_database_path(conn)
+    candidates: list[Path] = []
+    for index, relative in enumerate(layout.strings("runtime_database_files")):
+        candidates.append(layout.path(relative, field=f"runtime_database_files[{index}]"))
+    for index, pattern in enumerate(layout.strings("runtime_database_globs")):
+        candidates.extend(_safe_glob(layout, pattern, field=f"runtime_database_globs[{index}]"))
+
+    removed: list[str] = []
+    for path in sorted(set(candidates)):
+        try:
+            resolved = path.resolve()
+        except OSError:
+            resolved = path.absolute()
+        if active is not None and resolved == active:
+            continue
+        if not path.exists() and not path.is_symlink():
+            continue
+        try:
+            _remove_path(path, removed, layout.root)
+        except PermissionError as exc:
+            raise RuntimeError(f"Could not remove runtime database {path}. Close tools using it and retry.") from exc
+    return tuple(sorted(set(removed)))
+
+
+def write_reset_marker(layout: ResetLayout) -> Path:
+    marker = layout.configured_path("reset_marker")
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    temporary = marker.with_suffix(marker.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0",
+                "created_at": datetime.now().isoformat(timespec="seconds"),
+                "action": "force_first_run_on_next_start",
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(marker)
+    return marker
+
+
 def perform_full_first_run_reset(
     conn: sqlite3.Connection,
-    repo_root: Path,
+    application_root: Path,
     *,
     backup_destination: Path | None = None,
     create_backup: bool = True,
+    manifest_path: Path | None = None,
 ) -> ResetReport:
-    """Back up externally, wipe all learner data, and restore blank onboarding scaffolding."""
-    root = Path(repo_root).resolve()
+    """Back up externally, wipe all learner data, and force Step 1 on next launch."""
+    layout = load_reset_layout(application_root, manifest_path)
     backup_path = (
         create_external_reset_backup(
             conn,
-            root,
+            layout.root,
             destination_directory=backup_destination,
+            manifest_path=layout.manifest_path,
         )
         if create_backup
         else None
     )
     tables = wipe_database(conn)
-    removed, recreated = clean_personal_files(root)
+    runtime_removed = remove_runtime_databases(conn, layout)
+    removed, recreated = clean_personal_files(layout.root, manifest_path=layout.manifest_path)
+    marker = write_reset_marker(layout)
     return ResetReport(
         backup_path=backup_path,
         database_tables_cleared=tables,
         removed_paths=removed,
         recreated_paths=recreated,
+        runtime_databases_removed=runtime_removed,
+        reset_marker_path=marker,
     )

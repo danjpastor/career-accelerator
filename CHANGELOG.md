@@ -266,3 +266,31 @@
 - Rebuilt Full First-Run Reset to create an external safety ZIP, clear every application table, remove learner-owned files, and recreate safe onboarding scaffolding.
 - Preserved application code, pathway definitions, curriculum, starter templates, datasets, exercises, validation guides, and onboarding assets during a full reset.
 - Added clean-repository packaging scripts for alternate branches and new users.
+
+## 10.20.2 — Reset Reliability and Relocatable Paths
+
+- Added the approved Option 2 logo family for neutral, Data Analytics, IT Support, Cybersecurity, and Software Engineering states.
+- Added pathway-specific stacked selection logos, horizontal application logos, program icons, and Windows app icons.
+- Added locked first-run pathway selection with neutral Career Accelerator branding.
+- Enabled the Data Analytics pathway and retained the other pathways as configuration-driven shells.
+- Added a ChatGPT portfolio setup export and validated `.career-portfolio.json` importer.
+- Added dynamic project names/directories while retaining the existing three-project catalog as an existing-user migration fallback.
+- Added automatic existing-user detection so established profiles are not prompted or overwritten.
+- Added a one-time guided application tour and Setup menu actions to restart it.
+- Rebuilt Full First-Run Reset to create an external safety ZIP, clear every application table, remove learner-owned files, and recreate safe onboarding scaffolding.
+- Preserved application code, pathway definitions, curriculum, starter templates, datasets, exercises, validation guides, and onboarding assets during a full reset.
+- Added clean-repository packaging scripts for alternate branches and new users.
+
+## 10.20.5 — Fixed 90-Day Completion and Dashboard Reliability
+
+- Added a fixed Day 90 completion contract; adaptive scheduling may reprioritize work but cannot extend the deadline.
+- Added deadline-derived quotas for Google, SQL/DuckDB, Applied Labs, Accelerator Academy, and all three portfolio projects.
+- Added a 228-hour standard scope that fits the 18-hours-per-week, 90-day capacity with a small buffer.
+- Required exactly three integrated portfolio projects, each combining spreadsheet inspection, SQL, Python/pandas, Power BI/DAX/Power Query, GitHub reproducibility, and stakeholder communication.
+- Added 15–30 hour per-project and 70-hour total portfolio limits.
+- Added preferred-name collection during Step 1 onboarding and dynamic Dashboard greetings.
+- Replaced layout-consuming status-bar messages with a transient overlay notifier.
+- Restored two-line Today’s Focus rows with Today, Week, and Day n/90 pacing.
+- Expanded Today’s Focus to three Learning slots plus SQL and Portfolio.
+- Restored approved horizontal logo proportions with aspect-ratio-safe scaling.
+- Retained the cumulative pathway onboarding, one-time tour, portfolio importer, comprehensive reset, and fresh-repository builder.

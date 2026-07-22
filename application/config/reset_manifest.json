@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "pathways_root": "pathways",
+  "projects_root": "projects",
+  "portfolio_import_staging": ".portfolio-import-staging",
+  "portfolio_import_backup": "backups/portfolio-import",
+  "portfolio_import_archive": "archive/portfolio-import",
+  "portfolio_setup_template": "portfolio_onboarding/chatgpt_portfolio_setup.md",
+  "portfolio_package_schema": "portfolio_onboarding/portfolio_package.schema.json",
+  "primary_database_files": [
+    "data/career_accelerator.db",
+    "data/career_accelerator.db-wal",
+    "data/career_accelerator.db-shm"
+  ],
+  "reset_marker": "data/onboarding_reset_pending.json",
+  "portfolio_catalog": "data/portfolio_catalog.json",
+  "sql_practice_log": "resources/sql/SQL_PRACTICE_LOG.md",
+  "external_backup_directory_name": "Career-Accelerator-Reset-Backups",
+  "clear_and_recreate": [
+    {
+      "path": "projects",
+      "template": "portfolio"
+    },
+    {
+      "path": "career",
+      "template": "career"
+    },
+    {
+      "path": "workspaces",
+      "template": "workspaces"
+    },
+    {
+      "path": "resources/sql/datalemur",
+      "template": "datalemur"
+    },
+    {
+      "path": "practice/duckdb/submissions",
+      "template": "submissions"
+    },
+    {
+      "path": "practice/applied/submissions",
+      "template": "submissions"
+    },
+    {
+      "path": "exercise_packs/installed",
+      "template": "empty"
+    },
+    {
+      "path": "archive",
+      "template": "empty"
+    },
+    {
+      "path": "backups",
+      "template": "empty"
+    }
+  ],
+  "scaffold_directories": [
+    {
+      "path": "career/resume"
+    },
+    {
+      "path": "career/linkedin"
+    },
+    {
+      "path": "career/interview"
+    },
+    {
+      "path": "career/applications"
+    },
+    {
+      "path": "workspaces/tasks"
+    }
+  ],
+  "remove_files": [
+    "documentation/PROGRESS_SNAPSHOT.md",
+    "PROGRESS_SNAPSHOT.md"
+  ],
+  "remove_globs": [
+    "data/*progress*.json",
+    "data/*snapshot*.json",
+    "data/learner_*.json",
+    "data/user_*.json"
+  ],
+  "runtime_database_files": [
+    "data/career_private.db",
+    "data/career_private.db-wal",
+    "data/career_private.db-shm",
+    "practice/duckdb/career_practice.duckdb",
+    "practice/duckdb/career_practice.duckdb.wal",
+    "practice/duckdb/career_practice.duckdb-shm",
+    "practice/duckdb/career_practice.duckdb-wal"
+  ],
+  "runtime_database_globs": [
+    "practice/duckdb/submissions/**/*.duckdb",
+    "practice/duckdb/submissions/**/*.db"
+  ],
+  "generated_file_globs": [
+    "practice/**/submissions",
+    "weeks/week-*/RETROSPECTIVE.md",
+    "weeks/week-*/STUDY_PLAN.md",
+    "weeks/week-*/REFLECTION*.md",
+    "weeks/week-*/CAREER_TRANSITION_REFLECTION.md",
+    "weeks/week-*/artifacts/*"
+  ],
+  "backup_paths": [
+    "projects",
+    "career",
+    "workspaces",
+    "resources/sql/datalemur",
+    "resources/sql/SQL_PRACTICE_LOG.md",
+    "practice/duckdb/submissions",
+    "practice/applied/submissions",
+    "practice/duckdb/career_practice.duckdb",
+    "exercise_packs/installed",
+    "weeks",
+    "data/portfolio_catalog.json",
+    "data/career_private.db",
+    "documentation/PROGRESS_SNAPSHOT.md",
+    "PROGRESS_SNAPSHOT.md",
+    "archive",
+    "backups"
+  ]
+}

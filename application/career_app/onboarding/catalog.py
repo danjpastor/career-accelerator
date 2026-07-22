@@ -5,9 +5,12 @@ import json
 from pathlib import Path
 from typing import Any, Iterable
 
+from .paths import discover_application_root, load_reset_layout
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_PATHWAY_ROOT = REPO_ROOT / "pathways"
+
+def _default_pathway_root() -> Path:
+    root = discover_application_root(Path(__file__))
+    return load_reset_layout(root).configured_path("pathways_root")
 
 
 class PathwayCatalogError(ValueError):
@@ -167,7 +170,7 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def load_pathway_catalog(pathway_root: Path | None = None) -> PathwayCatalog:
-    root = Path(pathway_root or DEFAULT_PATHWAY_ROOT)
+    root = Path(pathway_root) if pathway_root is not None else _default_pathway_root()
     index_path = root / "index.json"
     index = _load_json(index_path)
 

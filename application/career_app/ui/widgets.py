@@ -1568,3 +1568,47 @@ class MiniSparkline(QWidget):
         painter.setBrush(QColor(COLORS["purple"]))
         painter.setPen(Qt.NoPen)
         painter.drawEllipse(points[-1], 3, 3)
+
+# BEGIN Career Accelerator FocusRow height compatibility
+# Installed by the onboarding patch. This runtime guard supports FocusRow
+# implementations whose internal density code differs from earlier releases.
+def _career_accelerator_install_focus_row_height_guard():
+    focus_row_cls = globals().get("FocusRow")
+    if focus_row_cls is None or getattr(
+        focus_row_cls, "_career_accelerator_height_guard_installed", False
+    ):
+        return
+
+    minimum_height = 78
+    original_set_fixed_height = getattr(focus_row_cls, "setFixedHeight", None)
+    original_show_event = getattr(focus_row_cls, "showEvent", None)
+
+    if callable(original_set_fixed_height):
+        def _career_accelerator_set_fixed_height(self, height):
+            try:
+                height = max(minimum_height, int(height))
+            except (TypeError, ValueError):
+                height = minimum_height
+            return original_set_fixed_height(self, height)
+
+        focus_row_cls.setFixedHeight = _career_accelerator_set_fixed_height
+
+    def _career_accelerator_show_event(self, event):
+        if callable(original_show_event):
+            original_show_event(self, event)
+        try:
+            if self.maximumHeight() < minimum_height:
+                self.setMaximumHeight(16777215)
+            if self.minimumHeight() < minimum_height:
+                self.setMinimumHeight(minimum_height)
+            self.updateGeometry()
+        except (AttributeError, RuntimeError, TypeError):
+            pass
+
+    focus_row_cls.showEvent = _career_accelerator_show_event
+    focus_row_cls._career_accelerator_height_guard_installed = True
+
+
+_career_accelerator_install_focus_row_height_guard()
+# END Career Accelerator FocusRow height compatibility
+

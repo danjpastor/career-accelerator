@@ -11,12 +11,16 @@ from typing import Any, Iterable
 import uuid
 
 from .portfolio_catalog import apply_runtime_catalog, write_project_catalog
+from .paths import load_reset_layout
 from .state import KEY_PORTFOLIO_STATUS, recompute_completion, set_settings
 
 
 PACKAGE_TYPE = "career_accelerator.portfolio_projects"
 SUPPORTED_SCHEMA_VERSIONS = {"1.0"}
 MAX_PROJECTS = 5
+MIN_PROJECT_MINUTES = 900
+MAX_PROJECT_MINUTES = 1_800
+MAX_PORTFOLIO_MINUTES = 4_200
 MAX_TEXT_FILE_BYTES = 5 * 1024 * 1024
 ALLOWED_TEXT_EXTENSIONS = {
     ".md",
@@ -359,6 +363,112 @@ def _normalize_files(project: dict[str, Any], context: str) -> list[dict[str, st
     return normalized
 
 
+INTEGRATED_CAPABILITIES = {
+    "SQL": (" sql", "sql ", "duckdb", "joins", "querying"),
+    "Python/pandas": ("python", "pandas", "jupyter", ".py", ".ipynb"),
+    "Power BI/DAX": ("power bi", "power query", "dax", "dimensional model"),
+    "Spreadsheet inspection": ("excel", "google sheets", "spreadsheet", "source inspection"),
+    "GitHub/reproducibility": ("github", " git", "repository", "reproducib"),
+    "Stakeholder communication": (
+        "stakeholder",
+        "presentation",
+        "executive summary",
+        "walkthrough",
+        "recommendation",
+    ),
+}
+
+
+def _project_capability_text(project: dict[str, Any]) -> str:
+    payload = {
+        "title": project.get("title", ""),
+        "summary": project.get("summary", ""),
+        "skills": project.get("skills", []),
+        "tools": project.get("tools", []),
+        "milestones": project.get("milestones", []),
+        "files": [item.get("path", "") for item in project.get("files", [])],
+        "decisions_supported": project.get("decisions_supported", []),
+        "portfolio_story": project.get("portfolio_story", ""),
+    }
+    return " " + json.dumps(payload, ensure_ascii=False).casefold() + " "
+
+
+def _validate_integrated_capabilities(project: dict[str, Any], context: str) -> None:
+    text = _project_capability_text(project)
+    missing = [
+        label
+        for label, keywords in INTEGRATED_CAPABILITIES.items()
+        if not any(keyword.casefold() in text for keyword in keywords)
+    ]
+
+    tool_text = " ".join(project.get("tools", [])).casefold()
+    required_tools = {
+        "SQL": ("sql", "duckdb"),
+        "Python/pandas": ("python", "pandas"),
+        "Power BI": ("power bi",),
+        "Spreadsheet": ("excel", "google sheets", "spreadsheet"),
+        "Git/GitHub": ("git", "github"),
+    }
+    for label, keywords in required_tools.items():
+        if not any(keyword in tool_text for keyword in keywords) and label not in missing:
+            missing.append(label)
+
+    file_paths = [str(item.get("path", "")).casefold() for item in project.get("files", [])]
+    if not any(path.endswith(".sql") for path in file_paths):
+        missing.append("SQL starter file")
+    if not any(path.endswith((".py", ".ipynb")) for path in file_paths):
+        missing.append("Python starter file")
+    if not any(
+        "power_bi" in path or "power-bi" in path or "dashboard" in path
+        for path in file_paths
+    ):
+        missing.append("Power BI/dashboard build guide")
+
+    if missing:
+        raise PortfolioImportError(
+            f"{context} must be an end-to-end analyst project. Missing integrated "
+            "capabilities or starter evidence: " + ", ".join(dict.fromkeys(missing))
+        )
+
+    project_minutes = sum(
+        int(item.get("estimated_minutes", 0) or 0)
+        for item in project.get("milestones", [])
+    )
+    if not MIN_PROJECT_MINUTES <= project_minutes <= MAX_PROJECT_MINUTES:
+        raise PortfolioImportError(
+            f"{context} must be scoped to {MIN_PROJECT_MINUTES // 60}-"
+            f"{MAX_PROJECT_MINUTES // 60} hours so all three projects fit the fixed "
+            f"90-day program; received {project_minutes / 60:.1f} hours."
+        )
+
+
+def _capability_matrix(project: dict[str, Any]) -> str:
+    text = _project_capability_text(project)
+    lines = [
+        f"# {project['title']} — Analyst Capability Matrix",
+        "",
+        "Every project is expected to combine the full analyst workflow. Use this checklist to link completed work to evidence.",
+        "",
+        "| Capability | Required evidence | Status |",
+        "|---|---|---|",
+    ]
+    evidence = {
+        "SQL": "Validated queries, joins, aggregations, and documented checks",
+        "Python/pandas": "Reproducible preparation, validation, automation, or analysis",
+        "Power BI/DAX": "Data model, measures, stakeholder dashboard, and design rationale",
+        "Spreadsheet inspection": "Documented source review and initial quality observations",
+        "GitHub/reproducibility": "README, environment/setup steps, organized files, and reproducible workflow",
+        "Stakeholder communication": "Findings, recommendations, limitations, and presentation",
+    }
+    for label, keywords in INTEGRATED_CAPABILITIES.items():
+        included = any(keyword.casefold() in text for keyword in keywords)
+        lines.append(
+            f"| {label} | {evidence[label]} | {'Planned' if included else 'Missing'} |"
+        )
+    lines.extend(["", "Replace **Planned** with links to completed evidence as the project progresses.", ""])
+    return "\n".join(lines)
+
+
 def validate_package(raw: Any) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise PortfolioImportError("The portfolio import must contain a JSON object")
@@ -402,8 +512,11 @@ def validate_package(raw: Any) -> dict[str, Any]:
     }
 
     raw_projects = raw.get("projects")
-    if not isinstance(raw_projects, list) or not 1 <= len(raw_projects) <= MAX_PROJECTS:
-        raise PortfolioImportError(f"projects must contain between 1 and {MAX_PROJECTS} projects")
+    if not isinstance(raw_projects, list) or len(raw_projects) != 3:
+        raise PortfolioImportError(
+            "Data Analytics portfolio packages must contain exactly three projects so "
+            "the fixed 90-day plan can schedule the complete portfolio."
+        )
 
     projects: list[dict[str, Any]] = []
     seen_keys: set[str] = set()
@@ -481,6 +594,22 @@ def validate_package(raw: Any) -> dict[str, Any]:
                 "files": _normalize_files(project, context),
             }
         )
+        _validate_integrated_capabilities(projects[-1], context)
+
+    total_portfolio_minutes = sum(
+        int(milestone["estimated_minutes"])
+        for project in projects
+        for milestone in project["milestones"]
+    )
+    if total_portfolio_minutes > MAX_PORTFOLIO_MINUTES:
+        raise PortfolioImportError(
+            "The three projects require "
+            f"{total_portfolio_minutes / 60:.1f} hours. The fixed 90-day program allows "
+            f"at most {MAX_PORTFOLIO_MINUTES / 60:.1f} portfolio hours so SQL, Python, "
+            "Power BI, foundational learning, practice, and job readiness can also be completed. "
+            "Reduce dataset size, KPI count, or analysis breadth without removing the required toolchain."
+        )
+
     generated_at = _require_text(raw, "generated_at", "package", maximum=100)
     try:
         datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
@@ -548,11 +677,11 @@ def _snapshot_table(conn: sqlite3.Connection, table: str) -> list[dict[str, Any]
     return [_row_dict(row, columns) for row in cursor.fetchall()]
 
 
-def _create_backup(conn: sqlite3.Connection, repo_root: Path) -> Path | None:
+def _create_backup(conn: sqlite3.Connection, backup_root: Path) -> Path | None:
     if not _portfolio_is_populated(conn):
         return None
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    backup_dir = repo_root / "backups" / "portfolio-import" / timestamp
+    backup_dir = backup_root / timestamp
     backup_dir.mkdir(parents=True, exist_ok=False)
     payload = {
         "created_at": datetime.now().isoformat(timespec="seconds"),
@@ -693,6 +822,7 @@ def _normalized_project_files(project: dict[str, Any]) -> dict[str, str]:
     files = {item["path"]: item["content"] for item in project["files"]}
     files.setdefault("README.md", _project_readme(project))
     files.setdefault("documentation/project_specification.md", _project_specification(project))
+    files.setdefault("documentation/analyst_capability_matrix.md", _capability_matrix(project))
     files.setdefault("documentation/data_dictionary.md", _data_dictionary(project))
     files.setdefault("documentation/kpi_definitions.md", _kpi_guide(project))
     files.setdefault(
@@ -727,8 +857,8 @@ def _write_staging_project(staging_root: Path, project: dict[str, Any]) -> Path:
     return project_dir
 
 
-def _archive_existing_directory(repo_root: Path, project_dir: Path, timestamp: str) -> Path:
-    archive_root = repo_root / "archive" / "portfolio-import" / timestamp
+def _archive_existing_directory(archive_base: Path, project_dir: Path, timestamp: str) -> Path:
+    archive_root = archive_base / timestamp
     archive_root.mkdir(parents=True, exist_ok=True)
     destination = archive_root / project_dir.name
     counter = 1
@@ -826,21 +956,22 @@ def import_portfolio_package(
     replace_existing: bool = False,
 ) -> PortfolioImportResult:
     repo_root = Path(repo_root).resolve()
+    layout = load_reset_layout(repo_root)
     package, package_sha256 = load_and_validate_package(source)
     if _portfolio_is_populated(conn) and not replace_existing:
         raise PortfolioImportError(
             "Portfolio data already exists. Re-run the import with explicit replacement after reviewing the backup warning."
         )
 
-    projects_root = repo_root / "projects"
+    projects_root = layout.configured_path("projects_root")
     projects_root.mkdir(parents=True, exist_ok=True)
-    backup_path = _create_backup(conn, repo_root)
+    backup_path = _create_backup(conn, layout.configured_path("portfolio_import_backup"))
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    staging_root = repo_root / ".portfolio-import-staging" / uuid.uuid4().hex
+    staging_root = layout.configured_path("portfolio_import_staging") / uuid.uuid4().hex
     staging_root.mkdir(parents=True, exist_ok=False)
     installed_dirs: list[Path] = []
     archived_dirs: list[tuple[Path, Path]] = []
-    catalog_target = repo_root / "data" / "portfolio_catalog.json"
+    catalog_target = layout.configured_path("portfolio_catalog")
     previous_catalog = catalog_target.read_bytes() if catalog_target.is_file() else None
     catalog_written = False
     try:
@@ -852,7 +983,9 @@ def import_portfolio_package(
                     raise PortfolioImportError(
                         f"Project directory already exists: {destination.name}"
                     )
-                archived = _archive_existing_directory(repo_root, destination, timestamp)
+                archived = _archive_existing_directory(
+                    layout.configured_path("portfolio_import_archive"), destination, timestamp
+                )
                 archived_dirs.append((archived, destination))
             shutil.move(str(staged_dir), str(destination))
             installed_dirs.append(destination)

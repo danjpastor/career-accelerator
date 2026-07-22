@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -32,18 +33,22 @@ from career_app.onboarding.catalog import (
     load_pathway_catalog,
 )
 from career_app.onboarding.portfolio_catalog import apply_runtime_catalog
+from career_app.onboarding.paths import load_reset_layout
 from career_app.onboarding.portfolio_package import (
     PortfolioImportError,
     import_portfolio_package,
 )
 from career_app.onboarding.setup_file import write_setup_file
+from career_app.services import completion_contract
 from career_app.onboarding.state import (
     KEY_COMPLETED,
+    KEY_DISPLAY_NAME,
     KEY_ORIGIN,
     KEY_PATHWAY,
     KEY_PORTFOLIO_STATUS,
     KEY_TOUR_COMPLETED,
     clear_seeded_portfolio_for_new_profile,
+    display_name as stored_display_name,
     get_setting,
     mark_portfolio_status,
     mark_tour_completed,
@@ -53,6 +58,7 @@ from career_app.onboarding.state import (
     reset_to_first_run,
     restart_tour,
     select_pathway,
+    set_display_name,
 )
 
 
@@ -125,6 +131,128 @@ TOUR_STEPS = (
 )
 
 
+class FullResetConfirmationDialog(QDialog):
+    CONFIRMATION_PHRASE = "RESET CAREER ACCELERATOR"
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Full First-Run Reset")
+        self.setModal(True)
+        self.resize(760, 650)
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(20, 20, 20, 20)
+        outer.setSpacing(14)
+
+        title = QLabel("Prepare Career Accelerator for a new learner")
+        title.setObjectName("DialogTitle")
+        title.setStyleSheet("font-size: 21px; font-weight: 700;")
+        outer.addWidget(title)
+
+        intro = QLabel(
+            "This is the destructive reset. It is different from resetting learning "
+            "progress and cannot be undone inside the application."
+        )
+        intro.setWordWrap(True)
+        outer.addWidget(intro)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        content = QWidget()
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(0, 0, 8, 0)
+        content_layout.setSpacing(12)
+
+        removed = QFrame()
+        removed.setObjectName("ResetRemovedCard")
+        removed.setStyleSheet(
+            "QFrame#ResetRemovedCard { border: 1px solid #d97706; border-radius: 10px; padding: 4px; }"
+        )
+        removed_layout = QVBoxLayout(removed)
+        removed_title = QLabel("REMOVED")
+        removed_title.setStyleSheet("font-weight: 800; color: #b45309;")
+        removed_layout.addWidget(removed_title)
+        removed_text = QLabel(
+            "• Selected pathway and onboarding status<br>"
+            "• Portfolio projects, milestones, notes, and generated project folders<br>"
+            "• DuckDB exercise progress, learner databases, SQL solutions, and submissions<br>"
+            "• Demonstrated evidence, achievements, skills, concepts, and tracked completion<br>"
+            "• Study sessions, applications, task workspaces, career materials, and reflections<br>"
+            "• Preferences, snapshots, installed optional packs, local backups, and archives"
+        )
+        removed_text.setWordWrap(True)
+        removed_layout.addWidget(removed_text)
+        content_layout.addWidget(removed)
+
+        preserved = QFrame()
+        preserved.setObjectName("ResetPreservedCard")
+        preserved.setStyleSheet(
+            "QFrame#ResetPreservedCard { border: 1px solid #3b82f6; border-radius: 10px; padding: 4px; }"
+        )
+        preserved_layout = QVBoxLayout(preserved)
+        preserved_title = QLabel("PRESERVED")
+        preserved_title.setStyleSheet("font-weight: 800; color: #2563eb;")
+        preserved_layout.addWidget(preserved_title)
+        preserved_text = QLabel(
+            "• Application source code and required folder structure<br>"
+            "• Pathway definitions, approved logos, and onboarding files<br>"
+            "• Accelerator Academy curricula and bundled exercise packs<br>"
+            "• Starter templates, static datasets, exercises, and validation guides<br>"
+            "• Repository documentation, setup scripts, and build files"
+        )
+        preserved_text.setWordWrap(True)
+        preserved_layout.addWidget(preserved_text)
+        content_layout.addWidget(preserved)
+
+        backup = QFrame()
+        backup.setStyleSheet("QFrame { border: 1px solid #6b7280; border-radius: 10px; padding: 4px; }")
+        backup_layout = QVBoxLayout(backup)
+        backup_title = QLabel("SAFETY BACKUP")
+        backup_title.setStyleSheet("font-weight: 800;")
+        backup_layout.addWidget(backup_title)
+        backup_text = QLabel(
+            "Before cleanup begins, Career Accelerator creates a ZIP beside the application "
+            "folder. The backup is outside the reset boundary so it cannot delete itself."
+        )
+        backup_text.setWordWrap(True)
+        backup_layout.addWidget(backup_text)
+        content_layout.addWidget(backup)
+        content_layout.addStretch(1)
+        scroll.setWidget(content)
+        outer.addWidget(scroll, 1)
+
+        phrase_label = QLabel(
+            "Type <b>RESET CAREER ACCELERATOR</b> to enable the reset button:"
+        )
+        phrase_label.setWordWrap(True)
+        outer.addWidget(phrase_label)
+        self.phrase = QLineEdit()
+        self.phrase.setPlaceholderText(self.CONFIRMATION_PHRASE)
+        self.phrase.setClearButtonEnabled(True)
+        outer.addWidget(self.phrase)
+
+        buttons = QHBoxLayout()
+        buttons.addStretch(1)
+        cancel = QPushButton("Cancel")
+        cancel.clicked.connect(self.reject)
+        self.reset_button = QPushButton("Erase Learner Data and Reset")
+        self.reset_button.setEnabled(False)
+        self.reset_button.setStyleSheet(
+            "QPushButton { font-weight: 700; padding: 9px 14px; }"
+            "QPushButton:enabled { background: #b91c1c; color: white; }"
+        )
+        self.reset_button.clicked.connect(self.accept)
+        buttons.addWidget(cancel)
+        buttons.addWidget(self.reset_button)
+        outer.addLayout(buttons)
+
+        self.phrase.textChanged.connect(self._update_confirmation)
+
+    def _update_confirmation(self, text: str) -> None:
+        self.reset_button.setEnabled(text.strip() == self.CONFIRMATION_PHRASE)
+
+
 class FirstRunCoordinator:
     """Bridges persistent onboarding state into the existing QMainWindow."""
 
@@ -139,7 +267,12 @@ class FirstRunCoordinator:
         self.repo_root = Path(repo_root)
         self.asset_root = Path(asset_root)
         self.version = str(version)
-        self.catalog: PathwayCatalog = load_pathway_catalog(self.repo_root / "pathways")
+        self.reset_layout = load_reset_layout(self.repo_root)
+        self.catalog_path = self.reset_layout.configured_path("portfolio_catalog")
+        self.reset_marker_path = self.reset_layout.configured_path("reset_marker")
+        self.catalog: PathwayCatalog = load_pathway_catalog(
+            self.reset_layout.configured_path("pathways_root")
+        )
         self.host = None
         self.stack = None
         self.sidebar = None
@@ -148,16 +281,21 @@ class FirstRunCoordinator:
         self._tour_dialog: GuidedTourDialog | None = None
 
     def migrate_existing_profile_if_needed(self) -> str:
-        return migrate_existing_profile_if_needed(self.conn)
+        return migrate_existing_profile_if_needed(
+            self.conn, reset_marker_path=self.reset_marker_path
+        )
 
     def finalize_initialization(self) -> bool:
         return clear_seeded_portfolio_for_new_profile(
             self.conn,
-            catalog_path=self.repo_root / "data" / "portfolio_catalog.json",
+            catalog_path=self.catalog_path,
         )
 
     def selected_pathway(self) -> PathwayDefinition | None:
         return self.catalog.get(get_setting(self.conn, KEY_PATHWAY))
+
+    def display_name(self) -> str:
+        return stored_display_name(self.conn)
 
     def brand_mapping(self) -> dict[str, str]:
         selected = self.selected_pathway()
@@ -259,9 +397,11 @@ class FirstRunCoordinator:
     def show_required_onboarding(self) -> None:
         if self.host is None:
             return
-        if get_setting(self.conn, KEY_PATHWAY) is None or get_setting(
-            self.conn, KEY_PORTFOLIO_STATUS, "pending"
-        ) == "pending":
+        if (
+            get_setting(self.conn, KEY_DISPLAY_NAME) is None
+            or get_setting(self.conn, KEY_PATHWAY) is None
+            or get_setting(self.conn, KEY_PORTFOLIO_STATUS, "pending") == "pending"
+        ):
             dialog = FirstRunWizard(self, self.host)
             self._onboarding_dialog = dialog
             result = dialog.exec()
@@ -350,66 +490,67 @@ class FirstRunCoordinator:
             )
         QMessageBox.information(self.host, "Career Accelerator Pathway", text)
 
+    def reset_summary_text(self) -> str:
+        return (
+            "Full First-Run Reset removes all learner-specific database records and "
+            "configured learner-owned files, then returns Career Accelerator to the "
+            "neutral locked pathway-selection screen. Static curricula, starter "
+            "datasets, exercises, templates, source code, and pathway graphics remain."
+        )
+
     def full_first_run_reset(self) -> None:
-        first = QMessageBox.warning(
-            self.host,
-            "Full First-Run Reset",
-            "This is the destructive reset used to prepare Career Accelerator for a different person. "
-            "It is separate from Reset Learning Progress.\n\n"
-            "It will remove the selected pathway, onboarding state, preferences, tracked progress, "
-            "study sessions, evidence, applications, portfolio records, and all other database rows.\n\n"
-            "A safety ZIP will be created outside the repository before anything is removed.",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Cancel,
-        )
-        if first != QMessageBox.StandardButton.Ok:
+        dialog = FullResetConfirmationDialog(self.host)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
             return
-        second = QMessageBox.question(
-            self.host,
-            "Confirm Personal File Cleanup",
-            "The reset will also delete learner-owned files from portfolio projects, career materials, "
-            "task workspaces, DataLemur solutions, DuckDB and Applied Lab submissions, weekly reflections, "
-            "installed optional exercise packs, repository backups, and archives.\n\n"
-            "Curriculum, starter templates, datasets, exercises, setup files, application code, pathway "
-            "definitions, and onboarding graphics will remain. Continue?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-        if second != QMessageBox.StandardButton.Yes:
-            return
-        final = QMessageBox.question(
-            self.host,
-            "Final Confirmation",
-            "Return Career Accelerator to the neutral, locked Step 1 state for a new learner?",
-            QMessageBox.StandardButton.Reset | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Cancel,
-        )
-        if final != QMessageBox.StandardButton.Reset:
-            return
+        if self.host is not None:
+            for timer_name in (
+                "timer",
+                "autosave_timer",
+                "greeting_timer",
+                "motivation_timer",
+            ):
+                timer = getattr(self.host, timer_name, None)
+                if timer is not None and hasattr(timer, "stop"):
+                    timer.stop()
+        self.conn.commit()
         try:
             report = reset_to_first_run(
                 self.conn,
-                repo_root=self.repo_root,
-                catalog_path=self.repo_root / "data" / "portfolio_catalog.json",
+                application_root=self.repo_root,
+                catalog_path=self.catalog_path,
+                manifest_path=self.reset_layout.manifest_path,
             )
         except Exception as exc:
             QMessageBox.critical(
                 self.host,
-                "Reset Failed",
-                "Career Accelerator could not complete the full reset. No success state was recorded.\n\n"
-                + str(exc),
+                "Full Reset Failed",
+                "Career Accelerator could not complete the full first-run reset. "
+                "The application has not recorded a successful reset.\n\n" + str(exc),
             )
             return
+
         backup = str(report.backup_path) if report.backup_path else "No backup requested"
-        QMessageBox.information(
-            self.host,
-            "Reset Complete",
-            f"Safety backup:\n{backup}\n\n"
-            f"Database tables cleared: {len(report.database_tables_cleared)}\n"
-            f"Personal paths removed: {len(report.removed_paths)}\n\n"
-            "Close and reopen Career Accelerator to begin with the neutral Step 1 pathway selector.",
+        summary = QMessageBox(self.host)
+        summary.setIcon(QMessageBox.Icon.Information)
+        summary.setWindowTitle("Full Reset Complete")
+        summary.setText("Career Accelerator is ready for a new learner.")
+        summary.setInformativeText(
+            "The application will close now. On the next launch it will open with the "
+            "neutral Career Accelerator branding and locked Step 1 pathway selector.\n\n"
+            f"Safety backup:\n{backup}"
         )
-        QApplication.quit()
+        summary.setDetailedText(
+            "Database tables cleared: " + str(len(report.database_tables_cleared)) + "\n"
+            "Learner paths removed: " + str(len(report.removed_paths)) + "\n"
+            "Secondary databases removed: " + str(len(report.runtime_databases_removed)) + "\n"
+            "Reset marker: " + str(report.reset_marker_path)
+        )
+        summary.exec()
+        app = QApplication.instance()
+        if self.host is not None:
+            self.host.close()
+        if app is not None:
+            app.quit()
 
 
 class _PathwayCard(QFrame):
@@ -506,7 +647,11 @@ class FirstRunWizard(QDialog):
         outer.addLayout(controls)
         self.stack.currentChanged.connect(self._update_controls)
 
-        initial = 1 if self.selected_pathway_id else 0
+        initial = (
+            1
+            if self.selected_pathway_id and get_setting(coordinator.conn, KEY_DISPLAY_NAME)
+            else 0
+        )
         self.stack.setCurrentIndex(initial)
         self._update_controls()
 
@@ -514,6 +659,7 @@ class FirstRunWizard(QDialog):
         page = QWidget()
         layout = QVBoxLayout(page)
         neutral_logo = QLabel()
+        neutral_logo.setScaledContents(False)
         neutral_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         neutral_logo_path = (
             self.coordinator.asset_root
@@ -533,12 +679,29 @@ class FirstRunWizard(QDialog):
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet("font-size:22pt;font-weight:800;")
         intro = QLabel(
-            "The application remains locked until a pathway is selected. Branding, learning tracks, "
-            "portfolio requirements, planner rules, and future tools load from this choice."
+            "Choose your pathway to begin a fixed 90-day, zero-to-hire-ready program. "
+            "The application remains locked until a pathway and greeting name are selected. "
+            "Branding, learning tracks, portfolio requirements, and deadline-aware planner rules "
+            "load from this choice."
         )
         intro.setWordWrap(True)
         layout.addWidget(title)
         layout.addWidget(intro)
+
+        name_row = QHBoxLayout()
+        name_label = QLabel("Name for your greeting")
+        name_label.setMinimumWidth(165)
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Enter your preferred name")
+        self.name_input.setMaxLength(60)
+        self.name_input.setText(get_setting(self.coordinator.conn, KEY_DISPLAY_NAME, "") or "")
+        self.name_input.setToolTip(
+            "This name appears in the greeting at the top of the Dashboard."
+        )
+        self.name_input.textChanged.connect(self._update_controls)
+        name_row.addWidget(name_label)
+        name_row.addWidget(self.name_input, 1)
+        layout.addLayout(name_row)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -635,7 +798,9 @@ class FirstRunWizard(QDialog):
         if not destination:
             return
         try:
-            path = write_setup_file(destination, pathway)
+            path = write_setup_file(
+                destination, pathway, learner_name=self.coordinator.display_name()
+            )
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Create Setup File", str(exc))
             return
@@ -699,6 +864,19 @@ class FirstRunWizard(QDialog):
             if self.coordinator.selected_pathway() is None:
                 QMessageBox.warning(self, "Select a Pathway", "Choose an available pathway to continue.")
                 return
+            try:
+                set_display_name(self.coordinator.conn, self.name_input.text())
+            except Exception as exc:
+                QMessageBox.warning(self, "Enter Your Name", str(exc))
+                self.name_input.setFocus()
+                return
+            completion_contract.ensure_contract(self.coordinator.conn, {
+                "current_week": 1,
+                "google_course": 1,
+                "google_module": 1,
+                "current_project": 1,
+                "weekly_target_hours": completion_contract.DEFAULT_WEEKLY_HOURS,
+            })
             self.stack.setCurrentIndex(1)
             return
         status = get_setting(self.coordinator.conn, KEY_PORTFOLIO_STATUS, "pending")
@@ -717,7 +895,10 @@ class FirstRunWizard(QDialog):
         self.back_button.setVisible(index > 0)
         if index == 0:
             self.next_button.setText("Continue")
-            self.next_button.setEnabled(self.coordinator.selected_pathway() is not None)
+            has_name = bool(getattr(self, "name_input", None) and self.name_input.text().strip())
+            self.next_button.setEnabled(
+                has_name and self.coordinator.selected_pathway() is not None
+            )
         else:
             self.next_button.setText("Start Guided Tour")
             status = get_setting(self.coordinator.conn, KEY_PORTFOLIO_STATUS, "pending")
@@ -787,7 +968,11 @@ class PortfolioSetupDialog(QDialog):
         )
         if destination:
             try:
-                path = write_setup_file(destination, pathway)
+                path = write_setup_file(
+                    destination,
+                    pathway,
+                    learner_name=self.coordinator.display_name(),
+                )
                 self.status.setText(f"Created {path}")
             except Exception as exc:
                 QMessageBox.warning(self, "Could Not Create File", str(exc))

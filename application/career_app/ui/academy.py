@@ -41,6 +41,7 @@ from career_app.academy.models import (
     LessonDefinition,
     SkillsLabDefinition,
 )
+from career_app.services import completion_contract
 from career_app.theme import COLORS
 from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
 from career_app.ui.exercise_packs import FeedbackLabel
@@ -214,6 +215,9 @@ class AcceleratorAcademyWidget(QWidget):
         self.conn = conn
         self.repository_root = Path(repository_root)
         self.service = AcademyService(conn, self.repository_root)
+        completion_contract.register_academy_catalog(
+            self.conn, self.service.catalog
+        )
         self.catalog = self.service.catalog
 
         self._nodes: list[JourneyNode] = []

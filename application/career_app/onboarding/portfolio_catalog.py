@@ -5,9 +5,12 @@ import json
 from pathlib import Path
 from typing import Any, Iterable
 
+from .paths import discover_application_root, load_reset_layout
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_CATALOG_PATH = REPO_ROOT / "data" / "portfolio_catalog.json"
+
+def _default_catalog_path() -> Path:
+    root = discover_application_root(Path(__file__))
+    return load_reset_layout(root).configured_path("portfolio_catalog")
 
 
 @dataclass(slots=True)
@@ -22,7 +25,7 @@ class ProjectCatalog:
 
 
 def load_project_catalog(path: Path | None = None) -> ProjectCatalog:
-    catalog_path = Path(path or DEFAULT_CATALOG_PATH)
+    catalog_path = Path(path) if path is not None else _default_catalog_path()
     if not catalog_path.is_file():
         return ProjectCatalog(explicit=False, names={}, directories={})
     try:
@@ -56,7 +59,7 @@ def write_project_catalog(
     projects: Iterable[dict[str, Any]],
     path: Path | None = None,
 ) -> Path:
-    catalog_path = Path(path or DEFAULT_CATALOG_PATH)
+    catalog_path = Path(path) if path is not None else _default_catalog_path()
     normalized: list[dict[str, Any]] = []
     for index, item in enumerate(projects, start=1):
         normalized.append(
