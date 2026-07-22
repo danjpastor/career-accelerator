@@ -177,7 +177,19 @@ class PortfolioHubWidget(QWidget):
         summary_row.addWidget(self.milestone_summary, 1)
         self.milestone_filter = QComboBox()
         self.milestone_filter.addItems(
-            ["All", "Ready / Open", "Completed", "Discovery", "Dataset", "SQL", "Python", "Power BI", "GitHub", "README"]
+            [
+                "All",
+                "Ready / Open",
+                "Completed",
+                "Discovery",
+                "Dataset",
+                "SQL",
+                "Python",
+                "Validation",
+                "Power BI",
+                "Communication",
+                "Publication",
+            ]
         )
         self.milestone_filter.currentIndexChanged.connect(self._populate_milestones)
         summary_row.addWidget(self.milestone_filter)

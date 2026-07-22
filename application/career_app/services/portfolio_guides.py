@@ -604,9 +604,19 @@ def _numbered(values: Iterable[str]) -> str:
 
 
 def _key_for(label: str, project_id: int) -> str:
+    canonical = globals().get(
+        "TRUE_MILESTONE_LABEL_KEYS",
+        {},
+    ).get(str(label).strip().casefold())
+    if canonical:
+        return canonical
     spec = task_spec(label, project_id)
     if spec is None:
-        return re.sub(r"[^a-z0-9]+", "_", label.casefold()).strip("_")
+        return re.sub(
+            r"[^a-z0-9]+",
+            "_",
+            str(label).casefold(),
+        ).strip("_")
     return spec.key
 
 
@@ -631,8 +641,9 @@ def guide_markdown(
     estimated_minutes: int,
     starter_text: str = "",
 ) -> str:
+    canonical_key = TRUE_MILESTONE_LABEL_KEYS.get(str(label).strip().casefold())
     spec = task_spec(label, project_id)
-    key = spec.key if spec is not None else _key_for(label, project_id)
+    key = canonical_key or (spec.key if spec is not None else _key_for(label, project_id))
     family = FAMILY.get(key, "delivery")
     artifacts = EXPECTED_ARTIFACTS.get(key, ("documentation/",))
     skills = SKILLS.get(key, (stage, "Portfolio project execution"))
@@ -837,3 +848,310 @@ def audit_guide(content: str) -> list[str]:
     if len(content.split()) < 350:
         issues.append("Guide is too brief for a substantial portfolio milestone")
     return issues
+
+# BEGIN TRUE PORTFOLIO MILESTONE GUIDE OVERRIDES V10.21.0
+TRUE_MILESTONE_LABEL_KEYS = {
+    "review and approve project brief": "review_and_approve_project_brief",
+    "approve data source and specification": "approve_data_source_and_specification",
+    "create or acquire raw dataset": "create_or_acquire_raw_dataset",
+    "validate relationships": "validate_relationships",
+    "review and finalize data dictionary": "review_and_finalize_data_dictionary",
+    "clean and validate analytical data": "clean_and_validate_analytical_data",
+    "build reproducible analytical database": "build_reproducible_analytical_database",
+    "complete sql analysis": "complete_sql_analysis",
+    "complete exploratory analysis": "complete_exploratory_analysis",
+    "validate findings across tools": "validate_findings_across_tools",
+    "build and validate power bi semantic model": "build_and_validate_power_bi_semantic_model",
+    "build and test power bi report": "build_and_test_power_bi_report",
+    "write executive summary and recommendations": "write_executive_summary_and_recommendations",
+    "publish reproducible portfolio case study": "publish_reproducible_portfolio_case_study",
+}
+EXPECTED_ARTIFACTS.update(
+    {
+        "review_and_approve_project_brief": (
+            "README.md",
+            "PROJECT_CHARTER.md",
+            "documentation/project_charter.md",
+        ),
+        "approve_data_source_and_specification": (
+            "config/project_sources.yaml",
+            "documentation/synthetic_data_specification.md",
+            "documentation/data_source_manifest.md",
+        ),
+        "create_or_acquire_raw_dataset": (
+            "data/raw/",
+            "config/project_sources.yaml",
+        ),
+        "review_and_finalize_data_dictionary": (
+            "DATA_DICTIONARY.md",
+            "documentation/data_dictionary.md",
+            "documentation/data_dictionary.csv",
+        ),
+        "clean_and_validate_analytical_data": (
+            "data/processed/",
+            "notebooks/clean_data.ipynb",
+            "sql/cleaning/",
+        ),
+        "build_reproducible_analytical_database": (
+            "sql/schema/",
+            "sql/load/",
+            "sql/create_schema.sql",
+            "sql/load_data.sql",
+        ),
+        "complete_sql_analysis": (
+            "sql/analysis/",
+            "sql/query_index.md",
+            "sql/README.md",
+        ),
+        "complete_exploratory_analysis": (
+            "notebooks/eda.ipynb",
+            "reports/eda/",
+        ),
+        "validate_findings_across_tools": (
+            "documentation/findings_validation.md",
+            "reports/findings_validation/",
+        ),
+        "build_and_validate_power_bi_semantic_model": (
+            "power-bi/",
+            "documentation/dax_measures.md",
+        ),
+        "build_and_test_power_bi_report": (
+            "power-bi/",
+            "images/dashboard/",
+        ),
+        "write_executive_summary_and_recommendations": (
+            "documentation/executive_summary.md",
+            "EXECUTIVE_SUMMARY.md",
+        ),
+        "publish_reproducible_portfolio_case_study": (
+            "README.md",
+            "images/",
+            "CHANGELOG.md",
+        ),
+    }
+)
+
+SKILLS.update(
+    {
+        "review_and_approve_project_brief": (
+            "Business problem framing",
+            "Stakeholder analysis",
+            "KPI governance",
+            "Analytical question design",
+        ),
+        "approve_data_source_and_specification": (
+            "Data sourcing",
+            "Data specification",
+            "Provenance review",
+        ),
+        "create_or_acquire_raw_dataset": (
+            "Source-data management",
+            "Reproducibility",
+        ),
+        "review_and_finalize_data_dictionary": (
+            "Metadata management",
+            "Schema documentation",
+            "Data governance",
+        ),
+        "clean_and_validate_analytical_data": (
+            "Data cleaning",
+            "Quality assurance",
+            "Exception handling",
+        ),
+        "build_reproducible_analytical_database": (
+            "SQL schema design",
+            "Reproducible loading",
+            "Row-count reconciliation",
+        ),
+        "complete_sql_analysis": (
+            "SQL analysis",
+            "KPI calculation",
+            "Query validation",
+        ),
+        "complete_exploratory_analysis": (
+            "Exploratory data analysis",
+            "Python",
+            "Analytical visualization",
+        ),
+        "validate_findings_across_tools": (
+            "Cross-tool reconciliation",
+            "Result validation",
+        ),
+        "build_and_validate_power_bi_semantic_model": (
+            "Power BI data modeling",
+            "DAX",
+            "Metric governance",
+        ),
+        "build_and_test_power_bi_report": (
+            "Dashboard design",
+            "Interaction testing",
+            "Business intelligence",
+        ),
+        "write_executive_summary_and_recommendations": (
+            "Executive communication",
+            "Recommendation development",
+        ),
+        "publish_reproducible_portfolio_case_study": (
+            "Portfolio presentation",
+            "Technical documentation",
+            "Release management",
+        ),
+    }
+)
+
+FAMILY.update(
+    {
+        "review_and_approve_project_brief": "discovery",
+        "approve_data_source_and_specification": "data",
+        "create_or_acquire_raw_dataset": "data",
+        "review_and_finalize_data_dictionary": "data",
+        "clean_and_validate_analytical_data": "data",
+        "build_reproducible_analytical_database": "sql",
+        "complete_sql_analysis": "sql",
+        "complete_exploratory_analysis": "python",
+        "validate_findings_across_tools": "validation",
+        "build_and_validate_power_bi_semantic_model": "powerbi",
+        "build_and_test_power_bi_report": "powerbi",
+        "write_executive_summary_and_recommendations": "communication",
+        "publish_reproducible_portfolio_case_study": "delivery",
+    }
+)
+
+TASK_STEPS.update(
+    {
+        "review_and_approve_project_brief": (
+            "Open the rendered Overview and project charter.",
+            "Confirm the business problem names a stakeholder decision rather than only a topic.",
+            "Confirm the primary and supporting stakeholders and what each needs from the analysis.",
+            "Review KPI definitions for grain, filters, time windows, null handling, and validation rules.",
+            "Review every business question for scope, decision value, and data availability.",
+            "Resolve contradictions between the Overview, charter, source specification, and milestone catalog.",
+            "Record approval in the project brief instead of duplicating it in an application note.",
+        ),
+        "approve_data_source_and_specification": (
+            "Confirm whether the data is public, licensed, internal, or synthetic.",
+            "Review provenance, generation rules, retrieval date, and permitted use.",
+            "Confirm table grains, required fields, date coverage, row volumes, keys, and relationships.",
+            "Map every business question and KPI to available fields.",
+            "Identify coverage gaps and revise either the scope or specification.",
+            "Approve the source manifest or synthetic-data specification.",
+        ),
+        "create_or_acquire_raw_dataset": (
+            "Place untouched source files under the raw-data folder.",
+            "Confirm every configured source path exists.",
+            "Record filenames, formats, row counts, grains, and provenance.",
+            "Inspect representative records without editing the source.",
+            "Confirm all required tables and fields are present.",
+            "Protect raw files from downstream transformation.",
+        ),
+        "review_and_finalize_data_dictionary": (
+            "Open the existing generated data dictionary; do not create a second dictionary.",
+            "Compare its table list with Data Explorer and project_sources.yaml.",
+            "Compare every documented column with DuckDB's detected schema.",
+            "Add missing business definitions, key roles, null meanings, units, allowed values, and authoritative-source notes.",
+            "Update descriptions affected by relationship validation or cleaning decisions.",
+            "Remove obsolete fields and document derived fields in their authoritative analytical layer.",
+            "Confirm all KPIs and business questions trace to documented fields.",
+        ),
+        "clean_and_validate_analytical_data": (
+            "Create an issue log from profiling and relationship-validation findings.",
+            "Separate genuine errors from valid business exceptions.",
+            "Define a reproducible treatment for each confirmed issue.",
+            "Implement transformations without editing raw sources.",
+            "Write processed outputs to documented paths.",
+            "Re-run row-count, key, relationship, range, category, and business-rule checks.",
+            "Explain every before-and-after difference and preserve unresolved exceptions.",
+        ),
+        "build_reproducible_analytical_database": (
+            "Define analytical tables or views and their grain.",
+            "Choose types and constraints that preserve identifiers, dates, and measures correctly.",
+            "Create a repeatable build and load order based on dependencies.",
+            "Load every required table from documented source or processed paths.",
+            "Reconcile source and loaded row counts.",
+            "Run post-load key, relationship, null, range, and business-rule checks.",
+            "Rebuild from a clean database to prove reproducibility.",
+        ),
+        "complete_sql_analysis": (
+            "Create a query plan mapped to approved business questions.",
+            "State the intended output grain before each analysis.",
+            "Validate joins before adding calculations.",
+            "Implement governed KPI definitions with explicit filters and denominator rules.",
+            "Test totals, nulls, edge cases, segments, and time periods.",
+            "Organize final SQL into a reproducible execution order.",
+            "Save result checkpoints and concise interpretations.",
+        ),
+        "complete_exploratory_analysis": (
+            "Run the notebook or script from a clean environment.",
+            "Describe coverage, distributions, categories, and important segments.",
+            "Explore relationships tied directly to approved business questions.",
+            "Investigate anomalies without silently treating them as errors.",
+            "Create purposeful labeled visuals and written interpretations.",
+            "Separate observations, hypotheses, and validated findings.",
+            "Save reproducible outputs to documented locations.",
+        ),
+        "validate_findings_across_tools": (
+            "List every finding intended for the report or executive summary.",
+            "Recalculate each headline metric independently.",
+            "Align filters, periods, null handling, and denominator rules across tools.",
+            "Compare values at total and segment levels.",
+            "Investigate discrepancies to their source rather than forcing agreement.",
+            "Classify each finding as confirmed, revised, unsupported, or pending.",
+            "Record the authoritative source and approved value.",
+        ),
+        "build_and_validate_power_bi_semantic_model": (
+            "Classify tables as facts, dimensions, bridges, or support tables.",
+            "Confirm grains and keys before creating relationships.",
+            "Build intentional one-to-many relationships and filter directions.",
+            "Create and mark the date table.",
+            "Create explicit governed DAX measures.",
+            "Test totals, filters, combined selections, and empty states.",
+            "Reconcile headline measures with SQL.",
+        ),
+        "build_and_test_power_bi_report": (
+            "Map report pages to stakeholder decisions and approved questions.",
+            "Build the executive overview and required operational detail pages.",
+            "Use the simplest visual that communicates each comparison.",
+            "Implement only decision-useful filters, cross-highlighting, and drill paths.",
+            "Test default, combined, contradictory, and empty selections.",
+            "Review accessibility, labels, hierarchy, and presentation sizing.",
+            "Reconcile every displayed value and capture final review screenshots.",
+        ),
+        "write_executive_summary_and_recommendations": (
+            "State the business problem and stakeholder decision.",
+            "Summarize the data and analytical approach without unnecessary implementation detail.",
+            "Present three to five validated quantified findings.",
+            "Explain the business implication of each finding.",
+            "Prioritize recommendations by impact, feasibility, owner, and next action.",
+            "State assumptions, limitations, and unresolved risks beside affected claims.",
+            "Link the narrative to supporting artifacts.",
+        ),
+        "publish_reproducible_portfolio_case_study": (
+            "Write a concise project value proposition.",
+            "Present the problem, stakeholders, KPIs, questions, methods, findings, and recommendations.",
+            "Add readable visuals and links to final artifacts.",
+            "Document repository structure and reproducibility guidance.",
+            "Disclose synthetic data, assumptions, and limitations.",
+            "Remove placeholders, temporary files, private information, and broken links.",
+            "Test the public repository in a clean browser session and create the final release.",
+        ),
+    }
+)
+
+NEXT_HANDOFF.update(
+    {
+        "review_and_approve_project_brief": "Use the approved brief to finalize the data source and specification.",
+        "approve_data_source_and_specification": "Create or acquire the immutable raw dataset.",
+        "create_or_acquire_raw_dataset": "Validate the table model and relationships before transformation.",
+        "review_and_finalize_data_dictionary": "Use approved field definitions during cleaning, schema design, analysis, and reporting.",
+        "clean_and_validate_analytical_data": "Build the reproducible analytical database from the processed layer.",
+        "build_reproducible_analytical_database": "Use the governed analytical layer to complete SQL analysis.",
+        "complete_sql_analysis": "Use SQL results to guide EDA and cross-tool validation.",
+        "complete_exploratory_analysis": "Promote only supported patterns into findings validation.",
+        "validate_findings_across_tools": "Use confirmed findings and governed metrics in Power BI.",
+        "build_and_validate_power_bi_semantic_model": "Build and test the report on the validated model.",
+        "build_and_test_power_bi_report": "Use the final report in the executive summary.",
+        "write_executive_summary_and_recommendations": "Package the project into the public case study.",
+        "publish_reproducible_portfolio_case_study": "Treat the release as the stable employer-facing version.",
+    }
+)
+# END TRUE PORTFOLIO MILESTONE GUIDE OVERRIDES V10.21.0

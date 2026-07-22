@@ -1233,66 +1233,87 @@ def _track_daily_completed(
     }
 
 
-def reconcile_daily_focus(
-    conn,
-):
-    """Mark persisted focus assignments complete without replacing them."""
-    _backfill_daily_focus_fields(
-        conn
-    )
-    focus_date = (
-        date.today().isoformat()
-    )
+def reconcile_daily_focus(conn):
+    """Reconcile concrete focus rows only from their actual task state."""
+    _backfill_daily_focus_fields(conn)
+    focus_date = date.today().isoformat()
 
-    rows = conn.execute(
-        """SELECT
-               f.*,
-               s.completed AS task_completed,
-               m.status AS task_status
-           FROM daily_focus f
-           LEFT JOIN sprint_tasks s
-             ON s.id=f.task_id
-           LEFT JOIN task_metadata m
-             ON m.task_id=f.task_id
-           WHERE f.focus_date=?
-             AND f.completed_at IS NULL
-           ORDER BY f.position""",
+    falsely_completed = conn.execute(
+        """
+        SELECT f.id
+        FROM daily_focus AS f
+        LEFT JOIN sprint_tasks AS s
+          ON s.id=f.task_id
+        LEFT JOIN task_metadata AS m
+          ON m.task_id=f.task_id
+        WHERE f.focus_date=?
+          AND f.task_id IS NOT NULL
+          AND f.completed_at IS NOT NULL
+          AND COALESCE(s.completed,0)=0
+          AND COALESCE(m.status,'')<>'Completed'
+        """,
         (focus_date,),
     ).fetchall()
 
-    changed = False
+    if falsely_completed:
+        conn.executemany(
+            """
+            UPDATE daily_focus
+            SET completed_at=NULL
+            WHERE id=?
+            """,
+            [
+                (int(row["id"]),)
+                for row in falsely_completed
+            ],
+        )
+
+    rows = conn.execute(
+        """
+        SELECT
+            f.*,
+            s.completed AS task_completed,
+            m.status AS task_status
+        FROM daily_focus AS f
+        LEFT JOIN sprint_tasks AS s
+          ON s.id=f.task_id
+        LEFT JOIN task_metadata AS m
+          ON m.task_id=f.task_id
+        WHERE f.focus_date=?
+          AND f.completed_at IS NULL
+        ORDER BY f.position
+        """,
+        (focus_date,),
+    ).fetchall()
+
+    changed = bool(falsely_completed)
+
     for row in rows:
         complete = False
 
         if (
-            row["task_id"]
-            is not None
+            row["task_id"] is not None
             and (
-                bool(
-                    row["task_completed"]
-                )
-                or row["task_status"]
-                == "Completed"
+                bool(row["task_completed"])
+                or row["task_status"] == "Completed"
             )
         ):
             complete = True
 
-        track_key = row[
-            "track_key"
-        ]
-        target_key = row[
-            "target_key"
-        ]
-
+        # Only roadmap fallback rows without a concrete task ID may infer
+        # completion from aggregate adaptive-track state.
         if (
             not complete
-            and track_key
+            and row["task_id"] is None
+            and row["track_key"]
         ):
             active = conn.execute(
-                """SELECT target_key
-                   FROM track_tasks
-                   WHERE track_key=?""",
-                (track_key,),
+                """
+                SELECT target_key
+                FROM track_tasks
+                WHERE track_key=?
+                """,
+                (row["track_key"],),
             ).fetchone()
             active_target = (
                 active["target_key"]
@@ -1301,28 +1322,28 @@ def reconcile_daily_focus(
             )
 
             if (
-                target_key
+                row["target_key"]
                 and active_target
                 and str(active_target)
-                != str(target_key)
+                != str(row["target_key"])
             ):
                 complete = True
             elif (
-                not bool(
-                    row["is_extra"]
-                )
+                not bool(row["is_extra"])
                 and _track_daily_completed(
                     conn,
-                    track_key,
+                    row["track_key"],
                 )
             ):
                 complete = True
 
         if complete:
             conn.execute(
-                """UPDATE daily_focus
-                   SET completed_at=CURRENT_TIMESTAMP
-                   WHERE id=?""",
+                """
+                UPDATE daily_focus
+                SET completed_at=CURRENT_TIMESTAMP
+                WHERE id=?
+                """,
                 (int(row["id"]),),
             )
             changed = True
@@ -1331,6 +1352,7 @@ def reconcile_daily_focus(
         conn.commit()
 
     return changed
+
 
 
 def mark_focus_task_completed(
@@ -3072,3 +3094,232 @@ def _record_focus_plan(
         )
 
     conn.commit()
+
+# BEGIN ALWAYS AVAILABLE GET AHEAD V10.21.1
+def get_ahead_candidates(conn, week, state, limit=12):
+    """Return prerequisite-ready optional work for the Get Ahead browser."""
+    requested = max(1, int(limit))
+    candidates = [
+        dict(item)
+        for item in _optional_candidate_pool(
+            conn,
+            int(week),
+            state,
+        )
+    ]
+
+    seen = set()
+    result = []
+
+    def add(item):
+        item = dict(item)
+        if item.get("task_id") is None and item.get("id") is not None:
+            item["task_id"] = item.get("id")
+        if item.get("id") is None and item.get("task_id") is not None:
+            item["id"] = item.get("task_id")
+        identity = _daily_focus_track_identity(conn, item)
+        if identity in seen:
+            return
+        seen.add(identity)
+        item.pop("_extra_score", None)
+        result.append(item)
+
+    for item in candidates:
+        add(item)
+
+    # Add future prerequisite-ready rows independently. They remain browser
+    # candidates and are not inserted into Next Tasks automatically.
+    for row in _future_extra_task_rows(
+        conn,
+        int(week),
+        limit=max(requested * 3, 24),
+    ):
+        item = _task_dict(row)
+        item["track_key"] = row["track_key"]
+        item["target_key"] = row["target_key"]
+        item["track_status"] = row["track_status"]
+        item["weekly_gap"] = 0
+        item["extra_reason"] = (
+            f"Get ahead on Week {int(row['week'])} roadmap work"
+        )
+        add(item)
+
+    return result[:requested]
+
+
+def start_get_ahead(conn, week, state, item):
+    """Add an optional task to today without starting or reconciling it."""
+    item = dict(item or {})
+    focus_date = date.today().isoformat()
+
+    track_key, target_key = _focus_track_fields(
+        conn,
+        item,
+    )
+    task_id = item.get("task_id")
+    if task_id is None:
+        task_id = item.get("id")
+
+    source_key = (
+        item.get("source_key")
+        or (
+            f"get-ahead:"
+            f"{item.get('category','general')}:"
+            f"{item.get('label','task')}"
+        )
+    )
+
+    if task_id is not None:
+        existing = conn.execute(
+            """
+            SELECT id
+            FROM daily_focus
+            WHERE focus_date=?
+              AND is_extra=1
+              AND task_id=?
+            LIMIT 1
+            """,
+            (
+                focus_date,
+                int(task_id),
+            ),
+        ).fetchone()
+    else:
+        existing = conn.execute(
+            """
+            SELECT id
+            FROM daily_focus
+            WHERE focus_date=?
+              AND is_extra=1
+              AND task_id IS NULL
+              AND source_key=?
+            LIMIT 1
+            """,
+            (
+                focus_date,
+                source_key,
+            ),
+        ).fetchone()
+
+    if existing is not None:
+        return {
+            "id": int(existing["id"]),
+            "added": False,
+        }
+
+    position = conn.execute(
+        """
+        SELECT COALESCE(MAX(position),0)+1
+        FROM daily_focus
+        WHERE focus_date=?
+        """,
+        (focus_date,),
+    ).fetchone()[0]
+
+    cursor = conn.execute(
+        """
+        INSERT INTO daily_focus (
+            focus_date,week,position,
+            task_id,source_key,category,title,
+            estimated_minutes,track_key,target_key,
+            is_extra
+        )
+        VALUES(?,?,?,?,?,?,?,?,?,?,1)
+        """,
+        (
+            focus_date,
+            int(week),
+            int(position),
+            task_id,
+            source_key,
+            item.get("category") or "General",
+            item.get("label") or "Get Ahead task",
+            int(
+                item.get(
+                    "estimated_minutes",
+                    30,
+                )
+                or 30
+            ),
+            track_key,
+            target_key,
+        ),
+    )
+    conn.commit()
+
+    return {
+        "id": int(cursor.lastrowid),
+        "added": True,
+        "task_id": task_id,
+        "source_key": source_key,
+    }
+
+
+
+def started_get_ahead_tasks(conn, week):
+    """Return only Get Ahead work explicitly added to today's plan."""
+    try:
+        rows = conn.execute(
+            """
+            SELECT
+                df.task_id AS id,
+                df.task_id,
+                COALESCE(s.label,df.title) AS label,
+                COALESCE(s.completed,0) AS completed,
+                COALESCE(m.category,df.category,'General') AS category,
+                COALESCE(
+                    m.estimated_minutes,
+                    df.estimated_minutes,
+                    30
+                ) AS estimated_minutes,
+                df.source_key,
+                df.track_key,
+                df.target_key,
+                df.week,
+                df.position
+            FROM daily_focus AS df
+            LEFT JOIN sprint_tasks AS s
+                ON s.id=df.task_id
+            LEFT JOIN task_metadata AS m
+                ON m.task_id=df.task_id
+            WHERE df.focus_date=?
+              AND df.is_extra=1
+            ORDER BY df.position
+            """,
+            (date.today().isoformat(),),
+        ).fetchall()
+    except Exception:
+        return []
+
+    return [dict(row) for row in rows]
+
+
+# Existing Today’s Focus Get Ahead controls remain prerequisite-based. Starting
+# one inserts it into daily_focus, which is the same explicit "add to today"
+# state used by the browser and Next Tasks.
+def optional_focus_candidate(conn, week, state):
+    plan = _stored_focus_plan(conn, int(week))
+    summary = focus_day_summary(
+        plan,
+        conn=conn,
+        week=int(week),
+    )
+    if summary["active_extra"] is not None:
+        return summary["active_extra"]
+    candidates = get_ahead_candidates(
+        conn,
+        int(week),
+        state,
+        limit=1,
+    )
+    return candidates[0] if candidates else None
+
+
+def start_extra_focus(conn, week, state, item):
+    return start_get_ahead(
+        conn,
+        int(week),
+        state,
+        item,
+    )
+# END ALWAYS AVAILABLE GET AHEAD V10.21.1

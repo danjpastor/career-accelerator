@@ -294,3 +294,31 @@
 - Expanded Today’s Focus to three Learning slots plus SQL and Portfolio.
 - Restored approved horizontal logo proportions with aspect-ratio-safe scaling.
 - Retained the cumulative pathway onboarding, one-time tour, portfolio importer, comprehensive reset, and fresh-repository builder.
+
+## 10.21.0 — True Milestones and Always-Available Get Ahead
+
+- Consolidated the legacy portfolio checklist into 14 durable stage-gate milestones.
+- Archived every removed minor task and preserved its completion history.
+- Linked discovery milestones to the generated Overview/project charter.
+- Reframed Complete Data Dictionary as Review and Finalize Data Dictionary.
+- Added canonical artifact paths and detailed guides for every new milestone.
+- Restored a settings-driven personalized Dashboard greeting.
+- Centered the visible sidebar logo by trimming transparent asset padding.
+- Made Get Ahead available before the daily plan is complete.
+- Added prerequisite-ready Get Ahead work to Next Tasks and a full task browser.
+
+## 10.21.2 — Robust Milestones and Get Ahead Installer
+
+- Consolidated the legacy portfolio checklist into 14 durable stage-gate milestones.
+- Archived every removed minor task and preserved its completion history.
+- Linked discovery milestones to the generated Overview/project charter.
+- Reframed Complete Data Dictionary as Review and Finalize Data Dictionary.
+- Added canonical artifact paths and detailed guides for every new milestone.
+- Restored a settings-driven personalized Dashboard greeting.
+- Centered the visible sidebar logo by trimming transparent asset padding.
+- Made the Get Ahead browser available before the daily plan is complete.
+- Prevented browser candidates from appearing in Next Tasks automatically.
+- Added Get Ahead work to Next Tasks only after Start and Add to Today is chosen.
+- Pinned the gradient Get Ahead button to the bottom of the Next Tasks card.
+- Added scale-safe button height and restored greeting emojis.
+
