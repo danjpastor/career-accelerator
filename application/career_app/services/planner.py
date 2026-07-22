@@ -1233,8 +1233,633 @@ def _track_daily_completed(
     }
 
 
+# DURABLE ADDED TODAY STORE + MAXIMIZED STARTUP 1
+MANUAL_FOCUS_TABLE = "manual_daily_focus"
+
+
+def _manual_focus_key(item):
+    item = dict(item or {})
+    track_key = str(item.get("track_key") or "").strip().lower()
+    target_key = str(item.get("target_key") or "").strip().lower()
+
+    if track_key and target_key:
+        return f"track:{track_key}:{target_key}"
+
+    source_key = str(item.get("source_key") or "").strip()
+    if source_key:
+        return f"source:{source_key}"
+
+    task_id = item.get("task_id")
+    if task_id is None:
+        task_id = item.get("id")
+    if task_id is not None:
+        return f"task:{int(task_id)}"
+
+    category = _normalized_task_label(
+        item.get("category") or "general"
+    )
+    label = _normalized_task_label(
+        item.get("label") or item.get("title") or "task"
+    )
+    return f"label:{category}:{label}"
+
+
+def _create_manual_focus_store(conn):
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS manual_daily_focus (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            focus_date TEXT NOT NULL,
+            manual_key TEXT NOT NULL,
+            week INTEGER NOT NULL,
+            task_id INTEGER,
+            source_key TEXT,
+            category TEXT NOT NULL DEFAULT 'General',
+            title TEXT NOT NULL,
+            detail TEXT,
+            estimated_minutes INTEGER NOT NULL DEFAULT 30,
+            destination INTEGER NOT NULL DEFAULT 0,
+            track_key TEXT,
+            target_key TEXT,
+            completed_at TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(focus_date, manual_key)
+        )
+        """
+    )
+
+
+def _manual_focus_task_id(conn, row):
+    task_id = row["task_id"]
+    if task_id is not None:
+        existing = conn.execute(
+            "SELECT id FROM sprint_tasks WHERE id=?",
+            (int(task_id),),
+        ).fetchone()
+        if existing is not None:
+            return int(existing["id"])
+
+    track_key = str(row["track_key"] or "").strip()
+    target_key = str(row["target_key"] or "").strip()
+    if track_key and target_key:
+        linked = conn.execute(
+            """
+            SELECT tt.task_id
+            FROM track_tasks AS tt
+            JOIN sprint_tasks AS s
+              ON s.id=tt.task_id
+            WHERE tt.track_key=?
+              AND tt.target_key=?
+            ORDER BY s.completed, s.week, s.sort_order
+            LIMIT 1
+            """,
+            (track_key, target_key),
+        ).fetchone()
+        if linked is not None:
+            return int(linked["task_id"])
+
+    source_key = str(row["source_key"] or "")
+    if source_key.startswith("task:"):
+        try:
+            source_task_id = int(source_key.split(":", 1)[1])
+        except (TypeError, ValueError):
+            source_task_id = None
+        if source_task_id is not None:
+            existing = conn.execute(
+                "SELECT id FROM sprint_tasks WHERE id=?",
+                (source_task_id,),
+            ).fetchone()
+            if existing is not None:
+                return int(existing["id"])
+
+    label = str(row["title"] or "").strip()
+    if label:
+        matching = conn.execute(
+            """
+            SELECT id
+            FROM sprint_tasks
+            WHERE label=?
+            ORDER BY
+                CASE WHEN completed=0 THEN 0 ELSE 1 END,
+                ABS(week-?),
+                sort_order
+            LIMIT 1
+            """,
+            (
+                label,
+                int(row["week"] or 1),
+            ),
+        ).fetchone()
+        if matching is not None:
+            return int(matching["id"])
+
+    return None
+
+
+def _backfill_manual_focus_store(conn):
+    _create_manual_focus_store(conn)
+    rows = conn.execute(
+        """
+        SELECT
+            f.focus_date,
+            f.week,
+            f.task_id,
+            f.source_key,
+            COALESCE(m.category,f.category,'General') AS category,
+            COALESCE(s.label,f.title) AS title,
+            f.title AS detail,
+            COALESCE(
+                m.estimated_minutes,
+                f.estimated_minutes,
+                30
+            ) AS estimated_minutes,
+            COALESCE(m.destination,0) AS destination,
+            f.track_key,
+            f.target_key,
+            CASE
+                WHEN f.completed_at IS NOT NULL
+                  OR COALESCE(s.completed,0)=1
+                  OR COALESCE(m.status,'')='Completed'
+                THEN COALESCE(f.completed_at,CURRENT_TIMESTAMP)
+                ELSE NULL
+            END AS completed_at
+        FROM daily_focus AS f
+        LEFT JOIN sprint_tasks AS s
+          ON s.id=f.task_id
+        LEFT JOIN task_metadata AS m
+          ON m.task_id=f.task_id
+        WHERE COALESCE(f.is_extra,0)=1
+        """
+    ).fetchall()
+
+    for row in rows:
+        item = dict(row)
+        manual_key = _manual_focus_key(item)
+        conn.execute(
+            """
+            INSERT INTO manual_daily_focus (
+                focus_date,manual_key,week,task_id,source_key,
+                category,title,detail,estimated_minutes,destination,
+                track_key,target_key,completed_at
+            )
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(focus_date,manual_key) DO UPDATE SET
+                week=excluded.week,
+                task_id=COALESCE(excluded.task_id,manual_daily_focus.task_id),
+                source_key=COALESCE(
+                    NULLIF(excluded.source_key,''),
+                    manual_daily_focus.source_key
+                ),
+                category=excluded.category,
+                title=excluded.title,
+                detail=COALESCE(
+                    NULLIF(excluded.detail,''),
+                    manual_daily_focus.detail
+                ),
+                estimated_minutes=excluded.estimated_minutes,
+                destination=excluded.destination,
+                track_key=COALESCE(
+                    NULLIF(excluded.track_key,''),
+                    manual_daily_focus.track_key
+                ),
+                target_key=COALESCE(
+                    NULLIF(excluded.target_key,''),
+                    manual_daily_focus.target_key
+                ),
+                completed_at=COALESCE(
+                    excluded.completed_at,
+                    manual_daily_focus.completed_at
+                ),
+                updated_at=CURRENT_TIMESTAMP
+            """,
+            (
+                row["focus_date"],
+                manual_key,
+                int(row["week"]),
+                row["task_id"],
+                row["source_key"],
+                row["category"] or "General",
+                row["title"] or "Get Ahead task",
+                row["detail"],
+                int(row["estimated_minutes"] or 30),
+                int(row["destination"] or 0),
+                row["track_key"],
+                row["target_key"],
+                row["completed_at"],
+            ),
+        )
+
+
+def _store_manual_focus_item(conn, week, item):
+    _backfill_manual_focus_store(conn)
+    item = dict(item or {})
+
+    track_key, target_key = _focus_track_fields(
+        conn,
+        item,
+    )
+    task_id = item.get("task_id")
+    if task_id is None:
+        task_id = item.get("id")
+
+    source_key = (
+        item.get("source_key")
+        or (
+            f"get-ahead:"
+            f"{item.get('category','general')}:"
+            f"{item.get('label','task')}"
+        )
+    )
+
+    destination = item.get("destination")
+    if destination is None and task_id is not None:
+        metadata = conn.execute(
+            """
+            SELECT destination
+            FROM task_metadata
+            WHERE task_id=?
+            """,
+            (int(task_id),),
+        ).fetchone()
+        destination = (
+            int(metadata["destination"] or 0)
+            if metadata is not None
+            else 0
+        )
+
+    stored = {
+        "task_id": task_id,
+        "source_key": source_key,
+        "category": item.get("category") or "General",
+        "label": item.get("label") or "Get Ahead task",
+        "track_key": track_key,
+        "target_key": target_key,
+    }
+    manual_key = _manual_focus_key(stored)
+
+    conn.execute(
+        """
+        INSERT INTO manual_daily_focus (
+            focus_date,manual_key,week,task_id,source_key,
+            category,title,detail,estimated_minutes,destination,
+            track_key,target_key,completed_at
+        )
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ON CONFLICT(focus_date,manual_key) DO UPDATE SET
+            week=excluded.week,
+            task_id=COALESCE(excluded.task_id,manual_daily_focus.task_id),
+            source_key=excluded.source_key,
+            category=excluded.category,
+            title=excluded.title,
+            detail=COALESCE(
+                NULLIF(excluded.detail,''),
+                manual_daily_focus.detail
+            ),
+            estimated_minutes=excluded.estimated_minutes,
+            destination=excluded.destination,
+            track_key=COALESCE(
+                NULLIF(excluded.track_key,''),
+                manual_daily_focus.track_key
+            ),
+            target_key=COALESCE(
+                NULLIF(excluded.target_key,''),
+                manual_daily_focus.target_key
+            ),
+            completed_at=COALESCE(
+                excluded.completed_at,
+                manual_daily_focus.completed_at
+            ),
+            updated_at=CURRENT_TIMESTAMP
+        """,
+        (
+            date.today().isoformat(),
+            manual_key,
+            int(week),
+            task_id,
+            source_key,
+            item.get("category") or "General",
+            item.get("label") or "Get Ahead task",
+            item.get("detail"),
+            int(item.get("estimated_minutes", 30) or 30),
+            int(destination or 0),
+            track_key,
+            target_key,
+            (
+                item.get("completed_at")
+                if item.get("completed")
+                else None
+            ),
+        ),
+    )
+    return manual_key
+
+
+def _restore_manual_focus_rows(conn, week):
+    _backfill_manual_focus_store(conn)
+    focus_date = date.today().isoformat()
+
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM manual_daily_focus
+        WHERE focus_date=?
+        ORDER BY created_at,id
+        """,
+        (focus_date,),
+    ).fetchall()
+
+    changed = False
+    for row in rows:
+        task_id = _manual_focus_task_id(
+            conn,
+            row,
+        )
+
+        task_completed = False
+        current_destination = int(row["destination"] or 0)
+        current_category = row["category"] or "General"
+        current_title = row["title"] or "Get Ahead task"
+        current_minutes = int(row["estimated_minutes"] or 30)
+
+        if task_id is not None:
+            task_row = conn.execute(
+                """
+                SELECT
+                    s.label,
+                    s.completed,
+                    m.status,
+                    m.category,
+                    m.estimated_minutes,
+                    m.destination
+                FROM sprint_tasks AS s
+                LEFT JOIN task_metadata AS m
+                  ON m.task_id=s.id
+                WHERE s.id=?
+                """,
+                (int(task_id),),
+            ).fetchone()
+            if task_row is not None:
+                task_completed = bool(
+                    task_row["completed"]
+                    or task_row["status"] == "Completed"
+                )
+                current_title = (
+                    task_row["label"]
+                    or current_title
+                )
+                current_category = (
+                    task_row["category"]
+                    or current_category
+                )
+                current_minutes = int(
+                    task_row["estimated_minutes"]
+                    or current_minutes
+                )
+                current_destination = int(
+                    task_row["destination"]
+                    or current_destination
+                )
+
+        completed_at = row["completed_at"]
+        if task_completed and completed_at is None:
+            completed_at = date.today().isoformat()
+
+        existing = None
+        if task_id is not None:
+            existing = conn.execute(
+                """
+                SELECT id
+                FROM daily_focus
+                WHERE focus_date=?
+                  AND COALESCE(is_extra,0)=1
+                  AND task_id=?
+                LIMIT 1
+                """,
+                (
+                    focus_date,
+                    int(task_id),
+                ),
+            ).fetchone()
+
+        if existing is None and row["source_key"]:
+            existing = conn.execute(
+                """
+                SELECT id
+                FROM daily_focus
+                WHERE focus_date=?
+                  AND COALESCE(is_extra,0)=1
+                  AND source_key=?
+                LIMIT 1
+                """,
+                (
+                    focus_date,
+                    row["source_key"],
+                ),
+            ).fetchone()
+
+        if (
+            existing is None
+            and row["track_key"]
+            and row["target_key"]
+        ):
+            existing = conn.execute(
+                """
+                SELECT id
+                FROM daily_focus
+                WHERE focus_date=?
+                  AND COALESCE(is_extra,0)=1
+                  AND track_key=?
+                  AND target_key=?
+                LIMIT 1
+                """,
+                (
+                    focus_date,
+                    row["track_key"],
+                    row["target_key"],
+                ),
+            ).fetchone()
+
+        if existing is None:
+            position = conn.execute(
+                """
+                SELECT COALESCE(MAX(position),0)+1
+                FROM daily_focus
+                WHERE focus_date=?
+                """,
+                (focus_date,),
+            ).fetchone()[0]
+            conn.execute(
+                """
+                INSERT INTO daily_focus (
+                    focus_date,week,position,task_id,source_key,
+                    category,title,estimated_minutes,track_key,
+                    target_key,is_extra,completed_at
+                )
+                VALUES(?,?,?,?,?,?,?,?,?,?,1,?)
+                """,
+                (
+                    focus_date,
+                    int(week),
+                    int(position),
+                    task_id,
+                    row["source_key"],
+                    current_category,
+                    current_title,
+                    current_minutes,
+                    row["track_key"],
+                    row["target_key"],
+                    completed_at,
+                ),
+            )
+            changed = True
+        else:
+            conn.execute(
+                """
+                UPDATE daily_focus
+                SET week=?,
+                    task_id=?,
+                    source_key=?,
+                    category=?,
+                    title=?,
+                    estimated_minutes=?,
+                    track_key=?,
+                    target_key=?,
+                    completed_at=COALESCE(completed_at,?)
+                WHERE id=?
+                """,
+                (
+                    int(week),
+                    task_id,
+                    row["source_key"],
+                    current_category,
+                    current_title,
+                    current_minutes,
+                    row["track_key"],
+                    row["target_key"],
+                    completed_at,
+                    int(existing["id"]),
+                ),
+            )
+
+        conn.execute(
+            """
+            UPDATE manual_daily_focus
+            SET week=?,
+                task_id=?,
+                category=?,
+                title=?,
+                estimated_minutes=?,
+                destination=?,
+                completed_at=?,
+                updated_at=CURRENT_TIMESTAMP
+            WHERE id=?
+            """,
+            (
+                int(week),
+                task_id,
+                current_category,
+                current_title,
+                current_minutes,
+                current_destination,
+                completed_at,
+                int(row["id"]),
+            ),
+        )
+
+    if rows or changed:
+        conn.commit()
+    return len(rows)
+
+
+def _sync_manual_focus_completion(conn):
+    _backfill_manual_focus_store(conn)
+    focus_date = date.today().isoformat()
+
+    conn.execute(
+        """
+        UPDATE manual_daily_focus
+        SET completed_at=COALESCE(
+                completed_at,
+                (
+                    SELECT f.completed_at
+                    FROM daily_focus AS f
+                    WHERE f.focus_date=manual_daily_focus.focus_date
+                      AND COALESCE(f.is_extra,0)=1
+                      AND (
+                          (
+                              manual_daily_focus.task_id IS NOT NULL
+                              AND f.task_id=manual_daily_focus.task_id
+                          )
+                          OR (
+                              manual_daily_focus.source_key IS NOT NULL
+                              AND f.source_key=manual_daily_focus.source_key
+                          )
+                      )
+                    ORDER BY f.position
+                    LIMIT 1
+                )
+            ),
+            updated_at=CURRENT_TIMESTAMP
+        WHERE focus_date=?
+        """,
+        (focus_date,),
+    )
+
+    rows = conn.execute(
+        """
+        SELECT id,task_id
+        FROM manual_daily_focus
+        WHERE focus_date=?
+          AND task_id IS NOT NULL
+          AND completed_at IS NULL
+        """,
+        (focus_date,),
+    ).fetchall()
+    for row in rows:
+        task = conn.execute(
+            """
+            SELECT s.completed,m.status
+            FROM sprint_tasks AS s
+            LEFT JOIN task_metadata AS m
+              ON m.task_id=s.id
+            WHERE s.id=?
+            """,
+            (int(row["task_id"]),),
+        ).fetchone()
+        if (
+            task is not None
+            and (
+                bool(task["completed"])
+                or task["status"] == "Completed"
+            )
+        ):
+            conn.execute(
+                """
+                UPDATE manual_daily_focus
+                SET completed_at=CURRENT_TIMESTAMP,
+                    updated_at=CURRENT_TIMESTAMP
+                WHERE id=?
+                """,
+                (int(row["id"]),),
+            )
+
+    conn.commit()
+
+
 def reconcile_daily_focus(conn):
     """Reconcile concrete focus rows only from their actual task state."""
+    _restore_manual_focus_rows(
+        conn,
+        int(
+            conn.execute(
+                "SELECT COALESCE(MAX(week),1) FROM daily_focus "
+                "WHERE focus_date=?",
+                (date.today().isoformat(),),
+            ).fetchone()[0]
+            or 1
+        ),
+    )
     _backfill_daily_focus_fields(conn)
     focus_date = date.today().isoformat()
 
@@ -1351,7 +1976,9 @@ def reconcile_daily_focus(conn):
     if changed:
         conn.commit()
 
+    _sync_manual_focus_completion(conn)
     return changed
+
 
 
 
@@ -1373,7 +2000,25 @@ def mark_focus_task_completed(
             int(task_id),
         ),
     )
+    _backfill_manual_focus_store(conn)
+    conn.execute(
+        """
+        UPDATE manual_daily_focus
+        SET completed_at=COALESCE(
+                completed_at,
+                CURRENT_TIMESTAMP
+            ),
+            updated_at=CURRENT_TIMESTAMP
+        WHERE focus_date=?
+          AND task_id=?
+        """,
+        (
+            date.today().isoformat(),
+            int(task_id),
+        ),
+    )
     conn.commit()
+
 
 
 def _stored_focus_plan(
@@ -1382,6 +2027,10 @@ def _stored_focus_plan(
 ):
     focus_date = (
         date.today().isoformat()
+    )
+    _restore_manual_focus_rows(
+        conn,
+        int(week),
     )
     rows = conn.execute(
         """SELECT
@@ -1403,21 +2052,54 @@ def _stored_focus_plan(
     if not rows:
         return []
 
-    stored_weeks = {
-        int(row["week"])
+    # PERSIST ADDED TODAY TASKS 1
+    # The base recommendation may be regenerated after a sprint-week sync,
+    # but rows explicitly added by the learner are durable for the date.
+    base_rows = [
+        row
         for row in rows
-    }
-    if stored_weeks != {
-        int(week)
-    }:
+        if not bool(row["is_extra"])
+    ]
+    extra_rows = [
+        row
+        for row in rows
+        if bool(row["is_extra"])
+    ]
+
+    stale_base = any(
+        int(row["week"]) != int(week)
+        for row in base_rows
+    )
+
+    if stale_base:
         conn.execute(
             """DELETE FROM daily_focus
-               WHERE focus_date=?""",
+               WHERE focus_date=?
+                 AND COALESCE(is_extra,0)=0""",
             (focus_date,),
         )
+
+    if extra_rows:
+        conn.execute(
+            """UPDATE daily_focus
+               SET week=?
+               WHERE focus_date=?
+                 AND COALESCE(is_extra,0)=1
+                 AND week<>?""",
+            (
+                int(week),
+                focus_date,
+                int(week),
+            ),
+        )
+
+    if stale_base or not base_rows:
         conn.commit()
+        # Returning no base plan lets intelligent_focus_plan regenerate the
+        # scheduled recommendation. _record_focus_plan preserves extra rows.
         return []
 
+    conn.commit()
     reconcile_daily_focus(
         conn
     )
@@ -1536,6 +2218,8 @@ def _stored_focus_plan(
         )
 
     return result
+
+
 
 
 def _today_completion_evidence(
@@ -2965,7 +3649,11 @@ def intelligent_focus_plan(
         ),
     )[:max_items]
     _record_focus_plan(conn, week, selected)
-    return selected
+    return _stored_focus_plan(
+        conn,
+        int(week),
+    )
+
 
 
 def rebuild_today_snapshot(
@@ -2982,6 +3670,10 @@ def rebuild_today_snapshot(
     replaced using the live adaptive-planning inputs.
     """
     focus_date = date.today().isoformat()
+    _restore_manual_focus_rows(
+        conn,
+        int(week),
+    )
     existing_rows = conn.execute(
         """SELECT
                id,focus_date,week,position,task_id,source_key,category,title,
@@ -2991,10 +3683,17 @@ def rebuild_today_snapshot(
            ORDER BY position""",
         (focus_date,),
     ).fetchall()
-    existing_count = len(existing_rows)
+    existing_count = sum(
+        1
+        for row in existing_rows
+        if not bool(row["is_extra"])
+    )
+    # PERSIST ADDED TODAY TASKS 1
+    # A manual rebuild replaces the recommendation, not learner-selected work.
     conn.execute(
         """DELETE FROM daily_focus
-           WHERE focus_date=?""",
+           WHERE focus_date=?
+             AND COALESCE(is_extra,0)=0""",
         (focus_date,),
     )
     conn.commit()
@@ -3037,6 +3736,8 @@ def rebuild_today_snapshot(
     }
 
 
+
+
 def _record_focus_plan(
     conn,
     week,
@@ -3045,10 +3746,39 @@ def _record_focus_plan(
     focus_date = (
         date.today().isoformat()
     )
+    _restore_manual_focus_rows(
+        conn,
+        int(week),
+    )
+
+    # PERSIST ADDED TODAY TASKS 1
+    # Preserve work the learner explicitly added. Only the generated base
+    # recommendation is replaceable.
+    extra_rows = conn.execute(
+        """SELECT id
+           FROM daily_focus
+           WHERE focus_date=?
+             AND COALESCE(is_extra,0)=1
+           ORDER BY position,id""",
+        (focus_date,),
+    ).fetchall()
+
+    # DAILY FOCUS POSITION COLLISION HOTFIX 1
+    # Move preserved manual rows out of the positive display range before
+    # inserting regenerated base rows. The date/position pair is unique, so
+    # waiting until after insertion to move extras can collide mid-rebuild.
+    conn.execute(
+        """UPDATE daily_focus
+           SET position=-(1000000000 + id)
+           WHERE focus_date=?
+             AND COALESCE(is_extra,0)=1""",
+        (focus_date,),
+    )
 
     conn.execute(
         """DELETE FROM daily_focus
-           WHERE focus_date=?""",
+           WHERE focus_date=?
+             AND COALESCE(is_extra,0)=0""",
         (focus_date,),
     )
 
@@ -3093,7 +3823,27 @@ def _record_focus_plan(
             ),
         )
 
+    # Place preserved additions directly after the regenerated base plan.
+    for position, row in enumerate(
+        extra_rows,
+        start=len(selected) + 1,
+    ):
+        conn.execute(
+            """UPDATE daily_focus
+               SET week=?,position=?
+               WHERE id=?""",
+            (
+                int(week),
+                int(position),
+                int(row["id"]),
+            ),
+        )
+
     conn.commit()
+    _sync_manual_focus_completion(conn)
+
+
+
 
 # BEGIN ALWAYS AVAILABLE GET AHEAD V10.21.1
 def get_ahead_candidates(conn, week, state, limit=12):
@@ -3169,6 +3919,18 @@ def start_get_ahead(conn, week, state, item):
         )
     )
 
+    _store_manual_focus_item(
+        conn,
+        int(week),
+        {
+            **item,
+            "task_id": task_id,
+            "source_key": source_key,
+            "track_key": track_key,
+            "target_key": target_key,
+        },
+    )
+
     if task_id is not None:
         existing = conn.execute(
             """
@@ -3202,6 +3964,7 @@ def start_get_ahead(conn, week, state, item):
         ).fetchone()
 
     if existing is not None:
+        conn.commit()
         return {
             "id": int(existing["id"]),
             "added": False,
@@ -3246,6 +4009,10 @@ def start_get_ahead(conn, week, state, item):
         ),
     )
     conn.commit()
+    _restore_manual_focus_rows(
+        conn,
+        int(week),
+    )
 
     return {
         "id": int(cursor.lastrowid),
@@ -3256,35 +4023,57 @@ def start_get_ahead(conn, week, state, item):
 
 
 
+
 def started_get_ahead_tasks(conn, week):
-    """Return only Get Ahead work explicitly added to today's plan."""
+    """Return durable Get Ahead work explicitly added to today's plan."""
     try:
+        _restore_manual_focus_rows(
+            conn,
+            int(week),
+        )
+        _sync_manual_focus_completion(conn)
         rows = conn.execute(
             """
             SELECT
-                df.task_id AS id,
-                df.task_id,
-                COALESCE(s.label,df.title) AS label,
-                COALESCE(s.completed,0) AS completed,
-                COALESCE(m.category,df.category,'General') AS category,
+                manual.task_id AS id,
+                manual.task_id,
+                COALESCE(s.label,manual.title) AS label,
+                CASE
+                    WHEN manual.completed_at IS NOT NULL
+                      OR COALESCE(s.completed,0)=1
+                      OR COALESCE(m.status,'')='Completed'
+                    THEN 1
+                    ELSE 0
+                END AS completed,
+                COALESCE(
+                    m.category,
+                    manual.category,
+                    'General'
+                ) AS category,
                 COALESCE(
                     m.estimated_minutes,
-                    df.estimated_minutes,
+                    manual.estimated_minutes,
                     30
                 ) AS estimated_minutes,
-                df.source_key,
-                df.track_key,
-                df.target_key,
-                df.week,
-                df.position
-            FROM daily_focus AS df
+                manual.source_key,
+                manual.track_key,
+                manual.target_key,
+                manual.week,
+                manual.id AS position,
+                manual.detail,
+                COALESCE(
+                    m.destination,
+                    manual.destination,
+                    0
+                ) AS destination,
+                1 AS is_extra
+            FROM manual_daily_focus AS manual
             LEFT JOIN sprint_tasks AS s
-                ON s.id=df.task_id
+              ON s.id=manual.task_id
             LEFT JOIN task_metadata AS m
-                ON m.task_id=df.task_id
-            WHERE df.focus_date=?
-              AND df.is_extra=1
-            ORDER BY df.position
+              ON m.task_id=manual.task_id
+            WHERE manual.focus_date=?
+            ORDER BY manual.created_at,manual.id
             """,
             (date.today().isoformat(),),
         ).fetchall()
@@ -3292,6 +4081,7 @@ def started_get_ahead_tasks(conn, week):
         return []
 
     return [dict(row) for row in rows]
+
 
 
 # Existing Today’s Focus Get Ahead controls remain prerequisite-based. Starting

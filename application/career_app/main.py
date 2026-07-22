@@ -11468,7 +11468,7 @@ def run():
         app.processEvents()
 
         splash.update_stage("Building the dashboard…", 88, 5)
-        window.show()
+        window.showMaximized()
         app.processEvents()
 
         splash.update_stage("Ready", 100, 6)
@@ -11486,3 +11486,4 @@ def run():
         raise
 
     sys.exit(app.exec())
+
