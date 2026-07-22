@@ -6,7 +6,7 @@
 **Project:** VFX Production Intelligence Dashboard  
 **Stage:** Dataset  
 **Estimated focused time:** about 75 minutes  
-**Guide updated:** 2026-07-21
+**Guide updated:** 2026-07-22
 
 ## Purpose
 
@@ -117,7 +117,7 @@ Use field definitions during cleaning, schema design, analysis, and dashboard mo
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
 **Milestone:** Complete data dictionary  
-**Started:** 2026-07-21
+**Started:** 2026-07-22
 
 ## Instructions
 

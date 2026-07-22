@@ -6,7 +6,7 @@
 **Project:** VFX Production Intelligence Dashboard  
 **Stage:** Discovery  
 **Estimated focused time:** about 60 minutes  
-**Guide updated:** 2026-07-21
+**Guide updated:** 2026-07-22
 
 ## Purpose
 
@@ -118,7 +118,7 @@ Use governed KPI definitions in business questions, SQL, Python, and Power BI.
 The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
 
 **Milestone:** Finalize KPIs  
-**Started:** 2026-07-21
+**Started:** 2026-07-22
 
 ## Instructions
 

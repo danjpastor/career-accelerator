@@ -85,6 +85,7 @@ from career_app.ui.academy import AcceleratorAcademyWidget
 from career_app.ui.first_run import FirstRunCoordinator
 from career_app.ui.notifications import OverlayNotifier
 from career_app.services import completion_contract
+from career_app.ui.startup_splash import StartupSplash
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
 
@@ -10792,6 +10793,37 @@ class CareerAccelerator(QMainWindow):
 def run():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    window = CareerAccelerator()
-    window.show()
+
+    splash = StartupSplash(ROOT, ASSET_ROOT)
+    splash.show_centered()
+    splash.update_stage("Checking application environment…", 12, 1)
+
+    try:
+        splash.update_stage("Loading database and migrations…", 28, 2)
+        window = CareerAccelerator()
+
+        splash.update_stage("Loading curriculum and learning tracks…", 55, 3)
+        app.processEvents()
+
+        splash.update_stage("Preparing portfolio and planner state…", 72, 4)
+        app.processEvents()
+
+        splash.update_stage("Building the dashboard…", 88, 5)
+        window.show()
+        app.processEvents()
+
+        splash.update_stage("Ready", 100, 6)
+        QTimer.singleShot(350, splash.close)
+    except Exception as exc:
+        splash.update_stage("Startup failed", 100, 6)
+        QMessageBox.critical(
+            splash,
+            "Career Accelerator Startup Error",
+            "Career Accelerator could not finish starting.\n\n"
+            f"{exc}\n\n"
+            "Review logs/career-accelerator-startup.log for launcher details.",
+        )
+        splash.close()
+        raise
+
     sys.exit(app.exec())
