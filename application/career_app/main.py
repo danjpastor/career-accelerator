@@ -11502,41 +11502,170 @@ class CareerAccelerator(QMainWindow):
         dialog.resize(520, 420)
         dialog.exec()
 
+def _external_startup_splash_path() -> Path | None:
+    if os.environ.get("CAREER_ACCELERATOR_EXTERNAL_SPLASH", "").strip() != "1":
+        return None
+
+    raw_path = os.environ.get(
+        "CAREER_ACCELERATOR_SPLASH_STATUS_PATH",
+        "",
+    ).strip()
+    if not raw_path:
+        return None
+
+    return Path(raw_path)
+
+
+def _update_external_startup_splash(
+    message: str,
+    value: int,
+    step: int,
+    detail: str,
+    state_name: str = "running",
+) -> bool:
+    status_path = _external_startup_splash_path()
+    if status_path is None:
+        return False
+
+    try:
+        import json
+
+        payload = {
+            "percent": max(0, min(100, int(value))),
+            "step": max(1, int(step)),
+            "total_steps": 8,
+            "message": str(message),
+            "detail": str(detail),
+            "state": str(state_name),
+        }
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = status_path.with_name(
+            f"{status_path.name}.{os.getpid()}.tmp"
+        )
+        temporary.write_text(
+            json.dumps(payload, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        os.replace(temporary, status_path)
+        return True
+    except (OSError, TypeError, ValueError):
+        return False
+
+
 def run():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
-    splash = StartupSplash(ROOT, ASSET_ROOT)
-    splash.show_centered()
-    splash.update_stage("Checking application environment…", 12, 1)
+    external_splash = _external_startup_splash_path() is not None
+    splash = None
+    window = None
+
+    if external_splash:
+        _update_external_startup_splash(
+            "Loading database and migrations",
+            62,
+            4,
+            "Initializing application data and applying required migrations.",
+        )
+    else:
+        splash = StartupSplash(ROOT, ASSET_ROOT)
+        splash.show_centered()
+        splash.update_stage("Checking application environment…", 12, 1)
 
     try:
-        splash.update_stage("Loading database and migrations…", 28, 2)
+        if splash is not None:
+            splash.update_stage("Loading database and migrations…", 28, 2)
+
         window = CareerAccelerator()
 
-        splash.update_stage("Loading curriculum and learning tracks…", 55, 3)
+        if external_splash:
+            _update_external_startup_splash(
+                "Loading curriculum and learning tracks",
+                76,
+                5,
+                "Preparing Accelerator Academy, practice, and learning progress.",
+            )
+        else:
+            splash.update_stage(
+                "Loading curriculum and learning tracks…",
+                55,
+                3,
+            )
         app.processEvents()
 
-        splash.update_stage("Preparing portfolio and planner state…", 72, 4)
+        if external_splash:
+            _update_external_startup_splash(
+                "Preparing portfolio and planner state",
+                86,
+                6,
+                "Loading portfolio milestones, planner state, and today's focus.",
+            )
+        else:
+            splash.update_stage(
+                "Preparing portfolio and planner state…",
+                72,
+                4,
+            )
         app.processEvents()
 
-        splash.update_stage("Building the dashboard…", 88, 5)
+        if external_splash:
+            _update_external_startup_splash(
+                "Building the dashboard",
+                94,
+                7,
+                "Finalizing the dashboard and opening the application window.",
+            )
+        else:
+            splash.update_stage("Building the dashboard…", 88, 5)
+
         window.showMaximized()
         app.processEvents()
 
-        splash.update_stage("Ready", 100, 6)
-        QTimer.singleShot(350, splash.close)
+        if external_splash:
+            _update_external_startup_splash(
+                "Ready",
+                100,
+                8,
+                "Career Accelerator is ready.",
+                "close",
+            )
+        else:
+            splash.update_stage("Ready", 100, 6)
+            QTimer.singleShot(350, splash.close)
+
     except Exception as exc:
-        splash.update_stage("Startup failed", 100, 6)
+        if external_splash:
+            _update_external_startup_splash(
+                "Startup failed",
+                100,
+                8,
+                str(exc),
+                "error",
+            )
+            message_parent = window
+        else:
+            splash.update_stage("Startup failed", 100, 6)
+            message_parent = splash
+
         QMessageBox.critical(
-            splash,
+            message_parent,
             "Career Accelerator Startup Error",
             "Career Accelerator could not finish starting.\n\n"
             f"{exc}\n\n"
             "Review logs/career-accelerator-startup.log for launcher details.",
         )
-        splash.close()
+
+        if external_splash:
+            _update_external_startup_splash(
+                "Startup failed",
+                100,
+                8,
+                str(exc),
+                "close",
+            )
+        else:
+            splash.close()
+
         raise
 
     sys.exit(app.exec())
-
