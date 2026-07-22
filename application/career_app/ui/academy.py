@@ -46,6 +46,7 @@ from career_app.theme import COLORS
 from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
 from career_app.ui.exercise_packs import FeedbackLabel
 from career_app.ui.widgets import Card
+from career_app.academy.task_clarity import build_activity_clarity
 
 
 @dataclass(frozen=True)
@@ -395,7 +396,7 @@ class AcceleratorAcademyWidget(QWidget):
             f"{len(self.catalog.lessons())} lessons",
             f"{total_steps} interactive steps",
             f"{len(assessments)} checkpoint" + ("s" if len(assessments) != 1 else ""),
-            f"{len(skills_labs)} applied project" + ("s" if len(skills_labs) != 1 else ""),
+            f"{len(skills_labs)} Skills Lab" + ("s" if len(skills_labs) != 1 else ""),
         ):
             pill = QLabel(text)
             pill.setStyleSheet(
@@ -861,7 +862,7 @@ class AcceleratorAcademyWidget(QWidget):
         path_title = self.catalog.program.paths[0].title
         card = Card(
             f"{path_title} Complete",
-            "You made it through every lesson, checkpoint, and applied project in this learning path.",
+            "You made it through every lesson, checkpoint, and Skills Lab in this learning path.",
         )
         card.layout.setContentsMargins(24, 24, 24, 24)
         badge = QLabel("✓")
@@ -936,7 +937,7 @@ class AcceleratorAcademyWidget(QWidget):
                                 target_key=f"academy:skills_lab:{lab.lab_id}",
                                 kind="skills_lab",
                                 title=lab.title,
-                                subtitle="Applied project • Demonstrated Evidence",
+                                subtitle="Skills Lab • Demonstrated Evidence",
                                 lab_id=lab.lab_id,
                                 track_id=track.track_id,
                                 track_title=track_title,
@@ -1843,41 +1844,190 @@ class AcceleratorAcademyWidget(QWidget):
             self._open_next_node()
 
     def _submit_assessment(self) -> None:
+        """Submit the active checkpoint and route to its own next Academy step."""
+
         if self._assessment is None:
             return
+
         self._save_assessment_answer(silent=True)
-        answers = self.service.assessment_drafts(self._assessment.assessment_id)
-        missing = [item.title for item in self._assessment.activities if not answers.get(item.activity_id, "").strip()]
+        answers = self.service.assessment_drafts(
+            self._assessment.assessment_id
+        )
+        missing = [
+            item.title
+            for item in self._assessment.activities
+            if not answers.get(item.activity_id, "").strip()
+        ]
         if missing:
             self.assessment_feedback.setText(
-                "A few questions still need answers: " + ", ".join(missing)
+                "Checkpoint not submitted.\n\n"
+                "Questions still needing answers:\n• "
+                + "\n• ".join(missing)
             )
             return
-        result = self.service.validate_assessment(self._assessment, answers)
+
+        result = self.service.validate_assessment(
+            self._assessment,
+            answers,
+        )
         score = round(float(result.get("score", 0.0)) * 100)
+
         if result.get("passed"):
-            self.assessment_feedback.setText(f"✅ You passed with {score}%! Your applied project is ready.")
-            QMessageBox.information(
-                self,
-                "Checkpoint Passed",
-                f"Score: {score}%\n\nGreat job—your applied project is ready.",
-            )
+            # Refresh progress first so prerequisite and recommendation state
+            # reflects the newly passed checkpoint.
             self.refresh_all()
-            lab = self.catalog.skills_labs()[0]
-            self.open_target(f"academy:skills_lab:{lab.lab_id}")
+
+            course_lab = None
+            course_title = ""
+            for course in self.catalog.courses():
+                assessment_ids = {
+                    item.assessment_id for item in course.assessments
+                }
+                if self._assessment.assessment_id not in assessment_ids:
+                    continue
+
+                course_title = course.title
+                for lab in course.skills_labs:
+                    completed = bool(
+                        self.conn.execute(
+                            """SELECT 1
+                               FROM academy_submissions
+                               WHERE item_type='skills_lab'
+                                 AND item_id=?
+                                 AND validation_status='Passed'
+                               LIMIT 1""",
+                            (lab.lab_id,),
+                        ).fetchone()
+                    )
+                    unlocked, _missing = self.service.skills_lab_unlocked(lab)
+                    if unlocked and not completed:
+                        course_lab = lab
+                        break
+                break
+
+            recommendation = self.service.next_recommendation()
+            target_key = None
+            next_kind = "Academy step"
+            next_title = ""
+
+            if course_lab is not None:
+                target_key = f"academy:skills_lab:{course_lab.lab_id}"
+                next_kind = "Skills Lab"
+                next_title = course_lab.title
+            elif recommendation is not None:
+                target_key = recommendation.target_key
+                next_title = recommendation.title
+                next_kind = {
+                    "skills_lab": "Skills Lab",
+                    "assessment": "Checkpoint",
+                    "lesson": "Lesson",
+                    "lesson_step": "Lesson step",
+                }.get(recommendation.kind, "Academy step")
+
+            feedback_lines = [
+                "✅ Checkpoint passed",
+                f"Score: {score}%",
+            ]
+            if next_title:
+                feedback_lines.extend(
+                    [
+                        "",
+                        f"Next: {next_kind} — {next_title}",
+                    ]
+                )
+                if next_kind == "Skills Lab":
+                    feedback_lines.extend(
+                        [
+                            "",
+                            "This Skills Lab is inside Accelerator Academy. "
+                            "It appears directly after this checkpoint in the "
+                            "left-hand learning path.",
+                        ]
+                    )
+            else:
+                feedback_lines.extend(
+                    [
+                        "",
+                        "The next Academy step is being recalculated. "
+                        "Use Resume Learning after the path refreshes.",
+                    ]
+                )
+            self.assessment_feedback.setText("\n".join(feedback_lines))
+
+            dialog = QMessageBox(self)
+            dialog.setIcon(QMessageBox.Icon.Information)
+            dialog.setWindowTitle("Checkpoint Complete")
+            dialog.setText("Checkpoint passed")
+            details = [f"Score: {score}%"]
+            if course_title:
+                details.append(f"Course: {course_title}")
+            if next_title:
+                details.append(f"Next: {next_kind} — {next_title}")
+            if next_kind == "Skills Lab":
+                details.extend(
+                    [
+                        "",
+                        "Location:",
+                        "Accelerator Academy → left-hand learning path → "
+                        f"{next_title}",
+                    ]
+                )
+            dialog.setInformativeText("\n".join(details))
+
+            open_button = None
+            if target_key:
+                open_button = dialog.addButton(
+                    f"Open {next_kind}",
+                    QMessageBox.ButtonRole.AcceptRole,
+                )
+                dialog.addButton(
+                    "Stay Here",
+                    QMessageBox.ButtonRole.RejectRole,
+                )
+            else:
+                dialog.addButton(
+                    "Close",
+                    QMessageBox.ButtonRole.AcceptRole,
+                )
+
+            dialog.exec()
+            if (
+                target_key
+                and open_button is not None
+                and dialog.clickedButton() is open_button
+            ):
+                self.open_target(target_key)
             return
-        failed_ids = [key for key, value in result.get("results", {}).items() if not value.get("passed")]
-        failed_titles = [
-            item.title for item in self._assessment.activities if item.activity_id in failed_ids
+
+        failed_ids = [
+            key
+            for key, value in result.get("results", {}).items()
+            if not value.get("passed")
         ]
-        self.assessment_feedback.setText(
-            f"You scored {score}%. Take another look at: " + ", ".join(failed_titles)
+        failed_titles = [
+            item.title
+            for item in self._assessment.activities
+            if item.activity_id in failed_ids
+        ]
+        message = [
+            f"Checkpoint not yet passed — {score}%",
+            "",
+            "Review these questions:",
+        ]
+        message.extend(f"• {title}" for title in failed_titles)
+        self.assessment_feedback.setText("\n".join(message))
+
+        dialog = QMessageBox(self)
+        dialog.setIcon(QMessageBox.Icon.Warning)
+        dialog.setWindowTitle("Checkpoint Needs Review")
+        dialog.setText("The checkpoint is not complete yet")
+        dialog.setInformativeText(
+            f"Score: {score}%\n\n"
+            "Return to the questions listed in the feedback panel, "
+            "make corrections, and submit again."
         )
-        QMessageBox.information(
-            self,
-            "Checkpoint Needs Review",
-            f"Score: {score}%\n\nReview the questions you missed, make a few changes, and try again.",
-        )
+        dialog.addButton("Continue Reviewing", QMessageBox.ButtonRole.AcceptRole)
+        dialog.exec()
         self.refresh_all()
 
     def _refresh_assessment_navigation(self) -> None:
@@ -1914,7 +2064,7 @@ class AcceleratorAcademyWidget(QWidget):
             markdown += "\n\n## Reflection questions\n" + "\n".join(f"- {item}" for item in lab.reflection_questions)
         self.lab_brief.set_markdown(
             markdown,
-            eyebrow="APPLIED PROJECT",
+            eyebrow="SKILLS LAB",
             subtitle=f"Final course milestone • About {lab.estimated_minutes} minutes",
             bookmarked=False,
         )
@@ -2156,25 +2306,65 @@ class AcceleratorAcademyWidget(QWidget):
             )
         return "\n\n".join(sections)
 
-    def _activity_markdown(self, activity: ActivityDefinition, *, embedded: bool = False) -> str:
+    def _activity_markdown(
+        self,
+        activity: ActivityDefinition,
+        *,
+        embedded: bool = False,
+    ) -> str:
+        # Career Accelerator v10.20.8: complete task-detail renderer
         presentation = dict(activity.presentation)
         scenario = str(presentation.get("scenario") or "Practice scenario")
-        introduction = str(presentation.get("introduction") or "Use what you just learned to work through the task below.")
-        task = str(presentation.get("task") or activity.prompt)
-        requirements = presentation.get("requirements") or []
-        expected = str(presentation.get("expected_output") or "Your result should match the requested shape and values.")
+        introduction = str(
+            presentation.get("introduction")
+            or "Use what you just learned to work through the task below."
+        )
+
+        expected_columns: tuple[str, ...] = ()
+        expected_row_count: int | None = None
+        if activity.runtime == "sql":
+            validator = dict(activity.validator)
+            expected_query = str(validator.get("expected_query") or "").strip()
+            if expected_query:
+                expected_result = self.service.run_activity(activity, expected_query)
+                if expected_result.passed:
+                    expected_columns = tuple(
+                        str(item) for item in expected_result.columns
+                    )
+                    if not bool(validator.get("allow_subset", False)):
+                        expected_row_count = len(expected_result.rows)
+            if validator.get("expected_row_count") is not None:
+                try:
+                    expected_row_count = int(validator["expected_row_count"])
+                except (TypeError, ValueError):
+                    pass
+
+        clarity = build_activity_clarity(
+            activity,
+            expected_columns=expected_columns,
+            expected_row_count=expected_row_count,
+        )
+        requirement_text = "\n".join(
+            f"- {item}" for item in clarity.requirements
+        )
         skills = presentation.get("skills_practiced") or []
-        requirement_text = "\n".join(f"- {item}" for item in requirements) or "- Follow the task and check your result."
-        skill_text = ", ".join(f"`{item}`" for item in skills) or activity.activity_type.value.title()
-        heading = f"## Your turn: {activity.title}" if embedded else f"# {activity.title}"
+        skill_text = (
+            ", ".join(f"`{item}`" for item in skills)
+            or activity.activity_type.value.title()
+        )
+        heading = (
+            f"## Your turn: {activity.title}"
+            if embedded
+            else f"# {activity.title}"
+        )
         return (
             f"{heading}\n\n"
             f"> **Scenario:** {scenario}\n\n"
             f"{introduction}\n\n"
             f"{self._schema_markdown(activity)}\n\n"
-            f"### Your turn\n> **Task:** {task}\n\n"
-            f"### What to include\n{requirement_text}\n\n"
-            f"### What you should see\n{expected}\n\n"
+            f"### Your task\n> {clarity.task}\n\n"
+            f"### Requirements\n{requirement_text}\n\n"
+            f"### Definition of done\n{clarity.expected_output}\n\n"
             f"### You’re practicing\n{skill_text}"
         )
 

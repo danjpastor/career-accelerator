@@ -606,7 +606,7 @@ class AcademyService:
             "score": score,
             "results": results,
             "feedback": (
-                "Checkpoint passed. The applied project is now unlocked."
+                "Checkpoint passed. The course Skills Lab is now unlocked."
                 if passed
                 else "Checkpoint not yet passed. Review the missed questions and submit another attempt."
             ),
