@@ -4024,6 +4024,201 @@ def start_get_ahead(conn, week, state, item):
 
 
 
+def remove_get_ahead_task(conn, week, item):
+    """Remove one manually added task from today without changing the task."""
+    item = dict(item or {})
+    focus_date = date.today().isoformat()
+    _backfill_manual_focus_store(conn)
+
+    task_id = item.get("task_id")
+    if task_id is None:
+        task_id = item.get("id")
+
+    source_key = str(
+        item.get("source_key") or ""
+    ).strip()
+    track_key = str(
+        item.get("track_key") or ""
+    ).strip()
+    target_key = str(
+        item.get("target_key") or ""
+    ).strip()
+    label = str(
+        item.get("label")
+        or item.get("title")
+        or "Added task"
+    )
+
+    identity_item = {
+        **item,
+        "task_id": task_id,
+        "source_key": source_key,
+        "track_key": track_key,
+        "target_key": target_key,
+    }
+    manual_key = _manual_focus_key(
+        identity_item
+    )
+
+    manual_rows = conn.execute(
+        """
+        SELECT
+            id,manual_key,task_id,source_key,
+            track_key,target_key,title
+        FROM manual_daily_focus
+        WHERE focus_date=?
+        """,
+        (focus_date,),
+    ).fetchall()
+
+    manual_ids = []
+    for row in manual_rows:
+        matches = (
+            row["manual_key"] == manual_key
+            or (
+                task_id is not None
+                and row["task_id"] is not None
+                and int(row["task_id"]) == int(task_id)
+            )
+            or (
+                bool(source_key)
+                and row["source_key"] == source_key
+            )
+            or (
+                bool(track_key)
+                and bool(target_key)
+                and row["track_key"] == track_key
+                and row["target_key"] == target_key
+            )
+        )
+        if matches:
+            manual_ids.append(
+                int(row["id"])
+            )
+            if not label or label == "Added task":
+                label = (
+                    row["title"]
+                    or label
+                )
+
+    focus_rows = conn.execute(
+        """
+        SELECT
+            id,task_id,source_key,
+            track_key,target_key,title
+        FROM daily_focus
+        WHERE focus_date=?
+          AND COALESCE(is_extra,0)=1
+        """,
+        (focus_date,),
+    ).fetchall()
+
+    focus_ids = []
+    for row in focus_rows:
+        matches = (
+            (
+                task_id is not None
+                and row["task_id"] is not None
+                and int(row["task_id"]) == int(task_id)
+            )
+            or (
+                bool(source_key)
+                and row["source_key"] == source_key
+            )
+            or (
+                bool(track_key)
+                and bool(target_key)
+                and row["track_key"] == track_key
+                and row["target_key"] == target_key
+            )
+        )
+        if matches:
+            focus_ids.append(
+                int(row["id"])
+            )
+            if not label or label == "Added task":
+                label = (
+                    row["title"]
+                    or label
+                )
+
+    if manual_ids:
+        conn.executemany(
+            """
+            DELETE FROM manual_daily_focus
+            WHERE id=?
+            """,
+            [
+                (row_id,)
+                for row_id in manual_ids
+            ],
+        )
+
+    if focus_ids:
+        conn.executemany(
+            """
+            DELETE FROM daily_focus
+            WHERE id=?
+            """,
+            [
+                (row_id,)
+                for row_id in focus_ids
+            ],
+        )
+
+    # Rebuild a collision-free contiguous order. Generated rows remain
+    # first and manually added rows remain after them.
+    remaining = conn.execute(
+        """
+        SELECT id
+        FROM daily_focus
+        WHERE focus_date=?
+        ORDER BY
+            COALESCE(is_extra,0),
+            position,
+            id
+        """,
+        (focus_date,),
+    ).fetchall()
+
+    if remaining:
+        conn.execute(
+            """
+            UPDATE daily_focus
+            SET position=-(1000000000 + id)
+            WHERE focus_date=?
+            """,
+            (focus_date,),
+        )
+        for position, row in enumerate(
+            remaining,
+            start=1,
+        ):
+            conn.execute(
+                """
+                UPDATE daily_focus
+                SET position=?,week=?
+                WHERE id=?
+                """,
+                (
+                    int(position),
+                    int(week),
+                    int(row["id"]),
+                ),
+            )
+
+    conn.commit()
+
+    return {
+        "removed": (
+            len(manual_ids)
+            + len(focus_ids)
+        ),
+        "label": label,
+        "task_id": task_id,
+    }
+
+
 def started_get_ahead_tasks(conn, week):
     """Return durable Get Ahead work explicitly added to today's plan."""
     try:

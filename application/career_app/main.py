@@ -6935,16 +6935,69 @@ class CareerAccelerator(QMainWindow):
             ("required", row)
             for row in required[:5]
         ]
-        remaining_slots = max(
-            0,
-            5 - len(displayed),
-        )
+        # REMOVE MANUALLY ADDED TODAY TASKS 1
+        # Added work is always shown after the standard queue. The card has
+        # its own scroll region, so no manual task needs to be hidden merely
+        # because five regular tasks are already available.
         displayed.extend(
             ("added_today", row)
-            for row in added_today[
-                :remaining_slots
-            ]
+            for row in added_today
         )
+
+        def remove_added_item(item):
+            title = str(
+                item.get("label")
+                or "this task"
+            )
+            confirmation = QMessageBox.question(
+                self,
+                "Remove from Today",
+                (
+                    f"Remove {title} from today's plan?\n\n"
+                    "This does not delete, complete, defer, or "
+                    "otherwise change the underlying task."
+                ),
+                (
+                    QMessageBox.StandardButton.Yes
+                    | QMessageBox.StandardButton.No
+                ),
+                QMessageBox.StandardButton.No,
+            )
+            if (
+                confirmation
+                != QMessageBox.StandardButton.Yes
+            ):
+                return
+
+            result = planner.remove_get_ahead_task(
+                self.conn,
+                int(week),
+                item,
+            )
+            self.state = state(
+                self.conn
+            )
+            self.refresh_all(
+                sync_tracks=False
+            )
+
+            if result.get("removed"):
+                self._notify(
+                    (
+                        f"Removed "
+                        f"{result.get('label') or title} "
+                        "from today's plan."
+                    ),
+                    3500,
+                )
+            else:
+                self._notify(
+                    (
+                        f"{title} was no longer in "
+                        "today's added tasks."
+                    ),
+                    3500,
+                )
 
         task_category_colors = {
             "Learning": COLORS["blue"],
@@ -6995,13 +7048,12 @@ class CareerAccelerator(QMainWindow):
                     )
 
                 if is_added_today:
-                    action_text = "Open"
+                    action_text = "Remove"
                     on_action = (
                         lambda _checked=False,
                         item=item:
-                        self._open_get_ahead_target(
-                            item,
-                            add_to_today=False,
+                        remove_added_item(
+                            item
                         )
                     )
                 else:
@@ -7108,6 +7160,7 @@ class CareerAccelerator(QMainWindow):
             )
 
         self.dashboard_tasks_layout.addStretch(1)
+
 
 
 
