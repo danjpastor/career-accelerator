@@ -8,10 +8,11 @@
   "brand": {
     "application_name": "Data Career Accelerator",
     "window_title": "Data Career Accelerator",
-    "logo_path": "data_career_accelerator_logo.png",
-    "horizontal_logo_path": "data_career_accelerator_horizontal.png",
-    "app_icon_path": "career_accelerator.ico",
-    "app_user_model_id": "DanielPastor.DataCareerAccelerator"
+    "logo_path": "pathways/data_analytics_stacked.png",
+    "horizontal_logo_path": "pathways/data_analytics_horizontal.png",
+    "app_icon_path": "pathways/data_analytics.ico",
+    "app_user_model_id": "DanielPastor.DataCareerAccelerator",
+    "program_icon_path": "pathways/data_analytics_program_icon.png"
   },
   "learning": {
     "system_name": "Accelerator Academy",

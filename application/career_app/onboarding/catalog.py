@@ -26,6 +26,7 @@ class PathwayDefinition:
     window_title: str
     logo_path: str
     horizontal_logo_path: str
+    program_icon_path: str
     app_icon_path: str
     app_user_model_id: str
     learning_system_name: str
@@ -82,6 +83,11 @@ class PathwayDefinition:
             horizontal_logo_path=_text(
                 brand.get("horizontal_logo_path"),
                 "brand.horizontal_logo_path",
+                source,
+            ),
+            program_icon_path=_text(
+                brand.get("program_icon_path"),
+                "brand.program_icon_path",
                 source,
             ),
             app_icon_path=_text(brand.get("app_icon_path"), "brand.app_icon_path", source),
@@ -171,7 +177,9 @@ def load_pathway_catalog(pathway_root: Path | None = None) -> PathwayCatalog:
     neutral_required = {
         "application_name",
         "window_title",
+        "logo_path",
         "horizontal_logo_path",
+        "program_icon_path",
         "app_icon_path",
         "app_user_model_id",
     }

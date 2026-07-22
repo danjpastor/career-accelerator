@@ -8,10 +8,11 @@
   "brand": {
     "application_name": "Software Engineering Career Accelerator",
     "window_title": "Software Engineering Career Accelerator",
-    "logo_path": "pathways/career_accelerator_horizontal.png",
-    "horizontal_logo_path": "pathways/career_accelerator_horizontal.png",
-    "app_icon_path": "pathways/career_accelerator_neutral.ico",
-    "app_user_model_id": "CareerAccelerator.SoftwareEngineering"
+    "logo_path": "pathways/software_engineering_stacked.png",
+    "horizontal_logo_path": "pathways/software_engineering_horizontal.png",
+    "app_icon_path": "pathways/software_engineering.ico",
+    "app_user_model_id": "CareerAccelerator.SoftwareEngineering",
+    "program_icon_path": "pathways/software_engineering_program_icon.png"
   },
   "learning": {
     "system_name": "Accelerator Academy",

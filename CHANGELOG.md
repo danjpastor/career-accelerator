@@ -252,3 +252,17 @@
 - Added a one-time guided application tour and Setup menu actions to restart it.
 - Added explicit portfolio replacement backups and a separate full first-run reset.
 - Added clean-repository packaging scripts for alternate branches and new users.
+
+## 10.20.1 — Pathway Graphics and Complete First-Run Reset
+
+- Added the approved Option 2 logo family for neutral, Data Analytics, IT Support, Cybersecurity, and Software Engineering states.
+- Added pathway-specific stacked selection logos, horizontal application logos, program icons, and Windows app icons.
+- Added locked first-run pathway selection with neutral Career Accelerator branding.
+- Enabled the Data Analytics pathway and retained the other pathways as configuration-driven shells.
+- Added a ChatGPT portfolio setup export and validated `.career-portfolio.json` importer.
+- Added dynamic project names/directories while retaining the existing three-project catalog as an existing-user migration fallback.
+- Added automatic existing-user detection so established profiles are not prompted or overwritten.
+- Added a one-time guided application tour and Setup menu actions to restart it.
+- Rebuilt Full First-Run Reset to create an external safety ZIP, clear every application table, remove learner-owned files, and recreate safe onboarding scaffolding.
+- Preserved application code, pathway definitions, curriculum, starter templates, datasets, exercises, validation guides, and onboarding assets during a full reset.
+- Added clean-repository packaging scripts for alternate branches and new users.

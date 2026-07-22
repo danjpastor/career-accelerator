@@ -8,10 +8,11 @@
   "brand": {
     "application_name": "IT Career Accelerator",
     "window_title": "IT Career Accelerator",
-    "logo_path": "pathways/career_accelerator_horizontal.png",
-    "horizontal_logo_path": "pathways/career_accelerator_horizontal.png",
-    "app_icon_path": "pathways/career_accelerator_neutral.ico",
-    "app_user_model_id": "CareerAccelerator.ITSupport"
+    "logo_path": "pathways/it_support_stacked.png",
+    "horizontal_logo_path": "pathways/it_support_horizontal.png",
+    "app_icon_path": "pathways/it_support.ico",
+    "app_user_model_id": "CareerAccelerator.ITSupport",
+    "program_icon_path": "pathways/it_support_program_icon.png"
   },
   "learning": {
     "system_name": "Accelerator Academy",

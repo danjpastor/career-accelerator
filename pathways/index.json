@@ -4,8 +4,10 @@
     "application_name": "Career Accelerator",
     "window_title": "Career Accelerator",
     "horizontal_logo_path": "pathways/career_accelerator_horizontal.png",
-    "app_icon_path": "pathways/career_accelerator_neutral.ico",
-    "app_user_model_id": "CareerAccelerator.Neutral"
+    "app_icon_path": "pathways/career_accelerator.ico",
+    "app_user_model_id": "CareerAccelerator.Neutral",
+    "logo_path": "pathways/career_accelerator_stacked.png",
+    "program_icon_path": "pathways/career_accelerator_program_icon.png"
   },
   "pathway_files": [
     "data_analytics.json",

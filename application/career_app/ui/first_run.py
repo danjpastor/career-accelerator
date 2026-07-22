@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
 import sqlite3
 import sys
@@ -167,7 +166,9 @@ class FirstRunCoordinator:
         return {
             "application_name": selected.application_name,
             "window_title": selected.window_title,
+            "logo_path": selected.logo_path,
             "horizontal_logo_path": selected.horizontal_logo_path,
+            "program_icon_path": selected.program_icon_path,
             "app_icon_path": selected.app_icon_path,
             "app_user_model_id": selected.app_user_model_id,
         }
@@ -349,26 +350,15 @@ class FirstRunCoordinator:
             )
         QMessageBox.information(self.host, "Career Accelerator Pathway", text)
 
-    def _backup_database(self) -> Path:
-        backup_dir = self.repo_root / "backups" / "first-run-reset"
-        backup_dir.mkdir(parents=True, exist_ok=True)
-        destination = backup_dir / (
-            "career_accelerator_" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".db"
-        )
-        target = sqlite3.connect(destination)
-        try:
-            self.conn.backup(target)
-        finally:
-            target.close()
-        return destination
-
     def full_first_run_reset(self) -> None:
         first = QMessageBox.warning(
             self.host,
             "Full First-Run Reset",
-            "This is different from resetting learning progress. It clears the selected pathway, "
-            "portfolio setup, tour state, and all tracked progress, then returns the app to Step 1.\n\n"
-            "A database backup will be created first.",
+            "This is the destructive reset used to prepare Career Accelerator for a different person. "
+            "It is separate from Reset Learning Progress.\n\n"
+            "It will remove the selected pathway, onboarding state, preferences, tracked progress, "
+            "study sessions, evidence, applications, portfolio records, and all other database rows.\n\n"
+            "A safety ZIP will be created outside the repository before anything is removed.",
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
             QMessageBox.StandardButton.Cancel,
         )
@@ -376,9 +366,12 @@ class FirstRunCoordinator:
             return
         second = QMessageBox.question(
             self.host,
-            "Confirm Full Reset",
-            "Portfolio project records and progress will be cleared. Project folders already on disk "
-            "are not silently deleted. Continue?",
+            "Confirm Personal File Cleanup",
+            "The reset will also delete learner-owned files from portfolio projects, career materials, "
+            "task workspaces, DataLemur solutions, DuckDB and Applied Lab submissions, weekly reflections, "
+            "installed optional exercise packs, repository backups, and archives.\n\n"
+            "Curriculum, starter templates, datasets, exercises, setup files, application code, pathway "
+            "definitions, and onboarding graphics will remain. Continue?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         )
@@ -387,27 +380,46 @@ class FirstRunCoordinator:
         final = QMessageBox.question(
             self.host,
             "Final Confirmation",
-            "Type-independent final confirmation: return Career Accelerator to its locked first-run state?",
+            "Return Career Accelerator to the neutral, locked Step 1 state for a new learner?",
             QMessageBox.StandardButton.Reset | QMessageBox.StandardButton.Cancel,
             QMessageBox.StandardButton.Cancel,
         )
         if final != QMessageBox.StandardButton.Reset:
             return
-        backup = self._backup_database()
-        reset_to_first_run(
-            self.conn,
-            catalog_path=self.repo_root / "data" / "portfolio_catalog.json",
-        )
+        try:
+            report = reset_to_first_run(
+                self.conn,
+                repo_root=self.repo_root,
+                catalog_path=self.repo_root / "data" / "portfolio_catalog.json",
+            )
+        except Exception as exc:
+            QMessageBox.critical(
+                self.host,
+                "Reset Failed",
+                "Career Accelerator could not complete the full reset. No success state was recorded.\n\n"
+                + str(exc),
+            )
+            return
+        backup = str(report.backup_path) if report.backup_path else "No backup requested"
         QMessageBox.information(
             self.host,
             "Reset Complete",
-            f"A safety backup was created at:\n{backup}\n\nClose and reopen Career Accelerator to begin Step 1.",
+            f"Safety backup:\n{backup}\n\n"
+            f"Database tables cleared: {len(report.database_tables_cleared)}\n"
+            f"Personal paths removed: {len(report.removed_paths)}\n\n"
+            "Close and reopen Career Accelerator to begin with the neutral Step 1 pathway selector.",
         )
         QApplication.quit()
 
 
 class _PathwayCard(QFrame):
-    def __init__(self, definition: PathwayDefinition, group: QButtonGroup, parent=None):
+    def __init__(
+        self,
+        definition: PathwayDefinition,
+        group: QButtonGroup,
+        asset_root: Path,
+        parent=None,
+    ):
         super().__init__(parent)
         self.definition = definition
         self.setObjectName("PathwayCard")
@@ -416,12 +428,29 @@ class _PathwayCard(QFrame):
         layout.setContentsMargins(18, 16, 18, 16)
         layout.setSpacing(8)
 
+        logo = QLabel()
+        logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo.setMinimumHeight(112)
+        logo_path = Path(asset_root) / definition.logo_path
+        if logo_path.is_file():
+            pixmap = QPixmap(str(logo_path))
+            logo.setPixmap(
+                pixmap.scaled(
+                    190,
+                    112,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+            )
+
         name = QLabel(definition.display_name)
+        name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         name.setStyleSheet("font-size:16pt;font-weight:700;")
         description = QLabel(definition.description)
         description.setWordWrap(True)
         description.setObjectName("Muted")
         status = QLabel("Available" if definition.is_available else "Coming Soon")
+        status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         status.setStyleSheet(
             "font-weight:700;color:#5FE0C2;" if definition.is_available else "font-weight:700;color:#A9B4C6;"
         )
@@ -435,6 +464,7 @@ class _PathwayCard(QFrame):
             button.setObjectName("Primary")
             group.addButton(button)
 
+        layout.addWidget(logo)
         layout.addWidget(name)
         layout.addWidget(status)
         layout.addWidget(description, 1)
@@ -483,7 +513,24 @@ class FirstRunWizard(QDialog):
     def _build_pathway_page(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
+        neutral_logo = QLabel()
+        neutral_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        neutral_logo_path = (
+            self.coordinator.asset_root
+            / self.coordinator.catalog.neutral_brand["logo_path"]
+        )
+        if neutral_logo_path.is_file():
+            neutral_logo.setPixmap(
+                QPixmap(str(neutral_logo_path)).scaled(
+                    280,
+                    170,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+            )
+        layout.addWidget(neutral_logo)
         title = QLabel("Choose your Career Accelerator pathway")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet("font-size:22pt;font-weight:800;")
         intro = QLabel(
             "The application remains locked until a pathway is selected. Branding, learning tracks, "
@@ -502,7 +549,9 @@ class FirstRunWizard(QDialog):
         self.pathway_group = QButtonGroup(self)
         self.pathway_group.setExclusive(True)
         for index, definition in enumerate(self.coordinator.catalog.pathways):
-            card = _PathwayCard(definition, self.pathway_group)
+            card = _PathwayCard(
+                definition, self.pathway_group, self.coordinator.asset_root
+            )
             grid.addWidget(card, index // 2, index % 2)
             card.button.clicked.connect(
                 lambda checked=False, pathway_id=definition.pathway_id: self._select_pathway(pathway_id)

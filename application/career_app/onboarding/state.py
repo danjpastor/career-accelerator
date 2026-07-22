@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 import json
 from pathlib import Path
 import sqlite3
@@ -253,23 +253,24 @@ def export_state(conn: sqlite3.Connection) -> dict[str, str]:
 def reset_to_first_run(
     conn: sqlite3.Connection,
     *,
-    catalog_path: Path,
-    start_date: str | None = None,
-) -> None:
-    """Perform the explicit full reset; normal progress resets do not call this."""
-    from career_app.database import factory_reset
+    repo_root: Path,
+    catalog_path: Path | None = None,
+    backup_destination: Path | None = None,
+):
+    """Perform the explicit destructive reset and return its safety report.
 
-    factory_reset(conn, start_date or date.today().isoformat())
-    with conn:
-        conn.execute("DELETE FROM settings WHERE key LIKE ?", (KEY_PREFIX + "%",))
-        for table in ("project_notes", "project_tasks"):
-            if _table_exists(conn, table):
-                conn.execute(f"DELETE FROM {table}")
-        if _table_exists(conn, "program_state"):
-            conn.execute(
-                "UPDATE program_state SET current_project=0, total_projects=0 WHERE id=1"
-            )
-    write_project_catalog([], catalog_path)
+    Normal learning-progress resets never call this function. The full reset creates
+    an external backup, clears every application table, removes learner-owned files,
+    and restores only the folder scaffolding required by first-run onboarding.
+    """
+    from .reset import perform_full_first_run_reset
+
+    report = perform_full_first_run_reset(
+        conn,
+        repo_root,
+        backup_destination=backup_destination,
+        create_backup=True,
+    )
+    write_project_catalog([], catalog_path or Path(repo_root) / "data" / "portfolio_catalog.json")
     apply_runtime_catalog([])
-    migrate_existing_profile_if_needed(conn)
-    set_settings(conn, {KEY_SEED_CLEANUP: "1"})
+    return report

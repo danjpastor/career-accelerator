@@ -8,10 +8,11 @@
   "brand": {
     "application_name": "Cybersecurity Career Accelerator",
     "window_title": "Cybersecurity Career Accelerator",
-    "logo_path": "pathways/career_accelerator_horizontal.png",
-    "horizontal_logo_path": "pathways/career_accelerator_horizontal.png",
-    "app_icon_path": "pathways/career_accelerator_neutral.ico",
-    "app_user_model_id": "CareerAccelerator.Cybersecurity"
+    "logo_path": "pathways/cybersecurity_stacked.png",
+    "horizontal_logo_path": "pathways/cybersecurity_horizontal.png",
+    "app_icon_path": "pathways/cybersecurity.ico",
+    "app_user_model_id": "CareerAccelerator.Cybersecurity",
+    "program_icon_path": "pathways/cybersecurity_program_icon.png"
   },
   "learning": {
     "system_name": "Accelerator Academy",
