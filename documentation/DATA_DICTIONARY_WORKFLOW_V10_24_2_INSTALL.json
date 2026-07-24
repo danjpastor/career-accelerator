@@ -1,0 +1,20 @@
+﻿{
+    "version":  "10.24.2",
+    "feature":  "Guided data dictionary review and active portfolio routing repair",
+    "installed_at":  "2026-07-23T09:09:15",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\GitHub\\career-accelerator\\patch_backups\\v10.24.2-data-dictionary-workflow-20260723-090915",
+    "files":  {
+                  "CHANGELOG.md":  "593847056A29062729D2050EB5D87259496254866EDE0E04FEC7AD280E1B3FA1",
+                  "application\\career_app\\ui\\portfolio_studios.py":  "011915B56E5CA313FCCA14852D6218DF71EC1B067388674938AE3305BDA8C002",
+                  "application\\career_app\\services\\portfolio_milestones.py":  "6B3D650F4F60F4461B61B7B05A2C0A74387C42D4B9C891CF5B841F36290D862F",
+                  "application\\career_app\\ui\\portfolio_workspace.py":  "60EAC909E876D0378CB1019E8A6F39F136EE5FD18FEAEB8D70F795B1FE7724EA",
+                  "application\\career_app\\__init__.py":  "F449C52B8B4145585CE094306371D393AFC8F49ED8BA43FEAA05D98617FCF187"
+              },
+    "preserves":  [
+                      "application databases",
+                      "portfolio project files",
+                      "data dictionary CSV and Markdown files",
+                      "Studio state and reviewed decisions",
+                      "Academy progress and task history"
+                  ]
+}

@@ -1,0 +1,25 @@
+﻿{
+    "version":  "10.25.2",
+    "feature":  "VS Code notebook comment shortcuts and non-blocking workspace close",
+    "installed_at":  "2026-07-24T15:27:55",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.25.2-notebook-hotkeys-fast-close-20260724-152754",
+    "files":  {
+                  "application\\career_app\\ui\\notebook_workspace.py":  "37477F5243F8FC6F086C1243ADC3E7EF2996C61555C9F6922C18D8BB98493E71",
+                  "application\\career_app\\ui\\task_workspace.py":  "63CEF24A9CE32B3224406600202EC4DEE894DD501EEBE0615707D561A5DD4CC1",
+                  "application\\career_app\\services\\task_workspace.py":  "DA9BBF20BDD6789BDFAAEC50BFEA14B26C1AE152FDC1ACB531EE1AC685831A78",
+                  "application\\career_app\\main.py":  "E779F8676CB460C43C08C73A45BA8E12C979FC94FF9A94831C50D028D40674C6",
+                  "CHANGELOG.md":  "8A23EC977BFE81185B737806BC6EFB06FA0C9264B72010513412F5822C17AE32",
+                  "application\\career_app\\ui\\portfolio_workspace.py":  "81751CDB0CC713E17FEEBE42C7082FA2666693A41FA19E0756935FB5872F3D20",
+                  "application\\career_app\\__init__.py":  "C6E58D189A2842BE3A90FE44A676400E139099E3358B83F5730D61B0E7A418E0"
+              },
+    "preserves":  [
+                      "guided Data Cleaning Studio",
+                      "per-table cleaning notebooks",
+                      "rendered Markdown notebook behavior",
+                      "Today’s Focus retrospective restoration",
+                      "overdue sequential task scheduling",
+                      "Current Sprint task browser",
+                      "Career Accelerator database and user progress",
+                      "portfolio files, notebooks, and DuckDB data"
+                  ]
+}

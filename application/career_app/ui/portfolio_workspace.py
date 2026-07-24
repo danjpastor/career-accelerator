@@ -16,15 +16,16 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QSizePolicy,
-    QTabWidget,
     QTextBrowser,
     QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
-from career_app.services import portfolio_workspace
+from career_app.services import portfolio_studios, portfolio_workspace
 from career_app.theme import stylesheet
+from career_app.ui import portfolio_studios as portfolio_studio_ui
+from career_app.ui.detachable_tabs import DetachableTabWidget
 from career_app.ui.markdown_preview import (
     path_field_stylesheet, raw_markdown_stylesheet, render_markdown_html,
 )
@@ -55,6 +56,8 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         self.task = self.workspace["task"]
         self.document_path = self.workspace["document_path"]
         self._dirty = False
+        self._closing = False
+        self._studios_shutdown = False
 
         self.setWindowTitle(
             f"Portfolio Milestone — {self.task['label']}"
@@ -63,6 +66,7 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         parent_width = max(820, parent.width() if parent is not None else 1180)
         parent_height = max(640, parent.height() if parent is not None else 860)
         self.resize(min(1180, parent_width - 44), min(860, parent_height - 44))
+        QTimer.singleShot(0, self.showMaximized)
         self.setStyleSheet(
             stylesheet(
                 getattr(parent, "_ui_scale", 1.0),
@@ -150,7 +154,11 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         root_layout.addWidget(self.data_workspace_row)
         self._refresh_data_workspace_status()
 
-        self.document_views = QTabWidget()
+        self.document_views = DetachableTabWidget(
+            self,
+            workspace_key=f"portfolio:{self.task_id}:workspace",
+            owner_window=self,
+        )
         self.document_views.setMinimumWidth(0)
 
         self.preview = QTextBrowser()
@@ -166,6 +174,31 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         )
         self.editor.textChanged.connect(self._changed)
         self.document_views.addTab(self.editor, "Raw Markdown")
+
+        self.studio_context = portfolio_studios.context_for(
+            self.root,
+            self.task,
+        )
+        self.studio_widgets = []
+        try:
+            self.studio_widgets = portfolio_studio_ui.build_studio_tabs(
+                self.document_views,
+                context=self.studio_context,
+                data_workspace=self.data_workspace,
+            )
+        except Exception as exc:
+            studio_error = QTextBrowser()
+            studio_error.setOpenExternalLinks(False)
+            studio_error.setHtml(
+                render_markdown_html(
+                    "# Milestone Studio Could Not Load\n\n"
+                    "The Visual Guide and Raw Markdown remain available. "
+                    "The milestone-specific workspace reported this error:\n\n"
+                    f"```text\n{exc}\n```"
+                )
+            )
+            self.document_views.addTab(studio_error, "Studio Error")
+
         root_layout.addWidget(self.document_views, 1)
 
         self.guide_setup = QWidget()
@@ -210,6 +243,10 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         bottom = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.save_state = QLabel("Saved")
         self.save_state.setObjectName("Muted")
+        for studio_widget in self.studio_widgets:
+            saved_signal = getattr(studio_widget, "saved", None)
+            if saved_signal is not None:
+                saved_signal.connect(self.save_state.setText)
         bottom.addWidget(self.save_state)
         bottom.addStretch()
 
@@ -241,6 +278,7 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         self._update_markdown_preview()
         self._refresh_guide_references()
         self.document_views.setCurrentIndex(0)
+        self.document_views.schedule_restore()
 
     def _refresh_data_workspace_status(self):
         plan = getattr(self, "data_workspace", None)
@@ -311,7 +349,10 @@ class PortfolioTaskWorkspaceDialog(QDialog):
     def _refresh_guide_references(self):
         if not hasattr(self, "reference_list"):
             return
-        if getattr(self, "data_workspace", None) is not None:
+        if (
+            getattr(self, "data_workspace", None) is not None
+            or bool(getattr(self, "studio_widgets", []))
+        ):
             self.reference_list.clear()
             self.guide_setup.setVisible(False)
             return
@@ -433,7 +474,12 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Open Project Folder", str(exc))
 
-    def save_document(self):
+    def save_document(
+        self,
+        *_args,
+        refresh_ui: bool = True,
+        silent: bool = False,
+    ) -> bool:
         try:
             portfolio_workspace.save_document(
                 self.conn,
@@ -442,10 +488,18 @@ class PortfolioTaskWorkspaceDialog(QDialog):
                 self.editor.toPlainText(),
             )
             self._dirty = False
-            self._update_markdown_preview()
-            self.save_state.setText("Saved")
+            if refresh_ui:
+                self._update_markdown_preview()
+                self.save_state.setText("Saved")
+            return True
         except Exception as exc:
-            QMessageBox.warning(self, "Could Not Save", str(exc))
+            if not silent:
+                QMessageBox.warning(
+                    self,
+                    "Could Not Save",
+                    str(exc),
+                )
+            return False
 
     def open_external(self):
         self.save_document()
@@ -463,6 +517,33 @@ class PortfolioTaskWorkspaceDialog(QDialog):
     def toggle_complete(self):
         completed = not bool(self.task["completed"])
         self.save_document()
+        if completed:
+            issues = []
+            for widget in getattr(self, "studio_widgets", []):
+                preparer = getattr(widget, "prepare_for_completion", None)
+                if callable(preparer):
+                    try:
+                        preparer()
+                    except Exception as exc:
+                        issues.append(f"Could not save the milestone workspace: {exc}")
+                        continue
+                checker = getattr(widget, "completion_issues", None)
+                if callable(checker):
+                    try:
+                        issues.extend(str(item) for item in checker() if str(item).strip())
+                    except Exception as exc:
+                        issues.append(str(exc))
+            if issues:
+                preview = issues[:24]
+                message = "\n".join(f"• {item}" for item in preview)
+                if len(issues) > len(preview):
+                    message += f"\n\n…and {len(issues) - len(preview)} more."
+                QMessageBox.information(
+                    self,
+                    "Milestone Still Needs Work",
+                    message,
+                )
+                return
         try:
             if self.completion_callback is not None:
                 self.completion_callback(self.task_id, completed)
@@ -487,7 +568,40 @@ class PortfolioTaskWorkspaceDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Update Milestone", str(exc))
 
-    def accept(self):
+    def _shutdown_studios(self):
+        if self._studios_shutdown:
+            return
+        self._studios_shutdown = True
+        for widget in getattr(self, "studio_widgets", []):
+            shutdown = getattr(widget, "shutdown", None)
+            if callable(shutdown):
+                try:
+                    shutdown()
+                except Exception:
+                    pass
+
+    def _flush_before_close(self) -> None:
+        if self._closing:
+            return
+        self._closing = True
+        self.document_views.prepare_workspace_close()
+        self.autosave_timer.stop()
+        self.preview_timer.stop()
         if self._dirty:
-            self.save_document()
+            self.save_document(
+                refresh_ui=False,
+                silent=True,
+            )
+        self._shutdown_studios()
+
+    def closeEvent(self, event):
+        self._flush_before_close()
+        super().closeEvent(event)
+
+    def accept(self):
+        self._flush_before_close()
         super().accept()
+
+    def reject(self):
+        self._flush_before_close()
+        super().reject()

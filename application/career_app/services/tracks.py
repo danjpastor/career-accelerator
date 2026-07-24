@@ -971,6 +971,106 @@ def _week_bounds(reference=None):
     return start, start + timedelta(days=6)
 
 
+ADAPTIVE_SCHEDULE_TABLE = "adaptive_track_schedule"
+
+
+def _create_adaptive_schedule_store(conn):
+    conn.execute(
+        f"""CREATE TABLE IF NOT EXISTS {ADAPTIVE_SCHEDULE_TABLE} (
+            track_key TEXT PRIMARY KEY,
+            target_key TEXT NOT NULL,
+            recommended_date TEXT NOT NULL,
+            assigned_week INTEGER NOT NULL,
+            assigned_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )"""
+    )
+
+
+def _recommended_target_date(
+    *,
+    weekly_target,
+    weekly_completed,
+    reference=None,
+):
+    """Return the recommended weekday for the next sequential track item.
+
+    Weekly targets are spread across Monday through Friday.  When this week's
+    quota is already complete, the next item is scheduled for next Monday.
+    """
+    current = reference or date.today()
+    week_start = current - timedelta(days=current.weekday())
+    weekly_target = max(0, int(weekly_target or 0))
+    ordinal = max(1, int(weekly_completed or 0) + 1)
+
+    if weekly_target <= 0 or ordinal > weekly_target:
+        return week_start + timedelta(days=7)
+
+    offset = max(
+        0,
+        min(
+            4,
+            math.ceil(ordinal * 5 / weekly_target) - 1,
+        ),
+    )
+    return week_start + timedelta(days=offset)
+
+
+def _ensure_target_schedule(
+    conn,
+    *,
+    track_key,
+    target_key,
+    week,
+    weekly_target,
+    weekly_completed,
+):
+    _create_adaptive_schedule_store(conn)
+    row = conn.execute(
+        f"""SELECT target_key,recommended_date
+            FROM {ADAPTIVE_SCHEDULE_TABLE}
+            WHERE track_key=?""",
+        (str(track_key),),
+    ).fetchone()
+
+    if row is not None and str(row["target_key"]) == str(target_key):
+        try:
+            return date.fromisoformat(str(row["recommended_date"]))
+        except (TypeError, ValueError):
+            pass
+
+    recommended = _recommended_target_date(
+        weekly_target=weekly_target,
+        weekly_completed=weekly_completed,
+    )
+    conn.execute(
+        f"""INSERT INTO {ADAPTIVE_SCHEDULE_TABLE}
+            (track_key,target_key,recommended_date,assigned_week)
+            VALUES(?,?,?,?)
+            ON CONFLICT(track_key) DO UPDATE SET
+                target_key=excluded.target_key,
+                recommended_date=excluded.recommended_date,
+                assigned_week=excluded.assigned_week,
+                assigned_at=CURRENT_TIMESTAMP,
+                updated_at=CURRENT_TIMESTAMP""",
+        (
+            str(track_key),
+            str(target_key),
+            recommended.isoformat(),
+            int(week),
+        ),
+    )
+    return recommended
+
+
+def _clear_target_schedule(conn, track_key):
+    _create_adaptive_schedule_store(conn)
+    conn.execute(
+        f"DELETE FROM {ADAPTIVE_SCHEDULE_TABLE} WHERE track_key=?",
+        (str(track_key),),
+    )
+
+
 def _days_remaining(reference=None):
     current = reference or date.today()
     return max(1, 7 - current.weekday())
@@ -3504,6 +3604,7 @@ def sync_all(conn, state):
                    WHERE track_key=?""",
                 (track_key,),
             )
+            _clear_target_schedule(conn, track_key)
             _upsert_state(
                 conn,
                 track_key,
@@ -3534,6 +3635,7 @@ def sync_all(conn, state):
                    WHERE track_key=?""",
                 (track_key,),
             )
+            _clear_target_schedule(conn, track_key)
             existing = _state_row(
                 conn,
                 track_key,
@@ -3568,6 +3670,7 @@ def sync_all(conn, state):
                    WHERE track_key=?""",
                 (track_key,),
             )
+            _clear_target_schedule(conn, track_key)
             existing = _state_row(
                 conn,
                 track_key,
@@ -3595,15 +3698,32 @@ def sync_all(conn, state):
             )
             continue
 
+        recommended_date = _ensure_target_schedule(
+            conn,
+            track_key=track_key,
+            target_key=target["target_key"],
+            week=week,
+            weekly_target=allocations[track_key]["weekly_target"],
+            weekly_completed=weekly[track_key],
+        )
+        due_now = recommended_date <= date.today()
+
         track_status = "Active"
-        if pace[track_key][
-            "weekly_goal_complete"
-        ]:
+        if (
+            pace[track_key]["weekly_goal_complete"]
+            and not due_now
+        ):
             track_status = "Weekly Complete"
-        elif pace[track_key][
-            "daily_goal_complete"
-        ]:
+        elif (
+            pace[track_key]["daily_goal_complete"]
+            and not due_now
+        ):
             track_status = "Daily Complete"
+
+        target_metadata = dict(target["metadata"] or {})
+        target_metadata["recommended_date"] = recommended_date.isoformat()
+        target_metadata["due_today"] = recommended_date == date.today()
+        target_metadata["overdue"] = recommended_date < date.today()
 
         _upsert_state(
             conn,
@@ -3616,7 +3736,7 @@ def sync_all(conn, state):
                 track_key
             ]["weekly_target"],
             status=track_status,
-            metadata=target["metadata"],
+            metadata=target_metadata,
         )
         _ensure_task(
             conn,

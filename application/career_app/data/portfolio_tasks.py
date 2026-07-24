@@ -166,8 +166,8 @@ VALIDATE_FINDINGS = _spec(
 
 CLEAN_DATA = _spec(
     "clean_data",
-    "Create a reproducible Python cleaning workflow that transforms the raw or staging data into analysis-ready files without altering the original sources.",
-    "Save the cleaning notebook or script, document every transformation, preserve raw files, produce processed outputs, and verify row counts, types, missing values, duplicates, and key fields after cleaning.",
+    "Use the Data Cleaning Studio to clean and validate every source table from the approved data dictionary. Work in the integrated table notebook or import externally cleaned CSV files without altering the raw sources.",
+    "For every table, produce an organized processed CSV, validate its schema and dictionary rules, document cleaning decisions and remaining exceptions, and mark the table complete. Finish when every processed table and summary is ready for the analytical database milestone.",
     "python_clean_data.md",
     120,
 )

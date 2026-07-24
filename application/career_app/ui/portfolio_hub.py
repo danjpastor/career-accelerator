@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtCore import QUrl, Qt, Signal
+from PySide6.QtCore import QTimer, QUrl, Qt, Signal
 from PySide6.QtGui import QBrush, QColor
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -34,7 +34,7 @@ from PySide6.QtWidgets import (
 )
 
 from career_app.data.roadmap import PROJECT_NAMES
-from career_app.services import portfolio_hub, task_workspace
+from career_app.services import portfolio_hub, portfolio_workspace, task_workspace
 from career_app.theme import COLORS
 from career_app.ui.markdown_preview import render_markdown_html
 from career_app.ui.portfolio_workspace import PortfolioTaskWorkspaceDialog
@@ -85,6 +85,7 @@ class PortfolioHubWidget(QWidget):
         self._inventory = {}
         self._milestones: list[dict[str, Any]] = []
         self._deliverables: list[dict[str, Any]] = []
+        self._guides_upgraded = False
         self._build()
         self.refresh_all()
 
@@ -434,6 +435,9 @@ class PortfolioHubWidget(QWidget):
                 self.overview.setPlainText("Your Portfolio Workspace is intentionally blank until personalized projects are imported.")
             return
         try:
+            if not self._guides_upgraded:
+                portfolio_workspace.upgrade_managed_guides(self.conn, self.root)
+                self._guides_upgraded = True
             project_id = self.project_id()
             self._milestones = portfolio_hub.milestone_rows(self.conn, project_id)
             self._deliverables = portfolio_hub.deliverable_rows(
@@ -534,7 +538,10 @@ class PortfolioHubWidget(QWidget):
             refresh_callback=self.refresh_all,
         )
         dialog.exec()
-        self.refresh_all()
+        if dialog.workspace_changed or dialog.completion_changed:
+            # Let the native milestone window disappear before refreshing tables and
+            # deliverables. This removes the impression that Close is hanging.
+            QTimer.singleShot(0, self.refresh_all)
 
     def _open_selected_guide(self):
         task_id = self._selected_task_id(self.milestone_table)
@@ -552,6 +559,17 @@ class PortfolioHubWidget(QWidget):
         if row is None:
             return
         completed = not bool(row["completed"])
+        if completed:
+            QMessageBox.information(
+                self,
+                "Finish in the Milestone Workspace",
+                (
+                    "Open the milestone workspace and use Mark Complete there. "
+                    "That lets Career Accelerator check the studio, notebook, or review items first."
+                ),
+            )
+            self._open_guide(task_id)
+            return
         try:
             if self.completion_callback is not None:
                 self.completion_callback(

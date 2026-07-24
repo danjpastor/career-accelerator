@@ -1,0 +1,66 @@
+{
+  "version": 2,
+  "project_id": 1,
+  "milestone_key": "data_dictionary_review",
+  "updated_at": "2026-07-24T12:21:49",
+  "data": {
+    "dictionary_saved_at": "2026-07-24T12:21:49",
+    "dictionary_issue_count": 0,
+    "dictionary_tables": {
+      "artists": {
+        "business_name": "Artists",
+        "description": "Contains records for artists used by the approved project analysis, including artist display name, primary VFX department, and production role.",
+        "grain": "One row per artist",
+        "expected_primary_key": "artist_id",
+        "notes": "",
+        "reviewed": "Yes"
+      },
+      "clients": {
+        "business_name": "Clients",
+        "description": "Contains records for clients used by the approved project analysis, including client or studio name, business category such as feature studio or agency, and primary client region.",
+        "grain": "One row per client",
+        "expected_primary_key": "client_id",
+        "notes": "clients.client_id is the parent of projects.client_id. Before the relationship can be used in final analysis, remove duplicate client rows, trim the whitespace from project PRJ-1003’s client_id, and resolve or quarantine project PRJ-1011, which references nonexistent client CL-999.",
+        "reviewed": "Yes"
+      },
+      "projects": {
+        "business_name": "Projects",
+        "description": "Stores project-level production information used to analyze client work, schedules, delivery performance, planned scope, budgeted labor, production leadership, and technical delivery requirements.",
+        "grain": "One VFX production project.",
+        "expected_primary_key": "project_id",
+        "notes": "",
+        "reviewed": "Yes"
+      },
+      "reviews": {
+        "business_name": "Reviews",
+        "description": "Stores shot-review events used to analyze revision activity, approval outcomes, internal-versus-client feedback, review turnaround time, and review-related production risk.",
+        "grain": "One review event for one shot.",
+        "expected_primary_key": "review_id",
+        "notes": "The raw Reviews table contains 3,883 rows and 3,843 distinct review IDs. It includes duplicate review records, invalid or missing shot and project references, mixed and invalid review dates, invalid review-round values, inconsistent outcomes, and invalid response-hour values.",
+        "reviewed": "Yes"
+      },
+      "shots": {
+        "business_name": "Shots",
+        "description": "Contains records for shots used by the approved project analysis, including owning project, editorial sequence identifier, and shot code within a project.",
+        "grain": "One row per shot",
+        "expected_primary_key": "shot_id",
+        "notes": "",
+        "reviewed": "Yes"
+      },
+      "time_entries": {
+        "business_name": "Time Entries",
+        "description": "Contains records for time entries used by the approved project analysis, including shot receiving the time, project receiving the time, and artist logging the time.",
+        "grain": "One row per logged work entry",
+        "expected_primary_key": "time_entry_id",
+        "notes": "",
+        "reviewed": "Yes"
+      }
+    },
+    "dictionary_saved_hash": "ce8d70730ea0291d86a09f9a1bb318d61a1f62e1e94a4b0d6e058fd077c39fed",
+    "dictionary_validated_at": "2026-07-24T12:21:13",
+    "dictionary_validation_issue_count": 0,
+    "dictionary_validated_hash": "ce8d70730ea0291d86a09f9a1bb318d61a1f62e1e94a4b0d6e058fd077c39fed",
+    "dictionary_generated_at": "2026-07-24T12:21:40",
+    "dictionary_generated_hash": "ce8d70730ea0291d86a09f9a1bb318d61a1f62e1e94a4b0d6e058fd077c39fed"
+  }
+}

@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (
     QApplication, QButtonGroup, QCheckBox, QComboBox, QDialog, QFormLayout,
     QInputDialog,
     QBoxLayout, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout, QLabel, QLayout,
-    QLineEdit, QListWidget, QMainWindow, QMessageBox, QPushButton, QProgressBar,
+    QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMessageBox,
+    QPushButton, QProgressBar,
     QScrollArea, QSizePolicy, QSlider, QSpinBox, QStackedWidget, QTableWidget,
     QTableWidgetItem, QTabWidget, QTextEdit, QVBoxLayout, QWidget
 )
@@ -77,7 +78,7 @@ from career_app.ui.responsive import (
     set_box_direction,
 )
 from career_app.ui.widgets import (
-    AreaChart, BadgeCard, BrandedBannerCard, Card, CircularTimer, Divider, FocusRow,
+    AreaChart, BadgeCard, BrandedBannerCard, Card, ClickableCard, CircularTimer, Divider, FocusRow,
     FooterMetricBox, MetricRow, MiniSparkline, Ring, SectionHeader,
     SidebarMetricCard, SoftPanel, StatRow, TaskRow, make_card_scrollable
 )
@@ -1201,19 +1202,55 @@ class CareerAccelerator(QMainWindow):
             Ring("Portfolio Progress", COLORS["orange"]),
             Ring("Weekly Goal", COLORS["gold"]),
         ]
+        self.rings[0].set_clickable(True)
+        self.rings[0].setToolTip(
+            "Click to view every named task assigned or completed in the current sprint."
+        )
+        self.rings[0].clicked.connect(self.open_current_sprint_dialog)
         self.dashboard_metric_cards = []
 
-        for ring in self.rings:
-            card = Card()
+        for index, ring in enumerate(self.rings):
+            card = ClickableCard() if index == 0 else Card()
             card.setMinimumHeight(96)
             card.setMaximumHeight(16777215)
             card.layout.setContentsMargins(8, 7, 8, 7)
-            card.layout.setSpacing(0)
+            card.layout.setSpacing(2 if index == 0 else 0)
             card.layout.addWidget(
                 ring,
                 0,
                 Qt.AlignVCenter,
             )
+            if index == 0:
+                card.clicked.connect(self.open_current_sprint_dialog)
+                card.setToolTip(
+                    "Click anywhere on this card to view every current sprint task."
+                )
+                self.current_sprint_tasks_button = QPushButton(
+                    "View Sprint Tasks"
+                )
+                self.current_sprint_tasks_button.setObjectName("Ghost")
+                self.current_sprint_tasks_button.setProperty(
+                    "dashboardAction",
+                    True,
+                )
+                self.current_sprint_tasks_button.setSizePolicy(
+                    QSizePolicy.Policy.Minimum,
+                    QSizePolicy.Policy.Fixed,
+                )
+                self.current_sprint_tasks_button.setMinimumHeight(
+                    max(30, int(round(30 * self._ui_scale)))
+                )
+                self.current_sprint_tasks_button.setToolTip(
+                    "Open the complete current sprint task list."
+                )
+                self.current_sprint_tasks_button.clicked.connect(
+                    self.open_current_sprint_dialog
+                )
+                card.layout.addWidget(
+                    self.current_sprint_tasks_button,
+                    0,
+                    Qt.AlignRight,
+                )
             self.dashboard_metric_cards.append(card)
 
         # ---------- Priority section ----------
@@ -5138,34 +5175,33 @@ class CareerAccelerator(QMainWindow):
     # ---------- Review ----------
     def review_page(self):
         page, root = self.page(
-            "📝 Weekly Review",
-            "Turn your activity into an automatic coaching summary.",
+            "📝 Weekly Summary",
+            "Complete the retrospective in its task; saved summaries are generated automatically.",
         )
         page.set_outer_scroll_enabled(False)
         body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.review_body_layout = body
-        form_card = Card("Generate Summary")
-        form = QFormLayout()
-        self.review_win = QTextEdit()
-        self.review_blocker = QTextEdit()
-        self.review_sql = QTextEdit()
-        self.review_adjustment = QTextEdit()
-        self.review_confidence = QSpinBox()
-        self.review_confidence.setRange(1, 10)
-        self.review_confidence.setValue(7)
-        form.addRow("Biggest win", self.review_win)
-        form.addRow("Primary blocker", self.review_blocker)
-        form.addRow("SQL topic to review", self.review_sql)
-        form.addRow("Next sprint adjustment", self.review_adjustment)
-        form.addRow("Confidence (1–10)", self.review_confidence)
-        form_card.layout.addLayout(form)
-        generate = QPushButton("Generate Weekly Summary")
-        generate.setObjectName("Primary")
-        generate.clicked.connect(self.generate_summary)
-        form_card.layout.addWidget(generate)
+
+        retrospective_card = Card("Current Retrospective")
+        guidance = QLabel(
+            "Weekly and 90-day retrospectives now take place entirely inside the "
+            "Retrospective task. The task includes the automatic progress snapshot, "
+            "guided prompts, autosave, completion validation, and generated summary. "
+            "No external document is required."
+        )
+        guidance.setWordWrap(True)
+        retrospective_card.layout.addWidget(guidance)
+
+        self.review_current_week = QLabel(
+            f"Current program week: {int(self.state['current_week'])}"
+        )
+        self.review_current_week.setObjectName("Muted")
+        retrospective_card.layout.addWidget(self.review_current_week)
+
         workspace_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.review_workspace_buttons = workspace_buttons
-        retrospective = QPushButton("Open Retrospective Workspace")
+        retrospective = QPushButton("Open Current Retrospective")
+        retrospective.setObjectName("Primary")
         retrospective.clicked.connect(
             lambda: self.open_weekly_workspace("retrospective")
         )
@@ -5175,11 +5211,18 @@ class CareerAccelerator(QMainWindow):
         )
         workspace_buttons.addWidget(retrospective)
         workspace_buttons.addWidget(study_plan)
-        form_card.layout.addLayout(workspace_buttons)
-        self.review_form_scroll = make_card_scrollable(form_card)
-        body.addWidget(form_card, 1)
+        retrospective_card.layout.addLayout(workspace_buttons)
+        retrospective_card.layout.addStretch()
+        body.addWidget(retrospective_card, 1)
 
         summaries = Card("Saved Summaries")
+        summary_help = QLabel(
+            "A weekly summary is created or updated after all required prompts "
+            "are saved in the corresponding retrospective task."
+        )
+        summary_help.setObjectName("Muted")
+        summary_help.setWordWrap(True)
+        summaries.layout.addWidget(summary_help)
         self.summary_list = QListWidget()
         self.summary_list.setWordWrap(True)
         self.summary_list.setHorizontalScrollBarPolicy(
@@ -6646,6 +6689,133 @@ class CareerAccelerator(QMainWindow):
         planned_total += len(standalone_rows)
 
         return completed_total, planned_total
+
+    def open_current_sprint_dialog(self):
+        try:
+            self._show_current_sprint_dialog()
+        except Exception as exc:
+            QMessageBox.critical(
+                self,
+                "Could Not Open Current Sprint",
+                (
+                    "The Current Sprint task list could not be opened.\n\n"
+                    f"Error: {exc}"
+                ),
+            )
+
+    def _show_current_sprint_dialog(self):
+        week = int(self.state["current_week"])
+        rows = task_workspace.current_sprint_items(
+            self.conn,
+            week,
+        )
+        done, total = self._current_sprint_progress(week)
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"Current Sprint — Week {week}")
+        dialog.resize(780, 590)
+        dialog.setStyleSheet(
+            stylesheet(self._ui_scale, self._content_scale)
+        )
+        layout = QVBoxLayout(dialog)
+
+        title = QLabel(f"Current Sprint — Week {week}")
+        title.setObjectName("Hero")
+        layout.addWidget(title)
+
+        summary = QLabel(
+            f"Sprint progress: {done} / {total} tasks. "
+            "This list includes every named assignment still active in the "
+            "sprint plus adaptive-track tasks completed during the week."
+        )
+        summary.setObjectName("Muted")
+        summary.setWordWrap(True)
+        layout.addWidget(summary)
+
+        task_list = QListWidget()
+        task_list.setWordWrap(True)
+        task_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        layout.addWidget(task_list, 1)
+
+        status_icon = {
+            "Completed": "✓",
+            "In Progress": "→",
+            "Planned": "○",
+        }
+        current_section = None
+        for row in rows:
+            section = str(row.get("section") or "General")
+            if section != current_section:
+                current_section = section
+                header = QListWidgetItem(section)
+                header.setFlags(Qt.ItemFlag.NoItemFlags)
+                task_list.addItem(header)
+
+            status = str(row.get("status") or "Planned")
+            icon = status_icon.get(status, "○")
+            detail = status
+            completed_date = str(row.get("completed_date") or "")
+            if status == "Completed" and completed_date:
+                detail = f"Completed {completed_date}"
+            item = QListWidgetItem(
+                f"    {icon} {row['label']}\n"
+                f"       {detail}"
+            )
+            item.setData(Qt.ItemDataRole.UserRole, dict(row))
+            task_list.addItem(item)
+
+        if not rows:
+            empty = QListWidgetItem(
+                "No named tasks have been assigned to this sprint yet."
+            )
+            empty.setFlags(Qt.ItemFlag.NoItemFlags)
+            task_list.addItem(empty)
+
+        actions = QHBoxLayout()
+        open_selected = QPushButton("Open Selected Task")
+        open_selected.setObjectName("Primary")
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(dialog.accept)
+        actions.addStretch()
+        actions.addWidget(open_selected)
+        actions.addWidget(close_button)
+        layout.addLayout(actions)
+
+        def open_current_selection(*_args):
+            selected = task_list.currentItem()
+            if selected is None:
+                return
+            data = selected.data(Qt.ItemDataRole.UserRole)
+            if not isinstance(data, dict):
+                return
+
+            if str(data.get("section")) == "Portfolio":
+                matches = self.conn.execute(
+                    """SELECT id
+                       FROM project_tasks
+                       WHERE project_id=?
+                         AND lower(trim(label))=lower(trim(?))""",
+                    (
+                        int(self.state["current_project"]),
+                        str(data.get("label") or ""),
+                    ),
+                ).fetchall()
+                if len(matches) == 1:
+                    dialog.accept()
+                    self.open_portfolio_task_workspace(
+                        int(matches[0]["id"])
+                    )
+                    return
+
+            dialog.accept()
+            self._open_get_ahead_target(data)
+
+        open_selected.clicked.connect(open_current_selection)
+        task_list.itemDoubleClicked.connect(open_current_selection)
+        dialog.exec()
+
     # END CURRENT SPRINT PROGRESS FIX
 
     # ---------- Always-available Get Ahead ----------
@@ -7294,6 +7464,11 @@ class CareerAccelerator(QMainWindow):
         )
         self.dashboard_focus_density_widgets = []
 
+        planner.refresh_due_track_focus(
+            self.conn,
+            int(week),
+            max_items=5,
+        )
         intelligent_focus = (
             planner.intelligent_focus_plan(
                 self.conn,
@@ -8986,6 +9161,10 @@ class CareerAccelerator(QMainWindow):
             self.kanban_layout.addWidget(column)
 
     def refresh_summaries(self):
+        if hasattr(self, "review_current_week"):
+            self.review_current_week.setText(
+                f"Current program week: {int(self.state['current_week'])}"
+            )
         self.summary_list.clear()
         rows = self.conn.execute(
             "SELECT week,summary FROM weekly_summaries ORDER BY week DESC"
@@ -9724,6 +9903,17 @@ class CareerAccelerator(QMainWindow):
             )
 
         label = str(row["label"] or "")
+        if task_workspace.classify_task(row) == "retrospective":
+            issues = task_workspace.retrospective_completion_issues(
+                self.conn,
+                task_id,
+            )
+            if issues:
+                raise ValueError(
+                    "Open the Retrospective task and complete these required prompts "
+                    "before marking it complete:\n\n"
+                    + "\n".join(f"• {issue}" for issue in issues)
+                )
         applied_number = applied_exercise_number_for_label(label)
         duckdb_number = duckdb_exercise_number_for_label(label)
         session_snapshot = session_guard.capture(self)
@@ -9889,7 +10079,6 @@ class CareerAccelerator(QMainWindow):
                 open_sql_problem_callback=self._route_sql_learning_task,
             )
             dialog.exec()
-            self.refresh_all(sync_tracks=False)
         except Exception as exc:
             QMessageBox.warning(
                 self,
@@ -10092,7 +10281,6 @@ class CareerAccelerator(QMainWindow):
                 refresh_callback=lambda: self.refresh_all(sync_tracks=False),
             )
             dialog.exec()
-            self.refresh_all(sync_tracks=False)
         except Exception as exc:
             QMessageBox.warning(
                 self,
@@ -11177,52 +11365,8 @@ class CareerAccelerator(QMainWindow):
         self.refresh_all()
 
     def generate_summary(self):
-        week = self.state["current_week"]
-        done, total = self._current_sprint_progress(week)
-        hours = self.conn.execute(
-            "SELECT COALESCE(SUM(hours),0) FROM study_sessions"
-        ).fetchone()[0]
-        sql_count = (
-            achievements.completed_sql_count(
-                self.conn
-            )
-        )
-
-        summary = (
-            f"Week {week}: {done}/{total} sprint tasks completed, "
-            f"{hours:g} study hours, and {sql_count} SQL problems completed. "
-            f"Win: {self.review_win.toPlainText() or 'Not recorded.'} "
-            f"Blocker: {self.review_blocker.toPlainText() or 'None recorded.'} "
-            f"SQL review: {self.review_sql.toPlainText() or 'Continue current progression.'} "
-            f"Next adjustment: {self.review_adjustment.toPlainText() or 'Continue roadmap.'} "
-            f"Confidence: {self.review_confidence.value()}/10."
-        )
-        self.conn.execute(
-            """INSERT INTO weekly_summaries
-               (week,hours,tasks_completed,tasks_total,sql_completed,summary)
-               VALUES(?,?,?,?,?,?)
-               ON CONFLICT(week) DO UPDATE SET
-               generated_at=CURRENT_TIMESTAMP,hours=excluded.hours,
-               tasks_completed=excluded.tasks_completed,
-               tasks_total=excluded.tasks_total,
-               sql_completed=excluded.sql_completed,summary=excluded.summary""",
-            (week, hours, done, total, sql_count, summary),
-        )
-        self.conn.commit()
-        retrospective_task_id = task_workspace.ensure_weekly_workspace_task(
-            self.conn,
-            week,
-            "retrospective",
-        )
-        task_workspace.upsert_generated_section(
-            self.conn,
-            ROOT,
-            retrospective_task_id,
-            heading="Generated Weekly Summary",
-            body=summary,
-            current_project=int(self.state["current_project"]),
-        )
-        self.refresh_all()
+        """Backward-compatible route to the integrated retrospective task."""
+        self.open_weekly_workspace("retrospective")
 
     def publish_progress(self):
         readiness = analytics.readiness(self.conn, self.state)

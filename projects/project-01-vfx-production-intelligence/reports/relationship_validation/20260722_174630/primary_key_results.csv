@@ -1,0 +1,7 @@
+table,grain,key,total_rows,null_key_rows,duplicate_key_groups,duplicate_extra_rows,status
+artists,One row per artist,artist_id,62,0,2,2,ISSUE
+clients,One row per client,client_id,14,0,2,2,ISSUE
+projects,One row per project,project_id,16,0,1,1,ISSUE
+shots,One row per shot,shot_id,1136,0,24,24,ISSUE
+reviews,One row per review event,review_id,3883,0,40,40,ISSUE
+time_entries,One row per logged work entry,time_entry_id,6935,0,70,70,ISSUE

@@ -44,6 +44,38 @@ class Card(QFrame):
             self.layout.addWidget(subtitle_label)
 
 
+class ClickableCard(Card):
+    """Card that behaves as a keyboard-accessible click target."""
+
+    clicked = Signal()
+
+    def __init__(self, title=None, subtitle=None):
+        super().__init__(title=title, subtitle=subtitle)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+    def mouseReleaseEvent(self, event):  # noqa: N802 - Qt API
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            and self.rect().contains(event.position().toPoint())
+        ):
+            self.clicked.emit()
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event):  # noqa: N802 - Qt API
+        if event.key() in (
+            Qt.Key.Key_Return,
+            Qt.Key.Key_Enter,
+            Qt.Key.Key_Space,
+        ):
+            self.clicked.emit()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+
 class BrandedBannerCard(Card):
     """Card with responsive brand artwork painted behind its live contents.
 
@@ -193,6 +225,8 @@ class SoftPanel(QFrame):
 
 
 class Ring(QWidget):
+    clicked = Signal()
+
     def __init__(self, title, color):
         super().__init__()
         self.title = title
@@ -203,6 +237,7 @@ class Ring(QWidget):
         self._ui_scale = 1.0
         self._interface_scale = 1.0
         self._density = "comfortable"
+        self._clickable = False
         self.setMinimumWidth(0)
         self.setMinimumHeight(70)
         self.setMaximumHeight(16777215)
@@ -243,6 +278,41 @@ class Ring(QWidget):
         self.subtitle = subtitle
         self.extra = extra
         self.update()
+
+    def set_clickable(self, clickable=True):
+        self._clickable = bool(clickable)
+        self.setCursor(
+            Qt.CursorShape.PointingHandCursor
+            if self._clickable
+            else Qt.CursorShape.ArrowCursor
+        )
+        self.setFocusPolicy(
+            Qt.FocusPolicy.StrongFocus
+            if self._clickable
+            else Qt.FocusPolicy.NoFocus
+        )
+
+    def mouseReleaseEvent(self, event):  # noqa: N802 - Qt API
+        if (
+            self._clickable
+            and event.button() == Qt.MouseButton.LeftButton
+            and self.rect().contains(event.position().toPoint())
+        ):
+            self.clicked.emit()
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
+
+    def keyPressEvent(self, event):  # noqa: N802 - Qt API
+        if (
+            self._clickable
+            and event.key()
+            in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Space)
+        ):
+            self.clicked.emit()
+            event.accept()
+            return
+        super().keyPressEvent(event)
 
     def paintEvent(self, event):
         painter = QPainter(self)

@@ -85,6 +85,821 @@ def validate_iso_date(value: str | None, *, field: str) -> str | None:
     return text
 
 
+
+
+_WEEKLY_RETROSPECTIVE_FIELDS = (
+    {
+        "key": "major_learning",
+        "label": "Major learning completed",
+        "prompt": "What course, lesson, assessment, or technical concept moved forward this week?",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "technical_practice",
+        "label": "SQL or technical practice completed",
+        "prompt": "What did you practice, validate, or solve? Include the topics that still need review.",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "project_progress",
+        "label": "Portfolio or project work completed",
+        "prompt": "What project milestone, artifact, analysis, or documentation changed this week?",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "biggest_win",
+        "label": "Biggest win",
+        "prompt": "What moved forward, and why did it matter?",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "blocker",
+        "label": "Friction or blocker",
+        "prompt": "What slowed progress? Describe the cause, not only the symptom. Enter “None” when appropriate.",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "learning",
+        "label": "What I learned",
+        "prompt": "Capture the most important lesson, insight, or correction from the week.",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "evidence",
+        "label": "Evidence created",
+        "prompt": "List substantial work you could show or discuss with an employer. Enter “None this week” when appropriate.",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "adjustment_1",
+        "label": "Next-sprint adjustment 1",
+        "prompt": "What specific change will you make next week?",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "adjustment_2",
+        "label": "Next-sprint adjustment 2",
+        "prompt": "What second specific change will you make next week?",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "confidence",
+        "label": "Confidence",
+        "prompt": "Rate your confidence from 1 to 10.",
+        "required": True,
+        "control": "score",
+    },
+    {
+        "key": "confidence_reason",
+        "label": "Confidence reason",
+        "prompt": "Why did you choose that confidence score?",
+        "required": True,
+        "rows": 3,
+    },
+)
+
+_PROGRAM_RETROSPECTIVE_FIELDS = (
+    {
+        "key": "original_goals",
+        "label": "Original goals",
+        "prompt": "What did you intend to accomplish during the 90-day program?",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "learning_progress",
+        "label": "Courses and learning milestones",
+        "prompt": "Summarize the learning tracks, courses, assessments, and major concepts completed.",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "technical_progress",
+        "label": "SQL and technical practice",
+        "prompt": "Summarize technical practice, problems solved, and the skills that became reliable.",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "project_progress",
+        "label": "Projects completed or advanced",
+        "prompt": "Summarize the portfolio projects, milestones, deliverables, and business outcomes produced.",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "applications_interviews",
+        "label": "Applications and interviews",
+        "prompt": "Record applications, networking, screenings, interviews, or job-readiness work completed.",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "strongest_evidence",
+        "label": "Strongest demonstrated evidence",
+        "prompt": "List the three strongest artifacts or examples that prove your readiness.",
+        "required": True,
+        "rows": 5,
+    },
+    {
+        "key": "skills_improved",
+        "label": "Skills that improved most",
+        "prompt": "Which technical, analytical, communication, and business skills improved the most?",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "remaining_gaps",
+        "label": "Remaining gaps",
+        "prompt": "What still needs practice, evidence, clarification, or stronger consistency?",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "what_worked",
+        "label": "What worked",
+        "prompt": "Which routines, tools, learning methods, or project decisions were most effective?",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "what_did_not_work",
+        "label": "What did not work",
+        "prompt": "What created avoidable friction or failed to produce the expected result?",
+        "required": True,
+        "rows": 4,
+    },
+    {
+        "key": "next_30_week_1",
+        "label": "Next 30 days — Week 1",
+        "prompt": "Define the first week’s measurable outcome and key actions.",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "next_30_week_2",
+        "label": "Next 30 days — Week 2",
+        "prompt": "Define the second week’s measurable outcome and key actions.",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "next_30_week_3",
+        "label": "Next 30 days — Week 3",
+        "prompt": "Define the third week’s measurable outcome and key actions.",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "next_30_week_4",
+        "label": "Next 30 days — Week 4",
+        "prompt": "Define the fourth week’s measurable outcome and key actions.",
+        "required": True,
+        "rows": 3,
+    },
+    {
+        "key": "commitment",
+        "label": "Commitment",
+        "prompt": "What is the next concrete action you will complete, and by what date?",
+        "required": True,
+        "rows": 3,
+    },
+)
+
+
+def retrospective_kind(label: str) -> str:
+    text = str(label or "").casefold()
+    return "program" if "90-day" in text or "90 day" in text else "weekly"
+
+
+def retrospective_form_spec(label: str) -> dict:
+    kind = retrospective_kind(label)
+    if kind == "program":
+        return {
+            "kind": kind,
+            "title": "90-Day Program Retrospective",
+            "intro": (
+                "Review the full program, document measurable progress, identify "
+                "remaining gaps, and create a dated 30-day continuation plan."
+            ),
+            "fields": _PROGRAM_RETROSPECTIVE_FIELDS,
+        }
+    return {
+        "kind": kind,
+        "title": "Weekly Retrospective",
+        "intro": (
+            "Review the week honestly, capture evidence and blockers, and choose "
+            "two specific adjustments for the next sprint."
+        ),
+        "fields": _WEEKLY_RETROSPECTIVE_FIELDS,
+    }
+
+
+def _retrospective_week_bounds(conn, week: int) -> tuple[date, date]:
+    row = conn.execute(
+        "SELECT start_date FROM program_state WHERE id=1"
+    ).fetchone()
+    try:
+        program_start = datetime.strptime(
+            str(row["start_date"]), "%Y-%m-%d"
+        ).date()
+    except (TypeError, ValueError, KeyError):
+        today = date.today()
+        program_start = today - timedelta(days=today.weekday())
+    week_start = program_start + timedelta(days=(max(1, int(week)) - 1) * 7)
+    return week_start, week_start + timedelta(days=6)
+
+
+def _sprint_item_label_key(value: str) -> str:
+    return re.sub(
+        r"[^a-z0-9]+",
+        " ",
+        str(value or "").casefold(),
+    ).strip()
+
+
+def _sprint_item_category(track_key, category, label) -> tuple[str, str]:
+    track = str(track_key or "").strip().casefold()
+    category_text = str(category or "").strip()
+    label_text = str(label or "").strip()
+    if track == "google" or GOOGLE_ROADMAP_PATTERN.search(label_text):
+        return "Google Course", "google"
+    if track == "sql" or category_text.casefold() == "sql":
+        return "SQL", "sql"
+    if track == "portfolio" or category_text.casefold() == "portfolio":
+        return "Portfolio", "portfolio"
+    if track == "academy":
+        return "Accelerator Academy", "academy"
+    if track == "applied":
+        return "Applied Labs", "applied"
+    if category_text:
+        return category_text, track
+    return "General", track
+
+
+def current_sprint_items(conn, week: int) -> list[dict]:
+    """Return every named assignment or completion in one sprint week.
+
+    Adaptive track task rows are reused as the learner advances.  The current
+    rows are therefore combined with the immutable completion-event history so
+    completed Google, SQL, Portfolio, Academy, and Applied items remain visible
+    by name in the sprint review.
+    """
+    week = max(1, int(week))
+    week_start, week_end = _retrospective_week_bounds(conn, week)
+
+    try:
+        sprint_rows = conn.execute(
+            """SELECT
+                   s.id AS task_id,
+                   s.week,
+                   s.sort_order,
+                   s.label,
+                   s.completed,
+                   m.category,
+                   m.destination,
+                   m.managed_key,
+                   tt.track_key,
+                   tt.target_key,
+                   tt.source_label,
+                   tt.linked_entity_id
+               FROM sprint_tasks AS s
+               LEFT JOIN task_metadata AS m
+                 ON m.task_id=s.id
+               LEFT JOIN track_tasks AS tt
+                 ON tt.task_id=s.id
+               WHERE s.week=?
+               ORDER BY s.sort_order,s.id""",
+            (week,),
+        ).fetchall()
+    except Exception:
+        sprint_rows = conn.execute(
+            """SELECT
+                   id AS task_id,
+                   week,
+                   sort_order,
+                   label,
+                   completed,
+                   NULL AS category,
+                   NULL AS destination,
+                   NULL AS managed_key,
+                   NULL AS track_key,
+                   NULL AS target_key,
+                   NULL AS source_label,
+                   NULL AS linked_entity_id
+               FROM sprint_tasks
+               WHERE week=?
+               ORDER BY sort_order,id""",
+            (week,),
+        ).fetchall()
+
+    try:
+        event_rows = conn.execute(
+            """SELECT
+                   track_key,
+                   event_key,
+                   item_label,
+                   completed_date
+               FROM track_events
+               WHERE completed_date BETWEEN ? AND ?
+               ORDER BY completed_date,id""",
+            (week_start.isoformat(), week_end.isoformat()),
+        ).fetchall()
+    except Exception:
+        event_rows = []
+
+    events_by_key = {
+        (
+            str(row["track_key"] or "").strip().casefold(),
+            str(row["event_key"] or "").strip(),
+        ): row
+        for row in event_rows
+    }
+    events_by_label = {}
+    for row in event_rows:
+        label_key = _sprint_item_label_key(row["item_label"])
+        if label_key:
+            events_by_label.setdefault(label_key, row)
+
+    try:
+        current_project_row = conn.execute(
+            "SELECT current_project FROM program_state WHERE id=1"
+        ).fetchone()
+        current_project = int(current_project_row[0])
+    except Exception:
+        current_project = None
+
+    items = []
+    item_by_exact_key = {}
+    item_by_label = {}
+
+    for row in sprint_rows:
+        label = str(row["label"] or "").strip()
+        if not label:
+            continue
+        section, track_key = _sprint_item_category(
+            row["track_key"],
+            row["category"],
+            label,
+        )
+        target_key = str(row["target_key"] or "").strip()
+        label_key = _sprint_item_label_key(label)
+        exact_key = (track_key, target_key) if track_key and target_key else None
+        completed = bool(row["completed"])
+        if exact_key and exact_key in events_by_key:
+            completed = True
+        elif label_key in events_by_label:
+            completed = True
+
+        if section == "Portfolio" and current_project is not None:
+            try:
+                matches = conn.execute(
+                    """SELECT completed
+                       FROM project_tasks
+                       WHERE project_id=? AND lower(trim(label))=lower(trim(?))""",
+                    (current_project, label),
+                ).fetchall()
+                if len(matches) == 1:
+                    completed = bool(matches[0]["completed"])
+            except Exception:
+                pass
+
+        status = "Completed" if completed else (
+            "In Progress"
+            if track_key or int(row["sort_order"] or 0) < 0
+            else "Planned"
+        )
+        destination = row["destination"]
+        if destination is None:
+            destination = {
+                "Google Course": 2,
+                "SQL": 4,
+                "Portfolio": 3,
+                "Accelerator Academy": 12,
+                "Review": 8,
+            }.get(section, 1)
+        item = {
+            "week": week,
+            "task_id": int(row["task_id"]),
+            "label": label,
+            "section": section,
+            "category": (
+                "Learning" if section == "Google Course" else section
+            ),
+            "track_key": track_key or None,
+            "target_key": target_key or None,
+            "destination": int(destination),
+            "linked_entity_id": row["linked_entity_id"],
+            "status": status,
+            "completed": completed,
+            "sort_order": int(row["sort_order"] or 0),
+            "completed_date": (
+                str(events_by_key[exact_key]["completed_date"])
+                if exact_key in events_by_key
+                else (
+                    str(events_by_label[label_key]["completed_date"])
+                    if label_key in events_by_label
+                    else ""
+                )
+            ),
+        }
+        items.append(item)
+        if exact_key:
+            item_by_exact_key[exact_key] = item
+        if label_key:
+            item_by_label[label_key] = item
+
+    for row in event_rows:
+        track_key = str(row["track_key"] or "").strip().casefold()
+        event_key = str(row["event_key"] or "").strip()
+        label = str(row["item_label"] or "").strip()
+        label_key = _sprint_item_label_key(label)
+        exact_key = (track_key, event_key)
+        existing = item_by_exact_key.get(exact_key) or item_by_label.get(label_key)
+        if existing is not None:
+            existing["completed"] = True
+            existing["status"] = "Completed"
+            existing["completed_date"] = str(row["completed_date"] or "")
+            continue
+
+        section, normalized_track = _sprint_item_category(
+            track_key,
+            "",
+            label,
+        )
+        destination = {
+            "Google Course": 2,
+            "SQL": 4,
+            "Portfolio": 3,
+            "Accelerator Academy": 12,
+            "Applied Labs": 2,
+        }.get(section, 1)
+        item = {
+            "week": week,
+            "task_id": None,
+            "label": label,
+            "section": section,
+            "category": (
+                "Learning" if section == "Google Course" else section
+            ),
+            "track_key": normalized_track or None,
+            "target_key": event_key or None,
+            "destination": destination,
+            "linked_entity_id": None,
+            "status": "Completed",
+            "completed": True,
+            "sort_order": -500000,
+            "completed_date": str(row["completed_date"] or ""),
+        }
+        items.append(item)
+        item_by_exact_key[exact_key] = item
+        if label_key:
+            item_by_label[label_key] = item
+
+    section_order = {
+        "Google Course": 0,
+        "Accelerator Academy": 1,
+        "SQL": 2,
+        "Portfolio": 3,
+        "Applied Labs": 4,
+        "Review": 5,
+        "Learning": 6,
+        "General": 7,
+    }
+    status_order = {
+        "In Progress": 0,
+        "Planned": 1,
+        "Completed": 2,
+    }
+    items.sort(
+        key=lambda item: (
+            section_order.get(item["section"], 50),
+            status_order.get(item["status"], 50),
+            item["sort_order"],
+            item["label"].casefold(),
+        )
+    )
+    return items
+
+
+def retrospective_weekly_milestones(conn, task_id: int) -> list[dict]:
+    row = task_record(conn, int(task_id))
+    if row is None:
+        raise ValueError("The selected retrospective task no longer exists.")
+    sections = [
+        {"title": "Google Course", "items": []},
+        {"title": "SQL", "items": []},
+        {"title": "Portfolio", "items": []},
+    ]
+    by_title = {section["title"]: section for section in sections}
+    for item in current_sprint_items(conn, int(row["week"])):
+        title = item["section"]
+        if title in by_title:
+            by_title[title]["items"].append(item)
+    return sections
+
+
+def retrospective_metrics(conn, week: int, kind: str) -> dict:
+    week = int(week)
+    week_start, week_end = _retrospective_week_bounds(conn, week)
+    if kind == "program":
+        session_where = ""
+        session_params = ()
+        sql_where = "WHERE status='Completed'"
+        sql_params = ()
+    else:
+        session_where = "WHERE session_date BETWEEN ? AND ?"
+        session_params = (week_start.isoformat(), week_end.isoformat())
+        sql_where = (
+            "WHERE status='Completed' AND completed_date BETWEEN ? AND ?"
+        )
+        sql_params = (week_start.isoformat(), week_end.isoformat())
+
+    hours = conn.execute(
+        f"SELECT COALESCE(SUM(hours),0) FROM study_sessions {session_where}",
+        session_params,
+    ).fetchone()[0]
+    sql_completed = conn.execute(
+        f"SELECT COUNT(*) FROM sql_practice {sql_where}",
+        sql_params,
+    ).fetchone()[0]
+
+    if kind == "program":
+        task_row = conn.execute(
+            "SELECT COALESCE(SUM(completed),0),COUNT(*) FROM sprint_tasks"
+        ).fetchone()
+    else:
+        task_row = conn.execute(
+            "SELECT COALESCE(SUM(completed),0),COUNT(*) FROM sprint_tasks WHERE week=?",
+            (week,),
+        ).fetchone()
+
+    project_row = conn.execute(
+        "SELECT COALESCE(SUM(completed),0),COUNT(*) FROM project_tasks"
+    ).fetchone()
+    applications = conn.execute(
+        "SELECT COUNT(*) FROM applications"
+    ).fetchone()[0]
+
+    return {
+        "week": week,
+        "week_start": week_start.isoformat(),
+        "week_end": week_end.isoformat(),
+        "hours": float(hours or 0),
+        "tasks_completed": int(task_row[0] or 0),
+        "tasks_total": int(task_row[1] or 0),
+        "sql_completed": int(sql_completed or 0),
+        "project_milestones_completed": int(project_row[0] or 0),
+        "project_milestones_total": int(project_row[1] or 0),
+        "applications": int(applications or 0),
+    }
+
+
+def retrospective_responses(conn, task_id: int) -> dict:
+    row = task_record(conn, int(task_id))
+    if row is None:
+        raise ValueError("The selected retrospective task no longer exists.")
+    spec = retrospective_form_spec(row["label"])
+    prefix = f"{spec['kind']}:"
+    values = {
+        field["key"]: ("7" if field.get("control") == "score" else "")
+        for field in spec["fields"]
+    }
+    saved_rows = conn.execute(
+        """SELECT section,note
+           FROM retrospective_notes
+           WHERE week=? AND section LIKE ?
+           ORDER BY id""",
+        (int(row["week"]), f"{prefix}%"),
+    ).fetchall()
+    for saved in saved_rows:
+        section = str(saved["section"] or "")
+        if not section.startswith(prefix):
+            continue
+        key = section[len(prefix):]
+        if key in values:
+            values[key] = str(saved["note"] or "")
+    return {
+        "task": row,
+        "spec": spec,
+        "values": values,
+        "metrics": retrospective_metrics(
+            conn,
+            int(row["week"]),
+            spec["kind"],
+        ),
+    }
+
+
+def retrospective_snapshot_text(metrics: dict, kind: str) -> str:
+    if kind == "program":
+        return (
+            f"Program totals • {metrics['hours']:g} study hours • "
+            f"{metrics['tasks_completed']}/{metrics['tasks_total']} roadmap tasks • "
+            f"{metrics['sql_completed']} SQL problems • "
+            f"{metrics['project_milestones_completed']}/"
+            f"{metrics['project_milestones_total']} portfolio milestones • "
+            f"{metrics['applications']} applications"
+        )
+    return (
+        f"{metrics['week_start']} through {metrics['week_end']} • "
+        f"{metrics['hours']:g} study hours • "
+        f"{metrics['tasks_completed']}/{metrics['tasks_total']} sprint tasks • "
+        f"{metrics['sql_completed']} SQL problems • "
+        f"{metrics['project_milestones_completed']}/"
+        f"{metrics['project_milestones_total']} portfolio milestones completed overall"
+    )
+
+
+def _retrospective_markdown(record: dict) -> str:
+    task = record["task"]
+    spec = record["spec"]
+    values = record["values"]
+    metrics = record["metrics"]
+    snapshot = retrospective_snapshot_text(metrics, spec["kind"])
+    heading = (
+        spec["title"]
+        if spec["kind"] == "program"
+        else f"Week {task['week']} Retrospective"
+    )
+    lines = [
+        f"# {heading}",
+        "",
+        "Completed inside Career Accelerator's Retrospective task.",
+        "",
+        "## Automatic progress snapshot",
+        "",
+        snapshot,
+        "",
+    ]
+    for field in spec["fields"]:
+        value = str(values.get(field["key"], "")).strip()
+        lines.extend([
+            f"## {field['label']}",
+            "",
+            value or "_Not recorded yet._",
+            "",
+        ])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def save_retrospective_draft(
+    conn,
+    task_id: int,
+    values: dict,
+) -> dict:
+    """Persist only the structured answers for fast autosave and close."""
+    row = task_record(conn, int(task_id))
+    if row is None:
+        raise ValueError("The selected retrospective task no longer exists.")
+    spec = retrospective_form_spec(row["label"])
+    prefix = f"{spec['kind']}:"
+    normalized = {}
+    rows = []
+    for field in spec["fields"]:
+        key = field["key"]
+        value = str(values.get(key, "") or "").strip()
+        if field.get("control") == "score":
+            try:
+                score = int(value or 7)
+            except ValueError:
+                score = 7
+            value = str(max(1, min(10, score)))
+        normalized[key] = value
+        rows.append(
+            (
+                int(row["week"]),
+                f"{prefix}{key}",
+                value,
+            )
+        )
+
+    # Replace this retrospective's answers in one transaction. Earlier
+    # versions performed a delete and insert for every prompt, which was
+    # noticeably slow when the database lived in a synchronized folder.
+    conn.execute(
+        """DELETE FROM retrospective_notes
+           WHERE week=?
+             AND section LIKE ?""",
+        (
+            int(row["week"]),
+            f"{prefix}%",
+        ),
+    )
+    conn.executemany(
+        """INSERT INTO retrospective_notes (week,section,note)
+           VALUES(?,?,?)""",
+        rows,
+    )
+    conn.commit()
+    return {
+        "task": row,
+        "spec": spec,
+        "values": normalized,
+    }
+
+
+def save_retrospective(
+    conn,
+    root: Path,
+    workspace_key: str,
+    task_id: int,
+    values: dict,
+) -> dict:
+    draft = save_retrospective_draft(
+        conn,
+        int(task_id),
+        values,
+    )
+    row = draft["task"]
+    spec = draft["spec"]
+    normalized = draft["values"]
+    record = {
+        "task": row,
+        "spec": spec,
+        "values": normalized,
+        "metrics": retrospective_metrics(
+            conn,
+            int(row["week"]),
+            spec["kind"],
+        ),
+    }
+    content = _retrospective_markdown(record)
+    workspace = _workspace_row(conn, workspace_key)
+    if workspace is None:
+        raise ValueError("The retrospective workspace no longer exists.")
+    save_document(
+        conn,
+        root,
+        workspace_key,
+        content,
+        scheduled_for=workspace["scheduled_for"],
+    )
+
+    required_complete = all(
+        str(normalized.get(field["key"], "") or "").strip()
+        for field in spec["fields"]
+        if field.get("required")
+    )
+    if spec["kind"] == "weekly" and required_complete:
+        metrics = record["metrics"]
+        summary = (
+            f"Week {row['week']}: {metrics['tasks_completed']}/"
+            f"{metrics['tasks_total']} sprint tasks completed, "
+            f"{metrics['hours']:g} study hours, and "
+            f"{metrics['sql_completed']} SQL problems completed. "
+            f"Win: {normalized.get('biggest_win') or 'Not recorded.'} "
+            f"Blocker: {normalized.get('blocker') or 'Not recorded.'} "
+            f"Next adjustments: {normalized.get('adjustment_1') or 'Not recorded.'}; "
+            f"{normalized.get('adjustment_2') or 'Not recorded.'} "
+            f"Confidence: {normalized.get('confidence') or '7'}/10."
+        )
+        conn.execute(
+            """INSERT INTO weekly_summaries
+               (week,hours,tasks_completed,tasks_total,sql_completed,summary)
+               VALUES(?,?,?,?,?,?)
+               ON CONFLICT(week) DO UPDATE SET
+               generated_at=CURRENT_TIMESTAMP,
+               hours=excluded.hours,
+               tasks_completed=excluded.tasks_completed,
+               tasks_total=excluded.tasks_total,
+               sql_completed=excluded.sql_completed,
+               summary=excluded.summary""",
+            (
+                int(row["week"]),
+                metrics["hours"],
+                metrics["tasks_completed"],
+                metrics["tasks_total"],
+                metrics["sql_completed"],
+                summary,
+            ),
+        )
+        conn.commit()
+
+    record["content"] = content
+    return record
+
+
+def retrospective_completion_issues(conn, task_id: int) -> list[str]:
+    record = retrospective_responses(conn, int(task_id))
+    values = record["values"]
+    issues = []
+    for field in record["spec"]["fields"]:
+        if not field.get("required"):
+            continue
+        if not str(values.get(field["key"], "") or "").strip():
+            issues.append(field["label"])
+    return issues
+
 def task_record(conn, task_id: int):
     return conn.execute(
         """SELECT

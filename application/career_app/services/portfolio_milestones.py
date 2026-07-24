@@ -41,14 +41,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Discovery",
         45,
         (
-            "Approve the business problem, stakeholders, decisions, scope, "
-            "KPIs, business questions, and success criteria as one coherent "
-            "project brief."
+            "Review the project plan and make sure the problem, audience, "
+            "questions, scope, deliverables, and success criteria all fit together."
         ),
         (
-            "The generated Overview and project charter clearly define the "
-            "business problem, primary stakeholders, approved KPIs, answerable "
-            "business questions, scope, and success criteria."
+            "The approved brief clearly explains who the project is for, what "
+            "decision it supports, what it will answer, and what success looks like."
         ),
         (
             "finalize business problem",
@@ -74,13 +72,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Dataset",
         60,
         (
-            "Approve the dataset source or synthetic-data specification, "
-            "including provenance, grain, coverage, required fields, business "
-            "rules, and known limitations."
+            "Review where the data comes from, what each table represents, "
+            "what it covers, and whether it can answer the approved questions."
         ),
         (
-            "A source manifest or synthetic-data specification is approved, "
-            "traceable, and sufficient to answer the approved business questions."
+            "The source is documented, its limits are clear, and it contains "
+            "the information needed for the project."
         ),
         (
             "create synthetic data specification",
@@ -97,12 +94,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Dataset",
         75,
         (
-            "Create, generate, or acquire the immutable raw dataset and record "
-            "where it came from."
+            "Bring the original data files into the project and record where "
+            "they came from without changing them."
         ),
         (
-            "All required source tables exist under the raw-data location, "
-            "remain unchanged, and are represented in the project source manifest."
+            "Every required raw file is present, unchanged, and listed in the "
+            "source manifest."
         ),
         (
             "generate dataset",
@@ -143,14 +140,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Dataset",
         45,
         (
-            "Audit the existing generated data dictionary against the actual "
-            "schemas rather than recreating documentation already produced by "
-            "earlier milestones."
+            "Compare the existing data dictionary with the real tables and "
+            "finish the definitions, rules, keys, and relationship notes."
         ),
         (
-            "Every current table and column is represented; types, business "
-            "definitions, key roles, null meanings, units, allowed values, and "
-            "important cleaning rules are accurate."
+            "Every current field is documented clearly and there are no "
+            "unexplained differences between the dictionary and the data."
         ),
         (
             "complete data dictionary",
@@ -167,12 +162,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Dataset",
         150,
         (
-            "Produce a reproducible cleaned analytical layer and prove that "
-            "cleaning decisions preserve the intended grain and relationships."
+            "Find data-quality problems, choose and apply the right fixes, and "
+            "save reviewed cleaned datasets without changing the raw files."
         ),
         (
-            "Processed data exists, raw inputs remain unchanged, every row-count "
-            "change is explained, and key, relationship, and business-rule checks pass."
+            "Cleaned outputs are saved, the raw files are untouched, and every "
+            "important change has been checked and explained."
         ),
         (
             "clean and validate data",
@@ -196,12 +191,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "SQL",
         120,
         (
-            "Combine schema creation, repeatable loading, and post-load quality "
-            "verification into one database build stage gate."
+            "Write a repeatable script that builds the analytical database from "
+            "the reviewed cleaned data."
         ),
         (
-            "A clean setup creates the analytical tables or views, loads them in "
-            "dependency order, reconciles source row counts, and passes post-load checks."
+            "The database can be rebuilt from the saved script, contains the "
+            "expected tables, and passes the final loading checks."
         ),
         (
             "create schema",
@@ -220,12 +215,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "SQL",
         180,
         (
-            "Answer the approved business questions with reproducible, validated, "
-            "readable SQL and governed KPI definitions."
+            "Write clear SQL that answers the approved business questions and "
+            "uses the agreed KPI definitions."
         ),
         (
-            "Final SQL runs from a clean setup, produces the intended output grain, "
-            "answers the approved questions, and includes validation and interpretation."
+            "The final queries run cleanly, return the intended results, and "
+            "include checks and short interpretations."
         ),
         (
             "write analysis queries",
@@ -250,13 +245,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Python",
         150,
         (
-            "Use a reproducible notebook or script to explore distributions, "
-            "segments, time patterns, anomalies, and candidate insights that "
-            "support the approved questions."
+            "Explore the cleaned data for useful patterns, segments, trends, "
+            "and unusual records tied to the project questions."
         ),
         (
-            "The analysis runs top-to-bottom, contains purposeful visuals and "
-            "written interpretations, and distinguishes observations from hypotheses."
+            "The notebook runs from top to bottom and clearly separates what "
+            "was observed from what still needs to be tested."
         ),
         (
             "perform exploratory analysis",
@@ -282,12 +276,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Validation",
         90,
         (
-            "Reconcile headline findings across SQL, Python, Power BI, source "
-            "data, KPI definitions, filters, and denominator rules."
+            "Compare the headline numbers across SQL, Python, and Power BI and "
+            "work out why any values do not match."
         ),
         (
-            "Every finding intended for publication is confirmed, revised, "
-            "unsupported, or explicitly pending, with discrepancies documented."
+            "Every number that will be published is confirmed or has a clear "
+            "note explaining the mismatch and final decision."
         ),
         (
             "validate findings",
@@ -303,12 +297,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Power BI",
         150,
         (
-            "Build the table model, relationships, date logic, and explicit DAX "
-            "measures as one governed semantic layer."
+            "Build the Power BI model, relationships, date table, and measures "
+            "needed for the final report."
         ),
         (
-            "Relationships and filter directions are intentional, measures are "
-            "explicit and documented, and headline values reconcile with SQL."
+            "The model behaves correctly under filters and its headline values "
+            "match the approved SQL results."
         ),
         (
             "build power bi model",
@@ -325,12 +319,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Power BI",
         210,
         (
-            "Build the complete stakeholder-facing report, including all required "
-            "pages, interactions, filters, drill paths, empty states, and accessibility."
+            "Build and test the Power BI report that the project audience will "
+            "actually use."
         ),
         (
-            "The report answers the approved questions, all displayed values reconcile, "
-            "and usability has been tested under realistic filter combinations."
+            "The report answers the approved questions, shows the correct values, "
+            "and works under realistic filter and navigation choices."
         ),
         (
             "build dashboards",
@@ -351,12 +345,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Communication",
         90,
         (
-            "Turn the validated analysis into a concise decision-focused narrative "
-            "with findings, recommendations, limitations, and next actions."
+            "Write a clear summary that connects the strongest findings to "
+            "practical recommendations, owners, limits, and next steps."
         ),
         (
-            "The summary identifies the decision, methods, three to five validated "
-            "findings, prioritized recommendations, assumptions, limitations, and owners."
+            "The summary gives the audience a clear decision, three to five "
+            "supported findings, and realistic actions."
         ),
         (
             "write executive summary",
@@ -378,12 +372,12 @@ MILESTONES: tuple[Milestone, ...] = (
         "Publication",
         120,
         (
-            "Package the finished project into an employer-facing, reproducible "
-            "GitHub case study and verify the public experience."
+            "Package the finished work into a clear public case study that an "
+            "employer can understand and review."
         ),
         (
-            "The public repository contains a complete README, readable visuals, "
-            "working links, reproducibility guidance, disclosures, and a final release."
+            "The public project has a complete README, readable visuals, working "
+            "links, clear setup notes, and no private or unfinished material."
         ),
         (
             "capture screenshots",
@@ -638,6 +632,16 @@ def reconcile(
         ).fetchall()
     ]
     project_ids = sorted({int(row["project_id"]) for row in rows})
+    try:
+        active_project_row = conn.execute(
+            "SELECT current_project FROM program_state WHERE id=1"
+        ).fetchone()
+        active_project_id = (
+            int(active_project_row[0]) if active_project_row is not None else None
+        )
+    except (sqlite3.OperationalError, TypeError, ValueError):
+        active_project_id = None
+
     result = {
         "projects": len(project_ids),
         "archived": 0,
@@ -779,11 +783,12 @@ def reconcile(
             canonical_ids[milestone.key] = task_id
             result["canonical_total"] += 1
 
-        # Point the live portfolio track at the first incomplete canonical
-        # milestone before removing legacy linked rows.
+        # Repair the live portfolio route only for the active project. The old
+        # loop updated the same track row once per project, so the last project
+        # silently replaced the correct link used by Today’s Focus and Next Tasks.
         first_incomplete = conn.execute(
             """
-            SELECT id,label
+            SELECT id,label,stage
             FROM project_tasks
             WHERE project_id=?
               AND (
@@ -800,19 +805,38 @@ def reconcile(
                 *[item.label for item in MILESTONES],
             ),
         ).fetchone()
-        if first_incomplete is not None:
+        if first_incomplete is not None and project_id == active_project_id:
             try:
+                source_label = (
+                    f"Portfolio • Project {project_id} • "
+                    f"{str(first_incomplete['stage'] or '')}"
+                ).rstrip(" •")
                 conn.execute(
                     """
                     UPDATE track_tasks
                     SET linked_entity_id=?,
-                        target_key=?
+                        target_key=?,
+                        source_label=?,
+                        updated_at=CURRENT_TIMESTAMP
                     WHERE track_key='portfolio'
                     """,
                     (
                         int(first_incomplete["id"]),
                         f"project:{project_id}:task:{int(first_incomplete['id'])}",
+                        source_label,
                     ),
+                )
+                conn.execute(
+                    """
+                    UPDATE sprint_tasks
+                    SET label=?
+                    WHERE id=(
+                        SELECT task_id
+                        FROM track_tasks
+                        WHERE track_key='portfolio'
+                    )
+                    """,
+                    (str(first_incomplete["label"]),),
                 )
             except sqlite3.OperationalError:
                 pass

@@ -1,122 +1,65 @@
 <!-- DCA MANAGED PORTFOLIO GUIDE START -->
-<!-- Guide version: 3 -->
+<!-- Guide version: 4 -->
 
 # Clean and validate analytical data
 
 **Project:** VFX Production Intelligence Dashboard  
 **Stage:** Dataset  
-**Estimated focused time:** about 150 minutes  
-**Guide updated:** 2026-07-22
+**Estimated focused time:** about 150 minutes
 
-## Purpose
+## What you're doing
 
-Produce a reproducible cleaned analytical layer and prove that cleaning decisions preserve the intended grain and relationships.
+Find data-quality problems, choose and apply the right fixes, and save reviewed cleaned datasets without changing the raw files.
 
-This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
+Use the Studio or Notebook tab in this milestone when one is available. Open an external tool only when the work genuinely belongs there, such as Power BI or a spreadsheet editor.
 
-## Business context
+## Why it matters
 
-Explain how this task helps answer the approved business problem or reduces risk in the final analysis. Before beginning, identify:
+Cleaning decisions change the analysis, so they need to be deliberate and repeatable.
 
-- The stakeholder decision supported by this work.
-- The business question, KPI, or delivery requirement it affects.
-- The consequence of completing it incorrectly or incompletely.
-- The authoritative project artifact where the result will live.
+## Before you start
 
-## Prerequisites
+- Use the finalized dictionary and relationship findings.
+- Keep all raw files unchanged.
 
-- Preserve all files under `data/raw/` unchanged.
-- Review the approved business questions and KPI definitions.
-- Confirm table grain, candidate keys, and required relationships before transforming data.
+## Steps
 
-## Inputs to review
+1. Open the Cleaning Notebook and profile the raw tables.
+2. List the real quality problems and separate them from valid exceptions.
+3. Choose SQL, Python, Google Sheets, or a local spreadsheet for each table.
+4. Write or make the cleaning changes yourself.
+5. Save each finished cleaned table and register it in Files & Outputs.
+6. Compare the raw and cleaned shapes and run the final checks.
+7. Write a short cleaning summary that explains what changed and why.
 
-- The project README and approved discovery artifacts.
-- The most recent outputs from prerequisite milestones.
-- The relevant raw, processed, SQL, notebook, Power BI, or documentation files.
-- The project source configuration at `config/project_sources.yaml` when data tables are involved.
-- Existing assumptions, exceptions, and validation findings that affect this task.
+## You're done when
 
-## Expected output
+- [ ] Cleaned outputs are saved, the raw files are untouched, and every important change has been checked and explained.
+- [ ] Every table has a reviewed cleaned output or a clear note explaining why no cleaning was needed.
+- [ ] The notebook or working spreadsheet shows the learner's actual cleaning work.
+- [ ] Important row, column, key, and business-rule changes have been checked and explained.
+- [ ] You saved the real project artifact, not only a note inside Career Accelerator.
+- [ ] Any assumptions, exceptions, and unresolved questions are easy to find.
 
-Create or update the appropriate project artifact. Expected locations include:
+## What to save
 
 - `data/processed/`
 - `notebooks/clean_data.ipynb`
 - `sql/cleaning/`
 
-The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
+Keep only the files that help another analyst understand or reproduce the work.
 
-## Detailed workflow
+## Keep in mind
 
-1. Create an issue log from profiling and relationship-validation findings.
-2. Separate genuine errors from valid business exceptions.
-3. Define a reproducible treatment for each confirmed issue.
-4. Implement transformations without editing raw sources.
-5. Write processed outputs to documented paths.
-6. Re-run row-count, key, relationship, range, category, and business-rule checks.
-7. Explain every before-and-after difference and preserve unresolved exceptions.
+- Do not remove unusual records just because they look inconvenient.
+- Do not overwrite the raw files.
+- Do not accept unexplained row loss or new duplicates.
 
-## Questions to answer while working
-
-- What is the exact grain, scope, audience, or decision represented by this output?
-- Which prior project definitions must remain consistent?
-- What evidence would prove the result is correct?
-- Which exceptions require a business decision rather than an automatic correction?
-- What could mislead a reviewer if it is not explained?
-- Which downstream milestone will consume this output?
-
-## Validation checklist
-
-- [ ] Raw source files remain unchanged.
-- [ ] Row counts, columns, data types, and keys are reconciled before and after any transformation.
-- [ ] Every exception is classified as corrected, intentionally retained, excluded, or unresolved.
-
-Also confirm:
-
-- [ ] The expected artifact exists at a clear repository path.
-- [ ] The work can be reproduced or reviewed without hidden application state.
-- [ ] Material assumptions and unresolved issues are visible.
-- [ ] Results are not copied from an example or supplied as an unmodified starter.
-- [ ] The artifact is ready to be linked from Demonstrated Evidence when appropriate.
-
-## Common mistakes to avoid
-
-- Editing raw files directly.
-- Treating repeated foreign keys as duplicate entity records.
-- Cleaning exceptions before documenting why they are exceptions.
-
-## Interpretation and decision prompts
-
-When the technical work is complete, record:
-
-1. The strongest result or decision produced by this milestone.
-2. The validation evidence supporting that result.
-3. Any exceptions, uncertainty, or limitations.
-4. The downstream impact on metrics, analysis, dashboards, or recommendations.
-5. The specific next action required.
-
-## Definition of done
-
-Processed data exists, raw inputs remain unchanged, every row-count change is explained, and key, relationship, and business-rule checks pass.
-
-## Demonstrated skills
-
-Completing this milestone may support evidence for:
-
-- Data cleaning
-- Quality assurance
-- Exception handling
-
-Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
-
-## Next-step handoff
+## Next step
 
 Build the reproducible analytical database from the processed layer.
 
-## Task-specific worksheet
-
-The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
+## Working notes
 
 - [ ] Record your work, decisions, and validation results here.
 

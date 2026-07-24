@@ -1484,6 +1484,7 @@ def prepare_project_data_workspace(
     *,
     refresh: bool = False,
     build: bool = True,
+    write_files: bool = True,
 ) -> ProjectDataPlan:
     root = Path(root).resolve()
     project_dir = _project_dir(root, int(project_id))
@@ -1498,7 +1499,8 @@ def prepare_project_data_workspace(
         build_database(plan)
     elif plan.database_path is not None:
         plan.database_ready = plan.database_path.is_file()
-    write_generated_files(plan, refresh=refresh)
+    if write_files:
+        write_generated_files(plan, refresh=refresh)
     return plan
 
 def _repo_relative(root: Path, path: Path | None) -> str:

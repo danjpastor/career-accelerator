@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "updated_at": "2026-07-24T15:47:32",
+  "milestones": {
+    "project_brief": {
+      "label": "Project brief",
+      "status": "available",
+      "artifacts": [
+        "PROJECT_CHARTER.md"
+      ]
+    },
+    "data_source_spec": {
+      "label": "Data source and specification",
+      "status": "available",
+      "artifacts": [
+        "docs/synthetic_data_specification.md",
+        "docs/source_brief/provided_data_dictionary_reference.csv",
+        "docs/source_brief/provided_kpi_definitions_reference.csv",
+        "docs/source_brief/provided_quality_issues_reference.csv",
+        "docs/source_brief/README.md",
+        "docs/source_brief/SOURCE_BRIEF.txt",
+        "config/project_sources.yaml"
+      ]
+    },
+    "raw_dataset": {
+      "label": "Raw datasets",
+      "status": "available",
+      "artifacts": [
+        "data/raw/csv/raw_artists.csv",
+        "data/raw/csv/raw_clients.csv",
+        "data/raw/csv/raw_projects.csv",
+        "data/raw/csv/raw_reviews.csv",
+        "data/raw/csv/raw_shots.csv",
+        "data/raw/csv/raw_time_entries.csv",
+        "data/raw/README.md",
+        "data/raw/vfx_production_intelligence_synthetic_raw.xlsx"
+      ]
+    },
+    "validate_relationships": {
+      "label": "Relationship validation",
+      "status": "available",
+      "artifacts": [
+        "notebooks/validate_relationships.ipynb",
+        "reports/relationship_validation/20260721_134407/consistency_results.csv",
+        "reports/relationship_validation/20260721_134407/primary_key_results.csv",
+        "reports/relationship_validation/20260721_134407/relationship_results.csv",
+        "reports/relationship_validation/20260721_134407/summary.md",
+        "reports/relationship_validation/20260722_174535/consistency_results.csv",
+        "reports/relationship_validation/20260722_174535/primary_key_results.csv",
+        "reports/relationship_validation/20260722_174535/relationship_results.csv",
+        "reports/relationship_validation/20260722_174535/summary.md",
+        "reports/relationship_validation/20260722_174630/consistency_results.csv",
+        "reports/relationship_validation/20260722_174630/primary_key_results.csv",
+        "reports/relationship_validation/20260722_174630/relationship_results.csv",
+        "reports/relationship_validation/20260722_174630/summary.md"
+      ]
+    },
+    "data_dictionary_review": {
+      "label": "Data dictionary",
+      "status": "available",
+      "artifacts": [
+        "documentation/data_dictionary.csv",
+        "documentation/data_dictionary.md",
+        "DATA_DICTIONARY.md",
+        "workspaces/studios/data_dictionary_review.json"
+      ]
+    },
+    "clean_analytical_data": {
+      "label": "Cleaned and validated data",
+      "status": "available",
+      "artifacts": [
+        "data/processed/README.md",
+        "notebooks/cleaning/artists_cleaning.ipynb",
+        "notebooks/cleaning/clients_cleaning.ipynb",
+        "notebooks/cleaning/projects_cleaning.ipynb",
+        "notebooks/cleaning/reviews_cleaning.ipynb",
+        "notebooks/cleaning/shots_cleaning.ipynb",
+        "notebooks/cleaning/time_entries_cleaning.ipynb"
+      ]
+    },
+    "analytical_database": {
+      "label": "Analytical database",
+      "status": "available",
+      "artifacts": [
+        "sql/schema/build_analytical_database.sql",
+        "data/working/project.duckdb"
+      ]
+    },
+    "sql_analysis": {
+      "label": "SQL analysis",
+      "status": "available",
+      "artifacts": [
+        "sql/analysis/README.md"
+      ]
+    },
+    "exploratory_analysis": {
+      "label": "Exploratory analysis",
+      "status": "available",
+      "artifacts": [
+        "notebooks/eda.ipynb"
+      ]
+    },
+    "validate_findings": {
+      "label": "Validated findings",
+      "status": "missing",
+      "artifacts": []
+    },
+    "power_bi_model": {
+      "label": "Power BI semantic model",
+      "status": "available",
+      "artifacts": [
+        "power-bi/README.md"
+      ]
+    },
+    "power_bi_report": {
+      "label": "Power BI report",
+      "status": "available",
+      "artifacts": [
+        "power-bi/README.md"
+      ]
+    },
+    "executive_summary": {
+      "label": "Executive summary",
+      "status": "missing",
+      "artifacts": []
+    },
+    "publish_case_study": {
+      "label": "Published case study",
+      "status": "available",
+      "artifacts": [
+        "README.md",
+        "outputs/screenshots/README.md"
+      ]
+    }
+  }
+}

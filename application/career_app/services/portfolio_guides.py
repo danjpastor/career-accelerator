@@ -16,7 +16,7 @@ from career_app.data.portfolio_tasks import task_spec
 GUIDE_START = "<!-- DCA MANAGED PORTFOLIO GUIDE START -->"
 GUIDE_END = "<!-- DCA MANAGED PORTFOLIO GUIDE END -->"
 LEARNER_START = "<!-- DCA LEARNER WORK START -->"
-GUIDE_VERSION = "3"
+GUIDE_VERSION = "4"
 
 EXPECTED_ARTIFACTS = {
     "business_problem": ("documentation/business_problem.md",),
@@ -630,6 +630,328 @@ def _worksheet_body(starter_text: str) -> str:
     return "\n".join(lines).strip()
 
 
+PLAIN_MILESTONE_GUIDES = {
+    "review_and_approve_project_brief": {
+        "why": "A clear brief gives the whole project one shared direction.",
+        "before": (
+            "Read the current project overview and any supplied brief.",
+            "Have the target audience and the main business problem in mind.",
+        ),
+        "steps": (
+            "Open the Project Brief Studio.",
+            "Check who the project is for and what decision the analysis should support.",
+            "Make the business questions specific enough to answer with data.",
+            "Set the scope, deliverables, and success criteria.",
+            "Fix anything that conflicts or is still vague.",
+            "Save the approved brief.",
+        ),
+        "done": (
+            "Someone new to the project can understand the problem, audience, questions, scope, and expected result.",
+            "The brief does not promise work or data that the project will not include.",
+        ),
+        "keep": (
+            "Do not turn the brief into a long report.",
+            "Do not list broad topics as business questions.",
+            "Mark assumptions instead of presenting them as facts.",
+        ),
+    },
+    "approve_data_source_and_specification": {
+        "why": "The project can only answer questions that the planned data can support.",
+        "before": (
+            "Keep the approved project brief open for reference.",
+            "Review any supplied data specification or source notes.",
+        ),
+        "steps": (
+            "Open the Data Source Studio.",
+            "Record where the data comes from and how it may be used.",
+            "Describe the expected tables, row grain, date coverage, and required fields.",
+            "Check that each business question can be answered with the planned fields.",
+            "Write down limits, gaps, or synthetic-data rules.",
+            "Approve the source when it is suitable for the project.",
+        ),
+        "done": (
+            "The source, coverage, grain, required fields, and limits are clear.",
+            "The approved questions are supported by the planned data.",
+        ),
+        "keep": (
+            "Do not approve a source only because it is convenient.",
+            "Do not hide gaps that may affect the final conclusions.",
+        ),
+    },
+    "create_or_acquire_raw_dataset": {
+        "why": "A protected raw layer gives the project a reliable starting point.",
+        "before": (
+            "Review the approved source and specification.",
+            "Know which files or tables are expected.",
+        ),
+        "steps": (
+            "Open the Data Intake Studio.",
+            "Add or acquire the original source files.",
+            "Check that the expected files, tables, and columns are present.",
+            "Preview a few rows without editing the source.",
+            "Save the source inventory and fingerprints.",
+            "Leave the raw files unchanged for the rest of the project.",
+        ),
+        "done": (
+            "Every required raw file is present and readable.",
+            "The source inventory matches the files in the raw-data folder.",
+            "The original files have not been cleaned or overwritten.",
+        ),
+        "keep": (
+            "Do not fix values in the raw files.",
+            "Do not mix cleaned outputs into the raw-data folder.",
+        ),
+    },
+    "review_and_finalize_data_dictionary": {
+        "why": "The dictionary gives every later step one trusted meaning for each field.",
+        "before": (
+            "Finish the relationship-validation notebook.",
+            "Have the current raw tables and the existing dictionary available.",
+        ),
+        "steps": (
+            "Open the Data Dictionary Studio.",
+            "Use Project Tables to select one table and complete its business description, grain, primary-key decision, and table notes.",
+            "Choose each field from the middle panel and review the read-only counts, sample values, repeated values, invalid formats, and unmatched relationship values.",
+            "Complete the editable business definition, expected type, null rule, key role, uniqueness rule, allowed values or format, relationship, unit, and cleaning expectation.",
+            "Use Check Field for specific feedback. Explain any real warning in the review-decision field before marking the field reviewed.",
+            "Mark every field reviewed, then mark the table reviewed and continue to the next table.",
+            "Run Check Dictionary, open any result by double-clicking it, save Studio progress, and generate the final data-dictionary document.",
+        ),
+        "done": (
+            "Every table has a documented description, grain, primary-key decision, and reviewed status.",
+            "Every current field is documented and marked reviewed.",
+            "Keys and relationships agree with the completed validation work.",
+            "There are no unexplained fields missing from either the data or the dictionary.",
+            "Check Dictionary passes and the generated Markdown document matches the saved Studio progress.",
+        ),
+        "keep": (
+            "Do not accept suggested business definitions without reviewing them.",
+            "Do not describe a candidate key as proven when the validation found duplicates.",
+        ),
+    },
+    "clean_and_validate_analytical_data": {
+        "why": "Cleaning decisions change the analysis, so they need to be deliberate and repeatable.",
+        "before": (
+            "Use the finalized dictionary and relationship findings.",
+            "Keep all raw files unchanged.",
+        ),
+        "steps": (
+            "Open the Cleaning Notebook and profile the raw tables.",
+            "List the real quality problems and separate them from valid exceptions.",
+            "Choose SQL, Python, Google Sheets, or a local spreadsheet for each table.",
+            "Write or make the cleaning changes yourself.",
+            "Save each finished cleaned table and register it in Files & Outputs.",
+            "Compare the raw and cleaned shapes and run the final checks.",
+            "Write a short cleaning summary that explains what changed and why.",
+        ),
+        "done": (
+            "Every table has a reviewed cleaned output or a clear note explaining why no cleaning was needed.",
+            "The notebook or working spreadsheet shows the learner's actual cleaning work.",
+            "Important row, column, key, and business-rule changes have been checked and explained.",
+        ),
+        "keep": (
+            "Do not remove unusual records just because they look inconvenient.",
+            "Do not overwrite the raw files.",
+            "Do not accept unexplained row loss or new duplicates.",
+        ),
+    },
+    "build_reproducible_analytical_database": {
+        "why": "A repeatable build makes the analytical data easy to check and rebuild.",
+        "before": (
+            "Finish and register the reviewed cleaned datasets.",
+            "Know the table names, grains, keys, and load order.",
+        ),
+        "steps": (
+            "Open the Database Build tab.",
+            "Write the SQL that creates and loads the analytical tables or views.",
+            "Use the reviewed cleaned files as the inputs.",
+            "Add the checks needed to confirm row counts, keys, and relationships.",
+            "Run Rebuild from Script.",
+            "Fix any error and run the complete script again.",
+            "Save the final build script.",
+        ),
+        "done": (
+            "The database is created from the saved script in one clean run.",
+            "The expected analytical tables are present.",
+            "The final load and validation checks pass or have clear notes.",
+        ),
+        "keep": (
+            "Do not rely on manual database changes that are missing from the script.",
+            "Do not load unreviewed raw files into the final analytical layer.",
+        ),
+    },
+    "complete_sql_analysis": {
+        "why": "Saved, readable queries show how the business answers were calculated.",
+        "before": (
+            "Build the analytical database and review the approved questions and KPI definitions.",
+            "Know the intended result grain for each query.",
+        ),
+        "steps": (
+            "Open the SQL Analysis tab.",
+            "Create one clear query file for each main question or closely related group of questions.",
+            "Write and run the SQL yourself.",
+            "Check joins, totals, nulls, edge cases, filters, and time periods.",
+            "Save a short interpretation with the final result.",
+            "Keep the final query files in a logical execution order.",
+        ),
+        "done": (
+            "The final SQL files run against the project database.",
+            "The queries answer the approved questions at the intended grain.",
+            "Important results have checks and short interpretations.",
+        ),
+        "keep": (
+            "Do not use `SELECT *` in final analysis queries.",
+            "Do not treat a plausible result as validated.",
+        ),
+    },
+    "complete_exploratory_analysis": {
+        "why": "Exploration helps you understand the data before deciding which patterns are strong enough to report.",
+        "before": (
+            "Use the cleaned analytical data.",
+            "Keep the approved business questions nearby.",
+        ),
+        "steps": (
+            "Open the EDA Notebook.",
+            "Explore coverage, distributions, categories, and important segments.",
+            "Look for time patterns and relationships tied to the project questions.",
+            "Investigate unusual records without assuming they are errors.",
+            "Create only visuals that help explain a useful pattern.",
+            "Write candidate findings and separate them from open questions.",
+        ),
+        "done": (
+            "The notebook runs from top to bottom and keeps its outputs.",
+            "Charts and notes are tied to the project questions.",
+            "Candidate findings are clearly separated from ideas that still need testing.",
+        ),
+        "keep": (
+            "Do not fill the notebook with charts that have no purpose.",
+            "Do not present correlation as proof of cause.",
+        ),
+    },
+    "validate_findings_across_tools": {
+        "why": "The headline numbers should agree because the logic agrees, not by accident.",
+        "before": (
+            "Choose the small set of metrics and findings that will appear in the final report.",
+            "Have the final SQL, Python, and Power BI results available.",
+        ),
+        "steps": (
+            "Open Results Verification.",
+            "Add each headline metric that will be published.",
+            "Enter the independently calculated values from SQL, Python, and Power BI.",
+            "Use a tolerance only when rounding makes it reasonable.",
+            "Investigate every mismatch in filters, dates, joins, null handling, and calculation rules.",
+            "Fix the source logic or write a clear resolution note.",
+            "Save the final verification matrix.",
+        ),
+        "done": (
+            "Every published metric matches across the tools used for that metric.",
+            "Any remaining difference has a clear reason and an approved final value.",
+        ),
+        "keep": (
+            "Do not force values to match by changing a number manually.",
+            "Do not compare results that use different filters or time periods.",
+        ),
+    },
+    "build_and_validate_power_bi_semantic_model": {
+        "why": "A well-tested model keeps every report page on the same business logic.",
+        "before": (
+            "Use the reviewed analytical database and finalized relationship decisions.",
+            "Keep the SQL validation totals available for comparison.",
+        ),
+        "steps": (
+            "Build the tables, relationships, date table, and measures in Power BI.",
+            "Open the Model Review tab beside the guide.",
+            "Work through each model check while testing the real `.pbix` file.",
+            "Compare the headline totals with SQL.",
+            "Save a model screenshot and short review note.",
+        ),
+        "done": (
+            "Every model-review check is complete.",
+            "The saved screenshot shows the reviewed model.",
+            "The final measures match the approved SQL values under tested filters.",
+        ),
+        "keep": (
+            "Do not create relationships before checking grain and keys.",
+            "Do not hide a mismatch behind formatting or rounding.",
+        ),
+    },
+    "build_and_test_power_bi_report": {
+        "why": "The final report needs to work for the audience, not only look finished in one screenshot.",
+        "before": (
+            "Finish the semantic model and confirm the headline measures.",
+            "Map each report page to an approved question or decision.",
+        ),
+        "steps": (
+            "Build the report pages in Power BI.",
+            "Open the Report Review tab beside the guide.",
+            "Test KPI values, filters, interactions, drill-through, navigation, and empty states.",
+            "Review labels, units, hierarchy, contrast, and text size.",
+            "Test the report at the size used for sharing or presenting.",
+            "Save final screenshots and review notes.",
+        ),
+        "done": (
+            "Every report-review check is complete.",
+            "The report answers the approved questions and keeps the validated values.",
+            "Final screenshots show the reviewed report at a readable size.",
+        ),
+        "keep": (
+            "Do not add a visual or filter that does not help the audience make a decision.",
+            "Do not test only the default filter state.",
+        ),
+    },
+    "write_executive_summary_and_recommendations": {
+        "why": "The audience needs a clear decision and action, not a tour of every query and chart.",
+        "before": (
+            "Use only findings that passed the final validation.",
+            "Keep the main audience and decision in view.",
+        ),
+        "steps": (
+            "Open Findings & Recommendations.",
+            "Write a short opening that states the problem and decision.",
+            "Add three to five strong findings with their evidence.",
+            "Explain why each finding matters to the audience.",
+            "Write a practical recommendation, owner, and next action.",
+            "Add the limitation that matters most for each claim.",
+            "Save and read the summary as one complete story.",
+        ),
+        "done": (
+            "The summary is focused on three to five supported findings.",
+            "Every recommendation is tied to evidence and has an owner or next action.",
+            "Important limitations are stated next to the affected claim.",
+        ),
+        "keep": (
+            "Do not repeat the full technical process in the opening.",
+            "Do not recommend an action the analysis does not support.",
+        ),
+    },
+    "publish_reproducible_portfolio_case_study": {
+        "why": "The public case study is the version an employer will actually review.",
+        "before": (
+            "Finish the project artifacts and final summary.",
+            "Remove private information, secrets, temporary files, and unfinished placeholders.",
+        ),
+        "steps": (
+            "Open the Case Study Publisher.",
+            "Build the case-study draft from the approved project artifacts.",
+            "Edit the draft so the story is clear, concise, and accurate.",
+            "Check the visuals, links, folder paths, and reproduction steps.",
+            "Run every publication check and fix what remains.",
+            "Back up the current README and apply the reviewed draft only when it is ready.",
+            "Review the repository as a visitor before publishing the final release.",
+        ),
+        "done": (
+            "Every publication check passes.",
+            "The README tells the complete project story and links to the supporting work.",
+            "The repository contains no private data, local-only paths, or unfinished placeholders.",
+        ),
+        "keep": (
+            "Do not publish the generated draft without reviewing it.",
+            "Do not include data or credentials that should remain private.",
+        ),
+    },
+}
+
+
 def guide_markdown(
     *,
     label: str,
@@ -641,30 +963,41 @@ def guide_markdown(
     estimated_minutes: int,
     starter_text: str = "",
 ) -> str:
+    """Build a short, human guide while preserving the learner-work section."""
     canonical_key = TRUE_MILESTONE_LABEL_KEYS.get(str(label).strip().casefold())
     spec = task_spec(label, project_id)
     key = canonical_key or (spec.key if spec is not None else _key_for(label, project_id))
     family = FAMILY.get(key, "delivery")
     artifacts = EXPECTED_ARTIFACTS.get(key, ("documentation/",))
-    skills = SKILLS.get(key, (stage, "Portfolio project execution"))
-    workflow = TASK_STEPS.get(
+    plain = PLAIN_MILESTONE_GUIDES.get(key, {})
+    workflow = plain.get("steps") or TASK_STEPS.get(
         key,
         (
-            "Review the task purpose and expected output.",
-            "Inspect the relevant source data and prior project decisions.",
-            "Complete the work in the correct project artifact.",
-            "Validate the result independently.",
-            "Record decisions, exceptions, and the next handoff.",
+            "Review what the milestone needs to produce.",
+            "Open the relevant project files and earlier decisions.",
+            "Complete the work in the Studio, notebook, or professional tool used for this milestone.",
+            "Check the result and explain anything that changed or remains unresolved.",
+            "Save the finished artifact in the project folder.",
         ),
     )
-    prerequisites = FAMILY_PREREQUISITES[family]
-    validation = COMMON_VALIDATION[family]
-    mistakes = COMMON_MISTAKES[family]
+    prerequisites = plain.get("before") or FAMILY_PREREQUISITES[family]
+    validation = plain.get("done") or COMMON_VALIDATION[family]
+    mistakes = plain.get("keep") or COMMON_MISTAKES[family]
     handoff = NEXT_HANDOFF.get(
         key,
-        "Use the validated output as the input to the next incomplete project milestone.",
+        "Use the finished work in the next incomplete project milestone.",
     )
     worksheet = _worksheet_body(starter_text)
+    why = plain.get("why") or {
+        "discovery": "A clear starting point keeps the project focused on a real audience, decision, and result.",
+        "data": "Good data work starts with knowing what the files represent, what can go wrong, and what is safe to use.",
+        "sql": "A repeatable SQL workflow makes the analysis easier to review, test, and rebuild.",
+        "python": "A clear notebook or script shows how the result was produced and makes the work easier to repeat.",
+        "powerbi": "A governed model and tested report keep the final numbers consistent and useful to the audience.",
+        "validation": "Important findings should agree for the same reason, not only happen to show the same number.",
+        "communication": "The final story must connect evidence to a decision without overstating what the data proves.",
+        "delivery": "A polished case study helps another person understand, review, and reproduce the project.",
+    }[family]
 
     managed = f"""
 {GUIDE_START}
@@ -674,102 +1007,48 @@ def guide_markdown(
 
 **Project:** {project_name}  
 **Stage:** {stage}  
-**Estimated focused time:** about {int(estimated_minutes or 45)} minutes  
-**Guide updated:** {date.today().isoformat()}
+**Estimated focused time:** about {int(estimated_minutes or 45)} minutes
 
-## Purpose
+## What you're doing
 
-{description or "Complete this portfolio milestone and produce a reviewable project artifact."}
+{description or "Complete this milestone and save a clear project result."}
 
-This milestone is not a documentation exercise inside the application. Complete the real work in the project files listed below. Use this guide to understand the workflow, validation standard, and handoff.
+Use the Studio or Notebook tab in this milestone when one is available. Open an external tool only when the work genuinely belongs there, such as Power BI or a spreadsheet editor.
 
-## Business context
+## Why it matters
 
-Explain how this task helps answer the approved business problem or reduces risk in the final analysis. Before beginning, identify:
+{why}
 
-- The stakeholder decision supported by this work.
-- The business question, KPI, or delivery requirement it affects.
-- The consequence of completing it incorrectly or incompletely.
-- The authoritative project artifact where the result will live.
-
-## Prerequisites
+## Before you start
 
 {_bullet(prerequisites)}
 
-## Inputs to review
-
-- The project README and approved discovery artifacts.
-- The most recent outputs from prerequisite milestones.
-- The relevant raw, processed, SQL, notebook, Power BI, or documentation files.
-- The project source configuration at `config/project_sources.yaml` when data tables are involved.
-- Existing assumptions, exceptions, and validation findings that affect this task.
-
-## Expected output
-
-Create or update the appropriate project artifact. Expected locations include:
-
-{_bullet(f"`{path}`" for path in artifacts)}
-
-The finished output must be understandable outside Career Accelerator. Do not place the substantive project result only in an application note field.
-
-## Detailed workflow
+## Steps
 
 {_numbered(workflow)}
 
-## Questions to answer while working
+## You're done when
 
-- What is the exact grain, scope, audience, or decision represented by this output?
-- Which prior project definitions must remain consistent?
-- What evidence would prove the result is correct?
-- Which exceptions require a business decision rather than an automatic correction?
-- What could mislead a reviewer if it is not explained?
-- Which downstream milestone will consume this output?
-
-## Validation checklist
-
+- [ ] {definition_of_done or "The project artifact is complete, checked, and ready for the next milestone."}
 {_bullet(f"[ ] {item}" for item in validation)}
+- [ ] You saved the real project artifact, not only a note inside Career Accelerator.
+- [ ] Any assumptions, exceptions, and unresolved questions are easy to find.
 
-Also confirm:
+## What to save
 
-- [ ] The expected artifact exists at a clear repository path.
-- [ ] The work can be reproduced or reviewed without hidden application state.
-- [ ] Material assumptions and unresolved issues are visible.
-- [ ] Results are not copied from an example or supplied as an unmodified starter.
-- [ ] The artifact is ready to be linked from Demonstrated Evidence when appropriate.
+{_bullet(f"`{path}`" for path in artifacts)}
 
-## Common mistakes to avoid
+Keep only the files that help another analyst understand or reproduce the work.
 
-{_bullet(mistakes)}
+## Keep in mind
 
-## Interpretation and decision prompts
+{_bullet(mistakes[:4])}
 
-When the technical work is complete, record:
-
-1. The strongest result or decision produced by this milestone.
-2. The validation evidence supporting that result.
-3. Any exceptions, uncertainty, or limitations.
-4. The downstream impact on metrics, analysis, dashboards, or recommendations.
-5. The specific next action required.
-
-## Definition of done
-
-{definition_of_done or "The real project artifact is complete, validated, saved, and ready for the next milestone."}
-
-## Demonstrated skills
-
-Completing this milestone may support evidence for:
-
-{_bullet(skills)}
-
-Evidence should point to the real artifact and describe what the work proves. A checked milestone without a substantive artifact is progress, not demonstrated evidence.
-
-## Next-step handoff
+## Next step
 
 {handoff}
 
-## Task-specific worksheet
-
-The worksheet below is a planning aid. Complete the substantive work in the project artifact, then use this area for concise decisions, checks, and handoff notes.
+## Working notes
 
 {worksheet}
 
@@ -782,8 +1061,9 @@ The worksheet below is a planning aid. Complete the substantive work in the proj
         + LEARNER_START
         + "\n\n"
         + "## Learner work and decisions\n\n"
-        + "- Add concise notes, decisions, unresolved questions, or links to the real project artifact.\n"
+        + "- Add short notes, decisions, unresolved questions, or links to the finished artifact.\n"
     )
+
 
 
 def upgrade_guide(existing: str, canonical: str) -> str:
@@ -830,24 +1110,22 @@ def skills_for_task(label: str, project_id: int) -> tuple[str, ...]:
 
 def audit_guide(content: str) -> list[str]:
     required = (
-        "## Purpose",
-        "## Business context",
-        "## Prerequisites",
-        "## Inputs to review",
-        "## Expected output",
-        "## Detailed workflow",
-        "## Validation checklist",
-        "## Common mistakes to avoid",
-        "## Definition of done",
-        "## Demonstrated skills",
-        "## Next-step handoff",
+        "## What you're doing",
+        "## Why it matters",
+        "## Before you start",
+        "## Steps",
+        "## You're done when",
+        "## What to save",
+        "## Keep in mind",
+        "## Next step",
     )
     issues = [f"Missing section: {heading}" for heading in required if heading not in content]
     if GUIDE_START not in content or GUIDE_END not in content:
         issues.append("Missing managed-guide markers")
-    if len(content.split()) < 350:
-        issues.append("Guide is too brief for a substantial portfolio milestone")
+    if len(content.split()) < 120:
+        issues.append("Guide is too brief to explain the milestone clearly")
     return issues
+
 
 # BEGIN TRUE PORTFOLIO MILESTONE GUIDE OVERRIDES V10.21.0
 TRUE_MILESTONE_LABEL_KEYS = {
@@ -869,14 +1147,13 @@ TRUE_MILESTONE_LABEL_KEYS = {
 EXPECTED_ARTIFACTS.update(
     {
         "review_and_approve_project_brief": (
-            "README.md",
+            "documentation/project_brief.md",
             "PROJECT_CHARTER.md",
-            "documentation/project_charter.md",
         ),
         "approve_data_source_and_specification": (
+            "documentation/data_source_review.md",
+            "documentation/data_source_manifest.csv",
             "config/project_sources.yaml",
-            "documentation/synthetic_data_specification.md",
-            "documentation/data_source_manifest.md",
         ),
         "create_or_acquire_raw_dataset": (
             "data/raw/",
@@ -893,15 +1170,12 @@ EXPECTED_ARTIFACTS.update(
             "sql/cleaning/",
         ),
         "build_reproducible_analytical_database": (
-            "sql/schema/",
-            "sql/load/",
-            "sql/create_schema.sql",
-            "sql/load_data.sql",
+            "sql/schema/build_analytical_database.sql",
+            "data/working/analytical.duckdb",
         ),
         "complete_sql_analysis": (
             "sql/analysis/",
-            "sql/query_index.md",
-            "sql/README.md",
+            "workspaces/studios/sql_analysis.json",
         ),
         "complete_exploratory_analysis": (
             "notebooks/eda.ipynb",
@@ -909,7 +1183,7 @@ EXPECTED_ARTIFACTS.update(
         ),
         "validate_findings_across_tools": (
             "documentation/findings_validation.md",
-            "reports/findings_validation/",
+            "documentation/findings_validation.csv",
         ),
         "build_and_validate_power_bi_semantic_model": (
             "power-bi/",
@@ -1045,13 +1319,13 @@ TASK_STEPS.update(
             "Protect raw files from downstream transformation.",
         ),
         "review_and_finalize_data_dictionary": (
-            "Open the existing generated data dictionary; do not create a second dictionary.",
-            "Compare its table list with Data Explorer and project_sources.yaml.",
-            "Compare every documented column with DuckDB's detected schema.",
-            "Add missing business definitions, key roles, null meanings, units, allowed values, and authoritative-source notes.",
-            "Update descriptions affected by relationship validation or cleaning decisions.",
-            "Remove obsolete fields and document derived fields in their authoritative analytical layer.",
-            "Confirm all KPIs and business questions trace to documented fields.",
+            "Open the Data Dictionary Studio and select the first table in Project Tables.",
+            "Document the selected table's business description, grain, expected primary key, and table-level notes.",
+            "Select each field in the middle panel and inspect the observed counts, samples, duplicates, invalid values, and relationship evidence.",
+            "Complete the expected business rules in the right panel without changing the observed evidence.",
+            "Use Check Field, explain genuine data-quality exceptions, and choose Mark Reviewed and Continue.",
+            "After every field is reviewed, mark the table reviewed and move to the next table.",
+            "Run Check Dictionary, correct every blocking and documentation result, save Studio progress, and generate the data_dictionary.md document.",
         ),
         "clean_and_validate_analytical_data": (
             "Create an issue log from profiling and relationship-validation findings.",

@@ -1,0 +1,23 @@
+﻿{
+    "version":  "10.25.3",
+    "feature":  "Detachable Task Workspace and Portfolio Workspace tabs",
+    "installed_at":  "2026-07-24T15:46:16",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.25.3-detachable-workspace-tabs-20260724-154615",
+    "files":  {
+                  "application\\career_app\\ui\\detachable_tabs.py":  "57318462D78F6FADE2489FBCA85083EB91F70AB8D3C6D2EAAD101D72D6E68082",
+                  "application\\career_app\\__init__.py":  "CB5018F240DE46883EB1EEB10F472D16BD00BB65ECF6402936A4D2139C07FF6F",
+                  "CHANGELOG.md":  "8627C78BC6CACFF4CAE3BEBFFE4A56A95EDAF9ADA7796843FBB2634767579BEA",
+                  "application\\career_app\\ui\\task_workspace.py":  "C312CA4283C60B224F79CA4A635C8AED2E1C59D4406FA103D1866B0FC369B066",
+                  "application\\career_app\\ui\\portfolio_workspace.py":  "183A0273343E8882D0B03457071E4C9B1A087225EE8E5B9C25179112526DCB8B"
+              },
+    "preserves":  [
+                      "integrated notebook kernel and cell state",
+                      "v10.25.2 fast-close behavior",
+                      "notebook comment hotkeys",
+                      "guided Data Cleaning Studio",
+                      "retrospective answers and milestone context",
+                      "overdue-track scheduling and Today’s Focus repair",
+                      "Current Sprint task browser",
+                      "Career Accelerator database and user progress"
+                  ]
+}

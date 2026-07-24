@@ -1,0 +1,24 @@
+﻿{
+    "version":  "10.24.9",
+    "feature":  "Integrated weekly and 90-day retrospective tasks",
+    "installed_at":  "2026-07-24T13:31:03",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.24.9-integrated-retrospectives-20260724-133102",
+    "files":  {
+                  "application\\career_app\\main.py":  "F9DC5A524E04D2D0256EE9A49B9E6F236F5FB49954F6B5CE074277B7B2486176",
+                  "application\\career_app\\services\\task_workspace.py":  "D8CC54D61F89B1423C13539DAEFD06A5E435A019E44E6D5F6C2D344DD611A307",
+                  "CHANGELOG.md":  "89D242E99B60D6355A2FCB4EFF25004F46A7E1ABBDD3B3D0143DC78899B05C4A",
+                  "application\\career_app\\ui\\task_workspace.py":  "3E201F704F1D2DE474E7ACF73649266FFB3AF40EEFD17442C4F753148F026D29",
+                  "application\\career_app\\__init__.py":  "4F3B18D621C963BFECF2DA9E6FD00CC765D9D342FFCAE2517BA90EA41DEB5122"
+              },
+    "planner_hash_preserved":  "2B6AD3C9628E1FE5AC4BAE6453199F1821AC6BB428C90303308E0CA413AE0071",
+    "preserves":  [
+                      "startup IndexError planner repair",
+                      "Career Accelerator database",
+                      "existing completed tasks and retrospectives",
+                      "Data Dictionary Studio content",
+                      "portfolio projects and project files",
+                      "notebooks and DuckDB files",
+                      "Academy, SQL, study, and application progress",
+                      "historical Markdown records and linked artifacts"
+                  ]
+}

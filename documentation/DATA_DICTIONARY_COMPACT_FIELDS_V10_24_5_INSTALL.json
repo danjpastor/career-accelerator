@@ -1,0 +1,20 @@
+﻿{
+    "version":  "10.24.5",
+    "feature":  "Compact one- and two-line Data Dictionary Studio editors",
+    "installed_at":  "2026-07-23T15:52:06",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\GitHub\\career-accelerator\\patch_backups\\v10.24.5-data-dictionary-compact-fields-20260723-155205",
+    "files":  {
+                  "CHANGELOG.md":  "EDBCD244F10B55178239D40F1D0D48BCB8A23F34F834F4BC7DA7775F56887A18",
+                  "application\\career_app\\__init__.py":  "E40C67D3A3587881E5013CBAB0FB13422C405E6FFF0C5023108D358B525E09B1",
+                  "application\\career_app\\ui\\portfolio_studios.py":  "2B308778C65A7D657338E211FC5DFBB3E70C4D2024120E4A75B95FC607680EE1"
+              },
+    "preserves":  [
+                      "application databases",
+                      "portfolio project files",
+                      "data dictionary CSV and Markdown files",
+                      "Studio state and reviewed decisions",
+                      "prior-milestone table autofill",
+                      "portfolio routing and scrolling fixes",
+                      "Academy progress and task history"
+                  ]
+}

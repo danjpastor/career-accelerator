@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
     QFileDialog,
+    QFrame,
     QFormLayout,
     QGridLayout,
     QHBoxLayout,
@@ -19,9 +20,9 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QSizePolicy,
     QSpinBox,
-    QTabWidget,
     QTextBrowser,
     QTextEdit,
     QVBoxLayout,
@@ -34,6 +35,7 @@ from career_app.services import (
     tracks,
 )
 from career_app.theme import stylesheet
+from career_app.ui.detachable_tabs import DetachableTabWidget
 from career_app.ui.markdown_preview import (
     path_field_stylesheet, raw_markdown_stylesheet, render_markdown_html,
 )
@@ -76,6 +78,19 @@ class TaskWorkspaceDialog(QDialog):
         )
         self.workspace_key = self.workspace["workspace_key"]
         self.task_id = self.workspace["task_id"]
+        self.is_retrospective = (
+            self.workspace["workspace_type"] == "retrospective"
+        )
+        self.retrospective_spec = (
+            workspace_service.retrospective_form_spec(
+                self.workspace["task_label"]
+            )
+            if self.is_retrospective
+            else None
+        )
+        self._retrospective_loading = False
+        self._retrospective_dirty = False
+        self._retrospective_closing = False
 
         self.setWindowTitle(
             f"Task Workspace — {self.workspace['task_label']}"
@@ -116,12 +131,24 @@ class TaskWorkspaceDialog(QDialog):
         context_actions.addStretch()
         root_layout.addLayout(context_actions)
 
-        self.tabs = QTabWidget()
+        self.tabs = DetachableTabWidget(
+            self,
+            workspace_key=f"task:{self.workspace_key}:main",
+            owner_window=self,
+        )
         self.tabs.setMinimumWidth(0)
         self.tabs.setSizePolicy(
             QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
         )
-        self.tabs.addTab(self._document_tab(), "Document")
+        if self.is_retrospective:
+            self.tabs.addTab(
+                self._retrospective_tab(),
+                "Retrospective",
+            )
+        self.tabs.addTab(
+            self._document_tab(),
+            "Generated Record" if self.is_retrospective else "Document",
+        )
         self.tabs.addTab(self._task_tab(), "Task & Schedule")
         self.tabs.addTab(self._evidence_tab(), "Artifacts & Sessions")
         root_layout.addWidget(self.tabs, 1)
@@ -147,8 +174,132 @@ class TaskWorkspaceDialog(QDialog):
         self.preview_timer.setInterval(180)
         self.preview_timer.timeout.connect(self._update_markdown_preview)
 
+        self.retrospective_autosave_timer = QTimer(self)
+        self.retrospective_autosave_timer.setSingleShot(True)
+        self.retrospective_autosave_timer.setInterval(1200)
+        self.retrospective_autosave_timer.timeout.connect(
+            lambda: self.save_retrospective(silent=True)
+        )
+
         self._load_workspace()
         self.document_views.setCurrentIndex(0)
+        if self.is_retrospective:
+            self.tabs.setCurrentIndex(0)
+        self.tabs.schedule_restore()
+        self.document_views.schedule_restore()
+
+    def _retrospective_tab(self):
+        tab = QWidget()
+        tab_layout = QVBoxLayout(tab)
+        tab_layout.setContentsMargins(4, 4, 4, 4)
+        tab_layout.setSpacing(8)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        host = QWidget()
+        layout = QVBoxLayout(host)
+        layout.setContentsMargins(10, 10, 10, 14)
+        layout.setSpacing(12)
+
+        title = QLabel(self.retrospective_spec["title"])
+        title.setObjectName("SectionTitle")
+        title.setWordWrap(True)
+        layout.addWidget(title)
+
+        intro = QLabel(self.retrospective_spec["intro"])
+        intro.setObjectName("Muted")
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+
+        snapshot_title = QLabel("Automatic progress snapshot")
+        snapshot_title.setStyleSheet("font-weight:700;")
+        layout.addWidget(snapshot_title)
+        self.retrospective_snapshot = QLabel("Loading progress…")
+        self.retrospective_snapshot.setObjectName("Muted")
+        self.retrospective_snapshot.setWordWrap(True)
+        layout.addWidget(self.retrospective_snapshot)
+
+        milestones_title = QLabel("This Week's Milestones")
+        milestones_title.setStyleSheet("font-weight:700;")
+        layout.addWidget(milestones_title)
+        milestones_help = QLabel(
+            "Google Course, SQL, and Portfolio milestones assigned or "
+            "completed during this retrospective week."
+        )
+        milestones_help.setObjectName("Muted")
+        milestones_help.setWordWrap(True)
+        layout.addWidget(milestones_help)
+        self.retrospective_milestones = QListWidget()
+        self.retrospective_milestones.setWordWrap(True)
+        self.retrospective_milestones.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.retrospective_milestones.setMinimumHeight(170)
+        self.retrospective_milestones.setMaximumHeight(280)
+        layout.addWidget(self.retrospective_milestones)
+
+        note = QLabel(
+            "Complete every required prompt here. Answers autosave as you work; "
+            "Save Retrospective Progress refreshes the generated record, and "
+            "the Weekly Summary is created once every required prompt is filled. "
+            "No external document is required."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        form = QFormLayout()
+        form.setFieldGrowthPolicy(
+            QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
+        )
+        self.retrospective_fields = {}
+        for field in self.retrospective_spec["fields"]:
+            label = QLabel(
+                field["label"] + (" *" if field.get("required") else "")
+            )
+            label.setToolTip(field.get("prompt", ""))
+            label.setWordWrap(True)
+            if field.get("control") == "score":
+                control = QSpinBox()
+                control.setRange(1, 10)
+                control.setValue(7)
+                control.valueChanged.connect(self._retrospective_changed)
+            else:
+                control = QTextEdit()
+                control.setPlaceholderText(field.get("prompt", ""))
+                rows = int(field.get("rows", 3))
+                control.setMinimumHeight(max(72, rows * 25))
+                control.setMaximumHeight(max(110, rows * 34))
+                control.textChanged.connect(self._retrospective_changed)
+            self.retrospective_fields[field["key"]] = control
+            form.addRow(label, control)
+        layout.addLayout(form)
+
+        self.retrospective_status = QLabel("Saved")
+        self.retrospective_status.setObjectName("Muted")
+        layout.addWidget(self.retrospective_status)
+
+        actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self._responsive_rows.append(actions)
+        save = QPushButton("Save Retrospective Progress")
+        save.setObjectName("Primary")
+        save.clicked.connect(self.save_retrospective)
+        complete = QPushButton("Complete Retrospective")
+        complete.clicked.connect(self.complete_retrospective)
+        actions.addWidget(save)
+        actions.addWidget(complete)
+        actions.addStretch()
+        layout.addLayout(actions)
+        layout.addStretch()
+
+        self.retrospective_controls = [
+            *self.retrospective_fields.values(),
+            save,
+            complete,
+        ]
+        scroll.setWidget(host)
+        tab_layout.addWidget(scroll)
+        return tab
 
     def _document_tab(self):
         tab = QWidget()
@@ -165,7 +316,11 @@ class TaskWorkspaceDialog(QDialog):
         path_row.addWidget(self.path_label, 1)
         layout.addLayout(path_row)
 
-        self.document_views = QTabWidget()
+        self.document_views = DetachableTabWidget(
+            self,
+            workspace_key=f"task:{self.workspace_key}:document",
+            owner_window=self,
+        )
         self.document_views.setMinimumWidth(0)
 
         self.preview = QTextBrowser()
@@ -175,8 +330,11 @@ class TaskWorkspaceDialog(QDialog):
 
         self.editor = QTextEdit()
         self.editor.setStyleSheet(raw_markdown_stylesheet())
+        self.editor.setReadOnly(self.is_retrospective)
         self.editor.setPlaceholderText(
-            "Edit the raw Markdown for this task guide and your work notes here."
+            "This record is generated from the Retrospective tab."
+            if self.is_retrospective
+            else "Edit the raw Markdown for this task guide and your work notes here."
         )
         self.editor.textChanged.connect(self._document_changed)
         self.document_views.addTab(self.editor, "Raw Markdown")
@@ -239,6 +397,11 @@ class TaskWorkspaceDialog(QDialog):
         buttons.addWidget(folder_button)
         buttons.addStretch()
         layout.addLayout(buttons)
+        if self.is_retrospective:
+            save_button.setVisible(False)
+            reload_button.setVisible(False)
+            external_button.setVisible(False)
+            folder_button.setVisible(False)
         return tab
 
     def _task_tab(self):
@@ -313,7 +476,11 @@ class TaskWorkspaceDialog(QDialog):
         save_task = QPushButton("Save Task & Schedule")
         save_task.setObjectName("Primary")
         save_task.clicked.connect(self.save_task_settings)
-        complete = QPushButton("Mark Complete")
+        complete = QPushButton(
+            "Complete Retrospective"
+            if self.is_retrospective
+            else "Mark Complete"
+        )
         complete.clicked.connect(self.mark_complete)
         edit = QPushButton("Open Detailed Task Editor")
         edit.clicked.connect(self.open_task_editor)
@@ -486,6 +653,8 @@ class TaskWorkspaceDialog(QDialog):
                 for control in self.task_controls:
                     control.setEnabled(False)
 
+            if self.is_retrospective:
+                self._load_retrospective()
             self._refresh_artifacts()
             self._refresh_sessions()
             self._dirty = False
@@ -516,6 +685,10 @@ class TaskWorkspaceDialog(QDialog):
 
     def _refresh_guide_references(self):
         if not hasattr(self, "reference_list"):
+            return
+        if self.is_retrospective:
+            self.reference_list.clear()
+            self.guide_setup.setVisible(False)
             return
         checked = set()
         for index in range(self.reference_list.count()):
@@ -652,6 +825,195 @@ class TaskWorkspaceDialog(QDialog):
             return
         self.accept()
 
+    def _load_retrospective_milestones(self):
+        if not self.is_retrospective or self.task_id is None:
+            return
+        self.retrospective_milestones.clear()
+        try:
+            sections = workspace_service.retrospective_weekly_milestones(
+                self.conn,
+                int(self.task_id),
+            )
+        except Exception as exc:
+            self.retrospective_milestones.addItem(
+                f"Milestone list unavailable: {exc}"
+            )
+            return
+
+        status_icon = {
+            "Completed": "✓",
+            "In Progress": "→",
+            "Planned": "○",
+        }
+        for section in sections:
+            header = QListWidgetItem(str(section["title"]))
+            header.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.retrospective_milestones.addItem(header)
+            items = list(section.get("items") or [])
+            if not items:
+                empty = QListWidgetItem("    No named milestones recorded.")
+                empty.setFlags(Qt.ItemFlag.NoItemFlags)
+                self.retrospective_milestones.addItem(empty)
+                continue
+            for item in items:
+                status = str(item.get("status") or "Planned")
+                icon = status_icon.get(status, "○")
+                detail = status
+                completed_date = str(item.get("completed_date") or "")
+                if status == "Completed" and completed_date:
+                    detail = f"Completed {completed_date}"
+                row = QListWidgetItem(
+                    f"    {icon} {item['label']}\n"
+                    f"       {detail}"
+                )
+                row.setFlags(Qt.ItemFlag.NoItemFlags)
+                self.retrospective_milestones.addItem(row)
+
+    def _retrospective_changed(self, *_args):
+        if self._retrospective_loading or not self.is_retrospective:
+            return
+        self._retrospective_dirty = True
+        self.retrospective_status.setText("Autosaving…")
+        self.retrospective_autosave_timer.start()
+
+    def _retrospective_values(self):
+        values = {}
+        for key, control in self.retrospective_fields.items():
+            if isinstance(control, QSpinBox):
+                values[key] = str(control.value())
+            else:
+                values[key] = control.toPlainText().strip()
+        return values
+
+    def _load_retrospective(self):
+        if not self.is_retrospective or self.task_id is None:
+            return
+        self._retrospective_loading = True
+        try:
+            record = workspace_service.retrospective_responses(
+                self.conn,
+                int(self.task_id),
+            )
+            self.retrospective_snapshot.setText(
+                workspace_service.retrospective_snapshot_text(
+                    record["metrics"],
+                    record["spec"]["kind"],
+                )
+            )
+            self._load_retrospective_milestones()
+            for key, control in self.retrospective_fields.items():
+                value = str(record["values"].get(key, "") or "")
+                control.blockSignals(True)
+                if isinstance(control, QSpinBox):
+                    try:
+                        control.setValue(int(value or 7))
+                    except ValueError:
+                        control.setValue(7)
+                else:
+                    control.setPlainText(value)
+                control.blockSignals(False)
+            enabled = bool(self.workspace["is_current"])
+            for control in self.retrospective_controls:
+                control.setEnabled(enabled)
+            self._retrospective_dirty = False
+            self.retrospective_status.setText("Saved")
+        finally:
+            self._retrospective_loading = False
+
+    def save_retrospective(self, *_args, silent=False):
+        if (
+            not self.is_retrospective
+            or self.task_id is None
+            or self._retrospective_loading
+            or not self.workspace["is_current"]
+        ):
+            return False
+        try:
+            if silent:
+                workspace_service.save_retrospective_draft(
+                    self.conn,
+                    int(self.task_id),
+                    self._retrospective_values(),
+                )
+                self._retrospective_dirty = False
+                self.retrospective_status.setText("Autosaved")
+                self.save_state.setText("Saved")
+                return True
+
+            record = workspace_service.save_retrospective(
+                self.conn,
+                self.root,
+                self.workspace_key,
+                int(self.task_id),
+                self._retrospective_values(),
+            )
+        except Exception as exc:
+            self.retrospective_status.setText("Save failed")
+            if not silent:
+                QMessageBox.warning(
+                    self,
+                    "Could Not Save Retrospective",
+                    str(exc),
+                )
+            return False
+
+        self.editor.blockSignals(True)
+        self.editor.setPlainText(record["content"])
+        self.editor.blockSignals(False)
+        self._update_markdown_preview()
+        self.retrospective_snapshot.setText(
+            workspace_service.retrospective_snapshot_text(
+                record["metrics"],
+                record["spec"]["kind"],
+            )
+        )
+        self._load_retrospective_milestones()
+        self._retrospective_dirty = False
+        self.retrospective_status.setText("Saved inside Career Accelerator")
+        self.save_state.setText("Saved")
+        return True
+
+    def complete_retrospective(self):
+        if not self.is_retrospective or self.task_id is None:
+            return
+        if not self.save_retrospective():
+            return
+        issues = workspace_service.retrospective_completion_issues(
+            self.conn,
+            int(self.task_id),
+        )
+        if issues:
+            QMessageBox.information(
+                self,
+                "Finish the Retrospective",
+                "Complete these required prompts before finishing:\n\n"
+                + "\n".join(f"• {issue}" for issue in issues),
+            )
+            self.tabs.setCurrentIndex(0)
+            return
+        try:
+            if self.complete_callback:
+                self.complete_callback(int(self.task_id))
+                # Refresh the automatic snapshot and weekly summary after the
+                # task itself has been counted as complete.
+                workspace_service.save_retrospective(
+                    self.conn,
+                    self.root,
+                    self.workspace_key,
+                    int(self.task_id),
+                    self._retrospective_values(),
+                )
+            else:
+                raise RuntimeError("Task completion is unavailable.")
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Retrospective Could Not Be Completed",
+                str(exc),
+            )
+            return
+        self.accept()
+
     def save_document(self):
         if self._loading:
             return
@@ -741,6 +1103,9 @@ class TaskWorkspaceDialog(QDialog):
         self.save_state.setText("Task and schedule saved")
 
     def mark_complete(self):
+        if self.is_retrospective:
+            self.complete_retrospective()
+            return
         if not self.workspace["is_current"] or self.task_id is None:
             return
         self.save_document()
@@ -915,12 +1280,52 @@ class TaskWorkspaceDialog(QDialog):
             row.setDirection(direction)
             row.setSpacing(7 if compact else 8)
 
-    def closeEvent(self, event):
+    def _collect_detached_tabs(self):
+        for tabs in (
+            getattr(self, "document_views", None),
+            getattr(self, "tabs", None),
+        ):
+            if tabs is not None:
+                tabs.prepare_workspace_close()
+
+    def _flush_before_close(self):
+        if self._retrospective_closing:
+            return
+        self._retrospective_closing = True
+
+        self._collect_detached_tabs()
+        self.autosave_timer.stop()
+        self.preview_timer.stop()
+        self.retrospective_autosave_timer.stop()
+
+        if self.is_retrospective:
+            if self._retrospective_dirty:
+                self.save_retrospective(silent=True)
+            return
+
         if self._dirty:
-            self.save_document()
+            try:
+                workspace_service.save_document(
+                    self.conn,
+                    self.root,
+                    self.workspace_key,
+                    self.editor.toPlainText(),
+                    scheduled_for=self.scheduled_edit.text(),
+                )
+                self._dirty = False
+            except Exception:
+                # Closing should not trap the learner in the dialog. The
+                # normal autosave and explicit Save controls remain available.
+                pass
+
+    def closeEvent(self, event):
+        self._flush_before_close()
         super().closeEvent(event)
 
     def accept(self):
-        if self._dirty:
-            self.save_document()
+        self._flush_before_close()
         super().accept()
+
+    def reject(self):
+        self._flush_before_close()
+        super().reject()

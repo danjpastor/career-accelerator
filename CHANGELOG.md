@@ -1,3 +1,92 @@
+# v10.25.3 - Detachable Workspace Tabs
+
+- Added reusable detachable tabs to general Task Workspaces and Portfolio Milestone Workspaces.
+- Dragging a tab outside its workspace moves the existing widget into a branded standalone window rather than creating a duplicate.
+- Preserved notebook kernels, running-state ownership, unsaved edits, outputs, rendered Markdown state, form values, selected tables, and scroll positions while detaching or reattaching.
+- Added drag-back reattachment to the original tab bar and a **Return to Workspace** button in every detached window.
+- Closing a detached window automatically returns its tab to the original workspace.
+- Added double-click-to-detach as an accessibility alternative to dragging.
+- Added tab reordering within the original tab bar.
+- Saved detached-window geometry and detached state per task workspace and restored it when the task is reopened.
+- Added off-screen recovery when a previously used monitor is unavailable.
+- Collected detached tabs before closing the owning workspace so no notebook, retrospective, or studio windows remain orphaned.
+- Preserved the v10.25.2 fast-close behavior and asynchronous notebook-kernel shutdown.
+
+# v10.25.2 - Notebook Comment Shortcuts and Fast Workspace Close
+
+- Added VS Code-compatible line-comment shortcuts to integrated Jupyter code cells:
+  - `Ctrl+/` toggles comments on the current line or selected lines.
+  - `Ctrl+K`, then `Ctrl+C` comments the current line or selected lines.
+  - `Ctrl+K`, then `Ctrl+U` uncomments the current line or selected lines.
+- Preserved indentation while commenting and uncommenting Python code.
+- Changed notebook kernels to start only when the first code cell runs.
+- Made notebook kernel shutdown asynchronous so closing a portfolio milestone no longer waits for the Jupyter kernel to stop.
+- Prevented duplicate studio shutdown work when a portfolio task closes.
+- Replaced the retrospective draft's per-prompt delete/insert loop with one batched transaction.
+- Stopped pending autosave and preview timers before task windows close.
+- Removed redundant full-application refreshes after task and portfolio dialogs close; explicit task changes still refresh through their existing callbacks.
+- Preserved the guided Data Cleaning Studio, per-table notebooks, retrospective restoration, Current Sprint browser, and overdue-track scheduling.
+
+# v10.25.1 - Guided Data Cleaning Installer Repair
+
+- Fixed the v10.25.0 installer treating the expected pre-launch absence of pandas as a fatal PowerShell error.
+- Removed the unnecessary installer-time pandas import probe; the launcher already verifies and installs pandas from requirements.txt.
+- Added a complete patch-install failure log with the original exception and PowerShell script stack trace.
+- Preserved the full Guided Data Cleaning Studio, integrated per-table notebooks, milestone continuity, and Today’s Focus retrospective repair.
+
+# v10.25.0 - Guided Data Cleaning Studio and Milestone Continuity
+
+- Rebuilt **Clean and validate analytical data** as a table-by-table Data Cleaning Studio.
+- Lists every configured source table with its inherited business name, purpose, grain, primary key, relationships, field definitions, null rules, key roles, uniqueness rules, valid values, known issues, and cleaning expectations from the completed Data Dictionary milestone.
+- Creates one managed integrated cleaning notebook per table under `notebooks/cleaning/`.
+- Added a notebook selector at the top of the Cleaning Notebook tab and saves the current notebook before switching files.
+- Added direct table-to-notebook routing from the Data Cleaning Studio.
+- Added **Export Raw CSV**, **Export Cleaning Package**, **Import Cleaned CSV**, processed-table validation, table summaries, and table completion review.
+- External cleaned files are validated and organized under `data/processed/csv/` without overwriting raw data; replaced processed files are backed up.
+- Added a project artifact registry and a **Previous Milestones** tab to downstream portfolio workspaces so later milestones can see and open the actual outputs produced earlier.
+- Markdown notebook cells now open rendered by default, switch to raw Markdown on double-click, and return to rendered mode when run.
+- Notebook execution scrolls to the bottom of the completed output cell; adding a new cell scrolls to the new block.
+- Restored the due weekly retrospective as a protected Today’s Focus commitment on Friday, with Monday recovery for a missed prior-week retrospective. Overdue track refreshes can no longer silently displace it.
+- Restored the full v10.24.6 Data Dictionary Studio implementation while preserving the v10.24.12 Current Sprint dialog and v10.24.11 overdue-task scheduling repairs.
+
+# v10.24.12 - Current Sprint Dialog Repair
+
+- Fixed `QListWidgetItem is not defined` when opening Current Sprint.
+- Added the missing Qt import used by sprint headers and task rows.
+- Applied compact Dashboard button padding and a scale-aware minimum height to prevent vertical text clipping.
+- Preserved all v10.24.11 overdue-track and Today’s Focus behavior.
+
+# v10.24.11 - Sprint Browser Reliability and Overdue Track Advancement
+
+- Made the entire Current Sprint metric card clickable and added a visible View Sprint Tasks button.
+- Added a guarded sprint-browser opener that surfaces query errors instead of failing silently.
+- Added persistent recommended dates for sequential Google, Academy, SQL, Portfolio, and Applied track targets.
+- Spread each track's weekly target across Monday through Friday and preserve unfinished target dates across week rollover.
+- Kept the next sequential task active when its recommended date is today or overdue, even after the normal daily target was completed.
+- Updated Next Tasks immediately after a predecessor completes when the new target is already due.
+- Replaced the completed same-track Today’s Focus row with the newly due target while preserving historical days and manually added work.
+- Preserved the v10.24.7-r1 startup IndexError repair and all v10.24.10 retrospective improvements.
+
+# v10.24.10 - Retrospective Context and Sprint Task Browser
+
+- Added a This Week's Milestones list inside every retrospective task, grouped by Google Course, SQL, and Portfolio.
+- Included both currently assigned milestones and adaptive-track completions from the retrospective week, with names and completion status.
+- Reworked retrospective autosave and close behavior so closing the window performs only a lightweight answer flush instead of regenerating Markdown and the full progress snapshot.
+- Stopped pending autosave timers during close and prevented duplicate close-time saves.
+- Made the Current Sprint progress ring clickable from the Dashboard.
+- Added a Current Sprint dialog showing every named active assignment and completed adaptive task for the week, with direct task opening.
+- Preserved the startup IndexError planner repair by leaving planner.py untouched.
+
+# v10.24.9 - Integrated Retrospective Tasks
+
+- Moved every weekly retrospective and the 90-day program retrospective into a guided in-app Retrospective tab.
+- Added automatic progress snapshots, structured prompts, autosave, required-field validation, and one-click completion.
+- Generated the Markdown retrospective record automatically from the in-app form; external editing is no longer required.
+- Generated or updated Weekly Summary records whenever a weekly retrospective is saved.
+- Replaced the duplicate Weekly Summary form with a direct route to the current retrospective task.
+- Prevented dashboard or planner checkboxes from bypassing required retrospective prompts.
+- Preserved historical Markdown records, linked artifacts, study sessions, task schedules, and all existing progress.
+
 # v10.19.2 — Guided Relationship Validation Workflow
 - Moved detailed relationship-validation instruction into the Markdown task guide.
 - Kept the Jupyter notebook clean and SQL-first: setup, queries, outputs, interpretations, and conclusion only.

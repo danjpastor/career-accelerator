@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 import re
+import sqlite3
 
 from career_app.data.roadmap import PROJECT_DIRS, PROJECT_NAMES
 from career_app.data.portfolio_tasks import task_spec
@@ -202,6 +203,47 @@ def ensure_document(conn, root: Path, task_id: int) -> dict:
     }
 
 
+def upgrade_managed_guides(conn, root: Path) -> dict[str, int]:
+    """Refresh every non-relationship milestone guide without touching learner work."""
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM project_tasks
+        WHERE managed_key LIKE 'milestone:%'
+        ORDER BY project_id,sort_order,id
+        """
+    ).fetchall()
+    result = {"created": 0, "updated": 0, "unchanged": 0, "skipped": 0}
+    for row in rows:
+        if _is_relationship_task(row):
+            # The relationship guide has its own established structure and remains unchanged.
+            result["skipped"] += 1
+            continue
+        try:
+            path = document_path(root, row)
+            canonical = starter_content(root, row, None)
+            if path.is_file():
+                existing = path.read_text(encoding="utf-8")
+                upgraded = portfolio_guides.upgrade_guide(existing, canonical)
+                if upgraded == existing:
+                    result["unchanged"] += 1
+                    continue
+                temporary = path.with_suffix(path.suffix + ".tmp")
+                temporary.write_text(upgraded, encoding="utf-8")
+                temporary.replace(path)
+                result["updated"] += 1
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                temporary = path.with_suffix(path.suffix + ".tmp")
+                temporary.write_text(canonical, encoding="utf-8")
+                temporary.replace(path)
+                result["created"] += 1
+        except Exception:
+            result["skipped"] += 1
+    return result
+
+
 def refresh_data_workspace(conn, root: Path, task_id: int) -> dict:
     row = project_task_record(conn, task_id)
     if row is None:
@@ -257,9 +299,22 @@ def project_data_files(conn, root: Path, task_id: int) -> dict:
 
 
 def save_document(conn, root: Path, task_id: int, content: str) -> Path:
-    workspace = ensure_document(conn, root, task_id)
-    path = workspace["document_path"]
-    path.write_text(str(content), encoding="utf-8")
+    """Save the already-open guide without rebuilding its milestone workspace.
+
+    The previous implementation called ``ensure_document`` for every autosave. For
+    relationship milestones that could rebuild DuckDB views and regenerate notebook
+    assets even though only Markdown text was changing. The dialog has already
+    validated the task and path when it opened, so saving only needs the canonical
+    project-local document path.
+    """
+    row = project_task_record(conn, task_id)
+    if row is None:
+        raise ValueError("The selected portfolio milestone no longer exists.")
+    path = document_path(root, row)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(str(content), encoding="utf-8")
+    temporary.replace(path)
     return path
 
 

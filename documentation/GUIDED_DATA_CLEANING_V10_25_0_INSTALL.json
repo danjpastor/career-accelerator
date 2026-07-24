@@ -1,0 +1,30 @@
+﻿{
+    "version":  "10.25.1",
+    "feature":  "Guided table-by-table Data Cleaning Studio and milestone artifact continuity",
+    "installed_at":  "2026-07-24T15:09:34",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.25.1-guided-data-cleaning-20260724-150933",
+    "files":  {
+                  "application\\career_app\\__init__.py":  "3AADD317B87CFF56C284ED307390A37FD96DFF2686356E48DF79CA25055A5130",
+                  "application\\career_app\\data\\portfolio_tasks.py":  "24216D8F3046880D0B2F89E63760FA0E835F78C0399386F88DBE49BCC254AF0E",
+                  "application\\career_app\\services\\planner.py":  "CBAF0E9DE66148B03CADA2FC5B82CEA7AF09ED13CD20C427E73CE7596FF1C0CF",
+                  "application\\career_app\\ui\\notebook_workspace.py":  "34B19E20F38BCDE9F2DD8F0B86911142C405C08D0D5E5F1BD913F9F4BA5BF018",
+                  "application\\career_app\\services\\portfolio_studios.py":  "4B3C58E3A362CEED62430FA529475640C6DB0A33619B156FF7711849A791C3F8",
+                  "application\\career_app\\ui\\project_context.py":  "749E759BC7FAF04A18DB753EE43FF403821506439EDA638934EBD820439B7DD7",
+                  "application\\career_app\\services\\cleaning_workspace.py":  "7C4B5E8388CA6645B7C210108B664192489E86083865AFB6166DDC9CF66BD172",
+                  "application\\career_app\\services\\project_artifacts.py":  "998278CFCCFF4D4F7BDDB8E029C9A5B7629B33EE87E53C70F66C035D18CB6209",
+                  "application\\career_app\\ui\\portfolio_studios.py":  "2FD7A46EA288013572682060E77768FB70880D7F5C3C25474D1F5C9D02755717",
+                  "requirements.txt":  "88332EB313B2909FEEE76312AEA8D847EE5A85437AB3BE4050E7A994756E0392",
+                  "Launch-Career-Accelerator.ps1":  "9CEF4F93BAA32826FCCFADBCAFDF4C91AC0B3EBD456506FC69524143FBF3E4E8",
+                  "CHANGELOG.md":  "990CF19DC131FBDB7E5850037A4BF2232945142AE669E54C2911EC7CCBF398CB",
+                  "application\\career_app\\ui\\cleaning_workspace.py":  "370C344E146648DD8B05780BA0AEA9A5C7420302B40FA7BDEFB1DE5EB85B0E3F"
+              },
+    "preserves":  [
+                      "Current Sprint dialog repair",
+                      "overdue sequential task scheduling",
+                      "integrated retrospective workspace and answers",
+                      "Career Accelerator database and progress",
+                      "completed Data Dictionary content and table review state",
+                      "raw project data, notebooks, processed files, and DuckDB databases",
+                      "Academy, Google, SQL, study, and application history"
+                  ]
+}

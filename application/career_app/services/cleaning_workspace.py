@@ -1,0 +1,757 @@
+"""Guided, table-by-table data-cleaning workspace helpers."""
+
+from __future__ import annotations
+
+from datetime import datetime
+import csv
+import hashlib
+import json
+from pathlib import Path
+import re
+import shutil
+from typing import Any
+
+from career_app.services import notebook_workspace, project_artifacts
+
+
+DICTIONARY_COLUMNS = (
+    "table",
+    "column",
+    "observed_type",
+    "expected_type",
+    "definition",
+    "nullable",
+    "key",
+    "expected_unique",
+    "valid_values",
+    "relationship",
+    "unit",
+    "notes",
+    "cleaning_expectation",
+    "warning_resolution",
+    "reviewed",
+)
+
+
+def _slug(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").casefold()).strip("_") or "table"
+
+
+def _display_name(value: str) -> str:
+    return str(value or "").replace("_", " ").strip().title()
+
+
+def _escape_markdown(value: Any) -> str:
+    return str(value or "").replace("|", "\\|").replace("\n", " ").strip()
+
+
+def dictionary_path(project_dir: Path) -> Path:
+    return Path(project_dir) / "documentation" / "data_dictionary.csv"
+
+
+def load_dictionary(project_dir: Path) -> list[dict[str, str]]:
+    path = dictionary_path(project_dir)
+    if not path.is_file():
+        return []
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        rows = []
+        for source in csv.DictReader(handle):
+            row = {key: str(source.get(key) or "").strip() for key in DICTIONARY_COLUMNS}
+            # Older dictionaries used observed null text and omitted these columns.
+            if not row["expected_unique"]:
+                row["expected_unique"] = "Required" if "primary key" in row["key"].casefold() else "Not required"
+            rows.append(row)
+        return rows
+
+
+def _load_table_setup(project_dir: Path) -> dict[str, dict[str, Any]]:
+    path = Path(project_dir) / "workspaces" / "studios" / "data_dictionary_review.json"
+    if not path.is_file():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return {}
+    stored = (payload.get("data") or {}).get("dictionary_tables")
+    if isinstance(stored, dict):
+        return {
+            str(key).casefold(): dict(value)
+            for key, value in stored.items()
+            if isinstance(value, dict)
+        }
+    if isinstance(stored, list):
+        result = {}
+        for value in stored:
+            if not isinstance(value, dict):
+                continue
+            key = str(value.get("table") or value.get("name") or "").casefold()
+            if key:
+                result[key] = dict(value)
+        return result
+    return {}
+
+
+def _table_fields(dictionary_rows: list[dict[str, str]]) -> dict[str, list[dict[str, str]]]:
+    result: dict[str, list[dict[str, str]]] = {}
+    for row in dictionary_rows:
+        table = row["table"].strip()
+        if table:
+            result.setdefault(table.casefold(), []).append(row)
+    return result
+
+
+def _primary_key(fields: list[dict[str, str]]) -> str:
+    keys = [row["column"] for row in fields if "primary key" in row["key"].casefold()]
+    return ", ".join(keys)
+
+
+def _relationships(fields: list[dict[str, str]]) -> list[str]:
+    result = []
+    for row in fields:
+        relationship = row["relationship"].strip()
+        if relationship:
+            result.append(f"{row['column']} → {relationship}")
+    return result
+
+
+def _known_issues(fields: list[dict[str, str]]) -> list[str]:
+    result: list[str] = []
+    for row in fields:
+        details = [
+            row["notes"],
+            row["warning_resolution"],
+        ]
+        for detail in details:
+            detail = detail.strip()
+            if detail:
+                text = f"{row['column']}: {detail}"
+                if text not in result:
+                    result.append(text)
+    return result
+
+
+def _cleaning_rules(fields: list[dict[str, str]]) -> list[str]:
+    result: list[str] = []
+    for row in fields:
+        expectation = row["cleaning_expectation"].strip()
+        if expectation:
+            result.append(f"{row['column']}: {expectation}")
+    return result
+
+
+def _source_records(context) -> list[dict[str, Any]]:
+    # Import lazily to avoid a service-module cycle during application startup.
+    from career_app.services import portfolio_studios
+
+    return portfolio_studios.cleaning_rows(context)
+
+
+def table_records(context) -> list[dict[str, Any]]:
+    dictionary_rows = load_dictionary(context.project_dir)
+    field_lookup = _table_fields(dictionary_rows)
+    setup_lookup = _load_table_setup(context.project_dir)
+    rows = _source_records(context)
+    result: list[dict[str, Any]] = []
+    for source in rows:
+        table = str(source.get("table") or Path(str(source.get("source_path") or "table")).stem)
+        fields = field_lookup.get(table.casefold(), [])
+        setup = setup_lookup.get(table.casefold(), {})
+        primary_key = str(
+            setup.get("primary_key")
+            or setup.get("expected_primary_key")
+            or setup.get("pk")
+            or _primary_key(fields)
+        ).strip()
+        purpose = str(
+            setup.get("purpose")
+            or setup.get("description")
+            or setup.get("table_purpose")
+            or setup.get("business_purpose")
+            or f"Source table used by the {context.project_name} analysis."
+        ).strip()
+        grain = str(
+            setup.get("grain")
+            or setup.get("one_row_represents")
+            or setup.get("row_grain")
+            or f"One {table.rstrip('s').replace('_', ' ')} record."
+        ).strip()
+        business_name = str(
+            setup.get("business_name")
+            or setup.get("display_name")
+            or _display_name(table)
+        ).strip()
+        result.append(
+            {
+                **dict(source),
+                "table": table,
+                "business_name": business_name,
+                "purpose": purpose,
+                "grain": grain,
+                "primary_key": primary_key,
+                "relationships": _relationships(fields),
+                "known_issues": _known_issues(fields),
+                "cleaning_rules": _cleaning_rules(fields),
+                "fields": fields,
+                "notebook_path": f"notebooks/cleaning/{_slug(table)}_cleaning.ipynb",
+                "processed_path": f"data/processed/csv/{_slug(table)}.csv",
+            }
+        )
+    return result
+
+
+def table_record(context, table_name: str) -> dict[str, Any]:
+    key = str(table_name or "").casefold()
+    for row in table_records(context):
+        if row["table"].casefold() == key:
+            return row
+    raise KeyError(f"Unknown cleaning table: {table_name}")
+
+
+def _dictionary_markdown(record: dict[str, Any]) -> str:
+    lines = [
+        "## What we already know",
+        "",
+        f"- **Business name:** {record['business_name']}",
+        f"- **Purpose:** {record['purpose']}",
+        f"- **One row represents:** {record['grain']}",
+        f"- **Expected primary key:** `{record['primary_key'] or 'Not established'}`",
+        "",
+        "### Relationships",
+    ]
+    if record["relationships"]:
+        lines.extend(f"- {item}" for item in record["relationships"])
+    else:
+        lines.append("- No parent relationship is documented for this table.")
+    lines.extend(
+        [
+            "",
+            "### Field rules from the approved data dictionary",
+            "",
+            "| Field | Definition | Expected type | Null rule | Key role | Uniqueness | Allowed values / format | Cleaning expectation |",
+            "|---|---|---|---|---|---|---|---|",
+        ]
+    )
+    for field in record["fields"]:
+        lines.append(
+            "| `{}` | {} | {} | {} | {} | {} | {} | {} |".format(
+                _escape_markdown(field["column"]),
+                _escape_markdown(field["definition"]),
+                _escape_markdown(field["expected_type"] or field["observed_type"]),
+                _escape_markdown(field["nullable"]),
+                _escape_markdown(field["key"] or "Not a key"),
+                _escape_markdown(field["expected_unique"]),
+                _escape_markdown(field["valid_values"]),
+                _escape_markdown(field["cleaning_expectation"]),
+            )
+        )
+    lines.extend(["", "### Known issues and approved decisions"])
+    if record["known_issues"]:
+        lines.extend(f"- {item}" for item in record["known_issues"])
+    else:
+        lines.append("- No specific warning is documented; still run the standard profiling checks.")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def cleaning_brief_markdown(context, record: dict[str, Any]) -> str:
+    upstream = project_artifacts.upstream_context_markdown(
+        context.project_dir,
+        "clean_analytical_data",
+    )
+    lines = [
+        f"# {context.project_name} — {record['business_name']} Cleaning Brief",
+        "",
+        "This brief was generated from the completed project milestones. Preserve the raw source and document any decision that differs from the approved dictionary.",
+        "",
+        upstream.rstrip(),
+        "",
+        _dictionary_markdown(record).rstrip(),
+        "",
+        "## Required result",
+        "",
+        f"- Reviewed processed dataset: `{record['processed_path']}`",
+        f"- Table cleaning summary: `documentation/cleaning/{_slug(record['table'])}_cleaning_summary.md`",
+        "- Validation must cover row counts, required columns, primary-key uniqueness, null rules, categories, ranges, dates, and relationships where applicable.",
+    ]
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _setup_code(context, record: dict[str, Any]) -> str:
+    project = context.project_dir.as_posix().replace("'", "\\'")
+    source = str(record["source_path"]).replace("'", "\\'")
+    processed = str(record["processed_path"]).replace("'", "\\'")
+    table = str(record["table"]).replace("'", "\\'")
+    return f'''from pathlib import Path
+import pandas as pd
+
+PROJECT_DIR = Path(r'{project}')
+TABLE_NAME = '{table}'
+RAW_PATH = PROJECT_DIR / r'{source}'
+PROCESSED_PATH = PROJECT_DIR / r'{processed}'
+PROCESSED_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+if RAW_PATH.suffix.lower() == '.csv':
+    raw_df = pd.read_csv(RAW_PATH)
+elif RAW_PATH.suffix.lower() == '.parquet':
+    raw_df = pd.read_parquet(RAW_PATH)
+else:
+    raise ValueError(f'Add the appropriate pandas reader for {{RAW_PATH.suffix}}')
+
+clean_df = raw_df.copy()
+print(f'{{TABLE_NAME}}: {{len(raw_df):,}} raw rows, {{len(raw_df.columns)}} columns')
+raw_df.head()
+'''
+
+
+def _profile_prompt(record: dict[str, Any]) -> str:
+    checks = [
+        "Confirm the source row count and column names.",
+        "Measure missing values by field.",
+        "Check exact duplicate rows.",
+    ]
+    if record["primary_key"]:
+        checks.append(f"Test uniqueness and nulls for `{record['primary_key']}`.")
+    checks.extend(
+        [
+            "Review observed categories and parsing problems.",
+            "Compare findings with the dictionary rules above before changing data.",
+        ]
+    )
+    return "## 1. Profile the raw table\n\n" + "\n".join(f"- {item}" for item in checks)
+
+
+def _validation_prompt(record: dict[str, Any]) -> str:
+    checks = [
+        "Required columns are still present.",
+        "Expected logical types can be produced consistently.",
+        "Required fields do not contain unresolved nulls.",
+        "Allowed values and formats match the dictionary.",
+        "Invalid negative, out-of-range, or impossible values are resolved or documented.",
+    ]
+    if record["primary_key"]:
+        checks.append(f"`{record['primary_key']}` is non-null and unique.")
+    if record["relationships"]:
+        checks.append("Foreign-key and relationship exceptions are measured and documented.")
+    return "## 3. Validate the processed result\n\n" + "\n".join(f"- {item}" for item in checks)
+
+
+def _notebook_cells(context, record: dict[str, Any]) -> list[dict[str, Any]]:
+    context_cell = notebook_workspace.new_markdown_cell(
+        _dictionary_markdown(record)
+    )
+    context_cell.setdefault("metadata", {})["dcaRole"] = "dictionary_context"
+    return [
+        notebook_workspace.new_markdown_cell(
+            f"# {context.project_name} — {record['business_name']} Cleaning\n\n"
+            "Work through this table from top to bottom. The context and rules below are inherited from earlier milestones."
+        ),
+        context_cell,
+        notebook_workspace.new_code_cell(_setup_code(context, record)),
+        notebook_workspace.new_markdown_cell(_profile_prompt(record)),
+        notebook_workspace.new_code_cell(
+            "# Write the profiling checks for this table here.\n"
+            "# Keep the outputs that justify your cleaning decisions.\n"
+        ),
+        notebook_workspace.new_markdown_cell(
+            "## 2. Apply the approved cleaning plan\n\n"
+            "Transform `clean_df` without modifying `raw_df`. Follow the field-level expectations above. "
+            "Document any treatment that differs from the approved dictionary."
+        ),
+        notebook_workspace.new_code_cell(
+            "# Write this table's cleaning transformations here.\n"
+            "# Example structure only: clean_df = clean_df.copy()\n"
+        ),
+        notebook_workspace.new_markdown_cell(_validation_prompt(record)),
+        notebook_workspace.new_code_cell(
+            "# Write the before-and-after validation checks here.\n"
+            "# The checks should fail visibly when an unresolved issue remains.\n"
+        ),
+        notebook_workspace.new_markdown_cell(
+            "## 4. Export the reviewed table\n\n"
+            f"After validation, save the reviewed result to `{record['processed_path']}`. "
+            "The Data Cleaning Studio will discover and validate the file."
+        ),
+        notebook_workspace.new_code_cell(
+            "# Run only after the table has passed your validation checks.\n"
+            "clean_df.to_csv(PROCESSED_PATH, index=False)\n"
+            "print(f'Saved {len(clean_df):,} rows to {PROCESSED_PATH}')\n"
+        ),
+        notebook_workspace.new_markdown_cell(
+            "## Cleaning summary\n\n"
+            "<!-- Describe what changed, why each important decision was appropriate, how many records were affected, and any remaining exception that a later milestone must know about. -->\n"
+        ),
+    ]
+
+
+def _dictionary_fingerprint(record: dict[str, Any]) -> str:
+    relevant = {
+        "business_name": record.get("business_name"),
+        "purpose": record.get("purpose"),
+        "grain": record.get("grain"),
+        "primary_key": record.get("primary_key"),
+        "relationships": record.get("relationships"),
+        "fields": record.get("fields"),
+    }
+    encoded = json.dumps(relevant, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def ensure_table_notebooks(context) -> list[dict[str, Any]]:
+    result = []
+    for record in table_records(context):
+        path = context.project_dir / record["notebook_path"]
+        fingerprint = _dictionary_fingerprint(record)
+        created = not path.is_file()
+        notebook_workspace.ensure_notebook(
+            path,
+            title=f"{context.project_name} — {record['business_name']} Cleaning",
+            cells=_notebook_cells(context, record),
+            template=f"portfolio-cleaning-table:{_slug(record['table'])}",
+        )
+        payload = notebook_workspace.load_notebook(path)
+        metadata = payload.setdefault("metadata", {})
+        previous = str(metadata.get("dcaDictionaryFingerprint") or "")
+        if created or previous != fingerprint:
+            context_text = _dictionary_markdown(record)
+            context_cell = next(
+                (
+                    cell
+                    for cell in payload.get("cells", [])
+                    if (cell.get("metadata") or {}).get("dcaRole")
+                    == "dictionary_context"
+                ),
+                None,
+            )
+            if context_cell is None:
+                context_cell = notebook_workspace.new_markdown_cell(context_text)
+                context_cell.setdefault("metadata", {})["dcaRole"] = "dictionary_context"
+                payload.setdefault("cells", []).insert(1, context_cell)
+            else:
+                notebook_workspace.set_source_text(context_cell, context_text)
+            metadata["dcaDictionaryFingerprint"] = fingerprint
+            metadata["dcaDictionaryRefreshedAt"] = datetime.now().isoformat(timespec="seconds")
+            notebook_workspace.save_notebook(path, payload)
+        result.append({**record, "notebook": path})
+    return result
+
+
+def _state_path(context) -> Path:
+    return context.project_dir / "workspaces" / "studios" / "clean_analytical_data.json"
+
+
+def load_state(context) -> dict[str, Any]:
+    path = _state_path(context)
+    if not path.is_file():
+        return {"version": 2, "tables": {}}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return {"version": 2, "tables": {}}
+    if not isinstance(payload, dict):
+        payload = {}
+    payload.setdefault("version", 2)
+    payload.setdefault("tables", {})
+    if not isinstance(payload["tables"], dict):
+        payload["tables"] = {}
+    return payload
+
+
+def save_state(context, payload: dict[str, Any]) -> Path:
+    path = _state_path(context)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = dict(payload)
+    payload["version"] = 2
+    payload["updated_at"] = datetime.now().isoformat(timespec="seconds")
+    temporary = path.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    temporary.replace(path)
+    project_artifacts.refresh_registry(context.project_dir)
+    return path
+
+
+def table_state(context, table_name: str) -> dict[str, Any]:
+    payload = load_state(context)
+    return dict(payload["tables"].get(_slug(table_name), {}))
+
+
+def update_table_state(context, table_name: str, **updates: Any) -> Path:
+    payload = load_state(context)
+    key = _slug(table_name)
+    current = dict(payload["tables"].get(key, {}))
+    current.update(updates)
+    current["updated_at"] = datetime.now().isoformat(timespec="seconds")
+    payload["tables"][key] = current
+    return save_state(context, payload)
+
+
+def expected_columns(record: dict[str, Any]) -> list[str]:
+    return [row["column"] for row in record["fields"] if row["column"]]
+
+
+def _null_not_allowed(rule: str) -> bool:
+    value = str(rule or "").casefold()
+    return "no null" in value or value == "required"
+
+
+def _unique_required(rule: str, key_role: str) -> bool:
+    value = str(rule or "").casefold()
+    return value == "required" or "primary key" in str(key_role or "").casefold()
+
+
+def validate_csv(path: Path, record: dict[str, Any], context=None) -> dict[str, Any]:
+    path = Path(path)
+    report: dict[str, Any] = {
+        "path": str(path),
+        "row_count": None,
+        "raw_row_count": None,
+        "row_difference": None,
+        "columns": [],
+        "missing_columns": [],
+        "new_columns": [],
+        "blocking": [],
+        "warnings": [],
+        "metrics": {},
+        "dictionary_fingerprint": _dictionary_fingerprint(record),
+    }
+    if path.suffix.casefold() != ".csv":
+        report["blocking"].append("Only CSV files can be fully validated inside the application. Export the cleaned table as CSV before importing it.")
+        return report
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        columns = [str(value) for value in (reader.fieldnames or [])]
+        rows = [dict(row) for row in reader]
+    report["row_count"] = len(rows)
+    report["columns"] = columns
+    expected = expected_columns(record)
+    report["missing_columns"] = [column for column in expected if column not in columns]
+    report["new_columns"] = [column for column in columns if column not in expected]
+    if report["missing_columns"]:
+        report["blocking"].append("Missing required dictionary columns: " + ", ".join(report["missing_columns"]))
+    if report["new_columns"]:
+        report["warnings"].append("New columns not yet documented in the dictionary: " + ", ".join(report["new_columns"]))
+    for field in record["fields"]:
+        column = field["column"]
+        if not column or column not in columns:
+            continue
+        values = [str(row.get(column) or "").strip() for row in rows]
+        null_count = sum(1 for value in values if value == "")
+        if _null_not_allowed(field["nullable"]) and null_count:
+            report["blocking"].append(f"{column}: {null_count} null or blank value(s) violate the dictionary rule.")
+        if _unique_required(field["expected_unique"], field["key"]):
+            nonempty = [value for value in values if value]
+            duplicates = len(nonempty) - len(set(nonempty))
+            if duplicates:
+                report["blocking"].append(f"{column}: {duplicates} duplicate value(s) violate the uniqueness rule.")
+        allowed = [item.strip() for item in re.split(r"[;,|]", field["valid_values"] or "") if item.strip()]
+        # Treat compact enumerations as strict; formats and prose remain guidance.
+        if allowed and len(allowed) <= 25 and all(len(item) <= 80 for item in allowed):
+            invalid = sorted({value for value in values if value and value not in allowed})
+            if invalid:
+                sample = ", ".join(invalid[:8])
+                suffix = "" if len(invalid) <= 8 else f" …and {len(invalid) - 8} more"
+                report["warnings"].append(f"{column}: values outside the documented set: {sample}{suffix}")
+        report["metrics"][column] = {"null_count": null_count, "distinct_count": len(set(values))}
+    if context is not None:
+        raw_path = context.project_dir / str(record.get("source_path") or "")
+        if raw_path.is_file() and raw_path.suffix.casefold() == ".csv":
+            with raw_path.open("r", encoding="utf-8-sig", newline="") as handle:
+                raw_count = sum(1 for _ in csv.reader(handle)) - 1
+            report["raw_row_count"] = max(0, raw_count)
+            report["row_difference"] = len(rows) - report["raw_row_count"]
+
+        table_lookup = {item["table"].casefold(): item for item in table_records(context)}
+        for field in record["fields"]:
+            relationship = str(field.get("relationship") or "").strip()
+            column = str(field.get("column") or "").strip()
+            if not relationship or not column or column not in columns:
+                continue
+            parts = [part.strip() for part in relationship.replace("→", ".").split(".") if part.strip()]
+            if len(parts) < 2:
+                report["warnings"].append(f"{column}: could not parse parent relationship '{relationship}'.")
+                continue
+            parent_table = parts[-2].casefold()
+            parent_column = parts[-1]
+            parent_record = table_lookup.get(parent_table)
+            if parent_record is None:
+                report["warnings"].append(f"{column}: parent table '{parts[-2]}' is not registered in the cleaning workspace.")
+                continue
+            parent_path = discover_processed(context, parent_record)
+            if parent_path is None:
+                parent_path = context.project_dir / str(parent_record.get("source_path") or "")
+            if not parent_path.is_file() or parent_path.suffix.casefold() != ".csv":
+                report["warnings"].append(f"{column}: parent values could not be loaded from {parent_path}.")
+                continue
+            with parent_path.open("r", encoding="utf-8-sig", newline="") as handle:
+                parent_rows = csv.DictReader(handle)
+                parent_values = {str(parent.get(parent_column) or "").strip() for parent in parent_rows}
+            child_values = [str(row.get(column) or "").strip() for row in rows]
+            orphans = sorted({value for value in child_values if value and value not in parent_values})
+            if orphans:
+                report["blocking"].append(
+                    f"{column}: {sum(1 for value in child_values if value and value not in parent_values)} row(s) reference values not found in {parts[-2]}.{parent_column}."
+                )
+
+    if not rows:
+        report["warnings"].append("The cleaned file contains no data rows.")
+    return report
+
+
+def processed_path(context, record: dict[str, Any]) -> Path:
+    return context.project_dir / record["processed_path"]
+
+
+def discover_processed(context, record: dict[str, Any]) -> Path | None:
+    expected = processed_path(context, record)
+    if expected.is_file():
+        return expected
+    legacy = context.project_dir / str(record.get("cleaned_output") or "")
+    return legacy if legacy.is_file() else None
+
+
+def import_cleaned_csv(context, table_name: str, source: Path) -> tuple[Path, dict[str, Any]]:
+    record = table_record(context, table_name)
+    source = Path(source)
+    report = validate_csv(source, record, context)
+    if report["blocking"]:
+        raise ValueError("\n".join(report["blocking"]))
+    target = processed_path(context, record)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.is_file():
+        backup = context.project_dir / "backups" / "cleaned-data"
+        backup.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        shutil.copy2(target, backup / f"{target.stem}-{stamp}{target.suffix}")
+    if source.resolve() != target.resolve():
+        shutil.copy2(source, target)
+    update_table_state(
+        context,
+        table_name,
+        processed_path=record["processed_path"],
+        imported_from=str(source),
+        imported_at=datetime.now().isoformat(timespec="seconds"),
+        validation=report,
+        status="Ready for review" if report["warnings"] else "Validated",
+        reviewed=False,
+    )
+    return target, report
+
+
+def validate_processed(context, table_name: str) -> dict[str, Any]:
+    record = table_record(context, table_name)
+    path = discover_processed(context, record)
+    if path is None:
+        return {
+            "row_count": None,
+            "columns": [],
+            "missing_columns": [],
+            "new_columns": [],
+            "blocking": ["No processed CSV has been generated or imported for this table."],
+            "warnings": [],
+            "metrics": {},
+        }
+    report = validate_csv(path, record, context)
+    update_table_state(
+        context,
+        table_name,
+        processed_path=str(path.relative_to(context.project_dir).as_posix()),
+        validation=report,
+        validated_at=datetime.now().isoformat(timespec="seconds"),
+        status=("Validation issues" if report["blocking"] else "Ready for review" if report["warnings"] else "Validated"),
+    )
+    return report
+
+
+def save_summary(context, table_name: str, summary: str) -> Path:
+    record = table_record(context, table_name)
+    path = context.project_dir / "documentation" / "cleaning" / f"{_slug(table_name)}_cleaning_summary.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    state = table_state(context, table_name)
+    report = state.get("validation") if isinstance(state.get("validation"), dict) else {}
+    lines = [
+        f"# {record['business_name']} Cleaning Summary",
+        "",
+        f"- **Source:** `{record['source_path']}`",
+        f"- **Processed output:** `{record['processed_path']}`",
+        f"- **Expected primary key:** `{record['primary_key'] or 'Not established'}`",
+        f"- **Last updated:** {datetime.now().isoformat(timespec='seconds')}",
+        "",
+        "## Decisions and remaining exceptions",
+        "",
+        str(summary or "").strip(),
+        "",
+        "## Latest validation",
+        "",
+        f"- Blocking issues: {len(report.get('blocking') or [])}",
+        f"- Warnings: {len(report.get('warnings') or [])}",
+        f"- Processed rows: {report.get('row_count') if report.get('row_count') is not None else 'Not recorded'}",
+    ]
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    update_table_state(context, table_name, summary=str(summary or "").strip(), summary_path=path.relative_to(context.project_dir).as_posix())
+    return path
+
+
+def mark_reviewed(context, table_name: str, reviewed: bool) -> list[str]:
+    issues = table_completion_issues(context, table_name)
+    if reviewed and issues:
+        return issues
+    update_table_state(context, table_name, reviewed=bool(reviewed), status="Complete" if reviewed else "Ready for review")
+    return []
+
+
+def table_completion_issues(context, table_name: str) -> list[str]:
+    record = table_record(context, table_name)
+    state = table_state(context, table_name)
+    path = discover_processed(context, record)
+    issues: list[str] = []
+    if path is None:
+        issues.append("Generate or import the processed CSV.")
+    report = state.get("validation") if isinstance(state.get("validation"), dict) else None
+    if report is None:
+        issues.append("Run processed-table validation.")
+    elif str(report.get("dictionary_fingerprint") or "") != _dictionary_fingerprint(record):
+        issues.append("The Data Dictionary changed after the last validation. Revalidate this table.")
+    elif report.get("blocking"):
+        issues.extend(str(item) for item in report["blocking"])
+    if not str(state.get("summary") or "").strip():
+        issues.append("Save the table cleaning summary and remaining exceptions.")
+    return issues
+
+
+def milestone_completion_issues(context) -> list[str]:
+    issues: list[str] = []
+    for record in table_records(context):
+        state = table_state(context, record["table"])
+        for issue in table_completion_issues(context, record["table"]):
+            issues.append(f"{record['business_name']}: {issue}")
+        if not bool(state.get("reviewed")):
+            issues.append(f"{record['business_name']}: mark the table complete after review.")
+    return issues
+
+
+def export_raw_csv(context, table_name: str, destination: Path) -> Path:
+    record = table_record(context, table_name)
+    source = context.project_dir / record["source_path"]
+    if not source.is_file():
+        raise FileNotFoundError(source)
+    destination = Path(destination)
+    if source.suffix.casefold() == ".csv":
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+        return destination
+    raise ValueError("This source is not a CSV. Use Export Cleaning Package to copy the original source and its rules.")
+
+
+def export_cleaning_package(context, table_name: str, destination_dir: Path) -> Path:
+    record = table_record(context, table_name)
+    destination = Path(destination_dir) / f"{_slug(table_name)}_cleaning_package"
+    destination.mkdir(parents=True, exist_ok=True)
+    source = context.project_dir / record["source_path"]
+    if not source.is_file():
+        raise FileNotFoundError(source)
+    shutil.copy2(source, destination / source.name)
+    (destination / "cleaning_brief.md").write_text(cleaning_brief_markdown(context, record), encoding="utf-8")
+    schema_path = destination / "expected_schema.csv"
+    with schema_path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=DICTIONARY_COLUMNS)
+        writer.writeheader()
+        writer.writerows(record["fields"])
+    return destination

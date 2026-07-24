@@ -1,0 +1,6 @@
+relationship,child_rows,joined_rows,null_fk_rows,orphan_rows,unmatched_rows,extra_rows,safe_to_use,status
+Projects → Clients,16,19,0,2,2,3,NO,ISSUE
+Shots → Projects,1136,1199,0,18,18,63,NO,ISSUE
+Reviews → Shots,3883,3966,9,26,35,83,NO,ISSUE
+Time Entries → Shots,6935,7100,12,33,45,165,NO,ISSUE
+Time Entries → Artists,6935,7133,14,19,33,198,NO,ISSUE
