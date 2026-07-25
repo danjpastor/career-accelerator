@@ -3,7 +3,7 @@
 - **Source:** `data/raw/csv/raw_artists.csv`
 - **Processed output:** `data/processed/csv/artists.csv`
 - **Expected primary key:** `artist_id`
-- **Last updated:** 2026-07-25T02:42:44
+- **Last updated:** 2026-07-25T14:38:13
 
 ## Decisions and remaining exceptions
 

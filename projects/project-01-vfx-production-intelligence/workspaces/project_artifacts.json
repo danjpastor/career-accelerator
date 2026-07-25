@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-07-25T02:42:44",
+  "updated_at": "2026-07-25T16:05:41",
   "milestones": {
     "project_brief": {
       "label": "Project brief",
@@ -70,6 +70,8 @@
       "status": "available",
       "artifacts": [
         "data/processed/csv/artists.csv",
+        "data/processed/csv/clients.csv",
+        "data/processed/csv/projects.csv",
         "data/processed/README.md",
         "notebooks/cleaning/artists_cleaning.ipynb",
         "notebooks/cleaning/clients_cleaning.ipynb",
@@ -78,6 +80,8 @@
         "notebooks/cleaning/shots_cleaning.ipynb",
         "notebooks/cleaning/time_entries_cleaning.ipynb",
         "documentation/cleaning/artists_cleaning_summary.md",
+        "documentation/cleaning/clients_cleaning_summary.md",
+        "documentation/cleaning/projects_cleaning_summary.md",
         "workspaces/studios/clean_analytical_data.json"
       ]
     },
