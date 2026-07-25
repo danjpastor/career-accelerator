@@ -434,6 +434,135 @@ def ensure_table_notebooks(context) -> list[dict[str, Any]]:
     return result
 
 
+
+def inspect_cleaning_notebook(
+    context,
+    source: Path,
+) -> dict[str, Any]:
+    """Validate an external notebook and identify the table it appears to use."""
+    source = Path(source)
+    if source.suffix.casefold() != ".ipynb":
+        raise ValueError("Choose a Jupyter notebook file ending in .ipynb.")
+    payload = notebook_workspace.load_notebook(source)
+    if int(payload.get("nbformat") or 0) < 4:
+        raise ValueError(
+            "The notebook uses an unsupported legacy format. Open and resave it "
+            "as notebook format 4 before importing."
+        )
+    cells = list(payload.get("cells") or [])
+    if not cells:
+        raise ValueError("The notebook does not contain any cells.")
+    valid_types = {"code", "markdown", "raw"}
+    invalid_types = sorted(
+        {
+            str(cell.get("cell_type") or "")
+            for cell in cells
+            if str(cell.get("cell_type") or "") not in valid_types
+        }
+    )
+    if invalid_types:
+        raise ValueError(
+            "The notebook contains unsupported cell type(s): "
+            + ", ".join(invalid_types)
+        )
+
+    searchable_parts = [source.stem.replace("_", " ")]
+    for cell in cells:
+        searchable_parts.append(notebook_workspace._source_text(cell))
+    searchable = "\n".join(searchable_parts).casefold()
+
+    detected: list[str] = []
+    for record in table_records(context):
+        table = str(record["table"])
+        business = str(record["business_name"])
+        candidates = {
+            table.casefold(),
+            _slug(table).replace("_", " "),
+            business.casefold(),
+            _slug(business).replace("_", " "),
+        }
+        if any(
+            candidate and re.search(
+                rf"(?<![a-z0-9]){re.escape(candidate)}(?![a-z0-9])",
+                searchable,
+            )
+            for candidate in candidates
+        ):
+            detected.append(table)
+
+    return {
+        "source": source,
+        "payload": payload,
+        "cell_count": len(cells),
+        "code_cell_count": sum(
+            1 for cell in cells if cell.get("cell_type") == "code"
+        ),
+        "detected_tables": detected,
+    }
+
+
+def import_cleaning_notebook(
+    context,
+    table_name: str,
+    source: Path,
+) -> dict[str, Any]:
+    """Import an external notebook into the selected managed table slot."""
+    record = table_record(context, table_name)
+    inspection = inspect_cleaning_notebook(context, source)
+    payload = inspection["payload"]
+    source = Path(source).resolve()
+    target = (context.project_dir / record["notebook_path"]).resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    backup_path: Path | None = None
+    if target.is_file():
+        backup_dir = context.project_dir / "backups" / "cleaning-notebooks"
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        backup_path = backup_dir / f"{target.stem}-{stamp}.ipynb"
+        shutil.copy2(target, backup_path)
+
+    metadata = payload.setdefault("metadata", {})
+    metadata["dcaManaged"] = True
+    metadata["dcaTemplate"] = (
+        f"portfolio-cleaning-table:{_slug(record['table'])}"
+    )
+    metadata["dcaCleaningTable"] = record["table"]
+    metadata["dcaImportedAt"] = datetime.now().isoformat(timespec="seconds")
+    metadata["dcaImportedFrom"] = str(source)
+    metadata["dcaDictionaryFingerprint"] = _dictionary_fingerprint(record)
+    notebook_workspace.save_notebook(target, payload)
+
+    relative_backup = ""
+    if backup_path is not None:
+        try:
+            relative_backup = backup_path.relative_to(
+                context.project_dir
+            ).as_posix()
+        except ValueError:
+            relative_backup = str(backup_path)
+
+    update_table_state(
+        context,
+        record["table"],
+        status="Imported notebook ready for review",
+        reviewed=False,
+        notebook_path=record["notebook_path"],
+        notebook_imported_at=metadata["dcaImportedAt"],
+        notebook_imported_from=str(source),
+        notebook_backup=relative_backup,
+    )
+    project_artifacts.refresh_registry(context.project_dir)
+    return {
+        "table": record["table"],
+        "target": target,
+        "backup": backup_path,
+        "detected_tables": inspection["detected_tables"],
+        "cell_count": inspection["cell_count"],
+        "code_cell_count": inspection["code_cell_count"],
+    }
+
+
 def _state_path(context) -> Path:
     return context.project_dir / "workspaces" / "studios" / "clean_analytical_data.json"
 

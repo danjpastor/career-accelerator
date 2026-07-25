@@ -1,3 +1,61 @@
+# v10.25.8 - Cleaning Notebook Import and Windows Workspace Geometry
+
+- Added **Import Cleaning Notebook** to every table in the Data Cleaning Studio.
+- Validates imported `.ipynb` files, checks the apparent table, and prevents obvious cross-table imports.
+- Saves the active integrated notebook before replacement.
+- Backs up the previous managed notebook under `backups/cleaning-notebooks/`.
+- Copies the imported notebook into the table's managed `notebooks/cleaning/` path and loads it immediately in the integrated Cleaning Notebook tab.
+- Records notebook provenance, import time, managed table, and Data Dictionary fingerprint in notebook metadata and studio state.
+- Keeps imported notebooks connected to the normal table dropdown, autosave, execution, and completion workflow.
+- Promoted Task Workspace and Portfolio Milestone windows to native top-level Windows windows with minimize, maximize, close, and snap support.
+- Fits workspace window frames to the monitor's actual available work area so the title bar and bottom controls cannot open behind the Windows taskbar.
+
+# v10.25.7 - Notebook Results and Editor Readability
+
+- Executes integrated SQL cells through a persistent DuckDB helper instead of relying on JupySQL to decide whether a statement returns rows.
+- Displays `DESCRIBE`, `SHOW`, `PRAGMA`, `EXPLAIN`, `SELECT`, and other row-returning SQL statements as readable dataframe tables.
+- Keeps `%%sql` in the learner notebook while sending a safe execution wrapper to the kernel.
+- Applies explicit dark-theme colors to table wrappers, headers, cells, indexes, text, and borders.
+- Adds inline table styles for reliable rendering in Qt's notebook output browser.
+- Repositions autocomplete below the active line, or above it when the bottom of the screen has insufficient room.
+- Removes cell execution errors from the notebook header next to Save Notebook; errors remain with the output cell where they occurred.
+- Keeps the kernel toolbar status short and places technical detail in its tooltip.
+
+# v10.25.6 - Reliable Notebook SQL Installer Repair
+
+- Fixed the v10.25.5 installer rejecting its own valid SQL language-detection payload.
+- Installer validation now checks `detect_notebook_language`, `_SQL_START_RE`, and `prepare_execution_source`, matching the actual implementation.
+- Preserved execution-time normalization for comments or blank lines before `%%sql` and for plain SQL cells.
+- Preserved readable ANSI-free notebook errors.
+
+# v10.25.5 - Reliable Notebook SQL Execution
+
+- Fixed SQL cells being passed to Python when blank lines or comments appeared before `%%sql`.
+- Plain SQL notebook cells are now routed through JupySQL automatically.
+- The execution runner moves `%%sql` to the required first physical line without rewriting the saved notebook cell.
+- Whole-line `#` comments in SQL cells are translated to `--` for execution.
+- SQL-like cells are recognized from their first meaningful statement, not only their first physical line.
+- Removed ANSI terminal color codes from notebook errors and text output so failures are readable in the integrated output panel.
+- Preserved all v10.25.4 autocomplete, paired-character, JupySQL connection, Jupyter table styling, and detached-window behavior.
+
+# v10.25.4 - VS Code Editing, JupySQL, and Native Detached Windows
+
+- Added per-window Windows AppUserModelIDs for separately listed detached tabs.
+
+- Added a reusable VS Code-inspired assistance layer for SQL and Python code editors.
+- Added content-aware completion from SQL keywords/functions, Python built-ins, variables already written in the editor, peer notebook cells, Data Dictionary fields, and project CSV table/column names.
+- Added `Ctrl+Space` completion, Tab acceptance, paired parentheses/brackets/quotes, paired deletion, selection wrapping, indentation, and VS Code line-comment shortcuts.
+- Applied the assisted editor to every shared SQL practice editor, integrated Jupyter code cell, analytical database build editor, and SQL analysis editor.
+- Added context-aware DuckDB exercise table and column completion.
+- Added a dedicated **+ SQL** notebook-cell action that creates a native `%%sql` cell.
+- Automatically loads the JupySQL extension when the integrated kernel starts and connects it to the project DuckDB database, with an in-memory DuckDB fallback.
+- Added `duckdb-engine` to application requirements and launcher verification so `%%sql` is installed and validated automatically.
+- Styled pandas and SQL result tables with Jupyter-like headers, borders, zebra rows, index cells, spacing, and scrollable table containers.
+- Added a live floating window preview when a tab is dragged beyond its workspace; releasing drops the tab window at that location.
+- Preserved the original tab widget instance while dragging so notebook kernels, outputs, unsaved edits, and form state remain intact.
+- Forced detached workspace windows to receive their own native Windows taskbar/Alt-Tab entry while retaining task-dialog ownership and modal interaction.
+- Preserved all v10.25.3 detachable-tab restoration, v10.25.2 fast-close behavior, and v10.25.1 guided cleaning workflows.
+
 # v10.25.3 - Detachable Workspace Tabs
 
 - Added reusable detachable tabs to general Task Workspaces and Portfolio Milestone Workspaces.

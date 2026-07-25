@@ -1,0 +1,105 @@
+{
+  "version": 2,
+  "tables": {
+    "artists": {
+      "processed_path": "data/processed/csv/artists.csv",
+      "validation": {
+        "path": "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\projects\\project-01-vfx-production-intelligence\\data\\processed\\csv\\artists.csv",
+        "row_count": 62,
+        "raw_row_count": 62,
+        "row_difference": 0,
+        "columns": [
+          "artist_id",
+          "artist_name",
+          "department",
+          "role",
+          "seniority",
+          "location",
+          "weekly_capacity_hours",
+          "hourly_cost_usd",
+          "hire_date",
+          "active_flag",
+          "manager_id",
+          "email"
+        ],
+        "missing_columns": [],
+        "new_columns": [],
+        "blocking": [
+          "artist_id: 2 duplicate value(s) violate the uniqueness rule.",
+          "hourly_cost_usd: 1 null or blank value(s) violate the dictionary rule.",
+          "email: 1 null or blank value(s) violate the dictionary rule.",
+          "email: 5 duplicate value(s) violate the uniqueness rule."
+        ],
+        "warnings": [
+          "artist_id: values outside the documented set: ART-001, ART-002, ART-003, ART-004, ART-005, ART-006, ART-007, ART-008 …and 52 more",
+          "artist_name: values outside the documented set: Aisha Scott, Aisha Walker, Alex Anderson, Alex Harris, Alex Patel, Alex Scott, Avery Allen, Blake Allen …and 50 more",
+          "department: values outside the documented set: MATCHMOVE, Roto/Paint, compositing, matte painting",
+          "role: values outside the documented set: Roto Artist",
+          "seniority: values outside the documented set: Lead",
+          "location: values outside the documented set: Remote-EU",
+          "weekly_capacity_hours: values outside the documented set: -8, 0, 24, 32, 35, 40, 40 hrs, 80",
+          "hourly_cost_usd: values outside the documented set: $95, -45, 100, 101, 103, 104, 105, 107 …and 35 more",
+          "hire_date: values outside the documented set: 2018-01-18, 2018-02-02, 2018-02-11, 2018-03-03, 2018-05-29, 2018-10-11, 2018-10-30, 2018-11-20 …and 52 more",
+          "active_flag: values outside the documented set: Active, FALSE, N, Y, Yes",
+          "manager_id: values outside the documented set: ART-003, ART-004, ART-006, ART-010, ART-012, ART-013, ART-014, ART-015 …and 18 more",
+          "email: values outside the documented set: aisha.scott@spectraforgevfx.example, aisha.walker@spectraforgevfx.example, alex.anderson@spectraforgevfx.example, alex.harris@spectraforgevfx.example, alex.patel@spectraforgevfx.example, alex.scott@spectraforgevfx.example, avery.allen@spectraforgevfx.example, blake.allen@spectraforgevfx.example …and 48 more"
+        ],
+        "metrics": {
+          "artist_id": {
+            "null_count": 0,
+            "distinct_count": 60
+          },
+          "artist_name": {
+            "null_count": 0,
+            "distinct_count": 58
+          },
+          "department": {
+            "null_count": 0,
+            "distinct_count": 11
+          },
+          "role": {
+            "null_count": 0,
+            "distinct_count": 17
+          },
+          "seniority": {
+            "null_count": 0,
+            "distinct_count": 4
+          },
+          "location": {
+            "null_count": 0,
+            "distinct_count": 7
+          },
+          "weekly_capacity_hours": {
+            "null_count": 0,
+            "distinct_count": 8
+          },
+          "hourly_cost_usd": {
+            "null_count": 1,
+            "distinct_count": 44
+          },
+          "hire_date": {
+            "null_count": 0,
+            "distinct_count": 60
+          },
+          "active_flag": {
+            "null_count": 0,
+            "distinct_count": 5
+          },
+          "manager_id": {
+            "null_count": 5,
+            "distinct_count": 27
+          },
+          "email": {
+            "null_count": 1,
+            "distinct_count": 57
+          }
+        },
+        "dictionary_fingerprint": "77c231883ee86dd39f04cdd5be8311ca2a4fe56e621ab45ac800e8ce6fd78413"
+      },
+      "validated_at": "2026-07-25T02:02:36",
+      "status": "Validation issues",
+      "updated_at": "2026-07-25T02:02:36"
+    }
+  },
+  "updated_at": "2026-07-25T02:02:36"
+}

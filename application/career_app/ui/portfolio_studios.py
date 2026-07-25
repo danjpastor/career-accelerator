@@ -45,6 +45,8 @@ from PySide6.QtWidgets import (
 
 from career_app.services import cleaning_workspace, google_sheets, portfolio_studios, project_data_workspace
 from career_app.ui.cleaning_workspace import DataCleaningStudio
+from career_app.ui.code_editor import AssistedTextEdit
+from career_app.ui.course_ui import SqlHighlighter
 from career_app.ui.notebook_workspace import IntegratedNotebookWidget
 from career_app.ui.project_context import ProjectContextWidget
 from career_app.ui.markdown_preview import raw_markdown_stylesheet
@@ -2533,7 +2535,11 @@ class DatabaseBuildStudio(StudioWidget):
         path_label.setObjectName("Muted")
         path_label.setWordWrap(True)
         layout.addWidget(path_label)
-        self.editor = QTextEdit()
+        self.editor = AssistedTextEdit(
+            language="sql",
+            project_dir=self.context.project_dir,
+        )
+        self._sql_highlighter = SqlHighlighter(self.editor.document())
         self.editor.setAcceptRichText(False)
         self.editor.setPlainText(self.script_path.read_text(encoding="utf-8"))
         layout.addWidget(self.editor, 2)
@@ -2627,8 +2633,11 @@ class SQLAnalysisStudio(StudioWidget):
         file_row.addWidget(open_query)
         layout.addLayout(file_row)
 
-        self.editor = QTextEdit()
-        self.editor.setAcceptRichText(False)
+        self.editor = AssistedTextEdit(
+            language="sql",
+            project_dir=self.context.project_dir,
+        )
+        self._sql_highlighter = SqlHighlighter(self.editor.document())
         self.editor.setStyleSheet(raw_markdown_stylesheet())
         self.editor.setPlaceholderText("Write the final SQL query here.")
         layout.addWidget(self.editor, 2)
@@ -3315,6 +3324,67 @@ def build_studio_tabs(
 
             cleaning_studio.open_notebook_requested.connect(
                 open_table_notebook
+            )
+
+            def import_table_notebook(
+                table_name: str,
+                source_path: str,
+            ) -> None:
+                try:
+                    record = cleaning_workspace.table_record(
+                        context,
+                        table_name,
+                    )
+                    target = context.project_dir / record["notebook_path"]
+                    if not notebook_widget.prepare_notebook_replacement(
+                        target
+                    ):
+                        return
+                    result = cleaning_workspace.import_cleaning_notebook(
+                        context,
+                        table_name,
+                        Path(source_path),
+                    )
+                    if not notebook_widget.reload_notebook(
+                        Path(result["target"])
+                    ):
+                        raise RuntimeError(
+                            "The notebook was imported, but the integrated "
+                            "notebook tab could not reload it. Close and reopen "
+                            "the milestone to load the imported file."
+                        )
+                    cleaning_studio.refresh()
+                    tabs.setCurrentIndex(notebook_tab_index)
+                    backup = result.get("backup")
+                    message = (
+                        f"Imported {Path(result['target']).name} for "
+                        f"{record['business_name']}."
+                    )
+                    if backup:
+                        try:
+                            backup_text = Path(backup).relative_to(
+                                context.project_dir
+                            ).as_posix()
+                        except ValueError:
+                            backup_text = str(backup)
+                        message += (
+                            "\n\nThe previous in-application notebook was "
+                            f"backed up to:\n{backup_text}"
+                        )
+                    QMessageBox.information(
+                        cleaning_studio,
+                        "Cleaning Notebook Imported",
+                        message,
+                    )
+                except Exception as exc:
+                    QMessageBox.warning(
+                        cleaning_studio,
+                        "Could Not Import Cleaning Notebook",
+                        str(exc),
+                    )
+
+            cleaning_studio.import_notebook_requested.connect(
+                import_table_notebook
             )
         else:
             add(DataCleaningStudio(context), "Data Cleaning Studio")

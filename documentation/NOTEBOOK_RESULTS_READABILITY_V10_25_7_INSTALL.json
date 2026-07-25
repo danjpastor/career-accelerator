@@ -1,0 +1,21 @@
+﻿{
+    "version":  "10.25.7",
+    "feature":  "Reliable notebook SQL result tables and readable editor UI",
+    "installed_at":  "2026-07-24T21:32:27",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.25.7-notebook-results-readability-20260724-213226",
+    "planner_hash_preserved":  "CBAF0E9DE66148B03CADA2FC5B82CEA7AF09ED13CD20C427E73CE7596FF1C0CF",
+    "fixes":  [
+                  "DESCRIBE and other SQL results displaying only Success",
+                  "dark notebook tables with unreadable black text",
+                  "autocomplete popup covering the active line",
+                  "cell errors expanding the Save Notebook toolbar"
+              ],
+    "preserves":  [
+                      "VS Code-style autocomplete and paired characters",
+                      "integrated notebook files and saved outputs",
+                      "detachable native taskbar windows",
+                      "guided Data Cleaning Studio",
+                      "retrospectives and scheduling repairs",
+                      "Career Accelerator database and learner progress"
+                  ]
+}

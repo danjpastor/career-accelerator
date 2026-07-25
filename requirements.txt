@@ -3,4 +3,5 @@ PyYAML>=6.0.2,<7
 duckdb>=1.4,<2
 ipykernel>=6.30,<7
 jupysql>=0.10,<1
+duckdb-engine>=0.17,<1
 pandas>=2.2,<3

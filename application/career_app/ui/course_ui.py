@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (
 )
 
 from career_app.theme import COLORS
+from career_app.ui.code_editor import AssistedPlainTextEdit
 
 
 ACCENT = COLORS.get("purple", "#8A5CFF")
@@ -283,13 +284,17 @@ class SqlCodeEditor(QWidget):
             "border-right:1px solid #263754;padding:10px 7px;}"
         )
 
-        self.editor = QPlainTextEdit()
+        self.editor = AssistedPlainTextEdit(language="sql")
         self.editor.setFrameShape(QFrame.Shape.NoFrame)
         self.editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
         self.editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.editor.setFont(fixed_font)
         self.editor.setTabStopDistance(28)
         self.editor.setPlaceholderText("Write one read-only SELECT or WITH query here.")
+        self.editor.setToolTip(
+            "VS Code-style SQL editor: Ctrl+Space autocomplete, Ctrl+/ comments, "
+            "paired quotes and brackets, Tab indentation."
+        )
         self.editor.setStyleSheet(
             "QPlainTextEdit {background:#111321;color:#FFFFFF;border:none;padding:10px;"
             "selection-background-color:#7346D1;}"
@@ -379,6 +384,25 @@ class SqlCodeEditor(QWidget):
         previous = self.editor.blockSignals(block)
         super().blockSignals(block)
         return previous
+
+    def set_completion_context(
+        self,
+        *,
+        tables=None,
+        columns=None,
+        extra_words=None,
+    ) -> None:
+        self.editor.set_completion_context(
+            tables=tables,
+            columns=columns,
+            extra_words=extra_words,
+        )
+
+    def set_project_context(self, project_dir) -> None:
+        self.editor.set_project_context(project_dir)
+
+    def trigger_completion(self) -> None:
+        self.editor.trigger_completion()
 
     def navigate_to_error(self, message: str) -> bool:
         match = re.search(r"(?:line|LINE)\s+(\d+)(?::(\d+))?", str(message or ""))

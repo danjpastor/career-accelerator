@@ -68,7 +68,7 @@ function Test-RequiredModules {
 
     $arguments = @(
         "-c",
-        "import PySide6, yaml, duckdb, ipykernel, sql, pandas"
+        "import PySide6, yaml, duckdb, ipykernel, sql, duckdb_engine, pandas"
     )
 
     $previousPreference = $ErrorActionPreference

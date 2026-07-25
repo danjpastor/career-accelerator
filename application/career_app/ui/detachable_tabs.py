@@ -11,12 +11,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import re
+import sys
 import uuid
 
 from PySide6.QtCore import QMimeData, QPoint, QRect, QSettings, Qt, QTimer, Signal
 from PySide6.QtGui import QCursor, QDrag, QIcon
 from PySide6.QtWidgets import (
     QApplication,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -42,6 +44,179 @@ def _settings_namespace(workspace_key: str) -> str:
     return f"detachable-tabs/{digest}"
 
 
+def _windows_guid(value: str, guid_type=None):
+    """Create a ctypes GUID without importing Windows-only modules elsewhere."""
+    import ctypes
+    import uuid as uuid_module
+
+    parsed = uuid_module.UUID(value)
+
+    if guid_type is None:
+        class GUID(ctypes.Structure):
+            _fields_ = (
+                ("Data1", ctypes.c_ulong),
+                ("Data2", ctypes.c_ushort),
+                ("Data3", ctypes.c_ushort),
+                ("Data4", ctypes.c_ubyte * 8),
+            )
+        guid_type = GUID
+
+    return guid_type(
+        parsed.time_low,
+        parsed.time_mid,
+        parsed.time_hi_version,
+        (ctypes.c_ubyte * 8)(*parsed.bytes[8:]),
+    ), guid_type
+
+
+def _set_windows_app_user_model_id(hwnd: int, app_id: str) -> None:
+    """Assign a per-window taskbar group so detached tabs stay separate."""
+    if sys.platform != "win32":
+        return
+    import ctypes
+    from ctypes import wintypes
+
+    iid_store, guid_type = _windows_guid(
+        "886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"
+    )
+    app_id_guid, _ = _windows_guid(
+        "9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3",
+        guid_type,
+    )
+
+    class PROPERTYKEY(ctypes.Structure):
+        _fields_ = (("fmtid", guid_type), ("pid", wintypes.DWORD))
+
+    class _PROPVARIANT_VALUE(ctypes.Union):
+        _fields_ = (("pwszVal", wintypes.LPWSTR), ("pointer", ctypes.c_void_p))
+
+    class PROPVARIANT(ctypes.Structure):
+        _anonymous_ = ("value",)
+        _fields_ = (
+            ("vt", ctypes.c_ushort),
+            ("reserved1", ctypes.c_ushort),
+            ("reserved2", ctypes.c_ushort),
+            ("reserved3", ctypes.c_ushort),
+            ("value", _PROPVARIANT_VALUE),
+        )
+
+    class IPropertyStore(ctypes.Structure):
+        pass
+
+    query_interface = ctypes.WINFUNCTYPE(
+        ctypes.c_long,
+        ctypes.POINTER(IPropertyStore),
+        ctypes.POINTER(guid_type),
+        ctypes.POINTER(ctypes.c_void_p),
+    )
+    add_ref = ctypes.WINFUNCTYPE(ctypes.c_ulong, ctypes.POINTER(IPropertyStore))
+    release = ctypes.WINFUNCTYPE(ctypes.c_ulong, ctypes.POINTER(IPropertyStore))
+    get_count = ctypes.WINFUNCTYPE(
+        ctypes.c_long, ctypes.POINTER(IPropertyStore), ctypes.POINTER(wintypes.DWORD)
+    )
+    get_at = ctypes.WINFUNCTYPE(
+        ctypes.c_long,
+        ctypes.POINTER(IPropertyStore),
+        wintypes.DWORD,
+        ctypes.POINTER(PROPERTYKEY),
+    )
+    get_value = ctypes.WINFUNCTYPE(
+        ctypes.c_long,
+        ctypes.POINTER(IPropertyStore),
+        ctypes.POINTER(PROPERTYKEY),
+        ctypes.POINTER(PROPVARIANT),
+    )
+    set_value = ctypes.WINFUNCTYPE(
+        ctypes.c_long,
+        ctypes.POINTER(IPropertyStore),
+        ctypes.POINTER(PROPERTYKEY),
+        ctypes.POINTER(PROPVARIANT),
+    )
+    commit = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.POINTER(IPropertyStore))
+
+    class IPropertyStoreVTable(ctypes.Structure):
+        _fields_ = (
+            ("QueryInterface", query_interface),
+            ("AddRef", add_ref),
+            ("Release", release),
+            ("GetCount", get_count),
+            ("GetAt", get_at),
+            ("GetValue", get_value),
+            ("SetValue", set_value),
+            ("Commit", commit),
+        )
+
+    IPropertyStore._fields_ = (("lpVtbl", ctypes.POINTER(IPropertyStoreVTable)),)
+
+    shell32 = ctypes.windll.shell32
+    function = shell32.SHGetPropertyStoreForWindow
+    function.argtypes = (
+        wintypes.HWND,
+        ctypes.POINTER(guid_type),
+        ctypes.POINTER(ctypes.POINTER(IPropertyStore)),
+    )
+    function.restype = ctypes.c_long
+
+    store = ctypes.POINTER(IPropertyStore)()
+    result = function(
+        wintypes.HWND(hwnd),
+        ctypes.byref(iid_store),
+        ctypes.byref(store),
+    )
+    if result < 0 or not store:
+        return
+
+    value_buffer = ctypes.c_wchar_p(str(app_id)[:128])
+    value = PROPVARIANT()
+    value.vt = 31  # VT_LPWSTR
+    value.pwszVal = value_buffer
+    key = PROPERTYKEY(app_id_guid, 5)  # PKEY_AppUserModel_ID
+    try:
+        if store.contents.lpVtbl.contents.SetValue(
+            store, ctypes.byref(key), ctypes.byref(value)
+        ) >= 0:
+            store.contents.lpVtbl.contents.Commit(store)
+    finally:
+        store.contents.lpVtbl.contents.Release(store)
+
+
+def _force_windows_taskbar_entry(
+    window: QWidget,
+    app_user_model_id: str = "",
+) -> None:
+    """Show a detached tab as an independent Windows taskbar/Alt-Tab item."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+
+        hwnd = int(window.winId())
+        user32 = ctypes.windll.user32
+        get_style = getattr(user32, "GetWindowLongPtrW", user32.GetWindowLongW)
+        set_style = getattr(user32, "SetWindowLongPtrW", user32.SetWindowLongW)
+        gwl_exstyle = -20
+        ws_ex_appwindow = 0x00040000
+        ws_ex_toolwindow = 0x00000080
+        style = int(get_style(hwnd, gwl_exstyle))
+        style = (style | ws_ex_appwindow) & ~ws_ex_toolwindow
+        set_style(hwnd, gwl_exstyle, style)
+        if app_user_model_id:
+            _set_windows_app_user_model_id(hwnd, app_user_model_id)
+        user32.SetWindowPos(
+            hwnd,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0x0001 | 0x0002 | 0x0004 | 0x0010 | 0x0020,
+        )
+    except Exception:
+        # The tab still functions as a normal top-level Qt window when the
+        # platform taskbar properties cannot be changed.
+        return
+
+
 @dataclass
 class _TabRecord:
     tab_id: str
@@ -59,6 +234,49 @@ class _DragPayload:
     source_tabs: "DetachableTabWidget"
     home_tabs: "DetachableTabWidget"
     record: _TabRecord
+
+
+class _TabDragPreview(QFrame):
+    """Non-interactive floating preview shown while a tab leaves its workspace."""
+
+    def __init__(self, record: _TabRecord, owner_window=None):
+        super().__init__(
+            None,
+            Qt.WindowType.ToolTip
+            | Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowDoesNotAcceptFocus,
+        )
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_TransparentForMouseEvents,
+            True,
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
+        self.setWindowOpacity(0.88)
+        self.setObjectName("DetachedTabDragPreview")
+        self.setStyleSheet(
+            "QFrame#DetachedTabDragPreview {background:#101A2C;"
+            "border:2px solid #8A5CFF;border-radius:10px;}"
+            "QLabel {color:#F3F6FF;background:transparent;}"
+        )
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 13, 16, 13)
+        title = QLabel(record.title)
+        title.setStyleSheet("font-size:11pt;font-weight:700;")
+        layout.addWidget(title)
+        detail = QLabel("Release to open this tab in its own window")
+        detail.setStyleSheet("color:#B8C4D8;")
+        layout.addWidget(detail)
+        if owner_window is not None:
+            size = owner_window.size()
+            self.resize(
+                max(460, int(size.width() * 0.56)),
+                max(280, int(size.height() * 0.52)),
+            )
+        else:
+            self.resize(720, 440)
+
+    def follow_cursor(self, cursor: QPoint) -> None:
+        self.move(cursor - QPoint(70, 20))
 
 
 class DetachableTabBar(QTabBar):
@@ -118,19 +336,46 @@ class DetachableTabBar(QTabBar):
             drag.setPixmap(pixmap)
             drag.setHotSpot(event.position().toPoint() - rect.topLeft())
 
+        owner = self._tabs.owner_window
+        owner_rect = (
+            QRect(owner.mapToGlobal(QPoint(0, 0)), owner.size())
+            if owner is not None
+            else QRect(self.mapToGlobal(QPoint(0, 0)), self.size())
+        )
+        preview = _TabDragPreview(record, owner)
+        preview_timer = QTimer(self)
+        preview_timer.setInterval(16)
+
+        def update_preview():
+            cursor = QCursor.pos()
+            if owner_rect.contains(cursor):
+                preview.hide()
+                return
+            preview.follow_cursor(cursor)
+            if not preview.isVisible():
+                preview.show()
+
+        preview_timer.timeout.connect(update_preview)
+        preview_timer.start()
+        update_preview()
         result = drag.exec(Qt.DropAction.MoveAction)
+        preview_timer.stop()
+        cursor = QCursor.pos()
+        preview_was_visible = preview.isVisible()
+        preview_position = preview.pos()
+        preview.close()
+        preview.deleteLater()
         _ACTIVE_DRAGS.pop(token, None)
 
-        if result != Qt.DropAction.MoveAction:
-            cursor = QCursor.pos()
-            owner = self._tabs.owner_window
-            owner_rect = (
-                QRect(owner.mapToGlobal(QPoint(0, 0)), owner.size())
-                if owner is not None
-                else QRect(self.mapToGlobal(QPoint(0, 0)), self.size())
+        if (
+            result != Qt.DropAction.MoveAction
+            and not owner_rect.contains(cursor)
+        ):
+            self._tabs.detach_widget(
+                widget,
+                preview_position if preview_was_visible else cursor,
+                position_is_window_origin=preview_was_visible,
             )
-            if not owner_rect.contains(cursor):
-                self._tabs.detach_widget(widget, cursor)
 
     def dragEnterEvent(self, event):  # noqa: N802 - Qt API
         payload = self._payload(event.mimeData())
@@ -188,11 +433,25 @@ class DetachedTabWindow(QMainWindow):
         record: _TabRecord,
         position: QPoint | None = None,
         geometry=None,
+        position_is_window_origin: bool = False,
     ):
         owner = home_tabs.owner_window
+        # Keep the workspace ownership so detached tabs remain interactive
+        # while the task dialog is modal.  A Windows native style is applied
+        # after show so the detached tab still receives its own taskbar entry.
         super().__init__(owner, Qt.WindowType.Window)
+        self._workspace_owner = owner
+        self.setAttribute(Qt.WidgetAttribute.WA_QuitOnClose, False)
+        self.setWindowModality(Qt.WindowModality.NonModal)
+        self.setProperty("detachedWorkspaceWindow", True)
         self.home_tabs = home_tabs
         self.record = record
+        taskbar_digest = hashlib.sha1(
+            f"{home_tabs.workspace_key}:{record.tab_id}".encode("utf-8")
+        ).hexdigest()[:20]
+        self._windows_app_user_model_id = (
+            "CareerAccelerator.Detached." + taskbar_digest
+        )
         self._suppress_return = False
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
         self.setWindowTitle(record.title)
@@ -241,7 +500,28 @@ class DetachedTabWindow(QMainWindow):
             height = max(520, int(owner_size.height() * 0.74)) if owner_size else 650
             self.resize(width, height)
             if position is not None:
-                self.move(position - QPoint(60, 24))
+                self.move(
+                    position
+                    if position_is_window_origin
+                    else position - QPoint(60, 24)
+                )
+
+        # Creating the native handle before show allows Windows Explorer to
+        # assign a unique taskbar group before the window first appears.
+        _force_windows_taskbar_entry(
+            self,
+            self._windows_app_user_model_id,
+        )
+
+    def showEvent(self, event):  # noqa: N802 - Qt API
+        super().showEvent(event)
+        QTimer.singleShot(
+            0,
+            lambda: _force_windows_taskbar_entry(
+                self,
+                self._windows_app_user_model_id,
+            ),
+        )
 
     def return_to_workspace(self):
         if self.host_tabs.indexOf(self.record.widget) >= 0:
@@ -536,7 +816,13 @@ class DetachableTabWidget(QTabWidget):
 
         source._after_widget_transferred(record)
 
-    def detach_widget(self, widget: QWidget, position: QPoint | None = None):
+    def detach_widget(
+        self,
+        widget: QWidget,
+        position: QPoint | None = None,
+        *,
+        position_is_window_origin: bool = False,
+    ):
         if self._detached_host:
             return
         index = self.indexOf(widget)
@@ -553,12 +839,19 @@ class DetachableTabWidget(QTabWidget):
         record.enabled = self.isTabEnabled(index)
         self._remove_record_widget(record)
 
-        geometry = self.detached_geometry(record.tab_id)
+        # A manual drag uses the current drop location.  Stored geometry is
+        # used only when restoring a previously detached layout.
+        geometry = (
+            None
+            if position is not None
+            else self.detached_geometry(record.tab_id)
+        )
         window = DetachedTabWindow(
             home_tabs=self.home_tabs,
             record=record,
             position=position,
             geometry=geometry,
+            position_is_window_origin=position_is_window_origin,
         )
         self.home_tabs._detached_windows[record.tab_id] = window
         self.home_tabs.mark_detached(record.tab_id)

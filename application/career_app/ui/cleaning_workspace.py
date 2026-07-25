@@ -35,6 +35,7 @@ class DataCleaningStudio(QWidget):
 
     saved = Signal(str)
     open_notebook_requested = Signal(str)
+    import_notebook_requested = Signal(str, str)
 
     def __init__(self, context, parent=None):
         super().__init__(parent)
@@ -156,6 +157,9 @@ class DataCleaningStudio(QWidget):
         notebook.setObjectName("Primary")
         notebook.clicked.connect(self.open_notebook)
         first_actions.addWidget(notebook)
+        import_notebook = QPushButton("Import Cleaning Notebook")
+        import_notebook.clicked.connect(self.import_notebook)
+        first_actions.addWidget(import_notebook)
         export_csv = QPushButton("Export Raw CSV")
         export_csv.clicked.connect(self.export_csv)
         first_actions.addWidget(export_csv)
@@ -291,6 +295,62 @@ class DataCleaningStudio(QWidget):
         record = self._record()
         if record is not None:
             self.open_notebook_requested.emit(record["table"])
+
+    def import_notebook(self) -> None:
+        record = self._record()
+        if record is None:
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Import Finished Cleaning Notebook",
+            str(self.context.project_dir),
+            "Jupyter notebooks (*.ipynb)",
+        )
+        if not path:
+            return
+        try:
+            inspection = cleaning_workspace.inspect_cleaning_notebook(
+                self.context,
+                Path(path),
+            )
+        except Exception as exc:
+            QMessageBox.warning(
+                self,
+                "Could Not Read Cleaning Notebook",
+                str(exc),
+            )
+            return
+
+        detected = list(inspection.get("detected_tables") or [])
+        selected = str(record["table"])
+        if detected and selected not in detected:
+            names = ", ".join(detected)
+            QMessageBox.warning(
+                self,
+                "Notebook Does Not Match Selected Table",
+                f"This notebook appears to reference {names}, but "
+                f"{record['business_name']} is selected. Select the matching "
+                "table first, or choose the correct notebook file.",
+            )
+            return
+
+        if not detected:
+            answer = QMessageBox.question(
+                self,
+                "Confirm Notebook Table",
+                f"Career Accelerator could not identify a table name in this "
+                f"notebook. Import it as the finished notebook for "
+                f"{record['business_name']}?\n\n"
+                f"Cells detected: {inspection['cell_count']}\n"
+                f"Code cells: {inspection['code_cell_count']}",
+                QMessageBox.StandardButton.Yes
+                | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return
+
+        self.import_notebook_requested.emit(selected, str(Path(path)))
 
     def export_csv(self) -> None:
         record = self._record()

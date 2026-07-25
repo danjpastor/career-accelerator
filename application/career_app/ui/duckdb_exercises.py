@@ -574,6 +574,18 @@ class DuckDBExercisesWidget(QWidget):
             f"duckdb_exercises/bookmarks/{number}", False, type=bool
         )
         inventory = runner.dataset_inventory(self.root, number)
+        completion_tables = {}
+        for dataset in inventory:
+            columns = list(dataset.get("columns") or [])
+            for table_name in (
+                dataset.get("table"),
+                dataset.get("prefixed_table"),
+            ):
+                if table_name:
+                    completion_tables[str(table_name)] = columns
+        self.sql_editor.set_completion_context(
+            tables=completion_tables,
+        )
         question_count = len(self._question_definitions)
         subtitle = (
             f"Week {item['week']} • {item['minutes']} minutes • "

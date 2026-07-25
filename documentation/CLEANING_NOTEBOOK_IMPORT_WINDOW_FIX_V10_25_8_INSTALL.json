@@ -1,0 +1,15 @@
+﻿{
+    "version":  "10.25.8",
+    "feature":  "External cleaning notebook import and Windows-safe workspace geometry",
+    "installed_at":  "2026-07-25T01:56:45",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.25.8-cleaning-notebook-import-window-fix-20260725-015645",
+    "planner_hash_preserved":  "CBAF0E9DE66148B03CADA2FC5B82CEA7AF09ED13CD20C427E73CE7596FF1C0CF",
+    "preserves":  [
+                      "integrated SQL execution and readable notebook results",
+                      "VS Code-style editor assistance",
+                      "detachable native taskbar windows",
+                      "guided Data Cleaning Studio state",
+                      "retrospectives and scheduling repairs",
+                      "Career Accelerator database and learner files"
+                  ]
+}

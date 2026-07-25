@@ -1,0 +1,31 @@
+﻿{
+    "version":  "10.25.4",
+    "feature":  "VS Code-style code editing, JupySQL, Jupyter tables, and native detached windows",
+    "installed_at":  "2026-07-24T20:57:23",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.25.4-vscode-editors-jupysql-20260724-205722",
+    "planner_hash_preserved":  "CBAF0E9DE66148B03CADA2FC5B82CEA7AF09ED13CD20C427E73CE7596FF1C0CF",
+    "first_launch_note":  "The launcher may install duckdb-engine into .venv before opening the application.",
+    "files":  {
+                  "Launch-Career-Accelerator.ps1":  "3C1B86EBB8EC32FC8372A6FF0D553129F499DD1F99F3604F18698BEEE7673506",
+                  "requirements.txt":  "8B416997AFB36602B46DB5B6894894DF900E88BDBB843CCF0B669481FDB4FD5B",
+                  "application\\career_app\\ui\\notebook_workspace.py":  "6DB074D83550AF73275F87514C9FFE95C9F9B6EC97695C16EBB88E8974691E6A",
+                  "CHANGELOG.md":  "463F0828DB8E29A96FAEC06BCC9E6660861C5F94D7705AE33494497B66575AD6",
+                  "application\\career_app\\ui\\detachable_tabs.py":  "CCCC1B2BF66CF5F60F3E327052916CC1D055BC0AE6DF1812CC83969048ED2AB0",
+                  "application\\career_app\\ui\\course_ui.py":  "66908D8C358398035A98A298CBA04023B4C62A60FA15A65CDC35504AE7C19031",
+                  "application\\career_app\\ui\\duckdb_exercises.py":  "FA63490644F4E79380F1D691E3F225033E15A3836852F47623573601D9C32AFD",
+                  "application\\career_app\\services\\notebook_workspace.py":  "E5749569431BC1FE1C6DB5AC7ABD4263113EF22C2761BF176DC3E78CEBE99A8B",
+                  "application\\career_app\\ui\\code_editor.py":  "24F8CFD1CACE34515BC54B02D9D0338FDA3F0FEAB51177307E990D7D7CA4F6AB",
+                  "application\\career_app\\ui\\portfolio_studios.py":  "AADF44475711B36D58852ECD1D338C59E0CEE780BB5284FCA360155AB083B40D",
+                  "application\\career_app\\__init__.py":  "ABCBCE73FCC44545750B731484B683627459A3CC637800BE53128AC7EC000B04"
+              },
+    "preserves":  [
+                      "guided Data Cleaning Studio",
+                      "retrospective workspace and Today’s Focus restoration",
+                      "overdue Next Tasks and Today’s Focus scheduling",
+                      "Current Sprint browser",
+                      "fast workspace close",
+                      "detachable tab state and geometry",
+                      "Career Accelerator database and progress",
+                      "portfolio files, notebooks, and DuckDB data"
+                  ]
+}

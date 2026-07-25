@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QRect, Qt, QTimer
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QBoxLayout,
     QComboBox,
@@ -58,6 +59,13 @@ class TaskWorkspaceDialog(QDialog):
         open_sql_problem_callback=None,
     ):
         super().__init__(parent)
+        self._workspace_parent = parent
+        self.setWindowFlags(
+            Qt.WindowType.Window
+            | Qt.WindowType.WindowSystemMenuHint
+            | Qt.WindowType.WindowMinMaxButtonsHint
+            | Qt.WindowType.WindowCloseButtonHint
+        )
         self.conn = conn
         self.root = Path(root)
         self.program_state = state
@@ -99,6 +107,7 @@ class TaskWorkspaceDialog(QDialog):
         parent_width = max(760, parent.width() if parent is not None else 1120)
         parent_height = max(580, parent.height() if parent is not None else 820)
         self.resize(min(1120, parent_width - 48), min(820, parent_height - 48))
+        QTimer.singleShot(0, self._fit_to_windows_work_area)
         self.setStyleSheet(
             stylesheet(
                 getattr(parent, "_ui_scale", 1.0),
@@ -1317,6 +1326,40 @@ class TaskWorkspaceDialog(QDialog):
                 # Closing should not trap the learner in the dialog. The
                 # normal autosave and explicit Save controls remain available.
                 pass
+
+    def _fit_to_windows_work_area(self) -> None:
+        """Keep the native window frame inside the Windows usable desktop."""
+        parent = self._workspace_parent
+        screen = None
+        if parent is not None:
+            try:
+                center = parent.window().frameGeometry().center()
+                screen = QGuiApplication.screenAt(center)
+            except Exception:
+                screen = None
+        if screen is None:
+            screen = self.screen() or QGuiApplication.primaryScreen()
+        if screen is None:
+            return
+
+        available = screen.availableGeometry()
+        self.showNormal()
+        self.ensurePolished()
+        frame = self.frameGeometry()
+        client = self.geometry()
+        left = max(0, client.left() - frame.left())
+        top = max(0, client.top() - frame.top())
+        right = max(0, frame.right() - client.right())
+        bottom = max(0, frame.bottom() - client.bottom())
+        target = QRect(
+            available.left() + left,
+            available.top() + top,
+            max(self.minimumWidth(), available.width() - left - right),
+            max(self.minimumHeight(), available.height() - top - bottom),
+        )
+        self.setGeometry(target)
+        self.raise_()
+        self.activateWindow()
 
     def closeEvent(self, event):
         self._flush_before_close()

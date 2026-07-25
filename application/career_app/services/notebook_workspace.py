@@ -8,12 +8,123 @@ import base64
 import html
 import json
 from pathlib import Path
+import re
 from typing import Any, Iterable
 
 
 NOTEBOOK_FORMAT = 4
 NOTEBOOK_MINOR = 5
 
+
+_ANSI_ESCAPE_RE = re.compile(
+    r"(?:\x1B[@-_][0-?]*[ -/]*[@-~])|(?:\x9B[0-?]*[ -/]*[@-~])"
+)
+_SQL_MAGIC_RE = re.compile(r"^\s*%%?sql(?:\s|$)", re.IGNORECASE)
+_SQL_START_RE = re.compile(
+    r"^(?:SELECT|WITH|CREATE|INSERT|UPDATE|DELETE|MERGE|DROP|ALTER|"
+    r"DESCRIBE|DESC|SHOW|PRAGMA|EXPLAIN|COPY|VALUES|CALL|EXPORT|IMPORT|"
+    r"ATTACH|DETACH|INSTALL|LOAD|PIVOT|UNPIVOT)\b",
+    re.IGNORECASE,
+)
+
+
+def strip_ansi(value: str) -> str:
+    """Remove terminal color/control sequences from notebook output text."""
+    return _ANSI_ESCAPE_RE.sub("", str(value or ""))
+
+
+def detect_execution_language(source: str, fallback: str = "python") -> str:
+    """Identify SQL cells even when comments or blank lines precede the magic."""
+    lines = str(source or "").replace("\r\n", "\n").replace("\r", "\n").splitlines()
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if _SQL_MAGIC_RE.match(stripped):
+            return "sql"
+        if stripped.startswith("#") or stripped.startswith("--"):
+            continue
+        if _SQL_START_RE.match(stripped):
+            return "sql"
+        break
+    return str(fallback or "python").casefold()
+
+
+def _sql_comment_line(line: str) -> str:
+    """Translate whole-line Python comments to SQL comments."""
+    leading = line[: len(line) - len(line.lstrip())]
+    stripped = line.lstrip()
+    if stripped.startswith("#"):
+        return leading + "--" + stripped[1:]
+    return line
+
+
+def sql_text_for_execution(source: str) -> str:
+    """Extract executable SQL while preserving the saved notebook source.
+
+    The learner may keep explanatory comments or blank lines above ``%%sql``.
+    They may also write a plain SQL cell.  This helper removes only the magic
+    line from the execution copy and converts whole-line Python comments to SQL
+    comments.
+    """
+    original = str(source or "").replace("\r\n", "\n").replace("\r", "\n")
+    lines = original.splitlines()
+    magic_index: int | None = None
+    inline_sql = ""
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        match = re.match(r"^%%?sql\b(.*)$", stripped, flags=re.IGNORECASE)
+        if match:
+            magic_index = index
+            inline_sql = str(match.group(1) or "").strip()
+            break
+
+    body: list[str] = []
+    if magic_index is not None:
+        for line in lines[:magic_index]:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if stripped.startswith("--"):
+                body.append(line)
+            elif stripped.startswith("#"):
+                body.append(_sql_comment_line(line))
+            else:
+                body.append("-- " + stripped)
+        if inline_sql:
+            body.append(inline_sql)
+        body.extend(_sql_comment_line(line) for line in lines[magic_index + 1 :])
+    else:
+        body = [_sql_comment_line(line) for line in lines]
+
+    while body and not body[0].strip():
+        body.pop(0)
+    while body and not body[-1].strip():
+        body.pop()
+    return "\n".join(body)
+
+
+def prepare_execution_source(source: str, language: str = "") -> str:
+    """Return kernel-ready source while preserving the notebook's saved text.
+
+    SQL cells execute through Career Accelerator's persistent DuckDB helper.
+    This avoids IPython treating SQL as Python and guarantees that statements
+    returning rows, including ``DESCRIBE`` and ``SHOW``, are displayed as a
+    dataframe instead of a generic success message.
+    """
+    original = str(source or "").replace("\r\n", "\n").replace("\r", "\n")
+    resolved_language = str(language or "").casefold()
+    if resolved_language != "sql":
+        resolved_language = detect_execution_language(
+            original,
+            resolved_language or "python",
+        )
+    if resolved_language != "sql":
+        return original
+
+    sql_text = sql_text_for_execution(original)
+    return f"_dca_execute_sql({sql_text!r})"
 
 def _source_text(cell: dict[str, Any]) -> str:
     value = cell.get("source", "")
@@ -206,6 +317,158 @@ def notebook_completion_issues(payload: dict[str, Any], policy: str = "") -> lis
     return issues
 
 
+_NOTEBOOK_OUTPUT_STYLE = """
+<style>
+.jp-OutputArea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #e5edf8;
+  background-color: #0b1324;
+}
+.jp-OutputArea .jp-table-wrap {
+  margin: 4px 0 8px 0;
+  overflow-x: auto;
+  border: 1px solid #3b4b66;
+  border-radius: 7px;
+  background-color: #0f172a;
+  color: #e5edf8;
+}
+.jp-OutputArea table,
+.jp-OutputArea .dataframe {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  min-width: 420px;
+  background-color: #0f172a;
+  color: #e5edf8;
+  font-size: 12px;
+}
+.jp-OutputArea thead tr,
+.jp-OutputArea .dataframe thead tr {
+  background-color: #1e293b;
+}
+.jp-OutputArea th {
+  padding: 7px 10px;
+  text-align: left;
+  font-weight: 650;
+  color: #f8fafc;
+  background-color: #1e293b;
+  border: 1px solid #475569;
+  white-space: nowrap;
+}
+.jp-OutputArea td {
+  padding: 6px 10px;
+  color: #e5edf8;
+  background-color: #111c31;
+  border: 1px solid #334155;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.jp-OutputArea tbody tr:nth-child(even) td {
+  background-color: #16223a;
+}
+.jp-OutputArea tbody th {
+  background-color: #17243b;
+  color: #f8fafc;
+  font-weight: 600;
+}
+.jp-OutputArea pre {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #334155;
+  border-radius: 7px;
+  background-color: #0f172a;
+  color: #e5edf8;
+  font-family: Consolas, "Cascadia Code", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+.jp-OutputArea img {
+  display: block;
+  max-width: 100%;
+  margin: 4px auto;
+}
+.jp-OutputArea .jp-output-separator {
+  height: 1px;
+  margin: 10px 0;
+  background-color: #334155;
+}
+</style>
+"""
+
+
+def _merge_inline_style(tag: str, style: str) -> str:
+    """Append inline CSS so QTextDocument renders tables consistently."""
+    style_match = re.search(
+        r'\sstyle\s*=\s*([\'"])(.*?)\1',
+        tag,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if style_match:
+        existing = style_match.group(2).rstrip().rstrip(";")
+        merged = existing + ";" + style
+        return (
+            tag[: style_match.start(2)]
+            + merged
+            + tag[style_match.end(2) :]
+        )
+    return tag[:-1] + f' style="{style}">' if tag.endswith(">") else tag
+
+
+def _safe_notebook_html(value: str) -> str:
+    text = re.sub(
+        r"<script\b[^>]*>.*?</script>",
+        "",
+        str(value or ""),
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    text = re.sub(
+        r'\son\w+\s*=\s*([\'"]).*?\1',
+        "",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if "<table" in text.casefold():
+        table_style = (
+            "border-collapse:collapse;width:100%;min-width:420px;"
+            "background-color:#0f172a;color:#e5edf8;font-size:12px"
+        )
+        th_style = (
+            "padding:7px 10px;text-align:left;font-weight:650;"
+            "background-color:#1e293b;color:#f8fafc;"
+            "border:1px solid #475569;white-space:nowrap"
+        )
+        td_style = (
+            "padding:6px 10px;background-color:#111c31;color:#e5edf8;"
+            "border:1px solid #334155;vertical-align:top;white-space:nowrap"
+        )
+        text = re.sub(
+            r"<table\b[^>]*>",
+            lambda match: _merge_inline_style(match.group(0), table_style),
+            text,
+            flags=re.IGNORECASE,
+        )
+        text = re.sub(
+            r"<th\b[^>]*>",
+            lambda match: _merge_inline_style(match.group(0), th_style),
+            text,
+            flags=re.IGNORECASE,
+        )
+        text = re.sub(
+            r"<td\b[^>]*>",
+            lambda match: _merge_inline_style(match.group(0), td_style),
+            text,
+            flags=re.IGNORECASE,
+        )
+        return (
+            '<div class="jp-table-wrap" style="margin:4px 0 8px 0;'
+            'overflow-x:auto;border:1px solid #3b4b66;border-radius:7px;'
+            'background-color:#0f172a;color:#e5edf8">'
+            + text
+            + "</div>"
+        )
+    return text
+
+
 def output_to_html(output: dict[str, Any]) -> str:
     """Render a notebook output without executing arbitrary HTML scripts."""
     output_type = str(output.get("output_type") or "")
@@ -213,12 +476,12 @@ def output_to_html(output: dict[str, Any]) -> str:
         text = output.get("text", "")
         if isinstance(text, list):
             text = "".join(str(part) for part in text)
-        return f"<pre>{html.escape(str(text))}</pre>"
+        return f"<pre>{html.escape(strip_ansi(str(text)))}</pre>"
     if output_type == "error":
         traceback = output.get("traceback") or []
         if isinstance(traceback, str):
             traceback = [traceback]
-        return "<pre>" + html.escape("\n".join(str(line) for line in traceback)) + "</pre>"
+        return "<pre>" + html.escape(strip_ansi("\n".join(str(line) for line in traceback))) + "</pre>"
     if output_type in {"execute_result", "display_data"}:
         data = output.get("data") or {}
         if "image/png" in data:
@@ -239,16 +502,25 @@ def output_to_html(output: dict[str, Any]) -> str:
             value = data["text/html"]
             if isinstance(value, list):
                 value = "".join(str(part) for part in value)
-            # QTextBrowser does not run JavaScript. Keep the generated table/HTML.
-            return str(value)
+            # QTextBrowser does not run JavaScript. Strip active content and
+            # keep the generated table markup inside a Jupyter-style wrapper.
+            return _safe_notebook_html(str(value))
         value = data.get("text/plain", "")
         if isinstance(value, list):
             value = "".join(str(part) for part in value)
-        return f"<pre>{html.escape(str(value))}</pre>"
+        return f"<pre>{html.escape(strip_ansi(str(value)))}</pre>"
     return ""
 
 
 def outputs_html(outputs: Iterable[dict[str, Any]]) -> str:
     rendered = [output_to_html(item) for item in outputs]
     rendered = [item for item in rendered if item]
-    return "<hr>".join(rendered)
+    if not rendered:
+        return ""
+    separator = '<div class="jp-output-separator"></div>'
+    return (
+        _NOTEBOOK_OUTPUT_STYLE
+        + '<div class="jp-OutputArea">'
+        + separator.join(rendered)
+        + "</div>"
+    )

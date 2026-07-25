@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import math
 import queue
+import re
+from urllib.parse import quote
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +27,7 @@ from PySide6.QtWidgets import (
 )
 
 from career_app.services import notebook_workspace
+from career_app.ui.code_editor import EditorAssistMixin, detect_notebook_language
 from career_app.ui.markdown_preview import render_markdown_html, raw_markdown_stylesheet
 
 
@@ -102,39 +105,96 @@ class NotebookKernelWorker(QThread):
             }
         return None
 
+    def _preferred_database_path(self) -> Path | None:
+        candidates = (
+            self.cwd / "data" / "working" / "project.duckdb",
+            self.cwd / "data" / "working" / "analytical.duckdb",
+            self.cwd / "project.duckdb",
+            self.cwd / "data" / "project.duckdb",
+        )
+        for candidate in candidates:
+            if candidate.is_file():
+                return candidate.resolve()
+        try:
+            discovered = sorted(self.cwd.rglob("*.duckdb"))
+        except OSError:
+            discovered = []
+        return discovered[0].resolve() if discovered else None
+
     @staticmethod
-    def _configure_default_table_display(client) -> bool:
-        """Set readable table defaults without limiting non-table output."""
-        setup_code = """
+    def _duckdb_url(path: Path | None) -> str:
+        if path is None:
+            return "duckdb:///:memory:"
+        value = path.resolve().as_posix()
+        encoded = quote(value, safe="/:")
+        if re.match(r"^[A-Za-z]:/", value):
+            return "duckdb:///" + encoded
+        return "duckdb:////" + encoded.lstrip("/")
+
+    def _configure_kernel(self, client) -> dict[str, Any]:
+        """Create a persistent DuckDB connection and notebook SQL helper."""
+        database = self._preferred_database_path()
+        database_value = str(database.resolve()) if database is not None else ":memory:"
+        setup_code = f"""
+_dca_kernel_setup_status = {{"sql_ready": False, "error": ""}}
 try:
     import pandas as _dca_pandas
-    _dca_pandas.set_option("display.max_rows", 10)
+    _dca_pandas.set_option("display.max_rows", 25)
     _dca_pandas.set_option("display.min_rows", 10)
     _dca_pandas.set_option("display.max_columns", None)
-    _dca_pandas.set_option("display.max_colwidth", None)
+    _dca_pandas.set_option("display.max_colwidth", 120)
+    _dca_pandas.set_option("display.width", 160)
 except Exception:
-    pass
+    _dca_pandas = None
+
+try:
+    import duckdb as _dca_duckdb
+    from IPython.display import display as _dca_display
+
+    _dca_duckdb_connection = _dca_duckdb.connect({database_value!r})
+
+    def _dca_execute_sql(query):
+        query = str(query or "").strip()
+        if not query:
+            raise ValueError("The SQL cell is empty.")
+        cursor = _dca_duckdb_connection.execute(query)
+        description = cursor.description
+        if description is not None:
+            frame = cursor.fetchdf()
+            _dca_display(frame)
+        else:
+            print("Query completed successfully.")
+        return None
+
+    _dca_kernel_setup_status["sql_ready"] = True
+except Exception as _dca_sql_error:
+    _dca_kernel_setup_status["error"] = str(_dca_sql_error)
 
 try:
     _dca_ipython = get_ipython()
     if _dca_ipython is not None:
-        _dca_ipython.config.SqlMagic.displaylimit = 10
-        try:
-            _dca_ipython.run_line_magic(
-                "config",
-                "SqlMagic.displaylimit = 10",
-            )
-        except Exception:
-            pass
+        _dca_ipython.run_line_magic("load_ext", "sql")
+        _dca_ipython.run_line_magic("config", "SqlMagic.displaylimit = 25")
+        _dca_ipython.run_line_magic("config", "SqlMagic.autopandas = True")
+        _dca_ipython.run_line_magic("config", "SqlMagic.feedback = 0")
 except Exception:
     pass
 """.strip()
+        result = {
+            "ready": False,
+            "sql_ready": False,
+            "database": database.name if database is not None else "memory",
+            "error": "",
+        }
         try:
             message_id = client.execute(
                 setup_code,
-                silent=True,
+                silent=False,
                 store_history=False,
                 allow_stdin=False,
+                user_expressions={
+                    "dca_setup": "repr(_dca_kernel_setup_status)",
+                },
             )
             while True:
                 message = client.get_iopub_msg(timeout=30)
@@ -153,12 +213,30 @@ except Exception:
                 parent = reply.get("parent_header") or {}
                 if parent.get("msg_id") == message_id:
                     break
-            return (
-                (reply.get("content") or {}).get("status")
-                == "ok"
+            content = reply.get("content") or {}
+            result["ready"] = content.get("status") == "ok"
+            expression = (
+                (content.get("user_expressions") or {})
+                .get("dca_setup", {})
+                .get("data", {})
+                .get("text/plain", "")
             )
-        except Exception:
-            return False
+            if expression:
+                import ast
+
+                try:
+                    parsed = ast.literal_eval(expression)
+                    if isinstance(parsed, str):
+                        parsed = ast.literal_eval(parsed)
+                    if isinstance(parsed, dict):
+                        result["sql_ready"] = bool(parsed.get("sql_ready"))
+                        result["error"] = str(parsed.get("error") or "")
+                except (ValueError, SyntaxError):
+                    pass
+            return result
+        except Exception as exc:
+            result["error"] = str(exc)
+            return result
 
     def run(self) -> None:
         manager = None
@@ -167,10 +245,16 @@ except Exception:
         try:
             self.kernel_status.emit("Starting kernel…")
             manager, client = self._start_kernel()
-            table_limit_ready = self._configure_default_table_display(client)
-            if table_limit_ready:
+            setup = self._configure_kernel(client)
+            if setup.get("sql_ready"):
                 self.kernel_status.emit(
-                    "Kernel ready • tables show up to 10 rows"
+                    "Kernel ready • SQL connected to "
+                    f"{setup.get('database') or 'DuckDB'}"
+                )
+            elif setup.get("error"):
+                self.kernel_status.emit(
+                    "Kernel ready • SQL unavailable: "
+                    f"{setup['error']}"
                 )
             else:
                 self.kernel_status.emit("Kernel ready")
@@ -292,208 +376,34 @@ class AutoHeightTextEdit(QTextEdit):
 
 
 
-class NotebookSourceEditor(AutoHeightTextEdit):
-    """Notebook code editor with VS Code-compatible line comments."""
+class NotebookSourceEditor(EditorAssistMixin, AutoHeightTextEdit):
+    """Notebook editor with VS Code-style editing and contextual completion."""
 
     def __init__(
         self,
         *,
         minimum_height: int = 90,
-        comment_prefix: str | None = "#",
+        language: str = "python",
+        project_dir: Path | None = None,
         parent=None,
     ):
-        super().__init__(
+        AutoHeightTextEdit.__init__(
+            self,
             minimum_height=minimum_height,
             parent=parent,
         )
-        self.comment_prefix = (
-            str(comment_prefix)
-            if comment_prefix
-            else None
+        self._init_editor_assist(
+            language=language,
+            project_dir=project_dir,
         )
-        self._comment_chord_active = False
-        self._comment_chord_timer = QTimer(self)
-        self._comment_chord_timer.setSingleShot(True)
-        self._comment_chord_timer.setInterval(1600)
-        self._comment_chord_timer.timeout.connect(
-            self._clear_comment_chord
-        )
-        if self.comment_prefix:
-            self.setToolTip(
-                "VS Code line-comment shortcuts: Ctrl+/ toggles; "
-                "Ctrl+K, Ctrl+C comments; Ctrl+K, Ctrl+U uncomments."
-            )
-
-    def _clear_comment_chord(self) -> None:
-        self._comment_chord_active = False
-
-    def _selected_block_numbers(self) -> tuple[int, int, bool]:
-        cursor = self.textCursor()
-        start = cursor.selectionStart()
-        end = cursor.selectionEnd()
-        had_selection = cursor.hasSelection()
-
-        if had_selection and end > start:
-            end_block = self.document().findBlock(end)
-            if end_block.isValid() and end == end_block.position():
-                end -= 1
-
-        start_block = self.document().findBlock(start)
-        end_block = self.document().findBlock(max(start, end))
-        return (
-            max(0, start_block.blockNumber()),
-            max(0, end_block.blockNumber()),
-            had_selection,
+        self.setToolTip(
+            "VS Code-style editor: Ctrl+Space autocomplete, Ctrl+/ comments, "
+            "Ctrl+K Ctrl+C / Ctrl+K Ctrl+U, paired quotes and brackets."
         )
 
-    def _line_comment_state(
-        self,
-        start_number: int,
-        end_number: int,
-    ) -> tuple[bool, bool]:
-        any_content = False
-        all_commented = True
-        for number in range(start_number, end_number + 1):
-            block = self.document().findBlockByNumber(number)
-            if not block.isValid():
-                continue
-            text = block.text()
-            stripped = text.lstrip(" \t")
-            if not stripped:
-                continue
-            any_content = True
-            if not stripped.startswith(self.comment_prefix):
-                all_commented = False
-        return any_content, all_commented
-
-    def _apply_line_comments(self, action: str) -> None:
-        if not self.comment_prefix:
+    def keyPressEvent(self, event) -> None:  # noqa: N802 - Qt API
+        if self.handle_editor_assist_key(event):
             return
-
-        current = self.textCursor()
-        original_block_number = current.blockNumber()
-        original_column = current.positionInBlock()
-        start_number, end_number, had_selection = (
-            self._selected_block_numbers()
-        )
-
-        any_content, all_commented = self._line_comment_state(
-            start_number,
-            end_number,
-        )
-        if action == "toggle":
-            action = "uncomment" if any_content and all_commented else "comment"
-
-        cursor_delta = 0
-        editor = QTextCursor(self.document())
-        editor.beginEditBlock()
-        try:
-            for number in range(end_number, start_number - 1, -1):
-                block = self.document().findBlockByNumber(number)
-                if not block.isValid():
-                    continue
-                line = block.text()
-                indent = len(line) - len(line.lstrip(" \t"))
-                stripped = line[indent:]
-                position = block.position() + indent
-
-                if action == "comment":
-                    addition = self.comment_prefix + " "
-                    editor.setPosition(position)
-                    editor.insertText(addition)
-                    if number == original_block_number:
-                        cursor_delta += len(addition)
-                elif action == "uncomment":
-                    if stripped.startswith(self.comment_prefix + " "):
-                        remove_count = len(self.comment_prefix) + 1
-                    elif stripped.startswith(self.comment_prefix):
-                        remove_count = len(self.comment_prefix)
-                    else:
-                        continue
-                    editor.setPosition(position)
-                    editor.setPosition(
-                        position + remove_count,
-                        QTextCursor.MoveMode.KeepAnchor,
-                    )
-                    editor.removeSelectedText()
-                    if number == original_block_number:
-                        cursor_delta -= remove_count
-        finally:
-            editor.endEditBlock()
-
-        restored = QTextCursor(self.document())
-        if had_selection:
-            first = self.document().findBlockByNumber(start_number)
-            last = self.document().findBlockByNumber(end_number)
-            if first.isValid() and last.isValid():
-                restored.setPosition(first.position())
-                restored.setPosition(
-                    last.position() + len(last.text()),
-                    QTextCursor.MoveMode.KeepAnchor,
-                )
-        else:
-            block = self.document().findBlockByNumber(
-                original_block_number
-            )
-            if block.isValid():
-                target_column = max(
-                    0,
-                    min(
-                        len(block.text()),
-                        original_column + cursor_delta,
-                    ),
-                )
-                restored.setPosition(block.position() + target_column)
-        self.setTextCursor(restored)
-
-    def toggle_line_comments(self) -> None:
-        self._apply_line_comments("toggle")
-
-    def comment_selected_lines(self) -> None:
-        self._apply_line_comments("comment")
-
-    def uncomment_selected_lines(self) -> None:
-        self._apply_line_comments("uncomment")
-
-    def keyPressEvent(self, event) -> None:
-        control = bool(
-            event.modifiers()
-            & Qt.KeyboardModifier.ControlModifier
-        )
-
-        if (
-            self.comment_prefix
-            and control
-            and event.key() == Qt.Key.Key_Slash
-        ):
-            self._clear_comment_chord()
-            self._comment_chord_timer.stop()
-            self.toggle_line_comments()
-            event.accept()
-            return
-
-        if (
-            self.comment_prefix
-            and control
-            and event.key() == Qt.Key.Key_K
-        ):
-            self._comment_chord_active = True
-            self._comment_chord_timer.start()
-            event.accept()
-            return
-
-        if self.comment_prefix and self._comment_chord_active:
-            self._clear_comment_chord()
-            self._comment_chord_timer.stop()
-            if control and event.key() == Qt.Key.Key_C:
-                self.comment_selected_lines()
-                event.accept()
-                return
-            if control and event.key() == Qt.Key.Key_U:
-                self.uncomment_selected_lines()
-                event.accept()
-                return
-
         super().keyPressEvent(event)
 
 
@@ -566,11 +476,19 @@ class NotebookCellWidget(QFrame):
     run_requested = Signal(object)
     delete_requested = Signal(object)
     add_code_requested = Signal(object)
+    add_sql_requested = Signal(object)
     add_markdown_requested = Signal(object)
 
-    def __init__(self, cell: dict[str, Any], parent=None):
+    def __init__(
+        self,
+        cell: dict[str, Any],
+        *,
+        project_dir: Path | None = None,
+        parent=None,
+    ):
         super().__init__(parent)
         self.cell = cell
+        self.project_dir = Path(project_dir) if project_dir is not None else None
         self.setObjectName("Card")
         self.setFrameShape(QFrame.Shape.StyledPanel)
         layout = QVBoxLayout(self)
@@ -592,9 +510,13 @@ class NotebookCellWidget(QFrame):
         self.run_button.clicked.connect(lambda: self.run_requested.emit(self))
         toolbar.addWidget(self.run_button)
 
-        add_code = QPushButton("+ Code")
+        add_code = QPushButton("+ Python")
         add_code.clicked.connect(lambda: self.add_code_requested.emit(self))
         toolbar.addWidget(add_code)
+        add_sql = QPushButton("+ SQL")
+        add_sql.setToolTip("Add a JupySQL cell beginning with %%sql.")
+        add_sql.clicked.connect(lambda: self.add_sql_requested.emit(self))
+        toolbar.addWidget(add_sql)
         add_markdown = QPushButton("+ Markdown")
         add_markdown.clicked.connect(lambda: self.add_markdown_requested.emit(self))
         toolbar.addWidget(add_markdown)
@@ -603,17 +525,20 @@ class NotebookCellWidget(QFrame):
         toolbar.addWidget(delete)
         layout.addLayout(toolbar)
 
+        source_text = notebook_workspace._source_text(cell)
+        source_language = (
+            "markdown"
+            if str(cell.get("cell_type") or "code") == "markdown"
+            else detect_notebook_language(source_text)
+        )
         self.editor = NotebookSourceEditor(
             minimum_height=90,
-            comment_prefix=(
-                None
-                if str(cell.get("cell_type") or "code") == "markdown"
-                else "#"
-            ),
+            language=source_language,
+            project_dir=self.project_dir,
         )
         self.editor.setStyleSheet(raw_markdown_stylesheet())
         self.editor.setAcceptRichText(False)
-        self.editor.setPlainText(notebook_workspace._source_text(cell))
+        self.editor.setPlainText(source_text)
         self.editor.textChanged.connect(self._editor_changed)
         layout.addWidget(self.editor)
 
@@ -629,6 +554,10 @@ class NotebookCellWidget(QFrame):
             minimum_height=40
         )
         self.output.setOpenExternalLinks(True)
+        self.output.setStyleSheet(
+            "QTextBrowser {background:#0B1324;color:#E5EDF8;"
+            "border:1px solid #334155;border-radius:8px;padding:4px;}"
+        )
         layout.addWidget(self.output)
         self.refresh_from_cell()
 
@@ -637,9 +566,23 @@ class NotebookCellWidget(QFrame):
         return str(self.cell.get("cell_type") or "code")
 
     def _editor_changed(self) -> None:
-        notebook_workspace.set_source_text(self.cell, self.editor.toPlainText())
-        if self.cell_type == "markdown" and self.markdown_preview.isVisible():
-            self.markdown_preview.setHtml(render_markdown_html(self.editor.toPlainText()))
+        source = self.editor.toPlainText()
+        notebook_workspace.set_source_text(self.cell, source)
+        if self.cell_type == "markdown":
+            self.editor.set_language("markdown")
+            if self.markdown_preview.isVisible():
+                self.markdown_preview.setHtml(render_markdown_html(source))
+        else:
+            self.editor.set_language(detect_notebook_language(source))
+            execution = self.cell.get("execution_count")
+            language_label = (
+                "SQL"
+                if self.editor.language() == "sql"
+                else "Python"
+            )
+            self.kind_label.setText(
+                f"{language_label} [{execution if execution is not None else ' '}]"
+            )
         self.changed.emit()
 
     def refresh_from_cell(self) -> None:
@@ -652,14 +595,21 @@ class NotebookCellWidget(QFrame):
             self.show_rendered()
         else:
             execution = self.cell.get("execution_count")
-            self.kind_label.setText(f"Code [{execution if execution is not None else ' '}]")
+            language_label = (
+                "SQL"
+                if self.editor.language() == "sql"
+                else "Python"
+            )
+            self.kind_label.setText(
+                f"{language_label} [{execution if execution is not None else ' '}]"
+            )
             self.run_button.setText("Run")
             self.run_button.setVisible(True)
             self.preview_button.setVisible(False)
             self.editor.setVisible(True)
             self.markdown_preview.setVisible(False)
             outputs = list(self.cell.get("outputs") or [])
-            self.output.setHtml(notebook_workspace.outputs_html(outputs) or "<span style='color:#888'>No output yet.</span>")
+            self.output.setHtml(notebook_workspace.outputs_html(outputs) or "<span style='color:#94A3B8'>No output yet.</span>")
             self.output.setVisible(True)
         QTimer.singleShot(0, self.refresh_heights)
 
@@ -696,7 +646,16 @@ class NotebookCellWidget(QFrame):
         self.run_button.setEnabled(not running)
         if self.cell_type == "code":
             execution = self.cell.get("execution_count")
-            self.kind_label.setText("Code [*]" if running else f"Code [{execution if execution is not None else ' '}]")
+            language_label = (
+                "SQL"
+                if self.editor.language() == "sql"
+                else "Python"
+            )
+            self.kind_label.setText(
+                f"{language_label} [*]"
+                if running
+                else f"{language_label} [{execution if execution is not None else ' '}]"
+            )
 
 
 class IntegratedNotebookWidget(QWidget):
@@ -750,6 +709,9 @@ class IntegratedNotebookWidget(QWidget):
         header.addWidget(self.path_label, 1)
         self.kernel_label = QLabel("Kernel not started")
         self.kernel_label.setObjectName("Muted")
+        self.kernel_label.setWordWrap(False)
+        self.kernel_label.setMaximumWidth(230)
+        self.kernel_label.setToolTip("The notebook kernel has not started yet.")
         header.addWidget(self.kernel_label)
         save = QPushButton("Save Notebook")
         save.setObjectName("Primary")
@@ -783,6 +745,12 @@ class IntegratedNotebookWidget(QWidget):
         self.autosave.setSingleShot(True)
         self.autosave.setInterval(1200)
         self.autosave.timeout.connect(self.save_notebook)
+        self.completion_context_timer = QTimer(self)
+        self.completion_context_timer.setSingleShot(True)
+        self.completion_context_timer.setInterval(90)
+        self.completion_context_timer.timeout.connect(
+            self._refresh_peer_completion_context
+        )
         self._rebuild_cells()
 
     def _rebuild_cells(self) -> None:
@@ -793,18 +761,36 @@ class IntegratedNotebookWidget(QWidget):
                 widget.deleteLater()
         self.cell_widgets.clear()
         for cell in self.payload.get("cells", []):
-            widget = NotebookCellWidget(cell)
+            widget = NotebookCellWidget(cell, project_dir=self.project_dir)
             widget.changed.connect(self._changed)
             widget.run_requested.connect(self.run_cell)
             widget.delete_requested.connect(self.delete_cell)
-            widget.add_code_requested.connect(lambda current, kind="code": self.add_cell_after(current, kind))
-            widget.add_markdown_requested.connect(lambda current, kind="markdown": self.add_cell_after(current, kind))
+            widget.add_code_requested.connect(
+                lambda current, kind="code": self.add_cell_after(current, kind)
+            )
+            widget.add_sql_requested.connect(
+                lambda current, kind="sql": self.add_cell_after(current, kind)
+            )
+            widget.add_markdown_requested.connect(
+                lambda current, kind="markdown": self.add_cell_after(current, kind)
+            )
             self.cells_layout.insertWidget(self.cells_layout.count() - 1, widget)
             self.cell_widgets.append(widget)
+        self._refresh_peer_completion_context()
+
+    def _refresh_peer_completion_context(self) -> None:
+        combined = "\n\n".join(
+            current.editor.toPlainText()
+            for current in self.cell_widgets
+            if current.cell_type == "code"
+        )
+        for current in self.cell_widgets:
+            current.editor.set_peer_text(combined)
 
     def _changed(self) -> None:
         self._dirty = True
         self.autosave.start()
+        self.completion_context_timer.start()
 
     def save_notebook(
         self,
@@ -841,10 +827,31 @@ class IntegratedNotebookWidget(QWidget):
         )
         worker.cell_started.connect(self._cell_started)
         worker.cell_finished.connect(self._cell_finished)
-        worker.kernel_status.connect(self.kernel_label.setText)
+        worker.kernel_status.connect(self._set_kernel_status)
         self.worker = worker
         worker.start()
         return worker
+
+    def _set_kernel_status(self, message: str) -> None:
+        """Keep detailed kernel errors out of the compact notebook toolbar."""
+        detail = notebook_workspace.strip_ansi(str(message or "")).strip()
+        lowered = detail.casefold()
+        if lowered.startswith("starting kernel"):
+            label = "Starting kernel…"
+        elif "sql connected" in lowered:
+            label = "Kernel ready • SQL connected"
+        elif "sql unavailable" in lowered:
+            label = "Kernel ready • SQL issue"
+        elif lowered.startswith("kernel ready"):
+            label = "Kernel ready"
+        elif lowered.startswith("kernel stopped"):
+            label = "Kernel stopped"
+        elif detail:
+            label = "Kernel issue"
+        else:
+            label = "Kernel status unavailable"
+        self.kernel_label.setText(label)
+        self.kernel_label.setToolTip(detail or label)
 
     def _switch_notebook(self, index: int) -> None:
         if self._switching_notebook or index < 0:
@@ -899,6 +906,66 @@ class IntegratedNotebookWidget(QWidget):
                 return True
         return False
 
+    def prepare_notebook_replacement(self, target: Path) -> bool:
+        """Persist active edits before an externally imported file replaces a slot."""
+        if self._running_count:
+            QMessageBox.information(
+                self,
+                "Notebook Is Running",
+                "Wait for the current notebook cells to finish before importing a notebook.",
+            )
+            return False
+        self.autosave.stop()
+        if self._dirty and not self.save_notebook():
+            return False
+        return True
+
+    def reload_notebook(self, target: Path) -> bool:
+        """Reload a managed notebook after the file was replaced externally."""
+        target = Path(target)
+        if self._running_count:
+            return False
+        try:
+            payload = notebook_workspace.load_notebook(target)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could Not Open Notebook", str(exc))
+            return False
+
+        if target not in self.notebook_paths:
+            self.notebook_paths.append(target)
+            label = self.notebook_labels.get(
+                str(target),
+                target.stem.replace("_", " ").title(),
+            )
+            self.notebook_selector.addItem(label, str(target))
+            self.notebook_selector.setVisible(len(self.notebook_paths) > 1)
+
+        index = self.notebook_paths.index(target)
+        self._switching_notebook = True
+        try:
+            self.notebook_selector.setCurrentIndex(index)
+        finally:
+            self._switching_notebook = False
+
+        self.notebook_path = target
+        self.payload = payload
+        self._dirty = False
+        self.path_label.setText(str(target))
+        self._kernel_name = str(
+            (self.payload.get("metadata") or {})
+            .get("kernelspec", {})
+            .get("name")
+            or "career-accelerator"
+        )
+        self._rebuild_cells()
+        self.notebook_changed.emit(str(target))
+        QTimer.singleShot(
+            0,
+            lambda: self.scroll.verticalScrollBar().setValue(0),
+        )
+        self.saved.emit(f"Imported notebook loaded • {target.name}")
+        return True
+
     def run_cell(self, widget: NotebookCellWidget) -> None:
         if widget not in self.cell_widgets:
             return
@@ -908,9 +975,13 @@ class IntegratedNotebookWidget(QWidget):
             QTimer.singleShot(0, lambda current=widget: self._scroll_to_cell_bottom(current))
             return
         index = self.cell_widgets.index(widget)
+        execution_source = notebook_workspace.prepare_execution_source(
+            widget.editor.toPlainText(),
+            widget.editor.language(),
+        )
         self._ensure_worker().execute_cell(
             index,
-            widget.editor.toPlainText(),
+            execution_source,
         )
 
     def run_all(self) -> None:
@@ -919,9 +990,13 @@ class IntegratedNotebookWidget(QWidget):
             if widget.cell_type == "markdown":
                 widget.show_rendered()
             else:
+                execution_source = notebook_workspace.prepare_execution_source(
+                    widget.editor.toPlainText(),
+                    widget.editor.language(),
+                )
                 self._ensure_worker().execute_cell(
                     index,
-                    widget.editor.toPlainText(),
+                    execution_source,
                 )
 
     def _cell_started(self, index: int) -> None:
@@ -941,8 +1016,6 @@ class IntegratedNotebookWidget(QWidget):
         self._changed()
         self.save_notebook()
         QTimer.singleShot(0, lambda current=widget: self._scroll_to_cell_bottom(current))
-        if error_message:
-            self.kernel_label.setText(f"Cell finished with an error: {error_message}")
 
     def _scroll_to_cell_bottom(self, widget: NotebookCellWidget) -> None:
         if widget not in self.cell_widgets:
@@ -957,7 +1030,12 @@ class IntegratedNotebookWidget(QWidget):
             index = self.cell_widgets.index(widget) + 1
         except ValueError:
             index = len(self.cell_widgets)
-        cell = notebook_workspace.new_markdown_cell() if kind == "markdown" else notebook_workspace.new_code_cell()
+        if kind == "markdown":
+            cell = notebook_workspace.new_markdown_cell()
+        elif kind == "sql":
+            cell = notebook_workspace.new_code_cell("%%sql\n\n")
+        else:
+            cell = notebook_workspace.new_code_cell()
         self.payload.setdefault("cells", []).insert(index, cell)
         self._rebuild_cells()
         self._changed()
@@ -994,6 +1072,7 @@ class IntegratedNotebookWidget(QWidget):
     def shutdown(self) -> None:
         """Save and release the kernel without blocking the main window."""
         self.autosave.stop()
+        self.completion_context_timer.stop()
         if self._dirty:
             self.save_notebook(silent=True)
 
