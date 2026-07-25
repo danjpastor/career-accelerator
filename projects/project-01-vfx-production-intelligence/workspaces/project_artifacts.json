@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-07-25T02:24:17",
+  "updated_at": "2026-07-25T02:42:44",
   "milestones": {
     "project_brief": {
       "label": "Project brief",
@@ -77,6 +77,7 @@
         "notebooks/cleaning/reviews_cleaning.ipynb",
         "notebooks/cleaning/shots_cleaning.ipynb",
         "notebooks/cleaning/time_entries_cleaning.ipynb",
+        "documentation/cleaning/artists_cleaning_summary.md",
         "workspaces/studios/clean_analytical_data.json"
       ]
     },

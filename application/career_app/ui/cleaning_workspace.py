@@ -392,10 +392,21 @@ class DataCleaningStudio(QWidget):
         lines.extend(f"• {item}" for item in (report.get("blocking") or []))
         if not report.get("blocking"):
             lines.append("• None")
-        lines.extend(["", "Warnings:"])
+
+        lines.extend(["", "Structural changes to review:"])
+        lines.extend(f"• {item}" for item in (report.get("structural_changes") or []))
+        if not report.get("structural_changes"):
+            lines.append("• None")
+
+        lines.extend(["", "Business-rule warnings:"])
         lines.extend(f"• {item}" for item in (report.get("warnings") or []))
         if not report.get("warnings"):
             lines.append("• None")
+
+        information = report.get("information") or []
+        if information:
+            lines.extend(["", "Validation notes:"])
+            lines.extend(f"• {item}" for item in information)
         return "\n".join(lines)
 
     def import_cleaned(self) -> None:
@@ -413,7 +424,7 @@ class DataCleaningStudio(QWidget):
             answer = QMessageBox.question(
                 self,
                 "Import Reviewed Cleaned CSV",
-                self._report_text(report) + "\n\nImport and organize this file under data/processed/csv/?",
+                self._report_text(report) + "\n\nImport this reviewed file and organize it under data/processed/csv/?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.Yes,
             )

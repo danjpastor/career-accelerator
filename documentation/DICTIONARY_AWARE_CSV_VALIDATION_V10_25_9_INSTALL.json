@@ -1,0 +1,25 @@
+﻿{
+    "version":  "10.25.9",
+    "feature":  "Dictionary-aware cleaned CSV validation and structural review",
+    "installed_at":  "2026-07-25T02:37:51",
+    "backup_folder":  "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\patch_backups\\v10.25.9-dictionary-aware-csv-validation-20260725-023751",
+    "planner_hash_preserved":  "CBAF0E9DE66148B03CADA2FC5B82CEA7AF09ED13CD20C427E73CE7596FF1C0CF",
+    "fixes":  [
+                  "identifiers treated as fixed allowed-value lists",
+                  "names treated as fixed allowed-value lists",
+                  "dates treated as fixed allowed-value lists",
+                  "numeric measures treated as fixed allowed-value lists",
+                  "foreign keys treated as fixed allowed-value lists",
+                  "emails treated as fixed allowed-value lists",
+                  "row-count changes mixed with business-rule warnings"
+              ],
+    "preserves":  [
+                      "cleaned CSV import and backup workflow",
+                      "cleaning notebook import",
+                      "integrated SQL notebooks",
+                      "detachable workspace tabs",
+                      "workspace Windows geometry repair",
+                      "retrospectives and scheduling repairs",
+                      "Career Accelerator database and learner work"
+                  ]
+}

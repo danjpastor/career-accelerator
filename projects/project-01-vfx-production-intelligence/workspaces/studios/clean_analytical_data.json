@@ -5,9 +5,9 @@
       "processed_path": "data/processed/csv/artists.csv",
       "validation": {
         "path": "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\projects\\project-01-vfx-production-intelligence\\data\\processed\\csv\\artists.csv",
-        "row_count": 62,
+        "row_count": 58,
         "raw_row_count": 62,
-        "row_difference": 0,
+        "row_difference": -4,
         "columns": [
           "artist_id",
           "artist_name",
@@ -24,82 +24,99 @@
         ],
         "missing_columns": [],
         "new_columns": [],
-        "blocking": [
-          "artist_id: 2 duplicate value(s) violate the uniqueness rule.",
-          "hourly_cost_usd: 1 null or blank value(s) violate the dictionary rule.",
-          "email: 1 null or blank value(s) violate the dictionary rule.",
-          "email: 5 duplicate value(s) violate the uniqueness rule."
+        "blocking": [],
+        "warnings": [],
+        "structural_changes": [
+          "Processed row count is 4 fewer than the raw source (62 → 58).",
+          "Removed 2 primary-key record(s): ART-005, ART-052",
+          "Consolidated 2 additional duplicate row(s) under retained primary keys."
         ],
-        "warnings": [
-          "artist_id: values outside the documented set: ART-001, ART-002, ART-003, ART-004, ART-005, ART-006, ART-007, ART-008 …and 52 more",
-          "artist_name: values outside the documented set: Aisha Scott, Aisha Walker, Alex Anderson, Alex Harris, Alex Patel, Alex Scott, Avery Allen, Blake Allen …and 50 more",
-          "department: values outside the documented set: MATCHMOVE, Roto/Paint, compositing, matte painting",
-          "role: values outside the documented set: Roto Artist",
-          "seniority: values outside the documented set: Lead",
-          "location: values outside the documented set: Remote-EU",
-          "weekly_capacity_hours: values outside the documented set: -8, 0, 24, 32, 35, 40, 40 hrs, 80",
-          "hourly_cost_usd: values outside the documented set: $95, -45, 100, 101, 103, 104, 105, 107 …and 35 more",
-          "hire_date: values outside the documented set: 2018-01-18, 2018-02-02, 2018-02-11, 2018-03-03, 2018-05-29, 2018-10-11, 2018-10-30, 2018-11-20 …and 52 more",
-          "active_flag: values outside the documented set: Active, FALSE, N, Y, Yes",
-          "manager_id: values outside the documented set: ART-003, ART-004, ART-006, ART-010, ART-012, ART-013, ART-014, ART-015 …and 18 more",
-          "email: values outside the documented set: aisha.scott@spectraforgevfx.example, aisha.walker@spectraforgevfx.example, alex.anderson@spectraforgevfx.example, alex.harris@spectraforgevfx.example, alex.patel@spectraforgevfx.example, alex.scott@spectraforgevfx.example, avery.allen@spectraforgevfx.example, blake.allen@spectraforgevfx.example …and 48 more"
+        "information": [
+          "Checked 5 controlled-value field(s) against exhaustive dictionary sets.",
+          "Treated 7 dictionary entries as formats, ranges, or examples—not fixed value lists."
         ],
+        "removed_primary_keys": [
+          "ART-005",
+          "ART-052"
+        ],
+        "added_primary_keys": [],
         "metrics": {
           "artist_id": {
             "null_count": 0,
-            "distinct_count": 60
+            "distinct_count": 58,
+            "rule_type": "format/range or open-ended guidance"
           },
           "artist_name": {
             "null_count": 0,
-            "distinct_count": 58
+            "distinct_count": 58,
+            "rule_type": "format/range or open-ended guidance"
           },
           "department": {
             "null_count": 0,
-            "distinct_count": 11
+            "distinct_count": 8,
+            "rule_type": "controlled set"
           },
           "role": {
             "null_count": 0,
-            "distinct_count": 17
+            "distinct_count": 17,
+            "rule_type": "controlled set"
           },
           "seniority": {
             "null_count": 0,
-            "distinct_count": 4
+            "distinct_count": 4,
+            "rule_type": "controlled set"
           },
           "location": {
             "null_count": 0,
-            "distinct_count": 7
+            "distinct_count": 7,
+            "rule_type": "controlled set"
           },
           "weekly_capacity_hours": {
             "null_count": 0,
-            "distinct_count": 8
+            "distinct_count": 5,
+            "rule_type": "format/range or open-ended guidance"
           },
           "hourly_cost_usd": {
-            "null_count": 1,
-            "distinct_count": 44
+            "null_count": 0,
+            "distinct_count": 42,
+            "rule_type": "format/range or open-ended guidance"
           },
           "hire_date": {
             "null_count": 0,
-            "distinct_count": 60
+            "distinct_count": 58,
+            "rule_type": "format/range or open-ended guidance"
           },
           "active_flag": {
             "null_count": 0,
-            "distinct_count": 5
+            "distinct_count": 2,
+            "rule_type": "controlled set"
           },
           "manager_id": {
             "null_count": 5,
-            "distinct_count": 27
+            "distinct_count": 27,
+            "rule_type": "format/range or open-ended guidance"
           },
           "email": {
-            "null_count": 1,
-            "distinct_count": 57
+            "null_count": 0,
+            "distinct_count": 58,
+            "rule_type": "format/range or open-ended guidance"
           }
         },
         "dictionary_fingerprint": "77c231883ee86dd39f04cdd5be8311ca2a4fe56e621ab45ac800e8ce6fd78413"
       },
-      "validated_at": "2026-07-25T02:02:36",
-      "status": "Validation issues",
-      "updated_at": "2026-07-25T02:02:36"
+      "validated_at": "2026-07-25T02:40:02",
+      "status": "Complete",
+      "updated_at": "2026-07-25T02:42:44",
+      "imported_from": "C:\\Users\\Dan\\Desktop\\raw_artists_cleaned.csv",
+      "imported_at": "2026-07-25T02:39:47",
+      "reviewed": true,
+      "notebook_path": "notebooks/cleaning/artists_cleaning.ipynb",
+      "notebook_imported_at": "2026-07-25T02:40:39",
+      "notebook_imported_from": "C:\\Users\\Dan\\Documents\\Insight Studio\\portfolio-project-vfx-production-intelligence\\notebooks\\clean_artists.ipynb",
+      "notebook_backup": "backups/cleaning-notebooks/artists_cleaning-20260725-024039.ipynb",
+      "summary": "The artists table was cleaned by standardizing text fields, email formatting, categorical values, dates, weekly capacity, and hourly cost data according to the completed Data Dictionary. Confirmed duplicate or superseded employee records were consolidated under a single canonical artist_id, with downstream references remapped before obsolete records were excluded; this included retaining ART-023 as Liam Young’s current Senior Lighting Artist record and ART-012 as Nico Patel’s confirmed Senior Paint Artist record. The incorrect Nico Patel email on ART-013 was corrected to Riley Allen’s company address. Valid null manager_id values were retained for artists without a direct manager, and no missing or questionable numeric values were replaced unless an approved business decision supported the correction. Remaining exceptions are limited to documented cases where organizational hierarchy or historical role changes cannot be proven from the source data alone; these records were preserved or flagged rather than altered without evidence.",
+      "summary_path": "documentation/cleaning/artists_cleaning_summary.md"
     }
   },
-  "updated_at": "2026-07-25T02:02:36"
+  "updated_at": "2026-07-25T02:42:44"
 }

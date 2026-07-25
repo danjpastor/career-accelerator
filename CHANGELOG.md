@@ -1,3 +1,14 @@
+# v10.25.9 - Dictionary-Aware Cleaned CSV Validation
+
+- Fixed the cleaned-CSV importer treating formats, examples, ranges, identifiers, names, dates, numeric measures, foreign keys, and email patterns as exhaustive allowed-value lists.
+- Strict allowed-value validation now applies only to clearly enumerated controlled categories.
+- Added targeted validation for documented dates, numeric ranges, identifier patterns, email domains, nullability, uniqueness, and relationships.
+- Self-referencing foreign keys are now checked against the CSV being imported instead of an older processed copy.
+- Added a dedicated **Structural changes to review** section showing removed and added primary-key records.
+- Row-count changes now remain reviewable without generating dozens of false value warnings.
+- Import status remains **Ready for review** when records were added or removed, even when all business rules pass.
+- Updated the review dialog to separate blocking issues, structural changes, business-rule warnings, and validation notes.
+
 # v10.25.8 - Cleaning Notebook Import and Windows Workspace Geometry
 
 - Added **Import Cleaning Notebook** to every table in the Data Cleaning Studio.

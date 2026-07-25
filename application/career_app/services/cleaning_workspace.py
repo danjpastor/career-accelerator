@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 import csv
 import hashlib
 import json
@@ -626,6 +627,171 @@ def _unique_required(rule: str, key_role: str) -> bool:
     return value == "required" or "primary key" in str(key_role or "").casefold()
 
 
+_ENUM_PROSE_MARKERS = (
+    "allowed only",
+    "first and last",
+    "format",
+    "numeric",
+    "amount",
+    "without",
+    "uppercase",
+    "digits",
+    "or null",
+    "yyyy",
+    "date",
+    "hours",
+    "when",
+    "pattern",
+    "example",
+)
+
+
+def _strict_allowed_values(field: dict[str, str]) -> list[str]:
+    """Return only values that are clearly an exhaustive controlled set.
+
+    Data Dictionary cells often contain formats, examples, ranges, or prose.
+    Those must never be treated as an enumeration merely because they contain
+    semicolons.
+    """
+
+    text = str(field.get("valid_values") or "").strip()
+    if not text:
+        return []
+    lowered = text.casefold()
+    if any(marker in lowered for marker in _ENUM_PROSE_MARKERS):
+        return []
+
+    raw_items = [
+        item.strip().rstrip(".")
+        for item in re.split(r"[;|]", text)
+        if item.strip()
+    ]
+    if len(raw_items) < 2 or len(raw_items) > 50:
+        return []
+
+    values: list[str] = []
+    for item in raw_items:
+        candidate = item
+        if "=" in candidate:
+            left, _right = candidate.split("=", 1)
+            left = left.strip()
+            if not left or len(left) > 24 or len(left.split()) > 2:
+                return []
+            candidate = left
+        if not candidate or len(candidate) > 64 or len(candidate.split()) > 4:
+            return []
+        if any(char in candidate for char in (":", "@", "#")):
+            return []
+        values.append(candidate)
+
+    # Preserve dictionary order while removing accidental duplicates.
+    return list(dict.fromkeys(values))
+
+
+def _decimal_value(value: str) -> Decimal | None:
+    try:
+        return Decimal(str(value).strip())
+    except (InvalidOperation, ValueError):
+        return None
+
+
+def _format_rule_issues(field: dict[str, str], values: list[str]) -> list[str]:
+    """Validate documented formats and ranges without inventing enums."""
+
+    column = str(field.get("column") or "Field")
+    rule_text = " ".join(
+        str(field.get(key) or "")
+        for key in (
+            "valid_values",
+            "expected_type",
+            "cleaning_expectation",
+        )
+    ).strip()
+    lowered = rule_text.casefold()
+    nonempty = [value for value in values if value]
+    issues: list[str] = []
+
+    if "yyyy-mm-dd" in lowered:
+        invalid = []
+        for value in nonempty:
+            try:
+                datetime.strptime(value, "%Y-%m-%d")
+            except ValueError:
+                invalid.append(value)
+        if invalid:
+            sample = ", ".join(sorted(set(invalid))[:5])
+            issues.append(
+                f"{column}: {len(invalid)} value(s) do not use the documented YYYY-MM-DD date format. Sample: {sample}"
+            )
+
+    numeric_rule = "numeric" in lowered or any(
+        token in str(field.get("expected_type") or "").casefold()
+        for token in ("integer", "decimal", "double", "float", "number")
+    )
+    if numeric_rule:
+        parsed = [(value, _decimal_value(value)) for value in nonempty]
+        invalid = [value for value, parsed_value in parsed if parsed_value is None]
+        if invalid:
+            sample = ", ".join(sorted(set(invalid))[:5])
+            issues.append(
+                f"{column}: {len(invalid)} value(s) are not numeric. Sample: {sample}"
+            )
+        valid_numbers = [parsed_value for _value, parsed_value in parsed if parsed_value is not None]
+        if "non-negative" in lowered:
+            negatives = [value for value in valid_numbers if value < 0]
+            if negatives:
+                issues.append(f"{column}: {len(negatives)} value(s) are below the documented minimum of 0.")
+        elif "positive" in lowered:
+            nonpositive = [value for value in valid_numbers if value <= 0]
+            if nonpositive:
+                issues.append(f"{column}: {len(nonpositive)} value(s) must be greater than 0.")
+
+    # Convert documented hash placeholders such as ART-### into a real format check.
+    pattern_match = re.search(r"\b([A-Z][A-Z0-9_]*)-(#+)(?!#)", rule_text)
+    if pattern_match:
+        prefix = re.escape(pattern_match.group(1))
+        digit_count = len(pattern_match.group(2))
+        pattern = re.compile(rf"^{prefix}-\d{{{digit_count}}}$")
+        invalid = [value for value in nonempty if not pattern.fullmatch(value)]
+        if invalid:
+            sample = ", ".join(sorted(set(invalid))[:5])
+            issues.append(
+                f"{column}: {len(invalid)} value(s) do not match the documented {pattern_match.group(0)} format. Sample: {sample}"
+            )
+
+    email_match = re.search(r"@([A-Za-z0-9.-]+)", rule_text)
+    if email_match:
+        domain = re.escape(email_match.group(1).rstrip("."))
+        pattern = re.compile(rf"^[A-Za-z0-9._%+\-]+@{domain}$", re.IGNORECASE)
+        invalid = [value for value in nonempty if not pattern.fullmatch(value)]
+        if invalid:
+            sample = ", ".join(sorted(set(invalid))[:5])
+            issues.append(
+                f"{column}: {len(invalid)} value(s) do not match the documented email domain and format. Sample: {sample}"
+            )
+
+    return issues
+
+
+def _primary_key_columns(record: dict[str, Any]) -> list[str]:
+    columns = [
+        str(field.get("column") or "").strip()
+        for field in record.get("fields") or []
+        if "primary key" in str(field.get("key") or "").casefold()
+    ]
+    if columns:
+        return [column for column in columns if column]
+    return [
+        column.strip()
+        for column in str(record.get("primary_key") or "").split(",")
+        if column.strip()
+    ]
+
+
+def _row_key(row: dict[str, Any], columns: list[str]) -> str:
+    return " | ".join(str(row.get(column) or "").strip() for column in columns)
+
+
 def validate_csv(path: Path, record: dict[str, Any], context=None) -> dict[str, Any]:
     path = Path(path)
     report: dict[str, Any] = {
@@ -638,6 +804,10 @@ def validate_csv(path: Path, record: dict[str, Any], context=None) -> dict[str, 
         "new_columns": [],
         "blocking": [],
         "warnings": [],
+        "structural_changes": [],
+        "information": [],
+        "removed_primary_keys": [],
+        "added_primary_keys": [],
         "metrics": {},
         "dictionary_fingerprint": _dictionary_fingerprint(record),
     }
@@ -670,22 +840,69 @@ def validate_csv(path: Path, record: dict[str, Any], context=None) -> dict[str, 
             duplicates = len(nonempty) - len(set(nonempty))
             if duplicates:
                 report["blocking"].append(f"{column}: {duplicates} duplicate value(s) violate the uniqueness rule.")
-        allowed = [item.strip() for item in re.split(r"[;,|]", field["valid_values"] or "") if item.strip()]
-        # Treat compact enumerations as strict; formats and prose remain guidance.
-        if allowed and len(allowed) <= 25 and all(len(item) <= 80 for item in allowed):
-            invalid = sorted({value for value in values if value and value not in allowed})
+        allowed = _strict_allowed_values(field)
+        if allowed:
+            allowed_lookup = {value.casefold(): value for value in allowed}
+            invalid = sorted(
+                {value for value in values if value and value.casefold() not in allowed_lookup}
+            )
             if invalid:
                 sample = ", ".join(invalid[:8])
                 suffix = "" if len(invalid) <= 8 else f" …and {len(invalid) - 8} more"
-                report["warnings"].append(f"{column}: values outside the documented set: {sample}{suffix}")
-        report["metrics"][column] = {"null_count": null_count, "distinct_count": len(set(values))}
+                report["warnings"].append(
+                    f"{column}: {len(invalid)} value(s) are outside the controlled dictionary set. Sample: {sample}{suffix}"
+                )
+        report["warnings"].extend(_format_rule_issues(field, values))
+        report["metrics"][column] = {
+            "null_count": null_count,
+            "distinct_count": len(set(values)),
+            "rule_type": "controlled set" if allowed else "format/range or open-ended guidance",
+        }
     if context is not None:
         raw_path = context.project_dir / str(record.get("source_path") or "")
         if raw_path.is_file() and raw_path.suffix.casefold() == ".csv":
             with raw_path.open("r", encoding="utf-8-sig", newline="") as handle:
-                raw_count = sum(1 for _ in csv.reader(handle)) - 1
-            report["raw_row_count"] = max(0, raw_count)
-            report["row_difference"] = len(rows) - report["raw_row_count"]
+                raw_reader = csv.DictReader(handle)
+                raw_rows = [dict(row) for row in raw_reader]
+            report["raw_row_count"] = len(raw_rows)
+            report["row_difference"] = len(rows) - len(raw_rows)
+            if report["row_difference"]:
+                direction = "more" if report["row_difference"] > 0 else "fewer"
+                report["structural_changes"].append(
+                    f"Processed row count is {abs(report['row_difference'])} {direction} than the raw source ({len(raw_rows)} → {len(rows)})."
+                )
+
+            primary_keys = _primary_key_columns(record)
+            if primary_keys and all(column in columns for column in primary_keys):
+                raw_keys = {_row_key(row, primary_keys) for row in raw_rows}
+                processed_keys = {_row_key(row, primary_keys) for row in rows}
+                raw_keys.discard("")
+                processed_keys.discard("")
+                removed = sorted(raw_keys - processed_keys)
+                added = sorted(processed_keys - raw_keys)
+                report["removed_primary_keys"] = removed
+                report["added_primary_keys"] = added
+                if removed:
+                    sample = ", ".join(removed[:12])
+                    suffix = "" if len(removed) <= 12 else f" …and {len(removed) - 12} more"
+                    report["structural_changes"].append(
+                        f"Removed {len(removed)} primary-key record(s): {sample}{suffix}"
+                    )
+                if added:
+                    sample = ", ".join(added[:12])
+                    suffix = "" if len(added) <= 12 else f" …and {len(added) - 12} more"
+                    report["structural_changes"].append(
+                        f"Added {len(added)} new primary-key record(s): {sample}{suffix}"
+                    )
+                if report["row_difference"] < 0:
+                    additional_reduction = max(
+                        0,
+                        abs(report["row_difference"]) - len(removed),
+                    )
+                    if additional_reduction:
+                        report["structural_changes"].append(
+                            f"Consolidated {additional_reduction} additional duplicate row(s) under retained primary keys."
+                        )
 
         table_lookup = {item["table"].casefold(): item for item in table_records(context)}
         for field in record["fields"]:
@@ -703,15 +920,18 @@ def validate_csv(path: Path, record: dict[str, Any], context=None) -> dict[str, 
             if parent_record is None:
                 report["warnings"].append(f"{column}: parent table '{parts[-2]}' is not registered in the cleaning workspace.")
                 continue
-            parent_path = discover_processed(context, parent_record)
-            if parent_path is None:
-                parent_path = context.project_dir / str(parent_record.get("source_path") or "")
-            if not parent_path.is_file() or parent_path.suffix.casefold() != ".csv":
-                report["warnings"].append(f"{column}: parent values could not be loaded from {parent_path}.")
-                continue
-            with parent_path.open("r", encoding="utf-8-sig", newline="") as handle:
-                parent_rows = csv.DictReader(handle)
-                parent_values = {str(parent.get(parent_column) or "").strip() for parent in parent_rows}
+            if parent_table == str(record.get("table") or "").casefold():
+                parent_values = {str(parent.get(parent_column) or "").strip() for parent in rows}
+            else:
+                parent_path = discover_processed(context, parent_record)
+                if parent_path is None:
+                    parent_path = context.project_dir / str(parent_record.get("source_path") or "")
+                if not parent_path.is_file() or parent_path.suffix.casefold() != ".csv":
+                    report["warnings"].append(f"{column}: parent values could not be loaded from {parent_path}.")
+                    continue
+                with parent_path.open("r", encoding="utf-8-sig", newline="") as handle:
+                    parent_rows = csv.DictReader(handle)
+                    parent_values = {str(parent.get(parent_column) or "").strip() for parent in parent_rows}
             child_values = [str(row.get(column) or "").strip() for row in rows]
             orphans = sorted({value for value in child_values if value and value not in parent_values})
             if orphans:
@@ -719,6 +939,22 @@ def validate_csv(path: Path, record: dict[str, Any], context=None) -> dict[str, 
                     f"{column}: {sum(1 for value in child_values if value and value not in parent_values)} row(s) reference values not found in {parts[-2]}.{parent_column}."
                 )
 
+    controlled_fields = sum(
+        1 for field in record.get("fields") or [] if _strict_allowed_values(field)
+    )
+    open_ended_fields = sum(
+        1
+        for field in record.get("fields") or []
+        if str(field.get("valid_values") or "").strip() and not _strict_allowed_values(field)
+    )
+    if controlled_fields:
+        report["information"].append(
+            f"Checked {controlled_fields} controlled-value field(s) against exhaustive dictionary sets."
+        )
+    if open_ended_fields:
+        report["information"].append(
+            f"Treated {open_ended_fields} dictionary entries as formats, ranges, or examples—not fixed value lists."
+        )
     if not rows:
         report["warnings"].append("The cleaned file contains no data rows.")
     return report
@@ -758,7 +994,7 @@ def import_cleaned_csv(context, table_name: str, source: Path) -> tuple[Path, di
         imported_from=str(source),
         imported_at=datetime.now().isoformat(timespec="seconds"),
         validation=report,
-        status="Ready for review" if report["warnings"] else "Validated",
+        status="Ready for review" if (report["warnings"] or report["structural_changes"]) else "Validated",
         reviewed=False,
     )
     return target, report
@@ -775,6 +1011,8 @@ def validate_processed(context, table_name: str) -> dict[str, Any]:
             "new_columns": [],
             "blocking": ["No processed CSV has been generated or imported for this table."],
             "warnings": [],
+            "structural_changes": [],
+            "information": [],
             "metrics": {},
         }
     report = validate_csv(path, record, context)
@@ -784,7 +1022,7 @@ def validate_processed(context, table_name: str) -> dict[str, Any]:
         processed_path=str(path.relative_to(context.project_dir).as_posix()),
         validation=report,
         validated_at=datetime.now().isoformat(timespec="seconds"),
-        status=("Validation issues" if report["blocking"] else "Ready for review" if report["warnings"] else "Validated"),
+        status=("Validation issues" if report["blocking"] else "Ready for review" if (report["warnings"] or report["structural_changes"]) else "Validated"),
     )
     return report
 
@@ -811,6 +1049,7 @@ def save_summary(context, table_name: str, summary: str) -> Path:
         "",
         f"- Blocking issues: {len(report.get('blocking') or [])}",
         f"- Warnings: {len(report.get('warnings') or [])}",
+        f"- Structural changes reviewed: {len(report.get('structural_changes') or [])}",
         f"- Processed rows: {report.get('row_count') if report.get('row_count') is not None else 'Not recorded'}",
     ]
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
