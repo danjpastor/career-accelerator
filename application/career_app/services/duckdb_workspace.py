@@ -12,6 +12,7 @@ import sys
 from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
 )
+from career_app.services import roadmap_mastery
 
 
 VALID_STATUSES = (
@@ -123,6 +124,7 @@ def ensure_submission(
     root: Path,
     number: int,
 ) -> tuple[Path, bool]:
+    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
     path = submission_path(
         root,
         number,
@@ -293,6 +295,7 @@ def save_progress(
     status: str,
     notes: str = "",
 ) -> dict:
+    roadmap_mastery.assert_duckdb_ready(conn, number)
     if status not in VALID_STATUSES:
         raise ValueError(
             f"Unsupported exercise status: {status}"
@@ -429,6 +432,8 @@ def save_progress(
         )
 
     conn.commit()
+    if completed:
+        roadmap_mastery.reconcile(conn, root)
     return progress(
         conn,
         root,

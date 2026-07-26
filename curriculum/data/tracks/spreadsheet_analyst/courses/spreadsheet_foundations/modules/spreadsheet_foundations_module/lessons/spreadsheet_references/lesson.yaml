@@ -1,0 +1,138 @@
+lesson_id: spreadsheet_references
+title: Cell References, Sorting & Filtering
+order: 2
+difficulty: beginner
+description: Build practical analyst skill in cell references, sorting & filtering.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply cell references, sorting & filtering in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.references
+- spreadsheet.formulas
+requires:
+- spreadsheet.structure
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_references_1
+  title: Cell References, Sorting & Filtering — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: Which reference stays fixed when copied?
+  answer_options:
+  - $B$2
+  - B2
+  - B$2 only in both directions
+  - Sheet1
+  starter: ''
+  solution: $B$2
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: $B$2
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which reference stays fixed when copied?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.references
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Cell References, Sorting & Filtering — Check 1
+    objective: Which reference stays fixed when copied?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.references**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_references_2
+  title: Cell References, Sorting & Filtering — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: What does filtering do?
+  answer_options:
+  - Temporarily hides rows that do not meet criteria
+  - Deletes rows permanently
+  - Changes every formula
+  - Sorts values automatically
+  starter: ''
+  solution: Temporarily hides rows that do not meet criteria
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Temporarily hides rows that do not meet criteria
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What does filtering do?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.references
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Cell References, Sorting & Filtering — Check 2
+    objective: What does filtering do?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.references**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_references_3
+  title: Cell References, Sorting & Filtering — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: Which function totals a numeric range?
+  answer_options:
+  - SUM
+  - COUNT
+  - IF
+  - XLOOKUP
+  starter: ''
+  solution: SUM
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: SUM
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which function totals a numeric range?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.references
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Cell References, Sorting & Filtering — Check 3
+    objective: Which function totals a numeric range?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.references**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

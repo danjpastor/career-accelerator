@@ -1,4 +1,4 @@
-# Week 5 Sprint — Analyze With Confidence
+# Week 5 Sprint — SQL Cleaning, Subqueries, and CTEs
 
 **Target time:** 15–20 hours
 
@@ -18,33 +18,34 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Finish Google Course 4 and begin Course 5
+Continue the current certificate module.
 
-### Analytics Skills
-Aggregations, CASE expressions, and KPI calculations
+### Accelerator Academy
+Complete SQL cleaning functions, type conversion, null handling, advanced CASE, subqueries, CTEs, and readable multi-step workflows.
 
 ### Portfolio
-Create the SQL schema and begin the core analysis
+Preparation only: finish the cleaning plan, validation plan, and decision-log templates. Do not modify portfolio data.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Academy:** Three cleaning and query-structure sessions
+- **DuckDB:** Two applied exercise sessions
+- **Interview Practice:** Two SQL Companion sessions
+- **Google:** Two certificate sessions
+- **Review:** Week 5 cumulative knowledge check
 
 ## Checklist
-- [ ] [Google Course 4] Finish the remaining course modules
-- [ ] [Google Course 5] Begin the first module
-- [ ] Complete DuckDB Exercise 04: Calculate subscription KPIs
-- [ ] Complete DuckDB Exercise 05: Segment service performance
-- [ ] Solve Signup Activation Rate
-- [ ] Create the Project 1 SQL schema
-- [ ] Load or connect the analysis dataset
-- [ ] Write the first five analytical queries
-- [ ] Validate query results against source totals
-- [ ] Document early findings and open questions
-- [ ] Commit the schema and first analysis queries
+- [ ] Complete the planned Google Certificate work for the week
+- [ ] Complete string, date, casting, and null-handling lessons
+- [ ] Complete advanced CASE and conditional transformation lessons
+- [ ] Complete subquery lessons
+- [ ] Complete CTE and multi-step workflow lessons
+- [ ] Complete DuckDB Exercise 03: Clean customer feedback
+- [ ] Complete DuckDB Exercise 07: Analyze order profitability
+- [ ] Complete DuckDB Exercise 12: Refactor an unreadable analytics query
+- [ ] Solve Histogram of Tweets or Duplicate Job Listings
+- [ ] Finish the portfolio cleaning and validation plan
+- [ ] Pass the Week 5 Cumulative Knowledge Check
 - [ ] Complete the Week 5 retrospective
 
 ## Daily Log
@@ -52,7 +53,7 @@ Create the SQL schema and begin the core analysis
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,10 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 12: Write an executive summary and stakeholder memo
-- [ ] Complete Applied Lab 17: Repair misleading KPI calculations
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 23: Evaluate sampling bias and representativeness
-- [ ] Complete Applied Lab 29: Build and interpret a conversion funnel
+- [ ] Clean a deliberately flawed practice dataset
+- [ ] Build and explain a reproducible multi-step SQL workflow

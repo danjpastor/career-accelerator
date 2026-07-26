@@ -1086,6 +1086,46 @@ class VisibleCheckBox(QWidget):
             painter.drawPath(check)
 
 
+class ElidedLabel(QLabel):
+    """Single-line label that keeps the full value in its tooltip."""
+
+    def __init__(self, text="", parent=None):
+        super().__init__("", parent)
+        self._full_text = str(text or "")
+        self.setWordWrap(False)
+        self.setMinimumWidth(0)
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed)
+        self.setToolTip(self._full_text)
+        self._refresh_elision()
+
+    def set_full_text(self, text):
+        self._full_text = str(text or "")
+        self.setToolTip(self._full_text)
+        self._refresh_elision()
+
+    def full_text(self):
+        return self._full_text
+
+    def _refresh_elision(self):
+        available = max(1, self.contentsRect().width())
+        super().setText(
+            self.fontMetrics().elidedText(
+                self._full_text,
+                Qt.TextElideMode.ElideRight,
+                available,
+            )
+        )
+
+    def resizeEvent(self, event):
+        self._refresh_elision()
+        super().resizeEvent(event)
+
+    def changeEvent(self, event):
+        self._refresh_elision()
+        super().changeEvent(event)
+
+
+
 class TaskRow(QWidget):
     def __init__(
         self,
@@ -1130,8 +1170,8 @@ class TaskRow(QWidget):
 
         self.title_label = QLabel(title)
         title_label = self.title_label
-        title_label.setWordWrap(False)
         title_label.setMinimumWidth(0)
+        title_label.setWordWrap(True)
         title_label.setStyleSheet(
             "font-weight:600;background:transparent;border:none;"
         )
@@ -1147,7 +1187,7 @@ class TaskRow(QWidget):
         source_label.setObjectName("TaskSource")
         source_label.setStyleSheet("font-size:8.7pt;")
         source_label.setMinimumWidth(0)
-        source_label.setWordWrap(False)
+        source_label.setWordWrap(True)
         source_label.setSizePolicy(
             QSizePolicy.Ignored,
             QSizePolicy.Preferred,
@@ -1165,8 +1205,6 @@ class TaskRow(QWidget):
             )
             metadata = self.metadata_label
             metadata.setObjectName("TaskCategory")
-            metadata.setMinimumWidth(58)
-            metadata.setMaximumWidth(78)
             metadata.setAlignment(
                 Qt.AlignRight | Qt.AlignVCenter
             )
@@ -1189,6 +1227,17 @@ class TaskRow(QWidget):
                     "background:transparent;border:none;"
                 )
 
+            # Measure after applying the metadata font. Do not cap the
+            # width: labels such as "Catch-Up • Learning" must remain
+            # completely visible at every supported interface scale.
+            metadata_width = max(
+                72,
+                metadata.fontMetrics().horizontalAdvance(
+                    metadata_text
+                ) + 18,
+            )
+            metadata.setFixedWidth(metadata_width)
+
             layout.addWidget(
                 metadata,
                 0,
@@ -1200,6 +1249,10 @@ class TaskRow(QWidget):
             self.action_button = QPushButton(action_text)
             action = self.action_button
             action.setObjectName("WorkspaceOpen")
+            action.setAttribute(
+                Qt.WidgetAttribute.WA_StyledBackground,
+                True,
+            )
             action.setMinimumSize(52, 28)
             action.setMaximumHeight(32)
             action.setToolTip("Open Task Workspace")
@@ -1220,9 +1273,19 @@ class TaskRow(QWidget):
         ultra = self._forced_density == "ultra"
         base = 25 if ultra else 30 if compact else 39
         margins = self.row_layout.contentsMargins()
-        text_height = self.title_label.fontMetrics().height()
+
+        def label_height(label):
+            width = max(80, label.width())
+            wrapped = (
+                label.heightForWidth(width)
+                if label.hasHeightForWidth()
+                else label.sizeHint().height()
+            )
+            return max(label.fontMetrics().height(), wrapped)
+
+        text_height = label_height(self.title_label)
         if self.source_label.isVisible():
-            text_height += self.source_label.fontMetrics().height()
+            text_height += label_height(self.source_label)
             text_height += self.text_layout.spacing()
         required = text_height + margins.top() + margins.bottom() + 2
         self.setMinimumHeight(max(base, required))
@@ -1237,7 +1300,8 @@ class TaskRow(QWidget):
         compact = self._forced_density != "comfortable"
         ultra = self._forced_density == "ultra"
         self.source_label.setVisible(not compact)
-        self.title_label.setWordWrap(False)
+        self.title_label.setWordWrap(not compact)
+        self.source_label.setWordWrap(not compact)
         self.row_layout.setContentsMargins(0, 1 if compact else 3, 0, 1 if compact else 3)
         self.row_layout.setSpacing(4 if ultra else 6 if compact else 9)
         if self.metadata_label is not None:
@@ -1251,8 +1315,8 @@ class TaskRow(QWidget):
     def resizeEvent(self, event):
         if self._forced_density == "comfortable":
             compact = event.size().width() < 430
-            self.title_label.setWordWrap(compact)
-            self.source_label.setWordWrap(compact)
+            self.title_label.setWordWrap(True)
+            self.source_label.setWordWrap(True)
             self.row_layout.setSpacing(6 if compact else 9)
         self._refresh_content_height()
         self.updateGeometry()
@@ -1297,9 +1361,10 @@ class FocusRow(QWidget):
         text.setContentsMargins(0, 0, 0, 0)
         text.setSpacing(1)
 
-        self.title_label = QLabel(title)
+        self.title_label = ElidedLabel(title)
         title_label = self.title_label
         title_label.setMinimumWidth(0)
+        title_label.setWordWrap(False)
         title_label.setStyleSheet(
             f"font-weight:700;color:{COLORS['muted'] if completed else accent};"
             + ("text-decoration:line-through;" if completed else "")
@@ -1311,7 +1376,7 @@ class FocusRow(QWidget):
         title_label.setToolTip(title)
         text.addWidget(title_label)
 
-        self.detail_label = QLabel(detail)
+        self.detail_label = ElidedLabel(detail)
         detail_label = self.detail_label
         detail_label.setObjectName("Muted")
         detail_label.setWordWrap(False)
@@ -1345,6 +1410,10 @@ class FocusRow(QWidget):
             self.action_button = QPushButton(action_text)
             action = self.action_button
             action.setObjectName("WorkspaceOpen")
+            action.setAttribute(
+                Qt.WidgetAttribute.WA_StyledBackground,
+                True,
+            )
             action.setMinimumSize(52, 28)
             action.setMaximumHeight(32)
             action.setToolTip("Open Task Workspace")
@@ -1365,12 +1434,20 @@ class FocusRow(QWidget):
         ultra = self._forced_density == "ultra"
         base = 25 if ultra else 30 if compact else 38
         margins = self.row_layout.contentsMargins()
-        text_height = self.title_label.fontMetrics().height()
+
+        title_height = self.title_label.fontMetrics().height() + 2
+        self.title_label.setFixedHeight(title_height)
+
+        text_height = title_height
         if self.detail_label.isVisible():
-            text_height += self.detail_label.fontMetrics().height()
-            text_height += self.text_layout.spacing()
+            detail_height = self.detail_label.fontMetrics().height() + 2
+            self.detail_label.setFixedHeight(detail_height)
+            text_height += detail_height + self.text_layout.spacing()
+
         required = text_height + margins.top() + margins.bottom() + 2
-        self.setMinimumHeight(max(base, required))
+        target = max(base, required)
+        self.setMinimumHeight(target)
+        self.setMaximumHeight(target)
 
     def set_interface_scale(self, scale):
         self._interface_scale = max(0.80, min(1.20, float(scale)))
@@ -1383,6 +1460,7 @@ class FocusRow(QWidget):
         ultra = self._forced_density == "ultra"
         self.detail_label.setVisible(not compact)
         self.title_label.setWordWrap(False)
+        self.detail_label.setWordWrap(False)
         self.row_layout.setContentsMargins(0, 1 if compact else 3, 0, 1 if compact else 3)
         self.row_layout.setSpacing(4 if ultra else 6 if compact else 9)
         self.icon_label.setFixedWidth(24 if ultra else 28 if compact else 34)
@@ -1400,8 +1478,8 @@ class FocusRow(QWidget):
     def resizeEvent(self, event):
         if self._forced_density == "comfortable":
             compact = event.size().width() < 440
-            self.title_label.setWordWrap(compact)
-            self.detail_label.setWordWrap(compact)
+            self.title_label.setWordWrap(False)
+            self.detail_label.setWordWrap(False)
             self.row_layout.setSpacing(6 if compact else 9)
         self._refresh_content_height()
         self.updateGeometry()

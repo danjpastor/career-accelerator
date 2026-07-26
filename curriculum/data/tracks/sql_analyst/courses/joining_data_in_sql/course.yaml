@@ -11,4 +11,5 @@ modules:
 - modules/combining_horizontally/module.yaml
 assessments:
 - assessments/joining_data_checkpoint.yaml
+- assessments/week_4_relationships_joins.yaml
 skills_labs: []

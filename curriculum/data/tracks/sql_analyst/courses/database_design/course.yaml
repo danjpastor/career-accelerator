@@ -13,5 +13,6 @@ modules:
 - modules/database_management/module.yaml
 assessments:
 - assessments/database_design_checkpoint.yaml
+- assessments/week_6_sql_mastery.yaml
 skills_labs:
 - skills_labs/community_impact_analysis.yaml

@@ -1,0 +1,138 @@
+lesson_id: spreadsheet_validation
+title: Validation Rules & Reconciliation
+order: 2
+difficulty: beginner
+description: Build practical analyst skill in validation rules & reconciliation.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply validation rules & reconciliation in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.validation
+- spreadsheet.reconciliation
+requires:
+- spreadsheet.cleaning
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_validation_1
+  title: Validation Rules & Reconciliation — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: What does data validation help control?
+  answer_options:
+  - Allowed input values
+  - Internet speed
+  - Workbook colors only
+  - SQL syntax
+  starter: ''
+  solution: Allowed input values
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Allowed input values
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What does data validation help control?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.validation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Validation Rules & Reconciliation — Check 1
+    objective: What does data validation help control?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.validation**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_validation_2
+  title: Validation Rules & Reconciliation — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: Why reconcile row counts?
+  answer_options:
+  - To explain additions, removals, or aggregation changes
+  - To make the file larger
+  - To hide errors
+  - To avoid documentation
+  starter: ''
+  solution: To explain additions, removals, or aggregation changes
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To explain additions, removals, or aggregation changes
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Why reconcile row counts?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.validation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Validation Rules & Reconciliation — Check 2
+    objective: Why reconcile row counts?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.validation**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_validation_3
+  title: Validation Rules & Reconciliation — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What should happen when a business value is ambiguous?
+  answer_options:
+  - Document it and request clarification
+  - Invent a plausible value
+  - Delete the row silently
+  - Use the average automatically
+  starter: ''
+  solution: Document it and request clarification
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Document it and request clarification
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What should happen when a business value is ambiguous?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.validation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Validation Rules & Reconciliation — Check 3
+    objective: What should happen when a business value is ambiguous?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.validation**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

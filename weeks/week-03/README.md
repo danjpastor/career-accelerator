@@ -1,4 +1,4 @@
-# Week 3 Sprint — Prepare Reliable Data
+# Week 3 Sprint — SQL Foundations and Aggregation
 
 **Target time:** 15–20 hours
 
@@ -18,33 +18,34 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Finish Google Course 2 and begin Course 3
+Continue the current certificate module.
 
-### Analytics Skills
-Data exploration, spreadsheet analysis, and duplicate checks
+### Accelerator Academy
+Complete SQL selection, filtering, sorting, aggregation, GROUP BY, HAVING, arithmetic, and introductory CASE.
 
 ### Portfolio
-Acquire or generate the dataset and start the data dictionary
+Preparation only: refine business questions, preliminary KPIs, and the analysis plan. Do not clean or analyze portfolio data.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Academy:** Three SQL learning sessions
+- **DuckDB:** Two guided exercise sessions
+- **Interview Practice:** One or two SQL Companion sessions
+- **Google:** Two certificate sessions
+- **Review:** Week 3 cumulative knowledge check
 
 ## Checklist
-- [ ] [Google Course 2] Finish the remaining course modules
-- [ ] [Google Course 3] Begin the first module
-- [ ] Practice spreadsheet sorting, filtering, and formulas
-- [ ] Solve Duplicate Job Listings
-- [ ] Solve Teams Power Users
-- [ ] Select or generate the Project 1 dataset
-- [ ] Document dataset provenance and limitations
-- [ ] Create the first data dictionary draft
-- [ ] Identify missing, duplicate, and inconsistent values
-- [ ] Define project scope and exclusions
-- [ ] Commit the dataset and dictionary structure
+- [ ] Complete the planned Google Certificate work for the week
+- [ ] Complete SQL selection, filtering, sorting, and limiting lessons
+- [ ] Complete SQL aggregation, GROUP BY, and HAVING lessons
+- [ ] Complete SQL arithmetic and introductory CASE lessons
+- [ ] Complete DuckDB Exercise 01: Filter and sort support tickets
+- [ ] Complete DuckDB Exercise 02: Summarize retail orders
+- [ ] Complete DuckDB Exercise 05: Segment service performance
+- [ ] Solve Data Science Skills in SQL Companion
+- [ ] Solve Pharmacy Analytics Part 1 or Laptop vs. Mobile Viewership
+- [ ] Refine portfolio business questions and KPI definitions
+- [ ] Pass the Week 3 Cumulative Knowledge Check
 - [ ] Complete the Week 3 retrospective
 
 ## Daily Log
@@ -52,7 +53,7 @@ Acquire or generate the dataset and start the data dictionary
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,4 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 07: Build an Excel analyst workbook
+- [ ] Build and reconcile grouped SQL summaries
+- [ ] Diagnose filtering, aggregation, and CASE errors

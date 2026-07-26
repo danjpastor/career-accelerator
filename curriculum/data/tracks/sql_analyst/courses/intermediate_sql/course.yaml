@@ -13,5 +13,6 @@ modules:
 - modules/conditional_operations/module.yaml
 assessments:
 - assessments/intermediate_sql_checkpoint.yaml
+- assessments/week_3_sql_foundations.yaml
 skills_labs:
 - skills_labs/student_wellbeing_analysis.yaml

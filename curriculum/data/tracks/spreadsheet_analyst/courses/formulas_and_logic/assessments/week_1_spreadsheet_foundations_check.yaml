@@ -1,0 +1,274 @@
+assessment_id: week_1_spreadsheet_foundations_check
+title: Week 1 Cumulative Knowledge Check
+order: 99
+description: Verify spreadsheet foundations and retained analyst workflow knowledge.
+estimated_minutes: 35
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled.
+- A score of 80% or higher passes.
+- The check includes current-week material and retained prior knowledge.
+requires:
+- spreadsheet.structure
+- spreadsheet.data_types
+- spreadsheet.references
+- spreadsheet.formulas
+- spreadsheet.conditional_logic
+passing_score: 0.8
+activities:
+- activity_id: w1_grain
+  title: Table grain
+  type: mastery
+  runtime: recognition
+  prompt: What should be defined before counting spreadsheet rows?
+  answer_options:
+  - What one row represents
+  - The chart color
+  - The workbook filename
+  - The zoom level
+  starter: ''
+  solution: What one row represents
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: What one row represents
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: What should be defined before counting spreadsheet rows?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w1_type
+  title: Identifier type
+  type: mastery
+  runtime: recognition
+  prompt: Which value should remain text?
+  answer_options:
+  - Employee ID 0007
+  - Hours worked 38.5
+  - Revenue 2500.00
+  - Completion rate 0.92
+  starter: ''
+  solution: Employee ID 0007
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Employee ID 0007
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: Which value should remain text?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w1_reference
+  title: Absolute reference
+  type: mastery
+  runtime: recognition
+  prompt: Which reference locks both row and column?
+  answer_options:
+  - $B$2
+  - B2
+  - B$2
+  - $B2
+  starter: ''
+  solution: $B$2
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: $B$2
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: Which reference locks both row and column?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w1_filter
+  title: Filter behavior
+  type: mastery
+  runtime: recognition
+  prompt: 'A filter should be understood as:'
+  answer_options:
+  - A temporary view of matching rows
+  - Permanent deletion
+  - A formula replacement
+  - A lookup
+  starter: ''
+  solution: A temporary view of matching rows
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A temporary view of matching rows
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A filter should be understood as:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w1_formula
+  title: Core formula
+  type: mastery
+  runtime: recognition
+  prompt: Which function calculates the mean?
+  answer_options:
+  - AVERAGE
+  - COUNT
+  - MAX
+  - SUM
+  starter: ''
+  solution: AVERAGE
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: AVERAGE
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: Which function calculates the mean?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w1_logic
+  title: Boolean logic
+  type: mastery
+  runtime: recognition
+  prompt: 'AND returns true when:'
+  answer_options:
+  - Every condition is true
+  - Any condition is true
+  - No cells are blank
+  - A lookup succeeds
+  starter: ''
+  solution: Every condition is true
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Every condition is true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'AND returns true when:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w1_error
+  title: Formula diagnosis
+  type: mastery
+  runtime: recognition
+  prompt: A copied formula points to the wrong fixed target. What should you inspect?
+  answer_options:
+  - Relative versus absolute references
+  - Worksheet color
+  - Pivot layout
+  - File size
+  starter: ''
+  solution: Relative versus absolute references
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Relative versus absolute references
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: A copied formula points to the wrong fixed target. What should you inspect?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w1_raw
+  title: Raw preservation
+  type: mastery
+  runtime: recognition
+  prompt: 'Before correcting values, create:'
+  answer_options:
+  - An untouched raw copy
+  - A final chart
+  - A password
+  - A macro
+  starter: ''
+  solution: An untouched raw copy
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: An untouched raw copy
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Before correcting values, create:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []

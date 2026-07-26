@@ -1,0 +1,137 @@
+lesson_id: spreadsheet_pivots
+title: Pivot Tables, Dimensions & Measures
+order: 1
+difficulty: beginner
+description: Build practical analyst skill in pivot tables, dimensions & measures.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply pivot tables, dimensions & measures in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.pivots
+requires:
+- spreadsheet.relationships
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_pivots_1
+  title: Pivot Tables, Dimensions & Measures — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: What belongs in a pivot Values area?
+  answer_options:
+  - A measure to aggregate
+  - A worksheet name
+  - A file path
+  - A comment
+  starter: ''
+  solution: A measure to aggregate
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A measure to aggregate
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What belongs in a pivot Values area?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.pivots
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Pivot Tables, Dimensions & Measures — Check 1
+    objective: What belongs in a pivot Values area?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.pivots**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_pivots_2
+  title: Pivot Tables, Dimensions & Measures — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: What is a dimension?
+  answer_options:
+  - A category used to group or filter results
+  - A calculation error
+  - A duplicate row
+  - A workbook password
+  starter: ''
+  solution: A category used to group or filter results
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A category used to group or filter results
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What is a dimension?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.pivots
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Pivot Tables, Dimensions & Measures — Check 2
+    objective: What is a dimension?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.pivots**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_pivots_3
+  title: Pivot Tables, Dimensions & Measures — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: Why validate pivot totals?
+  answer_options:
+  - To confirm they reconcile to the source population
+  - To make the chart prettier
+  - To remove all filters
+  - To hide nulls
+  starter: ''
+  solution: To confirm they reconcile to the source population
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To confirm they reconcile to the source population
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Why validate pivot totals?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.pivots
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Pivot Tables, Dimensions & Measures — Check 3
+    objective: Why validate pivot totals?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.pivots**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

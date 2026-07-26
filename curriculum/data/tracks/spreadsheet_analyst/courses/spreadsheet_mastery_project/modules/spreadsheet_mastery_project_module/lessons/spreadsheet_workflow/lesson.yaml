@@ -1,0 +1,137 @@
+lesson_id: spreadsheet_workflow
+title: Plan a Reproducible Spreadsheet Workflow
+order: 1
+difficulty: beginner
+description: Build practical analyst skill in plan a reproducible spreadsheet workflow.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply plan a reproducible spreadsheet workflow in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.reconciliation
+requires:
+- spreadsheet.kpis
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_workflow_1
+  title: Plan a Reproducible Spreadsheet Workflow — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: Which sequence is most reproducible?
+  answer_options:
+  - Preserve raw, profile, clean, validate, summarize, document
+  - Summarize, delete raw, guess fixes
+  - Chart first, then inspect
+  - Format only
+  starter: ''
+  solution: Preserve raw, profile, clean, validate, summarize, document
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Preserve raw, profile, clean, validate, summarize, document
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which sequence is most reproducible?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Plan a Reproducible Spreadsheet Workflow — Check 1
+    objective: Which sequence is most reproducible?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.reconciliation**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_workflow_2
+  title: Plan a Reproducible Spreadsheet Workflow — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: What belongs in a cleaning log?
+  answer_options:
+  - Issue, decision, transformation, validation result
+  - Only the file name
+  - Only chart titles
+  - Only completed dates
+  starter: ''
+  solution: Issue, decision, transformation, validation result
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Issue, decision, transformation, validation result
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What belongs in a cleaning log?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Plan a Reproducible Spreadsheet Workflow — Check 2
+    objective: What belongs in a cleaning log?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.reconciliation**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_workflow_3
+  title: Plan a Reproducible Spreadsheet Workflow — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What proves a lookup was safe?
+  answer_options:
+  - Key tests, missing-match review, and reconciled counts
+  - The formula copied without errors
+  - The workbook opened
+  - The sheet has filters
+  starter: ''
+  solution: Key tests, missing-match review, and reconciled counts
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Key tests, missing-match review, and reconciled counts
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What proves a lookup was safe?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Plan a Reproducible Spreadsheet Workflow — Check 3
+    objective: What proves a lookup was safe?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.reconciliation**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

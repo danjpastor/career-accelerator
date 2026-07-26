@@ -1,0 +1,311 @@
+assessment_id: week_3_sql_foundations
+title: Week 3 Cumulative Knowledge Check
+order: 99
+description: Verify spreadsheet retention plus SQL selection, filtering, aggregation, grouping, and business
+  metrics.
+estimated_minutes: 45
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled.
+- A score of 80% or higher passes.
+- The check includes current-week material and retained prior knowledge.
+requires:
+- roadmap.spreadsheet_mastery
+- sql.select_basics
+- sql.where
+- sql.aggregations
+passing_score: 0.8
+activities:
+- activity_id: w3_grain
+  title: Grain before aggregation
+  type: mastery
+  runtime: recognition
+  prompt: 'Before grouping, confirm:'
+  answer_options:
+  - What one source row represents
+  - The chart theme
+  - The file extension
+  - The password
+  starter: ''
+  solution: What one source row represents
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: What one source row represents
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Before grouping, confirm:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w3_where
+  title: WHERE versus HAVING
+  type: mastery
+  runtime: recognition
+  prompt: 'WHERE filters:'
+  answer_options:
+  - Rows before aggregation
+  - Groups after aggregation only
+  - Columns after export
+  - Pivot charts
+  starter: ''
+  solution: Rows before aggregation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Rows before aggregation
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'WHERE filters:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w3_having
+  title: HAVING purpose
+  type: mastery
+  runtime: recognition
+  prompt: 'HAVING filters:'
+  answer_options:
+  - Aggregated groups
+  - Raw workbook cells
+  - Column names
+  - File paths
+  starter: ''
+  solution: Aggregated groups
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Aggregated groups
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'HAVING filters:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w3_distinct
+  title: Distinct counting
+  type: mastery
+  runtime: recognition
+  prompt: 'COUNT DISTINCT is used to count:'
+  answer_options:
+  - Unique non-null values
+  - Every duplicate twice
+  - Only blank values
+  - Worksheet tabs
+  starter: ''
+  solution: Unique non-null values
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Unique non-null values
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'COUNT DISTINCT is used to count:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w3_case
+  title: Conditional metric
+  type: mastery
+  runtime: recognition
+  prompt: 'CASE inside an aggregate can create:'
+  answer_options:
+  - A conditional business metric
+  - A database backup
+  - A workbook password
+  - A join key automatically
+  starter: ''
+  solution: A conditional business metric
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A conditional business metric
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'CASE inside an aggregate can create:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w3_sheet
+  title: Spreadsheet retention
+  type: mastery
+  runtime: recognition
+  prompt: 'A pivot-table total should be:'
+  answer_options:
+  - Reconciled to the source population
+  - Accepted without checking
+  - Compared only to color
+  - Deleted when different
+  starter: ''
+  solution: Reconciled to the source population
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Reconciled to the source population
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A pivot-table total should be:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w3_sql_group
+  title: Grouped ticket summary
+  type: mastery
+  runtime: sql
+  prompt: Return status and ticket_count from support_tickets, sorted by status.
+  starter: 'SELECT
+
+    FROM support_tickets;'
+  solution: 'SELECT status, COUNT(*) AS ticket_count
+
+    FROM support_tickets
+
+    GROUP BY status
+
+    ORDER BY status;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT status, COUNT(*) AS ticket_count
+
+      FROM support_tickets
+
+      GROUP BY status
+
+      ORDER BY status;'
+    required_patterns:
+    - COUNT\s*\(
+    - GROUP\s+BY\s+status
+    - ORDER\s+BY\s+status
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 8
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Write the complete query independently.
+    task: Return status and ticket_count from support_tickets, sorted by status.
+    requirements:
+    - Return only the requested columns.
+    - Use the required SQL concepts.
+    expected_output: One row per status.
+    skills_practiced:
+    - independent SQL
+    after_correct: The query meets the requested grain and output.
+    common_errors: []
+    table: support_tickets
+- activity_id: w3_sql_inventory
+  title: Average inventory by category
+  type: mastery
+  runtime: sql
+  prompt: Return category and average_units from inventory, sorted by category.
+  starter: 'SELECT
+
+    FROM inventory;'
+  solution: 'SELECT category, AVG(units_on_hand) AS average_units
+
+    FROM inventory
+
+    GROUP BY category
+
+    ORDER BY category;'
+  hints: []
+  validator:
+    type: sql_result
+    dataset_id: sql_foundations
+    expected_query: 'SELECT category, AVG(units_on_hand) AS average_units
+
+      FROM inventory
+
+      GROUP BY category
+
+      ORDER BY category;'
+    required_patterns:
+    - AVG\s*\(
+    - GROUP\s+BY\s+category
+    forbidden_patterns: []
+    order_sensitive: true
+    column_sensitive: true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 8
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Write the complete query independently.
+    task: Return category and average_units from inventory, sorted by category.
+    requirements:
+    - Return only the requested columns.
+    - Use the required SQL concepts.
+    expected_output: One row per category.
+    skills_practiced:
+    - independent SQL
+    after_correct: The query meets the requested grain and output.
+    common_errors: []
+    table: inventory

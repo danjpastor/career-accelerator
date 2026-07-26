@@ -1,4 +1,4 @@
-# Week 4 Sprint — Process and Clean
+# Week 4 Sprint — Relationships, Grain, and Joins
 
 **Target time:** 15–20 hours
 
@@ -18,33 +18,34 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Finish Google Course 3 and begin Course 4
+Continue the current certificate module.
 
-### Analytics Skills
-NULL handling, cleaning logic, and validation queries
+### Accelerator Academy
+Complete table grain, keys, INNER JOIN, LEFT JOIN, multi-table joins, set operations, and relationship validation.
 
 ### Portfolio
-Clean and validate the dataset and draft the analytical schema
+Preparation only: finalize the relationship map and planned validation checks. Portfolio joins remain locked.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Academy:** Three relationship and join sessions
+- **DuckDB:** Two validation sessions
+- **Interview Practice:** Two SQL Companion sessions
+- **Google:** Two certificate sessions
+- **Review:** Week 4 cumulative knowledge check
 
 ## Checklist
-- [ ] [Google Course 3] Finish the remaining course modules
-- [ ] [Google Course 4] Begin the first module
-- [ ] Document a repeatable data-cleaning checklist
-- [ ] Complete DuckDB Exercise 03: Clean customer feedback
-- [ ] Solve Pharmacy Analytics Part 1
-- [ ] Clean the Project 1 dataset
-- [ ] Record every transformation and quality decision
-- [ ] Validate row counts, keys, and business rules
-- [ ] Draft the Project 1 analytical schema
-- [ ] Define table relationships and grain
-- [ ] Commit the cleaned dataset workflow
+- [ ] Complete the planned Google Certificate work for the week
+- [ ] Complete table grain, primary-key, and foreign-key lessons
+- [ ] Complete INNER JOIN and LEFT JOIN lessons
+- [ ] Complete multi-table joins and set-operations lessons
+- [ ] Complete relationship validation and row-multiplication lessons
+- [ ] Complete DuckDB Exercise 04: Calculate subscription KPIs
+- [ ] Complete DuckDB Exercise 06: Join customers, orders, and payments
+- [ ] Solve Page With No Likes in SQL Companion
+- [ ] Solve Signup Activation Rate or Second Day Confirmation
+- [ ] Finalize the portfolio relationship map and validation checklist
+- [ ] Pass the Week 4 Cumulative Knowledge Check
 - [ ] Complete the Week 4 retrospective
 
 ## Daily Log
@@ -52,7 +53,7 @@ Clean and validate the dataset and draft the analytical schema
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,9 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 15: Apply the SQL validation checklist
-- [ ] Complete Applied Lab 16: Fix a join that duplicates revenue
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 22: Analyze descriptive statistics and distributions
+- [ ] Validate keys and relationships in a practice database
+- [ ] Diagnose and repair a row-multiplying join

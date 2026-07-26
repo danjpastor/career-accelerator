@@ -1,0 +1,340 @@
+assessment_id: week_8_portfolio_readiness
+title: Week 8 Portfolio Readiness Assessment
+order: 99
+description: Verify Python/pandas plus retained spreadsheet, SQL, Power BI, data-quality, and communication
+  mastery.
+estimated_minutes: 55
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled.
+- A score of 80% or higher passes.
+- The check includes current-week material and retained prior knowledge.
+requires:
+- roadmap.sql_mastery
+- roadmap.power_bi_mastery
+- python.basics
+- python_pandas
+- pandas.aggregation
+- pandas.indexing
+passing_score: 0.8
+activities:
+- activity_id: w8_df
+  title: DataFrame
+  type: mastery
+  runtime: recognition
+  prompt: 'A pandas DataFrame is:'
+  answer_options:
+  - A two-dimensional labeled data structure
+  - A Power BI visual
+  - A SQL database server
+  - A spreadsheet formula
+  starter: ''
+  solution: A two-dimensional labeled data structure
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A two-dimensional labeled data structure
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A pandas DataFrame is:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_filter
+  title: Boolean filtering
+  type: mastery
+  runtime: recognition
+  prompt: 'Multiple pandas Series conditions should use:'
+  answer_options:
+  - '& or | with each condition in parentheses'
+  - Python and directly between Series
+  - SQL HAVING
+  - A pivot filter only
+  starter: ''
+  solution: '& or | with each condition in parentheses'
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: '& or | with each condition in parentheses'
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Multiple pandas Series conditions should use:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_missing
+  title: Missing values
+  type: mastery
+  runtime: recognition
+  prompt: 'Before filling missing values, first:'
+  answer_options:
+  - Understand why they are missing and how the field is used
+  - Replace all with zero
+  - Delete every row
+  - Convert all columns to text
+  starter: ''
+  solution: Understand why they are missing and how the field is used
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Understand why they are missing and how the field is used
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Before filling missing values, first:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_merge
+  title: Merge validation
+  type: mastery
+  runtime: recognition
+  prompt: 'A pandas merge should validate:'
+  answer_options:
+  - Keys, expected cardinality, unmatched rows, and row counts
+  - Only column colors
+  - Only notebook title
+  - Only file size
+  starter: ''
+  solution: Keys, expected cardinality, unmatched rows, and row counts
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Keys, expected cardinality, unmatched rows, and row counts
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A pandas merge should validate:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_group
+  title: groupby
+  type: mastery
+  runtime: recognition
+  prompt: 'groupby is used to:'
+  answer_options:
+  - Split data into groups and calculate summaries
+  - Create Power BI relationships
+  - Write SQL DDL
+  - Format cells
+  starter: ''
+  solution: Split data into groups and calculate summaries
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Split data into groups and calculate summaries
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'groupby is used to:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_notebook
+  title: Notebook quality
+  type: mastery
+  runtime: recognition
+  prompt: 'A portfolio notebook should separate:'
+  answer_options:
+  - Setup, analysis, outputs, and concise interpretation
+  - All code into one line
+  - Only screenshots
+  - Only markdown
+  starter: ''
+  solution: Setup, analysis, outputs, and concise interpretation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Setup, analysis, outputs, and concise interpretation
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A portfolio notebook should separate:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_model
+  title: Power BI retention
+  type: mastery
+  runtime: recognition
+  prompt: 'A reliable data model begins with:'
+  answer_options:
+  - Defined fact grain and dimension keys
+  - Visual colors
+  - Tooltips
+  - Bookmarks
+  starter: ''
+  solution: Defined fact grain and dimension keys
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Defined fact grain and dimension keys
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A reliable data model begins with:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_sql
+  title: SQL retention
+  type: mastery
+  runtime: recognition
+  prompt: 'Before trusting a multi-table KPI, validate:'
+  answer_options:
+  - Join cardinality, grain, null rules, and denominator
+  - Only the alias
+  - Only the chart
+  - Only the maximum value
+  starter: ''
+  solution: Join cardinality, grain, null rules, and denominator
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Join cardinality, grain, null rules, and denominator
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Before trusting a multi-table KPI, validate:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_comm
+  title: Communication
+  type: mastery
+  runtime: recognition
+  prompt: 'A recommendation should include:'
+  answer_options:
+  - Evidence, expected impact, assumptions, and limitations
+  - Only confidence
+  - Only code
+  - Only a chart title
+  starter: ''
+  solution: Evidence, expected impact, assumptions, and limitations
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Evidence, expected impact, assumptions, and limitations
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A recommendation should include:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w8_ready
+  title: Readiness
+  type: mastery
+  runtime: recognition
+  prompt: 'Portfolio execution should begin when:'
+  answer_options:
+  - The required skills are demonstrated and the readiness assessment is passed
+  - A dataset is downloaded
+  - A folder exists
+  - A chart is selected
+  starter: ''
+  solution: The required skills are demonstrated and the readiness assessment is passed
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The required skills are demonstrated and the readiness assessment is passed
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Portfolio execution should begin when:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []

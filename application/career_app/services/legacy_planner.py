@@ -24,15 +24,38 @@ DEFAULTS = {
     "General": (25, "Low", 3, 1),
 }
 
-# The weekly roadmap remains the ground-truth structure:
-# two learning priorities, one SQL priority, and one portfolio priority.
-FOCUS_SLOT_ORDER = (
-    "Learning",
-    "Learning",
-    "Learning",
-    "SQL",
-    "Portfolio",
-)
+
+def _coerce_int(value, default=None):
+    """Return an integer without allowing malformed persisted rows to crash startup."""
+    if value is None or isinstance(value, bool):
+        return default
+    try:
+        if isinstance(value, float) and not value.is_integer():
+            return default
+        text = str(value).strip()
+        if not text or not re.fullmatch(r"[+-]?\d+", text):
+            return default
+        return int(text)
+    except (TypeError, ValueError, OverflowError):
+        return default
+
+# The roadmap phase controls which categories may consume Today's Focus.
+# Weeks 1-2 are spreadsheet-first, Weeks 3-6 are SQL-first, Weeks 7-8
+# introduce Power BI and Python, and portfolio execution begins in Week 9.
+FOCUS_SLOT_ORDER = ("Learning", "Learning", "SQL", "Portfolio")
+
+
+def focus_slot_order(week):
+    week = int(week)
+    if week <= 2:
+        return ("Learning", "Learning", "Learning", "Portfolio")
+    if week <= 6:
+        return ("Learning", "Learning", "SQL", "SQL")
+    if week <= 8:
+        return ("Learning", "Learning", "SQL", "Review")
+    if week <= 11:
+        return ("Portfolio", "Portfolio", "SQL", "Learning")
+    return ("Portfolio", "Portfolio", "Review", "Learning")
 
 
 def infer(label):
@@ -192,6 +215,14 @@ def _normalized_task_label(label):
 
 
 def _row_identity(row):
+    managed_key = str(
+        row["managed_key"]
+        if "managed_key" in row.keys()
+        else ""
+    ).strip().lower()
+    if managed_key:
+        return f"managed:{managed_key}"
+
     track_key = str(
         row["track_key"]
         if "track_key" in row.keys()
@@ -226,7 +257,7 @@ def _focus_identity(conn, item):
     task_id = item.get("task_id")
     if task_id is not None:
         row = conn.execute(
-            """SELECT tt.track_key,s.week,s.label,m.category
+            """SELECT tt.track_key,s.week,s.label,m.category,m.managed_key
                FROM sprint_tasks s
                JOIN task_metadata m ON m.task_id=s.id
                LEFT JOIN track_tasks tt ON tt.task_id=s.id
@@ -318,6 +349,7 @@ def available(conn, week):
                m.category,
                m.prerequisite_state,
                m.prerequisite_reason,
+               m.managed_key,
                tt.track_key,
                tt.target_key
            FROM sprint_tasks s
@@ -416,6 +448,38 @@ def available(conn, week):
         seen.add(identity)
         deduplicated.append(row)
     return deduplicated
+
+def next_tasks(conn, week):
+    """Return the visible Next Tasks queue, including locked overdue catch-up work.
+
+    Today's Focus remains prerequisite-ready only. Next Tasks is deliberately
+    broader so the learner can see every overdue roadmap requirement and why
+    later items are locked.
+    """
+    week = int(week)
+    ready = list(available(conn, week))
+    catchups = conn.execute(
+        """SELECT
+               s.id,s.week,s.sort_order,s.label,s.completed,m.status,m.priority,
+               m.estimated_minutes,m.energy,m.deferred_until,m.destination,m.category,
+               m.prerequisite_state,m.prerequisite_reason,m.managed_key,
+               tt.track_key,tt.target_key
+           FROM sprint_tasks s
+           JOIN task_metadata m ON m.task_id=s.id
+           LEFT JOIN track_tasks tt ON tt.task_id=s.id
+           WHERE s.week=? AND s.completed=0
+             AND m.status<>'Completed'
+             AND m.managed_key LIKE 'roadmap_v1026:%'
+           ORDER BY s.sort_order,s.id""",
+        (week,),
+    ).fetchall()
+    catchup_ids = {int(row["id"]) for row in catchups}
+    # Preserve the complete catch-up queue, then add a small number of normal
+    # ready tasks so current Google/Academy progress remains visible.
+    result = list(catchups)
+    result.extend(row for row in ready if int(row["id"]) not in catchup_ids)
+    return result
+
 
 def task_schedule_eligibility(
     conn,
@@ -998,8 +1062,9 @@ def _daily_focus_track_identity(
     task_id = item.get(
         "task_id"
     )
-    if task_id is not None:
-        return f"task:{int(task_id)}"
+    numeric_task_id = _coerce_int(task_id)
+    if numeric_task_id is not None:
+        return f"task:{numeric_task_id}"
 
     return (
         source_key
@@ -1252,8 +1317,9 @@ def _manual_focus_key(item):
     task_id = item.get("task_id")
     if task_id is None:
         task_id = item.get("id")
-    if task_id is not None:
-        return f"task:{int(task_id)}"
+    numeric_task_id = _coerce_int(task_id)
+    if numeric_task_id is not None:
+        return f"task:{numeric_task_id}"
 
     category = _normalized_task_label(
         item.get("category") or "general"
@@ -1290,12 +1356,231 @@ def _create_manual_focus_store(conn):
     )
 
 
+def _repair_focus_storage(conn, active_week):
+    """Repair malformed planner rows left by an interrupted roadmap upgrade.
+
+    Daily Focus is derived scheduling data, but older patch attempts could leave
+    a task title in an integer field.  SQLite permits that even on INTEGER
+    columns.  Normalize the rows before any ``int(...)`` conversion so one bad
+    snapshot can never prevent the application from opening.
+    """
+    _create_manual_focus_store(conn)
+    current_week = max(1, _coerce_int(active_week, 1))
+
+    # Keep catch-up labels ASCII-safe for the hidden PowerShell launcher.
+    for row in conn.execute(
+        """SELECT s.id,s.label FROM sprint_tasks AS s
+           JOIN task_metadata AS m ON m.task_id=s.id
+           WHERE m.managed_key LIKE 'roadmap_v1026:%'"""
+    ).fetchall():
+        label = str(row["label"] or "")
+        cleaned = label.replace("Catch-Up • ", "Catch-Up: ").replace(
+            "Catch-Up â€¢ ", "Catch-Up: "
+        )
+        if cleaned != label:
+            conn.execute(
+                "UPDATE sprint_tasks SET label=? WHERE id=?",
+                (cleaned, int(row["id"])),
+            )
+
+    # Normalize sprint task numeric fields first because they are the recovery
+    # source for Daily Focus rows.
+    sprint_rows = conn.execute(
+        """SELECT s.id,s.week,s.sort_order,s.label,s.completed,m.managed_key
+           FROM sprint_tasks AS s
+           LEFT JOIN task_metadata AS m ON m.task_id=s.id"""
+    ).fetchall()
+    for row in sprint_rows:
+        task_id = int(row["id"])
+        managed = str(row["managed_key"] or "")
+        week_value = _coerce_int(
+            row["week"], current_week if managed.startswith("roadmap_v1026:") else 1
+        )
+        sort_value = _coerce_int(
+            row["sort_order"],
+            (-760000 + task_id) if managed.startswith("roadmap_v1026:") else task_id,
+        )
+        completed_value = 1 if _coerce_int(row["completed"], 0) else 0
+        conn.execute(
+            "UPDATE sprint_tasks SET week=?,sort_order=?,completed=? WHERE id=?",
+            (week_value, sort_value, completed_value, task_id),
+        )
+
+    metadata_rows = conn.execute(
+        """SELECT m.task_id,m.priority,m.estimated_minutes,m.destination,s.label
+           FROM task_metadata AS m
+           LEFT JOIN sprint_tasks AS s ON s.id=m.task_id"""
+    ).fetchall()
+    for row in metadata_rows:
+        defaults = infer(str(row["label"] or ""))
+        conn.execute(
+            """UPDATE task_metadata
+               SET priority=?,estimated_minutes=?,destination=?
+               WHERE task_id=?""",
+            (
+                _coerce_int(row["priority"], int(defaults.get("priority", 3) or 3)),
+                _coerce_int(
+                    row["estimated_minutes"],
+                    int(defaults.get("minutes", 30) or 30),
+                ),
+                _coerce_int(
+                    row["destination"],
+                    int(defaults.get("destination", 0) or 0),
+                ),
+                int(row["task_id"]),
+            ),
+        )
+
+    def recover_task_id(raw_task_id, source_key, title):
+        candidate = _coerce_int(raw_task_id)
+        if candidate is not None:
+            exists = conn.execute(
+                "SELECT 1 FROM sprint_tasks WHERE id=?", (candidate,)
+            ).fetchone()
+            if exists is not None:
+                return candidate
+
+        match = re.fullmatch(r"task:(\d+)", str(source_key or "").strip())
+        if match:
+            candidate = int(match.group(1))
+            exists = conn.execute(
+                "SELECT 1 FROM sprint_tasks WHERE id=?", (candidate,)
+            ).fetchone()
+            if exists is not None:
+                return candidate
+
+        label = str(title or "").strip()
+        if label:
+            found = conn.execute(
+                """SELECT id FROM sprint_tasks
+                   WHERE label=?
+                   ORDER BY completed,ABS(week-?),sort_order,id
+                   LIMIT 1""",
+                (label, current_week),
+            ).fetchone()
+            if found is not None:
+                return int(found["id"])
+        return None
+
+    daily_rows = conn.execute(
+        """SELECT id,focus_date,week,position,task_id,source_key,category,title,
+                  estimated_minutes,is_extra
+           FROM daily_focus
+           ORDER BY focus_date,position,id"""
+    ).fetchall()
+    max_positions = {}
+    for row in daily_rows:
+        focus_date = str(row["focus_date"])
+        valid_position = _coerce_int(row["position"])
+        if valid_position is not None:
+            max_positions[focus_date] = max(
+                max_positions.get(focus_date, 0), valid_position
+            )
+
+    for row in daily_rows:
+        focus_date = str(row["focus_date"])
+        position = _coerce_int(row["position"])
+        if position is None:
+            position = max_positions.get(focus_date, 0) + 1
+            max_positions[focus_date] = position
+
+        task_id = recover_task_id(
+            row["task_id"], row["source_key"], row["title"]
+        )
+        week_value = _coerce_int(row["week"], current_week)
+        minutes = _coerce_int(row["estimated_minutes"])
+        category = str(row["category"] or "General")
+        title = str(row["title"] or "").strip()
+        source_key = str(row["source_key"] or "").strip()
+
+        if task_id is not None:
+            task = conn.execute(
+                """SELECT s.label,m.estimated_minutes,m.category
+                   FROM sprint_tasks AS s
+                   LEFT JOIN task_metadata AS m ON m.task_id=s.id
+                   WHERE s.id=?""",
+                (task_id,),
+            ).fetchone()
+            if task is not None:
+                if not title or _coerce_int(title) is not None:
+                    title = str(task["label"] or title or "Task")
+                if minutes is None:
+                    minutes = _coerce_int(task["estimated_minutes"], 30)
+                if not category or category == "General":
+                    category = str(task["category"] or category or "General")
+            if not source_key or source_key.startswith("task:"):
+                source_key = f"task:{task_id}"
+
+        if not title:
+            title = "Roadmap task"
+        if minutes is None:
+            minutes = int(infer(title).get("minutes", 30) or 30)
+
+        conn.execute(
+            """UPDATE daily_focus
+               SET week=?,position=?,task_id=?,source_key=?,category=?,title=?,
+                   estimated_minutes=?,is_extra=?
+               WHERE id=?""",
+            (
+                week_value,
+                position,
+                task_id,
+                source_key or f"recovered:{row['id']}",
+                category or "General",
+                title,
+                minutes,
+                1 if _coerce_int(row["is_extra"], 0) else 0,
+                int(row["id"]),
+            ),
+        )
+
+    manual_rows = conn.execute(
+        """SELECT id,week,task_id,source_key,title,estimated_minutes,destination
+           FROM manual_daily_focus"""
+    ).fetchall()
+    for row in manual_rows:
+        task_id = recover_task_id(
+            row["task_id"], row["source_key"], row["title"]
+        )
+        minutes = _coerce_int(row["estimated_minutes"])
+        destination = _coerce_int(row["destination"], 0)
+        if task_id is not None:
+            meta = conn.execute(
+                "SELECT estimated_minutes,destination FROM task_metadata WHERE task_id=?",
+                (task_id,),
+            ).fetchone()
+            if meta is not None:
+                if minutes is None:
+                    minutes = _coerce_int(meta["estimated_minutes"], 30)
+                if destination == 0:
+                    destination = _coerce_int(meta["destination"], 0)
+        conn.execute(
+            """UPDATE manual_daily_focus
+               SET week=?,task_id=?,estimated_minutes=?,destination=?
+               WHERE id=?""",
+            (
+                _coerce_int(row["week"], current_week),
+                task_id,
+                minutes if minutes is not None else 30,
+                destination,
+                int(row["id"]),
+            ),
+        )
+
+    conn.commit()
+
+
+def repair_persisted_planner_data(conn, week):
+    """Public startup repair used before track and dashboard refreshes."""
+    _repair_focus_storage(conn, week)
+
+
 def _manual_focus_task_id(conn, row):
-    task_id = row["task_id"]
+    task_id = _coerce_int(row["task_id"])
     if task_id is not None:
         existing = conn.execute(
             "SELECT id FROM sprint_tasks WHERE id=?",
-            (int(task_id),),
+            (task_id,),
         ).fetchone()
         if existing is not None:
             return int(existing["id"])
@@ -2028,9 +2313,11 @@ def _stored_focus_plan(
     focus_date = (
         date.today().isoformat()
     )
+    normalized_week = max(1, _coerce_int(week, 1))
+    _repair_focus_storage(conn, normalized_week)
     _restore_manual_focus_rows(
         conn,
-        int(week),
+        normalized_week,
     )
     rows = conn.execute(
         """SELECT
@@ -2067,7 +2354,7 @@ def _stored_focus_plan(
     ]
 
     stale_base = any(
-        int(row["week"]) != int(week)
+        _coerce_int(row["week"], normalized_week) != normalized_week
         for row in base_rows
     )
 
@@ -2087,9 +2374,9 @@ def _stored_focus_plan(
                  AND COALESCE(is_extra,0)=1
                  AND week<>?""",
             (
-                int(week),
+                normalized_week,
                 focus_date,
-                int(week),
+                normalized_week,
             ),
         )
 
@@ -2153,16 +2440,13 @@ def _stored_focus_plan(
         result.append(
             {
                 "task_id": (
-                    int(row["task_id"])
-                    if row["task_id"]
-                    is not None
-                    else None
+                    _coerce_int(row["task_id"])
                 ),
-                "week": int(
-                    row["week"]
+                "week": _coerce_int(
+                    row["week"], normalized_week
                 ),
-                "sort_order": int(
-                    row["position"]
+                "sort_order": _coerce_int(
+                    row["position"], len(result) + 1
                 ),
                 "label": row["title"],
                 "category": (
@@ -2177,19 +2461,14 @@ def _stored_focus_plan(
                         or "Not Started"
                     )
                 ),
-                "priority": int(
-                    row["priority"]
-                    or 3
+                "priority": _coerce_int(
+                    row["priority"], 3
                 ),
-                "estimated_minutes": int(
-                    row[
-                        "estimated_minutes"
-                    ]
-                    or 30
+                "estimated_minutes": _coerce_int(
+                    row["estimated_minutes"], 30
                 ),
-                "destination": int(
-                    row["destination"]
-                    or 0
+                "destination": _coerce_int(
+                    row["destination"], 0
                 ),
                 "carryover": False,
                 "carryover_note": None,
@@ -3305,6 +3584,263 @@ def tomorrow_preview(
 
 
 
+def ensure_due_retrospective_focus(conn, week, max_items=5):
+    """Keep the due weekly retrospective visible in today's frozen plan.
+
+    Friday's current-week retrospective and Monday's missed prior-week
+    retrospective are protected planning commitments.  Track advancement may
+    refresh other rows, but it must not silently remove the review task.
+    """
+    current_week = int(week)
+    weekday = date.today().weekday()
+    due_week = current_week if weekday == 4 else current_week - 1 if weekday == 0 and current_week > 1 else None
+    if due_week is None:
+        return False
+
+    task = conn.execute(
+        """SELECT s.id,s.label,m.category,m.estimated_minutes
+           FROM sprint_tasks AS s
+           JOIN task_metadata AS m ON m.task_id=s.id
+           WHERE s.week=?
+             AND s.completed=0
+             AND m.status<>'Completed'
+             AND m.category='Review'
+             AND lower(s.label) LIKE '%retrospective%'
+           ORDER BY m.priority,s.sort_order,s.id
+           LIMIT 1""",
+        (int(due_week),),
+    ).fetchone()
+    if task is None:
+        return False
+
+    focus_date = date.today().isoformat()
+    existing = conn.execute(
+        """SELECT id FROM daily_focus
+           WHERE focus_date=?
+             AND (task_id=? OR lower(title)=lower(?))
+           LIMIT 1""",
+        (focus_date, int(task["id"]), task["label"]),
+    ).fetchone()
+    if existing is not None:
+        return False
+
+    count = int(
+        conn.execute(
+            """SELECT COUNT(*) FROM daily_focus
+               WHERE focus_date=? AND COALESCE(is_extra,0)=0""",
+            (focus_date,),
+        ).fetchone()[0]
+        or 0
+    )
+
+    # Put the due review first so it remains visible in compact dashboard
+    # layouts. Preserve manually added rows and historical dates.
+    conn.execute(
+        """UPDATE daily_focus
+           SET position=position+1000
+           WHERE focus_date=?""",
+        (focus_date,),
+    )
+
+    if count >= int(max_items):
+        replace = conn.execute(
+            """SELECT id
+               FROM daily_focus
+               WHERE focus_date=?
+                 AND COALESCE(is_extra,0)=0
+                 AND category<>'Review'
+               ORDER BY position DESC,id DESC
+               LIMIT 1""",
+            (focus_date,),
+        ).fetchone()
+        if replace is not None:
+            conn.execute(
+                "DELETE FROM daily_focus WHERE id=?",
+                (int(replace["id"]),),
+            )
+
+    conn.execute(
+        """INSERT INTO daily_focus
+           (focus_date,week,position,task_id,source_key,category,title,
+            estimated_minutes,track_key,target_key,is_extra,completed_at)
+           VALUES(?,?,?,?,?,?,?,?,NULL,NULL,0,NULL)""",
+        (
+            focus_date,
+            current_week,
+            1,
+            int(task["id"]),
+            f"task:{int(task['id'])}",
+            task["category"] or "Review",
+            task["label"],
+            int(task["estimated_minutes"] or 20),
+        ),
+    )
+    conn.execute(
+        """UPDATE daily_focus
+           SET position=position-999
+           WHERE focus_date=?
+             AND position>1000""",
+        (focus_date,),
+    )
+    conn.commit()
+    return True
+
+
+def refresh_due_track_focus(conn, week, max_items=5):
+    """Replace completed same-track focus rows with a due sequential target.
+
+    Today's Focus is intentionally frozen, but an overdue adaptive task must
+    advance when its predecessor is completed.  This function changes only the
+    current day's derived focus rows and never rewrites historical days.
+    """
+    focus_date = date.today().isoformat()
+    retrospective_changed = ensure_due_retrospective_focus(
+        conn,
+        int(week),
+        max_items=max_items,
+    )
+    try:
+        schedules = conn.execute(
+            """SELECT
+                   tt.track_key,
+                   tt.target_key,
+                   tt.task_id,
+                   s.label,
+                   m.category,
+                   m.estimated_minutes
+               FROM track_tasks AS tt
+               JOIN adaptive_track_schedule AS ats
+                 ON ats.track_key=tt.track_key
+                AND ats.target_key=tt.target_key
+               JOIN track_state AS ts
+                 ON ts.track_key=tt.track_key
+               JOIN sprint_tasks AS s
+                 ON s.id=tt.task_id
+               JOIN task_metadata AS m
+                 ON m.task_id=s.id
+               WHERE ts.status='Active'
+                 AND ats.recommended_date<=?
+                 AND s.completed=0
+                 AND m.status NOT IN ('Completed','Blocked')
+               ORDER BY CASE tt.track_key
+                   WHEN 'google' THEN 0
+                   WHEN 'academy' THEN 1
+                   WHEN 'sql' THEN 2
+                   WHEN 'portfolio' THEN 3
+                   WHEN 'applied' THEN 4
+                   ELSE 9 END""",
+            (focus_date,),
+        ).fetchall()
+    except Exception:
+        return retrospective_changed
+
+    if not schedules:
+        return retrospective_changed
+
+    changed = retrospective_changed
+    for row in schedules:
+        exact = conn.execute(
+            """SELECT id
+               FROM daily_focus
+               WHERE focus_date=?
+                 AND lower(COALESCE(track_key,''))=lower(?)
+                 AND COALESCE(target_key,'')=?
+               LIMIT 1""",
+            (focus_date, row["track_key"], row["target_key"]),
+        ).fetchone()
+        if exact is not None:
+            continue
+
+        previous = conn.execute(
+            """SELECT id,position
+               FROM daily_focus
+               WHERE focus_date=?
+                 AND COALESCE(is_extra,0)=0
+                 AND completed_at IS NOT NULL
+                 AND (
+                     lower(COALESCE(track_key,''))=lower(?)
+                     OR lower(COALESCE(source_key,''))=lower(?)
+                 )
+               ORDER BY position
+               LIMIT 1""",
+            (
+                focus_date,
+                row["track_key"],
+                f"roadmap:{row['track_key']}",
+            ),
+        ).fetchone()
+
+        if previous is not None:
+            conn.execute(
+                """UPDATE daily_focus
+                   SET week=?,
+                       task_id=?,
+                       source_key=?,
+                       category=?,
+                       title=?,
+                       estimated_minutes=?,
+                       track_key=?,
+                       target_key=?,
+                       completed_at=NULL
+                   WHERE id=?""",
+                (
+                    int(week),
+                    int(row["task_id"]),
+                    f"task:{int(row['task_id'])}",
+                    row["category"] or "General",
+                    row["label"],
+                    int(row["estimated_minutes"] or 30),
+                    row["track_key"],
+                    row["target_key"],
+                    int(previous["id"]),
+                ),
+            )
+            changed = True
+            continue
+
+        count = conn.execute(
+            """SELECT COUNT(*)
+               FROM daily_focus
+               WHERE focus_date=?
+                 AND COALESCE(is_extra,0)=0""",
+            (focus_date,),
+        ).fetchone()[0]
+        if int(count or 0) >= int(max_items):
+            continue
+
+        position = conn.execute(
+            """SELECT COALESCE(MAX(position),0)+1
+               FROM daily_focus
+               WHERE focus_date=?""",
+            (focus_date,),
+        ).fetchone()[0]
+        conn.execute(
+            """INSERT INTO daily_focus
+               (
+                   focus_date,week,position,task_id,source_key,category,title,
+                   estimated_minutes,track_key,target_key,is_extra,completed_at
+               )
+               VALUES(?,?,?,?,?,?,?,?,?,?,0,NULL)""",
+            (
+                focus_date,
+                int(week),
+                int(position or 1),
+                int(row["task_id"]),
+                f"task:{int(row['task_id'])}",
+                row["category"] or "General",
+                row["label"],
+                int(row["estimated_minutes"] or 30),
+                row["track_key"],
+                row["target_key"],
+            ),
+        )
+        changed = True
+
+    if changed:
+        conn.commit()
+    return changed
+
+
 def intelligent_focus_plan(
     conn,
     week,
@@ -3316,8 +3852,7 @@ def intelligent_focus_plan(
 
     Selection order:
     1. Promote up to two unfinished items shown yesterday.
-    2. Fill the roadmap's Learning/Learning/SQL/Portfolio slots with
-       in-progress and highest-priority real tasks.
+    2. Fill phase-aware roadmap slots with in-progress and highest-priority real tasks.
     3. Use the hard-coded weekly roadmap only when no real task can
        satisfy a required slot.
     """
@@ -3329,6 +3864,15 @@ def intelligent_focus_plan(
         week,
     )
     if existing_plan:
+        if refresh_due_track_focus(
+            conn,
+            int(week),
+            max_items=max_items,
+        ):
+            return _stored_focus_plan(
+                conn,
+                int(week),
+            )
         return existing_plan
 
     current = []
@@ -3378,7 +3922,8 @@ def intelligent_focus_plan(
     selected = []
     used_task_ids = set()
     used_focus_identities = set()
-    remaining_slots = list(FOCUS_SLOT_ORDER)
+    slot_order = focus_slot_order(week)
+    remaining_slots = list(slot_order)
 
     # Promote yesterday's unfinished recommendations while preserving
     # at least two roadmap-grounded slots for today's work.
@@ -3472,25 +4017,37 @@ def intelligent_focus_plan(
         ]
 
         for slot_index, slot_category in enumerate(
-            FOCUS_SLOT_ORDER
+            slot_order
         ):
             if len(selected) >= max_items:
                 break
 
             represented_count = represented.count(slot_category)
             required_count = (
-                list(FOCUS_SLOT_ORDER)[: slot_index + 1]
+                list(slot_order)[: slot_index + 1]
                 .count(slot_category)
             )
             if represented_count >= required_count:
                 continue
 
-            fallback = fallbacks[slot_index]
-            fallback_identity = _focus_identity(
-                conn,
-                fallback,
-            )
-            if fallback_identity in used_focus_identities:
+            fallback = None
+            fallback_identity = None
+            for candidate_fallback in fallbacks:
+                if candidate_fallback["category"] != slot_category:
+                    continue
+                candidate_identity = _focus_identity(
+                    conn,
+                    candidate_fallback,
+                )
+                if candidate_identity in used_focus_identities:
+                    continue
+                fallback = candidate_fallback
+                fallback_identity = candidate_identity
+                break
+
+            # A missing optional fallback should leave the slot open instead
+            # of aborting application startup.
+            if fallback is None:
                 continue
             fallback_track = str(
                 fallback["source_key"]
@@ -3649,6 +4206,11 @@ def intelligent_focus_plan(
         ),
     )[:max_items]
     _record_focus_plan(conn, week, selected)
+    ensure_due_retrospective_focus(
+        conn,
+        int(week),
+        max_items=max_items,
+    )
     return _stored_focus_plan(
         conn,
         int(week),
@@ -4308,3 +4870,155 @@ def start_extra_focus(conn, week, state, item):
         item,
     )
 # END ALWAYS AVAILABLE GET AHEAD V10.21.1
+
+# ---------------------------------------------------------------------------
+# Unified planning runtime (v10.27.0)
+# ---------------------------------------------------------------------------
+# The legacy planner above remains only so historical migrations and older
+# task-editing paths can resolve their symbols.  All active dashboard planning
+# is delegated to one deterministic task/readiness service below.
+from career_app.services import unified_tasks as _unified_tasks
+
+
+def refresh_due_track_focus(conn, week, max_items=5):
+    _unified_tasks.migrate_runtime(conn, int(week))
+    return _unified_tasks.daily_plan(conn, int(week), max_items=max_items)
+
+
+def intelligent_focus_plan(conn, week, guide, state, max_items=5):
+    del guide, state
+    return _unified_tasks.daily_plan(conn, int(week), max_items=max_items)
+
+
+def next_tasks(conn, week):
+    return _unified_tasks.next_tasks(conn, int(week), limit=6)
+
+
+def coming_up_tasks(conn, week, limit=3):
+    return _unified_tasks.coming_up(conn, int(week), limit=int(limit))
+
+
+def focus_day_summary(items, *, conn=None, week=None):
+    del week
+    if conn is None:
+        active = list(items or [])
+        return {
+            "total_count": len(active),
+            "completed_count": 0,
+            "planned_minutes": sum(int(item.get("estimated_minutes") or 0) for item in active),
+            "completed_titles": [],
+            "session_count": 0,
+            "active_extra": None,
+            "all_base_complete": False,
+            "inferred_empty_complete": False,
+        }
+    return _unified_tasks.completion_summary(conn, list(items or []))
+
+
+def rebuild_today_snapshot(conn, week, guide, state, max_items=5):
+    del guide, state
+    today = date.today().isoformat()
+    conn.execute(
+        "DELETE FROM daily_focus WHERE focus_date=? AND completed_at IS NULL",
+        (today,),
+    )
+    conn.commit()
+    items = _unified_tasks.daily_plan(conn, int(week), max_items=max_items)
+    return {
+        "focus_date": today,
+        "created": len(items),
+        "items": items,
+    }
+
+
+def available(conn, week):
+    return _unified_tasks.ready_tasks(conn, int(week))
+
+
+def make_plan(conn, week, available_minutes, energy):
+    del energy
+    remaining = max(0, int(available_minutes or 0))
+    selected = []
+    for task in _unified_tasks.ready_tasks(conn, int(week)):
+        minutes = int(task.get("estimated_minutes") or 30)
+        if selected and minutes > remaining:
+            continue
+        selected.append(task)
+        remaining = max(0, remaining - minutes)
+        if remaining <= 0:
+            break
+    return selected, remaining
+
+
+def task_schedule_eligibility(conn, task_id, week):
+    task_id = _coerce_int(task_id, 0)
+    task = next(
+        (
+            item
+            for item in _unified_tasks.all_tasks(conn, int(week))
+            if int(item.get("id") or 0) == task_id
+        ),
+        None,
+    )
+    if task is None:
+        return {"eligible": False, "ready": False, "reason": "Task not found."}
+    if task.get("ready"):
+        return {"eligible": True, "ready": True, "reason": "Ready for the dynamic queue."}
+    return {
+        "eligible": False,
+        "ready": False,
+        "reason": str(task.get("prerequisite_reason") or "Complete the prerequisite first."),
+    }
+
+
+def get_ahead_candidates(conn, week, state, limit=12):
+    del state
+    candidates = _unified_tasks.optional_practice(conn, int(week), limit=int(limit))
+    for candidate in candidates:
+        candidate["extra_reason"] = "Optional prerequisite-ready practice"
+    return candidates
+
+
+def started_get_ahead_tasks(conn, week):
+    del conn, week
+    return []
+
+
+def start_get_ahead(conn, week, state, item):
+    del conn, week, state
+    # Optional Practice is intentionally not persisted into Today\'s Focus.
+    return dict(item or {})
+
+
+def remove_get_ahead_task(conn, week, item):
+    del conn, week
+    return {"removed": False, "label": str((item or {}).get("label") or "")}
+
+
+def optional_focus_candidate(conn, week, state):
+    del conn, week, state
+    return None
+
+
+def start_extra_focus(conn, week, state, item):
+    return start_get_ahead(conn, week, state, item)
+
+
+def tomorrow_preview(conn, week, state, limit=3):
+    del state
+    today_ids = {int(item.get("id") or 0) for item in _unified_tasks.daily_plan(conn, int(week))}
+    preview = []
+    for item in _unified_tasks.next_tasks(conn, int(week), limit=20):
+        if int(item.get("id") or 0) in today_ids:
+            continue
+        preview.append(
+            {
+                "title": str(item.get("label") or "Task"),
+                "detail": str(item.get("display_source") or item.get("detail") or "Ready next"),
+                "minutes": int(item.get("estimated_minutes") or 30),
+                "task_id": item.get("id"),
+            }
+        )
+        if len(preview) >= int(limit):
+            break
+    return preview

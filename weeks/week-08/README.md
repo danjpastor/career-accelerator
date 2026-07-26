@@ -1,4 +1,4 @@
-# Week 8 Sprint — Act on Insights
+# Week 8 Sprint — Python, pandas, and Portfolio Readiness
 
 **Target time:** 15–20 hours
 
@@ -18,33 +18,34 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Finish Google Course 6 and begin Course 7
+Close remaining certificate gaps while completing the final learning-phase requirements.
 
-### Analytics Skills
-Mixed review plus analytics-focused Python and pandas
+### Accelerator Academy
+Complete Python and pandas foundations, inspection, cleaning, grouping, merging, notebooks, and analytical communication.
 
 ### Portfolio
-Refine the dashboard and write actionable recommendations
+Pass the Portfolio Readiness Assessment to unlock portfolio cleaning, analysis, modeling, and dashboard execution.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Academy:** Three Python and pandas sessions
+- **Applied Practice:** Two notebook sessions
+- **SQL Retention:** One mixed DuckDB session
+- **Google:** Certificate catch-up or completion
+- **Review:** Portfolio Readiness Assessment
 
 ## Checklist
-- [ ] [Google Course 6] Finish the remaining course modules
-- [ ] [Google Course 7] Begin the first module
-- [ ] Complete a Python and pandas fundamentals lesson
-- [ ] Load and inspect a dataset with pandas
-- [ ] Solve Odd and Even Measurements
-- [ ] Refine dashboard layout and visual hierarchy
-- [ ] Add a recommendations section
-- [ ] Connect each recommendation to evidence
-- [ ] Write the executive narrative
-- [ ] Review the project with a stakeholder mindset
-- [ ] Commit dashboard and narrative improvements
+- [ ] Complete the planned Google Certificate work for the week
+- [ ] Complete Python variables, data types, functions, and packages
+- [ ] Complete pandas loading, inspection, filtering, and missing-value lessons
+- [ ] Complete pandas cleaning, type conversion, and date-parsing lessons
+- [ ] Complete pandas groupby, aggregation, and calculated-column lessons
+- [ ] Complete pandas merge, duplicate handling, and export lessons
+- [ ] Complete notebook organization and analytical interpretation lessons
+- [ ] Complete DuckDB Exercise 10: Mixed workforce assessment
+- [ ] Complete a mixed SQL retention review
+- [ ] Finalize the portfolio execution plan and readiness checklist
+- [ ] Pass the Week 8 Portfolio Readiness Assessment
 - [ ] Complete the Week 8 retrospective
 
 ## Daily Log
@@ -52,7 +53,7 @@ Refine the dashboard and write actionable recommendations
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,10 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 03: Build a Power BI star schema
-- [ ] Complete Applied Lab 04: Build and validate DAX measures
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 26: Analyze an A/B test and practical significance
-- [ ] Complete Applied Lab 31: Analyze customer and revenue churn
+- [ ] Clean and analyze a practice dataset with pandas
+- [ ] Complete a cross-tool portfolio-readiness simulation

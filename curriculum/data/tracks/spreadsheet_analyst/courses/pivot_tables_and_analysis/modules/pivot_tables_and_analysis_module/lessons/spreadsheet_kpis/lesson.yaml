@@ -1,0 +1,137 @@
+lesson_id: spreadsheet_kpis
+title: KPI Summaries & Business Interpretation
+order: 2
+difficulty: beginner
+description: Build practical analyst skill in kpi summaries & business interpretation.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply kpi summaries & business interpretation in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.kpis
+requires:
+- spreadsheet.pivots
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_kpis_1
+  title: KPI Summaries & Business Interpretation — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: 'A KPI definition must include:'
+  answer_options:
+  - Population, numerator, denominator, and time period when relevant
+  - Only a chart color
+  - Only a title
+  - Only a target
+  starter: ''
+  solution: Population, numerator, denominator, and time period when relevant
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Population, numerator, denominator, and time period when relevant
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: 'A KPI definition must include:'
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.kpis
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: KPI Summaries & Business Interpretation — Check 1
+    objective: 'A KPI definition must include:'
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.kpis**. Focus on preserving source data, defining the
+      unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_kpis_2
+  title: KPI Summaries & Business Interpretation — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: What makes a recommendation defensible?
+  answer_options:
+  - It is tied to validated evidence and stated limitations
+  - It sounds confident
+  - It uses many charts
+  - It excludes assumptions
+  starter: ''
+  solution: It is tied to validated evidence and stated limitations
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It is tied to validated evidence and stated limitations
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What makes a recommendation defensible?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.kpis
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: KPI Summaries & Business Interpretation — Check 2
+    objective: What makes a recommendation defensible?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.kpis**. Focus on preserving source data, defining the
+      unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_kpis_3
+  title: KPI Summaries & Business Interpretation — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What should a concise finding state?
+  answer_options:
+  - What changed, why it matters, and the supporting metric
+  - Every formula in the workbook
+  - Only the highest value
+  - Only an opinion
+  starter: ''
+  solution: What changed, why it matters, and the supporting metric
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: What changed, why it matters, and the supporting metric
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What should a concise finding state?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.kpis
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: KPI Summaries & Business Interpretation — Check 3
+    objective: What should a concise finding state?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.kpis**. Focus on preserving source data, defining the
+      unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

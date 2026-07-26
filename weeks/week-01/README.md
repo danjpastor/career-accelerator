@@ -1,4 +1,4 @@
-# Week 1 Sprint — Analytics Foundations
+# Week 1 Sprint — Spreadsheet Foundations
 
 **Target time:** 15–20 hours
 
@@ -18,33 +18,34 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Start Google Course 1
+Continue the current certificate module while establishing a consistent weekly study rhythm.
 
-### Analytics Skills
-Introduction to SQL: SELECT, FROM, WHERE, ORDER BY, LIMIT
+### Accelerator Academy
+Complete spreadsheet structure, references, formulas, conditional logic, and basic summaries.
 
 ### Portfolio
-Choose a portfolio problem and define its business context
+Preparation only: review the brief, confirm the business problem, create the project structure, and preserve untouched raw data.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Academy:** Three spreadsheet learning sessions
+- **Google:** Two certificate sessions
+- **Practice:** Two guided spreadsheet activities
+- **Portfolio:** One short preparation block
+- **Review:** Week 1 cumulative knowledge check and retrospective
 
 ## Checklist
-- [ ] [Google Course 1] Complete orientation and the first learning module
-- [ ] [Google Course 1] Record key concepts and unfamiliar terminology
-- [ ] Create a realistic weekly study schedule
-- [ ] Complete DataCamp: Introduction to SQL — Chapter 1: Relational Databases
-- [ ] Complete DuckDB Exercise 01: Filter and sort support tickets
-- [ ] Solve Histogram of Tweets
-- [ ] Solve Data Science Skills
-- [ ] Choose the first portfolio project problem
-- [ ] Identify the intended audience and business value
-- [ ] Write a short career-transition reflection
-- [ ] Create or confirm the GitHub portfolio structure
+- [ ] Complete the planned Google Certificate work for the week
+- [ ] Complete Spreadsheet Structure and Data Types
+- [ ] Complete Cell References and Core Formulas
+- [ ] Complete Conditional Formulas and Logic
+- [ ] Complete Conditional Summaries
+- [ ] Practice sorting, filtering, and identifying missing values
+- [ ] Build and validate a small formula-based summary
+- [ ] Review the flagship project brief and stakeholder problem
+- [ ] Create or verify the project folder structure
+- [ ] Preserve the untouched raw source files
+- [ ] Pass the Week 1 Cumulative Knowledge Check
 - [ ] Complete the Week 1 retrospective
 
 ## Daily Log
@@ -52,7 +53,7 @@ Choose a portfolio problem and define its business context
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -60,3 +61,8 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
+
+## Applied Labs
+
+- [ ] Spreadsheet foundations guided practice
+- [ ] Formula and reference error diagnosis

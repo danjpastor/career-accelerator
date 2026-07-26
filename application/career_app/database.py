@@ -491,6 +491,7 @@ def factory_reset(conn, start_date):
     """
     progress_tables = [
         "daily_focus",
+        "roadmap_requirement_state",
         "roadmap_task_archive",
         "task_workspace_artifacts",
         "task_workspaces",

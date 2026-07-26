@@ -38,11 +38,11 @@ class AcademyService:
         self._register_package()
         self._seed_progress()
         self.progress.reconcile_lessons(self.catalog.lessons())
-        # Academy activity rows are the source of truth. Rebuild the adaptive
-        # completion ledger and today's focus state from those rows before the
-        # next recommendation is exposed to the legacy planner.
+        # Academy activity rows are the source of truth. Rebuild the durable
+        # completion ledger, retire obsolete external-learning recommendations,
+        # and expose one canonical next Academy task. The unified planner owns
+        # Today’s Focus and Next Tasks.
         self._reconcile_activity_events()
-        self._reconcile_today_focus_progress()
         self._retire_datacamp_recommendations()
         self.sync_planner_task()
 
@@ -368,18 +368,25 @@ class AcademyService:
         return self.recommendations.assessment_passed(assessment_id)
 
     def assessment_unlocked(self, assessment: AssessmentDefinition) -> tuple[bool, tuple[str, ...]]:
+        gate_ready, gate_missing = self.recommendations.assessment_unlocked(
+            assessment.assessment_id
+        )
+        if not gate_ready and not self.assessment_passed(assessment.assessment_id):
+            return False, gate_missing
         missing = self._missing_skills(assessment.requires)
         return not missing, missing
 
     def skills_lab_unlocked(self, lab: SkillsLabDefinition) -> tuple[bool, tuple[str, ...]]:
-        missing = list(self._missing_skills(lab.requires))
+        gate_ready, gate_missing = self.recommendations.skills_lab_unlocked(lab.lab_id)
+        missing = list(gate_missing if not gate_ready else ())
+        missing.extend(self._missing_skills(lab.requires))
         for course in self.catalog.courses():
             if lab not in course.skills_labs:
                 continue
             for assessment in course.assessments:
                 if not self.assessment_passed(assessment.assessment_id):
                     missing.append(f"checkpoint:{assessment.title}")
-        return not missing, tuple(missing)
+        return not missing, tuple(dict.fromkeys(missing))
 
     def remember_target(self, target_key: str) -> None:
         program = self.catalog.program
@@ -600,6 +607,9 @@ class AcademyService:
             ),
         )
         self.conn.commit()
+        if passed:
+            from career_app.services import roadmap_mastery
+            roadmap_mastery.reconcile(self.conn)
         self.sync_planner_task()
         return {
             "passed": passed,
@@ -942,6 +952,77 @@ class AcademyService:
             # Standalone engine tests may not include the legacy planner tables.
             return
 
+    @staticmethod
+    def _roadmap_catchup_key_for_recommendation(
+        recommendation: AcademyRecommendation | None,
+    ) -> str | None:
+        """Return the managed catch-up key represented by a recommendation.
+
+        Existing learners can have an overdue lesson in the v10.26 roadmap and
+        the Academy adaptive pointer can recommend an activity inside that same
+        lesson.  The overdue roadmap row is the visible planner task; creating a
+        second Academy row would duplicate the work and can leave an older SQL
+        recommendation visible during the spreadsheet catch-up phase.
+        """
+        if recommendation is None:
+            return None
+        target = str(recommendation.target_key or "")
+        parts = target.split(":")
+        if len(parts) >= 4 and parts[:2] == ["academy", "activity"]:
+            return f"roadmap_v1026:lesson:{parts[2]}"
+        if len(parts) >= 3 and parts[:2] == ["academy", "assessment"]:
+            return f"roadmap_v1026:assessment:{parts[2]}"
+        return None
+
+    def _use_existing_roadmap_catchup(
+        self,
+        recommendation: AcademyRecommendation | None,
+        planner_metadata: dict[str, Any],
+    ) -> bool:
+        """Suppress the duplicate adaptive task when a catch-up row owns it."""
+        managed_key = self._roadmap_catchup_key_for_recommendation(recommendation)
+        if not managed_key:
+            return False
+        catchup = self.conn.execute(
+            """SELECT s.id FROM sprint_tasks s
+               JOIN task_metadata m ON m.task_id=s.id
+               WHERE s.completed=0 AND m.managed_key=?
+               LIMIT 1""",
+            (managed_key,),
+        ).fetchone()
+        if catchup is None:
+            return False
+
+        existing = self.conn.execute(
+            "SELECT task_id FROM track_tasks WHERE track_key=?",
+            (self.TRACK_KEY,),
+        ).fetchone()
+        if existing is not None:
+            task_id = int(existing["task_id"] if hasattr(existing, "keys") else existing[0])
+            self.conn.execute(
+                "DELETE FROM daily_focus WHERE task_id=? AND completed_at IS NULL",
+                (task_id,),
+            )
+            self.conn.execute(
+                "DELETE FROM track_tasks WHERE track_key=?",
+                (self.TRACK_KEY,),
+            )
+            row = self.conn.execute(
+                "SELECT completed FROM sprint_tasks WHERE id=?", (task_id,)
+            ).fetchone()
+            completed = bool(row and int(row[0] or 0))
+            if not completed:
+                self.conn.execute("DELETE FROM task_metadata WHERE task_id=?", (task_id,))
+                self.conn.execute("DELETE FROM sprint_tasks WHERE id=?", (task_id,))
+
+        self.conn.execute(
+            """UPDATE track_state SET metadata=?,status='Active',updated_at=CURRENT_TIMESTAMP
+               WHERE track_key=?""",
+            (json.dumps(planner_metadata), self.TRACK_KEY),
+        )
+        self.conn.commit()
+        return True
+
     def sync_planner_task(self) -> None:
         """Expose the next prerequisite-ready Academy action to the existing planner."""
         recommendation = self.next_recommendation()
@@ -1048,6 +1129,8 @@ class AcademyService:
                    WHERE track_key=?""",
                 (json.dumps(planner_metadata), self.TRACK_KEY),
             )
+            if self._use_existing_roadmap_catchup(recommendation, planner_metadata):
+                return
             if existing:
                 task_id = int(existing[0])
                 self.conn.execute(
@@ -1088,22 +1171,9 @@ class AcademyService:
                        VALUES(?,?,?,?)""",
                     (self.TRACK_KEY, task_id, recommendation.target_key, system_name),
                 )
-            if not adaptive["daily_goal_complete"]:
-                self._sync_today_academy_focus(
-                    task_id=task_id,
-                    recommendation=recommendation,
-                    current_week=current_week,
-                )
-            else:
-                # Remove only unfinished auto-generated Academy rows. Completed
-                # rows stay frozen with the lesson title the learner actually did.
-                self.conn.execute(
-                    """DELETE FROM daily_focus
-                       WHERE focus_date=? AND completed_at IS NULL AND is_extra=0
-                         AND (LOWER(COALESCE(track_key,''))='academy'
-                              OR LOWER(COALESCE(source_key,''))='roadmap:academy')""",
-                    (date.today().isoformat(),),
-                )
+            # The unified planner reads this canonical task and decides whether
+            # it belongs in Today’s Focus. Academy no longer writes or deletes
+            # dashboard focus rows directly.
             self.conn.commit()
         except (sqlite3.OperationalError, TypeError, IndexError):
             # Standalone engine tests and future editions may not include the legacy planner tables.

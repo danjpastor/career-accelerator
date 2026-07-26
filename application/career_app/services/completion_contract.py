@@ -73,6 +73,16 @@ def _columns(conn: sqlite3.Connection, table: str) -> set[str]:
     return {str(row[1]) for row in conn.execute(f'PRAGMA table_info("{table}")')}
 
 
+def _coerce_task_id(value: Any) -> int | None:
+    try:
+        text = str(value).strip()
+        if not text or not text.lstrip("+-").isdigit():
+            return None
+        return int(text)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
 def _row_value(row: Any, key: str, index: int = 0, default: Any = None) -> Any:
     if row is None:
         return default
@@ -668,10 +678,10 @@ def _track_key_for_item(conn: sqlite3.Connection, item: dict[str, Any]) -> str |
     source_key = str(item.get("source_key") or "")
     if source_key.startswith("roadmap:"):
         return source_key.split(":", 1)[1].lower()
-    task_id = item.get("task_id")
+    task_id = _coerce_task_id(item.get("task_id"))
     if task_id is not None and _table_exists(conn, "track_tasks"):
         row = conn.execute(
-            "SELECT track_key FROM track_tasks WHERE task_id=?", (int(task_id),)
+            "SELECT track_key FROM track_tasks WHERE task_id=?", (task_id,)
         ).fetchone()
         value = _row_value(row, "track_key", 0, None)
         if value:
@@ -701,28 +711,19 @@ def focus_detail(
     detail: str,
     state: Any,
 ) -> str:
-    """Guarantee a descriptive second line with daily, weekly, and 90-day pacing."""
-    text = " ".join(str(detail or item.get("label") or "Continue assigned work").split())
-    track_key = _track_key_for_item(conn, item)
-    pace = _track_pace(conn, track_key)
-    additions: list[str] = []
-    if "Today " not in text and pace:
-        today_target = int(pace.get("today_target", 0) or 0)
-        today_completed = int(pace.get("today_completed", 0) or 0)
-        if today_target:
-            additions.append(f"Today {today_completed}/{today_target}")
-    if "Week " not in text and pace:
-        weekly_target = int(pace.get("weekly_target", 0) or 0)
-        weekly_completed = int(pace.get("weekly_completed", 0) or 0)
-        if weekly_target:
-            additions.append(f"Week {weekly_completed}/{weekly_target}")
+    """Return the concise supporting line used by Today’s Focus.
 
-    contract_clock = clock(conn)
-    if contract_clock.get("active") and "Day " not in text:
-        additions.append(f"Day {contract_clock['program_day']}/{PROGRAM_DAYS}")
-    if additions:
-        text += " • " + " • ".join(additions)
-    return text
+    Program pacing belongs in the dashboard summary and sprint cards rather
+    than on every individual task row.
+    """
+    return " ".join(
+        str(
+            detail
+            or item.get("detail")
+            or item.get("label")
+            or "Continue assigned work"
+        ).split()
+    )
 
 
 def summary(conn: sqlite3.Connection, state: Any) -> dict[str, Any]:

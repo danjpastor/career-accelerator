@@ -957,37 +957,6 @@ GOOGLE_MODULE_CONCEPTS = {
     (5, 3): {"analysis_foundations", "sql_joins", "sql_subqueries"},
 }
 
-DATACAMP_CATALOG = [
-    ("Introduction to SQL", "Chapter 1: Relational Databases", {"sql_fundamentals"}),
-    ("Introduction to SQL", "Chapter 2: Querying", {"sql_fundamentals", "sql_querying"}),
-    ("Intermediate SQL", "Chapter 1: Data Aggregation", {"sql_aggregation"}),
-    ("Intermediate SQL", "Chapter 2: Data Transformation", {"sql_querying"}),
-    ("Intermediate SQL", "Chapter 3: Data Filtering", {"sql_querying", "sql_date_logic"}),
-    ("Intermediate SQL", "Chapter 4: Conditional Operations", {"sql_case"}),
-    ("Joining Data in SQL", "Chapter 1: Combining Data Vertically", {"sql_joins"}),
-    ("Joining Data in SQL", "Chapter 2: Combining Data Horizontally", {"sql_joins"}),
-    ("Data Manipulation in SQL", "Chapter 1: We'll take the CASE", {"sql_case"}),
-    ("Data Manipulation in SQL", "Chapter 2: Short and Simple Subqueries", {"sql_subqueries", "sql_intermediate"}),
-    ("Data Manipulation in SQL", "Chapter 3: Correlated Queries, Nested Queries, and Common Table Expressions", {"sql_subqueries", "sql_ctes", "sql_intermediate"}),
-    ("Data Manipulation in SQL", "Chapter 4: Window Functions", {"sql_window_functions", "sql_intermediate"}),
-    ("Introduction to Power BI", "Chapter 1: Getting Started with Power BI", {"power_bi_foundations"}),
-    ("Introduction to Power BI", "Chapter 2: Transforming Data", {"power_bi_foundations", "power_query"}),
-    ("Introduction to Power BI", "Chapter 3: Visualizing Data", {"power_bi_foundations", "report_design"}),
-    ("Introduction to Power BI", "Chapter 4: Filtering", {"power_bi_foundations", "report_design"}),
-    ("Data Modeling in Power BI", "Chapter 1: Defining Tables", {"power_bi", "dimensional_modeling"}),
-    ("Data Modeling in Power BI", "Chapter 2: Shaping Tables", {"power_bi", "power_query"}),
-    ("Data Modeling in Power BI", "Chapter 3: Dimensional Modeling", {"power_bi", "dimensional_modeling"}),
-    ("Data Modeling in Power BI", "Chapter 4: Star and Snowflake schemas", {"power_bi", "dimensional_modeling"}),
-    ("Introduction to Python", "Chapter 1: Python Basics", {"python_fundamentals"}),
-    ("Introduction to Python", "Chapter 2: Python Lists", {"python_fundamentals"}),
-    ("Introduction to Python", "Chapter 3: Functions and Packages", {"python_fundamentals"}),
-    ("Introduction to Python", "Chapter 4: NumPy", {"python_fundamentals"}),
-    ("Data Manipulation with pandas", "Chapter 1: Transforming DataFrames", {"python_pandas"}),
-    ("Data Manipulation with pandas", "Chapter 2: Aggregating DataFrames", {"python_pandas"}),
-    ("Data Manipulation with pandas", "Chapter 3: Slicing and Indexing DataFrames", {"python_pandas"}),
-    ("Data Manipulation with pandas", "Chapter 4: Creating and Visualizing DataFrames", {"python_pandas", "visualization_foundations"}),
-]
-
 SQL_PROBLEM_CONCEPTS = {
     "Histogram of Tweets": {"sql_aggregation", "sql_ctes"},
     "Data Science Skills": {"sql_aggregation"},
@@ -1094,7 +1063,6 @@ PROJECT_TASK_CONCEPTS = {
 
 TRACK_FALLBACK_CONCEPTS = {
     "google": {"google_certificate"},
-    "datacamp": {"datacamp_curriculum"},
     "sql": {"sql_practice"},
     "portfolio": {"portfolio_work"},
     "applied": {"applied_practice"},
@@ -1233,17 +1201,6 @@ def _number_from_text(task: Any, pattern: str) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def _datacamp_index(task: Any) -> int | None:
-    direct = _target_index(task, "datacamp")
-    if direct and 1 <= direct <= len(DATACAMP_CATALOG):
-        return direct
-    text = _normalize_title(_task_text(task))
-    for index, (course, chapter, _) in enumerate(DATACAMP_CATALOG, start=1):
-        if _normalize_title(course) in text and _normalize_title(chapter) in text:
-            return index
-    return None
-
-
 _LIVE_CATALOG_OVERRIDES_CACHE: dict[str, Any] | None = None
 
 
@@ -1265,13 +1222,6 @@ def _load_live_catalog_overrides() -> dict[str, Any]:
             value = getattr(track_service, name, None)
             if isinstance(value, dict):
                 overrides[name] = value
-    except (ImportError, AttributeError):
-        pass
-    try:
-        from career_app.data.roadmap import DATACAMP_TRACK  # type: ignore
-
-        if isinstance(DATACAMP_TRACK, list):
-            overrides["DATACAMP_TRACK"] = DATACAMP_TRACK
     except (ImportError, AttributeError):
         pass
     _LIVE_CATALOG_OVERRIDES_CACHE = overrides
@@ -1320,25 +1270,16 @@ def infer_task_concepts(
                 100,
             )
 
-    datacamp_index = _datacamp_index(task)
-    if datacamp_index is not None:
-        _, _, concepts = DATACAMP_CATALOG[datacamp_index - 1]
-        add(concepts, f"datacamp-chapter:{datacamp_index}", 100)
-
-    live_datacamp = overrides.get("DATACAMP_TRACK", [])
-    if live_datacamp:
-        for index, item in enumerate(live_datacamp, start=1):
-            if not isinstance(item, (list, tuple)) or len(item) < 2:
-                continue
-            if _normalize_title(item[0]) in normalized_text and _normalize_title(item[1]) in normalized_text:
-                if 1 <= index <= len(DATACAMP_CATALOG):
-                    add(DATACAMP_CATALOG[index - 1][2], f"live-datacamp:{index}", 100)
-                break
 
     sql_map = dict(SQL_PROBLEM_CONCEPTS)
     live_sql = overrides.get("SQL_PROBLEM_REQUIREMENTS")
     if isinstance(live_sql, dict):
-        sql_map.update({str(key): set(value) for key, value in live_sql.items()})
+        for key, value in live_sql.items():
+            if isinstance(value, dict):
+                concepts = set(value.get("all_of", set())) | set(value.get("any_of", set()))
+            else:
+                concepts = set(value)
+            sql_map[str(key)] = concepts
     for title, concepts in sql_map.items():
         if _normalize_title(title) in normalized_text:
             add(concepts, f"sql-problem:{title}", 100)

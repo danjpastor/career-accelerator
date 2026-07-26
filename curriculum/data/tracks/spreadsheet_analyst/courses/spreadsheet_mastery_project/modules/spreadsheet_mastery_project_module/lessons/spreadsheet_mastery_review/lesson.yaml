@@ -1,0 +1,146 @@
+lesson_id: spreadsheet_mastery_review
+title: Spreadsheet Mastery Review
+order: 2
+difficulty: beginner
+description: Build practical analyst skill in spreadsheet mastery review.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply spreadsheet mastery review in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.reconciliation
+requires:
+- spreadsheet.structure
+- spreadsheet.formulas
+- spreadsheet.conditional_logic
+- spreadsheet.cleaning
+- spreadsheet.validation
+- spreadsheet.lookups
+- spreadsheet.relationships
+- spreadsheet.pivots
+- spreadsheet.kpis
+- spreadsheet.reconciliation
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_mastery_review_1
+  title: Spreadsheet Mastery Review — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: Which action should happen before final analysis?
+  answer_options:
+  - Reconcile cleaned and summarized outputs to the source
+  - Delete unresolved rows
+  - Hide errors
+  - Convert identifiers to numbers
+  starter: ''
+  solution: Reconcile cleaned and summarized outputs to the source
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Reconcile cleaned and summarized outputs to the source
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which action should happen before final analysis?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Spreadsheet Mastery Review — Check 1
+    objective: Which action should happen before final analysis?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.reconciliation**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_mastery_review_2
+  title: Spreadsheet Mastery Review — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: What should an analyst do with an unresolved assumption?
+  answer_options:
+  - Document it as a limitation and seek confirmation
+  - Present it as fact
+  - Remove it from notes
+  - Replace it with zero
+  starter: ''
+  solution: Document it as a limitation and seek confirmation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Document it as a limitation and seek confirmation
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What should an analyst do with an unresolved assumption?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Spreadsheet Mastery Review — Check 2
+    objective: What should an analyst do with an unresolved assumption?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.reconciliation**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_mastery_review_3
+  title: Spreadsheet Mastery Review — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What indicates spreadsheet mastery?
+  answer_options:
+  - A reproducible, validated workflow with clear interpretation
+  - A workbook with many tabs
+  - A colorful chart
+  - A large file
+  starter: ''
+  solution: A reproducible, validated workflow with clear interpretation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A reproducible, validated workflow with clear interpretation
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What indicates spreadsheet mastery?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Spreadsheet Mastery Review — Check 3
+    objective: What indicates spreadsheet mastery?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.reconciliation**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

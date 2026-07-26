@@ -35,6 +35,7 @@ from PySide6.QtWidgets import (
 )
 
 from career_app.academy import AcademyService
+from career_app.academy.recommendations import TRACK_GATE_ASSESSMENTS
 from career_app.academy.models import (
     ActivityDefinition,
     AssessmentDefinition,
@@ -983,6 +984,12 @@ class AcceleratorAcademyWidget(QWidget):
             ).fetchall()
         }
 
+        def track_gate_missing(track_id: str | None) -> tuple[str, ...]:
+            gate = TRACK_GATE_ASSESSMENTS.get(str(track_id or ""))
+            if gate is None or gate[0] in passed_assessments:
+                return ()
+            return (f"checkpoint:{gate[1]}",)
+
         lab_course_assessments: dict[str, tuple[str, ...]] = {}
         for course in self.catalog.courses():
             assessment_ids = tuple(item.assessment_id for item in course.assessments)
@@ -1003,11 +1010,18 @@ class AcceleratorAcademyWidget(QWidget):
                     activity.required_for_mastery
                     and bool(row["last_attempt_solution_assisted"])
                 )
-                missing = tuple(skill for skill in lesson.requires if skill not in mastered)
-                unlocked = not missing
+                gate_missing = () if passed else track_gate_missing(node.track_id)
+                missing = gate_missing or tuple(
+                    skill for skill in lesson.requires if skill not in mastered
+                )
+                unlocked = passed or not missing
                 reason: str | None = None
                 if missing:
-                    reason = "Master first: " + ", ".join(missing)
+                    readable = [
+                        item.split(":", 1)[1] if item.startswith("checkpoint:") else item
+                        for item in missing
+                    ]
+                    reason = "Master first: " + ", ".join(readable)
                 else:
                     for earlier in lesson.activities:
                         if earlier.activity_id == activity.activity_id:
@@ -1033,7 +1047,9 @@ class AcceleratorAcademyWidget(QWidget):
                 if assessment.assessment_id in passed_assessments:
                     cache[node.target_key] = ("Passed", True, None)
                     continue
-                missing = tuple(skill for skill in assessment.requires if skill not in mastered)
+                missing = track_gate_missing(node.track_id) or tuple(
+                    skill for skill in assessment.requires if skill not in mastered
+                )
                 unlocked = not missing
                 answered = bool(
                     self._assessment_answers.get(str(node.activity_id), "").strip()
@@ -1049,7 +1065,8 @@ class AcceleratorAcademyWidget(QWidget):
             if lab.lab_id in passed_labs:
                 cache[node.target_key] = ("Passed", True, None)
                 continue
-            missing_items = [skill for skill in lab.requires if skill not in mastered]
+            missing_items = list(track_gate_missing(node.track_id))
+            missing_items.extend(skill for skill in lab.requires if skill not in mastered)
             for assessment_id in lab_course_assessments.get(lab.lab_id, ()):
                 if assessment_id not in passed_assessments:
                     assessment = self.catalog.assessment(assessment_id)
@@ -1422,6 +1439,18 @@ class AcceleratorAcademyWidget(QWidget):
             self._open_lab_node(node)
         self.refresh_all()
         self._select_current_roadmap_item()
+
+    def open_assessment(self, assessment_id: str) -> None:
+        """Open the first unfinished activity in a specific assessment."""
+        assessment = self.catalog.assessment(str(assessment_id))
+        drafts = self.service.assessment_drafts(assessment.assessment_id)
+        activity = next(
+            (item for item in assessment.activities if not drafts.get(item.activity_id, "").strip()),
+            assessment.activities[0],
+        )
+        self.open_target(
+            f"academy:assessment:{assessment.assessment_id}:{activity.activity_id}"
+        )
 
     def open_lesson(self, lesson_id: str, activity_id: str | None = None) -> None:
         """Compatibility route used by existing planner/navigation code."""

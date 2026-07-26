@@ -70,8 +70,8 @@ TOUR_STEPS = (
     ),
     (
         1,
-        "Adaptive Planner",
-        "The planner coordinates independent learning and portfolio tracks. It prioritizes the certificate pathway, respects prerequisites, and adjusts pacing to the available study time.",
+        "Daily Plan",
+        "The Daily Plan keeps the Google Certificate first, then selects up to five prerequisite-ready Academy, practice, assessment, or portfolio tasks. Locked work stays under Coming Up until it is ready.",
     ),
     (
         2,

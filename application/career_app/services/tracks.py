@@ -17,10 +17,17 @@ from career_app.data.duckdb_exercises import (
     exercise_for_label,
     exercise_number_for_label,
 )
-from career_app.data.roadmap import (
-    DATACAMP_TRACK,
-    SQL_COMPANION,
-)
+from career_app.data.roadmap import SQL_COMPANION
+
+
+def _coerce_task_id(value):
+    try:
+        text = str(value).strip()
+        if not re.fullmatch(r"[+-]?\d+", text):
+            return None
+        return int(text)
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 TRACK_CONFIG = {
@@ -589,15 +596,31 @@ SKILL_DEFINITIONS = {
     ),
     "power_bi_foundations": (
         "Power BI Foundations",
-        "DataCamp Power BI",
+        "Complete the Accelerator Academy Power BI foundations course and practical checks",
     ),
     "power_bi": (
         "Power BI Modeling and DAX",
-        "DataCamp Power BI modeling",
+        "Complete the Accelerator Academy Power BI modeling and DAX practical checks",
     ),
     "python_pandas": (
         "Python and pandas",
-        "DataCamp Python",
+        "Complete the Accelerator Academy Python and pandas practical checks",
+    ),
+    "roadmap.spreadsheet_mastery": (
+        "Spreadsheet Mastery",
+        "Pass the Week 2 Spreadsheet Mastery Assessment",
+    ),
+    "roadmap.sql_mastery": (
+        "Spreadsheet & SQL Mastery",
+        "Pass the Week 6 Spreadsheet & SQL Mastery Assessment",
+    ),
+    "roadmap.power_bi_mastery": (
+        "Power BI Mastery",
+        "Pass the Week 7 Power BI Mastery Assessment",
+    ),
+    "roadmap.portfolio_readiness": (
+        "Portfolio Readiness",
+        "Pass the Week 8 Portfolio Readiness Assessment",
     ),
     "portfolio_delivery": (
         "Portfolio Case Study Delivery",
@@ -683,110 +706,80 @@ SQL_REQUIREMENTS = {
         "sql_joins",
     },
 }
-
-
 SQL_PROBLEM_REQUIREMENTS = {
-    "Histogram of Tweets": {
-        "sql_aggregation",
-        "sql_ctes",
-    },
-    "Data Science Skills": {
-        "sql_aggregation",
-    },
-    "Page With No Likes": {
-        "sql_joins",
-    },
-    "Laptop vs. Mobile Viewership": {
-        "sql_aggregation",
-        "sql_case",
-    },
-    "Duplicate Job Listings": {
-        "sql_aggregation",
-    },
-    "Teams Power Users": {
-        "sql_aggregation",
-    },
-    "Pharmacy Analytics Part 1": {
-        "analysis_foundations",
-        "sql_aggregation",
-    },
-    "Signup Activation Rate": {
-        "sql_aggregation",
-        "sql_joins",
-    },
-    "User's Third Transaction": {
-        "sql_window_functions",
-    },
-    "Second Highest Salary": {
-        "sql_window_functions",
-    },
-    "Top Three Salaries": {
-        "sql_joins",
-        "sql_window_functions",
-    },
-    "Tweets' Rolling Averages": {
-        "sql_window_functions",
-    },
-    "Odd and Even Measurements": {
-        "sql_ctes",
-        "sql_window_functions",
-    },
-    "User Shopping Sprees": {
-        "sql_aggregation",
-        "sql_date_logic",
-    },
-    "Supercloud Customer": {
-        "sql_aggregation",
-        "sql_joins",
-    },
-    "Second Day Confirmation": {
-        "sql_date_logic",
-        "sql_joins",
-    },
+    "Histogram of Tweets": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_date_logic"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Data Science Skills": {"all_of": {"roadmap.spreadsheet_mastery", "sql_querying", "sql_aggregation"}, "any_of": set()},
+    "Page With No Likes": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_querying"}, "any_of": set()},
+    "Laptop vs. Mobile Viewership": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_case"}, "any_of": set()},
+    "Duplicate Job Listings": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Teams Power Users": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_date_logic"}, "any_of": set()},
+    "Pharmacy Analytics Part 1": {"all_of": {"roadmap.spreadsheet_mastery", "sql_querying"}, "any_of": set()},
+    "Signup Activation Rate": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_joins", "sql_case"}, "any_of": set()},
+    "User's Third Transaction": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Second Highest Salary": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Top Three Salaries": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_window_functions"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Tweets' Rolling Averages": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions"}, "any_of": set()},
+    "Odd and Even Measurements": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions", "sql_date_logic", "sql_case"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "User Shopping Sprees": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_date_logic"}, "any_of": set()},
+    "Supercloud Customer": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_joins"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Second Day Confirmation": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_date_logic"}, "any_of": set()},
 }
 
-
+SQL_PROBLEM_WEEK = {
+    "Data Science Skills": 3, "Pharmacy Analytics Part 1": 3,
+    "Laptop vs. Mobile Viewership": 3, "Teams Power Users": 3,
+    "Page With No Likes": 4, "Signup Activation Rate": 4, "Second Day Confirmation": 4,
+    "Histogram of Tweets": 5, "Duplicate Job Listings": 5,
+    "Second Highest Salary": 5, "Supercloud Customer": 5,
+    "User's Third Transaction": 6, "Top Three Salaries": 6,
+    "Odd and Even Measurements": 6, "Tweets' Rolling Averages": 7,
+    "User Shopping Sprees": 7,
+}
 
 SQL_SKILL_ACCEPTED_EVIDENCE = {
     "sql_fundamentals": (
-        "DataCamp Introduction to SQL, completed Google Course 5, "
-        "DuckDB Exercise 01, or completed SQL practice"
+        "Complete Accelerator Academy SQL foundations, DuckDB Exercise 01, "
+        "or validated introductory SQL practice"
     ),
     "sql_querying": (
-        "DataCamp Introduction to SQL, completed Google Course 5, "
-        "DuckDB Exercise 01, or completed querying practice"
+        "Complete Accelerator Academy selection, filtering, sorting, DISTINCT, and LIMIT lessons, "
+        "DuckDB Exercise 01, or validated querying practice"
     ),
     "sql_aggregation": (
-        "DataCamp Intermediate SQL: Data Aggregation, completed Google Course 5, "
-        "DuckDB Exercise 02/04/05, or a completed aggregation problem"
+        "Complete Accelerator Academy aggregation and grouping lessons, DuckDB Exercise 02/04/05, "
+        "or a validated aggregation problem"
     ),
     "sql_date_logic": (
-        "DataCamp Intermediate SQL: Data Filtering, DuckDB Exercise 04, "
-        "or a completed date-logic problem"
+        "Complete Accelerator Academy date and time functions, DuckDB Exercise 04, "
+        "or a validated date-logic problem"
     ),
     "sql_case": (
-        "DataCamp Intermediate SQL: Conditional Operations, DuckDB Exercise "
-        "03/04/05, or a completed CASE problem"
+        "Complete Accelerator Academy CASE and conditional aggregation lessons, DuckDB Exercise 03/04/05, "
+        "or a validated CASE problem"
     ),
     "sql_joins": (
-        "DataCamp Joining Data in SQL, DuckDB Exercise 06, "
-        "or a completed join problem"
+        "Complete Accelerator Academy joins and relationship lessons, DuckDB Exercise 06, "
+        "or a validated join problem"
     ),
     "sql_subqueries": (
-        "DataCamp Data Manipulation in SQL: Subqueries, DuckDB Exercise 07, "
-        "or completed subquery practice"
+        "Complete the Accelerator Academy subqueries lesson, DuckDB Exercise 07, "
+        "or validated subquery practice"
     ),
     "sql_ctes": (
-        "DataCamp Data Manipulation in SQL: CTEs, DuckDB Exercise "
-        "07/08/09/10/12, or a completed CTE problem"
+        "Complete the Accelerator Academy CTE lesson, DuckDB Exercise 07/08/09/10/12, "
+        "or validated CTE practice"
     ),
     "sql_window_functions": (
-        "DataCamp Data Manipulation in SQL: Window Functions, DuckDB Exercise "
-        "08/10/11, or a completed window-function problem"
+        "Complete Accelerator Academy window-function lessons, DuckDB Exercise 08/10/11, "
+        "or a validated window-function problem"
     ),
     "sql_intermediate": (
-        "Completed subquery, CTE, or window-function learning and practice"
+        "Complete validated subquery, CTE, or window-function learning and practice"
     ),
+    "roadmap.spreadsheet_mastery": "Pass the Week 2 Spreadsheet Mastery Assessment",
+    "roadmap.sql_mastery": "Pass the Week 6 Spreadsheet & SQL Mastery Assessment",
+    "roadmap.power_bi_mastery": "Pass the Week 7 Power BI Mastery Assessment",
+    "roadmap.portfolio_readiness": "Pass the Week 8 Portfolio Readiness Assessment",
 }
 
 DUCKDB_SKILL_EVIDENCE = {
@@ -838,8 +831,7 @@ SQL_SKILL_HIERARCHY = {
         "sql_fundamentals", "sql_querying", "sql_intermediate"
     },
     "sql_ctes": {
-        "sql_fundamentals", "sql_querying",
-        "sql_subqueries", "sql_intermediate"
+        "sql_fundamentals", "sql_querying", "sql_intermediate"
     },
     "sql_window_functions": {
         "sql_fundamentals", "sql_querying", "sql_intermediate"
@@ -892,19 +884,69 @@ SKILL_CATEGORY = {
 }
 
 
-def _sql_requirements(
-    title,
-    topic,
-):
-    return set(
-        SQL_PROBLEM_REQUIREMENTS.get(
-            title,
-            SQL_REQUIREMENTS.get(
-                topic,
-                {"sql_querying"},
-            ),
+def _sql_requirement_groups(title, topic):
+    spec = SQL_PROBLEM_REQUIREMENTS.get(title)
+    if spec is None:
+        return {"all_of": set(SQL_REQUIREMENTS.get(topic, {"sql_querying"})), "any_of": set()}
+    if isinstance(spec, dict):
+        return {"all_of": set(spec.get("all_of", set())), "any_of": set(spec.get("any_of", set()))}
+    return {"all_of": set(spec), "any_of": set()}
+
+
+def _sql_requirements(title, topic):
+    groups = _sql_requirement_groups(title, topic)
+    return set(groups["all_of"]) | set(groups["any_of"])
+
+
+def _sql_requirement_status(title, topic, unlocked):
+    """Evaluate all-of and alternative SQL prerequisites consistently.
+
+    ``any_of`` requirements represent accepted solution paths.  They must not be
+    flattened into a set that falsely requires every alternative.
+    """
+    groups = _sql_requirement_groups(title, topic)
+    unlocked = set(unlocked)
+    missing_all = set(groups["all_of"]) - unlocked
+    missing_any = set()
+    if groups["any_of"] and not (set(groups["any_of"]) & unlocked):
+        missing_any = set(groups["any_of"])
+    required = set(groups["all_of"]) | set(groups["any_of"])
+    missing_names = [
+        SKILL_DEFINITIONS[skill][0]
+        for skill in sorted(missing_all)
+    ]
+    if missing_any:
+        missing_names.append(
+            "One of: "
+            + " or ".join(
+                SKILL_DEFINITIONS[skill][0]
+                for skill in sorted(missing_any)
+            )
         )
-    )
+    return {
+        "ready": not missing_all and not missing_any,
+        "required": required,
+        "missing_all": missing_all,
+        "missing_any": missing_any,
+        "missing": missing_all | missing_any,
+        "missing_names": missing_names,
+    }
+
+PORTFOLIO_PREPARATION_LABELS = {
+    "Review and approve project brief",
+    "Approve data source and specification",
+    "Create or acquire raw dataset",
+    "Validate Relationships",
+    "Review and finalize data dictionary",
+    "Finalize business problem",
+    "Finalize stakeholders",
+    "Finalize KPIs",
+    "Finalize business questions",
+    "Create synthetic data specification",
+    "Generate dataset",
+    "Validate relationships",
+    "Complete data dictionary",
+}
 
 
 PROJECT_EXACT_REQUIREMENTS = {
@@ -1791,55 +1833,9 @@ def _datacamp_alignment(course):
     )
 
 
-def _datacamp_target(
-    conn,
-    state,
-    pace,
-):
-    row = _state_row(
-        conn,
-        "datacamp",
-    )
-    position = (
-        int(row["position"])
-        if row else 0
-    )
-
-    if position >= len(DATACAMP_TRACK):
-        return None
-
-    course_name, chapter, estimate = (
-        DATACAMP_TRACK[position]
-    )
-    metadata = {
-        "course": course_name,
-        "lesson": chapter,
-        "chapter": chapter,
-        "curriculum_position": position + 1,
-        "estimated_minutes": estimate,
-        "total_items": len(
-            DATACAMP_TRACK
-        ),
-        "alignment": _datacamp_alignment(
-            int(state["google_course"])
-        ),
-    }
-    metadata.update(pace)
-
-    return {
-        "target_key": f"item:{position}",
-        "label": (
-            f"Complete DataCamp: {course_name} — "
-            f"{chapter}"
-        ),
-        "source_label": (
-            f"DataCamp • {course_name}"
-        ),
-        "estimate": estimate,
-        "position": position,
-        "subposition": 0,
-        "metadata": metadata,
-    }
+def _datacamp_target(conn, state, pace):
+    """Legacy compatibility hook. DataCamp is no longer an active roadmap track."""
+    return None
 
 
 def _completed_sql(conn):
@@ -1916,10 +1912,80 @@ def completed_applied_numbers(conn):
     )
 
 
+ACADEMY_SKILL_EQUIVALENTS = {
+    "sql.table_structure": {"sql_fundamentals", "sql_querying"},
+    "sql.data_types": {"sql_fundamentals", "sql_querying"},
+    "sql.select_basics": {"sql_fundamentals", "sql_querying"},
+    "sql.column_selection": {"sql_fundamentals", "sql_querying"},
+    "sql.aliases": {"sql_fundamentals", "sql_querying"},
+    "sql.where": {"sql_fundamentals", "sql_querying"},
+    "sql.comparison_operators": {"sql_fundamentals", "sql_querying"},
+    "sql.boolean_logic": {"sql_fundamentals", "sql_querying"},
+    "sql.null_filtering": {"sql_fundamentals", "sql_querying"},
+    "sql.order_by": {"sql_fundamentals", "sql_querying"},
+    "sql.clause_composition": {"sql_fundamentals", "sql_querying"},
+    "sql.distinct": {"sql_fundamentals", "sql_querying"},
+    "sql.limit": {"sql_fundamentals", "sql_querying"},
+    "sql.advanced_filtering": {"sql_querying"},
+    "sql.multiple_conditions": {"sql_querying"},
+    "sql.complex_filters": {"sql_querying"},
+    "sql.aggregations": {"sql_aggregation"},
+    "sql.grouping_single": {"sql_aggregation"},
+    "sql.grouping_multiple": {"sql_aggregation"},
+    "sql.case_logic": {"sql_case"},
+    "sql.conditional_transform": {"sql_case"},
+    "sql.conditional_aggregation": {"sql_case", "sql_aggregation"},
+    "sql.date_time_functions": {"sql_date_logic"},
+    "sql.joins": {"sql_joins"},
+    "sql.left_join": {"sql_joins"},
+    "sql.multi_column_join": {"sql_joins"},
+    "sql.set_operations": {"sql_joins"},
+    "sql.subqueries": {"sql_subqueries", "sql_intermediate"},
+    "sql.ctes_correlated": {"sql_ctes", "sql_intermediate"},
+    "sql.window_functions": {"sql_window_functions", "sql_intermediate"},
+    "sql.window_basics": {"sql_window_functions", "sql_intermediate"},
+    "sql.window_frames": {"sql_window_functions", "sql_intermediate"},
+    "sql.window_ranking": {"sql_window_functions", "sql_intermediate"},
+    "sql.window_extensions": {"sql_window_functions", "sql_intermediate"},
+    "database.schemas_normalization": {"sql_fundamentals", "sql_validation"},
+    "database.views": {"sql_fundamentals"},
+    "database.processing_models": {"sql_fundamentals"},
+    "database.management": {"sql_fundamentals"},
+}
+
+
+def _academy_skill_evidence(conn):
+    tables = {
+        row["name"] for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+    }
+    if "academy_skill_evidence" not in tables:
+        return {}
+    evidence = {}
+    rows = conn.execute(
+        """SELECT skill_key,source_type,source_id,learning_item_id
+           FROM academy_skill_evidence
+           WHERE validation_status='passed'"""
+    ).fetchall()
+    for row in rows:
+        granular = str(row["skill_key"] or "").strip()
+        if not granular:
+            continue
+        broad = set(ACADEMY_SKILL_EQUIVALENTS.get(granular, set()))
+        if granular in SKILL_DEFINITIONS:
+            broad.add(granular)
+        if not broad:
+            continue
+        source_label = str(row["learning_item_id"] or row["source_id"] or granular).replace("_", " ").strip().title()
+        source = f"Accelerator Academy: {source_label}"
+        for skill_key in broad:
+            _append_evidence(evidence, skill_key, source)
+    return evidence
+
+
 def _skill_evidence(conn, state):
     course = int(state["google_course"])
-    datacamp = _state_row(conn, "datacamp")
-    data_position = int(datacamp["position"]) if datacamp else 0
     evidence = {}
 
     google_thresholds = {
@@ -1941,21 +2007,10 @@ def _skill_evidence(conn, state):
                 f"Completed Google Course {completed_course}",
             )
 
-    if course > 5:
-        source = "Completed Google Course 5 analysis and SQL work"
-        for skill_key in {
-            "sql_fundamentals", "sql_querying", "sql_aggregation"
-        }:
-            _append_evidence(evidence, skill_key, source)
 
-    for skill_key, threshold in DATACAMP_SKILL_THRESHOLDS.items():
-        if data_position >= threshold:
-            course_name, chapter, _ = DATACAMP_TRACK[threshold - 1]
-            _append_evidence(
-                evidence,
-                skill_key,
-                f"DataCamp: {course_name} — {chapter}",
-            )
+    for skill_key, sources in _academy_skill_evidence(conn).items():
+        for source in sources:
+            _append_evidence(evidence, skill_key, source)
 
     for number in sorted(_completed_duckdb_exercises(conn)):
         exercise = DUCKDB_EXERCISES[number]
@@ -1974,7 +2029,11 @@ def _skill_evidence(conn, state):
         if item is None:
             continue
         source = f"Completed SQL problem: {title}"
-        for skill_key in _sql_requirements(title, item[2]):
+        for skill_key in _sql_requirement_groups(title, item[2])["all_of"]:
+            # Interview completion can demonstrate SQL concepts, but it may not
+            # manufacture a weekly mastery-gate credential.
+            if skill_key.startswith("roadmap."):
+                continue
             if skill_key in SQL_SKILL_ACCEPTED_EVIDENCE:
                 _append_evidence(evidence, skill_key, source)
 
@@ -1995,16 +2054,25 @@ def _skill_evidence(conn, state):
     return evidence
 
 
+def approved_skill_evidence(conn, state):
+    """Return the canonical validated evidence used by every skill lockout."""
+    return _skill_evidence(conn, state)
+
+
+def approved_skills(conn, state):
+    return set(approved_skill_evidence(conn, state))
+
+
 def _derived_skills(conn, state):
-    return set(_skill_evidence(conn, state))
+    return approved_skills(conn, state)
 
 def _evidence_source_track(evidence_items, skill_key):
     sources = set()
     for item in evidence_items:
         if item.startswith("Completed Google"):
             sources.add("google")
-        elif item.startswith("DataCamp:"):
-            sources.add("datacamp")
+        elif item.startswith("Accelerator Academy:"):
+            sources.add("academy")
         elif item.startswith("DuckDB"):
             sources.add("duckdb")
         elif item.startswith("Completed SQL"):
@@ -2065,11 +2133,10 @@ def _requirements_for_project(
     stage=None,
 ):
     if label in PROJECT_EXACT_REQUIREMENTS:
-        return set(
-            PROJECT_EXACT_REQUIREMENTS[
-                label
-            ]
-        )
+        requirements = set(PROJECT_EXACT_REQUIREMENTS[label])
+        if label not in PORTFOLIO_PREPARATION_LABELS:
+            requirements.add("roadmap.portfolio_readiness")
+        return requirements
 
     lower = label.lower()
     requirements = set()
@@ -2165,9 +2232,10 @@ def _requirements_for_project(
         )
 
     if not requirements:
-        requirements.add(
-            "analytics_foundations"
-        )
+        requirements.add("analytics_foundations")
+
+    if label not in PORTFOLIO_PREPARATION_LABELS:
+        requirements.add("roadmap.portfolio_readiness")
 
     return requirements
 
@@ -2216,14 +2284,13 @@ def _sql_target(
         if title in completed:
             continue
 
-        required = _sql_requirements(
+        requirement_status = _sql_requirement_status(
             title,
             topic,
+            unlocked,
         )
-        missing = set(required) - set(
-            unlocked
-        )
-        if missing:
+        required = requirement_status["required"]
+        if not requirement_status["ready"]:
             locked_candidates.append(
                 (
                     index,
@@ -2233,7 +2300,8 @@ def _sql_target(
                     concepts,
                     estimate,
                     required,
-                    missing,
+                    requirement_status["missing"],
+                    requirement_status["missing_names"],
                 )
             )
             continue
@@ -2291,14 +2359,8 @@ def _sql_target(
             _estimate,
             required,
             missing,
+            missing_names,
         ) = locked_candidates[0]
-
-        missing_names = [
-            SKILL_DEFINITIONS[
-                skill
-            ][0]
-            for skill in sorted(missing)
-        ]
         metadata = {
             "title": title,
             "difficulty": difficulty,
@@ -2375,6 +2437,10 @@ def _portfolio_target(
         required,
         unlocked,
     )
+    execution_too_early = (
+        int(state["current_week"]) < 9
+        and str(row["label"]) not in PORTFOLIO_PREPARATION_LABELS
+    )
 
     metadata = {
         "project_id": project_id,
@@ -2394,11 +2460,15 @@ def _portfolio_target(
     }
     metadata.update(pace)
 
-    if missing_names:
-        metadata["blocked_reason"] = (
-            "Learn first: "
-            + ", ".join(missing_names)
-        )
+    if missing_names or execution_too_early:
+        reasons = []
+        if execution_too_early:
+            reasons.append(
+                "Scheduled for Week 9 after the learning phase and Portfolio Readiness Assessment"
+            )
+        if missing_names:
+            reasons.append("Learn first: " + ", ".join(missing_names))
+        metadata["blocked_reason"] = " • ".join(reasons)
         return {
             "locked": True,
             "position": completed,
@@ -3056,7 +3126,7 @@ def _sync_sprint_prerequisites(
 
     rows = conn.execute(
         """SELECT
-               s.id,s.label,s.completed,
+               s.id,s.week,s.sort_order,s.label,s.completed,
                m.category,m.status
            FROM sprint_tasks s
            JOIN task_metadata m
@@ -3089,6 +3159,7 @@ def _sync_sprint_prerequisites(
         label = row["label"]
         lower = label.lower()
         required = set()
+        explicit_missing = None
         reason = None
 
         applied_number = (
@@ -3140,10 +3211,7 @@ def _sync_sprint_prerequisites(
             applied_number is None
             and "datacamp" in lower
         ):
-            reason = (
-                "Managed by the independent "
-                "DataCamp track."
-            )
+            reason = "Legacy external-learning task retired."
 
         elif (
             applied_number is None
@@ -3157,12 +3225,13 @@ def _sync_sprint_prerequisites(
             )
             item = sql_lookup.get(title)
             if item:
-                required = (
-                    _sql_requirements(
-                        title,
-                        item[2],
-                    )
+                requirement_status = _sql_requirement_status(
+                    title,
+                    item[2],
+                    unlocked,
                 )
+                required = requirement_status["required"]
+                explicit_missing = requirement_status["missing_names"]
 
         elif (
             applied_number is None
@@ -3173,15 +3242,34 @@ def _sync_sprint_prerequisites(
                     label
                 )
             )
+            if (
+                int(state["current_week"]) < 9
+                and label not in PORTFOLIO_PREPARATION_LABELS
+            ):
+                reason = (
+                    "Scheduled for Week 9 after the learning phase and "
+                    "Portfolio Readiness Assessment."
+                )
+                if int(row["week"]) < 9:
+                    conn.execute(
+                        "UPDATE sprint_tasks SET week=?,sort_order=? WHERE id=?",
+                        (9, _next_sort_order(conn, 9, "portfolio"), task_id),
+                    )
 
-        missing = _missing_skill_names(
-            required,
-            unlocked,
+        missing = (
+            list(explicit_missing)
+            if explicit_missing is not None
+            else _missing_skill_names(
+                required,
+                unlocked,
+            )
         )
         if missing:
+            skill_reason = "Learn first: " + ", ".join(missing)
             reason = (
-                "Learn first: "
-                + ", ".join(missing)
+                reason + " " + skill_reason
+                if reason
+                else skill_reason
             )
 
         conn.execute(
@@ -4753,10 +4841,13 @@ def focus_presentation(conn, item):
     label = _clean_focus_text(
         item.get("label")
     )
-    task_id = item.get("task_id")
+    task_id = _coerce_task_id(item.get("task_id"))
 
     if item.get("roadmap_fallback"):
-        title = item.get(
+        # Unified roadmap items should stay actionable on the dashboard.
+        # The task label is the primary title; a concise action reason belongs
+        # on the supporting line.
+        title = label or item.get(
             "display_title",
             {
                 "Learning": "Learning",
@@ -4769,18 +4860,35 @@ def focus_presentation(conn, item):
                 "Roadmap Task",
             ),
         )
-        action = _clean_focus_text(
-            item.get(
-                "detail",
-                label,
-            )
+
+        task_description = ""
+        if task_id is not None:
+            detail_row = conn.execute(
+                "SELECT description FROM task_metadata WHERE task_id=?",
+                (int(task_id),),
+            ).fetchone()
+            if detail_row is not None:
+                task_description = _clean_focus_text(
+                    detail_row["description"]
+                )
+
+        source = _clean_focus_text(
+            item.get("display_source")
+            or item.get("source_label")
+            or category
+        )
+        # The task title already provides the destination context. Keep the
+        # visible supporting line concise and action-oriented; use the source
+        # only as a fallback when no useful detail exists.
+        reason = _clean_focus_text(
+            item.get("detail")
+            or task_description
+            or label
         )
         return {
             "style_category": category,
             "title": title,
-            "detail": (
-                f"{action} • Weekly roadmap"
-            ),
+            "detail": reason or source or label,
         }
 
     link = (
@@ -4940,6 +5048,40 @@ def complete_track_task(
            WHERE id=?""",
         (task_id,),
     ).fetchone()["label"]
+
+    # Completion controls are guarded in the UI, but the track service is the
+    # final authority.  Enforce the same prerequisite contract here so a stale
+    # checkbox, deep link, or alternate workspace cannot bypass a lockout.
+    if track_key == "sql":
+        title = str(link["target_key"] or "").split("problem:", 1)[-1].strip()
+        readiness = sql_problem_readiness(conn, state, title)
+        already_completed = conn.execute(
+            "SELECT 1 FROM sql_practice WHERE platform='DataLemur' AND title=? AND status='Completed'",
+            (title,),
+        ).fetchone()
+        if not readiness["ready"] and already_completed is None:
+            raise PermissionError(
+                "This SQL interview problem is locked. Complete "
+                + ", ".join(readiness["missing_names"])
+                + " first."
+            )
+    elif track_key == "portfolio":
+        project_task = None
+        if link["linked_entity_id"] is not None:
+            project_task = conn.execute(
+                "SELECT label,stage FROM project_tasks WHERE id=?",
+                (int(link["linked_entity_id"]),),
+            ).fetchone()
+        project_label = str(project_task["label"] if project_task else label)
+        project_stage = str(project_task["stage"] if project_task else "")
+        required = _requirements_for_project(project_label, project_stage)
+        missing = _missing_skill_names(required, _derived_skills(conn, state))
+        if missing:
+            raise PermissionError(
+                "This portfolio milestone is locked. Complete "
+                + ", ".join(missing)
+                + " first."
+            )
 
     conn.execute(
         """UPDATE sprint_tasks
@@ -5575,10 +5717,7 @@ def _skill_in_progress_sources(conn, state):
         2: {"business_framing"},
         3: {"data_preparation"},
         4: {"data_cleaning"},
-        5: {
-            "analysis_foundations", "sql_fundamentals",
-            "sql_querying", "sql_aggregation"
-        },
+        5: {"analysis_foundations"},
         6: {"visualization_foundations", "data_storytelling"},
         8: {"portfolio_delivery"},
         9: {"career_readiness"},
@@ -5590,18 +5729,6 @@ def _skill_in_progress_sources(conn, state):
             f"Google Course {course} in progress",
         )
 
-    datacamp = _state_row(conn, "datacamp")
-    data_position = int(datacamp["position"]) if datacamp else 0
-    next_position = data_position + 1
-    if next_position <= len(DATACAMP_TRACK):
-        course_name, chapter, _ = DATACAMP_TRACK[next_position - 1]
-        for skill_key, threshold in DATACAMP_SKILL_THRESHOLDS.items():
-            if threshold == next_position:
-                _append_evidence(
-                    sources,
-                    skill_key,
-                    f"DataCamp: {course_name} — {chapter} in progress",
-                )
 
     rows = conn.execute(
         """SELECT s.label
@@ -5697,6 +5824,8 @@ def sql_problem_readiness(
             "ready": False,
             "required_keys": [],
             "required_names": [],
+            "required_all_of": [],
+            "required_any_of": [],
             "missing_keys": [],
             "missing_names": [
                 "Problem is not in the SQL catalog"
@@ -5707,13 +5836,25 @@ def sql_problem_readiness(
         conn,
         state,
     )
-    required = _sql_requirements(
-        title,
-        item[2],
-    )
-    missing = set(required) - set(
-        unlocked
-    )
+    groups = _sql_requirement_groups(title, item[2])
+    required = set(groups["all_of"]) | set(groups["any_of"])
+    missing_all = set(groups["all_of"]) - set(unlocked)
+    missing_any = set()
+    if groups["any_of"] and not (set(groups["any_of"]) & set(unlocked)):
+        missing_any = set(groups["any_of"])
+    missing = missing_all | missing_any
+    missing_names = [
+        SKILL_DEFINITIONS[key][0]
+        for key in sorted(missing_all)
+    ]
+    if missing_any:
+        missing_names.append(
+            "One of: "
+            + " or ".join(
+                SKILL_DEFINITIONS[key][0]
+                for key in sorted(missing_any)
+            )
+        )
 
     evidence_map = _skill_evidence(conn, state)
 
@@ -5724,11 +5865,12 @@ def sql_problem_readiness(
             SKILL_DEFINITIONS[key][0]
             for key in sorted(required)
         ],
+        "required_all_of": sorted(groups["all_of"]),
+        "required_any_of": sorted(groups["any_of"]),
         "missing_keys": sorted(missing),
-        "missing_names": [
-            SKILL_DEFINITIONS[key][0]
-            for key in sorted(missing)
-        ],
+        "missing_names": missing_names,
+        "missing_all_of": sorted(missing_all),
+        "missing_any_of": sorted(missing_any),
         "evidence": {
             key: list(evidence_map.get(key, []))
             for key in sorted(required)
@@ -5760,13 +5902,12 @@ def next_sql_titles(
         title = item[0]
         if title in completed:
             continue
-        required = _sql_requirements(
-            title,
-            item[2],
-        )
-        if not set(required).issubset(
-            unlocked
-        ):
+        groups = _sql_requirement_groups(title, item[2])
+        if not set(groups["all_of"]).issubset(unlocked):
+            continue
+        if groups["any_of"] and not (set(groups["any_of"]) & set(unlocked)):
+            continue
+        if state is not None and int(SQL_PROBLEM_WEEK.get(title, 99)) > int(state["current_week"]):
             continue
         titles.append(title)
         if len(titles) >= max(

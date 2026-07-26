@@ -1,0 +1,137 @@
+lesson_id: spreadsheet_cleaning
+title: Text, Dates, Numbers & Duplicates
+order: 1
+difficulty: beginner
+description: Build practical analyst skill in text, dates, numbers & duplicates.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply text, dates, numbers & duplicates in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.cleaning
+requires:
+- spreadsheet.conditional_aggregation
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_cleaning_1
+  title: Text, Dates, Numbers & Duplicates — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: What should happen before removing duplicates?
+  answer_options:
+  - Confirm the table grain and duplicate rule
+  - Delete every repeated name
+  - Sort by color
+  - Convert all values to text
+  starter: ''
+  solution: Confirm the table grain and duplicate rule
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Confirm the table grain and duplicate rule
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What should happen before removing duplicates?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.cleaning
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Text, Dates, Numbers & Duplicates — Check 1
+    objective: What should happen before removing duplicates?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.cleaning**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_cleaning_2
+  title: Text, Dates, Numbers & Duplicates — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: What problem does TRIM address?
+  answer_options:
+  - Extra spaces
+  - Duplicate rows
+  - Missing worksheets
+  - Incorrect joins
+  starter: ''
+  solution: Extra spaces
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Extra spaces
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What problem does TRIM address?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.cleaning
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Text, Dates, Numbers & Duplicates — Check 2
+    objective: What problem does TRIM address?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.cleaning**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_cleaning_3
+  title: Text, Dates, Numbers & Duplicates — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What is the safest cleaning workflow?
+  answer_options:
+  - Raw copy, documented rules, cleaned output, validation
+  - Edit raw data with no log
+  - Delete uncertain values
+  - Replace blanks with zero automatically
+  starter: ''
+  solution: Raw copy, documented rules, cleaned output, validation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Raw copy, documented rules, cleaned output, validation
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What is the safest cleaning workflow?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.cleaning
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Text, Dates, Numbers & Duplicates — Check 3
+    objective: What is the safest cleaning workflow?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.cleaning**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

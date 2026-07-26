@@ -14,6 +14,7 @@ teaches:
 - powerbi.interface
 requires:
 - sql.window_functions
+- roadmap.sql_mastery
 mastery:
   passing_score: 1.0
 activities:
@@ -52,8 +53,8 @@ activities:
     title: Getting Started with Power BI
     objective: Build a practical understanding of getting started with power bi.
     action_label: Choose the best answer
-    body: Power BI separates report design, data inspection, model relationships, and query transformations into
-      distinct work areas. Choose the view that matches the action you need to perform.
+    body: Power BI separates report design, data inspection, model relationships, and query transformations
+      into distinct work areas. Choose the view that matches the action you need to perform.
   required_for_completion: true
 - activity_id: powerbi_getting_started_step_2
   title: 'Practice 2: Getting Started with Power BI'
@@ -90,8 +91,8 @@ activities:
     title: Getting Started with Power BI
     objective: Build a practical understanding of getting started with power bi.
     action_label: Choose the best answer
-    body: A quick source check catches missing columns, unexpected row counts, and incorrect types before they spread
-      into measures and visuals.
+    body: A quick source check catches missing columns, unexpected row counts, and incorrect types before they
+      spread into measures and visuals.
   required_for_completion: true
 - activity_id: powerbi_getting_started_step_3
   title: 'Practice 3: Getting Started with Power BI'
@@ -128,5 +129,6 @@ activities:
     title: Getting Started with Power BI
     objective: Build a practical understanding of getting started with power bi.
     action_label: Choose the best answer
-    body: A reliable workflow moves from source understanding toward presentation, with validation at every stage.
+    body: A reliable workflow moves from source understanding toward presentation, with validation at every
+      stage.
   required_for_completion: true

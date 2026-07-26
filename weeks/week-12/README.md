@@ -1,4 +1,4 @@
-# Week 12 Sprint — Launch the Search
+# Week 12 Sprint — Portfolio QA and Career Launch
 
 **Target time:** 15–20 hours
 
@@ -18,41 +18,42 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Review certificate notes and close remaining gaps
+Record certificate completion and close only remaining documented gaps.
 
-### Analytics Skills
-Mixed interview review and explanation practice
+### Applied Skills
+Complete final SQL review, project walkthrough practice, and targeted remediation.
 
-### Portfolio
-Polish all evidence and begin a consistent application cadence
+### Portfolio and Career
+Finish Project 3, audit all projects, publish final versions, update career materials, rehearse interviews, and begin targeted applications.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Project 3:** Three completion blocks
+- **Portfolio QA:** Two audit blocks
+- **Career Materials:** One résumé and LinkedIn block
+- **Interview and Applications:** Two launch blocks
+- **Review:** Final 90-day assessment and reflection
 
 ## Checklist
-- [ ] Review notes from Google Courses 1–9
-- [ ] Complete DuckDB Exercise 10: Mixed workforce assessment
-- [ ] Complete DuckDB Exercise 11: Explain joins and window functions
-- [ ] Polish Project 1 and Project 2 repositories
-- [ ] Advance or outline Project 3
-- [ ] Finalize the data-analyst résumé
-- [ ] Finalize the LinkedIn profile
-- [ ] Prepare five STAR stories
-- [ ] Create a reusable application tracking workflow
-- [ ] Submit the first targeted applications
-- [ ] Schedule follow-up dates
-- [ ] Complete the 90-day retrospective
+- [ ] Complete Project 3 analysis and visual deliverable
+- [ ] Write and publish the Project 3 case study
+- [ ] Re-run critical calculations across all three projects
+- [ ] Audit documentation, screenshots, links, and reproducibility
+- [ ] Finalize the résumé with all three project bullets
+- [ ] Finalize LinkedIn and GitHub profile evidence
+- [ ] Prepare project walkthroughs and five STAR stories
+- [ ] Complete a timed SQL and spreadsheet review
+- [ ] Complete a mock interview and record remediation needs
+- [ ] Submit the first targeted applications and record follow-up dates
+- [ ] Pass the final program completion audit
+- [ ] Complete the 90-day retrospective and post-program plan
 
 ## Daily Log
 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -61,6 +62,7 @@ Add one row after each study session.
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
 
-## Additional Applied Labs
+## Applied Labs
 
-- [ ] Complete Applied Lab 36: Optimize Power BI performance
+- [ ] Cross-project calculation and publication audit
+- [ ] Final interview and portfolio presentation simulation

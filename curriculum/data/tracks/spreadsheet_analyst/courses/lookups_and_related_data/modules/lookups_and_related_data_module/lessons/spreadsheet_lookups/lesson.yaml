@@ -1,0 +1,137 @@
+lesson_id: spreadsheet_lookups
+title: Exact Lookups with XLOOKUP
+order: 1
+difficulty: beginner
+description: Build practical analyst skill in exact lookups with xlookup.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply exact lookups with xlookup in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.lookups
+requires:
+- spreadsheet.validation
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_lookups_1
+  title: Exact Lookups with XLOOKUP — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: What should identify the lookup row?
+  answer_options:
+  - A stable lookup key
+  - Cell color
+  - The longest text value
+  - A chart title
+  starter: ''
+  solution: A stable lookup key
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A stable lookup key
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What should identify the lookup row?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.lookups
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Exact Lookups with XLOOKUP — Check 1
+    objective: What should identify the lookup row?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.lookups**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_lookups_2
+  title: Exact Lookups with XLOOKUP — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: What can duplicate lookup keys cause?
+  answer_options:
+  - Ambiguous or incorrect matches
+  - Guaranteed accuracy
+  - Automatic aggregation
+  - No effect
+  starter: ''
+  solution: Ambiguous or incorrect matches
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Ambiguous or incorrect matches
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What can duplicate lookup keys cause?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.lookups
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Exact Lookups with XLOOKUP — Check 2
+    objective: What can duplicate lookup keys cause?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.lookups**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_lookups_3
+  title: Exact Lookups with XLOOKUP — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What should an unmatched key produce?
+  answer_options:
+  - A documented missing-match result
+  - A fabricated match
+  - Automatic deletion
+  - A random value
+  starter: ''
+  solution: A documented missing-match result
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A documented missing-match result
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What should an unmatched key produce?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.lookups
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Exact Lookups with XLOOKUP — Check 3
+    objective: What should an unmatched key produce?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.lookups**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

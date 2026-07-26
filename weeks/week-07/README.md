@@ -1,4 +1,4 @@
-# Week 7 Sprint — Share the Story
+# Week 7 Sprint — Power BI and Power Query
 
 **Target time:** 15–20 hours
 
@@ -18,33 +18,34 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Begin and progress through Google Course 6
+Use certificate work as supporting learning while Power BI is the primary Academy focus.
 
-### Analytics Skills
-Window functions and dashboard-ready result sets
+### Accelerator Academy
+Complete Power Query, data modeling, relationships, DAX foundations, report design, and validation against SQL.
 
 ### Portfolio
-Build the first Power BI dashboard prototype
+Preparation may continue, but dashboard construction remains locked until Power BI mastery and final portfolio readiness.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Academy:** Three Power BI and Power Query sessions
+- **Applied Practice:** Two report-building sessions
+- **SQL Retention:** One DuckDB and one interview session
+- **Google:** One or two supporting sessions
+- **Review:** Power BI Mastery Assessment
 
 ## Checklist
-- [ ] [Google Course 6] Complete the first half of the course
-- [ ] [Google Course 6] Record visualization and storytelling notes
-- [ ] Learn Power BI data loading and relationships
-- [ ] Create initial DAX measures
-- [ ] Solve Top Three Salaries
-- [ ] Solve Tweets' Rolling Averages
-- [ ] Build the Project 1 executive overview page
-- [ ] Build the first detailed analysis page
-- [ ] Add slicers and useful interaction
-- [ ] Check visual accessibility and labels
-- [ ] Capture the first dashboard screenshots
+- [ ] Complete the planned Google Certificate work for the week
+- [ ] Complete Power BI orientation and Power Query foundations
+- [ ] Complete reproducible Power Query transformations
+- [ ] Complete fact, dimension, relationship, and star-schema lessons
+- [ ] Complete measures, calculated columns, and DAX foundations
+- [ ] Complete report layout, interaction, and accessibility lessons
+- [ ] Validate Power BI results against SQL outputs
+- [ ] Complete DuckDB Exercise 09: Timed product challenge
+- [ ] Solve Tweets' Rolling Averages or User Shopping Sprees
+- [ ] Finalize the portfolio dashboard requirements and KPI-to-visual map
+- [ ] Pass the Week 7 Power BI Mastery Assessment
 - [ ] Complete the Week 7 retrospective
 
 ## Daily Log
@@ -52,7 +53,7 @@ Build the first Power BI dashboard prototype
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,9 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 02: Transform data with Power Query
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 25: Perform and interpret a hypothesis test
-- [ ] Complete Applied Lab 30: Calculate monthly cohort retention
+- [ ] Transform and model a practice dataset in Power BI
+- [ ] Build and validate a small executive report

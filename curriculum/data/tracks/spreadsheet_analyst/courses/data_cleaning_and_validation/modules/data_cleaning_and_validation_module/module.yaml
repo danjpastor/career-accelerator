@@ -1,0 +1,7 @@
+module_id: data_cleaning_and_validation_module
+title: Data Cleaning & Validation
+order: 1
+description: Clean text, dates, numbers, duplicates, and missing values without altering the raw source.
+lessons:
+- lessons/spreadsheet_cleaning/lesson.yaml
+- lessons/spreadsheet_validation/lesson.yaml

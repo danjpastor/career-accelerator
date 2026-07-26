@@ -1,4 +1,4 @@
-# Week 10 Sprint — Career Positioning
+# Week 10 Sprint — Flagship Project — Model, Report, and Publish
 
 **Target time:** 15–20 hours
 
@@ -18,41 +18,42 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Complete Google Course 8 and begin Course 9
+Close only essential remaining certificate requirements.
 
-### Analytics Skills
-Medium SQL and timed explanation practice
+### Applied Skills
+Use targeted reinforcement for Power Query, DAX, visualization, or communication gaps.
 
 ### Portfolio
-Begin Project 2 and convert Project 1 into career evidence
+Complete the Project 1 model, Power BI report, findings, recommendations, documentation, and publication.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Portfolio:** Four model and report blocks
+- **Validation:** Two SQL-to-Power-BI reconciliation blocks
+- **Writing:** One case-study block
+- **Career Evidence:** One résumé and walkthrough block
+- **Review:** Project 1 completion gate
 
 ## Checklist
-- [ ] [Google Course 8] Complete the capstone requirements
-- [ ] [Google Course 9] Begin the career-focused course
-- [ ] Solve Supercloud Customer
-- [ ] Explain one completed SQL solution aloud
-- [ ] Define the Project 2 problem and stakeholders
-- [ ] Select or generate the Project 2 dataset
-- [ ] Draft the Project 2 charter and KPIs
-- [ ] Add Project 1 to the résumé
-- [ ] Draft a Project 1 interview walkthrough
-- [ ] Update LinkedIn project evidence
-- [ ] Commit the Project 2 foundation
-- [ ] Complete the Week 10 retrospective
+- [ ] Import the validated Project 1 model into Power BI
+- [ ] Build reproducible Power Query steps
+- [ ] Configure and validate the data model relationships
+- [ ] Create and test required DAX measures
+- [ ] Build executive and operational report views
+- [ ] Validate every key dashboard value against SQL
+- [ ] Write findings, recommendations, assumptions, and limitations
+- [ ] Finalize the README and reproducibility instructions
+- [ ] Add clear screenshots and project artifacts
+- [ ] Prepare a concise Project 1 interview walkthrough
+- [ ] Publish Project 1 and verify all repository links
+- [ ] Pass the Project 1 completion gate
 
 ## Daily Log
 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,11 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 10: Aggregate and export pandas results
-- [ ] Complete Applied Lab 11: Reproduce SQL results in pandas
-- [ ] Complete Applied Lab 20: Reconcile conflicting finance totals
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 28: Interpret a simple linear regression
-- [ ] Complete Applied Lab 34: Build a raw-to-analytics data workflow
+- [ ] Project 1 Power BI model and calculation audit
+- [ ] Project 1 stakeholder walkthrough and publication review

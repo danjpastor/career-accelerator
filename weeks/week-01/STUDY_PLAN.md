@@ -1,51 +1,44 @@
-# Week 1 Study Plan
+# Week 1 Study Plan — Spreadsheet Foundations
 
-Created: 2026-07-15
+## Goal
+Build the spreadsheet and data-foundation skills required before SQL begins, while continuing the current Google Data Analytics Certificate module.
 
-## Weekly Outcomes
+## Suggested schedule
 
-1.  Finish Build Career Accelerator App
-2.  Continue progress on Google Data Analyst Certification
-3.  Set up first portfolio project and expand sql comfortability.
+### Session 1 — Spreadsheet structure
+- Complete Spreadsheet Structure and Data Types.
+- Inspect a small table and identify rows, columns, fields, records, ranges, and data types.
+- Record one question about the portfolio source data without changing it.
 
-## Schedule
+### Session 2 — References and formulas
+- Complete Cell References and Core Formulas.
+- Practice relative and absolute references.
+- Build and validate `SUM`, `AVERAGE`, `MIN`, `MAX`, `COUNT`, and `COUNTA` calculations.
 
-### Monday
-- Finish Google Course 4
-- Build Career Accelerator App
+### Session 3 — Conditional logic
+- Complete Conditional Formulas and Logic.
+- Practice `IF`, `AND`, and `OR` with a controlled dataset.
+- Diagnose at least one intentionally broken formula.
 
-### Tuesday
--  Continue Google Course 5, Module 1 (90m • Learning • In Progress)
-- Histogram of Tweets
-- Data Camp Intro to SQL Chapter 1
-- Generate Portfolio 1 synthetic dataset.
+### Session 4 — Conditional summaries
+- Complete Conditional Summaries.
+- Practice `COUNTIF`, `COUNTIFS`, `SUMIF`, and `SUMIFS`.
+- Reconcile a summary to the source rows.
 
-### Wednesday
-- Write preliminary career-transition reflection
-- Finish Google Course 5, Module 2 (90m • Learning • In Progress)
-- Solve Data Science Skills (20m • SQL • In Progress)
+### Session 5 — Google Certificate
+- Complete the planned certificate work for the week.
+- Capture brief notes on concepts that overlap with Academy material.
 
-### Thursday
-- Finish Google Course 5, Module 3 (90m • Learning • In Progress)
+### Session 6 — Portfolio preparation
+- Review the project brief and stakeholders.
+- Confirm the project folder structure.
+- Preserve untouched raw files.
+- Do not clean, transform, join, or analyze portfolio data.
 
-### Friday
-- 
+### Session 7 — Mastery and review
+- Complete the Week 1 Cumulative Knowledge Check.
+- Complete targeted remediation for any weak topic.
+- Write the Week 1 retrospective.
 
-### Saturday
-- 
-
-### Sunday
-- Weekly retrospective and next-week setup
-
-## Current Roadmap Snapshot
-
-- [ ] Continue Google Course 5, Module 2 (90m • Learning • In Progress)
-- [ ] Complete DataCamp: Introduction to SQL — Chapter 2: Querying (70m • Learning • In Progress)
-- [ ] Solve Data Science Skills (20m • SQL • In Progress)
-- [ ] Generate dataset (45m • Portfolio • In Progress)
-- [ ] Write a short career-transition reflection (25m • General • Not Started)
-- [ ] Complete the Week 1 retrospective (20m • Review • Not Started)
-
-## Constraints and Adjustments
-
-- 
+## Completion rule
+Week 2 unlocks after the required Week 1 spreadsheet lessons and cumulative knowledge check are complete. SQL, DuckDB exercises, and SQL Companion interview problems are intentionally not scheduled during Week 1.

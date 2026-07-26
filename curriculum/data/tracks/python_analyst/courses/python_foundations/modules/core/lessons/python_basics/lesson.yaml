@@ -14,6 +14,8 @@ teaches:
 - python.basics
 requires:
 - powerbi.star_schema
+- roadmap.sql_mastery
+- roadmap.power_bi_mastery
 mastery:
   passing_score: 1.0
 activities:

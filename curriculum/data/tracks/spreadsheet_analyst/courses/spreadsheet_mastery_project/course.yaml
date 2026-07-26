@@ -1,0 +1,13 @@
+course_id: spreadsheet_mastery_project
+title: Spreadsheet Mastery Project
+order: 6
+description: Apply the complete spreadsheet workflow and demonstrate readiness for SQL.
+estimated_minutes: 120
+outcomes:
+- Complete interactive spreadsheet decisions and validation checks.
+- Explain how the workflow supports a reliable analyst result.
+modules:
+- modules/spreadsheet_mastery_project_module/module.yaml
+assessments:
+- assessments/week_2_spreadsheet_mastery.yaml
+skills_labs: []

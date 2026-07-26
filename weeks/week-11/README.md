@@ -1,4 +1,4 @@
-# Week 11 Sprint — Portfolio Depth
+# Week 11 Sprint — Portfolio Projects 2 and 3
 
 **Target time:** 15–20 hours
 
@@ -18,41 +18,42 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Complete Google Course 9 and the certificate
+Finish any remaining certificate requirement without displacing portfolio deadlines.
 
-### Analytics Skills
-Interview SQL, query review, and time-limited practice
+### Applied Skills
+Use focused practice only for skills directly required by the active projects.
 
 ### Portfolio
-Complete Project 2 and prepare Project 3
+Complete a focused Project 2 and begin or substantially complete Project 3 with a distinct business capability.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Project 2:** Three completion blocks
+- **Project 3:** Three foundation and analysis blocks
+- **Validation:** One cross-project QA block
+- **Career Evidence:** One résumé or walkthrough block
+- **Review:** Weekly portfolio checkpoint
 
 ## Checklist
-- [ ] [Google Course 9] Complete the remaining course modules
-- [ ] [Google Course 9] Record certificate completion
-- [ ] Solve Second Day Confirmation
-- [ ] Complete DuckDB Exercise 09: 30-minute product challenge
-- [ ] Complete the Project 2 analysis
-- [ ] Build and document the Project 2 dashboard
-- [ ] Publish Project 2 to GitHub
-- [ ] Draft a Project 2 résumé bullet
-- [ ] Choose the Project 3 problem or dataset
-- [ ] Practice two project interview answers
-- [ ] Review the portfolio for missing evidence
-- [ ] Complete the Week 11 retrospective
+- [ ] Finalize the Project 2 problem, stakeholders, KPIs, and scope
+- [ ] Clean and validate Project 2 data
+- [ ] Complete Project 2 analysis and reconcile calculations
+- [ ] Build the Project 2 visual deliverable
+- [ ] Write and publish the Project 2 case study
+- [ ] Create a Project 2 résumé bullet and interview explanation
+- [ ] Finalize the Project 3 problem, stakeholders, KPIs, and scope
+- [ ] Acquire, preserve, and document Project 3 source data
+- [ ] Clean and validate Project 3 data
+- [ ] Begin Project 3 analysis and visual design
+- [ ] Audit Projects 1 and 2 for missing evidence
+- [ ] Complete the Week 11 portfolio checkpoint
 
 ## Daily Log
 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,9 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 14: Document analytical decisions and limitations
-- [ ] Complete Applied Lab 21: Propose a safer alternative metric
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 35: Audit an AI-generated analysis
+- [ ] Project 2 completion and publication review
+- [ ] Project 3 scope, data-quality, and analysis review

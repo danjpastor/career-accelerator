@@ -7,6 +7,22 @@ from .models import ActivityDefinition, ProgressState
 from .progress import ProgressRepository
 
 
+TRACK_GATE_ASSESSMENTS = {
+    "sql_analyst": (
+        "week_2_spreadsheet_mastery",
+        "Week 2 Spreadsheet Mastery Assessment",
+    ),
+    "power_bi_analyst": (
+        "week_6_sql_mastery",
+        "Week 6 Spreadsheet & SQL Mastery Assessment",
+    ),
+    "python_analyst": (
+        "week_7_power_bi_mastery",
+        "Week 7 Power BI Mastery Assessment",
+    ),
+}
+
+
 @dataclass(frozen=True)
 class AcademyRecommendation:
     kind: str
@@ -31,7 +47,42 @@ class RecommendationEngine:
         self.index = index
         self.progress = progress
 
+    def track_unlocked(self, track_id: str) -> tuple[bool, tuple[str, ...]]:
+        gate = TRACK_GATE_ASSESSMENTS.get(str(track_id))
+        if gate is None:
+            return True, ()
+        assessment_id, title = gate
+        if self.assessment_passed(assessment_id):
+            return True, ()
+        return False, (f"checkpoint:{title}",)
+
+    def _activity_already_passed(
+        self,
+        lesson_id: str,
+        activity_id: str,
+    ) -> bool:
+        row = self.progress.activity_row(lesson_id, activity_id)
+        return bool(row and row["state"] == "Passed")
+
+    def _lesson_already_completed(self, location: LessonLocation) -> bool:
+        required = tuple(
+            item for item in location.lesson.activities
+            if item.required_for_completion
+        )
+        return bool(required) and all(
+            self._activity_already_passed(location.lesson.lesson_id, item.activity_id)
+            for item in required
+        )
+
     def lesson_unlocked(self, location: LessonLocation) -> tuple[bool, tuple[str, ...]]:
+        # Preserve access to lessons the learner already completed before the
+        # roadmap migration, while preventing unfinished later-track work from
+        # bypassing the new mastery gates.
+        if self._lesson_already_completed(location):
+            return True, ()
+        track_ready, track_missing = self.track_unlocked(location.track.track_id)
+        if not track_ready:
+            return False, track_missing
         mastered = self.progress.mastered_skills()
         missing = tuple(skill for skill in location.lesson.requires if skill not in mastered)
         return not missing, missing
@@ -41,9 +92,17 @@ class RecommendationEngine:
         location: LessonLocation,
         activity: ActivityDefinition,
     ) -> tuple[bool, str | None]:
+        # Previously passed steps remain reviewable after the migration. New or
+        # unfinished steps obey both the track gate and the lesson prerequisites.
+        if self._activity_already_passed(location.lesson.lesson_id, activity.activity_id):
+            return True, None
         lesson_ready, missing = self.lesson_unlocked(location)
         if not lesson_ready:
-            return False, "Master first: " + ", ".join(missing)
+            readable = [
+                item.split(":", 1)[1] if item.startswith("checkpoint:") else item
+                for item in missing
+            ]
+            return False, "Master first: " + ", ".join(readable)
         for earlier in location.lesson.activities:
             if earlier.activity_id == activity.activity_id:
                 break
@@ -70,6 +129,37 @@ class RecommendationEngine:
                 (lab_id,),
             ).fetchone()
         )
+
+    def _track_for_assessment(self, assessment_id: str):
+        for path in self.index.catalog.program.paths:
+            for track in path.tracks:
+                for course in track.courses:
+                    if any(
+                        item.assessment_id == assessment_id
+                        for item in course.assessments
+                    ):
+                        return track
+        return None
+
+    def _track_for_lab(self, lab_id: str):
+        for path in self.index.catalog.program.paths:
+            for track in path.tracks:
+                for course in track.courses:
+                    if any(item.lab_id == lab_id for item in course.skills_labs):
+                        return track
+        return None
+
+    def assessment_unlocked(self, assessment_id: str) -> tuple[bool, tuple[str, ...]]:
+        track = self._track_for_assessment(str(assessment_id))
+        if track is None:
+            return False, ("Academy assessment",)
+        return self.track_unlocked(track.track_id)
+
+    def skills_lab_unlocked(self, lab_id: str) -> tuple[bool, tuple[str, ...]]:
+        track = self._track_for_lab(str(lab_id))
+        if track is None:
+            return False, ("Academy Skills Lab",)
+        return self.track_unlocked(track.track_id)
 
 
     def is_complete(self) -> bool:
@@ -192,6 +282,12 @@ class RecommendationEngine:
         # query per lesson step.
         for path in self.index.catalog.program.paths:
             for track in path.tracks:
+                track_ready, _track_missing = self.track_unlocked(track.track_id)
+                if not track_ready:
+                    # The checkpoint that unlocks this track lives in an earlier
+                    # track and is returned there. Never skip into unfinished SQL,
+                    # Power BI, or Python content through the fallback traversal.
+                    continue
                 for course in track.courses:
                     for module in course.modules:
                         for lesson in module.lessons:
@@ -293,6 +389,9 @@ class RecommendationEngine:
         # the path active and direct the learner to the first unfinished step.
         if not self.is_complete():
             for location in self.index.ordered_lessons():
+                track_ready, _track_missing = self.track_unlocked(location.track.track_id)
+                if not track_ready:
+                    continue
                 for step_index, activity in enumerate(
                     location.lesson.activities, start=1
                 ):
@@ -322,54 +421,59 @@ class RecommendationEngine:
                         location, activity, step_index, reason=reason
                     )
 
-            for course in self.index.catalog.courses():
-                for assessment in course.assessments:
-                    if self.assessment_passed(assessment.assessment_id):
+            for path in self.index.catalog.program.paths:
+                for track in path.tracks:
+                    track_ready, _track_missing = self.track_unlocked(track.track_id)
+                    if not track_ready:
                         continue
-                    missing = tuple(
-                        skill for skill in assessment.requires
-                        if skill not in mastered
-                    )
-                    prerequisite = self._prerequisite_recommendation(
-                        missing, activity_rows
-                    )
-                    if prerequisite is not None:
-                        return prerequisite
-                    return AcademyRecommendation(
-                        kind="assessment",
-                        title=assessment.title,
-                        target_key=f"academy:assessment:{assessment.assessment_id}",
-                        estimated_minutes=assessment.estimated_minutes,
-                        reason=(
-                            "Review the prerequisite path before starting this checkpoint: "
-                            + ", ".join(missing)
-                            if missing
-                            else "Complete the next checkpoint in the learning path."
-                        ),
-                    )
+                    for course in track.courses:
+                        for assessment in course.assessments:
+                            if self.assessment_passed(assessment.assessment_id):
+                                continue
+                            missing = tuple(
+                                skill for skill in assessment.requires
+                                if skill not in mastered
+                            )
+                            prerequisite = self._prerequisite_recommendation(
+                                missing, activity_rows
+                            )
+                            if prerequisite is not None:
+                                return prerequisite
+                            return AcademyRecommendation(
+                                kind="assessment",
+                                title=assessment.title,
+                                target_key=f"academy:assessment:{assessment.assessment_id}",
+                                estimated_minutes=assessment.estimated_minutes,
+                                reason=(
+                                    "Review the prerequisite path before starting this checkpoint: "
+                                    + ", ".join(missing)
+                                    if missing
+                                    else "Complete the next checkpoint in the learning path."
+                                ),
+                            )
 
-                for lab in course.skills_labs:
-                    if self.skills_lab_passed(lab.lab_id):
-                        continue
-                    missing = tuple(
-                        skill for skill in lab.requires
-                        if skill not in mastered
-                    )
-                    prerequisite = self._prerequisite_recommendation(
-                        missing, activity_rows
-                    )
-                    if prerequisite is not None:
-                        return prerequisite
-                    return AcademyRecommendation(
-                        kind="skills_lab",
-                        title=lab.title,
-                        target_key=f"academy:skills_lab:{lab.lab_id}",
-                        estimated_minutes=lab.estimated_minutes,
-                        reason=(
-                            "Review the prerequisite path before starting this project: "
-                            + ", ".join(missing)
-                            if missing
-                            else "Complete the next applied project in the learning path."
-                        ),
-                    )
+                        for lab in course.skills_labs:
+                            if self.skills_lab_passed(lab.lab_id):
+                                continue
+                            missing = tuple(
+                                skill for skill in lab.requires
+                                if skill not in mastered
+                            )
+                            prerequisite = self._prerequisite_recommendation(
+                                missing, activity_rows
+                            )
+                            if prerequisite is not None:
+                                return prerequisite
+                            return AcademyRecommendation(
+                                kind="skills_lab",
+                                title=lab.title,
+                                target_key=f"academy:skills_lab:{lab.lab_id}",
+                                estimated_minutes=lab.estimated_minutes,
+                                reason=(
+                                    "Review the prerequisite path before starting this project: "
+                                    + ", ".join(missing)
+                                    if missing
+                                    else "Complete the next applied project in the learning path."
+                                ),
+                            )
         return None

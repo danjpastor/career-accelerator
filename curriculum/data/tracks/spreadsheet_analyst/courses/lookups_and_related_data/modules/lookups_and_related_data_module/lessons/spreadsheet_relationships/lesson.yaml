@@ -1,0 +1,137 @@
+lesson_id: spreadsheet_relationships
+title: Matching Tables & Understanding Grain
+order: 2
+difficulty: beginner
+description: Build practical analyst skill in matching tables & understanding grain.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply matching tables & understanding grain in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.relationships
+requires:
+- spreadsheet.lookups
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_relationships_1
+  title: Matching Tables & Understanding Grain — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: What is a one-to-many relationship?
+  answer_options:
+  - One parent record can relate to several detail records
+  - Every key appears once everywhere
+  - No tables share fields
+  - Every row duplicates
+  starter: ''
+  solution: One parent record can relate to several detail records
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: One parent record can relate to several detail records
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What is a one-to-many relationship?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.relationships
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Matching Tables & Understanding Grain — Check 1
+    objective: What is a one-to-many relationship?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.relationships**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_relationships_2
+  title: Matching Tables & Understanding Grain — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: 'Before matching two tables, verify:'
+  answer_options:
+  - Key uniqueness and table grain
+  - Font size
+  - Chart type
+  - Worksheet tab color
+  starter: ''
+  solution: Key uniqueness and table grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Key uniqueness and table grain
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: 'Before matching two tables, verify:'
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.relationships
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Matching Tables & Understanding Grain — Check 2
+    objective: 'Before matching two tables, verify:'
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.relationships**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_relationships_3
+  title: Matching Tables & Understanding Grain — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: Why can a lookup return the wrong record?
+  answer_options:
+  - The lookup key is not unique or the match mode is wrong
+  - The workbook has formulas
+  - The data is sorted
+  - The file is saved
+  starter: ''
+  solution: The lookup key is not unique or the match mode is wrong
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The lookup key is not unique or the match mode is wrong
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Why can a lookup return the wrong record?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.relationships
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Matching Tables & Understanding Grain — Check 3
+    objective: Why can a lookup return the wrong record?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.relationships**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

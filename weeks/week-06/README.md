@@ -1,4 +1,4 @@
-# Week 6 Sprint — Analytical SQL
+# Week 6 Sprint — Advanced SQL and Mastery
 
 **Target time:** 15–20 hours
 
@@ -18,33 +18,34 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Complete Google Course 5
+Complete or substantially finish the certificate learning scheduled for the first half.
 
-### Analytics Skills
-Joins, CTEs, subqueries, ranking, and window functions
+### Accelerator Academy
+Complete window functions, date analysis, rankings, running calculations, advanced workflows, and full SQL review.
 
 ### Portfolio
-Complete the main SQL analysis and validate the findings
+Execution remains locked. Use the week to prove spreadsheet and SQL mastery before advancing.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Academy:** Three advanced SQL sessions
+- **DuckDB:** Two capstone-style sessions
+- **Interview Practice:** Two or three mixed sessions
+- **Google:** Certificate completion or catch-up
+- **Review:** Spreadsheet and SQL Mastery Assessment
 
 ## Checklist
-- [ ] [Google Course 5] Complete the remaining modules
-- [ ] [Google Course 5] Finish all required activities and assessments
-- [ ] Complete DuckDB Exercise 06: Join customers, orders, and payments
-- [ ] Complete DuckDB Exercise 07: Analyze order profitability
-- [ ] Solve User's Third Transaction
-- [ ] Solve Second Highest Salary
-- [ ] Complete the main Project 1 SQL query set
-- [ ] Add validation and edge-case queries
-- [ ] Translate query outputs into business findings
-- [ ] Complete DuckDB Exercise 12: Refactor an analytics query
-- [ ] Commit the completed SQL analysis
+- [ ] Complete the planned Google Certificate work for the week
+- [ ] Complete ROW_NUMBER, RANK, and DENSE_RANK lessons
+- [ ] Complete partitioning, ordering, and window-frame lessons
+- [ ] Complete running totals, period comparisons, and date-analysis lessons
+- [ ] Complete advanced SQL workflow and interpretation review
+- [ ] Complete DuckDB Exercise 08: Analyze a VFX production snapshot
+- [ ] Complete DuckDB Exercise 11: Explain joins and window functions
+- [ ] Solve User's Third Transaction in SQL Companion
+- [ ] Solve Top Three Salaries or Odd and Even Measurements
+- [ ] Complete targeted remediation for any missing SQL prerequisite
+- [ ] Pass the Week 6 Spreadsheet and SQL Mastery Assessment
 - [ ] Complete the Week 6 retrospective
 
 ## Daily Log
@@ -52,7 +53,7 @@ Complete the main SQL analysis and validate the findings
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,9 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 18: Repair a misleading chart and narrative
-- [ ] Complete Applied Lab 19: Timed analysis of missed deadlines
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 24: Calculate confidence intervals and margin of error
+- [ ] Complete an end-to-end SQL analysis on practice data
+- [ ] Explain and validate joins, CTEs, and window calculations

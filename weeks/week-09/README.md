@@ -1,4 +1,4 @@
-# Week 9 Sprint — Complete the Capstone
+# Week 9 Sprint — Flagship Project — Clean and Analyze
 
 **Target time:** 15–20 hours
 
@@ -18,41 +18,42 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Complete Google Course 7 and begin Course 8
+Complete only remaining certificate catch-up that does not displace portfolio execution.
 
-### Analytics Skills
-Integrated review across SQL, BI, and Python
+### Applied Skills
+Use targeted Academy, DuckDB, or interview review only when the active project exposes a skill gap.
 
 ### Portfolio
-Publish Project 1 as a complete portfolio case study
+Clean and validate Project 1, build the analytical database, complete SQL analysis, and reconcile findings.
 
 ## Recommended Rhythm
 
-- **Learning:** Four focused sessions across the week
-- **SQL:** Two or three practice sessions with written explanations
-- **Portfolio:** Two evidence-producing work blocks
-- **Review:** One weekly retrospective and next-week setup
+- **Portfolio:** Four substantial execution blocks
+- **Validation:** Two focused quality and relationship checks
+- **Targeted Learning:** One remediation block
+- **Documentation:** One evidence and decision-log block
+- **Review:** Weekly project checkpoint
 
 ## Checklist
-- [ ] [Google Course 7] Complete the remaining course modules
-- [ ] [Google Course 8] Begin the capstone course
-- [ ] Complete DuckDB Exercise 08: Analyze a VFX production snapshot
-- [ ] Solve User Shopping Sprees
-- [ ] Finalize the Project 1 dashboard
-- [ ] Finalize the Project 1 README
-- [ ] Add screenshots and a data dictionary
-- [ ] Write the methodology and limitations sections
-- [ ] Create presentation or walkthrough notes
-- [ ] Write a résumé-ready project bullet
-- [ ] Publish Project 1 to GitHub
-- [ ] Complete the Week 9 retrospective
+- [ ] Confirm raw-data preservation and project reproducibility
+- [ ] Profile every Project 1 source table
+- [ ] Validate row counts, grain, keys, and relationships
+- [ ] Document nulls, duplicates, invalid types, and ambiguous business values
+- [ ] Create staged and cleaned Project 1 tables
+- [ ] Re-run validation checks against the cleaned outputs
+- [ ] Build analysis-ready tables or views
+- [ ] Calculate and validate core KPIs in SQL
+- [ ] Complete exploratory and exception analysis
+- [ ] Reconcile project findings to source totals
+- [ ] Update the cleaning log, data dictionary, and limitations
+- [ ] Complete the Week 9 project checkpoint
 
 ## Daily Log
 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | DataCamp | SQL Problems | Portfolio |
+| Date | Hours | Google | Academy | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 
@@ -63,12 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete Applied Lab 05: Build an executive Power BI report
-- [ ] Complete Applied Lab 06: Plan Power BI publishing and security
-- [ ] Complete Applied Lab 13: Prepare a dashboard walkthrough and Q&A
-
-## Additional Applied Labs
-
-- [ ] Complete Applied Lab 27: Separate correlation from causation
-- [ ] Complete Applied Lab 32: Explain forecast-versus-actual variance
-- [ ] Complete Applied Lab 33: Ingest paginated REST API and JSON data
+- [ ] Project 1 relationship and cleaning validation
+- [ ] Project 1 SQL and exploratory-analysis review

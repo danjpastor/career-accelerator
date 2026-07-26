@@ -1,0 +1,13 @@
+course_id: formulas_and_logic
+title: Formulas & Conditional Logic
+order: 2
+description: Build reliable formulas, conditional calculations, and summary logic.
+estimated_minutes: 120
+outcomes:
+- Complete interactive spreadsheet decisions and validation checks.
+- Explain how the workflow supports a reliable analyst result.
+modules:
+- modules/formulas_and_logic_module/module.yaml
+assessments:
+- assessments/week_1_spreadsheet_foundations_check.yaml
+skills_labs: []

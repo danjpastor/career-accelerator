@@ -1,0 +1,273 @@
+assessment_id: week_7_power_bi_mastery
+title: Week 7 Power BI Mastery Assessment
+order: 99
+description: Verify Power Query, modeling, DAX, visual design, and retained SQL validation.
+estimated_minutes: 45
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled.
+- A score of 80% or higher passes.
+- The check includes current-week material and retained prior knowledge.
+requires:
+- roadmap.sql_mastery
+- powerbi.power_query
+- powerbi.dimensional_modeling
+- powerbi.star_schema
+passing_score: 0.8
+activities:
+- activity_id: w7_query
+  title: Power Query
+  type: mastery
+  runtime: recognition
+  prompt: 'Applied Steps should represent:'
+  answer_options:
+  - Reproducible source transformations
+  - Manual dashboard clicks only
+  - SQL interview answers
+  - Random formatting
+  starter: ''
+  solution: Reproducible source transformations
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Reproducible source transformations
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Applied Steps should represent:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w7_fact
+  title: Fact table
+  type: mastery
+  runtime: recognition
+  prompt: 'A fact table usually stores:'
+  answer_options:
+  - Events or measurements at a defined grain
+  - Only report colors
+  - Only descriptions
+  - Only lookup labels
+  starter: ''
+  solution: Events or measurements at a defined grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Events or measurements at a defined grain
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A fact table usually stores:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w7_dim
+  title: Dimension table
+  type: mastery
+  runtime: recognition
+  prompt: 'A dimension table usually stores:'
+  answer_options:
+  - Descriptive attributes used to filter or group facts
+  - Only measures
+  - Only duplicate events
+  - Only errors
+  starter: ''
+  solution: Descriptive attributes used to filter or group facts
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Descriptive attributes used to filter or group facts
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A dimension table usually stores:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w7_measure
+  title: Measure versus column
+  type: mastery
+  runtime: recognition
+  prompt: 'A measure is preferred for:'
+  answer_options:
+  - A calculation that responds to filter context
+  - A fixed row-level source value
+  - A file path
+  - A relationship key
+  starter: ''
+  solution: A calculation that responds to filter context
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A calculation that responds to filter context
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A measure is preferred for:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w7_cardinality
+  title: Cardinality
+  type: mastery
+  runtime: recognition
+  prompt: 'The common star-schema relationship is:'
+  answer_options:
+  - One dimension row to many fact rows
+  - Many dimensions to one label only
+  - No relationships
+  - Many-to-many by default
+  starter: ''
+  solution: One dimension row to many fact rows
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: One dimension row to many fact rows
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'The common star-schema relationship is:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w7_validate
+  title: Validation
+  type: mastery
+  runtime: recognition
+  prompt: 'Dashboard KPIs should be checked against:'
+  answer_options:
+  - Independent SQL or spreadsheet calculations
+  - Only visual appearance
+  - A screenshot
+  - A random sample only
+  starter: ''
+  solution: Independent SQL or spreadsheet calculations
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Independent SQL or spreadsheet calculations
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Dashboard KPIs should be checked against:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w7_visual
+  title: Visual choice
+  type: mastery
+  runtime: recognition
+  prompt: 'A line chart is usually best for:'
+  answer_options:
+  - A measure over ordered time
+  - A single total
+  - A text lookup
+  - A key uniqueness test
+  starter: ''
+  solution: A measure over ordered time
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A measure over ordered time
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A line chart is usually best for:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w7_filter
+  title: Filter context
+  type: mastery
+  runtime: recognition
+  prompt: 'CALCULATE is used to:'
+  answer_options:
+  - Evaluate an expression under modified filter context
+  - Import a CSV
+  - Rename a query
+  - Create a workbook
+  starter: ''
+  solution: Evaluate an expression under modified filter context
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Evaluate an expression under modified filter context
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'CALCULATE is used to:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []

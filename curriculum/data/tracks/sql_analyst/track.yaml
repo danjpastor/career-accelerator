@@ -1,9 +1,9 @@
 track_id: sql_analyst
 title: SQL Fundamentals
 navigation_title: SQL
-order: 1
-description: Build SQL fundamentals through seven structured courses, chapter-level practice, checkpoints, and original
-  bonus projects.
+order: 2
+description: Build SQL fundamentals through seven structured courses, chapter-level practice, checkpoints,
+  and original bonus projects.
 courses:
 - courses/introduction_to_sql/course.yaml
 - courses/intermediate_sql/course.yaml

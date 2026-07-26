@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 from career_app.services import duckdb_workspace
 from career_app.services import duckdb_exercise_runner as runner
+from career_app.services import roadmap_mastery
 from career_app.theme import COLORS
 from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
 from career_app.ui.widgets import Card
@@ -324,6 +325,7 @@ class DuckDBExercisesWidget(QWidget):
 
         reference_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.reference_row = reference_row
+        self.reference_buttons = []
         for label, callback in (
             ("Instructions", lambda: self.open_reference("instructions")),
             ("Starter", lambda: self.open_reference("starter")),
@@ -333,6 +335,7 @@ class DuckDBExercisesWidget(QWidget):
             button = QPushButton(label)
             button.setObjectName("Secondary")
             button.clicked.connect(callback)
+            self.reference_buttons.append(button)
             reference_row.addWidget(button)
         reference_row.addStretch()
         practice_layout.addLayout(reference_row)
@@ -409,6 +412,52 @@ class DuckDBExercisesWidget(QWidget):
         super().resizeEvent(event)
         self._apply_responsive_layout()
 
+    def _readiness(self, number: int | None = None) -> dict[str, Any]:
+        target = int(number if number is not None else self.current_number or 1)
+        return roadmap_mastery.duckdb_readiness(self.conn, target)
+
+    def _ensure_current_ready(self, *, show_message: bool = True) -> bool:
+        if self.current_number is None:
+            return False
+        readiness = self._readiness(self.current_number)
+        if readiness.get("ready"):
+            return True
+        if show_message:
+            self.feedback.show_message(
+                "Exercise locked. " + str(readiness.get("reason") or "Complete the prerequisites first."),
+                "hint",
+            )
+        return False
+
+    def _apply_access_state(self, readiness: dict[str, Any], completed: bool) -> None:
+        enabled = bool(completed or readiness.get("ready"))
+        for widget in (
+            self.status_combo,
+            self.question_combo,
+            self.sql_editor,
+            self.run_button,
+            self.check_question_button,
+            self.check_exercise_button,
+            self.notes,
+            self.save_button,
+            self.submit_button,
+        ):
+            widget.setEnabled(enabled)
+        for button in self.reference_buttons:
+            button.setEnabled(enabled)
+        if not enabled:
+            reason = str(readiness.get("reason") or "Complete the prerequisites first.")
+            self.feedback.show_message("Exercise locked. " + reason, "hint")
+            self.question_prompt.setText(
+                "This exercise is visible so you can see what is coming next, but its editor and files "
+                "remain locked until the required Academy lessons, mastery checks, and earlier exercises are complete."
+            )
+            self.sql_editor.setPlaceholderText("Locked — complete the listed prerequisites first.")
+        else:
+            self.sql_editor.setPlaceholderText(
+                "Write the SQL answer for the selected question. Each question is saved independently."
+            )
+
     def refresh(self, *, preserve_number: bool = True) -> None:
         preferred = self.current_number if preserve_number else None
         if preferred is None:
@@ -432,12 +481,23 @@ class DuckDBExercisesWidget(QWidget):
         for row, number in enumerate(sorted(DUCKDB_EXERCISES)):
             item = DUCKDB_EXERCISES[number]
             status = statuses[number].get("status", "Not Started")
-            marker = "●" if status == "Completed" else "◐" if status == "In Progress" else "○"
+            readiness = roadmap_mastery.duckdb_readiness(self.conn, number)
+            marker = (
+                "●" if status == "Completed"
+                else "🔒" if not readiness.get("ready")
+                else "◐" if status == "In Progress"
+                else "○"
+            )
             list_item = QListWidgetItem(
                 f"{marker}  EXERCISE {number:02d}\n     {item['title']}"
             )
             list_item.setData(Qt.ItemDataRole.UserRole, number)
-            list_item.setToolTip(f"{item['concepts']} • {item['minutes']} minutes")
+            tooltip = f"{item['concepts']} • {item['minutes']} minutes"
+            if not readiness.get("ready") and status != "Completed":
+                tooltip += "\nLocked — " + str(readiness.get("reason") or "Complete the prerequisites first.")
+            else:
+                tooltip += "\nReady" if status != "Completed" else "\nCompleted"
+            list_item.setToolTip(tooltip)
             self.exercise_list.addItem(list_item)
             if number == preferred:
                 target_row = row
@@ -544,6 +604,8 @@ class DuckDBExercisesWidget(QWidget):
     def _persist_submission_draft(self) -> Path | None:
         if self.current_number is None:
             return None
+        if not self._ensure_current_ready(show_message=False):
+            raise PermissionError(self._readiness().get("reason") or "Exercise is locked.")
         return runner.save_submission(
             self.root, self.current_number, self._full_submission_sql()
         )
@@ -647,6 +709,11 @@ class DuckDBExercisesWidget(QWidget):
             f"{len(inventory)} dataset{'s' if len(inventory) != 1 else ''}"
         )
         self.back_button.setEnabled(number > min(DUCKDB_EXERCISES))
+        readiness = roadmap_mastery.duckdb_readiness(self.conn, number)
+        self._apply_access_state(
+            readiness,
+            str(progress.get("status") or "") == "Completed",
+        )
         QTimer.singleShot(0, self._apply_workspace_split)
 
     def current_question_number(self) -> int:
@@ -740,6 +807,8 @@ class DuckDBExercisesWidget(QWidget):
     def run_question(self) -> None:
         if self.current_number is None:
             return
+        if not self._ensure_current_ready():
+            return
         question_number = self.current_question_number()
         full_sql = self._full_submission_sql()
         try:
@@ -763,6 +832,8 @@ class DuckDBExercisesWidget(QWidget):
     def check_question(self) -> None:
         if self.current_number is None:
             return
+        if not self._ensure_current_ready():
+            return
         question_number = self.current_question_number()
         full_sql = self._full_submission_sql()
         try:
@@ -784,6 +855,8 @@ class DuckDBExercisesWidget(QWidget):
 
     def check_exercise(self) -> dict[str, Any] | None:
         if self.current_number is None:
+            return None
+        if not self._ensure_current_ready():
             return None
         full_sql = self._full_submission_sql()
         try:
@@ -825,6 +898,8 @@ class DuckDBExercisesWidget(QWidget):
     def save_progress(self, *, show_confirmation: bool = True) -> None:
         if self.current_number is None:
             return
+        if not self._ensure_current_ready():
+            return
         try:
             path = self._persist_submission_draft()
             status = self.status_combo.currentText()
@@ -849,6 +924,8 @@ class DuckDBExercisesWidget(QWidget):
 
     def submit_exercise(self) -> None:
         if self.current_number is None:
+            return
+        if not self._ensure_current_ready():
             return
         try:
             self._persist_submission_draft()
@@ -919,6 +996,8 @@ class DuckDBExercisesWidget(QWidget):
     def open_submission_file(self) -> None:
         if self.current_number is None:
             return
+        if not self._ensure_current_ready():
+            return
         path = self._persist_submission_draft()
         if path is None:
             return
@@ -926,6 +1005,8 @@ class DuckDBExercisesWidget(QWidget):
 
     def open_reference(self, key: str) -> None:
         if self.current_number is None:
+            return
+        if not self._ensure_current_ready():
             return
         path = runner.exercise_paths(self.root, self.current_number).get(key)
         if path is None or not path.exists():
@@ -935,6 +1016,8 @@ class DuckDBExercisesWidget(QWidget):
 
     def open_dataset_folder(self) -> None:
         if self.current_number is None:
+            return
+        if not self._ensure_current_ready():
             return
         path = runner.exercise_paths(self.root, self.current_number)["datasets"]
         path.mkdir(parents=True, exist_ok=True)

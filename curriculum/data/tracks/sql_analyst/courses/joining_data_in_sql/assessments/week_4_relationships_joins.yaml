@@ -1,0 +1,271 @@
+assessment_id: week_4_relationships_joins
+title: Week 4 Cumulative Knowledge Check
+order: 99
+description: Verify keys, grain, joins, cardinality, missing matches, and retained spreadsheet/SQL foundations.
+estimated_minutes: 40
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled.
+- A score of 80% or higher passes.
+- The check includes current-week material and retained prior knowledge.
+requires:
+- roadmap.spreadsheet_mastery
+- sql.joins
+passing_score: 0.8
+activities:
+- activity_id: w4_pk
+  title: Primary key
+  type: mastery
+  runtime: recognition
+  prompt: 'A primary key should be:'
+  answer_options:
+  - Unique and non-null at the table grain
+  - Repeated in every row
+  - A measure
+  - A chart title
+  starter: ''
+  solution: Unique and non-null at the table grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Unique and non-null at the table grain
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A primary key should be:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w4_fk
+  title: Foreign key
+  type: mastery
+  runtime: recognition
+  prompt: 'A foreign key usually:'
+  answer_options:
+  - References a key in another table
+  - Must be unique in the detail table
+  - Stores a calculation
+  - Creates a chart
+  starter: ''
+  solution: References a key in another table
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: References a key in another table
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A foreign key usually:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w4_left
+  title: LEFT JOIN
+  type: mastery
+  runtime: recognition
+  prompt: 'A LEFT JOIN preserves:'
+  answer_options:
+  - Every row from the left table
+  - Only matching right rows
+  - Only duplicate keys
+  - No unmatched rows
+  starter: ''
+  solution: Every row from the left table
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Every row from the left table
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A LEFT JOIN preserves:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w4_multiply
+  title: Row multiplication
+  type: mastery
+  runtime: recognition
+  prompt: 'Unexpected join multiplication often indicates:'
+  answer_options:
+  - Duplicate keys at the join grain
+  - Correct filtering
+  - An empty table
+  - A chart issue
+  starter: ''
+  solution: Duplicate keys at the join grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Duplicate keys at the join grain
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Unexpected join multiplication often indicates:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w4_orphan
+  title: Orphan record
+  type: mastery
+  runtime: recognition
+  prompt: 'An orphan foreign key has:'
+  answer_options:
+  - No matching parent key
+  - A valid match
+  - A null measure only
+  - A pivot total
+  starter: ''
+  solution: No matching parent key
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: No matching parent key
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'An orphan foreign key has:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w4_validate
+  title: Join validation
+  type: mastery
+  runtime: recognition
+  prompt: What should be compared before and after a join?
+  answer_options:
+  - Row counts and key uniqueness
+  - Font size
+  - Worksheet names
+  - File dates only
+  starter: ''
+  solution: Row counts and key uniqueness
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Row counts and key uniqueness
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: What should be compared before and after a join?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w4_lookup
+  title: Spreadsheet retention
+  type: mastery
+  runtime: recognition
+  prompt: 'Duplicate lookup keys create:'
+  answer_options:
+  - Ambiguous matches
+  - Guaranteed accuracy
+  - Automatic totals
+  - No risk
+  starter: ''
+  solution: Ambiguous matches
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Ambiguous matches
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Duplicate lookup keys create:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w4_explain
+  title: Business explanation
+  type: mastery
+  runtime: recognition
+  prompt: 'A safe join explanation includes:'
+  answer_options:
+  - Grain, keys, cardinality, and row-count checks
+  - Only SQL syntax
+  - Only the final total
+  - Only a screenshot
+  starter: ''
+  solution: Grain, keys, cardinality, and row-count checks
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Grain, keys, cardinality, and row-count checks
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A safe join explanation includes:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []

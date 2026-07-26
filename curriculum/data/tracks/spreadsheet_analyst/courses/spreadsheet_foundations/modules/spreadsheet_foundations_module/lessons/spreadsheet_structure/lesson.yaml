@@ -1,0 +1,137 @@
+lesson_id: spreadsheet_structure
+title: Rows, Columns, Tables & Data Types
+order: 1
+difficulty: beginner
+description: Build practical analyst skill in rows, columns, tables & data types.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply rows, columns, tables & data types in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.structure
+- spreadsheet.data_types
+requires: []
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: spreadsheet_structure_1
+  title: Rows, Columns, Tables & Data Types — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: What does one row represent?
+  answer_options:
+  - One business record at the table grain
+  - One formula
+  - One workbook
+  - One chart
+  starter: ''
+  solution: One business record at the table grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: One business record at the table grain
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What does one row represent?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.structure
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Rows, Columns, Tables & Data Types — Check 1
+    objective: What does one row represent?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.structure**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_structure_2
+  title: Rows, Columns, Tables & Data Types — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: Which value should usually remain text?
+  answer_options:
+  - Customer ID 00124
+  - Order total 125.50
+  - Units sold 12
+  - Discount rate 0.15
+  starter: ''
+  solution: Customer ID 00124
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Customer ID 00124
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which value should usually remain text?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.structure
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Rows, Columns, Tables & Data Types — Check 2
+    objective: Which value should usually remain text?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.structure**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: spreadsheet_structure_3
+  title: Rows, Columns, Tables & Data Types — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What should be preserved before cleaning?
+  answer_options:
+  - An untouched raw copy
+  - Only the final pivot table
+  - Only screenshots
+  - A blank workbook
+  starter: ''
+  solution: An untouched raw copy
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: An untouched raw copy
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What should be preserved before cleaning?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.structure
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: Rows, Columns, Tables & Data Types — Check 3
+    objective: What should be preserved before cleaning?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.structure**. Focus on preserving source data, defining
+      the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

@@ -1,0 +1,334 @@
+assessment_id: week_2_spreadsheet_mastery
+title: Week 2 Spreadsheet Mastery Assessment
+order: 99
+description: Prove complete spreadsheet readiness before SQL unlocks. This assessment also serves as a placement
+  check for learners with prior spreadsheet experience.
+estimated_minutes: 45
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled.
+- A score of 80% or higher passes.
+- The check includes current-week material and retained prior knowledge.
+requires: []
+passing_score: 0.8
+activities:
+- activity_id: w2_countifs
+  title: Conditional count
+  type: mastery
+  runtime: recognition
+  prompt: Which function counts records meeting several criteria?
+  answer_options:
+  - COUNTIFS
+  - COUNT
+  - SUMIFS
+  - XLOOKUP
+  starter: ''
+  solution: COUNTIFS
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: COUNTIFS
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: Which function counts records meeting several criteria?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_clean
+  title: Cleaning rule
+  type: mastery
+  runtime: recognition
+  prompt: 'Before deleting duplicates, verify:'
+  answer_options:
+  - Grain and duplicate key
+  - Font and color
+  - Worksheet order
+  - Chart title
+  starter: ''
+  solution: Grain and duplicate key
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Grain and duplicate key
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Before deleting duplicates, verify:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_lookup
+  title: Lookup safety
+  type: mastery
+  runtime: recognition
+  prompt: What makes a lookup key reliable?
+  answer_options:
+  - It is stable and unique at the intended grain
+  - It is numeric
+  - It is sorted
+  - It is formatted as currency
+  starter: ''
+  solution: It is stable and unique at the intended grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It is stable and unique at the intended grain
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: What makes a lookup key reliable?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_missing
+  title: Missing match
+  type: mastery
+  runtime: recognition
+  prompt: 'An unmatched lookup should be:'
+  answer_options:
+  - Flagged and investigated
+  - Changed to zero automatically
+  - Deleted silently
+  - Assigned a random record
+  starter: ''
+  solution: Flagged and investigated
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Flagged and investigated
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'An unmatched lookup should be:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_pivot
+  title: Pivot measure
+  type: mastery
+  runtime: recognition
+  prompt: What belongs in the Values area?
+  answer_options:
+  - A measure to aggregate
+  - A workbook name
+  - A source path
+  - A note
+  starter: ''
+  solution: A measure to aggregate
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A measure to aggregate
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: What belongs in the Values area?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_reconcile
+  title: Reconciliation
+  type: mastery
+  runtime: recognition
+  prompt: Why compare raw and cleaned row counts?
+  answer_options:
+  - To explain every addition or removal
+  - To increase file size
+  - To hide blanks
+  - To avoid documentation
+  starter: ''
+  solution: To explain every addition or removal
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To explain every addition or removal
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: Why compare raw and cleaned row counts?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_kpi
+  title: KPI definition
+  type: mastery
+  runtime: recognition
+  prompt: 'A reliable rate includes:'
+  answer_options:
+  - A defined numerator, denominator, population, and period
+  - Only a title
+  - Only a target
+  - Only a chart
+  starter: ''
+  solution: A defined numerator, denominator, population, and period
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A defined numerator, denominator, population, and period
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A reliable rate includes:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_assumption
+  title: Ambiguity
+  type: mastery
+  runtime: recognition
+  prompt: What should happen when a business value is unclear?
+  answer_options:
+  - Document it and seek clarification
+  - Invent a value
+  - Delete the record
+  - Use the average
+  starter: ''
+  solution: Document it and seek clarification
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Document it and seek clarification
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: What should happen when a business value is unclear?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_retention
+  title: Week 1 retention
+  type: mastery
+  runtime: recognition
+  prompt: Which reference remains fully fixed?
+  answer_options:
+  - $C$5
+  - C5
+  - C$5
+  - $C5
+  starter: ''
+  solution: $C$5
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: $C$5
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: Which reference remains fully fixed?
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w2_interpret
+  title: Interpretation
+  type: mastery
+  runtime: recognition
+  prompt: 'A useful finding states:'
+  answer_options:
+  - The result, why it matters, and supporting evidence
+  - Only the largest number
+  - Only a chart label
+  - Only an opinion
+  starter: ''
+  solution: The result, why it matters, and supporting evidence
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The result, why it matters, and supporting evidence
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A useful finding states:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []

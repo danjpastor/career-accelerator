@@ -1,0 +1,274 @@
+assessment_id: week_5_cleaning_ctes
+title: Week 5 Cumulative Knowledge Check
+order: 99
+description: Verify cleaning, null handling, type conversion, CASE, subqueries, CTEs, and prior relationship
+  knowledge.
+estimated_minutes: 40
+instructions:
+- Complete every question independently.
+- Hints and full solutions are disabled.
+- A score of 80% or higher passes.
+- The check includes current-week material and retained prior knowledge.
+requires:
+- roadmap.spreadsheet_mastery
+- sql.transformations
+- sql.subqueries
+- sql.ctes_correlated
+passing_score: 0.8
+activities:
+- activity_id: w5_null
+  title: NULL handling
+  type: mastery
+  runtime: recognition
+  prompt: 'COALESCE should be used when:'
+  answer_options:
+  - A documented fallback is appropriate
+  - Every null must become zero
+  - A join is missing
+  - A file is large
+  starter: ''
+  solution: A documented fallback is appropriate
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A documented fallback is appropriate
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'COALESCE should be used when:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w5_cast
+  title: Safe conversion
+  type: mastery
+  runtime: recognition
+  prompt: 'TRY_CAST is useful because it:'
+  answer_options:
+  - Returns null instead of failing on invalid conversion
+  - Deletes invalid rows
+  - Creates a primary key
+  - Sorts text
+  starter: ''
+  solution: Returns null instead of failing on invalid conversion
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Returns null instead of failing on invalid conversion
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'TRY_CAST is useful because it:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w5_case
+  title: CASE logic
+  type: mastery
+  runtime: recognition
+  prompt: 'CASE is used to:'
+  answer_options:
+  - Apply explicit conditional business rules
+  - Create backups
+  - Import workbooks
+  - Build indexes automatically
+  starter: ''
+  solution: Apply explicit conditional business rules
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Apply explicit conditional business rules
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'CASE is used to:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w5_cte
+  title: CTE purpose
+  type: mastery
+  runtime: recognition
+  prompt: 'A CTE can improve:'
+  answer_options:
+  - Readability of a multi-step query
+  - Chart colors
+  - File compression
+  - Password security
+  starter: ''
+  solution: Readability of a multi-step query
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Readability of a multi-step query
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A CTE can improve:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w5_subquery
+  title: Subquery
+  type: mastery
+  runtime: recognition
+  prompt: 'A subquery is:'
+  answer_options:
+  - A query nested inside another query
+  - A spreadsheet tab
+  - A duplicate row
+  - A Power BI visual
+  starter: ''
+  solution: A query nested inside another query
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A query nested inside another query
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A subquery is:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w5_raw
+  title: Raw preservation
+  type: mastery
+  runtime: recognition
+  prompt: 'Cleaning should write to:'
+  answer_options:
+  - A staged or cleaned output, not the untouched source
+  - The only raw file
+  - A random worksheet
+  - A screenshot
+  starter: ''
+  solution: A staged or cleaned output, not the untouched source
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A staged or cleaned output, not the untouched source
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Cleaning should write to:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w5_join
+  title: Week 4 retention
+  type: mastery
+  runtime: recognition
+  prompt: 'Before joining cleaned tables, re-check:'
+  answer_options:
+  - Key uniqueness and grain
+  - Chart type
+  - Workbook theme
+  - Only row color
+  starter: ''
+  solution: Key uniqueness and grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Key uniqueness and grain
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'Before joining cleaned tables, re-check:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+- activity_id: w5_log
+  title: Decision log
+  type: mastery
+  runtime: recognition
+  prompt: 'A cleaning log should record:'
+  answer_options:
+  - Issue, rule, transformation, validation, unresolved questions
+  - Only the final total
+  - Only deleted rows
+  - Only file names
+  starter: ''
+  solution: Issue, rule, transformation, validation, unresolved questions
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Issue, rule, transformation, validation, unresolved questions
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Weekly cumulative knowledge check
+    introduction: Demonstrate retained understanding without hints.
+    task: 'A cleaning log should record:'
+    requirements:
+    - Choose the best analyst answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []

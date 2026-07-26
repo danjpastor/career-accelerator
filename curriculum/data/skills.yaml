@@ -194,3 +194,54 @@ skills:
   analysis.community_impact:
     title: Community-program impact analysis
     category: Applied SQL
+  spreadsheet.structure:
+    title: Spreadsheet structure and tables
+    category: Spreadsheets
+  spreadsheet.data_types:
+    title: Spreadsheet data types
+    category: Spreadsheets
+  spreadsheet.references:
+    title: Relative and absolute references
+    category: Spreadsheet Formulas
+  spreadsheet.formulas:
+    title: Core spreadsheet formulas
+    category: Spreadsheet Formulas
+  spreadsheet.conditional_logic:
+    title: Conditional spreadsheet logic
+    category: Spreadsheet Formulas
+  spreadsheet.conditional_aggregation:
+    title: Conditional summary formulas
+    category: Spreadsheet Formulas
+  spreadsheet.cleaning:
+    title: Spreadsheet data cleaning
+    category: Spreadsheet Data Quality
+  spreadsheet.validation:
+    title: Spreadsheet data validation
+    category: Spreadsheet Data Quality
+  spreadsheet.lookups:
+    title: Spreadsheet lookups
+    category: Spreadsheet Relationships
+  spreadsheet.relationships:
+    title: Matching related spreadsheet data
+    category: Spreadsheet Relationships
+  spreadsheet.pivots:
+    title: Pivot-table analysis
+    category: Spreadsheet Analysis
+  spreadsheet.kpis:
+    title: Spreadsheet KPI construction
+    category: Spreadsheet Analysis
+  spreadsheet.reconciliation:
+    title: Spreadsheet reconciliation and QA
+    category: Spreadsheet Analysis
+  roadmap.spreadsheet_mastery:
+    title: Spreadsheet mastery gate
+    category: Roadmap Mastery
+  roadmap.sql_mastery:
+    title: SQL mastery gate
+    category: Roadmap Mastery
+  roadmap.power_bi_mastery:
+    title: Power BI mastery gate
+    category: Roadmap Mastery
+  roadmap.portfolio_readiness:
+    title: Portfolio readiness gate
+    category: Roadmap Mastery

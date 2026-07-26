@@ -13,4 +13,5 @@ modules:
 - modules/window_functions_intro/module.yaml
 assessments:
 - assessments/data_manipulation_checkpoint.yaml
+- assessments/week_5_cleaning_ctes.yaml
 skills_labs: []

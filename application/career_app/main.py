@@ -42,7 +42,7 @@ from career_app.data.duckdb_exercises import (
     exercise_source,
 )
 from career_app.data.roadmap import (
-    DATACAMP_TRACK, DATALEMUR_PROBLEM_URLS, PROJECT_DIRS, PROJECT_NAMES,
+    DATALEMUR_PROBLEM_URLS, PROJECT_DIRS, PROJECT_NAMES,
     PROJECT_STAGES, SQL_COMPANION, WEEKLY_GUIDANCE
 )
 from career_app.services import (
@@ -50,16 +50,18 @@ from career_app.services import (
     analytics,
     applied_workspace,
     coach,
-    planner,
     duckdb_workspace,
+    planner,
+    portfolio_evidence,
+    portfolio_milestones,
     portfolio_workspace,
+    roadmap_mastery,
     session_guard,
     sql_workspace,
     task_workspace,
     tracks,
-
-        portfolio_evidence,
-    portfolio_milestones,)
+    unified_tasks,
+)
 from career_app.services import exercise_packs
 from career_app.services.backup import create_backup, prune_backups_with_report
 from career_app.services.migration import migrate
@@ -83,6 +85,7 @@ from career_app.ui.widgets import (
     SidebarMetricCard, SoftPanel, StatRow, TaskRow, make_card_scrollable
 )
 
+from career_app.academy import AcademyService
 from career_app.ui.academy import AcceleratorAcademyWidget
 from career_app.ui.first_run import FirstRunCoordinator
 from career_app.ui.notifications import OverlayNotifier
@@ -93,7 +96,7 @@ ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
 
 NAV = [
     ("🏠 Dashboard", 0),
-    ("🚀 Adaptive Planner", 1),
+    ("🚀 Daily Plan", 1),
     ("📚 Learning", 2),
     ("🎓 Accelerator Academy", 12),
     ("📁 Portfolio Workspace", 3),
@@ -400,21 +403,26 @@ class CareerAccelerator(QMainWindow):
             ROOT,
         )
         self.sprint_rollover = sync_calendar_sprint_week(self.conn)
+        # Seed durable compatibility records once, then build every active
+        # recommendation from the unified curriculum/progress/readiness stack.
         planner.seed(self.conn)
         self.state = state(self.conn)
         planner.sync_google_course_progress(
             self.conn,
             self.state["google_course"],
         )
-        tracks.sync_all(
-            self.conn,
-            self.state,
-        )
-        self.state = state(self.conn)
         self.first_run.finalize_initialization()
-        self.state = completion_contract.prepare_state(self.conn, self.state)
+        self.state = completion_contract.prepare_state(self.conn, state(self.conn))
         tracks.sync_all(self.conn, self.state)
+        AcademyService(self.conn, ROOT)
+        roadmap_mastery.reconcile(self.conn, ROOT)
         self.state = state(self.conn)
+        planner.repair_persisted_planner_data(
+            self.conn, self.state["current_week"]
+        )
+        unified_tasks.migrate_runtime(
+            self.conn, int(self.state["current_week"])
+        )
 
         self.elapsed_seconds = 0
         self.timer_state = "ready"
@@ -752,7 +760,7 @@ class CareerAccelerator(QMainWindow):
             button.setChecked(False)
         label_map = {
             0: "Dashboard",
-            1: "Adaptive Planner",
+            1: "Daily Plan",
             2: "Learning",
             3: "Portfolio Workspace",
             4: "SQL Companion",
@@ -1090,6 +1098,10 @@ class CareerAccelerator(QMainWindow):
     def _academy_progress_changed(self):
         """Refresh shared planner and Learning cards after an Academy action."""
         self.state = state(self.conn)
+        tracks.sync_all(self.conn, self.state)
+        roadmap_mastery.reconcile(self.conn, ROOT)
+        unified_tasks.migrate_runtime(self.conn, int(self.state["current_week"]))
+        self.state = state(self.conn)
         if hasattr(self, "learning_cards"):
             self.refresh_learning()
         self.refresh_dashboard(sync_tracks=False)
@@ -1332,6 +1344,13 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_focus_scroll.setWidget(
             self.dashboard_focus_rows_host
         )
+        self.dashboard_focus_scroll.verticalScrollBar().valueChanged.connect(
+            lambda _value:
+            self._repaint_dashboard_scroll_actions(
+                self.dashboard_focus_scroll,
+                self.dashboard_focus_rows_host,
+            )
+        )
         self.dashboard_focus_card.layout.addWidget(
             self.dashboard_focus_scroll,
             1,
@@ -1394,7 +1413,7 @@ class CareerAccelerator(QMainWindow):
         task_header = SectionHeader(
             "📋",
             "Next Tasks",
-            "Up next from your sprint",
+            "Next prerequisite-ready work",
             "View All",
         )
         task_header.action_button.clicked.connect(
@@ -1451,22 +1470,28 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_tasks_scroll.setWidget(
             self.dashboard_tasks_rows_host
         )
+        self.dashboard_tasks_scroll.verticalScrollBar().valueChanged.connect(
+            lambda _value:
+            self._repaint_dashboard_scroll_actions(
+                self.dashboard_tasks_scroll,
+                self.dashboard_tasks_rows_host,
+            )
+        )
         self.dashboard_tasks_card.layout.addWidget(
             self.dashboard_tasks_scroll,
             1,
         )
 
         self.dashboard_get_ahead_button = QPushButton(
-            "Get Ahead — Browse Available Work"
+            "Optional Practice"
         )
         self.dashboard_get_ahead_button.setObjectName(
             "Primary"
         )
         self.dashboard_get_ahead_button.setToolTip(
             (
-                "Browse prerequisite-ready work. "
-                "Nothing is added until Add to Today "
-                "is selected."
+                "Browse additional prerequisite-ready practice. "
+                "Optional work never changes Today’s Focus or weekly requirements."
             )
         )
         button_height = max(
@@ -2412,30 +2437,37 @@ class CareerAccelerator(QMainWindow):
     # ---------- Planner ----------
     def planner_page(self):
         page, root = self.page(
-            "🚀 Adaptive Planner",
-            "Build a plan around the time and energy you actually have today.",
+            "🚀 Daily Plan",
+            "A Google-first, prerequisite-aware view of today and what is ready next.",
         )
 
-        controls = Card("Plan This Session")
-        form = QFormLayout()
-        self.plan_minutes = QSpinBox()
-        self.plan_minutes.setRange(15, 480)
-        self.plan_minutes.setValue(90)
-        self.plan_energy = QComboBox()
-        self.plan_energy.addItems(["Low", "Normal", "High"])
-        self.plan_energy.setCurrentText("Normal")
-        form.addRow("Minutes available", self.plan_minutes)
-        form.addRow("Energy level", self.plan_energy)
-        controls.layout.addLayout(form)
-        build = QPushButton("Build My Plan")
-        build.setObjectName("Primary")
-        build.clicked.connect(self.build_plan)
-        controls.layout.addWidget(build)
+        controls = Card(
+            "Dynamic Plan",
+            (
+                "The plan refreshes from verified progress. Locked work stays out "
+                "until its prerequisite is complete."
+            ),
+        )
+        summary = QLabel(
+            "Today targets up to five ready tasks. Google Certificate work stays "
+            "first until the certificate is complete."
+        )
+        summary.setObjectName("Muted")
+        summary.setWordWrap(True)
+        controls.layout.addWidget(summary)
+        refresh_button = QPushButton("Refresh Dynamic Plan")
+        refresh_button.setObjectName("Primary")
+        refresh_button.clicked.connect(self.refresh_planner)
+        controls.layout.addWidget(refresh_button)
         root.addWidget(controls)
 
         body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.planner_body_layout = body
-        queue = Card("Recommended Priority Queue")
+
+        queue = Card(
+            "Today’s Ready Plan",
+            "Only prerequisite-ready tasks appear. Fewer than five tasks is valid.",
+        )
         self.plan_list = QListWidget()
         self.plan_list.setWordWrap(True)
         self.plan_list.setHorizontalScrollBarPolicy(
@@ -2447,60 +2479,42 @@ class CareerAccelerator(QMainWindow):
         queue.layout.addWidget(self.plan_list)
         queue_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.planner_queue_buttons = queue_buttons
-        continue_button = QPushButton("Continue")
+        continue_button = QPushButton("Continue Selected")
         continue_button.setObjectName("Primary")
         continue_button.clicked.connect(self.continue_plan)
-        defer_button = QPushButton("Move to Tomorrow")
-        defer_button.clicked.connect(self.defer_plan)
-        block_button = QPushButton("Mark Blocked")
-        block_button.clicked.connect(self.block_plan)
         workspace_button = QPushButton("Open Workspace")
         workspace_button.clicked.connect(self.open_plan_workspace)
         queue_buttons.addWidget(continue_button)
-        queue_buttons.addWidget(defer_button)
-        queue_buttons.addWidget(block_button)
         queue_buttons.addWidget(workspace_button)
+        queue_buttons.addStretch()
         queue.layout.addLayout(queue_buttons)
         body.addWidget(queue, 1)
 
         backlog = Card(
-            "Sprint Backlog",
-            (
-                "Click a row to select it. "
-                "The selected task stays highlighted in purple."
-            ),
+            "Next Ready Tasks",
+            "The next six ready tasks, followed by a short Coming Up lock preview.",
         )
         self.backlog_list = QListWidget()
         self.backlog_list.setWordWrap(True)
         self.backlog_list.setHorizontalScrollBarPolicy(
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
-        self.backlog_list.setObjectName(
-            "SprintBacklogList"
-        )
+        self.backlog_list.setObjectName("SprintBacklogList")
         self.backlog_list.itemDoubleClicked.connect(
             lambda _item: self.open_backlog_workspace()
         )
         backlog.layout.addWidget(self.backlog_list)
         backlog_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.planner_backlog_actions = backlog_actions
-        edit = QPushButton("Edit Selected Task")
-        edit.clicked.connect(self.edit_task)
-        workspace = QPushButton("Open Workspace")
+        workspace = QPushButton("Open Selected")
         workspace.setObjectName("Primary")
         workspace.clicked.connect(self.open_backlog_workspace)
-        backlog_actions.addWidget(edit)
+        history = QPushButton("Completion History / Undo")
+        history.clicked.connect(self.open_completion_history)
         backlog_actions.addWidget(workspace)
+        backlog_actions.addWidget(history)
+        backlog_actions.addStretch()
         backlog.layout.addLayout(backlog_actions)
-
-        history = QPushButton(
-            "Completion History / Undo"
-        )
-        history.clicked.connect(
-            self.open_completion_history
-        )
-        backlog.layout.addWidget(history)
-
         body.addWidget(backlog, 1)
         root.addLayout(body, 1)
 
@@ -2510,8 +2524,8 @@ class CareerAccelerator(QMainWindow):
             compact_actions = width < 720
             set_box_direction(self.planner_queue_buttons, compact_actions, 7)
             set_box_direction(self.planner_backlog_actions, compact_actions, 7)
-            self.plan_list.setMinimumHeight(210 if stacked else 260)
-            self.backlog_list.setMinimumHeight(210 if stacked else 260)
+            self.plan_list.setMinimumHeight(210 if stacked else 300)
+            self.backlog_list.setMinimumHeight(210 if stacked else 300)
 
         self._register_page_responsive(page, update_planner_layout)
         return page
@@ -3991,8 +4005,10 @@ class CareerAccelerator(QMainWindow):
 
     # BEGIN EXERCISE PACKS
     def _duckdb_exercises_changed(self):
+        roadmap_mastery.reconcile(self.conn, ROOT)
         self.state = state(self.conn)
         tracks.sync_all(self.conn, self.state)
+        roadmap_mastery.reconcile(self.conn, ROOT)
         self.state = state(self.conn)
         self.refresh_all(sync_tracks=False)
     # END EXERCISE PACKS
@@ -4035,13 +4051,18 @@ class CareerAccelerator(QMainWindow):
                 ROOT,
                 number,
             )
-            status_icon = {
-                "Completed": "✅",
-                "In Progress": "🟡",
-                "Not Started": "⬜",
-            }.get(
-                record["status"],
-                "⬜",
+            readiness = roadmap_mastery.duckdb_readiness(
+                self.conn,
+                number,
+            )
+            status_icon = (
+                "✅"
+                if record["status"] == "Completed"
+                else "🔒"
+                if not readiness.get("ready")
+                else "🟡"
+                if record["status"] == "In Progress"
+                else "⬜"
             )
             submission_icon = (
                 " • 💾 Submission"
@@ -4068,10 +4089,21 @@ class CareerAccelerator(QMainWindow):
                 Qt.ItemDataRole.UserRole,
                 int(number),
             )
+            access_line = (
+                "Completed — review access remains available."
+                if record["status"] == "Completed"
+                else "Ready"
+                if readiness.get("ready")
+                else "Locked — " + str(
+                    readiness.get("reason")
+                    or "Complete the required Academy learning first."
+                )
+            )
             list_item.setToolTip(
                 (
                     f"Roadmap week: {item['week']}\n"
                     f"Status: {record['status']}\n"
+                    f"Access: {access_line}\n"
                     f"Concepts: {item['concepts']}\n"
                     f"Submission: "
                     f"{record['submission_path'] or 'Not created'}"
@@ -4125,6 +4157,11 @@ class CareerAccelerator(QMainWindow):
             ROOT,
             number,
         )
+        readiness = roadmap_mastery.duckdb_readiness(
+            self.conn,
+            number,
+        )
+        completed = record["status"] == "Completed"
 
         self.duckdb_selected_number = number
         self.duckdb_title.setText(
@@ -4150,10 +4187,18 @@ class CareerAccelerator(QMainWindow):
             record["notes"]
         )
 
-        if record["status"] == "Completed":
+        if completed:
             detail = (
                 f"Completed "
-                f"{record['completed_date'] or 'previously'}"
+                f"{record['completed_date'] or 'previously'} • Review access available."
+            )
+        elif not readiness.get("ready"):
+            detail = (
+                "Locked • "
+                + str(
+                    readiness.get("reason")
+                    or "Complete the required Academy learning first."
+                )
             )
         elif record["submission_exists"]:
             detail = (
@@ -4180,8 +4225,26 @@ class CareerAccelerator(QMainWindow):
             detail
         )
         self.set_duckdb_workspace_enabled(
-            True
+            completed or bool(readiness.get("ready"))
         )
+
+    def _duckdb_selection_accessible(self, number=None, *, notify=True):
+        target = int(number if number is not None else self.duckdb_selected_number or 0)
+        if target <= 0:
+            return False
+        progress = duckdb_workspace.progress(self.conn, ROOT, target)
+        if progress.get("status") == "Completed":
+            return True
+        readiness = roadmap_mastery.duckdb_readiness(self.conn, target)
+        if readiness.get("ready"):
+            return True
+        if notify:
+            self._notify(
+                "Exercise locked. "
+                + str(readiness.get("reason") or "Complete the required Academy learning first."),
+                6200,
+            )
+        return False
 
     def open_duckdb_reference(
         self,
@@ -4193,6 +4256,9 @@ class CareerAccelerator(QMainWindow):
                 "Select a DuckDB exercise first.",
                 3200,
             )
+            return
+
+        if not self._duckdb_selection_accessible(number):
             return
 
         path = duckdb_workspace.paths(
@@ -4231,6 +4297,9 @@ class CareerAccelerator(QMainWindow):
             )
             return
 
+        if not self._duckdb_selection_accessible(number):
+            return
+
         path = duckdb_workspace.paths(
             ROOT,
             number,
@@ -4261,6 +4330,9 @@ class CareerAccelerator(QMainWindow):
                 "Select a DuckDB exercise first.",
                 3200,
             )
+            return
+
+        if not self._duckdb_selection_accessible(number):
             return
 
         try:
@@ -4332,6 +4404,9 @@ class CareerAccelerator(QMainWindow):
             )
             return
 
+        if not self._duckdb_selection_accessible(number):
+            return
+
         status = self.duckdb_status.currentText()
         submission = (
             duckdb_workspace.submission_path(
@@ -4393,15 +4468,14 @@ class CareerAccelerator(QMainWindow):
                     notes=self.duckdb_notes.toPlainText(),
                 )
             )
-            planner.mark_focus_task_completed(
-                self.conn,
-                task_id,
-            )
+            roadmap_mastery.reconcile(self.conn, ROOT)
             self.state = state(self.conn)
             tracks.sync_all(
                 self.conn,
                 self.state,
             )
+            roadmap_mastery.reconcile(self.conn, ROOT)
+            self.state = state(self.conn)
             self.refresh_all(
                 sync_tracks=False
             )
@@ -4622,7 +4696,7 @@ class CareerAccelerator(QMainWindow):
         )
         self.session_datacamp = QLineEdit()
         self.session_datacamp.setPlaceholderText(
-            "Chapter or exercise completed"
+            "Academy lesson, practice, lab, or assessment completed"
         )
         self.session_portfolio = QLineEdit()
         self.session_portfolio.setPlaceholderText(
@@ -4651,7 +4725,7 @@ class CareerAccelerator(QMainWindow):
         form_grid.addWidget(QLabel("Google progress"), 3, 0)
         form_grid.addWidget(self.session_google, 3, 1, 1, 3)
 
-        form_grid.addWidget(QLabel("DataCamp progress"), 4, 0)
+        form_grid.addWidget(QLabel("Academy / practice progress"), 4, 0)
         form_grid.addWidget(self.session_datacamp, 4, 1, 1, 3)
 
         form_grid.addWidget(QLabel("Portfolio progress"), 5, 0)
@@ -5659,7 +5733,6 @@ class CareerAccelerator(QMainWindow):
         return page
 
     def update_time_based_header(self):
-        # SAFE GET AHEAD ADJUSTMENT 1
         now = datetime.now()
         hour = now.hour
         learner_name = str(
@@ -6494,67 +6567,37 @@ class CareerAccelerator(QMainWindow):
             )
 
     def dashboard_task_source(self, row):
-        modular_source = tracks.source_for_task(
-            self.conn,
-            row["id"],
-        )
-        if modular_source:
-            return modular_source
+        explicit = str(row.get("display_source") or "").strip()
+        if explicit:
+            return explicit
 
-        label = str(row["label"] or "").strip()
+        task_id = row.get("id") or row.get("task_id")
+        if task_id is not None:
+            modular_source = tracks.source_for_task(self.conn, int(task_id))
+            if modular_source:
+                return modular_source
+
+        label = str(row.get("label") or "").strip()
         applied_source = applied_exercise_source(label)
         if applied_source:
             return applied_source
-
         duckdb_source = exercise_source(label)
         if duckdb_source:
             return duckdb_source
 
         lower_label = label.lower()
-        category = row["category"] or "General"
-        week = int(
-            row["week"]
-            or self.state["current_week"]
-        )
-
-        current_google_match = re.match(
-            r"Continue Google Course (\d+), "
-            r"Module (\d+)$",
-            label,
-            re.IGNORECASE,
-        )
-        if current_google_match:
-            return (
-                f"Google • Course "
-                f"{current_google_match.group(1)}, "
-                f"Module "
-                f"{current_google_match.group(2)}"
-            )
-
-        google_match = re.search(
-            r"\[Google Course (\d+)\]",
-            label,
-            re.IGNORECASE,
-        )
-        if google_match:
-            return (
-                f"Google • Course "
-                f"{google_match.group(1)}"
-            )
-
+        category = str(row.get("category") or "General")
+        week = int(row.get("week") or self.state["current_week"])
+        if "google course" in lower_label or "google certificate" in lower_label:
+            return f"Google • Course {self.state['google_course']}, Module {self.state['google_module']}"
         if category == "Learning":
-            return (
-                f"Google • Course "
-                f"{self.state['google_course']}, "
-                f"Module {self.state['google_module']}"
-            )
+            if "assessment" in lower_label or "knowledge check" in lower_label:
+                return "Weekly Mastery Check"
+            return "Accelerator Academy"
         if category == "SQL":
             return "SQL Practice"
         if category == "Portfolio":
-            return (
-                f"Portfolio • Project "
-                f"{self.state['current_project']}"
-            )
+            return f"Portfolio • Project {self.state['current_project']}"
         if category == "Review":
             return f"Weekly Review • Week {week}"
         return f"Roadmap • Week {week}"
@@ -6818,7 +6861,7 @@ class CareerAccelerator(QMainWindow):
 
     # END CURRENT SPRINT PROGRESS FIX
 
-    # ---------- Always-available Get Ahead ----------
+    # ---------- Optional prerequisite-ready practice ----------
     def _get_ahead_candidates(self, limit=12):
         return planner.get_ahead_candidates(
             self.conn,
@@ -6896,36 +6939,25 @@ class CareerAccelerator(QMainWindow):
 
 
     def open_get_ahead_dialog(self):
-        candidates = self._get_ahead_candidates(limit=18)
+        candidates = self._get_ahead_candidates(limit=12)
         if not candidates:
             QMessageBox.information(
                 self,
-                "No Get Ahead Tasks",
-                (
-                    "There are no additional "
-                    "prerequisite-ready tasks available yet."
-                ),
+                "No Optional Practice",
+                "There is no additional prerequisite-ready practice available right now.",
             )
             return
 
         dialog = QDialog(self)
-        dialog.setWindowTitle("Get Ahead")
-        dialog.resize(760, 560)
-        dialog.setStyleSheet(
-            stylesheet(
-                self._ui_scale,
-                self._content_scale,
-            )
-        )
+        dialog.setWindowTitle("Optional Practice")
+        dialog.resize(760, 520)
+        dialog.setStyleSheet(stylesheet(self._ui_scale, self._content_scale))
         layout = QVBoxLayout(dialog)
 
         heading = QLabel(
-            (
-                "Browse prerequisite-ready work. Open lets you "
-                "inspect the task without changing today's plan. "
-                "Add to Today places it in Today's Focus and "
-                "Next Tasks without starting it."
-            )
+            "Optional Practice contains extra ready exercises after required work. "
+            "Opening an item does not add it to Today’s Focus, change weekly targets, "
+            "or unlock future curriculum early."
         )
         heading.setWordWrap(True)
         heading.setObjectName("Muted")
@@ -6933,242 +6965,68 @@ class CareerAccelerator(QMainWindow):
 
         task_list = QListWidget()
         task_list.setWordWrap(True)
-        task_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
+        task_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         for candidate in candidates:
-            week = int(
-                candidate.get(
-                    "week",
-                    self.state["current_week"],
-                )
-                or self.state["current_week"]
-            )
-            reason = str(
-                candidate.get("extra_reason")
-                or "Prerequisite-ready work"
-            )
-            minutes = int(
-                candidate.get(
-                    "estimated_minutes",
-                    30,
-                )
-                or 30
-            )
+            minutes = int(candidate.get("estimated_minutes") or 30)
             task_list.addItem(
-                f"Week {week} • {minutes}m • "
-                f"{candidate.get('category', 'General')}\n"
-                f"{candidate.get('label', 'Get Ahead task')}\n"
-                f"{reason}"
+                f"{candidate.get('display_source') or candidate.get('category', 'Practice')} • {minutes}m\n"
+                f"{candidate.get('label', 'Optional practice')}"
             )
-            row = task_list.item(
-                task_list.count() - 1
-            )
-            row.setData(
-                Qt.ItemDataRole.UserRole,
-                dict(candidate),
-            )
+            row = task_list.item(task_list.count() - 1)
+            row.setData(Qt.ItemDataRole.UserRole, dict(candidate))
         task_list.setCurrentRow(0)
         layout.addWidget(task_list, 1)
 
         actions = QHBoxLayout()
-        open_only = QPushButton(
-            "Open Without Adding"
-        )
-        add_today = QPushButton(
-            "Add to Today"
-        )
-        add_today.setObjectName("Primary")
-        cancel = QPushButton("Cancel")
-
-        for button in (
-            open_only,
-            add_today,
-            cancel,
-        ):
-            button.ensurePolished()
-            button_height = max(
-                40,
-                int(button.sizeHint().height()) + 6,
-                int(button.fontMetrics().height()) + 20,
-            )
-            button.setMinimumHeight(button_height)
-            button.setMaximumHeight(button_height)
-            button.setSizePolicy(
-                QSizePolicy.Policy.Expanding,
-                QSizePolicy.Policy.Fixed,
-            )
-
-        def selected_candidate():
-            row = task_list.currentItem()
-            return (
-                row.data(
-                    Qt.ItemDataRole.UserRole
-                )
-                if row is not None
-                else None
-            )
+        open_button = QPushButton("Open Selected Practice")
+        open_button.setObjectName("Primary")
+        close_button = QPushButton("Close")
 
         def open_selected():
-            item = selected_candidate()
-            if item is None:
+            row = task_list.currentItem()
+            item = row.data(Qt.ItemDataRole.UserRole) if row is not None else None
+            if not isinstance(item, dict):
                 return
             dialog.accept()
-            self._open_get_ahead_target(
-                item,
-                add_to_today=False,
-            )
+            self._open_get_ahead_target(item, add_to_today=False)
 
-        def add_selected():
-            item = selected_candidate()
-            if item is None:
-                return
-            planner.start_get_ahead(
-                self.conn,
-                int(self.state["current_week"]),
-                self.state,
-                item,
-            )
-            self.state = state(self.conn)
-            dialog.accept()
-            self.refresh_all(
-                sync_tracks=False
-            )
-            self._notify(
-                (
-                    f"Added {item.get('label', 'task')} "
-                    "to today's plan."
-                ),
-                3500,
-            )
-
-        open_only.clicked.connect(
-            open_selected
-        )
-        add_today.clicked.connect(
-            add_selected
-        )
-        cancel.clicked.connect(
-            dialog.reject
-        )
-        task_list.itemDoubleClicked.connect(
-            lambda _item: open_selected()
-        )
-
-        actions.addWidget(open_only)
-        actions.addWidget(add_today)
+        open_button.clicked.connect(open_selected)
+        close_button.clicked.connect(dialog.reject)
+        task_list.itemDoubleClicked.connect(lambda _item: open_selected())
         actions.addStretch()
-        actions.addWidget(cancel)
+        actions.addWidget(open_button)
+        actions.addWidget(close_button)
         layout.addLayout(actions)
         dialog.exec()
 
 
 
 
+    def _repaint_dashboard_scroll_actions(
+        self,
+        scroll_area,
+        rows_host,
+    ):
+        """Repaint row action buttons after a QScrollArea viewport move."""
+        viewport = scroll_area.viewport()
+        viewport.update()
+
+        def repaint_visible_actions():
+            viewport.update()
+            for button in rows_host.findChildren(QPushButton):
+                if not button.property("workspace_open_button"):
+                    continue
+                button.raise_()
+                button.update()
+
+        QTimer.singleShot(0, repaint_visible_actions)
+
     def _refresh_dashboard_next_tasks(self, week):
-        self.clear_layout(
-            self.dashboard_tasks_layout
-        )
+        self.clear_layout(self.dashboard_tasks_layout)
         self.dashboard_task_density_widgets = []
 
-        required = [
-            dict(row)
-            for row in planner.available(
-                self.conn,
-                int(week),
-            )
-        ]
-        added_today = [
-            dict(row)
-            for row in planner.started_get_ahead_tasks(
-                self.conn,
-                int(week),
-            )
-        ]
-
-        required_ids = {
-            int(row["id"])
-            for row in required
-            if row.get("id") is not None
-        }
-        added_today = [
-            row
-            for row in added_today
-            if (
-                self._get_ahead_task_id(row) is None
-                or self._get_ahead_task_id(row)
-                not in required_ids
-            )
-        ]
-
-        displayed = [
-            ("required", row)
-            for row in required[:5]
-        ]
-        # REMOVE MANUALLY ADDED TODAY TASKS 1
-        # Added work is always shown after the standard queue. The card has
-        # its own scroll region, so no manual task needs to be hidden merely
-        # because five regular tasks are already available.
-        displayed.extend(
-            ("added_today", row)
-            for row in added_today
-        )
-
-        def remove_added_item(item):
-            title = str(
-                item.get("label")
-                or "this task"
-            )
-            confirmation = QMessageBox.question(
-                self,
-                "Remove from Today",
-                (
-                    f"Remove {title} from today's plan?\n\n"
-                    "This does not delete, complete, defer, or "
-                    "otherwise change the underlying task."
-                ),
-                (
-                    QMessageBox.StandardButton.Yes
-                    | QMessageBox.StandardButton.No
-                ),
-                QMessageBox.StandardButton.No,
-            )
-            if (
-                confirmation
-                != QMessageBox.StandardButton.Yes
-            ):
-                return
-
-            result = planner.remove_get_ahead_task(
-                self.conn,
-                int(week),
-                item,
-            )
-            self.state = state(
-                self.conn
-            )
-            self.refresh_all(
-                sync_tracks=False
-            )
-
-            if result.get("removed"):
-                self._notify(
-                    (
-                        f"Removed "
-                        f"{result.get('label') or title} "
-                        "from today's plan."
-                    ),
-                    3500,
-                )
-            else:
-                self._notify(
-                    (
-                        f"{title} was no longer in "
-                        "today's added tasks."
-                    ),
-                    3500,
-                )
-
+        ready = [dict(row) for row in planner.next_tasks(self.conn, int(week))]
+        coming_up = [dict(row) for row in planner.coming_up_tasks(self.conn, int(week), limit=3)]
         task_category_colors = {
             "Learning": COLORS["blue"],
             "SQL": COLORS["purple"],
@@ -7177,157 +7035,58 @@ class CareerAccelerator(QMainWindow):
             "General": COLORS["muted"],
         }
 
-        if displayed:
-            for index, (kind, row) in enumerate(
-                displayed
-            ):
-                item = dict(row)
-                task_id = self._get_ahead_task_id(
-                    item
+        if ready:
+            for index, item in enumerate(ready):
+                task_id = self._get_ahead_task_id(item)
+                category = str(item.get("category") or "General")
+                category_text = f"Catch-Up • {category}" if item.get("is_catch_up") else category
+                workspace_available = (
+                    task_id is not None
+                    and task_workspace.workspace_supported_task_id(self.conn, task_id)
                 )
-                category = str(
-                    item.get("category")
-                    or "General"
-                )
-                is_added_today = (
-                    kind == "added_today"
-                )
-
-                if (
-                    is_added_today
-                    and task_id is not None
-                ):
-                    second_line = (
-                        self.dashboard_task_source(
-                            item
-                        )
-                    )
-                elif is_added_today:
-                    second_line = (
-                        str(item.get("detail") or "")
-                        or (
-                            f"Roadmap • Week "
-                            f"{int(item.get('week', week) or week)}"
-                        )
-                    )
-                else:
-                    second_line = (
-                        self.dashboard_task_source(
-                            item
-                        )
-                    )
-
-                if is_added_today:
-                    action_text = "Remove"
-                    on_action = (
-                        lambda _checked=False,
-                        item=item:
-                        remove_added_item(
-                            item
-                        )
-                    )
-                else:
-                    workspace_available = (
-                        task_id is not None
-                        and task_workspace
-                        .workspace_supported_task_id(
-                            self.conn,
-                            task_id,
-                        )
-                    )
-                    action_text = (
-                        "Open"
-                        if workspace_available
-                        else None
-                    )
-                    on_action = (
-                        (
-                            lambda _checked=False,
-                            task_id=task_id:
-                            self.open_task_workspace(
-                                task_id=task_id
-                            )
-                        )
-                        if workspace_available
-                        else None
-                    )
-
                 task_row = TaskRow(
-                    title=str(
-                        item.get("label")
-                        or "Task"
+                    title=str(item.get("label") or "Task"),
+                    source=self.dashboard_task_source(item),
+                    checked=False,
+                    status_text="",
+                    category_text=category_text,
+                    category_color=task_category_colors.get(category, COLORS["muted"]),
+                    action_text="Open" if workspace_available else None,
+                    on_action=(
+                        (lambda _checked=False, task_id=task_id: self.open_task_workspace(task_id=task_id))
+                        if workspace_available else None
                     ),
-                    source=second_line,
-                    checked=bool(
-                        item.get("completed")
-                    ),
-                    status_text=(
-                        "Completed"
-                        if item.get("completed")
-                        else (
-                            "Added Today"
-                            if is_added_today
-                            else ""
-                        )
-                    ),
-                    category_text=(
-                        f"Get Ahead • {category}"
-                        if is_added_today
-                        else category
-                    ),
-                    category_color=(
-                        COLORS["cyan"]
-                        if is_added_today
-                        else task_category_colors.get(
-                            category,
-                            COLORS["muted"],
-                        )
-                    ),
-                    action_text=action_text,
-                    on_action=on_action,
-                    completed=bool(
-                        item.get("completed")
-                    ),
+                    completed=False,
                 )
-
                 if task_id is None:
-                    task_row.checkbox.setEnabled(
-                        False
-                    )
+                    task_row.checkbox.setEnabled(False)
                 else:
                     task_row.checkbox.stateChanged.connect(
-                        lambda state_value,
-                        task_row=task_row,
-                        task_id=task_id:
-                        self.queue_dashboard_task_completion(
-                            task_row,
-                            task_id,
-                            state_value,
-                        )
+                        lambda state_value, task_row=task_row, task_id=task_id:
+                        self.queue_dashboard_task_completion(task_row, task_id, state_value)
                     )
-
-                self.dashboard_tasks_layout.addWidget(
-                    task_row
-                )
-                self.dashboard_task_density_widgets.append(
-                    task_row
-                )
-                if index < len(displayed) - 1:
-                    self.dashboard_tasks_layout.addWidget(
-                        Divider()
-                    )
+                self.dashboard_tasks_layout.addWidget(task_row)
+                self.dashboard_task_density_widgets.append(task_row)
+                if index < len(ready) - 1:
+                    self.dashboard_tasks_layout.addWidget(Divider())
         else:
-            empty = QLabel(
-                (
-                    "No active tasks. Use Get Ahead "
-                    "to browse prerequisite-ready work."
-                )
-            )
+            empty = QLabel("No prerequisite-ready task is available right now.")
             empty.setObjectName("Muted")
             empty.setWordWrap(True)
-            self.dashboard_tasks_layout.addWidget(
-                empty
-            )
+            self.dashboard_tasks_layout.addWidget(empty)
+
+        if coming_up:
+            self.dashboard_tasks_layout.addWidget(Divider())
+            heading = QLabel("Coming Up")
+            heading.setStyleSheet("font-weight:700;")
+            self.dashboard_tasks_layout.addWidget(heading)
+            for item in coming_up:
+                reason = str(item.get("prerequisite_reason") or "Complete the prerequisite first.")
+                locked = QLabel(f"🔒 {item.get('label', 'Locked task')}\n{reason}")
+                locked.setObjectName("Muted")
+                locked.setWordWrap(True)
+                locked.setToolTip(reason)
+                self.dashboard_tasks_layout.addWidget(locked)
 
         self.dashboard_tasks_layout.addStretch(1)
 
@@ -7652,7 +7411,7 @@ class CareerAccelerator(QMainWindow):
                             "eligible Applied Lab"
                         ): "Eligible Applied Lab",
                         (
-                            "Get ahead on tomorrow's "
+                            "Optional practice for tomorrow's "
                             "external learning"
                         ): "External learning",
                     }.get(
@@ -7668,7 +7427,7 @@ class CareerAccelerator(QMainWindow):
                         self.dashboard_extra_focus_candidate
                     ):
                         title = (
-                            f"Get Ahead • "
+                            f"Optional • "
                             f"{task_label}"
                         )
                     else:
@@ -7677,9 +7436,7 @@ class CareerAccelerator(QMainWindow):
                             f"{task_label}"
                         )
 
-            task_id = item.get(
-                "task_id"
-            )
+            task_id = self._get_ahead_task_id(item)
             workspace_available = (
                 task_workspace.workspace_supported_task_id(
                     self.conn,
@@ -7990,6 +7747,17 @@ class CareerAccelerator(QMainWindow):
                     self.focus_layout.addWidget(
                         Divider()
                     )
+
+            if not intelligent_focus:
+                no_ready = QLabel(
+                    "No prerequisite-ready task is available. "
+                    "Complete the first item under Coming Up to unlock more work."
+                )
+                no_ready.setObjectName("Muted")
+                no_ready.setWordWrap(True)
+                no_ready.setMinimumHeight(44)
+                no_ready.setAlignment(Qt.AlignVCenter)
+                self.focus_layout.addWidget(no_ready)
 
         compact_completed_state = bool(
             focus_summary[
@@ -8319,110 +8087,42 @@ class CareerAccelerator(QMainWindow):
         self.refresh_backlog()
 
     def refresh_backlog(self):
-        selected_task_id = (
-            self.backlog_list.property(
-                "pendingSelectedTaskId"
-            )
-            or self.selected_task_id(
-                self.backlog_list
-            )
-        )
-        self.backlog_list.setProperty(
-            "pendingSelectedTaskId",
-            None,
-        )
-        selected_row = None
-
+        selected_task_id = self.selected_task_id(self.backlog_list)
         self.backlog_list.blockSignals(True)
         self.backlog_list.clear()
 
-        rows = self.conn.execute(
-            """SELECT
-                      s.id,
-                      s.label,
-                      s.completed,
-                      m.status,
-                      m.priority,
-                      m.estimated_minutes,
-                      m.energy,
-                      m.deferred_until,
-                      m.category,
-                      m.prerequisite_state,
-                      m.prerequisite_reason
-               FROM sprint_tasks s
-               JOIN task_metadata m
-                 ON m.task_id=s.id
-               WHERE s.week=?
-                 AND (
-                     s.label NOT LIKE
-                         'Complete Applied Lab %'
-                     OR s.completed=1
-                     OR s.id IN (
-                         SELECT task_id
-                         FROM track_tasks
-                         WHERE track_key='applied'
-                     )
-                 )
-               ORDER BY m.priority,s.sort_order""",
-            (self.state["current_week"],),
-        ).fetchall()
-
-        for row in rows:
-            deferred = (
-                f" → {row['deferred_until']}"
-                if row["deferred_until"]
-                else ""
-            )
-            eligibility_text = ""
-            if (
-                row["prerequisite_state"]
-                == "Blocked"
-            ):
-                eligibility_text = " • 🔒 Locked"
-
+        ready = planner.next_tasks(self.conn, self.state["current_week"])
+        for row in ready:
+            catch_up = "Catch-Up • " if row.get("is_catch_up") else ""
             self.backlog_list.addItem(
-                f"#{row['id']} • {row['status']} • "
-                f"P{row['priority']} • "
-                f"{row['estimated_minutes']}m • "
-                f"{row['energy']} • "
-                f"{row['category']}"
-                f"{eligibility_text} • "
-                f"{row['label']}{deferred}"
+                f"#{row['id']} • READY • {row['estimated_minutes']}m • "
+                f"{catch_up}{row.get('display_source') or row['category']} • "
+                f"{row['label']}"
             )
-            row_index = (
-                self.backlog_list.count() - 1
-            )
-            list_item = self.backlog_list.item(
-                row_index
-            )
-            list_item.setData(
-                Qt.ItemDataRole.UserRole,
-                int(row["id"]),
-            )
-            list_item.setToolTip(
-                (
-                    f"Selected task #{row['id']}\n"
-                    f"Status: {row['status']}\n"
-                    f"Priority: {row['priority']}\n"
-                    f"Estimate: {row['estimated_minutes']} minutes\n"
-                    f"Eligibility: {row['prerequisite_state']}\n"
-                    f"{row['prerequisite_reason'] or ''}"
-                )
-            )
+            item = self.backlog_list.item(self.backlog_list.count() - 1)
+            item.setData(Qt.ItemDataRole.UserRole, int(row["id"]))
+            if selected_task_id == int(row["id"]):
+                self.backlog_list.setCurrentItem(item)
 
-            if (
-                selected_task_id is not None
-                and int(row["id"])
-                == int(selected_task_id)
-            ):
-                selected_row = row_index
+        coming = planner.coming_up_tasks(
+            self.conn, self.state["current_week"], limit=3
+        )
+        if coming:
+            separator = QListWidgetItem("COMING UP — complete the listed prerequisite to unlock")
+            separator.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.backlog_list.addItem(separator)
+            for row in coming:
+                reason = str(row.get("prerequisite_reason") or "Complete the prerequisite first.")
+                item = QListWidgetItem(f"🔒 {row['label']} • {reason}")
+                item.setFlags(Qt.ItemFlag.NoItemFlags)
+                item.setToolTip(reason)
+                self.backlog_list.addItem(item)
 
+        if not ready and not coming:
+            empty = QListWidgetItem("No remaining roadmap tasks were found.")
+            empty.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.backlog_list.addItem(empty)
         self.backlog_list.blockSignals(False)
-
-        if selected_row is not None:
-            self.backlog_list.setCurrentRow(
-                selected_row
-            )
 
     def refresh_learning(self):
         track_data = tracks.snapshot(
@@ -9438,24 +9138,27 @@ class CareerAccelerator(QMainWindow):
         )
 
     def build_plan(self):
-        rows, remaining = planner.make_plan(
+        rows = planner.intelligent_focus_plan(
             self.conn,
             self.state["current_week"],
-            self.plan_minutes.value(),
-            self.plan_energy.currentText(),
+            WEEKLY_GUIDANCE.get(self.state["current_week"], ()),
+            self.state,
+            max_items=5,
         )
         self.plan_list.clear()
         for row in rows:
+            catch_up = "Catch-Up • " if row.get("is_catch_up") else ""
             self.plan_list.addItem(
                 f"#{row['id']} • {row['estimated_minutes']}m • "
-                f"{row['energy']} • {row['category']} • {row['label']}"
+                f"{catch_up}{row.get('display_source') or row['category']} • "
+                f"{row['label']}"
             )
             item = self.plan_list.item(self.plan_list.count() - 1)
             item.setData(Qt.ItemDataRole.UserRole, int(row["id"]))
         if not rows:
-            self.plan_list.addItem("No eligible tasks for this time and energy level.")
-        elif remaining:
-            self.plan_list.addItem(f"Unused time: {remaining} minutes")
+            self.plan_list.addItem(
+                "No prerequisite-ready task is available. Review Coming Up for the next unlock."
+            )
 
     def selected_task_id(self, widget):
         item = widget.currentItem()
@@ -9523,21 +9226,6 @@ class CareerAccelerator(QMainWindow):
         )
         self.continue_plan()
 
-    def defer_plan(self):
-        task_id = self.selected_task_id(self.plan_list)
-        if task_id:
-            planner.defer(self.conn, task_id)
-            self.refresh_all()
-
-    def block_plan(self):
-        task_id = self.selected_task_id(self.plan_list)
-        if task_id:
-            self.conn.execute(
-                "UPDATE task_metadata SET status='Blocked' WHERE task_id=?",
-                (task_id,),
-            )
-            self.conn.commit()
-            self.refresh_all()
 
     def edit_task(self, task_id=None):
         if isinstance(task_id, bool):
@@ -10030,7 +9718,27 @@ class CareerAccelerator(QMainWindow):
         finally:
             session_guard.restore(self, session_snapshot)
 
+    def _route_roadmap_academy_task(self, task_id):
+        row = self.conn.execute(
+            "SELECT starter_path FROM task_metadata WHERE task_id=?",
+            (int(task_id),),
+        ).fetchone()
+        starter = str(row["starter_path"] or "") if row else ""
+        if starter.startswith("academy:lesson:"):
+            lesson_id = starter.split(":", 2)[2]
+            self.navigate(12)
+            self.academy_widget.open_lesson(lesson_id)
+            return True
+        if starter.startswith("academy:assessment:"):
+            assessment_id = starter.split(":", 2)[2]
+            self.navigate(12)
+            self.academy_widget.open_assessment(assessment_id)
+            return True
+        return False
+
     def open_task_workspace(self, *, task_id=None, workspace_key=None):
+        if task_id is not None and self._route_roadmap_academy_task(int(task_id)):
+            return
         if task_id is not None:
             portfolio_link = self.conn.execute(
                 """SELECT linked_entity_id
@@ -10522,20 +10230,24 @@ class CareerAccelerator(QMainWindow):
                  AND title=?""",
             (title,),
         ).fetchone()
-        readiness = tracks.sql_problem_readiness(
+        readiness = roadmap_mastery.sql_problem_readiness(
             self.conn,
-            self.state,
             title,
         )
 
         self.sql_selected_title = title
         problem_url = DATALEMUR_PROBLEM_URLS.get(title, "")
-        self.sql_external_button.setEnabled(bool(problem_url))
-        self.sql_external_button.setToolTip(
-            problem_url
-            if problem_url
-            else "No DataLemur page is configured for this problem."
-        )
+        completed_record = bool(record is not None and record["status"] == "Completed")
+        external_ready = bool(problem_url) and (completed_record or readiness["ready"])
+        self.sql_external_button.setEnabled(external_ready)
+        if not problem_url:
+            self.sql_external_button.setToolTip("No DataLemur page is configured for this problem.")
+        elif external_ready:
+            self.sql_external_button.setToolTip(problem_url)
+        else:
+            self.sql_external_button.setToolTip(
+                "Locked until the listed Academy and mastery prerequisites are complete."
+            )
         self.sql_title.setText(match[0])
         self.sql_difficulty.setText(match[1])
         self.sql_topic.setText(match[2])
@@ -10620,8 +10332,19 @@ class CareerAccelerator(QMainWindow):
                     skill_key,
                     "approved learning or practice",
                 )
-                for skill_key in readiness["missing_keys"]
+                for skill_key in readiness.get("missing_all_of", [])
             ]
+            alternatives = readiness.get("missing_any_of", [])
+            if alternatives:
+                missing_options.append(
+                    "One alternative path: "
+                    + " OR ".join(
+                        readiness["accepted_evidence"].get(
+                            skill_key, "approved learning or practice"
+                        )
+                        for skill_key in alternatives
+                    )
+                )
             self.sql_workspace_status.setText(
                 "Locked • Learn first: "
                 + ", ".join(readiness["missing_names"])
@@ -10816,6 +10539,8 @@ class CareerAccelerator(QMainWindow):
                 ),
             )
         self.conn.commit()
+        if completed:
+            roadmap_mastery.reconcile(self.conn, ROOT)
         self.link_current_sql_solution_artifact(title, path)
         self.sql_submission_path.setText(relative_path)
         return path, status
@@ -10825,7 +10550,7 @@ class CareerAccelerator(QMainWindow):
         if not title:
             self._notify("Select a SQL problem first.", 3200)
             return
-        readiness = tracks.sql_problem_readiness(self.conn, self.state, title)
+        readiness = roadmap_mastery.sql_problem_readiness(self.conn, title)
         if not readiness["ready"] and not self.conn.execute(
             "SELECT 1 FROM sql_practice WHERE platform='DataLemur' AND title=? AND status='Completed'",
             (title,),
@@ -10850,7 +10575,7 @@ class CareerAccelerator(QMainWindow):
             self._notify("Select a SQL problem first.", 3200)
             return
 
-        readiness = tracks.sql_problem_readiness(self.conn, self.state, title)
+        readiness = roadmap_mastery.sql_problem_readiness(self.conn, title)
         if not readiness["ready"]:
             QMessageBox.warning(
                 self,
@@ -10905,9 +10630,8 @@ class CareerAccelerator(QMainWindow):
             self.sql_topic.text()
             or "the main SQL concept"
         )
-        readiness = tracks.sql_problem_readiness(
+        readiness = roadmap_mastery.sql_problem_readiness(
             self.conn,
-            self.state,
             title,
         )
         required = ", ".join(

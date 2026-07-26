@@ -1,3 +1,51 @@
+# Career Accelerator v10.27.0
+
+## Unified learning and planning system
+
+- Replaced the overlapping adaptive, manual-focus, Added Today, and Get Ahead planners with one deterministic task/readiness runtime.
+- Keeps the Google Data Analytics Certificate as the first unfinished priority every day until completion.
+- Generates up to five prerequisite-ready Today’s Focus tasks and shows fewer when fewer tasks are available.
+- Generates six prerequisite-ready Next Tasks and separates locked work into a clear Coming Up list.
+- Replaces the old time/energy queue and editable sprint backlog with a simplified Daily Plan page showing Today’s Ready Plan and Next Ready Tasks.
+- Uses canonical task IDs and source metadata so Google module text cannot overwrite Academy, DuckDB, interview, or portfolio tasks.
+- Establishes the sequential Academy path: Spreadsheets, SQL, Power BI, Python and pandas, then Portfolio Readiness.
+- Centralizes DuckDB, SQL interview, weekly mastery, Academy, and portfolio lockouts behind one readiness facade.
+- Removes the retired DataCamp catalog from active roadmap and concept inference while preserving historical database fields and migration support.
+- Converts catch-up into a derived presentation label instead of storing it inside task titles.
+- Replaces the Get Ahead workflow with non-persistent Optional Practice.
+- Preserves completed Academy work, Google progress, SQL and DuckDB completions, portfolio milestones, study history, applications, and evidence.
+- Adds explicit empty-focus guidance when no prerequisite-ready task exists.
+
+# Career Accelerator v10.26.3
+
+## Startup routing repair
+
+- Fixed dashboard startup failure when a non-DuckDB task label was checked by the DuckDB source-routing helper.
+- DuckDB source detection now accepts either an exercise number or a task label and safely returns no match for unrelated tasks.
+- Spreadsheet catch-up tasks can now render in Today's Focus and Next Tasks without being passed to `int()`.
+- Preserves all learner progress and planner data.
+
+# v10.26.2 - Catch-Up Planner Startup Recovery
+
+- Repairs malformed numeric values in catch-up sprint tasks, task metadata, Today’s Focus, and the durable Added Today store before track or dashboard refreshes.
+- Recovers task links from source keys and matching sprint-task labels instead of allowing one damaged derived row to block application startup.
+- Hardens Today’s Focus, track presentation, and pacing-detail helpers against malformed transient task identifiers.
+- Changes managed catch-up labels to an ASCII-safe `Catch-Up:` prefix so hidden-launcher error messages no longer display mojibake.
+- Preserves learner progress and regenerates only derived scheduling values that cannot be safely interpreted.
+
+# v10.26.1 - Integrated Roadmap Scheduling and Practice Lockout Repair
+
+- Rebuilt Weeks 1-8 around the prerequisite sequence: spreadsheets, SQL, Power BI, then Python and pandas.
+- Added lesson-level spreadsheet reconciliation so existing learners receive missing spreadsheet lessons and mastery checks as catch-up work without losing completed progress.
+- Regenerates Today's Focus after roadmap reconciliation and resynchronizes tracks so obsolete Week 2 portfolio execution no longer remains active.
+- Added phase-aware Today's Focus slots and a dedicated Next Tasks queue that shows ready and blocked catch-up work with exact reasons.
+- Audited all SQL Companion interview problems, removed DataCamp and Google Course 5 as SQL prerequisite evidence, and applied corrected all-of/any-of skill requirements.
+- Shows all SQL Companion problems with Completed, Ready, or Locked status and disables editors and completion actions while prerequisites are unmet.
+- Audited all DuckDB exercises and enforced prerequisites through both DuckDB interfaces and the underlying run, check, save, and submit services.
+- Preserved completed SQL problems and DuckDB exercises for review while preventing incomplete advanced practice from bypassing Academy mastery gates.
+- Added Academy track gates: Spreadsheet Mastery before unfinished SQL work, SQL Mastery before Power BI, and Power BI Mastery before Python.
+- Retired legacy DataCamp tasks from active scheduling while preserving historical records in the database.
+
 # v10.25.9 - Dictionary-Aware Cleaned CSV Validation
 
 - Fixed the cleaned-CSV importer treating formats, examples, ranges, identifiers, names, dates, numeric measures, foreign keys, and email patterns as exhaustive allowed-value lists.

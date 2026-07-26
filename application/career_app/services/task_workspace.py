@@ -26,10 +26,7 @@ from career_app.services import (
 )
 
 
-EXTERNAL_LEARNING_TRACKS = {
-    "google",
-    "datacamp",
-}
+EXTERNAL_LEARNING_TRACKS = {"google"}
 
 GOOGLE_ROADMAP_PATTERN = re.compile(
     r"^\s*\[Google Course \d+\]",
@@ -950,7 +947,6 @@ def is_external_learning_values(
         or "google course" in lower
         or "google certificate" in lower
         or lower.startswith("google •")
-        or "datacamp" in lower
     )
 
 
@@ -1354,7 +1350,7 @@ def _generic_template_marker(content: str) -> bool:
     return (
         "What needs to be completed and why?" in text
         or "## Objective\n\n## Plan" in text
-        or "- DataCamp progress:" in text
+        or "- External learning progress:" in text
     )
 
 
@@ -1514,7 +1510,7 @@ def ensure_workspace(
         raise ValueError("The selected task no longer exists.")
     if not workspace_supported(row):
         raise ValueError(
-            "Google Certificate and DataCamp activities are tracked through "
+            "Google Certificate and Accelerator Academy activities are tracked through "
             "Learning and Study Sessions. They do not need Task Workspaces."
         )
     key = workspace_key_for_task(conn, int(task_id))

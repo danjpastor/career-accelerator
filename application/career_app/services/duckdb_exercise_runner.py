@@ -14,7 +14,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Iterable
 
-from career_app.services import duckdb_workspace
+from career_app.services import duckdb_workspace, roadmap_mastery
 from career_app.services.applied_lab_runner import split_sql_statements
 
 
@@ -101,6 +101,7 @@ def submission_sql(root: Path, number: int) -> str:
 
 
 def save_submission(root: Path, number: int, sql: str) -> Path:
+    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
     path = duckdb_workspace.submission_path(Path(root), int(number))
     path.parent.mkdir(parents=True, exist_ok=True)
     content = str(sql or "").replace("\r\n", "\n").replace("\r", "\n")
@@ -417,6 +418,7 @@ def run_sql(root: Path, number: int, sql: str, *, row_limit: int = 500) -> dict[
 
 
 def run_question(root: Path, number: int, full_sql: str, question_number: int) -> dict[str, Any]:
+    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
     questions = {question.number: question for question in parse_questions(full_sql)}
     question = questions.get(int(question_number))
     if question is None:
@@ -564,6 +566,7 @@ def check_question(
     full_sql: str,
     question_number: int,
 ) -> dict[str, Any]:
+    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
     questions = {question.number: question for question in parse_questions(full_sql)}
     question = questions.get(int(question_number))
     if question is None:
@@ -593,6 +596,7 @@ def check_question(
 
 
 def check_exercise(root: Path, number: int, full_sql: str) -> dict[str, Any]:
+    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
     questions = parse_questions(full_sql)
     if not questions:
         raise DuckDBExerciseRunnerError("The submission does not contain any exercise questions.")

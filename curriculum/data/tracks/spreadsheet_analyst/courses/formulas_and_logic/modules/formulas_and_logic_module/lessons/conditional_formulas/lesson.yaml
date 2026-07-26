@@ -1,0 +1,137 @@
+lesson_id: conditional_formulas
+title: IF, AND, OR & Error Handling
+order: 1
+difficulty: beginner
+description: Build practical analyst skill in if, and, or & error handling.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply if, and, or & error handling in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.conditional_logic
+requires:
+- spreadsheet.formulas
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: conditional_formulas_1
+  title: IF, AND, OR & Error Handling — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: Which function returns different values based on a test?
+  answer_options:
+  - IF
+  - SUM
+  - AVERAGE
+  - SORT
+  starter: ''
+  solution: IF
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: IF
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which function returns different values based on a test?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.conditional_logic
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: IF, AND, OR & Error Handling — Check 1
+    objective: Which function returns different values based on a test?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.conditional_logic**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: conditional_formulas_2
+  title: IF, AND, OR & Error Handling — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: When should IFERROR be used?
+  answer_options:
+  - When a known lookup or calculation error needs an intentional fallback
+  - To hide every unexpected data problem
+  - To replace data validation
+  - To remove duplicates
+  starter: ''
+  solution: When a known lookup or calculation error needs an intentional fallback
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: When a known lookup or calculation error needs an intentional fallback
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: When should IFERROR be used?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.conditional_logic
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: IF, AND, OR & Error Handling — Check 2
+    objective: When should IFERROR be used?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.conditional_logic**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: conditional_formulas_3
+  title: IF, AND, OR & Error Handling — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: What does AND require?
+  answer_options:
+  - Every included condition to be true
+  - At least one condition to be true
+  - No conditions
+  - Only text values
+  starter: ''
+  solution: Every included condition to be true
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Every included condition to be true
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: What does AND require?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.conditional_logic
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: IF, AND, OR & Error Handling — Check 3
+    objective: What does AND require?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.conditional_logic**. Focus on preserving source data,
+      defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

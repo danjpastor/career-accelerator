@@ -1,0 +1,12 @@
+track_id: spreadsheet_analyst
+title: Spreadsheets for Data Analysts
+navigation_title: Spreadsheets
+order: 1
+description: Build complete spreadsheet foundations before advancing to SQL, Power BI, and Python.
+courses:
+- courses/spreadsheet_foundations/course.yaml
+- courses/formulas_and_logic/course.yaml
+- courses/data_cleaning_and_validation/course.yaml
+- courses/lookups_and_related_data/course.yaml
+- courses/pivot_tables_and_analysis/course.yaml
+- courses/spreadsheet_mastery_project/course.yaml

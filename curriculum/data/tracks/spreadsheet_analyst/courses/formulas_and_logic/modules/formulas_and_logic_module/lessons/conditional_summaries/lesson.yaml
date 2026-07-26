@@ -1,0 +1,137 @@
+lesson_id: conditional_summaries
+title: COUNTIFS, SUMIFS & Variance
+order: 2
+difficulty: beginner
+description: Build practical analyst skill in countifs, sumifs & variance.
+estimated_minutes: 30
+content: lesson.md
+objectives:
+- Apply countifs, sumifs & variance in a data-analysis workflow.
+- Explain the validation or quality check that makes the result reliable.
+key_takeaways:
+- Preserve raw data and document transformations.
+- Validate the result before using it in a business decision.
+teaches:
+- spreadsheet.conditional_aggregation
+requires:
+- spreadsheet.conditional_logic
+mastery:
+  passing_score: 1.0
+activities:
+- activity_id: conditional_summaries_1
+  title: COUNTIFS, SUMIFS & Variance — Check 1
+  type: recognition
+  runtime: recognition
+  prompt: Which function counts rows meeting several conditions?
+  answer_options:
+  - COUNTIFS
+  - COUNT
+  - SUMIF
+  - XLOOKUP
+  starter: ''
+  solution: COUNTIFS
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: COUNTIFS
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which function counts rows meeting several conditions?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: COUNTIFS, SUMIFS & Variance — Check 1
+    objective: Which function counts rows meeting several conditions?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.conditional_aggregation**. Focus on preserving source
+      data, defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: conditional_summaries_2
+  title: COUNTIFS, SUMIFS & Variance — Check 2
+  type: recognition
+  runtime: recognition
+  prompt: Which function sums values using multiple criteria?
+  answer_options:
+  - SUMIFS
+  - COUNTA
+  - AVERAGE
+  - IFERROR
+  starter: ''
+  solution: SUMIFS
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: SUMIFS
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: Which function sums values using multiple criteria?
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: COUNTIFS, SUMIFS & Variance — Check 2
+    objective: Which function sums values using multiple criteria?
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.conditional_aggregation**. Focus on preserving source
+      data, defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true
+- activity_id: conditional_summaries_3
+  title: COUNTIFS, SUMIFS & Variance — Check 3
+  type: mastery
+  runtime: recognition
+  prompt: 'A variance is commonly calculated as:'
+  answer_options:
+  - Actual minus target
+  - Target divided by zero
+  - Count of blank cells
+  - A lookup key
+  starter: ''
+  solution: Actual minus target
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Actual minus target
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: beginner
+  estimated_minutes: 4
+  presentation:
+    scenario: Spreadsheet analyst workflow
+    introduction: Use the business and data-quality context to choose the most reliable analyst action.
+    task: 'A variance is commonly calculated as:'
+    requirements:
+    - Choose the answer that preserves data quality and reproducibility.
+    expected_output: One selected answer.
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
+    after_correct: This choice follows a reproducible analyst workflow.
+    common_errors: []
+  instruction:
+    title: COUNTIFS, SUMIFS & Variance — Check 3
+    objective: 'A variance is commonly calculated as:'
+    action_label: Choose the best answer
+    body: Apply the lesson principles for **spreadsheet.conditional_aggregation**. Focus on preserving source
+      data, defining the unit of analysis, validating calculations, and documenting decisions.
+  required_for_completion: true

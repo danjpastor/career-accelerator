@@ -3,6 +3,7 @@ import json
 import re
 from pathlib import Path
 
+from career_app.services import roadmap_mastery
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 from career_app.data.roadmap_tasks import task_key, task_spec
@@ -439,6 +440,7 @@ def _sync_portfolio_task_guidance(conn) -> dict:
 
 
 def migrate(conn, root: Path):
+    roadmap_mastery_result = roadmap_mastery.reconcile(conn, root)
     sprint_count = 0
     project_count = 0
 

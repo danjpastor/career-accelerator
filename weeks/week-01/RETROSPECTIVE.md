@@ -1,21 +1,35 @@
-# Week 1 Retrospective
+# Week 1 Retrospective — Spreadsheet Foundations
 
-## Completion
-- Hours:
-- Google progress:
-- DataCamp progress:
-- DataLemur completed:
-- Portfolio milestones:
+## Progress snapshot
+- Hours studied:
+- Google Certificate progress:
+- Accelerator Academy progress:
+- Spreadsheet skills practiced:
+- Portfolio preparation or execution completed:
+- Weekly mastery result:
 
-## Wins
-- Made signifigant progress in the Google Data Analytics Cert
+## Biggest win
+What moved forward, and why did it matter?
 
-## Blockers
--
+## Friction or blocker
+What slowed progress? Identify the underlying concept, workflow, or scheduling problem.
 
-## SQL Topics to Review
-- Joins
-- Subqueries
+## Mastery evidence
+What can you now do independently that you could not do at the start of the week?
+- 
 
-## Week 2 Adjustments
--
+## Remaining gaps
+List only gaps that require catch-up or targeted remediation.
+- 
+
+## Evidence created
+Link substantial work that could support an assessment, portfolio review, or interview.
+- 
+
+## Next-sprint adjustments
+- [ ] Adjustment 1:
+- [ ] Adjustment 2:
+
+## Confidence
+- Score from 1–10:
+- Reason:
