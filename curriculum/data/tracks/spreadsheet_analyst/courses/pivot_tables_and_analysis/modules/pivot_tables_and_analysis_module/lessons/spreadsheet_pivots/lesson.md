@@ -1,13 +1,19 @@
 # Pivot Tables, Dimensions & Measures
 
-Spreadsheet work is analyst work when it is structured, reproducible, and validated. In this lesson, you will apply **pivot tables, dimensions & measures** to a realistic workflow.
+Use pivot tables—or equivalent grouped summaries—to explore revenue by region and units by category.
 
-## Analyst standard
+## Learn
 
-1. Preserve the source.
-2. Define what one row represents.
-3. Apply an explicit rule.
-4. Validate counts, totals, and unmatched records.
-5. Document assumptions and unresolved questions.
+Dimensions such as Region or Category define groups. Measures such as Revenue or Units are summed, counted, or averaged for those groups.
 
-Complete each interactive check before continuing.
+## Try It
+
+Create a pivot table from Orders with Region in Rows and Sum of Revenue in Values. Place it in Analysis Workspace starting at A28. Sort the values largest to smallest.
+
+## Practice
+
+Create a second pivot or grouped summary with Category in Rows and Sum of Units in Values. Place it in Analysis Workspace starting at G28 and sort largest to smallest.
+
+## Check Your Work
+
+Save the **Northstar Operations Practice Workbook.xlsx** working copy, return to Accelerator Academy, and select **Check Workbook**. The application checks the saved workbook structure and asks for a short evidence answer only when the result cannot be validated reliably across both Excel and Google Sheets.

@@ -1,13 +1,19 @@
 # Plan a Reproducible Spreadsheet Workflow
 
-Spreadsheet work is analyst work when it is structured, reproducible, and validated. In this lesson, you will apply **plan a reproducible spreadsheet workflow** to a realistic workflow.
+Document a reproducible spreadsheet workflow so another analyst can understand, refresh, and verify the workbook.
 
-## Analyst standard
+## Learn
 
-1. Preserve the source.
-2. Define what one row represents.
-3. Apply an explicit rule.
-4. Validate counts, totals, and unmatched records.
-5. Document assumptions and unresolved questions.
+A professional workbook should preserve raw data, document the major transformations, validate totals, refresh outputs, and save a clear final file.
 
-Complete each interactive check before continuing.
+## Try It
+
+On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.
+
+## Practice
+
+In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which sheet contains the final analysis, and what another analyst should refresh first.
+
+## Check Your Work
+
+Save the **Northstar Operations Practice Workbook.xlsx** working copy, return to Accelerator Academy, and select **Check Workbook**. The application checks the saved workbook structure and asks for a short evidence answer only when the result cannot be validated reliably across both Excel and Google Sheets.

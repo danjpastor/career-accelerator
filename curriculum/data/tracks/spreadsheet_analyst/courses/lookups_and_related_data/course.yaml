@@ -1,11 +1,11 @@
 course_id: lookups_and_related_data
 title: Lookups & Related Data
 order: 4
-description: Match related records safely and diagnose missing or duplicate lookup keys.
-estimated_minutes: 120
+description: Connect Orders to Products and Customers with exact lookups and relationship checks.
+estimated_minutes: 240
 outcomes:
-- Complete interactive spreadsheet decisions and validation checks.
-- Explain how the workflow supports a reliable analyst result.
+- Complete real spreadsheet work in Excel or Google Sheets.
+- Validate the saved workbook and explain the finished business result.
 modules:
 - modules/lookups_and_related_data_module/module.yaml
 assessments: []

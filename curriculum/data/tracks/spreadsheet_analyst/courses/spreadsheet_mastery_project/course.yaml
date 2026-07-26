@@ -1,11 +1,11 @@
 course_id: spreadsheet_mastery_project
 title: Spreadsheet Mastery Project
 order: 6
-description: Apply the complete spreadsheet workflow and demonstrate readiness for SQL.
-estimated_minutes: 120
+description: Finish, validate, and document a portfolio-ready Northstar operations analysis workbook.
+estimated_minutes: 240
 outcomes:
-- Complete interactive spreadsheet decisions and validation checks.
-- Explain how the workflow supports a reliable analyst result.
+- Complete real spreadsheet work in Excel or Google Sheets.
+- Validate the saved workbook and explain the finished business result.
 modules:
 - modules/spreadsheet_mastery_project_module/module.yaml
 assessments:

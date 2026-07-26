@@ -1,11 +1,11 @@
 course_id: data_cleaning_and_validation
 title: Data Cleaning & Validation
 order: 3
-description: Clean text, dates, numbers, duplicates, and missing values without altering the raw source.
-estimated_minutes: 120
+description: Clean real customer fields, add controlled inputs, and reconcile the Orders table.
+estimated_minutes: 240
 outcomes:
-- Complete interactive spreadsheet decisions and validation checks.
-- Explain how the workflow supports a reliable analyst result.
+- Complete real spreadsheet work in Excel or Google Sheets.
+- Validate the saved workbook and explain the finished business result.
 modules:
 - modules/data_cleaning_and_validation_module/module.yaml
 assessments: []

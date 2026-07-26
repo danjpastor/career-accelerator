@@ -1,8 +1,7 @@
 assessment_id: week_8_portfolio_readiness
 title: Week 8 Portfolio Readiness Assessment
 order: 99
-description: Verify Python/pandas plus retained spreadsheet, SQL, Power BI, data-quality, and communication
-  mastery.
+description: Verify Python/pandas plus retained spreadsheet, SQL, Power BI, data-quality, and communication mastery.
 estimated_minutes: 55
 instructions:
 - Complete every question independently.
@@ -54,7 +53,34 @@ activities:
   title: Boolean filtering
   type: mastery
   runtime: recognition
-  prompt: 'Multiple pandas Series conditions should use:'
+  prompt: 'Multiple pandas Series conditions should use:
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
+
+    3. Click any cell inside the complete data table.
+
+    4. Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
+
+    5. Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
+    and click **OK**.
+
+    6. Leave the filter active so Career Accelerator can verify the finished workbook.
+
+    7. Confirm the finished workbook matches this result: **One selected answer.**
+
+    8. Wait until Google Sheets shows that saving is complete.
+
+    9. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   answer_options:
   - '& or | with each condition in parentheses'
   - Python and directly between Series
@@ -82,6 +108,26 @@ activities:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click any cell inside the complete data table.
+    - Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
+    - Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
+      and click **OK**.
+    - Leave the filter active so Career Accelerator can verify the finished workbook.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
 - activity_id: w8_missing
   title: Missing values
   type: mastery

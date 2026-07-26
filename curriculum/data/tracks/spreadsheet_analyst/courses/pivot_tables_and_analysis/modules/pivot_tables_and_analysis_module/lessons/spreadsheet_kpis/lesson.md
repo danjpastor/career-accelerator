@@ -1,13 +1,19 @@
 # KPI Summaries & Business Interpretation
 
-Spreadsheet work is analyst work when it is structured, reproducible, and validated. In this lesson, you will apply **kpi summaries & business interpretation** to a realistic workflow.
+Build a compact KPI block and a chart that communicates the most important operational result.
 
-## Analyst standard
+## Learn
 
-1. Preserve the source.
-2. Define what one row represents.
-3. Apply an explicit rule.
-4. Validate counts, totals, and unmatched records.
-5. Document assumptions and unresolved questions.
+A KPI block summarizes the most important numbers. A simple column or bar chart is usually the clearest way to compare a measure across a small number of categories.
 
-Complete each interactive check before continuing.
+## Try It
+
+In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so a delivered rate below 60% is clearly flagged for attention.
+
+## Practice
+
+Create a column or bar chart from the region summary. Give it the title Revenue by Region and place it near the KPI block without covering the data.
+
+## Check Your Work
+
+Save the **Northstar Operations Practice Workbook.xlsx** working copy, return to Accelerator Academy, and select **Check Workbook**. The application checks the saved workbook structure and asks for a short evidence answer only when the result cannot be validated reliably across both Excel and Google Sheets.

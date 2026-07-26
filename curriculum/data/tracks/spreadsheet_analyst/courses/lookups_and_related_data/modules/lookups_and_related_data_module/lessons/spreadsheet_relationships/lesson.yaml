@@ -2,136 +2,314 @@ lesson_id: spreadsheet_relationships
 title: Matching Tables & Understanding Grain
 order: 2
 difficulty: beginner
-description: Build practical analyst skill in matching tables & understanding grain.
-estimated_minutes: 30
+description: Validate table relationships and build a customer-level summary without losing the Orders table grain.
+estimated_minutes: 40
 content: lesson.md
 objectives:
-- Apply matching tables & understanding grain in a data-analysis workflow.
-- Explain the validation or quality check that makes the result reliable.
+- Check for unmatched Product IDs.
+- Create a summary at customer grain.
 key_takeaways:
-- Preserve raw data and document transformations.
-- Validate the result before using it in a business decision.
-teaches:
+- Joining data changes which fields are available, not the grain unless rows are duplicated.
+- Relationship checks should identify unmatched and duplicate keys.
+teaches: &id001
 - spreadsheet.relationships
 requires:
 - spreadsheet.lookups
+workbook:
+  workbook_name: Northstar Operations Practice Workbook.xlsx
+  file_name: Northstar Operations Practice Workbook.xlsx
+  template: workbooks/Northstar Operations Practice Workbook.xlsx
+  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+    Check Workbook.
 mastery:
   passing_score: 1.0
 activities:
 - activity_id: spreadsheet_relationships_1
-  title: Matching Tables & Understanding Grain — Check 1
+  title: Learn — Quick concept check
   type: recognition
   runtime: recognition
-  prompt: What is a one-to-many relationship?
+  prompt: What should one row represent in a customer summary?
   answer_options:
-  - One parent record can relate to several detail records
-  - Every key appears once everywhere
-  - No tables share fields
-  - Every row duplicates
+  - One customer
+  - One order line
+  - One product
+  - One formula
   starter: ''
-  solution: One parent record can relate to several detail records
-  hints: []
+  solution: One customer
+  hints:
+  - Review the short explanation and focus on the role each field or formula plays.
   validator:
     type: exact_answer
-    expected_answer: One parent record can relate to several detail records
+    expected_answer: One customer
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: What is a one-to-many relationship?
+    scenario: Northstar Operations practice workbook
+    introduction: Start with one short concept check before working in the real workbook.
+    task: What should one row represent in a customer summary?
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
+    - Choose the answer that best supports a reliable spreadsheet workflow.
     expected_output: One selected answer.
     skills_practiced:
     - spreadsheet.relationships
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    after_correct: You are ready to apply the idea in the Northstar workbook.
   instruction:
-    title: Matching Tables & Understanding Grain — Check 1
-    objective: What is a one-to-many relationship?
+    title: Learn — Matching Tables & Understanding Grain
+    objective: What should one row represent in a customer summary?
     action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.relationships**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    body: The Orders table is at order grain. A customer summary is at customer grain, so each customer should appear
+      once with aggregated order measures.
   required_for_completion: true
-- activity_id: spreadsheet_relationships_2
-  title: Matching Tables & Understanding Grain — Check 2
-  type: recognition
-  runtime: recognition
-  prompt: 'Before matching two tables, verify:'
-  answer_options:
-  - Key uniqueness and table grain
-  - Font size
-  - Chart type
-  - Worksheet tab color
+- activity_id: spreadsheet_relationships_workbook_guided
+  title: Try It — Check for unmatched Product IDs
+  type: guided
+  runtime: workbook
+  prompt: 'On Analysis Workspace, calculate the number of Product IDs in Orders that do not appear in Products.
+    Put the result in B17.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Analysis Workspace** and work in Analysis Workspace, range A17:B17.
+
+    3. Use these columns for this task: **Unmatched Product IDs**.
+
+    4. Click the first required output cell and type `=` to begin the formula.
+
+    5. Build the formula with the source cells from the current row, then press **Enter**.
+
+    6. Drag the blue fill handle through the full required range.
+
+    7. Spot-check the first, middle, and last result before checking your work.
+
+    8. Confirm the finished workbook matches this result: **B17 contains a formula that counts unmatched Product
+    IDs.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: Key uniqueness and table grain
-  hints: []
+  solution: B17 contains a formula that counts unmatched Product IDs.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: Key uniqueness and table grain
+    type: workbook
+    checks:
+    - type: formula_present
+      sheet: Analysis Workspace
+      cell: B17
+      min_count: 1
+      contains_any:
+      - countif
+      - match
+      - xlookup
+    success_feedback: The workbook now has a relationship-quality check for Product ID.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Analysis Workspace
+    columns:
+    - Unmatched Product IDs
+    row_range: A17:B17
+    starting_state: B17 is blank. Orders and Products share Product ID.
+    expected_result: B17 contains a formula that counts unmatched Product IDs.
+    column_descriptions:
+      Unmatched Product IDs: Count of order Product IDs not found in Products.
+    sample_values:
+    - 'Unmatched Product IDs: 0'
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
-  estimated_minutes: 4
+  estimated_minutes: 12
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: 'Before matching two tables, verify:'
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: On Analysis Workspace, calculate the number of Product IDs in Orders that do not appear in Products. Put
+      the result in B17.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.relationships
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Compare Orders Product ID with Products Product ID.
+    - Return a count, not a list.
+    - Save before checking.
+    expected_output: B17 contains a formula that counts unmatched Product IDs.
+    skills_practiced: *id001
+    after_correct: The workbook now has a relationship-quality check for Product ID.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Matching Tables & Understanding Grain — Check 2
-    objective: 'Before matching two tables, verify:'
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.relationships**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    title: Try It — Check for unmatched Product IDs
+    objective: On Analysis Workspace, calculate the number of Product IDs in Orders that do not appear in Products.
+      Put the result in B17.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
-- activity_id: spreadsheet_relationships_3
-  title: Matching Tables & Understanding Grain — Check 3
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Analysis Workspace** and work in Analysis Workspace, range A17:B17.
+    - 'Use these columns for this task: **Unmatched Product IDs**.'
+    - Click the first required output cell and type `=` to begin the formula.
+    - Build the formula with the source cells from the current row, then press **Enter**.
+    - Drag the blue fill handle through the full required range.
+    - Spot-check the first, middle, and last result before checking your work.
+    - 'Confirm the finished workbook matches this result: **B17 contains a formula that counts unmatched Product
+      IDs.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+- activity_id: spreadsheet_relationships_workbook_practice
+  title: Practice — Build a customer revenue summary
   type: mastery
-  runtime: recognition
-  prompt: Why can a lookup return the wrong record?
-  answer_options:
-  - The lookup key is not unique or the match mode is wrong
-  - The workbook has formulas
-  - The data is sorted
-  - The file is saved
+  runtime: workbook
+  prompt: 'In Analysis Workspace A20:D26, create a customer summary with Customer ID, Customer Name, Order Count,
+    and Revenue. Use one row per customer and include at least six customers.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Analysis Workspace** and work in Analysis Workspace, range A20:D26.
+
+    3. Use these columns for this task: **Customer ID, Customer Name, Order Count, Revenue**.
+
+    4. Click the first required output cell and type `=` to begin the formula.
+
+    5. Build the formula with the source cells from the current row, then press **Enter**.
+
+    6. Drag the blue fill handle through the full required range.
+
+    7. Spot-check the first, middle, and last result before checking your work.
+
+    8. Confirm the finished workbook matches this result: **Row 20 contains the four requested headers and rows
+    below contain one record per customer.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: The lookup key is not unique or the match mode is wrong
-  hints: []
+  solution: Row 20 contains the four requested headers and rows below contain one record per customer.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: The lookup key is not unique or the match mode is wrong
+    type: workbook
+    checks:
+    - type: headers
+      sheet: Analysis Workspace
+      row: 20
+      expected:
+      - Customer ID
+      - Customer Name
+      - Order Count
+      - Revenue
+      exact: false
+    - type: populated_range
+      sheet: Analysis Workspace
+      range: A20:D26
+      min_count: 20
+    success_feedback: The customer summary uses a clear customer grain and contains the requested measures.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Analysis Workspace
+    columns:
+    - Customer ID
+    - Customer Name
+    - Order Count
+    - Revenue
+    row_range: A20:D26
+    starting_state: A20:D26 is reserved for a customer-level summary.
+    expected_result: Row 20 contains the four requested headers and rows below contain one record per customer.
+    column_descriptions:
+      Customer ID: Identifier that connects an order to the Customers sheet.
+      Customer Name: The Customer Name field used in this workbook task.
+      Order Count: Number of orders associated with one customer.
+      Revenue: Calculated order value after applying the row discount.
+    sample_values:
+    - 'Customer ID: C001'
+    - 'Order Count: 4'
+    - 'Revenue: $9,450.00'
   required_for_practice: false
   required_for_mastery: true
-  evidence_eligible: true
-  difficulty: beginner
-  estimated_minutes: 4
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 18
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: Why can a lookup return the wrong record?
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: In Analysis Workspace A20:D26, create a customer summary with Customer ID, Customer Name, Order Count,
+      and Revenue. Use one row per customer and include at least six customers.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.relationships
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Use one row per customer.
+    - Include the four requested columns in that order.
+    - Calculate Order Count and Revenue from Orders.
+    - Save the workbook.
+    expected_output: Row 20 contains the four requested headers and rows below contain one record per customer.
+    skills_practiced: *id001
+    after_correct: The customer summary uses a clear customer grain and contains the requested measures.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Matching Tables & Understanding Grain — Check 3
-    objective: Why can a lookup return the wrong record?
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.relationships**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    title: Practice — Build a customer revenue summary
+    objective: In Analysis Workspace A20:D26, create a customer summary with Customer ID, Customer Name, Order Count,
+      and Revenue. Use one row per customer and include at least six customers.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Analysis Workspace** and work in Analysis Workspace, range A20:D26.
+    - 'Use these columns for this task: **Customer ID, Customer Name, Order Count, Revenue**.'
+    - Click the first required output cell and type `=` to begin the formula.
+    - Build the formula with the source cells from the current row, then press **Enter**.
+    - Drag the blue fill handle through the full required range.
+    - Spot-check the first, middle, and last result before checking your work.
+    - 'Confirm the finished workbook matches this result: **Row 20 contains the four requested headers and rows
+      below contain one record per customer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true

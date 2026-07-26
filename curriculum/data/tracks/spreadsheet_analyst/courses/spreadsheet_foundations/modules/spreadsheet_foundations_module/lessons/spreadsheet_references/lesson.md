@@ -1,13 +1,19 @@
 # Cell References, Sorting & Filtering
 
-Spreadsheet work is analyst work when it is structured, reproducible, and validated. In this lesson, you will apply **cell references, sorting & filtering** to a realistic workflow.
+Create calculated columns with relative references, then use an absolute reference for a shared business assumption.
 
-## Analyst standard
+## Learn
 
-1. Preserve the source.
-2. Define what one row represents.
-3. Apply an explicit rule.
-4. Validate counts, totals, and unmatched records.
-5. Document assumptions and unresolved questions.
+Relative references change with the row. Absolute references use dollar signs to keep a cell fixed. For example, `=K2*(1+'Lookup Tables'!$B$2)` changes K2 as it fills down but always uses the tax rate in B2.
 
-Complete each interactive check before continuing.
+## Try It
+
+On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 − Discount), then fill the formula through K37.
+
+## Practice
+
+Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in 'Lookup Tables'!$B$2. Fill the formula through row 37. Then filter Region to West and sort Revenue from largest to smallest. Enter the Order ID at the top of the filtered list in Check Your Work.
+
+## Check Your Work
+
+Save the **Northstar Operations Practice Workbook.xlsx** working copy, return to Accelerator Academy, and select **Check Workbook**. The application checks the saved workbook structure and asks for a short evidence answer only when the result cannot be validated reliably across both Excel and Google Sheets.

@@ -114,6 +114,7 @@ def _activity(raw: dict[str, Any], source: Path) -> ActivityDefinition:
         answer_options=_tuple_strings(raw.get("answer_options", []), "answer_options", source),
         presentation=_mapping(raw.get("presentation"), "presentation", source),
         instruction=_mapping(raw.get("instruction"), "instruction", source),
+        workbook=_mapping(raw.get("workbook"), "workbook", source),
         required_for_completion=bool(raw.get("required_for_completion", True)),
         estimated_minutes=max(1, int(raw.get("estimated_minutes", 5))),
     )
@@ -141,6 +142,7 @@ def _lesson(path: Path) -> LessonDefinition:
         description=str(raw.get("description") or "").strip(),
         objectives=_tuple_strings(raw.get("objectives", []), "objectives", path),
         key_takeaways=_tuple_strings(raw.get("key_takeaways", []), "key_takeaways", path),
+        workbook=_mapping(raw.get("workbook"), "workbook", path),
         estimated_minutes=max(1, int(raw.get("estimated_minutes", 25))),
     )
 

@@ -2,136 +2,361 @@ lesson_id: spreadsheet_pivots
 title: Pivot Tables, Dimensions & Measures
 order: 1
 difficulty: beginner
-description: Build practical analyst skill in pivot tables, dimensions & measures.
-estimated_minutes: 30
+description: Use pivot tables—or equivalent grouped summaries—to explore revenue by region and units by category.
+estimated_minutes: 40
 content: lesson.md
 objectives:
-- Apply pivot tables, dimensions & measures in a data-analysis workflow.
-- Explain the validation or quality check that makes the result reliable.
+- Place a dimension in rows and a measure in values.
+- Validate the highest-performing region and category.
 key_takeaways:
-- Preserve raw data and document transformations.
-- Validate the result before using it in a business decision.
-teaches:
+- Dimensions describe groups; measures are aggregated.
+- A pivot result should be checked against a known summary or total.
+teaches: &id001
 - spreadsheet.pivots
 requires:
 - spreadsheet.relationships
+workbook:
+  workbook_name: Northstar Operations Practice Workbook.xlsx
+  file_name: Northstar Operations Practice Workbook.xlsx
+  template: workbooks/Northstar Operations Practice Workbook.xlsx
+  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+    Check Workbook.
 mastery:
   passing_score: 1.0
 activities:
 - activity_id: spreadsheet_pivots_1
-  title: Pivot Tables, Dimensions & Measures — Check 1
+  title: Learn — Quick concept check
   type: recognition
   runtime: recognition
-  prompt: What belongs in a pivot Values area?
+  prompt: 'In a pivot table, which field is a measure?
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
+
+    3. Select the complete source table, including its header row.
+
+    4. Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
+
+    5. Add the row, column, value, and filter fields named in the task in the Pivot table editor.
+
+    6. Set the required summarize-by calculation and reconcile the grand total to the source data.
+
+    7. Confirm the finished workbook matches this result: **One selected answer.**
+
+    8. Wait until Google Sheets shows that saving is complete.
+
+    9. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   answer_options:
-  - A measure to aggregate
-  - A worksheet name
-  - A file path
-  - A comment
+  - Revenue
+  - Region
+  - Category
+  - Customer Name
   starter: ''
-  solution: A measure to aggregate
-  hints: []
+  solution: Revenue
+  hints:
+  - Review the short explanation and focus on the role each field or formula plays.
   validator:
     type: exact_answer
-    expected_answer: A measure to aggregate
+    expected_answer: Revenue
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: What belongs in a pivot Values area?
+    scenario: Northstar Operations practice workbook
+    introduction: Start with one short concept check before working in the real workbook.
+    task: In a pivot table, which field is a measure?
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
+    - Choose the answer that best supports a reliable spreadsheet workflow.
     expected_output: One selected answer.
     skills_practiced:
     - spreadsheet.pivots
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    after_correct: You are ready to apply the idea in the Northstar workbook.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Pivot Tables, Dimensions & Measures — Check 1
-    objective: What belongs in a pivot Values area?
+    title: Learn — Pivot Tables, Dimensions & Measures
+    objective: In a pivot table, which field is a measure?
     action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.pivots**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    body: Dimensions such as Region or Category define groups. Measures such as Revenue or Units are summed, counted,
+      or averaged for those groups.
   required_for_completion: true
-- activity_id: spreadsheet_pivots_2
-  title: Pivot Tables, Dimensions & Measures — Check 2
-  type: recognition
-  runtime: recognition
-  prompt: What is a dimension?
-  answer_options:
-  - A category used to group or filter results
-  - A calculation error
-  - A duplicate row
-  - A workbook password
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Select the complete source table, including its header row.
+    - Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
+    - Add the row, column, value, and filter fields named in the task in the Pivot table editor.
+    - Set the required summarize-by calculation and reconcile the grand total to the source data.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+- activity_id: spreadsheet_pivots_workbook_guided
+  title: Try It — Summarize revenue by region
+  type: guided
+  runtime: workbook
+  prompt: 'Create a pivot table from Orders with Region in Rows and Sum of Revenue in Values. Place it in Analysis
+    Workspace starting at A28. Sort the values largest to smallest.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Analysis Workspace** and work in Analysis Workspace, range A28:D34.
+
+    3. Use these columns for this task: **Region, Sum of Revenue**.
+
+    4. Select the complete source table, including its header row.
+
+    5. Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
+
+    6. Add the row, column, value, and filter fields named in the task in the Pivot table editor.
+
+    7. Set the required summarize-by calculation and reconcile the grand total to the source data.
+
+    8. Confirm the finished workbook matches this result: **A region summary or pivot is saved in A28:D34, with
+    West as the highest-revenue region.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: A category used to group or filter results
-  hints: []
+  solution: A region summary or pivot is saved in A28:D34, with West as the highest-revenue region.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: A category used to group or filter results
+    type: workbook
+    checks:
+    - type: any_of
+      checks:
+      - type: pivot_present
+        sheet: Analysis Workspace
+      - type: populated_range
+        sheet: Analysis Workspace
+        range: A28:D34
+        min_count: 8
+    - type: evidence_answer
+      expected_answer: West
+      message: Review the region summary and enter the highest-revenue region.
+    success_feedback: Your region summary is saved and you correctly identified West as the highest-revenue region.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Analysis Workspace
+    columns:
+    - Region
+    - Sum of Revenue
+    row_range: A28:D34
+    starting_state: A28:D34 is reserved for the region analysis.
+    expected_result: A region summary or pivot is saved in A28:D34, with West as the highest-revenue region.
+    column_descriptions:
+      Region: Sales territory assigned to the order or customer.
+      Sum of Revenue: Aggregated revenue for one dimension value.
+    sample_values:
+    - 'Region: West'
+    - 'Sum of Revenue: $115,106.00'
+    evidence_prompt: Which region has the highest total revenue?
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
-  estimated_minutes: 4
+  estimated_minutes: 12
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: What is a dimension?
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: Create a pivot table from Orders with Region in Rows and Sum of Revenue in Values. Place it in Analysis
+      Workspace starting at A28. Sort the values largest to smallest.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.pivots
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Use Orders as the source.
+    - Group by Region.
+    - Summarize Revenue with Sum.
+    - Sort largest to smallest and save.
+    expected_output: A region summary or pivot is saved in A28:D34, with West as the highest-revenue region.
+    skills_practiced: *id001
+    after_correct: Your region summary is saved and you correctly identified West as the highest-revenue region.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Pivot Tables, Dimensions & Measures — Check 2
-    objective: What is a dimension?
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.pivots**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    title: Try It — Summarize revenue by region
+    objective: Create a pivot table from Orders with Region in Rows and Sum of Revenue in Values. Place it in Analysis
+      Workspace starting at A28. Sort the values largest to smallest.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
-- activity_id: spreadsheet_pivots_3
-  title: Pivot Tables, Dimensions & Measures — Check 3
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Analysis Workspace** and work in Analysis Workspace, range A28:D34.
+    - 'Use these columns for this task: **Region, Sum of Revenue**.'
+    - Select the complete source table, including its header row.
+    - Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
+    - Add the row, column, value, and filter fields named in the task in the Pivot table editor.
+    - Set the required summarize-by calculation and reconcile the grand total to the source data.
+    - 'Confirm the finished workbook matches this result: **A region summary or pivot is saved in A28:D34, with
+      West as the highest-revenue region.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+- activity_id: spreadsheet_pivots_workbook_practice
+  title: Practice — Summarize units by category
   type: mastery
-  runtime: recognition
-  prompt: Why validate pivot totals?
-  answer_options:
-  - To confirm they reconcile to the source population
-  - To make the chart prettier
-  - To remove all filters
-  - To hide nulls
+  runtime: workbook
+  prompt: 'Create a second pivot or grouped summary with Category in Rows and Sum of Units in Values. Place it in
+    Analysis Workspace starting at G28 and sort largest to smallest.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Analysis Workspace** and work in Analysis Workspace, range G28:J34.
+
+    3. Use these columns for this task: **Category, Sum of Units**.
+
+    4. Select the complete source table, including its header row.
+
+    5. Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
+
+    6. Add the row, column, value, and filter fields named in the task in the Pivot table editor.
+
+    7. Set the required summarize-by calculation and reconcile the grand total to the source data.
+
+    8. Confirm the finished workbook matches this result: **A category summary is saved in G28:J34, with Technology
+    as the highest-unit category.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: To confirm they reconcile to the source population
-  hints: []
+  solution: A category summary is saved in G28:J34, with Technology as the highest-unit category.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: To confirm they reconcile to the source population
+    type: workbook
+    checks:
+    - type: any_of
+      checks:
+      - type: pivot_present
+        sheet: Analysis Workspace
+      - type: populated_range
+        sheet: Analysis Workspace
+        range: G28:J34
+        min_count: 6
+    - type: evidence_answer
+      expected_answer: Technology
+      message: Review the category summary and enter the highest-unit category.
+    success_feedback: Your category summary is saved and you correctly identified Technology as the highest-unit
+      category.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Analysis Workspace
+    columns:
+    - Category
+    - Sum of Units
+    row_range: G28:J34
+    starting_state: G28:J34 is reserved for the category analysis.
+    expected_result: A category summary is saved in G28:J34, with Technology as the highest-unit category.
+    column_descriptions:
+      Category: Product category returned from the Products sheet.
+      Sum of Units: Aggregated unit quantity for one dimension value.
+    sample_values:
+    - 'Category: Furniture'
+    - 'Sum of Units: 374'
+    evidence_prompt: Which category has the highest total units?
   required_for_practice: false
   required_for_mastery: true
-  evidence_eligible: true
-  difficulty: beginner
-  estimated_minutes: 4
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 18
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: Why validate pivot totals?
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: Create a second pivot or grouped summary with Category in Rows and Sum of Units in Values. Place it in
+      Analysis Workspace starting at G28 and sort largest to smallest.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.pivots
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Use the Category lookup added to Orders.
+    - Summarize Units with Sum.
+    - Sort largest to smallest and save.
+    expected_output: A category summary is saved in G28:J34, with Technology as the highest-unit category.
+    skills_practiced: *id001
+    after_correct: Your category summary is saved and you correctly identified Technology as the highest-unit category.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Pivot Tables, Dimensions & Measures — Check 3
-    objective: Why validate pivot totals?
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.pivots**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    title: Practice — Summarize units by category
+    objective: Create a second pivot or grouped summary with Category in Rows and Sum of Units in Values. Place
+      it in Analysis Workspace starting at G28 and sort largest to smallest.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Analysis Workspace** and work in Analysis Workspace, range G28:J34.
+    - 'Use these columns for this task: **Category, Sum of Units**.'
+    - Select the complete source table, including its header row.
+    - Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
+    - Add the row, column, value, and filter fields named in the task in the Pivot table editor.
+    - Set the required summarize-by calculation and reconcile the grand total to the source data.
+    - 'Confirm the finished workbook matches this result: **A category summary is saved in G28:J34, with Technology
+      as the highest-unit category.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true

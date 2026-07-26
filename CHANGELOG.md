@@ -1,3 +1,20 @@
+# Career Accelerator v10.29.0
+
+## Spreadsheet Academy workbook overhaul
+
+- Rebuilt the 12-lesson Spreadsheet Academy around one continuing **Northstar Operations Practice Workbook** used in Excel or Google Sheets.
+- Added realistic Orders, Customers, Products, Employees, Inventory, Lookup Tables, and Analysis Workspace sheets.
+- Added personal working-copy management so the curriculum template is never edited directly.
+- Added **Open Practice Workbook**, **Use in Google Sheets**, **Reset Lesson Workbook**, and **Open Lesson Instructions** controls to practical spreadsheet steps.
+- Rewrote spreadsheet lessons into a consistent Learn, Try It, Practice, Check Your Work, and Continue sequence using natural business instructions.
+- Added configured workbook metadata for every practical activity, including sheet, columns, row range, column descriptions, sample values, starting state, and finished result.
+- Replaced fragile spreadsheet table-schema detection with curriculum metadata that remains visible even when workbook inspection fails.
+- Added native `.xlsx` validation for formulas, tables and filters, data validation, conditional formatting, populated outputs, pivots, charts, and evidence answers.
+- Added real sorting, filtering, relative and absolute references, conditional logic, cleaning, validation, lookups, relationship checks, pivots, KPIs, charting, conditional formatting, workflow documentation, and mastery work.
+- Preserved the completed final workbook as an **Academy Capstone** in Demonstrated Evidence after the mastery check passes.
+- Replaced the Next Tasks scroll host with a content-sized implementation that ends at the final row, hides its scrollbar when all tasks fit, and recalculates after refresh, resize, and interface scaling.
+- Kept Optional Practice anchored outside the Next Tasks scroll region and preserved two-line task rows.
+
 # Career Accelerator v10.28.1
 
 ## Sprint tracking and task metadata alignment

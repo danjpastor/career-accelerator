@@ -2,35 +2,68 @@ lesson_id: conditional_formulas
 title: IF, AND, OR & Error Handling
 order: 1
 difficulty: beginner
-description: Build practical analyst skill in if, and, or & error handling.
-estimated_minutes: 30
+description: Turn operational rules into clear IF and AND formulas that classify each order.
+estimated_minutes: 40
 content: lesson.md
 objectives:
-- Apply if, and, or & error handling in a data-analysis workflow.
-- Explain the validation or quality check that makes the result reliable.
+- Create a simple status flag with IF.
+- Combine conditions with IF and AND.
 key_takeaways:
-- Preserve raw data and document transformations.
-- Validate the result before using it in a business decision.
-teaches:
+- IF converts a business rule into a repeatable classification.
+- AND requires every included condition to be true.
+teaches: &id001
 - spreadsheet.conditional_logic
 requires:
 - spreadsheet.formulas
+workbook:
+  workbook_name: Northstar Operations Practice Workbook.xlsx
+  file_name: Northstar Operations Practice Workbook.xlsx
+  template: workbooks/Northstar Operations Practice Workbook.xlsx
+  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+    Check Workbook.
 mastery:
   passing_score: 1.0
 activities:
 - activity_id: conditional_formulas_1
-  title: IF, AND, OR & Error Handling — Check 1
+  title: Learn — Quick concept check
   type: recognition
   runtime: recognition
-  prompt: Which function returns different values based on a test?
+  prompt: 'Which formula structure returns one result when a condition is true and another when it is false?
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
+
+    3. Click the first required output cell and start an `IF` formula with `=`.
+
+    4. Enter the condition, the result when TRUE, and the result when FALSE.
+
+    5. Use `AND(...)` inside the condition when every listed requirement must be true.
+
+    6. Fill the formula down and test at least one TRUE row and one FALSE row.
+
+    7. Confirm the finished workbook matches this result: **One selected answer.**
+
+    8. Wait until Google Sheets shows that saving is complete.
+
+    9. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   answer_options:
   - IF
   - SUM
-  - AVERAGE
-  - SORT
+  - XLOOKUP
+  - COUNTIF
   starter: ''
   solution: IF
-  hints: []
+  hints:
+  - Review the short explanation and focus on the role each field or formula plays.
   validator:
     type: exact_answer
     expected_answer: IF
@@ -40,98 +73,293 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: Which function returns different values based on a test?
+    scenario: Northstar Operations practice workbook
+    introduction: Start with one short concept check before working in the real workbook.
+    task: Which formula structure returns one result when a condition is true and another when it is false?
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
+    - Choose the answer that best supports a reliable spreadsheet workflow.
     expected_output: One selected answer.
     skills_practiced:
     - spreadsheet.conditional_logic
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    after_correct: You are ready to apply the idea in the Northstar workbook.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: IF, AND, OR & Error Handling — Check 1
-    objective: Which function returns different values based on a test?
+    title: Learn — IF, AND, OR & Error Handling
+    objective: Which formula structure returns one result when a condition is true and another when it is false?
     action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.conditional_logic**. Focus on preserving source data,
-      defining the unit of analysis, validating calculations, and documenting decisions.
+    body: Conditional formulas let a spreadsheet apply the same business rule to every row. `IF` handles two outcomes,
+      while `AND` or `OR` combines several tests.
   required_for_completion: true
-- activity_id: conditional_formulas_2
-  title: IF, AND, OR & Error Handling — Check 2
-  type: recognition
-  runtime: recognition
-  prompt: When should IFERROR be used?
-  answer_options:
-  - When a known lookup or calculation error needs an intentional fallback
-  - To hide every unexpected data problem
-  - To replace data validation
-  - To remove duplicates
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click the first required output cell and start an `IF` formula with `=`.
+    - Enter the condition, the result when TRUE, and the result when FALSE.
+    - Use `AND(...)` inside the condition when every listed requirement must be true.
+    - Fill the formula down and test at least one TRUE row and one FALSE row.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+- activity_id: conditional_formulas_workbook_guided
+  title: Try It — Flag completed orders
+  type: guided
+  runtime: workbook
+  prompt: 'On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return Open.
+    Fill the formula through M37.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Orders** and work in Orders, range M2:M37.
+
+    3. Use these columns for this task: **Status, Fulfillment Flag**.
+
+    4. Click the first required output cell and begin the lookup formula with `=`.
+
+    5. Use the current row''s key as the search key and the named lookup table as the lookup range.
+
+    6. Use an exact match and lock the lookup range with `$` references before filling down.
+
+    7. Verify at least three results against the source table and correct unexpected `#N/A` values.
+
+    8. Confirm the finished workbook matches this result: **Every row in M2:M37 contains an IF formula returning
+    Complete or Open.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: When a known lookup or calculation error needs an intentional fallback
-  hints: []
+  solution: Every row in M2:M37 contains an IF formula returning Complete or Open.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: When a known lookup or calculation error needs an intentional fallback
+    type: workbook
+    checks:
+    - type: headers
+      sheet: Orders
+      row: 1
+      expected:
+      - Fulfillment Flag
+    - type: formula_present
+      sheet: Orders
+      range: M2:M37
+      min_count: 36
+      contains_all:
+      - if
+      contains_any:
+      - j2
+      - status
+    success_feedback: Every order now has a consistent fulfillment classification.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Orders
+    columns:
+    - Status
+    - Fulfillment Flag
+    row_range: J1:M37
+    starting_state: Status is stored in column J and column M is available.
+    expected_result: Every row in M2:M37 contains an IF formula returning Complete or Open.
+    column_descriptions:
+      Status: Current order status from the approved lookup list.
+      Fulfillment Flag: Plain-language classification based on the order status.
+    sample_values:
+    - 'Status: Delivered'
+    - 'Fulfillment Flag: Complete'
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
-  estimated_minutes: 4
+  estimated_minutes: 12
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: When should IFERROR be used?
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return Open.
+      Fill the formula through M37.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.conditional_logic
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Test the Status value from the same row.
+    - Use the exact outputs Complete and Open.
+    - Fill through row 37 and save.
+    expected_output: Every row in M2:M37 contains an IF formula returning Complete or Open.
+    skills_practiced: *id001
+    after_correct: Every order now has a consistent fulfillment classification.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: IF, AND, OR & Error Handling — Check 2
-    objective: When should IFERROR be used?
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.conditional_logic**. Focus on preserving source data,
-      defining the unit of analysis, validating calculations, and documenting decisions.
+    title: Try It — Flag completed orders
+    objective: On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return
+      Open. Fill the formula through M37.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
-- activity_id: conditional_formulas_3
-  title: IF, AND, OR & Error Handling — Check 3
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Orders** and work in Orders, range M2:M37.
+    - 'Use these columns for this task: **Status, Fulfillment Flag**.'
+    - Click the first required output cell and begin the lookup formula with `=`.
+    - Use the current row's key as the search key and the named lookup table as the lookup range.
+    - Use an exact match and lock the lookup range with `$` references before filling down.
+    - Verify at least three results against the source table and correct unexpected `#N/A` values.
+    - 'Confirm the finished workbook matches this result: **Every row in M2:M37 contains an IF formula returning
+      Complete or Open.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+- activity_id: conditional_formulas_workbook_practice
+  title: Practice — Identify large orders for review
   type: mastery
-  runtime: recognition
-  prompt: What does AND require?
-  answer_options:
-  - Every included condition to be true
-  - At least one condition to be true
-  - No conditions
-  - Only text values
+  runtime: workbook
+  prompt: 'Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000;
+    otherwise return Standard. Fill through N37.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Orders** and work in Orders, range N2:N37.
+
+    3. Use these columns for this task: **Units, Revenue, Large Order Flag**.
+
+    4. Click the first required output cell and start an `IF` formula with `=`.
+
+    5. Enter the condition, the result when TRUE, and the result when FALSE.
+
+    6. Use `AND(...)` inside the condition when every listed requirement must be true.
+
+    7. Fill the formula down and test at least one TRUE row and one FALSE row.
+
+    8. Confirm the finished workbook matches this result: **N2:N37 uses IF with AND to classify each order as Review
+    or Standard.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: Every included condition to be true
-  hints: []
+  solution: N2:N37 uses IF with AND to classify each order as Review or Standard.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: Every included condition to be true
+    type: workbook
+    checks:
+    - type: headers
+      sheet: Orders
+      row: 1
+      expected:
+      - Large Order Flag
+    - type: formula_present
+      sheet: Orders
+      range: N2:N37
+      min_count: 36
+      contains_all:
+      - if
+      - and
+    success_feedback: The workbook consistently identifies large orders that need review.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Orders
+    columns:
+    - Units
+    - Revenue
+    - Large Order Flag
+    row_range: G1:N37
+    starting_state: Units is in G and Revenue is in K. Column N is available.
+    expected_result: N2:N37 uses IF with AND to classify each order as Review or Standard.
+    column_descriptions:
+      Units: Number of product units ordered.
+      Revenue: Calculated order value after applying the row discount.
+      Large Order Flag: Review indicator for orders that meet the lesson thresholds.
+    sample_values:
+    - 'Units: 18'
+    - 'Revenue: $9,450.00'
+    - 'Large Order Flag: Review'
   required_for_practice: false
   required_for_mastery: true
-  evidence_eligible: true
-  difficulty: beginner
-  estimated_minutes: 4
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 18
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: What does AND require?
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000; otherwise
+      return Standard. Fill through N37.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.conditional_logic
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Require both conditions.
+    - Use the exact outputs Review and Standard.
+    - Fill through row 37 and save.
+    expected_output: N2:N37 uses IF with AND to classify each order as Review or Standard.
+    skills_practiced: *id001
+    after_correct: The workbook consistently identifies large orders that need review.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: IF, AND, OR & Error Handling — Check 3
-    objective: What does AND require?
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.conditional_logic**. Focus on preserving source data,
-      defining the unit of analysis, validating calculations, and documenting decisions.
+    title: Practice — Identify large orders for review
+    objective: Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000;
+      otherwise return Standard. Fill through N37.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Orders** and work in Orders, range N2:N37.
+    - 'Use these columns for this task: **Units, Revenue, Large Order Flag**.'
+    - Click the first required output cell and start an `IF` formula with `=`.
+    - Enter the condition, the result when TRUE, and the result when FALSE.
+    - Use `AND(...)` inside the condition when every listed requirement must be true.
+    - Fill the formula down and test at least one TRUE row and one FALSE row.
+    - 'Confirm the finished workbook matches this result: **N2:N37 uses IF with AND to classify each order as Review
+      or Standard.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true

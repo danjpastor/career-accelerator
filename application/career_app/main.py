@@ -84,7 +84,8 @@ from career_app.ui.responsive import (
 from career_app.ui.widgets import (
     AreaChart, BadgeCard, BrandedBannerCard, Card, ClickableCard, CircularTimer, Divider, FocusRow,
     FooterMetricBox, MetricRow, MiniSparkline, Ring, SectionHeader,
-    SidebarMetricCard, SoftPanel, StatRow, TaskRow, make_card_scrollable
+    ContentSizedScrollArea, SidebarMetricCard, SoftPanel, StatRow, TaskRow,
+    make_card_scrollable
 )
 
 from career_app.academy import AcademyService
@@ -1387,10 +1388,9 @@ class CareerAccelerator(QMainWindow):
         )
         self.dashboard_tasks_card.layout.addWidget(task_header)
 
-        self.dashboard_tasks_scroll = QScrollArea(
+        self.dashboard_tasks_scroll = ContentSizedScrollArea(
             self.dashboard_tasks_card
         )
-        self.dashboard_tasks_scroll.setWidgetResizable(True)
         self.dashboard_tasks_scroll.setMinimumSize(0, 0)
         self.dashboard_tasks_scroll.setFrameShape(
             QFrame.Shape.NoFrame
@@ -5175,19 +5175,24 @@ class CareerAccelerator(QMainWindow):
         QTimer.singleShot(0, repaint_visible_actions)
 
     def _sync_dashboard_tasks_scroll_extent(self):
-        """Shrink the Next Tasks content host to its real final row."""
+        """End the Next Tasks scroll range at the final rendered row."""
         if not hasattr(self, "dashboard_tasks_rows_host"):
             return
         self.dashboard_tasks_layout.invalidate()
         self.dashboard_tasks_layout.activate()
-        content_height = max(
-            0,
-            int(self.dashboard_tasks_layout.sizeHint().height()),
+        if hasattr(self.dashboard_tasks_scroll, "sync_content_extent"):
+            self.dashboard_tasks_scroll.sync_content_extent()
+        else:
+            content_height = max(
+                0,
+                int(self.dashboard_tasks_layout.sizeHint().height()),
+            )
+            self.dashboard_tasks_rows_host.setFixedHeight(content_height)
+            self.dashboard_tasks_rows_host.updateGeometry()
+        self._repaint_dashboard_scroll_actions(
+            self.dashboard_tasks_scroll,
+            self.dashboard_tasks_rows_host,
         )
-        self.dashboard_tasks_rows_host.setMinimumHeight(content_height)
-        self.dashboard_tasks_rows_host.setMaximumHeight(content_height)
-        self.dashboard_tasks_rows_host.updateGeometry()
-        self.dashboard_tasks_scroll.widget().updateGeometry()
 
     def _refresh_dashboard_next_tasks(self, week):
         self.clear_layout(self.dashboard_tasks_layout)
@@ -9332,6 +9337,12 @@ def run():
 
         window = CareerAccelerator()
 
+
+        # DCA GOOGLE SHEETS ACADEMY V10.30.1
+
+        from career_app.ui.google_sheets_academy import install_google_sheets_academy
+
+        install_google_sheets_academy(window, ROOT)
         if external_splash:
             _update_external_startup_splash(
                 "Loading curriculum and learning tracks",

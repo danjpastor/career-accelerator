@@ -1,11 +1,12 @@
 course_id: spreadsheet_foundations
 title: Spreadsheet Foundations
 order: 1
-description: Understand spreadsheet structure, data types, references, sorting, filtering, and core formulas.
-estimated_minutes: 120
+description: Learn workbook structure, create filterable tables, and build reliable relative and absolute-reference
+  formulas.
+estimated_minutes: 240
 outcomes:
-- Complete interactive spreadsheet decisions and validation checks.
-- Explain how the workflow supports a reliable analyst result.
+- Complete real spreadsheet work in Excel or Google Sheets.
+- Validate the saved workbook and explain the finished business result.
 modules:
 - modules/spreadsheet_foundations_module/module.yaml
 assessments: []

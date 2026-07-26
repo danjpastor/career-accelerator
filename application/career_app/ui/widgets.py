@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 from PySide6.QtCore import (
     QEasingCurve, Property, QPropertyAnimation, QSequentialAnimationGroup,
-    Qt, QRectF, QPointF, QSize, Signal
+    QEvent, QTimer, Qt, QRectF, QPointF, QSize, Signal
 )
 from PySide6.QtGui import (
     QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPen, QBrush,
@@ -16,6 +16,114 @@ from PySide6.QtWidgets import (
 )
 
 from career_app.theme import COLORS
+
+
+class ContentSizedScrollArea(QScrollArea):
+    """A vertical scroll area whose content ends at its final rendered row.
+
+    ``QScrollArea`` with ``widgetResizable=True`` expands a short content widget
+    to the viewport height. After rows are removed, Qt can also retain an older
+    size hint long enough for the vertical range to include empty space. This
+    class keeps the content widget at the exact height requested by its layout
+    and recalculates that height after layout changes and viewport resizing.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._extent_sync_pending = False
+        self.setWidgetResizable(False)
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+
+    def setWidget(self, widget):  # noqa: N802 - Qt API
+        previous = self.widget()
+        if previous is not None:
+            previous.removeEventFilter(self)
+        super().setWidget(widget)
+        if widget is not None:
+            widget.installEventFilter(self)
+            widget.setMinimumWidth(0)
+            widget.setSizePolicy(
+                QSizePolicy.Policy.Fixed,
+                QSizePolicy.Policy.Fixed,
+            )
+        self.schedule_content_extent_sync()
+
+    def schedule_content_extent_sync(self) -> None:
+        if self._extent_sync_pending:
+            return
+        self._extent_sync_pending = True
+        QTimer.singleShot(0, self._run_scheduled_extent_sync)
+
+    def _run_scheduled_extent_sync(self) -> None:
+        self._extent_sync_pending = False
+        self.sync_content_extent()
+
+    def sync_content_extent(self) -> None:
+        content = self.widget()
+        if content is None:
+            return
+        layout = content.layout()
+        if layout is None:
+            return
+
+        viewport_width = max(0, int(self.viewport().width()))
+        if viewport_width <= 0:
+            self.schedule_content_extent_sync()
+            return
+
+        # Width must be known before querying the layout height so wrapped text
+        # and scaled row metrics contribute their current, not stale, size.
+        content.setFixedWidth(viewport_width)
+        layout.invalidate()
+        layout.activate()
+        content_height = max(0, int(layout.sizeHint().height()))
+        content.setFixedSize(viewport_width, content_height)
+        content.updateGeometry()
+        self.viewport().update()
+
+        # Showing or hiding the vertical scrollbar changes viewport width. A
+        # second queued pass settles that one-pixel/layout-cycle difference.
+        QTimer.singleShot(0, self._settle_content_extent)
+
+    def _settle_content_extent(self) -> None:
+        content = self.widget()
+        if content is None or content.layout() is None:
+            return
+        viewport_width = max(0, int(self.viewport().width()))
+        if viewport_width <= 0:
+            return
+        layout = content.layout()
+        if content.width() != viewport_width:
+            content.setFixedWidth(viewport_width)
+            layout.invalidate()
+            layout.activate()
+        content_height = max(0, int(layout.sizeHint().height()))
+        if content.size() != QSize(viewport_width, content_height):
+            content.setFixedSize(viewport_width, content_height)
+            content.updateGeometry()
+        self.viewport().update()
+
+    def eventFilter(self, watched, event):  # noqa: N802 - Qt API
+        if watched is self.widget() and event.type() in (
+            QEvent.Type.LayoutRequest,
+            QEvent.Type.FontChange,
+            QEvent.Type.StyleChange,
+        ):
+            self.schedule_content_extent_sync()
+        return super().eventFilter(watched, event)
+
+    def resizeEvent(self, event):  # noqa: N802 - Qt API
+        super().resizeEvent(event)
+        self.schedule_content_extent_sync()
+
+    def showEvent(self, event):  # noqa: N802 - Qt API
+        super().showEvent(event)
+        self.schedule_content_extent_sync()
 
 
 class Card(QFrame):

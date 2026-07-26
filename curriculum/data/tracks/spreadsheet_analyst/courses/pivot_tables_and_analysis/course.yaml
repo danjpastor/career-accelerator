@@ -1,11 +1,11 @@
 course_id: pivot_tables_and_analysis
 title: Pivot Tables & Analysis
 order: 5
-description: Summarize measures by dimensions, validate KPIs, and communicate findings.
-estimated_minutes: 120
+description: Build pivot summaries, KPIs, and a clear operational chart in the continuing workbook.
+estimated_minutes: 240
 outcomes:
-- Complete interactive spreadsheet decisions and validation checks.
-- Explain how the workflow supports a reliable analyst result.
+- Complete real spreadsheet work in Excel or Google Sheets.
+- Validate the saved workbook and explain the finished business result.
 modules:
 - modules/pivot_tables_and_analysis_module/module.yaml
 assessments: []

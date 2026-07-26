@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import html
 import json
 import re
+import shutil
 import sqlite3
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -15,7 +17,13 @@ from .models import ActivityDefinition, ActivityType, AssessmentDefinition, Less
 from .progress import ProgressRepository
 from .recommendations import AcademyRecommendation, RecommendationEngine
 from .schema import ensure_academy_schema
-from .validators import SqlValidator, ValidationResult, validate_recognition
+from .validators import (
+    SqlValidator,
+    ValidationResult,
+    WorkbookValidationError,
+    WorkbookValidator,
+    validate_recognition,
+)
 
 
 class AcademyService:
@@ -412,6 +420,119 @@ class AcademyService:
         ).fetchone()
         return str(row[0]) if row and row[0] else None
 
+    def workbook_metadata(
+        self,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+    ) -> dict[str, Any]:
+        """Return configured workbook context even when file inspection fails."""
+        metadata = dict(lesson.workbook)
+        metadata.update(dict(activity.workbook))
+        return metadata
+
+    def _workbook_template_path(self, metadata: dict[str, Any]) -> Path:
+        reference = str(metadata.get("template") or "").strip()
+        if not reference:
+            raise WorkbookValidationError(
+                "This lesson does not declare a practice-workbook template."
+            )
+        candidate = (self.curriculum_root / reference).resolve()
+        try:
+            candidate.relative_to(self.curriculum_root.resolve())
+        except ValueError as exc:
+            raise WorkbookValidationError(
+                "The configured workbook template is outside the curriculum package."
+            ) from exc
+        if not candidate.is_file():
+            raise WorkbookValidationError(
+                f"The practice-workbook template is missing: {candidate.name}"
+            )
+        return candidate
+
+    def workbook_workspace_dir(self) -> Path:
+        path = self.repository_root / "academy_workspace" / "spreadsheets"
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def workbook_path(
+        self,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+    ) -> Path:
+        metadata = self.workbook_metadata(lesson, activity)
+        filename = str(
+            metadata.get("file_name")
+            or metadata.get("workbook_name")
+            or "Northstar Operations Practice Workbook.xlsx"
+        ).strip()
+        if not filename.casefold().endswith(".xlsx"):
+            filename += ".xlsx"
+        filename = Path(filename).name
+        return self.workbook_workspace_dir() / filename
+
+    def ensure_workbook(
+        self,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+    ) -> Path:
+        metadata = self.workbook_metadata(lesson, activity)
+        template = self._workbook_template_path(metadata)
+        destination = self.workbook_path(lesson, activity)
+        if not destination.exists():
+            shutil.copy2(template, destination)
+        return destination
+
+    def reset_workbook(
+        self,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+    ) -> tuple[Path, Path | None]:
+        """Archive the active workbook, then create a clean working copy."""
+        metadata = self.workbook_metadata(lesson, activity)
+        template = self._workbook_template_path(metadata)
+        destination = self.workbook_path(lesson, activity)
+        archived: Path | None = None
+        if destination.exists():
+            archive_dir = self.workbook_workspace_dir() / "archive"
+            archive_dir.mkdir(parents=True, exist_ok=True)
+            stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            archived = archive_dir / f"{destination.stem} - {stamp}{destination.suffix}"
+            shutil.move(str(destination), str(archived))
+        shutil.copy2(template, destination)
+        return destination, archived
+
+    def write_workbook_instructions(
+        self,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+        instruction_text: str,
+    ) -> Path:
+        metadata = self.workbook_metadata(lesson, activity)
+        workbook = self.ensure_workbook(lesson, activity)
+        title = f"{lesson.title} — {activity.title}"
+        sheet = str(metadata.get("sheet") or "See the lesson")
+        html_path = self.workbook_workspace_dir() / "current-lesson-instructions.html"
+        html_path.write_text(
+            "<!doctype html><html><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            "<title>" + html.escape(title) + "</title>"
+            "<style>body{font-family:Segoe UI,Arial,sans-serif;max-width:920px;"
+            "margin:32px auto;padding:0 24px;line-height:1.55;color:#172033;}"
+            "h1{color:#4b2b85} .meta{background:#f3effb;border:1px solid #d7c8f0;"
+            "padding:14px 16px;border-radius:10px;margin-bottom:20px;}"
+            "pre{white-space:pre-wrap;font-family:Segoe UI,Arial,sans-serif;"
+            "background:#f7f8fb;border:1px solid #d9deea;padding:18px;border-radius:10px;}"
+            "code{background:#eef1f7;padding:2px 4px;border-radius:4px}</style></head><body>"
+            f"<h1>{html.escape(title)}</h1>"
+            f"<div class='meta'><strong>Workbook:</strong> {html.escape(workbook.name)}<br>"
+            f"<strong>Sheet:</strong> {html.escape(sheet)}<br>"
+            f"<strong>Location:</strong> {html.escape(str(workbook))}</div>"
+            f"<pre>{html.escape(instruction_text)}</pre>"
+            "</body></html>",
+            encoding="utf-8",
+        )
+        return html_path
+
     def validate_activity(
         self,
         lesson: LessonDefinition,
@@ -425,6 +546,20 @@ class AcademyService:
             dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
             dataset = self.catalog.datasets[dataset_id]
             result = SqlValidator(dataset).validate(answer, dict(activity.validator))
+        elif activity.runtime == "workbook":
+            try:
+                workbook = self.ensure_workbook(lesson, activity)
+                with WorkbookValidator(workbook) as validator:
+                    result = validator.validate(answer, dict(activity.validator))
+                if result.passed and activity.evidence_eligible:
+                    self._record_workbook_capstone_evidence(
+                        lesson=lesson,
+                        activity=activity,
+                        workbook=workbook,
+                        result=result,
+                    )
+            except WorkbookValidationError as exc:
+                result = ValidationResult(False, str(exc))
         else:
             result = ValidationResult(False, f"Unsupported activity runtime: {activity.runtime}")
         state = self.progress.record_validation(lesson, activity, answer, result.as_dict())
@@ -441,6 +576,11 @@ class AcademyService:
         return result
 
     def run_activity(self, activity: ActivityDefinition, answer: str) -> ValidationResult:
+        if activity.runtime == "workbook":
+            return ValidationResult(
+                False,
+                "Save the workbook, then use Check Workbook to validate the practical task.",
+            )
         if activity.runtime != "sql":
             return ValidationResult(False, "Run is available for executable activities.")
         dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
@@ -736,6 +876,87 @@ class AcademyService:
             if any(lab.lab_id == lab_id for lab in course.skills_labs):
                 return course.course_id
         return None
+
+    def _course_id_for_lesson(self, lesson_id: str) -> str | None:
+        for course in self.catalog.courses():
+            if any(
+                lesson.lesson_id == lesson_id
+                for module in course.modules
+                for lesson in module.lessons
+            ):
+                return course.course_id
+        return None
+
+    def _record_workbook_capstone_evidence(
+        self,
+        *,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+        workbook: Path,
+        result: ValidationResult,
+    ) -> Path:
+        """Snapshot a validated workbook and register it as Academy evidence."""
+        evidence_dir = (
+            self.repository_root
+            / "workspaces"
+            / "academy"
+            / "workbook_capstones"
+        )
+        evidence_dir.mkdir(parents=True, exist_ok=True)
+        artifact = evidence_dir / f"{lesson.lesson_id}.xlsx"
+        shutil.copy2(workbook, artifact)
+        relative_artifact = str(artifact.relative_to(self.repository_root))
+        source_type = "Academy Capstone"
+        source_name = "Northstar Operations Workbook Analysis"
+        demonstrated_skills = tuple(
+            dict.fromkeys((*lesson.requires, *lesson.teaches))
+        )
+        notes = (
+            "Validated continuing workbook containing formulas, cleaning, "
+            "lookups, reconciliations, summaries, KPIs, and documented QA steps."
+        )
+        for skill in demonstrated_skills:
+            self._insert_evidence(
+                skill=skill,
+                source_type=source_type,
+                source_id=activity.activity_id,
+                source_name=source_name,
+                course_id=self._course_id_for_lesson(lesson.lesson_id),
+                learning_item_id=lesson.lesson_id,
+                difficulty=activity.difficulty,
+                dataset="Northstar Operations Practice Workbook",
+                submission_path=relative_artifact,
+                job_competency="Spreadsheet analysis, validation, and reporting",
+                notes=notes,
+                metadata={
+                    "validation": result.as_dict(),
+                    "workbook": workbook.name,
+                    "lesson_id": lesson.lesson_id,
+                    "activity_id": activity.activity_id,
+                },
+            )
+
+        display_skills = [
+            str(self.catalog.skills.get(skill, {}).get("title") or skill)
+            for skill in demonstrated_skills
+        ]
+        skill_summary = ", ".join(dict.fromkeys(display_skills)) or "Spreadsheet analysis"
+        description = (
+            f"Completed and validated {source_name}. "
+            f"Skills demonstrated: {skill_summary}. "
+            f"Artifact: {relative_artifact}."
+        )
+        self.conn.execute(
+            "DELETE FROM evidence WHERE source_type=? AND source_name=?",
+            (source_type, source_name),
+        )
+        self.conn.execute(
+            """INSERT INTO evidence(skill,source_type,source_name,description)
+               VALUES(?,?,?,?)""",
+            (skill_summary, source_type, source_name, description),
+        )
+        self.conn.commit()
+        return artifact
 
     def _record_project_evidence(
         self,

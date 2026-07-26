@@ -2,36 +2,70 @@ lesson_id: spreadsheet_references
 title: Cell References, Sorting & Filtering
 order: 2
 difficulty: beginner
-description: Build practical analyst skill in cell references, sorting & filtering.
-estimated_minutes: 30
+description: Create calculated columns with relative references, then use an absolute reference for a shared business
+  assumption.
+estimated_minutes: 40
 content: lesson.md
 objectives:
-- Apply cell references, sorting & filtering in a data-analysis workflow.
-- Explain the validation or quality check that makes the result reliable.
+- Write a row-level revenue formula and fill it down.
+- Lock a shared rate with an absolute reference.
 key_takeaways:
-- Preserve raw data and document transformations.
-- Validate the result before using it in a business decision.
-teaches:
+- Relative references move as a formula is filled down.
+- Absolute references keep a shared assumption fixed.
+teaches: &id001
 - spreadsheet.references
 - spreadsheet.formulas
 requires:
 - spreadsheet.structure
+workbook:
+  workbook_name: Northstar Operations Practice Workbook.xlsx
+  file_name: Northstar Operations Practice Workbook.xlsx
+  template: workbooks/Northstar Operations Practice Workbook.xlsx
+  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+    Check Workbook.
 mastery:
   passing_score: 1.0
 activities:
 - activity_id: spreadsheet_references_1
-  title: Cell References, Sorting & Filtering — Check 1
+  title: Learn — Quick concept check
   type: recognition
   runtime: recognition
-  prompt: Which reference stays fixed when copied?
+  prompt: 'Which reference stays fixed when a formula is copied down?
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
+
+    3. Click the first required output cell and begin the lookup formula with `=`.
+
+    4. Use the current row''s key as the search key and the named lookup table as the lookup range.
+
+    5. Use an exact match and lock the lookup range with `$` references before filling down.
+
+    6. Verify at least three results against the source table and correct unexpected `#N/A` values.
+
+    7. Confirm the finished workbook matches this result: **One selected answer.**
+
+    8. Wait until Google Sheets shows that saving is complete.
+
+    9. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   answer_options:
   - $B$2
   - B2
-  - B$2 only in both directions
-  - Sheet1
+  - B$2:B10
+  - B:B
   starter: ''
   solution: $B$2
-  hints: []
+  hints:
+  - Review the short explanation and focus on the role each field or formula plays.
   validator:
     type: exact_answer
     expected_answer: $B$2
@@ -41,98 +75,314 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: Which reference stays fixed when copied?
+    scenario: Northstar Operations practice workbook
+    introduction: Start with one short concept check before working in the real workbook.
+    task: Which reference stays fixed when a formula is copied down?
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
+    - Choose the answer that best supports a reliable spreadsheet workflow.
     expected_output: One selected answer.
     skills_practiced:
     - spreadsheet.references
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    after_correct: You are ready to apply the idea in the Northstar workbook.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Cell References, Sorting & Filtering — Check 1
-    objective: Which reference stays fixed when copied?
+    title: Learn — Cell References, Sorting & Filtering
+    objective: Which reference stays fixed when a formula is copied down?
     action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.references**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    body: Relative references change with the row. Absolute references use dollar signs to keep a cell fixed. For
+      example, `=K2*(1+'Lookup Tables'!$B$2)` changes K2 as it fills down but always uses the tax rate in B2.
   required_for_completion: true
-- activity_id: spreadsheet_references_2
-  title: Cell References, Sorting & Filtering — Check 2
-  type: recognition
-  runtime: recognition
-  prompt: What does filtering do?
-  answer_options:
-  - Temporarily hides rows that do not meet criteria
-  - Deletes rows permanently
-  - Changes every formula
-  - Sorts values automatically
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click the first required output cell and begin the lookup formula with `=`.
+    - Use the current row's key as the search key and the named lookup table as the lookup range.
+    - Use an exact match and lock the lookup range with `$` references before filling down.
+    - Verify at least three results against the source table and correct unexpected `#N/A` values.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+- activity_id: spreadsheet_references_workbook_guided
+  title: Try It — Calculate order revenue
+  type: guided
+  runtime: workbook
+  prompt: 'On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 − Discount),
+    then fill the formula through K37.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Orders** and work in Orders, range K2:K37.
+
+    3. Use these columns for this task: **Units, Unit Price, Discount, Revenue**.
+
+    4. Click the first required output cell and type `=` to begin the formula.
+
+    5. Build the formula with the source cells from the current row, then press **Enter**.
+
+    6. Drag the blue fill handle through the full required range.
+
+    7. Spot-check the first, middle, and last result before checking your work.
+
+    8. Confirm the finished workbook matches this result: **K1 is Revenue and every order row from K2 through K37
+    contains a saved formula.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: Temporarily hides rows that do not meet criteria
-  hints: []
+  solution: K1 is Revenue and every order row from K2 through K37 contains a saved formula.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: Temporarily hides rows that do not meet criteria
+    type: workbook
+    checks:
+    - type: headers
+      sheet: Orders
+      row: 1
+      expected:
+      - Revenue
+    - type: formula_present
+      sheet: Orders
+      range: K2:K37
+      min_count: 36
+      contains_any:
+      - g2
+      - units
+      message: Enter the revenue formula in K2 and fill it through K37.
+    success_feedback: Revenue is calculated for every order row.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Orders
+    columns:
+    - Units
+    - Unit Price
+    - Discount
+    - Revenue
+    row_range: G1:K37
+    starting_state: Columns G, H, and I contain Units, Unit Price, and Discount. Column K is available for Revenue.
+    expected_result: K1 is Revenue and every order row from K2 through K37 contains a saved formula.
+    column_descriptions:
+      Units: Number of product units ordered.
+      Unit Price: Selling price for one unit, stored in U.S. dollars.
+      Discount: Order discount stored as a decimal percentage.
+      Revenue: Calculated order value after applying the row discount.
+    sample_values:
+    - 'Units: 18'
+    - 'Unit Price: $525.00'
+    - 'Discount: 0%'
+    - 'Revenue: $9,450.00'
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
-  estimated_minutes: 4
+  estimated_minutes: 12
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: What does filtering do?
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 − Discount),
+      then fill the formula through K37.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.references
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Use the values from the same order row.
+    - Account for the Discount column.
+    - Format Revenue as US dollars.
+    - Fill the formula through row 37 and save.
+    expected_output: K1 is Revenue and every order row from K2 through K37 contains a saved formula.
+    skills_practiced: *id001
+    after_correct: Revenue is calculated for every order row.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Cell References, Sorting & Filtering — Check 2
-    objective: What does filtering do?
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.references**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    title: Try It — Calculate order revenue
+    objective: On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 − Discount),
+      then fill the formula through K37.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
-- activity_id: spreadsheet_references_3
-  title: Cell References, Sorting & Filtering — Check 3
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Orders** and work in Orders, range K2:K37.
+    - 'Use these columns for this task: **Units, Unit Price, Discount, Revenue**.'
+    - Click the first required output cell and type `=` to begin the formula.
+    - Build the formula with the source cells from the current row, then press **Enter**.
+    - Drag the blue fill handle through the full required range.
+    - Spot-check the first, middle, and last result before checking your work.
+    - 'Confirm the finished workbook matches this result: **K1 is Revenue and every order row from K2 through K37
+      contains a saved formula.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+- activity_id: spreadsheet_references_workbook_practice
+  title: Practice — Use an absolute tax-rate reference
   type: mastery
-  runtime: recognition
-  prompt: Which function totals a numeric range?
-  answer_options:
-  - SUM
-  - COUNT
-  - IF
-  - XLOOKUP
+  runtime: workbook
+  prompt: 'Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in ''Lookup Tables''!$B$2.
+    Fill the formula through row 37. Then filter Region to West and sort Revenue from largest to smallest. Enter
+    the Order ID at the top of the filtered list in Check Your Work.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **Orders** and work in Orders, range L2:L37.
+
+    3. Use these columns for this task: **Revenue, Adjusted Revenue**.
+
+    4. Click the first required output cell and begin the lookup formula with `=`.
+
+    5. Use the current row''s key as the search key and the named lookup table as the lookup range.
+
+    6. Use an exact match and lock the lookup range with `$` references before filling down.
+
+    7. Verify at least three results against the source table and correct unexpected `#N/A` values.
+
+    8. Confirm the finished workbook matches this result: **Adjusted Revenue uses a locked $B$2 tax-rate reference.
+    With Region filtered to West and Revenue sorted largest to smallest, NS-1017 appears first.**
+
+    9. Wait until Google Sheets shows that saving is complete.
+
+    10. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
   starter: ''
-  solution: SUM
-  hints: []
+  solution: Adjusted Revenue uses a locked $B$2 tax-rate reference. With Region filtered to West and Revenue sorted
+    largest to smallest, NS-1017 appears first.
+  hints:
+  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
+  - Save the .xlsx working copy before selecting Check Workbook.
   validator:
-    type: exact_answer
-    expected_answer: SUM
+    type: workbook
+    checks:
+    - type: headers
+      sheet: Orders
+      row: 1
+      expected:
+      - Adjusted Revenue
+    - type: formula_present
+      sheet: Orders
+      range: L2:L37
+      min_count: 36
+      contains_all:
+      - $b$2
+      message: Use a locked $B$2 reference and fill Adjusted Revenue through row 37.
+    - type: table_or_filter
+      sheet: Orders
+    - type: evidence_answer
+      expected_answer: NS-1017
+      message: Filter Region to West, sort Revenue largest to smallest, and enter the first Order ID.
+    success_feedback: The absolute reference is correct, and the saved filter/sort workflow identifies NS-1017 as
+      the largest West order.
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
+      Check Workbook.
+    sheet: Orders
+    columns:
+    - Revenue
+    - Adjusted Revenue
+    row_range: K1:L37
+    starting_state: Revenue is available in column K, Adjusted Revenue is blank, and the Orders filter is ready
+      to use.
+    expected_result: Adjusted Revenue uses a locked $B$2 tax-rate reference. With Region filtered to West and Revenue
+      sorted largest to smallest, NS-1017 appears first.
+    column_descriptions:
+      Revenue: Calculated order value after applying the row discount.
+      Adjusted Revenue: Revenue adjusted by the shared tax rate in Lookup Tables!B2.
+    sample_values:
+    - 'Revenue: $9,450.00'
+    - 'Adjusted Revenue: $10,111.50'
+    evidence_prompt: Which Order ID appears first after filtering Region to West and sorting Revenue largest to
+      smallest?
   required_for_practice: false
   required_for_mastery: true
-  evidence_eligible: true
-  difficulty: beginner
-  estimated_minutes: 4
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 18
   presentation:
-    scenario: Spreadsheet analyst workflow
-    introduction: Use the business and data-quality context to choose the most reliable analyst action.
-    task: Which function totals a numeric range?
+    scenario: Northstar Operations practice workbook
+    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    task: Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in 'Lookup Tables'!$B$2.
+      Fill the formula through row 37. Then filter Region to West and sort Revenue from largest to smallest. Enter
+      the Order ID at the top of the filtered list in Check Your Work.
     requirements:
-    - Choose the answer that preserves data quality and reproducibility.
-    expected_output: One selected answer.
-    skills_practiced:
-    - spreadsheet.references
-    after_correct: This choice follows a reproducible analyst workflow.
-    common_errors: []
+    - Enter Adjusted Revenue in L2 and fill it through L37.
+    - Use the shared tax rate in 'Lookup Tables'!$B$2 with an absolute reference.
+    - Filter Region so only West orders are visible.
+    - Sort Revenue from largest to smallest.
+    - Save the workbook and enter the first visible Order ID in Check Your Work.
+    expected_output: Adjusted Revenue uses a locked $B$2 tax-rate reference. With Region filtered to West and Revenue
+      sorted largest to smallest, NS-1017 appears first.
+    skills_practiced: *id001
+    after_correct: The absolute reference is correct, and the saved filter/sort workflow identifies NS-1017 as the
+      largest West order.
+    common_errors:
+    - Editing the template instead of the personal working copy.
+    - Checking the task before saving the .xlsx file.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
   instruction:
-    title: Cell References, Sorting & Filtering — Check 3
-    objective: Which function totals a numeric range?
-    action_label: Choose the best answer
-    body: Apply the lesson principles for **spreadsheet.references**. Focus on preserving source data, defining
-      the unit of analysis, validating calculations, and documenting decisions.
+    title: Practice — Use an absolute tax-rate reference
+    objective: Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in 'Lookup Tables'!$B$2.
+      Fill the formula through row 37. Then filter Region to West and sort Revenue from largest to smallest. Enter
+      the Order ID at the top of the filtered list in Check Your Work.
+    action_label: Open the workbook and complete the task
+    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
+      starting state, and finished result. The workbook controls on the right create or open your personal copy
+      without changing the original template.
   required_for_completion: true
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **Orders** and work in Orders, range L2:L37.
+    - 'Use these columns for this task: **Revenue, Adjusted Revenue**.'
+    - Click the first required output cell and begin the lookup formula with `=`.
+    - Use the current row's key as the search key and the named lookup table as the lookup range.
+    - Use an exact match and lock the lookup range with `$` references before filling down.
+    - Verify at least three results against the source table and correct unexpected `#N/A` values.
+    - 'Confirm the finished workbook matches this result: **Adjusted Revenue uses a locked $B$2 tax-rate reference.
+      With Region filtered to West and Revenue sorted largest to smallest, NS-1017 appears first.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true

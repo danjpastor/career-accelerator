@@ -1,13 +1,19 @@
 # Spreadsheet Mastery Review
 
-Spreadsheet work is analyst work when it is structured, reproducible, and validated. In this lesson, you will apply **spreadsheet mastery review** to a realistic workflow.
+Finish the Northstar operations workbook, verify the major outputs, and demonstrate spreadsheet readiness for SQL.
 
-## Analyst standard
+## Learn
 
-1. Preserve the source.
-2. Define what one row represents.
-3. Apply an explicit rule.
-4. Validate counts, totals, and unmatched records.
-5. Document assumptions and unresolved questions.
+The mastery review checks the full workflow: preserved source data, calculated columns, conditional logic, cleaning, validation, lookups, summaries, KPIs, visualization, and documentation.
 
-Complete each interactive check before continuing.
+## Try It
+
+Review the completed workbook. Confirm that the Orders calculations, customer cleaning, lookups, validation rules, analysis summaries, KPI block, chart, and workflow checklist are all saved.
+
+## Practice
+
+Use the finished workbook to confirm Total Revenue. Enter the value shown by your KPI formula in I3, rounded to two decimal places.
+
+## Check Your Work
+
+Save the **Northstar Operations Practice Workbook.xlsx** working copy, return to Accelerator Academy, and select **Check Workbook**. The application checks the saved workbook structure and asks for a short evidence answer only when the result cannot be validated reliably across both Excel and Google Sheets.

@@ -49,6 +49,7 @@ class ActivityDefinition:
     answer_options: tuple[str, ...] = ()
     presentation: Mapping[str, Any] = field(default_factory=dict)
     instruction: Mapping[str, Any] = field(default_factory=dict)
+    workbook: Mapping[str, Any] = field(default_factory=dict)
     required_for_completion: bool = True
     estimated_minutes: int = 5
 
@@ -67,6 +68,7 @@ class LessonDefinition:
     description: str = ""
     objectives: tuple[str, ...] = ()
     key_takeaways: tuple[str, ...] = ()
+    workbook: Mapping[str, Any] = field(default_factory=dict)
     estimated_minutes: int = 25
 
 

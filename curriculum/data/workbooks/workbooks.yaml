@@ -1,0 +1,261 @@
+workbooks:
+- workbook_id: northstar_operations
+  title: Northstar Operations Practice Workbook
+  template: Northstar Operations Practice Workbook.xlsx
+  working_copy: academy_workspace/spreadsheets/Northstar Operations Practice Workbook.xlsx
+  description: 'A continuing operations-analysis workbook used throughout the Spreadsheet Academy. The template
+    remains read-only; each learner works in a personal copy.
+
+
+    <!-- DCA GOOGLE SHEETS STEPS START -->
+
+    ### Complete this task in Google Sheets
+
+
+    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+    2. Open **the worksheet named in the task** and work in the worksheet named in the task, range A1:J37.
+
+    3. Use these columns for this task: **{''name'': ''Order ID'', ''description'': ''Unique text identifier for
+    one customer order.'', ''sample'': ''NS-1001''}, {''name'': ''Order Date'', ''description'': ''Date the customer
+    order was created.'', ''sample'': ''01/05/2026''}, {''name'': ''Customer ID'', ''description'': ''Identifier
+    that connects an order to the Customers sheet.'', ''sample'': ''C001''}, {''name'': ''Region'', ''description'':
+    ''Sales territory assigned to the order or customer.'', ''sample'': ''West''}, {''name'': ''Sales Rep'', ''description'':
+    ''Employee responsible for the order.'', ''sample'': ''Maya Chen''}, {''name'': ''Product ID'', ''description'':
+    ''Identifier that connects an order to the Products sheet.'', ''sample'': ''P002''}, {''name'': ''Units'', ''description'':
+    ''Number of product units ordered.'', ''sample'': ''18''}, {''name'': ''Unit Price'', ''description'': ''Selling
+    price for one unit, stored in U.S. dollars.'', ''sample'': ''$525.00''}, {''name'': ''Discount'', ''description'':
+    ''Order discount stored as a decimal percentage.'', ''sample'': ''0%''}, {''name'': ''Status'', ''description'':
+    ''Current order status from the approved lookup list.'', ''sample'': ''Delivered''}**.
+
+    4. Click the first required output cell and begin the lookup formula with `=`.
+
+    5. Use the current row''s key as the search key and the named lookup table as the lookup range.
+
+    6. Use an exact match and lock the lookup range with `$` references before filling down.
+
+    7. Verify at least three results against the source table and correct unexpected `#N/A` values.
+
+    8. Wait until Google Sheets shows that saving is complete.
+
+    9. Return to Career Accelerator and click **Check My Work**.
+
+    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  sheets:
+    Orders:
+      range: A1:J37
+      grain: One row represents one customer order.
+      columns:
+      - name: Order ID
+        description: Unique text identifier for one customer order.
+        sample: NS-1001
+      - name: Order Date
+        description: Date the customer order was created.
+        sample: 01/05/2026
+      - name: Customer ID
+        description: Identifier that connects an order to the Customers sheet.
+        sample: C001
+      - name: Region
+        description: Sales territory assigned to the order or customer.
+        sample: West
+      - name: Sales Rep
+        description: Employee responsible for the order.
+        sample: Maya Chen
+      - name: Product ID
+        description: Identifier that connects an order to the Products sheet.
+        sample: P002
+      - name: Units
+        description: Number of product units ordered.
+        sample: '18'
+      - name: Unit Price
+        description: Selling price for one unit, stored in U.S. dollars.
+        sample: $525.00
+      - name: Discount
+        description: Order discount stored as a decimal percentage.
+        sample: 0%
+      - name: Status
+        description: 'Current order status from the approved lookup list.
+
+
+          <!-- DCA GOOGLE SHEETS STEPS START -->
+
+          ### Complete this task in Google Sheets
+
+
+          1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+
+          2. Open **the worksheet named in the task** and work in the worksheet named in the task.
+
+          3. Click the first required output cell and begin the lookup formula with `=`.
+
+          4. Use the current row''s key as the search key and the named lookup table as the lookup range.
+
+          5. Use an exact match and lock the lookup range with `$` references before filling down.
+
+          6. Verify at least three results against the source table and correct unexpected `#N/A` values.
+
+          7. Wait until Google Sheets shows that saving is complete.
+
+          8. Return to Career Accelerator and click **Check My Work**.
+
+          <!-- DCA GOOGLE SHEETS STEPS END -->'
+        sample: Delivered
+        google_sheets:
+          source_of_truth: Google Sheets
+          steps:
+          - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+          - Open **the worksheet named in the task** and work in the worksheet named in the task.
+          - Click the first required output cell and begin the lookup formula with `=`.
+          - Use the current row's key as the search key and the named lookup table as the lookup range.
+          - Use an exact match and lock the lookup range with `$` references before filling down.
+          - Verify at least three results against the source table and correct unexpected `#N/A` values.
+          - Wait until Google Sheets shows that saving is complete.
+          - Return to Career Accelerator and click **Check My Work**.
+          workbook_flow: one_continuing_linked_google_sheet
+          primary_action: Open Google Sheet
+          check_action: Check My Work
+          hide_download_upload: true
+    Customers:
+      range: A1:H13
+      grain: One row represents one customer.
+      columns:
+      - name: Customer ID
+        description: Identifier that connects an order to the Customers sheet.
+        sample: C001
+      - name: Customer Name Raw
+        description: Customer name exactly as received from the source system.
+        sample: '  summit health group'
+      - name: Segment
+        description: Customer segment used for grouped analysis.
+        sample: Enterprise
+      - name: City
+        description: Customer city.
+        sample: Seattle
+      - name: State
+        description: Two-letter U.S. state abbreviation.
+        sample: WA
+      - name: Region
+        description: Sales territory assigned to the order or customer.
+        sample: West
+      - name: Phone Raw
+        description: Phone value in its original inconsistent source format.
+        sample: (206) 555-0131
+      - name: Join Date Raw
+        description: Customer join date in its original mixed text format.
+        sample: 1/8/2024
+    Products:
+      range: A1:F9
+      grain: One row represents one product.
+      columns:
+      - name: Product ID
+        description: Identifier that connects an order to the Products sheet.
+        sample: P001
+      - name: Product
+        description: Product name used in order analysis.
+        sample: Ergonomic Desk Chair
+      - name: Category
+        description: Product category returned from the Products sheet.
+        sample: Furniture
+      - name: Unit Cost
+        description: Internal cost per unit returned from the Products sheet.
+        sample: $145.00
+      - name: List Price
+        description: Standard selling price before order-level discounts.
+        sample: $249.00
+      - name: Reorder Level
+        description: Inventory threshold that triggers replenishment review.
+        sample: '18'
+    Employees:
+      range: A1:F9
+      grain: One row represents one employee.
+      columns:
+      - name: Employee ID
+        description: Unique employee identifier.
+        sample: E001
+      - name: Sales Rep
+        description: Employee responsible for the order.
+        sample: Maya Chen
+      - name: Team
+        description: Commercial team assignment.
+        sample: Enterprise
+      - name: Region
+        description: Sales territory assigned to the order or customer.
+        sample: West
+      - name: Hire Date
+        description: Employee start date.
+        sample: 03/15/2022
+      - name: Weekly Capacity Hours
+        description: Planned weekly productive capacity.
+        sample: '40'
+    Inventory:
+      range: A1:E25
+      grain: One row represents one product at one warehouse.
+      columns:
+      - name: Product ID
+        description: Identifier that connects an order to the Products sheet.
+        sample: P001
+      - name: Warehouse
+        description: Warehouse holding the inventory.
+        sample: Seattle
+      - name: On Hand
+        description: Current quantity available at the warehouse.
+        sample: '52'
+      - name: Reorder Level
+        description: Quantity threshold for replenishment.
+        sample: '18'
+      - name: Last Restock
+        description: Most recent restock date.
+        sample: 01/03/2026
+    Lookup Tables:
+      range: A1:D5
+      grain: Each lookup list contains one approved value per row.
+      columns:
+      - name: Region
+        description: Approved region names.
+        sample: West
+      - name: Tax Rate
+        description: Shared tax-rate input used for absolute-reference practice.
+        sample: 7%
+      - name: Order Status
+        description: Approved order-status values.
+        sample: Delivered
+      - name: Segment
+        description: Approved customer segments.
+        sample: Enterprise
+    Analysis Workspace:
+      range: A1:J52
+      grain: A purpose-built output sheet containing lesson results, summaries, KPIs, and documentation.
+      sections:
+      - Workbook Foundation
+      - Conditional Summaries
+      - Validation & Reconciliation
+      - Customer Summary
+      - KPI Dashboard
+      - Pivot / Summary Outputs
+      - Reproducible Workflow Checklist
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task, range A1:J37.
+    - 'Use these columns for this task: **{''name'': ''Order ID'', ''description'': ''Unique text identifier for
+      one customer order.'', ''sample'': ''NS-1001''}, {''name'': ''Order Date'', ''description'': ''Date the customer
+      order was created.'', ''sample'': ''01/05/2026''}, {''name'': ''Customer ID'', ''description'': ''Identifier
+      that connects an order to the Customers sheet.'', ''sample'': ''C001''}, {''name'': ''Region'', ''description'':
+      ''Sales territory assigned to the order or customer.'', ''sample'': ''West''}, {''name'': ''Sales Rep'', ''description'':
+      ''Employee responsible for the order.'', ''sample'': ''Maya Chen''}, {''name'': ''Product ID'', ''description'':
+      ''Identifier that connects an order to the Products sheet.'', ''sample'': ''P002''}, {''name'': ''Units'',
+      ''description'': ''Number of product units ordered.'', ''sample'': ''18''}, {''name'': ''Unit Price'', ''description'':
+      ''Selling price for one unit, stored in U.S. dollars.'', ''sample'': ''$525.00''}, {''name'': ''Discount'',
+      ''description'': ''Order discount stored as a decimal percentage.'', ''sample'': ''0%''}, {''name'': ''Status'',
+      ''description'': ''Current order status from the approved lookup list.'', ''sample'': ''Delivered''}**.'
+    - Click the first required output cell and begin the lookup formula with `=`.
+    - Use the current row's key as the search key and the named lookup table as the lookup range.
+    - Use an exact match and lock the lookup range with `$` references before filling down.
+    - Verify at least three results against the source table and correct unexpected `#N/A` values.
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
