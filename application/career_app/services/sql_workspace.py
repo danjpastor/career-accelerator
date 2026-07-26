@@ -1,4 +1,4 @@
-"""Local SQL solution-file helpers for the SQL Companion."""
+"""Local SQL solution-file helpers for the Learning Practice."""
 
 from __future__ import annotations
 

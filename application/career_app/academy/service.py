@@ -7,6 +7,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from career_app.navigation import PAGE_LEARNING
+
 from .catalog import CatalogIndex
 from .loader import load_catalog
 from .models import ActivityDefinition, ActivityType, AssessmentDefinition, LessonDefinition, SkillsLabDefinition
@@ -20,7 +22,7 @@ class AcademyService:
     """Application-facing facade for the generic curriculum engine."""
 
     TRACK_KEY = "academy"
-    DESTINATION_INDEX = 12
+    DESTINATION_INDEX = PAGE_LEARNING
 
     def __init__(self, conn: sqlite3.Connection, repository_root: str | Path):
         self.conn = conn

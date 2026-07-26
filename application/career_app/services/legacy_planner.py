@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from career_app.navigation import PAGE_LEARNING, PAGE_PORTFOLIO
+
 from datetime import date, timedelta
 import json
 import re
@@ -76,7 +78,7 @@ def infer(label):
             "minutes": duckdb_exercise["minutes"],
             "energy": "Normal",
             "priority": duckdb_exercise["priority"],
-            "destination": 4,
+            "destination": PAGE_LEARNING,
         }
 
     lower = label.lower()
@@ -826,7 +828,7 @@ def _roadmap_fallbacks(conn, state):
             "status": "Roadmap",
             "priority": 1,
             "estimated_minutes": 45,
-            "destination": 2,
+            "destination": PAGE_LEARNING,
             "carryover": False,
             "roadmap_fallback": True,
             "source_key": "roadmap:google",
@@ -843,7 +845,7 @@ def _roadmap_fallbacks(conn, state):
             "status": "Roadmap",
             "priority": 1,
             "estimated_minutes": int(academy_meta.get("estimated_minutes", 30)),
-            "destination": 12,
+            "destination": PAGE_LEARNING,
             "carryover": False,
             "roadmap_fallback": True,
             "source_key": "roadmap:academy",
@@ -859,7 +861,7 @@ def _roadmap_fallbacks(conn, state):
             "status": "Roadmap",
             "priority": 1,
             "estimated_minutes": 35,
-            "destination": 4,
+            "destination": PAGE_LEARNING,
             "carryover": False,
             "roadmap_fallback": True,
             "source_key": "roadmap:sql",
@@ -873,7 +875,7 @@ def _roadmap_fallbacks(conn, state):
             "status": "Roadmap",
             "priority": 2,
             "estimated_minutes": 45,
-            "destination": 3,
+            "destination": PAGE_PORTFOLIO,
             "carryover": False,
             "roadmap_fallback": True,
             "source_key": "roadmap:portfolio",

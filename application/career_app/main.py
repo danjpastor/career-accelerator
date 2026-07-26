@@ -26,13 +26,16 @@ from PySide6.QtWidgets import (
 )
 
 from career_app import __version__
+from career_app.navigation import (
+    NAV_ITEMS as NAV, PAGE_APPLICATIONS, PAGE_DASHBOARD, PAGE_LEARNING,
+    PAGE_PORTFOLIO, PAGE_PUBLISH, PAGE_READINESS, PAGE_SETTINGS, PAGE_STUDY,
+    PAGE_WORKSPACES, destination_for,
+)
 from career_app.database import (
     connect, ensure_default_state, factory_reset, save_setting, setting, state,
     sync_calendar_sprint_week, update_state,
 )
 from career_app.data.applied_exercises import (
-    APPLIED_EXERCISES,
-    CATEGORY_ORDER,
     exercise_number_for_label as applied_exercise_number_for_label,
     exercise_source as applied_exercise_source,
 )
@@ -61,8 +64,8 @@ from career_app.services import (
     task_workspace,
     tracks,
     unified_tasks,
+    task_icons,
 )
-from career_app.services import exercise_packs
 from career_app.services.backup import create_backup, prune_backups_with_report
 from career_app.services.migration import migrate
 from career_app.services.publisher import publish
@@ -70,7 +73,6 @@ from career_app.theme import COLORS, stylesheet
 from career_app.ui.duckdb_exercises import DuckDBExercisesWidget
 from career_app.ui.course_ui import SqlCodeEditor
 from career_app.ui.applied_labs import AppliedLabsWidget
-from career_app.ui.exercise_packs import ExercisePacksWidget, ExerciseSuggestionPanel
 from career_app.ui.task_workspace import TaskWorkspaceDialog
 from career_app.ui.portfolio_workspace import PortfolioTaskWorkspaceDialog
 from career_app.ui.portfolio_hub import PortfolioHubWidget
@@ -93,22 +95,6 @@ from career_app.services import completion_contract
 from career_app.ui.startup_splash import StartupSplash
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
-
-NAV = [
-    ("🏠 Dashboard", 0),
-    ("🚀 Daily Plan", 1),
-    ("📚 Learning", 2),
-    ("🎓 Accelerator Academy", 12),
-    ("📁 Portfolio Workspace", 3),
-    ("💻 SQL Companion", 4),
-    ("⏱️ Study Session", 5),
-    ("🎯 Job Readiness", 6),
-    ("💼 Applications", 7),
-    ("📝 Weekly Summary", 8),
-    ("🚀 Publish & Git", 9),
-    ("🗂️ Task Workspaces", 11),
-    ("⚙️ Settings", 10),
-]
 
 
 
@@ -487,18 +473,14 @@ class CareerAccelerator(QMainWindow):
 
         builders = [
             self.dashboard_page,
-            self.planner_page,
             self.learning_page,
             self.portfolio_page,
-            self.sql_page,
             self.study_page,
             self.readiness_page,
             self.applications_page,
-            self.review_page,
             self.publish_page,
-            self.settings_page,
             self.task_workspaces_page,
-            self.academy_page,
+            self.settings_page,
         ]
         for builder in builders:
             self.stack.addWidget(builder())
@@ -638,6 +620,7 @@ class CareerAccelerator(QMainWindow):
                 QSizePolicy.Policy.Expanding,
             )
             button.setCheckable(True)
+            button.setProperty("page_index", int(index))
             button.clicked.connect(
                 lambda checked=False, target=index: self.navigate(target)
             )
@@ -752,33 +735,33 @@ class CareerAccelerator(QMainWindow):
         return side
 
     def navigate(self, index):
+        index = max(0, min(int(index), self.stack.count() - 1))
         self.stack.setCurrentIndex(index)
-        if index == 12 and hasattr(self, "academy_widget"):
+        if index == PAGE_LEARNING and hasattr(self, "academy_widget"):
             self.academy_widget.refresh_all()
-            self.academy_widget.open_recommendation()
         for button in self.nav_buttons:
             button.setChecked(False)
-        label_map = {
-            0: "Dashboard",
-            1: "Daily Plan",
-            2: "Learning",
-            3: "Portfolio Workspace",
-            4: "SQL Companion",
-            5: "Study Session",
-            6: "Job Readiness",
-            7: "Applications",
-            8: "Weekly Summary",
-            9: "Publish & Git",
-            10: "Settings",
-            11: "Task Workspaces",
-            12: "Accelerator Academy",
-        }
-        target = label_map.get(index)
-        if target:
-            for button in self.nav_buttons:
-                if target in button.text():
-                    button.setChecked(True)
-                    break
+        for button in self.nav_buttons:
+            stored_index = button.property("page_index")
+            if stored_index is not None and int(stored_index) == index:
+                button.setChecked(True)
+                break
+
+    def open_learning_section(self, section="Path", practice=None):
+        self.navigate(PAGE_LEARNING)
+        index_map = getattr(self, "learning_section_index", {})
+        index = index_map.get(str(section or "Path"), index_map.get("Path", 0))
+        if hasattr(self, "learning_tabs"):
+            self.learning_tabs.setCurrentIndex(int(index))
+        if practice is not None and hasattr(self, "sql_tabs"):
+            practice_map = {
+                "Interview Problems": 0,
+                "SQL Interview Problems": 0,
+                "DuckDB Exercises": 1,
+            }
+            self.sql_tabs.setCurrentIndex(practice_map.get(str(practice), 0))
+        if section == "Path" and hasattr(self, "academy_widget"):
+            self.academy_widget.refresh_all()
 
     def page(self, title, subtitle=None):
         page = ResponsiveScrollPage(
@@ -1090,11 +1073,6 @@ class CareerAccelerator(QMainWindow):
                 self.clear_layout(item.layout())
 
     # ---------- Dashboard ----------
-    def academy_page(self):
-        self.academy_widget = AcceleratorAcademyWidget(self.conn, ROOT, self)
-        self.academy_widget.progressChanged.connect(self._academy_progress_changed)
-        return self.academy_widget
-
     def _academy_progress_changed(self):
         """Refresh shared planner and Learning cards after an Academy action."""
         self.state = state(self.conn)
@@ -1168,14 +1146,6 @@ class CareerAccelerator(QMainWindow):
 
         header.addLayout(left_header)
         header.addStretch()
-        # BEGIN EXERCISE PACKS
-        self.exercise_suggestion_panel = ExerciseSuggestionPanel(
-            self.open_exercise_pack, self
-        )
-        header.addWidget(
-            self.exercise_suggestion_panel, 0, Qt.AlignVCenter
-        )
-        # END EXERCISE PACKS
 
         right_header = QVBoxLayout()
         right_header.setSpacing(5)
@@ -1414,10 +1384,6 @@ class CareerAccelerator(QMainWindow):
             "📋",
             "Next Tasks",
             "Next prerequisite-ready work",
-            "View All",
-        )
-        task_header.action_button.clicked.connect(
-            lambda: self.navigate(1)
         )
         self.dashboard_tasks_card.layout.addWidget(task_header)
 
@@ -1694,7 +1660,7 @@ class CareerAccelerator(QMainWindow):
         summary_header = QHBoxLayout()
         summary_header.setSpacing(8)
         summary_header.addWidget(
-            SectionHeader("📊", "Weekly Summary"),
+            SectionHeader("📊", "This Week"),
             1,
         )
 
@@ -1718,10 +1684,10 @@ class CareerAccelerator(QMainWindow):
             self.summary_rows
         )
 
-        self.dashboard_summary_button = QPushButton("View Full Summary")
+        self.dashboard_summary_button = QPushButton("Open Retrospective")
         summary_button = self.dashboard_summary_button
         summary_button.setObjectName("Secondary")
-        summary_button.clicked.connect(lambda: self.navigate(8))
+        summary_button.clicked.connect(lambda: self.open_weekly_workspace("retrospective"))
         self.dashboard_summary_card.layout.addWidget(
             summary_button
         )
@@ -1899,7 +1865,7 @@ class CareerAccelerator(QMainWindow):
             QSizePolicy.Fixed,
         )
         self.dashboard_view_readiness_button.clicked.connect(
-            lambda: self.navigate(6)
+            lambda: self.navigate(PAGE_READINESS)
         )
 
         self.dashboard_mission_card.layout.addLayout(
@@ -2335,10 +2301,6 @@ class CareerAccelerator(QMainWindow):
             if compact_header
             else Qt.AlignmentFlag.AlignRight
         )
-        if hasattr(self, "exercise_suggestion_panel"):
-            self.exercise_suggestion_panel.set_compact(
-                mode != "wide" or density != "comfortable"
-            )
 
         if mode == self.dashboard_layout_mode:
             self.dashboard_content.updateGeometry()
@@ -2434,114 +2396,120 @@ class CareerAccelerator(QMainWindow):
 
         self.dashboard_content.updateGeometry()
 
-    # ---------- Planner ----------
-    def planner_page(self):
-        page, root = self.page(
-            "🚀 Daily Plan",
-            "A Google-first, prerequisite-aware view of today and what is ready next.",
-        )
-
-        controls = Card(
-            "Dynamic Plan",
-            (
-                "The plan refreshes from verified progress. Locked work stays out "
-                "until its prerequisite is complete."
-            ),
-        )
-        summary = QLabel(
-            "Today targets up to five ready tasks. Google Certificate work stays "
-            "first until the certificate is complete."
-        )
-        summary.setObjectName("Muted")
-        summary.setWordWrap(True)
-        controls.layout.addWidget(summary)
-        refresh_button = QPushButton("Refresh Dynamic Plan")
-        refresh_button.setObjectName("Primary")
-        refresh_button.clicked.connect(self.refresh_planner)
-        controls.layout.addWidget(refresh_button)
-        root.addWidget(controls)
-
-        body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.planner_body_layout = body
-
-        queue = Card(
-            "Today’s Ready Plan",
-            "Only prerequisite-ready tasks appear. Fewer than five tasks is valid.",
-        )
-        self.plan_list = QListWidget()
-        self.plan_list.setWordWrap(True)
-        self.plan_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.plan_list.itemDoubleClicked.connect(
-            lambda _item: self.open_plan_workspace()
-        )
-        queue.layout.addWidget(self.plan_list)
-        queue_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.planner_queue_buttons = queue_buttons
-        continue_button = QPushButton("Continue Selected")
-        continue_button.setObjectName("Primary")
-        continue_button.clicked.connect(self.continue_plan)
-        workspace_button = QPushButton("Open Workspace")
-        workspace_button.clicked.connect(self.open_plan_workspace)
-        queue_buttons.addWidget(continue_button)
-        queue_buttons.addWidget(workspace_button)
-        queue_buttons.addStretch()
-        queue.layout.addLayout(queue_buttons)
-        body.addWidget(queue, 1)
-
-        backlog = Card(
-            "Next Ready Tasks",
-            "The next six ready tasks, followed by a short Coming Up lock preview.",
-        )
-        self.backlog_list = QListWidget()
-        self.backlog_list.setWordWrap(True)
-        self.backlog_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.backlog_list.setObjectName("SprintBacklogList")
-        self.backlog_list.itemDoubleClicked.connect(
-            lambda _item: self.open_backlog_workspace()
-        )
-        backlog.layout.addWidget(self.backlog_list)
-        backlog_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.planner_backlog_actions = backlog_actions
-        workspace = QPushButton("Open Selected")
-        workspace.setObjectName("Primary")
-        workspace.clicked.connect(self.open_backlog_workspace)
-        history = QPushButton("Completion History / Undo")
-        history.clicked.connect(self.open_completion_history)
-        backlog_actions.addWidget(workspace)
-        backlog_actions.addWidget(history)
-        backlog_actions.addStretch()
-        backlog.layout.addLayout(backlog_actions)
-        body.addWidget(backlog, 1)
-        root.addLayout(body, 1)
-
-        def update_planner_layout(width):
-            stacked = width < 900
-            set_box_direction(self.planner_body_layout, stacked, 10)
-            compact_actions = width < 720
-            set_box_direction(self.planner_queue_buttons, compact_actions, 7)
-            set_box_direction(self.planner_backlog_actions, compact_actions, 7)
-            self.plan_list.setMinimumHeight(210 if stacked else 300)
-            self.backlog_list.setMinimumHeight(210 if stacked else 300)
-
-        self._register_page_responsive(page, update_planner_layout)
-        return page
-
     # ---------- Learning ----------
+    def _build_interview_practice_tab(self):
+        problem_tab = QWidget()
+        problem_layout = QBoxLayout(
+            QBoxLayout.Direction.LeftToRight,
+            problem_tab,
+        )
+        self.sql_problem_layout = problem_layout
+        problem_layout.setContentsMargins(0, 8, 0, 0)
+        problem_layout.setSpacing(10)
+
+        recommendations = Card(
+            "SQL Interview Problems",
+            "Practice only problems whose prerequisite concepts are already demonstrated.",
+        )
+        self.sql_recommendations_card = recommendations
+        self.sql_problem_list = QListWidget()
+        self.sql_problem_list.setWordWrap(True)
+        self.sql_problem_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.sql_problem_list.currentItemChanged.connect(self.prefill_sql)
+        recommendations.layout.addWidget(self.sql_problem_list)
+        problem_layout.addWidget(recommendations, 1)
+
+        detail = Card("Problem Workspace")
+        self.sql_detail_card = detail
+        self.sql_workspace_status = QLabel("Select a problem on the left.")
+        self.sql_workspace_status.setObjectName("Muted")
+        self.sql_workspace_status.setWordWrap(True)
+        detail.layout.addWidget(self.sql_workspace_status)
+
+        form = QFormLayout()
+        self.sql_title = QLineEdit()
+        self.sql_difficulty = QLineEdit("Easy")
+        self.sql_topic = QLineEdit()
+        self.sql_concepts = QLineEdit()
+        for field in (
+            self.sql_title,
+            self.sql_difficulty,
+            self.sql_topic,
+            self.sql_concepts,
+        ):
+            field.setReadOnly(True)
+        self.sql_mastery = QSpinBox()
+        self.sql_mastery.setRange(1, 5)
+        self.sql_mastery.setValue(1)
+        self.sql_review = QLineEdit()
+        self.sql_submission_path = QLineEdit()
+        self.sql_submission_path.setReadOnly(True)
+        self.sql_notes = QTextEdit()
+        form.addRow("Problem title", self.sql_title)
+        form.addRow("Difficulty", self.sql_difficulty)
+        form.addRow("Topic", self.sql_topic)
+        form.addRow("Concepts", self.sql_concepts)
+        form.addRow("Mastery (1–5)", self.sql_mastery)
+        form.addRow("Review date", self.sql_review)
+        form.addRow("Submission", self.sql_submission_path)
+        form.addRow("Notes", self.sql_notes)
+        detail.layout.addLayout(form)
+
+        answer_label = QLabel("Your SQL submission")
+        answer_label.setObjectName("SectionTitle")
+        detail.layout.addWidget(answer_label)
+        self.sql_answer_editor = SqlCodeEditor()
+        self.sql_answer_editor.setMinimumHeight(190)
+        self.sql_answer_editor.setPlaceholderText(
+            "Write your interview-problem solution here. Save it before marking the problem complete."
+        )
+        detail.layout.addWidget(self.sql_answer_editor, 1)
+
+        buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        self.sql_problem_buttons = buttons
+        self.sql_external_button = QPushButton("Open on DataLemur ↗")
+        self.sql_external_button.setObjectName("Secondary")
+        self.sql_external_button.setToolTip(
+            "Open the selected problem's exact DataLemur page in your browser."
+        )
+        self.sql_external_button.setEnabled(False)
+        self.sql_external_button.clicked.connect(self.open_sql_problem_url)
+        self.sql_save_button = QPushButton("Save Submission")
+        self.sql_save_button.setObjectName("Secondary")
+        self.sql_save_button.clicked.connect(self.save_sql_submission)
+        self.sql_complete_button = QPushButton("Mark Complete")
+        self.sql_complete_button.setObjectName("Primary")
+        self.sql_complete_button.clicked.connect(self.save_sql)
+        self.sql_hint_button = QPushButton("Need a Hint")
+        self.sql_hint_button.clicked.connect(self.sql_hint)
+        self.sql_solution_button = QPushButton("Open Submission File")
+        self.sql_solution_button.clicked.connect(self.open_sql_solution)
+        for button in (
+            self.sql_external_button,
+            self.sql_save_button,
+            self.sql_complete_button,
+            self.sql_hint_button,
+            self.sql_solution_button,
+        ):
+            buttons.addWidget(button)
+        detail.layout.addLayout(buttons)
+        self.sql_detail_scroll = make_card_scrollable(detail)
+        self.sql_selected_title = None
+        self.set_sql_workspace_enabled(False)
+        problem_layout.addWidget(detail, 1)
+        return problem_tab
+
     def learning_page(self):
         page, root = self.page(
-            "📚 Learning Dashboard",
-            "Track structured learning and complete guided labs that produce employer-ready evidence.",
+            "📚 Learning",
+            "Follow the Academy path, update the Google Certificate, and practice in one workspace.",
         )
         page.set_outer_scroll_enabled(False)
+
         self.learning_tabs = QTabWidget()
         self.learning_tabs.setObjectName("LearningTabs")
-        # The Learning sections use dedicated navigation buttons instead of a
-        # native tab strip.  Keeping the QTabWidget as the page stack preserves
-        # existing routing while eliminating the tab-bar baseline/divider.
         self.learning_tabs.tabBar().hide()
         self.learning_tabs.setDocumentMode(False)
         self.learning_tabs.setStyleSheet(
@@ -2555,324 +2523,167 @@ class CareerAccelerator(QMainWindow):
             QSizePolicy.Policy.Expanding,
         )
 
+        self.learning_section_index = {
+            "Path": 0,
+            "Certificate": 1,
+            "Practice": 2,
+            "Skills Lab": 3,
+        }
         self.learning_section_nav = QWidget()
         self.learning_section_nav.setObjectName("LearningSectionNav")
-        learning_section_layout = QHBoxLayout(self.learning_section_nav)
-        learning_section_layout.setContentsMargins(0, 0, 0, 0)
-        learning_section_layout.setSpacing(8)
+        nav_layout = QHBoxLayout(self.learning_section_nav)
+        nav_layout.setContentsMargins(0, 0, 0, 0)
+        nav_layout.setSpacing(8)
         self.learning_tab_button_group = QButtonGroup(self.learning_section_nav)
         self.learning_tab_button_group.setExclusive(True)
         self.learning_tab_buttons = []
-        for index, label in enumerate((
-            "Learning Overview",
-            "Applied Labs",
-            "Exercises",
-        )):
+        for label, index in self.learning_section_index.items():
             button = QPushButton(label)
             button.setObjectName("LearningSectionButton")
             button.setCheckable(True)
             button.setCursor(Qt.CursorShape.PointingHandCursor)
             button.clicked.connect(
                 lambda checked=False, target=index: (
-                    self.learning_tabs.setCurrentIndex(target)
-                    if checked else None
+                    self.learning_tabs.setCurrentIndex(target) if checked else None
                 )
             )
             self.learning_tab_button_group.addButton(button, index)
             self.learning_tab_buttons.append(button)
-            learning_section_layout.addWidget(button)
-        learning_section_layout.addStretch(1)
+            nav_layout.addWidget(button)
+        nav_layout.addStretch(1)
         self.learning_tab_buttons[0].setChecked(True)
         self.learning_section_nav.setStyleSheet(
             f"""
-            QWidget#LearningSectionNav {{
-                background: transparent;
-                border: none;
-            }}
+            QWidget#LearningSectionNav {{ background: transparent; border: none; }}
             QPushButton#LearningSectionButton {{
-                background: {COLORS['panel']};
-                color: {COLORS['muted']};
-                border: 1px solid {COLORS['border']};
-                border-radius: 10px;
-                padding: 8px 15px;
-                min-height: 20px;
-                font-weight: 600;
+                background: {COLORS['panel']}; color: {COLORS['muted']};
+                border: 1px solid {COLORS['border']}; border-radius: 10px;
+                padding: 8px 15px; min-height: 20px; font-weight: 600;
             }}
             QPushButton#LearningSectionButton:hover {{
-                background: {COLORS['panel_hover']};
-                color: white;
+                background: {COLORS['panel_hover']}; color: white;
                 border-color: {COLORS['purple_soft']};
             }}
             QPushButton#LearningSectionButton:checked {{
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
                             stop:0 {COLORS['magenta']}, stop:1 {COLORS['purple']});
-                color: white;
-                border-color: #C07BFF;
-                font-weight: 700;
-            }}
-            QPushButton#LearningSectionButton:checked:hover {{
-                background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                            stop:0 #FF6BC6, stop:1 #A477FF);
-                border-color: #E0B5FF;
-            }}
-            QPushButton#LearningSectionButton:pressed {{
-                padding: 8px 15px;
+                color: white; border-color: #C07BFF; font-weight: 700;
             }}
             """
         )
-        root.addWidget(self.learning_section_nav, 0)
+        root.addWidget(self.learning_section_nav)
 
-        overview = QWidget()
-        overview_root = QVBoxLayout(overview)
-        overview_root.setContentsMargins(0, 8, 0, 0)
-        overview_root.setSpacing(12)
-        self.learning_cards = {}
-        grid = QGridLayout()
-        self.learning_overview_grid = grid
-        self.learning_overview_cards = []
-        learning_tracks = [
-            ("🎓 Google Certificate", "Google"),
-            ("🎓 Accelerator Academy", "Academy"),
-            ("💻 SQL Practice", "SQL"),
-            ("📊 Power BI", "Power BI"),
-            ("🐍 Python", "Python"),
-            ("📁 Portfolio", "Portfolio"),
-            ("📐 Statistics", "Statistics"),
-            ("🧪 Applied Labs", "Applied Labs"),
-        ]
-        for index, (title, key) in enumerate(learning_tracks):
-            card = Card(title)
-            value = QLabel("—")
-            value.setStyleSheet("font-size:20pt;font-weight:700;")
-            detail = QLabel("")
-            detail.setObjectName("Muted")
-            detail.setWordWrap(True)
-            button = QPushButton("Continue →")
-            button.clicked.connect(
-                lambda checked=False, track_key=key: self.continue_learning_track(track_key)
-            )
-            card.layout.addWidget(value)
-            card.layout.addWidget(detail)
-            card.layout.addStretch()
-            card.layout.addWidget(button)
-            self.learning_overview_cards.append(card)
-            self.learning_cards[key] = (value, detail)
-        overview_root.addLayout(grid)
+        self.academy_widget = AcceleratorAcademyWidget(self.conn, ROOT, self)
+        self.academy_widget.progressChanged.connect(self._academy_progress_changed)
+        self.learning_tabs.addTab(self.academy_widget, "Path")
 
-        progress = Card("Update Learning Progress")
+        certificate = QWidget()
+        certificate_layout = QVBoxLayout(certificate)
+        certificate_layout.setContentsMargins(0, 8, 0, 0)
+        certificate_layout.setSpacing(12)
+        certificate_card = Card(
+            "Google Data Analytics Certificate",
+            "Update the external certificate only when you complete a course module.",
+        )
+        self.google_certificate_status = QLabel("")
+        self.google_certificate_status.setObjectName("Muted")
+        self.google_certificate_status.setWordWrap(True)
+        certificate_card.layout.addWidget(self.google_certificate_status)
         form = QFormLayout()
         self.week_input = QSpinBox(); self.week_input.setRange(1, 12)
         self.course_input = QSpinBox(); self.course_input.setRange(1, 9)
         self.module_input = QSpinBox(); self.module_input.setRange(1, 4)
-        self.course_input.valueChanged.connect(
-            self.update_google_module_range
-        )
+        self.course_input.valueChanged.connect(self.update_google_module_range)
         self.hours_input = QSpinBox(); self.hours_input.setRange(1, 40)
         form.addRow("Current week", self.week_input)
         form.addRow("Google course", self.course_input)
         form.addRow("Google module", self.module_input)
         form.addRow("Weekly target hours", self.hours_input)
-        progress.layout.addLayout(form)
-        save = QPushButton("Save Learning Progress")
+        certificate_card.layout.addLayout(form)
+        certificate_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
+        save = QPushButton("Save Certificate Progress")
         save.setObjectName("Primary")
         save.clicked.connect(self.save_learning)
-        progress.layout.addWidget(save)
-        overview_root.addWidget(progress)
-        overview_root.addStretch(1)
+        continue_google = QPushButton("Open Current Google Task")
+        continue_google.clicked.connect(lambda: self.continue_learning_track("Google"))
+        certificate_actions.addWidget(save)
+        certificate_actions.addWidget(continue_google)
+        certificate_actions.addStretch()
+        certificate_card.layout.addLayout(certificate_actions)
+        certificate_layout.addWidget(certificate_card)
+        certificate_layout.addStretch(1)
+        self.learning_tabs.addTab(certificate, "Certificate")
 
-        labs = QWidget()
-        labs_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, labs)
-        self.legacy_labs_layout = labs_layout
-        labs_layout.setContentsMargins(0, 8, 0, 0)
-        labs_layout.setSpacing(10)
+        practice = QWidget()
+        practice_layout = QVBoxLayout(practice)
+        practice_layout.setContentsMargins(0, 8, 0, 0)
+        practice_layout.setSpacing(8)
+        self.sql_tabs = QTabWidget()
+        self.sql_tabs.setMinimumWidth(0)
+        self.sql_tabs.setSizePolicy(
+            QSizePolicy.Policy.Ignored,
+            QSizePolicy.Policy.Expanding,
+        )
+        self.sql_tabs.addTab(
+            self._build_interview_practice_tab(),
+            "SQL Interview Problems",
+        )
+        self.duckdb_exercises_widget = DuckDBExercisesWidget(self.conn, ROOT, self)
+        self.duckdb_exercises_widget.changed.connect(self._duckdb_exercises_changed)
+        self.sql_tabs.addTab(self.duckdb_exercises_widget, "DuckDB Exercises")
+        practice_layout.addWidget(self.sql_tabs, 1)
+        self.learning_tabs.addTab(practice, "Practice")
 
-        library = Card(
-            "Applied Lab Library",
-            "Power BI, Excel, pandas, communication, validation, diagnostic, and timed exercises.",
-        )
-        self.applied_track_summary = QLabel(
-            ""
-        )
-        self.applied_track_summary.setObjectName(
-            "Muted"
-        )
-        self.applied_track_summary.setWordWrap(
-            True
-        )
-        library.layout.addWidget(
-            self.applied_track_summary
-        )
-
-        pin_row = QHBoxLayout()
-        pin_row.addWidget(
-            QLabel("Adaptive branch")
-        )
-        self.applied_branch_pin = QComboBox()
-        self.applied_branch_pin.addItems(
-            [
-                "Auto",
-                *tracks.APPLIED_BRANCH_ORDER,
-            ]
-        )
-        self.applied_branch_pin.currentTextChanged.connect(
-            self.save_applied_branch_pin
-        )
-        pin_row.addWidget(
-            self.applied_branch_pin,
-            1,
-        )
-        library.layout.addLayout(
-            pin_row
-        )
-
-        filter_row = QHBoxLayout()
-        filter_row.addWidget(QLabel("Category"))
-        self.applied_category_filter = QComboBox()
-        self.applied_category_filter.addItems(["All", *CATEGORY_ORDER])
-        self.applied_category_filter.currentTextChanged.connect(self.refresh_applied_exercises)
-        filter_row.addWidget(self.applied_category_filter, 1)
-        library.layout.addLayout(filter_row)
-        self.applied_exercise_list = QListWidget()
-        self.applied_exercise_list.setWordWrap(True)
-        self.applied_exercise_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.applied_exercise_list.currentItemChanged.connect(self.prefill_applied_exercise)
-        library.layout.addWidget(self.applied_exercise_list, 1)
-        labs_layout.addWidget(library, 1)
-
-        detail = Card("Applied Lab Workspace")
-        self.applied_workspace_status = QLabel("Select a lab on the left.")
-        self.applied_workspace_status.setObjectName("Muted")
-        self.applied_workspace_status.setWordWrap(True)
-        detail.layout.addWidget(self.applied_workspace_status)
-        detail_form = QFormLayout()
-        self.applied_title = QLineEdit(); self.applied_title.setReadOnly(True)
-        self.applied_category = QLineEdit(); self.applied_category.setReadOnly(True)
-        self.applied_week = QLineEdit(); self.applied_week.setReadOnly(True)
-        self.applied_concepts = QLineEdit(); self.applied_concepts.setReadOnly(True)
-        self.applied_estimate = QLineEdit(); self.applied_estimate.setReadOnly(True)
-        self.applied_submission_path = QLineEdit(); self.applied_submission_path.setReadOnly(True)
-        self.applied_status = QComboBox(); self.applied_status.addItems(list(applied_workspace.VALID_STATUSES))
-        self.applied_notes = QTextEdit()
-        self.applied_notes.setPlaceholderText("Record assumptions, validation results, artifact paths, and interview notes.")
-        detail_form.addRow("Lab", self.applied_title)
-        detail_form.addRow("Category", self.applied_category)
-        detail_form.addRow("Roadmap week", self.applied_week)
-        detail_form.addRow("Concepts", self.applied_concepts)
-        detail_form.addRow("Estimate", self.applied_estimate)
-        detail_form.addRow("Status", self.applied_status)
-        detail_form.addRow("Submission", self.applied_submission_path)
-        detail_form.addRow("Notes", self.applied_notes)
-        detail.layout.addLayout(detail_form)
-
-        refs = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_labs_refs = refs
-        self.applied_instructions_button = QPushButton("Open Instructions")
-        self.applied_instructions_button.clicked.connect(lambda: self.open_applied_reference("instructions"))
-        self.applied_starter_button = QPushButton("Open Starter")
-        self.applied_starter_button.clicked.connect(lambda: self.open_applied_reference("starter"))
-        self.applied_validation_button = QPushButton("Open Validation")
-        self.applied_validation_button.clicked.connect(lambda: self.open_applied_reference("validation"))
-        self.applied_datasets_button = QPushButton("Open Dataset Folder")
-        self.applied_datasets_button.clicked.connect(self.open_applied_datasets)
-        for button in (self.applied_instructions_button,self.applied_starter_button,self.applied_validation_button,self.applied_datasets_button):
-            refs.addWidget(button)
-        detail.layout.addLayout(refs)
-
-        actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_labs_actions = actions
-        self.applied_submission_button = QPushButton("Create / Open Submission")
-        self.applied_submission_button.setObjectName("Primary")
-        self.applied_submission_button.clicked.connect(self.open_applied_submission)
-        self.applied_save_button = QPushButton("Save Lab Progress")
-        self.applied_save_button.clicked.connect(self.save_applied_progress)
-        actions.addWidget(self.applied_submission_button)
-        actions.addWidget(self.applied_save_button)
-        detail.layout.addLayout(actions)
-        self.applied_selected_number = None
-        self.set_applied_workspace_enabled(False)
-        labs_layout.addWidget(detail, 1)
-
-        overview_scroll = QScrollArea()
-        overview_scroll.setWidgetResizable(True)
-        overview_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        overview_scroll.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        overview_scroll.setStyleSheet(
-            "QScrollArea {background:transparent;border:none;}"
-        )
-        overview_scroll.setWidget(overview)
-        self.learning_overview_scroll = overview_scroll
-        self.learning_tabs.addTab(overview_scroll, "Learning Overview")
-        # BEGIN EXERCISE PACKS
-        self._legacy_applied_labs_page = labs
-        self.applied_labs_widget = AppliedLabsWidget(
-            self.conn, ROOT, self
-        )
-        self.applied_labs_widget.changed.connect(
-            self._applied_labs_changed
-        )
-        self.learning_tabs.addTab(
-            self.applied_labs_widget, "Applied Labs"
-        )
-        # END EXERCISE PACKS
-        # BEGIN EXERCISE PACKS
-        self.exercise_packs_widget = ExercisePacksWidget(
-            self.conn, ROOT, self
-        )
-        self.exercise_packs_widget.packsChanged.connect(
-            self._exercise_packs_changed
-        )
-        self.learning_tabs.addTab(
-            self.exercise_packs_widget, "Exercises"
-        )
-        # END EXERCISE PACKS
+        self.applied_labs_widget = AppliedLabsWidget(self.conn, ROOT, self)
+        self.applied_labs_widget.changed.connect(self._applied_labs_changed)
+        self.learning_tabs.addTab(self.applied_labs_widget, "Skills Lab")
         root.addWidget(self.learning_tabs, 1)
 
-        def update_learning_layout(width):
-            columns = 3 if width >= 1040 else 2 if width >= 680 else 1
-            reflow_grid(
-                self.learning_overview_grid,
-                self.learning_overview_cards,
-                columns,
-            )
-            stacked = width < 880
-            set_box_direction(self.legacy_labs_layout, stacked, 10)
-            set_box_direction(self.legacy_labs_refs, width < 720, 7)
-            set_box_direction(self.legacy_labs_actions, width < 620, 7)
-            self.learning_tabs.setMinimumHeight(0)
-            self.learning_tabs.setMaximumHeight(16777215)
-
-        self._learning_layout_handler = update_learning_layout
-        def sync_learning_section_button(index):
+        def sync_learning_button(index):
             button = self.learning_tab_button_group.button(index)
             if button is not None:
                 button.setChecked(True)
 
-        self.learning_tabs.currentChanged.connect(sync_learning_section_button)
+        def update_learning_layout(width):
+            compact = width < 720
+            self.learning_section_nav.layout().setSpacing(5 if compact else 8)
+            set_box_direction(self.sql_problem_layout, width < 760, 10)
+            set_box_direction(self.sql_problem_buttons, width < 900, 7)
+            self.sql_recommendations_card.setMinimumHeight(180 if compact else 0)
+            self.sql_recommendations_card.setMaximumHeight(250 if compact else 16777215)
+            self.sql_problem_layout.setStretch(0, 0 if compact else 1)
+            self.sql_problem_layout.setStretch(1, 1)
+            self.learning_tabs.setMinimumHeight(0)
+            self.learning_tabs.setMaximumHeight(16777215)
+
+        self.learning_tabs.currentChanged.connect(sync_learning_button)
         self.learning_tabs.currentChanged.connect(
             lambda _index: update_learning_layout(max(0, page.viewport().width()))
         )
+        self.sql_tabs.currentChanged.connect(
+            lambda _index: update_learning_layout(max(0, page.viewport().width()))
+        )
+        self._learning_layout_handler = update_learning_layout
+        self._sql_layout_handler = update_learning_layout
         self._register_page_responsive(page, update_learning_layout)
         return page
+
     def continue_learning_track(self, track_key):
-        """Route every Learning Overview Continue button to real work."""
+        """Route Learning controls into the consolidated Learning workspace."""
         key = str(track_key or "").strip()
-        if key == "Academy" or key in {"Power BI", "Python", "Statistics"}:
-            self.navigate(12)
+        if key in {"Academy", "Power BI", "Python", "Statistics"}:
+            self.open_learning_section("Path")
+            if hasattr(self, "academy_widget"):
+                self.academy_widget.open_recommendation()
             return
         if key == "SQL":
-            self.navigate(4)
+            self.open_learning_section("Practice", "SQL Interview Problems")
             return
         if key == "Portfolio":
-            self.navigate(3)
+            self.navigate(PAGE_PORTFOLIO)
             return
-        if key == "Applied Labs":
-            self.navigate(2)
-            if hasattr(self, "learning_tabs"):
-                self.learning_tabs.setCurrentIndex(1)
+        if key in {"Applied Labs", "Skills Lab"}:
+            self.open_learning_section("Skills Lab")
             return
         if key == "Google":
             row = self.conn.execute(
@@ -2885,15 +2696,14 @@ class CareerAccelerator(QMainWindow):
             if row is not None:
                 self.open_task_workspace(task_id=int(row["task_id"]))
             else:
-                self.navigate(2)
+                self.open_learning_section("Certificate")
                 self._notify(
-                    "Your Google Certificate progress is tracked here. Update the course and module when you finish the next section.",
+                    "Update the Google course and module after completing the next external section.",
                     6000,
                 )
             return
-        self.navigate(2)
+        self.open_learning_section("Path")
 
-    # BEGIN EXERCISE PACKS
     def _applied_labs_changed(self):
         self.state = state(self.conn)
         tracks.sync_all(self.conn, self.state)
@@ -2902,555 +2712,6 @@ class CareerAccelerator(QMainWindow):
     # END EXERCISE PACKS
 
     # BEGIN EXERCISE PACKS
-    def _exercise_packs_changed(self):
-        if hasattr(self, "exercise_packs_widget"):
-            self.exercise_packs_widget.refresh()
-        self.refresh_dashboard(sync_tracks=False)
-
-    def open_exercise_pack(self, pack_id):
-        self.navigate(2)
-        self.learning_tabs.setCurrentWidget(self.exercise_packs_widget)
-        self.exercise_packs_widget.select_pack(pack_id)
-    # END EXERCISE PACKS
-
-
-    def set_applied_workspace_enabled(self, enabled):
-        for widget in (
-            self.applied_status,self.applied_notes,self.applied_instructions_button,
-            self.applied_starter_button,self.applied_validation_button,
-            self.applied_datasets_button,self.applied_submission_button,
-            self.applied_save_button,
-        ):
-            widget.setEnabled(enabled)
-
-    def save_applied_branch_pin(
-        self,
-        branch,
-    ):
-        if branch not in {
-            "Auto",
-            *tracks.APPLIED_BRANCH_ORDER,
-        }:
-            branch = "Auto"
-
-        save_setting(
-            self.conn,
-            "applied_branch_pin",
-            branch,
-        )
-        self.state = state(
-            self.conn
-        )
-        tracks.sync_all(
-            self.conn,
-            self.state,
-        )
-        self.refresh_all(
-            sync_tracks=False
-        )
-        self._notify(
-            (
-                "Applied Labs branch set to "
-                f"{branch}."
-            ),
-            4200,
-        )
-
-    def refresh_applied_exercises(
-        self,
-        _filter_text=None,
-    ):
-        previous = getattr(
-            self,
-            "applied_selected_number",
-            None,
-        )
-        category = (
-            self.applied_category_filter.currentText()
-        )
-
-        current_pin = (
-            tracks.applied_branch_pin(
-                self.conn
-            )
-        )
-        self.applied_branch_pin.blockSignals(
-            True
-        )
-        self.applied_branch_pin.setCurrentText(
-            current_pin
-        )
-        self.applied_branch_pin.blockSignals(
-            False
-        )
-
-        track = tracks.snapshot(
-            self.conn,
-            self.state,
-        )["applied"]
-        metadata = track["metadata"]
-        next_title = metadata.get(
-            "title",
-            "No eligible lab yet",
-        )
-        branch = metadata.get(
-            "branch",
-            current_pin
-            if current_pin != "Auto"
-            else "Auto",
-        )
-        self.applied_track_summary.setText(
-            (
-                f"Adaptive track: "
-                f"{track['status']} • "
-                f"Branch: {branch} • "
-                f"Next: {next_title} • "
-                f"Week "
-                f"{track['weekly_completed']} / "
-                f"{track['weekly_target']}. "
-                "Only the selected lab enters the active schedule."
-            )
-        )
-
-        active_number = metadata.get(
-            "lab_number"
-        )
-        self.applied_exercise_list.blockSignals(
-            True
-        )
-        self.applied_exercise_list.clear()
-        rows = {}
-
-        for number, item in sorted(
-            APPLIED_EXERCISES.items()
-        ):
-            if (
-                category != "All"
-                and item["category"]
-                != category
-            ):
-                continue
-
-            record = applied_workspace.progress(
-                self.conn,
-                ROOT,
-                number,
-            )
-            readiness = (
-                tracks.applied_lab_readiness(
-                    self.conn,
-                    self.state,
-                    number,
-                )
-            )
-
-            if record["status"] == "Completed":
-                icon = "✅"
-            elif (
-                active_number is not None
-                and int(active_number)
-                == int(number)
-                and track["status"]
-                == "Active"
-            ):
-                icon = "▶"
-            elif not readiness["ready"]:
-                icon = "🔒"
-            elif record["status"] == "In Progress":
-                icon = "🟡"
-            else:
-                icon = "⬜"
-
-            saved = (
-                " • 💾 Submission"
-                if record[
-                    "submission_exists"
-                ]
-                else ""
-            )
-            optional_text = (
-                " • Optional"
-                if item.get(
-                    "optional",
-                    False,
-                )
-                else ""
-            )
-            self.applied_exercise_list.addItem(
-                f"{icon} {number:02d}. "
-                f"{item['category']} • "
-                f"{item['title']} • "
-                f"Week {item['week']} • "
-                f"{item['minutes']} min"
-                f"{optional_text}"
-                f"{saved}"
-            )
-            index = (
-                self.applied_exercise_list.count()
-                - 1
-            )
-            list_item = (
-                self.applied_exercise_list.item(
-                    index
-                )
-            )
-            list_item.setData(
-                Qt.ItemDataRole.UserRole,
-                int(number),
-            )
-
-            eligibility = (
-                "Ready"
-                if readiness["ready"]
-                else (
-                    "Locked: "
-                    + "; ".join(
-                        readiness["missing"]
-                    )
-                )
-            )
-            list_item.setToolTip(
-                (
-                    f"Branch: "
-                    f"{readiness['branch']}\n"
-                    f"Concepts: "
-                    f"{item['concepts']}\n"
-                    f"Status: "
-                    f"{record['status']}\n"
-                    f"Adaptive eligibility: "
-                    f"{eligibility}\n"
-                    f"Submission: "
-                    f"{record['submission_path'] or 'Not created'}"
-                )
-            )
-            rows[number] = index
-
-        self.applied_exercise_list.blockSignals(
-            False
-        )
-
-        if not rows:
-            self.applied_exercise_list.addItem(
-                "No labs match this category."
-            )
-            self.applied_selected_number = None
-            self.set_applied_workspace_enabled(
-                False
-            )
-            return
-
-        selected = (
-            previous
-            if previous in rows
-            else (
-                int(active_number)
-                if (
-                    active_number is not None
-                    and int(active_number)
-                    in rows
-                )
-                else next(iter(rows))
-            )
-        )
-        self.applied_exercise_list.setCurrentRow(
-            rows[selected]
-        )
-
-    def prefill_applied_exercise(self, item, _previous=None):
-        if item is None:
-            self.applied_selected_number = None
-            self.set_applied_workspace_enabled(False)
-            return
-        number = item.data(Qt.ItemDataRole.UserRole)
-        if number is None:
-            return
-        number = int(number)
-        lab = APPLIED_EXERCISES[number]
-        record = applied_workspace.progress(
-            self.conn,
-            ROOT,
-            number,
-        )
-        readiness = (
-            tracks.applied_lab_readiness(
-                self.conn,
-                self.state,
-                number,
-            )
-        )
-        self.applied_selected_number = number
-        self.applied_title.setText(f"{number:02d}. {lab['title']}")
-        self.applied_category.setText(lab["category"])
-        self.applied_week.setText(f"Week {lab['week']}")
-        self.applied_concepts.setText(lab["concepts"])
-        self.applied_estimate.setText(f"{lab['minutes']} minutes")
-        self.applied_status.setCurrentText(record["status"])
-        self.applied_submission_path.setText(record["submission_path"] or "Not created")
-        self.applied_notes.setPlainText(record["notes"])
-        if record["status"] == "Completed":
-            message = (
-                "Completed. This lab contributes to "
-                "Skills & Concepts and Demonstrated Evidence."
-            )
-        elif not readiness["ready"]:
-            message = (
-                "Locked for adaptive scheduling • "
-                + "; ".join(
-                    readiness["missing"]
-                )
-                + ". You may review the materials now, "
-                  "but complete the prerequisites first."
-            )
-        elif record["submission_exists"]:
-            message = (
-                "Submission saved locally. Continue editing, "
-                "validate the deliverables, and save progress."
-            )
-        else:
-            message = (
-                "Ready for adaptive scheduling. Read the instructions "
-                "and validation guide, then create a saved submission."
-            )
-        if record["submission_exists"] and not record["submission_changed"]:
-            message += " The submission still matches the starter."
-        self.applied_workspace_status.setText(message)
-        self.set_applied_workspace_enabled(True)
-
-    def open_applied_reference(self, kind):
-        number = self.applied_selected_number
-        if number is None:
-            self._notify("Select an applied lab first.", 3200)
-            return
-        path = applied_workspace.paths(ROOT, number).get(kind)
-        try:
-            editor = sql_workspace.open_in_editor(path, root=ROOT)
-        except Exception as exc:
-            QMessageBox.warning(self, "Could Not Open Lab File", str(exc))
-            return
-        self._notify(f"Opened {path.name} in {editor}.", 4200)
-
-    def open_applied_datasets(self):
-        number = self.applied_selected_number
-        if number is None:
-            self._notify("Select an applied lab first.", 3200)
-            return
-        path = applied_workspace.paths(ROOT, number)["datasets"]
-        try:
-            app_name = applied_workspace.open_folder(path)
-        except Exception as exc:
-            QMessageBox.warning(self, "Could Not Open Dataset Folder", str(exc))
-            return
-        self._notify(f"Opened the dataset folder in {app_name}.", 4200)
-
-    def open_applied_submission(self):
-        number = self.applied_selected_number
-        if number is None:
-            self._notify("Select an applied lab first.", 3200)
-            return
-        try:
-            path, created = applied_workspace.ensure_submission(ROOT, number)
-            record = applied_workspace.progress(self.conn, ROOT, number)
-            status = "In Progress" if record["status"] == "Not Started" else record["status"]
-            applied_workspace.save_progress(
-                self.conn, ROOT, number, status=status,
-                notes=self.applied_notes.toPlainText(),
-            )
-            editor = sql_workspace.open_in_editor(path, root=ROOT)
-        except Exception as exc:
-            QMessageBox.warning(self, "Could Not Open Submission", str(exc))
-            return
-        self.applied_status.setCurrentText(status)
-        self.applied_submission_path.setText(str(path.relative_to(ROOT)).replace("\\", "/"))
-        self.refresh_applied_exercises()
-        self._notify(
-            f"{'Created and opened' if created else 'Opened'} {path.name} in {editor}.", 5200
-        )
-
-    def save_applied_progress(self):
-        number = self.applied_selected_number
-        if number is None:
-            self._notify(
-                "Select an applied lab first.",
-                3200,
-            )
-            return
-
-        status = (
-            self.applied_status.currentText()
-        )
-        readiness = (
-            tracks.applied_lab_readiness(
-                self.conn,
-                self.state,
-                number,
-            )
-        )
-
-        if (
-            status == "Completed"
-            and not readiness["ready"]
-        ):
-            QMessageBox.warning(
-                self,
-                "Prerequisites Not Complete",
-                (
-                    "Complete the following first:\n\n"
-                    + "\n".join(
-                        f"• {reason}"
-                        for reason in readiness[
-                            "missing"
-                        ]
-                    )
-                ),
-            )
-            return
-
-        submission = (
-            applied_workspace.submission_path(
-                ROOT,
-                number,
-            )
-        )
-        if (
-            status == "Completed"
-            and not submission.exists()
-        ):
-            QMessageBox.warning(
-                self,
-                "Submission Required",
-                (
-                    "Create a saved submission before "
-                    "marking the lab complete."
-                ),
-            )
-            return
-
-        if (
-            status == "Completed"
-            and not applied_workspace.submission_has_changes(
-                ROOT,
-                number,
-            )
-        ):
-            answer = QMessageBox.question(
-                self,
-                "Submission Matches Starter",
-                (
-                    "The saved submission still matches the starter. "
-                    "Mark the lab complete anyway?"
-                ),
-                (
-                    QMessageBox.StandardButton.Yes
-                    | QMessageBox.StandardButton.No
-                ),
-                QMessageBox.StandardButton.No,
-            )
-            if (
-                answer
-                != QMessageBox.StandardButton.Yes
-            ):
-                return
-
-        session_snapshot = (
-            session_guard.capture(self)
-        )
-        completion_message = None
-        try:
-            record = (
-                applied_workspace.save_progress(
-                    self.conn,
-                    ROOT,
-                    number,
-                    status=status,
-                    notes=(
-                        self.applied_notes.toPlainText()
-                    ),
-                )
-            )
-
-            task_id = (
-                record["task_ids"][0]
-                if record["task_ids"]
-                else None
-            )
-            active = (
-                tracks.active_applied_task_for_number(
-                    self.conn,
-                    number,
-                )
-            )
-
-            if (
-                status == "Completed"
-                and active is not None
-            ):
-                result = (
-                    tracks.complete_track_task(
-                        self.conn,
-                        int(
-                            active["task_id"]
-                        ),
-                        self.state,
-                    )
-                )
-                completion_message = (
-                    result.get(
-                        "message"
-                    )
-                )
-            else:
-                tracks.record_applied_change(
-                    self.conn,
-                    number=number,
-                    completed=(
-                        status
-                        == "Completed"
-                    ),
-                    task_id=task_id,
-                )
-
-            self.state = state(
-                self.conn
-            )
-            tracks.sync_all(
-                self.conn,
-                self.state,
-            )
-            self.refresh_all(
-                sync_tracks=False
-            )
-        except Exception as exc:
-            QMessageBox.warning(
-                self,
-                "Could Not Save Applied Lab",
-                str(exc),
-            )
-            return
-        finally:
-            session_guard.restore(
-                self,
-                session_snapshot,
-            )
-
-        message = (
-            completion_message
-            or (
-                f"Applied Lab "
-                f"{number:02d} saved as "
-                f"{record['status']}."
-            )
-        )
-        if status == "Completed":
-            message += (
-                " Added to Demonstrated Evidence."
-            )
-        self._notify(
-            message,
-            6000,
-        )
-
-
-    # ---------- Portfolio ----------
     def portfolio_page(self):
         # PORTFOLIO WORKSPACE COMMAND CENTER V10.20.0
         self.portfolio_hub = PortfolioHubWidget(
@@ -3478,451 +2739,6 @@ class CareerAccelerator(QMainWindow):
 
         return self.portfolio_hub
 
-    def sql_page(self):
-        page, root = self.page(
-            "💻 SQL Companion",
-            (
-                "Practice interview problems or complete guided DuckDB "
-                "exercises with saved local submissions."
-            ),
-        )
-        page.set_outer_scroll_enabled(False)
-
-        self.sql_tabs = QTabWidget()
-        self.sql_tabs.setMinimumWidth(0)
-        self.sql_tabs.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
-
-        # DataLemur problem workspace.
-        problem_tab = QWidget()
-        problem_layout = QBoxLayout(
-            QBoxLayout.Direction.LeftToRight,
-            problem_tab,
-        )
-        self.sql_problem_layout = problem_layout
-        problem_layout.setContentsMargins(
-            0,
-            8,
-            0,
-            0,
-        )
-        problem_layout.setSpacing(10)
-
-        recommendations = Card(
-            "Today's SQL"
-        )
-        self.sql_recommendations_card = recommendations
-        self.sql_problem_list = QListWidget()
-        self.sql_problem_list.setWordWrap(True)
-        self.sql_problem_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.sql_problem_list.currentItemChanged.connect(
-            self.prefill_sql
-        )
-        recommendations.layout.addWidget(
-            self.sql_problem_list
-        )
-        problem_layout.addWidget(
-            recommendations,
-            1,
-        )
-
-        detail = Card("Problem Workspace")
-        self.sql_detail_card = detail
-        self.sql_workspace_status = QLabel(
-            "Select a problem on the left."
-        )
-        self.sql_workspace_status.setObjectName(
-            "Muted"
-        )
-        self.sql_workspace_status.setWordWrap(
-            True
-        )
-        detail.layout.addWidget(
-            self.sql_workspace_status
-        )
-
-        form = QFormLayout()
-        self.sql_title = QLineEdit()
-        self.sql_difficulty = QLineEdit(
-            "Easy"
-        )
-        self.sql_topic = QLineEdit()
-        self.sql_concepts = QLineEdit()
-        for field in (
-            self.sql_title,
-            self.sql_difficulty,
-            self.sql_topic,
-            self.sql_concepts,
-        ):
-            field.setReadOnly(True)
-
-        self.sql_mastery = QSpinBox()
-        self.sql_mastery.setRange(1, 5)
-        self.sql_mastery.setValue(1)
-        self.sql_review = QLineEdit()
-        self.sql_submission_path = QLineEdit()
-        self.sql_submission_path.setReadOnly(True)
-        self.sql_notes = QTextEdit()
-        form.addRow(
-            "Problem title",
-            self.sql_title,
-        )
-        form.addRow(
-            "Difficulty",
-            self.sql_difficulty,
-        )
-        form.addRow(
-            "Topic",
-            self.sql_topic,
-        )
-        form.addRow(
-            "Concepts",
-            self.sql_concepts,
-        )
-        form.addRow(
-            "Mastery (1–5)",
-            self.sql_mastery,
-        )
-        form.addRow(
-            "Review date",
-            self.sql_review,
-        )
-        form.addRow(
-            "Submission",
-            self.sql_submission_path,
-        )
-        form.addRow(
-            "Notes",
-            self.sql_notes,
-        )
-        detail.layout.addLayout(form)
-
-        sql_answer_label = QLabel("Your SQL submission")
-        sql_answer_label.setObjectName("SectionTitle")
-        detail.layout.addWidget(sql_answer_label)
-        self.sql_answer_editor = SqlCodeEditor()
-        self.sql_answer_editor.setMinimumHeight(190)
-        self.sql_answer_editor.setPlaceholderText(
-            "Write your interview-problem solution here. Save it before marking the problem complete."
-        )
-        detail.layout.addWidget(self.sql_answer_editor, 1)
-
-        buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.sql_problem_buttons = buttons
-        self.sql_external_button = QPushButton(
-            "Open on DataLemur ↗"
-        )
-        self.sql_external_button.setObjectName(
-            "Secondary"
-        )
-        self.sql_external_button.setToolTip(
-            "Open the selected problem's exact DataLemur page in your browser."
-        )
-        self.sql_external_button.setEnabled(False)
-        self.sql_external_button.clicked.connect(
-            self.open_sql_problem_url
-        )
-        self.sql_save_button = QPushButton(
-            "Save Submission"
-        )
-        self.sql_save_button.setObjectName(
-            "Secondary"
-        )
-        self.sql_save_button.clicked.connect(
-            self.save_sql_submission
-        )
-        self.sql_complete_button = QPushButton(
-            "Mark Complete"
-        )
-        self.sql_complete_button.setObjectName(
-            "Primary"
-        )
-        self.sql_complete_button.clicked.connect(
-            self.save_sql
-        )
-        self.sql_hint_button = QPushButton(
-            "Need a Hint"
-        )
-        self.sql_hint_button.clicked.connect(
-            self.sql_hint
-        )
-        self.sql_solution_button = QPushButton(
-            "Open Submission File"
-        )
-        self.sql_solution_button.clicked.connect(
-            self.open_sql_solution
-        )
-        buttons.addWidget(
-            self.sql_external_button
-        )
-        buttons.addWidget(
-            self.sql_save_button
-        )
-        buttons.addWidget(
-            self.sql_complete_button
-        )
-        buttons.addWidget(
-            self.sql_hint_button
-        )
-        buttons.addWidget(
-            self.sql_solution_button
-        )
-        detail.layout.addLayout(buttons)
-        self.sql_detail_scroll = make_card_scrollable(detail)
-
-        self.sql_selected_title = None
-        self.set_sql_workspace_enabled(False)
-        problem_layout.addWidget(detail, 1)
-
-        # Guided DuckDB exercise workspace.
-        exercise_tab = QWidget()
-        exercise_layout = QBoxLayout(
-            QBoxLayout.Direction.LeftToRight,
-            exercise_tab,
-        )
-        self.legacy_duckdb_layout = exercise_layout
-        exercise_layout.setContentsMargins(
-            0,
-            8,
-            0,
-            0,
-        )
-        exercise_layout.setSpacing(10)
-
-        exercise_library = Card(
-            "DuckDB Exercise Library",
-            (
-                "Select an exercise to open its instructions, datasets, "
-                "starter SQL, validation guide, and saved submission."
-            ),
-        )
-        self.duckdb_exercise_list = (
-            QListWidget()
-        )
-        self.duckdb_exercise_list.currentItemChanged.connect(
-            self.prefill_duckdb_exercise
-        )
-        exercise_library.layout.addWidget(
-            self.duckdb_exercise_list
-        )
-        exercise_layout.addWidget(
-            exercise_library,
-            1,
-        )
-
-        exercise_detail = Card(
-            "Exercise Workspace"
-        )
-        self.duckdb_workspace_status = QLabel(
-            "Select an exercise on the left."
-        )
-        self.duckdb_workspace_status.setObjectName(
-            "Muted"
-        )
-        self.duckdb_workspace_status.setWordWrap(
-            True
-        )
-        exercise_detail.layout.addWidget(
-            self.duckdb_workspace_status
-        )
-
-        exercise_form = QFormLayout()
-        self.duckdb_title = QLineEdit()
-        self.duckdb_week = QLineEdit()
-        self.duckdb_concepts = QLineEdit()
-        self.duckdb_estimate = QLineEdit()
-        self.duckdb_submission_path = (
-            QLineEdit()
-        )
-        for field in (
-            self.duckdb_title,
-            self.duckdb_week,
-            self.duckdb_concepts,
-            self.duckdb_estimate,
-            self.duckdb_submission_path,
-        ):
-            field.setReadOnly(True)
-
-        self.duckdb_status = QComboBox()
-        self.duckdb_status.addItems(
-            list(
-                duckdb_workspace.VALID_STATUSES
-            )
-        )
-        self.duckdb_notes = QTextEdit()
-        self.duckdb_notes.setPlaceholderText(
-            (
-                "Record assumptions, checks, mistakes corrected, "
-                "or what you learned."
-            )
-        )
-
-        exercise_form.addRow(
-            "Exercise",
-            self.duckdb_title,
-        )
-        exercise_form.addRow(
-            "Roadmap week",
-            self.duckdb_week,
-        )
-        exercise_form.addRow(
-            "Concepts",
-            self.duckdb_concepts,
-        )
-        exercise_form.addRow(
-            "Estimate",
-            self.duckdb_estimate,
-        )
-        exercise_form.addRow(
-            "Status",
-            self.duckdb_status,
-        )
-        exercise_form.addRow(
-            "Submission",
-            self.duckdb_submission_path,
-        )
-        exercise_form.addRow(
-            "Notes",
-            self.duckdb_notes,
-        )
-        exercise_detail.layout.addLayout(
-            exercise_form
-        )
-
-        reference_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_duckdb_reference_buttons = reference_buttons
-        self.duckdb_instructions_button = (
-            QPushButton("Open Instructions")
-        )
-        self.duckdb_instructions_button.clicked.connect(
-            lambda: self.open_duckdb_reference(
-                "instructions"
-            )
-        )
-        self.duckdb_starter_button = QPushButton(
-            "Open Starter SQL"
-        )
-        self.duckdb_starter_button.clicked.connect(
-            lambda: self.open_duckdb_reference(
-                "starter"
-            )
-        )
-        self.duckdb_validation_button = (
-            QPushButton("Open Validation")
-        )
-        self.duckdb_validation_button.clicked.connect(
-            lambda: self.open_duckdb_reference(
-                "validation"
-            )
-        )
-        self.duckdb_datasets_button = QPushButton(
-            "Open Dataset Folder"
-        )
-        self.duckdb_datasets_button.clicked.connect(
-            self.open_duckdb_datasets
-        )
-        for button in (
-            self.duckdb_instructions_button,
-            self.duckdb_starter_button,
-            self.duckdb_validation_button,
-            self.duckdb_datasets_button,
-        ):
-            reference_buttons.addWidget(button)
-        exercise_detail.layout.addLayout(
-            reference_buttons
-        )
-
-        submission_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.legacy_duckdb_submission_buttons = submission_buttons
-        self.duckdb_submission_button = (
-            QPushButton(
-                "Create / Open Submission"
-            )
-        )
-        self.duckdb_submission_button.setObjectName(
-            "Primary"
-        )
-        self.duckdb_submission_button.clicked.connect(
-            self.open_duckdb_submission
-        )
-        self.duckdb_save_button = QPushButton(
-            "Save Exercise Progress"
-        )
-        self.duckdb_save_button.clicked.connect(
-            self.save_duckdb_progress
-        )
-        submission_buttons.addWidget(
-            self.duckdb_submission_button
-        )
-        submission_buttons.addWidget(
-            self.duckdb_save_button
-        )
-        exercise_detail.layout.addLayout(
-            submission_buttons
-        )
-
-        self.duckdb_selected_number = None
-        self.set_duckdb_workspace_enabled(
-            False
-        )
-        exercise_layout.addWidget(
-            exercise_detail,
-            1,
-        )
-
-        self.sql_tabs.addTab(
-            problem_tab,
-            "Interview Problems",
-        )
-        # BEGIN EXERCISE PACKS
-        self._legacy_duckdb_exercises_page = exercise_tab
-        self.duckdb_exercises_widget = DuckDBExercisesWidget(
-            self.conn, ROOT, self
-        )
-        self.duckdb_exercises_widget.changed.connect(
-            self._duckdb_exercises_changed
-        )
-        self.sql_tabs.addTab(
-            self.duckdb_exercises_widget, "DuckDB Exercises"
-        )
-        # END EXERCISE PACKS
-        root.addWidget(
-            self.sql_tabs,
-            1,
-        )
-
-        def update_sql_layout(width):
-            # At the supported desktop minimum the library and workspace stay
-            # side by side; their own lists/editors/cards handle overflow.
-            compact = width < 620
-            set_box_direction(self.sql_problem_layout, compact, 10)
-            set_box_direction(self.legacy_duckdb_layout, compact, 10)
-            set_box_direction(self.sql_problem_buttons, width < 680, 7)
-            set_box_direction(
-                self.legacy_duckdb_reference_buttons, width < 720, 7
-            )
-            set_box_direction(
-                self.legacy_duckdb_submission_buttons, width < 620, 7
-            )
-            self.sql_recommendations_card.setMinimumHeight(180 if compact else 0)
-            self.sql_recommendations_card.setMaximumHeight(250 if compact else 16777215)
-            self.sql_detail_card.setMinimumHeight(0)
-            self.sql_problem_layout.setStretch(0, 0 if compact else 1)
-            self.sql_problem_layout.setStretch(1, 1)
-            self.sql_tabs.setMinimumHeight(0)
-            self.sql_tabs.setMaximumHeight(16777215)
-
-        self._sql_layout_handler = update_sql_layout
-        self.sql_tabs.currentChanged.connect(
-            lambda _index: update_sql_layout(max(0, page.viewport().width()))
-        )
-        self._register_page_responsive(page, update_sql_layout)
-        return page
-    # BEGIN EXERCISE PACKS
     @staticmethod
     def _normalized_learning_task_label(value):
         return re.sub(r'[^a-z0-9]+', ' ', str(value or '').casefold()).strip()
@@ -3945,7 +2761,7 @@ class CareerAccelerator(QMainWindow):
 
         duckdb_number = duckdb_exercise_number_for_label(label)
         if duckdb_number is not None and hasattr(self, 'duckdb_exercises_widget'):
-            self.navigate(4)
+            self.open_learning_section("Practice", "DuckDB Exercises")
             self.sql_tabs.setCurrentWidget(self.duckdb_exercises_widget)
             self.duckdb_exercises_widget.select_exercise(int(duckdb_number))
             self._notify(
@@ -3973,7 +2789,7 @@ class CareerAccelerator(QMainWindow):
             )
         if not problem_title or not hasattr(self, 'sql_problem_list'):
             return False
-        self.navigate(4)
+        self.open_learning_section("Practice", "SQL Interview Problems")
         self.sql_tabs.setCurrentIndex(0)
         normalized_title = self._normalized_learning_task_label(problem_title)
         target_row = None
@@ -4014,499 +2830,6 @@ class CareerAccelerator(QMainWindow):
     # END EXERCISE PACKS
 
 
-    def set_duckdb_workspace_enabled(
-        self,
-        enabled,
-    ):
-        for widget in (
-            self.duckdb_status,
-            self.duckdb_notes,
-            self.duckdb_instructions_button,
-            self.duckdb_starter_button,
-            self.duckdb_validation_button,
-            self.duckdb_datasets_button,
-            self.duckdb_submission_button,
-            self.duckdb_save_button,
-        ):
-            widget.setEnabled(enabled)
-
-    def refresh_duckdb_exercises(self):
-        previous_number = getattr(
-            self,
-            "duckdb_selected_number",
-            None,
-        )
-
-        self.duckdb_exercise_list.blockSignals(
-            True
-        )
-        self.duckdb_exercise_list.clear()
-
-        number_to_row = {}
-        for number, item in sorted(
-            DUCKDB_EXERCISES.items()
-        ):
-            record = duckdb_workspace.progress(
-                self.conn,
-                ROOT,
-                number,
-            )
-            readiness = roadmap_mastery.duckdb_readiness(
-                self.conn,
-                number,
-            )
-            status_icon = (
-                "✅"
-                if record["status"] == "Completed"
-                else "🔒"
-                if not readiness.get("ready")
-                else "🟡"
-                if record["status"] == "In Progress"
-                else "⬜"
-            )
-            submission_icon = (
-                " • 💾 Submission"
-                if record["submission_exists"]
-                else ""
-            )
-            self.duckdb_exercise_list.addItem(
-                f"{status_icon} "
-                f"{number:02d}. {item['title']} • "
-                f"{item['minutes']} min • "
-                f"{item['concepts']}"
-                f"{submission_icon}"
-            )
-            row_index = (
-                self.duckdb_exercise_list.count()
-                - 1
-            )
-            list_item = (
-                self.duckdb_exercise_list.item(
-                    row_index
-                )
-            )
-            list_item.setData(
-                Qt.ItemDataRole.UserRole,
-                int(number),
-            )
-            access_line = (
-                "Completed — review access remains available."
-                if record["status"] == "Completed"
-                else "Ready"
-                if readiness.get("ready")
-                else "Locked — " + str(
-                    readiness.get("reason")
-                    or "Complete the required Academy learning first."
-                )
-            )
-            list_item.setToolTip(
-                (
-                    f"Roadmap week: {item['week']}\n"
-                    f"Status: {record['status']}\n"
-                    f"Access: {access_line}\n"
-                    f"Concepts: {item['concepts']}\n"
-                    f"Submission: "
-                    f"{record['submission_path'] or 'Not created'}"
-                )
-            )
-            number_to_row[
-                number
-            ] = row_index
-
-        selected_number = (
-            previous_number
-            if previous_number
-            in number_to_row
-            else 1
-        )
-
-        self.duckdb_exercise_list.blockSignals(
-            False
-        )
-        if selected_number in number_to_row:
-            self.duckdb_exercise_list.setCurrentRow(
-                number_to_row[
-                    selected_number
-                ]
-            )
-
-    def prefill_duckdb_exercise(
-        self,
-        item,
-        _previous=None,
-    ):
-        if item is None:
-            self.duckdb_selected_number = None
-            self.set_duckdb_workspace_enabled(
-                False
-            )
-            return
-
-        number = item.data(
-            Qt.ItemDataRole.UserRole
-        )
-        if number is None:
-            return
-
-        number = int(number)
-        exercise = DUCKDB_EXERCISES[
-            number
-        ]
-        record = duckdb_workspace.progress(
-            self.conn,
-            ROOT,
-            number,
-        )
-        readiness = roadmap_mastery.duckdb_readiness(
-            self.conn,
-            number,
-        )
-        completed = record["status"] == "Completed"
-
-        self.duckdb_selected_number = number
-        self.duckdb_title.setText(
-            f"{number:02d}. {exercise['title']}"
-        )
-        self.duckdb_week.setText(
-            f"Week {exercise['week']}"
-        )
-        self.duckdb_concepts.setText(
-            exercise["concepts"]
-        )
-        self.duckdb_estimate.setText(
-            f"{exercise['minutes']} minutes"
-        )
-        self.duckdb_status.setCurrentText(
-            record["status"]
-        )
-        self.duckdb_submission_path.setText(
-            record["submission_path"]
-            or "Not created"
-        )
-        self.duckdb_notes.setPlainText(
-            record["notes"]
-        )
-
-        if completed:
-            detail = (
-                f"Completed "
-                f"{record['completed_date'] or 'previously'} • Review access available."
-            )
-        elif not readiness.get("ready"):
-            detail = (
-                "Locked • "
-                + str(
-                    readiness.get("reason")
-                    or "Complete the required Academy learning first."
-                )
-            )
-        elif record["submission_exists"]:
-            detail = (
-                "Submission saved locally. "
-                "Use Create / Open Submission to continue editing."
-            )
-        else:
-            detail = (
-                "Start with the instructions, then create a submission "
-                "copy before writing your solution."
-            )
-
-        if (
-            record["submission_exists"]
-            and not record[
-                "submission_changed"
-            ]
-        ):
-            detail += (
-                " The saved submission still matches the starter file."
-            )
-
-        self.duckdb_workspace_status.setText(
-            detail
-        )
-        self.set_duckdb_workspace_enabled(
-            completed or bool(readiness.get("ready"))
-        )
-
-    def _duckdb_selection_accessible(self, number=None, *, notify=True):
-        target = int(number if number is not None else self.duckdb_selected_number or 0)
-        if target <= 0:
-            return False
-        progress = duckdb_workspace.progress(self.conn, ROOT, target)
-        if progress.get("status") == "Completed":
-            return True
-        readiness = roadmap_mastery.duckdb_readiness(self.conn, target)
-        if readiness.get("ready"):
-            return True
-        if notify:
-            self._notify(
-                "Exercise locked. "
-                + str(readiness.get("reason") or "Complete the required Academy learning first."),
-                6200,
-            )
-        return False
-
-    def open_duckdb_reference(
-        self,
-        kind,
-    ):
-        number = self.duckdb_selected_number
-        if number is None:
-            self._notify(
-                "Select a DuckDB exercise first.",
-                3200,
-            )
-            return
-
-        if not self._duckdb_selection_accessible(number):
-            return
-
-        path = duckdb_workspace.paths(
-            ROOT,
-            number,
-        ).get(kind)
-        if path is None:
-            return
-
-        try:
-            editor_name = (
-                sql_workspace.open_in_editor(
-                    path,
-                    root=ROOT,
-                )
-            )
-        except Exception as exc:
-            QMessageBox.warning(
-                self,
-                "Could Not Open Exercise File",
-                str(exc),
-            )
-            return
-
-        self._notify(
-            f"Opened {path.name} in {editor_name}.",
-            4200,
-        )
-
-    def open_duckdb_datasets(self):
-        number = self.duckdb_selected_number
-        if number is None:
-            self._notify(
-                "Select a DuckDB exercise first.",
-                3200,
-            )
-            return
-
-        if not self._duckdb_selection_accessible(number):
-            return
-
-        path = duckdb_workspace.paths(
-            ROOT,
-            number,
-        )["datasets"]
-        try:
-            app_name = (
-                duckdb_workspace.open_folder(
-                    path
-                )
-            )
-        except Exception as exc:
-            QMessageBox.warning(
-                self,
-                "Could Not Open Dataset Folder",
-                str(exc),
-            )
-            return
-
-        self._notify(
-            f"Opened the dataset folder in {app_name}.",
-            4200,
-        )
-
-    def open_duckdb_submission(self):
-        number = self.duckdb_selected_number
-        if number is None:
-            self._notify(
-                "Select a DuckDB exercise first.",
-                3200,
-            )
-            return
-
-        if not self._duckdb_selection_accessible(number):
-            return
-
-        try:
-            path, created = (
-                duckdb_workspace.ensure_submission(
-                    ROOT,
-                    number,
-                )
-            )
-            current = duckdb_workspace.progress(
-                self.conn,
-                ROOT,
-                number,
-            )
-            status = current["status"]
-            if status == "Not Started":
-                status = "In Progress"
-
-            duckdb_workspace.save_progress(
-                self.conn,
-                ROOT,
-                number,
-                status=status,
-                notes=self.duckdb_notes.toPlainText(),
-            )
-            editor_name = (
-                sql_workspace.open_in_editor(
-                    path,
-                    root=ROOT,
-                )
-            )
-        except Exception as exc:
-            QMessageBox.warning(
-                self,
-                "Could Not Open Submission",
-                str(exc),
-            )
-            return
-
-        self.duckdb_status.setCurrentText(
-            status
-        )
-        self.duckdb_submission_path.setText(
-            str(
-                path.relative_to(ROOT)
-            ).replace(
-                "\\",
-                "/",
-            )
-        )
-        self.refresh_duckdb_exercises()
-
-        action = (
-            "Created and opened"
-            if created
-            else "Opened"
-        )
-        self._notify(
-            f"{action} {path.name} in {editor_name}.",
-            5200,
-        )
-
-    def save_duckdb_progress(self):
-        number = self.duckdb_selected_number
-        if number is None:
-            self._notify(
-                "Select a DuckDB exercise first.",
-                3200,
-            )
-            return
-
-        if not self._duckdb_selection_accessible(number):
-            return
-
-        status = self.duckdb_status.currentText()
-        submission = (
-            duckdb_workspace.submission_path(
-                ROOT,
-                number,
-            )
-        )
-
-        if (
-            status == "Completed"
-            and not submission.exists()
-        ):
-            QMessageBox.warning(
-                self,
-                "Submission Required",
-                (
-                    "Create a saved submission before marking the "
-                    "exercise complete."
-                ),
-            )
-            return
-
-        if (
-            status == "Completed"
-            and not duckdb_workspace.submission_has_changes(
-                ROOT,
-                number,
-            )
-        ):
-            confirmation = QMessageBox.question(
-                self,
-                "Submission Matches Starter",
-                (
-                    "The saved submission still matches the starter file. "
-                    "Mark the exercise complete anyway?"
-                ),
-                (
-                    QMessageBox.StandardButton.Yes
-                    | QMessageBox.StandardButton.No
-                ),
-                QMessageBox.StandardButton.No,
-            )
-            if (
-                confirmation
-                != QMessageBox.StandardButton.Yes
-            ):
-                return
-
-        session_snapshot = (
-            session_guard.capture(self)
-        )
-        try:
-            record = (
-                duckdb_workspace.save_progress(
-                    self.conn,
-                    ROOT,
-                    number,
-                    status=status,
-                    notes=self.duckdb_notes.toPlainText(),
-                )
-            )
-            roadmap_mastery.reconcile(self.conn, ROOT)
-            self.state = state(self.conn)
-            tracks.sync_all(
-                self.conn,
-                self.state,
-            )
-            roadmap_mastery.reconcile(self.conn, ROOT)
-            self.state = state(self.conn)
-            self.refresh_all(
-                sync_tracks=False
-            )
-        except Exception as exc:
-            QMessageBox.warning(
-                self,
-                "Could Not Save Exercise",
-                str(exc),
-            )
-            return
-        finally:
-            session_guard.restore(
-                self,
-                session_snapshot,
-            )
-
-        message = (
-            f"DuckDB Exercise {number:02d} saved as "
-            f"{record['status']}."
-        )
-        if status == "Completed":
-            message += (
-                " Added to Demonstrated Evidence."
-            )
-        self._notify(
-            message,
-            6000,
-        )
-
-
-    # ---------- Study ----------
     def study_page(self):
         page, root = self.page(
             "⏱️ Study Session",
@@ -5247,74 +3570,6 @@ class CareerAccelerator(QMainWindow):
         return page
 
     # ---------- Review ----------
-    def review_page(self):
-        page, root = self.page(
-            "📝 Weekly Summary",
-            "Complete the retrospective in its task; saved summaries are generated automatically.",
-        )
-        page.set_outer_scroll_enabled(False)
-        body = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.review_body_layout = body
-
-        retrospective_card = Card("Current Retrospective")
-        guidance = QLabel(
-            "Weekly and 90-day retrospectives now take place entirely inside the "
-            "Retrospective task. The task includes the automatic progress snapshot, "
-            "guided prompts, autosave, completion validation, and generated summary. "
-            "No external document is required."
-        )
-        guidance.setWordWrap(True)
-        retrospective_card.layout.addWidget(guidance)
-
-        self.review_current_week = QLabel(
-            f"Current program week: {int(self.state['current_week'])}"
-        )
-        self.review_current_week.setObjectName("Muted")
-        retrospective_card.layout.addWidget(self.review_current_week)
-
-        workspace_buttons = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.review_workspace_buttons = workspace_buttons
-        retrospective = QPushButton("Open Current Retrospective")
-        retrospective.setObjectName("Primary")
-        retrospective.clicked.connect(
-            lambda: self.open_weekly_workspace("retrospective")
-        )
-        study_plan = QPushButton("Open Study Plan Workspace")
-        study_plan.clicked.connect(
-            lambda: self.open_weekly_workspace("study_plan")
-        )
-        workspace_buttons.addWidget(retrospective)
-        workspace_buttons.addWidget(study_plan)
-        retrospective_card.layout.addLayout(workspace_buttons)
-        retrospective_card.layout.addStretch()
-        body.addWidget(retrospective_card, 1)
-
-        summaries = Card("Saved Summaries")
-        summary_help = QLabel(
-            "A weekly summary is created or updated after all required prompts "
-            "are saved in the corresponding retrospective task."
-        )
-        summary_help.setObjectName("Muted")
-        summary_help.setWordWrap(True)
-        summaries.layout.addWidget(summary_help)
-        self.summary_list = QListWidget()
-        self.summary_list.setWordWrap(True)
-        self.summary_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        summaries.layout.addWidget(self.summary_list)
-        body.addWidget(summaries, 1)
-        root.addLayout(body, 1)
-
-        def update_review_layout(width):
-            set_box_direction(self.review_body_layout, width < 620, 10)
-            set_box_direction(self.review_workspace_buttons, width < 620, 7)
-            self.summary_list.setMinimumHeight(0)
-
-        self._register_page_responsive(page, update_review_layout)
-        return page
-
-    # ---------- Publish ----------
     def publish_page(self):
         page, root = self.page(
             "🚀 Publish & Git",
@@ -5648,6 +3903,9 @@ class CareerAccelerator(QMainWindow):
         )
         quick_row.addWidget(retrospective)
         quick_row.addWidget(study_plan)
+        completion_history = QPushButton("Completion History / Undo")
+        completion_history.clicked.connect(self.open_completion_history)
+        quick_row.addWidget(completion_history)
         quick_row.addStretch()
         quick.layout.addLayout(quick_row)
         root.addWidget(quick)
@@ -6543,14 +4801,12 @@ class CareerAccelerator(QMainWindow):
         self.refresh_dashboard(
             sync_tracks=False
         )
-        self.refresh_planner()
         self.refresh_learning()
         self.refresh_project()
         self.refresh_sql()
         self.refresh_sessions()
         self.refresh_readiness()
         self.refresh_applications()
-        self.refresh_summaries()
         self.refresh_git()
         self.refresh_task_workspaces()
 
@@ -6925,15 +5181,9 @@ class CareerAccelerator(QMainWindow):
 
         destination = item.get("destination")
         if destination is None:
-            destination = {
-                "Learning": 2,
-                "SQL": 4,
-                "Portfolio": 3,
-                "Review": 8,
-                "General": 1,
-            }.get(
-                str(item.get("category") or "General"),
-                1,
+            destination = destination_for(
+                category=str(item.get("category") or "General"),
+                track_key=str(item.get("track_key") or ""),
             )
         self.navigate(int(destination))
 
@@ -6973,6 +5223,15 @@ class CareerAccelerator(QMainWindow):
                 f"{candidate.get('label', 'Optional practice')}"
             )
             row = task_list.item(task_list.count() - 1)
+            row.setIcon(
+                QIcon(
+                    str(
+                        task_icons.path_for_task(
+                            ASSET_ROOT, candidate, int(self.state["current_week"])
+                        )
+                    )
+                )
+            )
             row.setData(Qt.ItemDataRole.UserRole, dict(candidate))
         task_list.setCurrentRow(0)
         layout.addWidget(task_list, 1)
@@ -7051,6 +5310,8 @@ class CareerAccelerator(QMainWindow):
                     status_text="",
                     category_text=category_text,
                     category_color=task_category_colors.get(category, COLORS["muted"]),
+                    icon=task_icons.path_for_task(ASSET_ROOT, item, int(week)),
+                    icon_fallback="•",
                     action_text="Open" if workspace_available else None,
                     on_action=(
                         (lambda _checked=False, task_id=task_id: self.open_task_workspace(task_id=task_id))
@@ -7082,9 +5343,17 @@ class CareerAccelerator(QMainWindow):
             self.dashboard_tasks_layout.addWidget(heading)
             for item in coming_up:
                 reason = str(item.get("prerequisite_reason") or "Complete the prerequisite first.")
-                locked = QLabel(f"🔒 {item.get('label', 'Locked task')}\n{reason}")
-                locked.setObjectName("Muted")
-                locked.setWordWrap(True)
+                locked = TaskRow(
+                    title=str(item.get("label") or "Locked task"),
+                    source=reason,
+                    checked=False,
+                    category_text="Locked",
+                    category_color=COLORS["muted"],
+                    icon=task_icons.path_for_task(ASSET_ROOT, item, int(week)),
+                    icon_fallback="🔒",
+                    completed=False,
+                )
+                locked.checkbox.hide()
                 locked.setToolTip(reason)
                 self.dashboard_tasks_layout.addWidget(locked)
 
@@ -7184,12 +5453,6 @@ class CareerAccelerator(QMainWindow):
             f"Project {self.state['current_project']}"
         )
         self.update_time_based_header()
-        # BEGIN EXERCISE PACKS
-        suggestion = exercise_packs.best_suggestion_for_database(
-            ROOT, self.conn, self.state
-        )
-        self.exercise_suggestion_panel.set_suggestion(suggestion)
-        # END EXERCISE PACKS
 
         readiness_data = analytics.readiness(
             self.conn,
@@ -7273,18 +5536,7 @@ class CareerAccelerator(QMainWindow):
             ),
         }
 
-        focus_title_icons = {
-            "Google Certificate": "🎓",
-            "Accelerator Academy": "🎓",
-            "Learning": "🎓",
-            "SQL Practice": "💻",
-            "DuckDB Practice": "🦆",
-            "SQL Fundamentals": "💻",
-            "Portfolio Project": "📁",
-            "Applied Labs": "🧪",
-            "Weekly Review": "📝",
-            "Roadmap Task": "📌",
-        }
+        track_snapshot = tracks.snapshot(self.conn, self.state)
 
         def add_focus_item(
             item,
@@ -7337,7 +5589,8 @@ class CareerAccelerator(QMainWindow):
                     f"{item.get('label', title)} "
                     "• Completed today"
                 )
-                emoji = "✅"
+                icon_path = task_icons.path_for_key(ASSET_ROOT, "assessment")
+                icon_fallback = "✅"
                 duration = "Done"
                 accent = COLORS[
                     "green"
@@ -7370,14 +5623,16 @@ class CareerAccelerator(QMainWindow):
                 detail = presentation[
                     "detail"
                 ]
-                emoji = (
-                    "✨"
-                    if optional
-                    else focus_title_icons.get(
-                        title,
-                        default_emoji,
-                    )
+                icon_path = task_icons.path_for_task(
+                    ASSET_ROOT, item, int(week)
                 )
+                icon_fallback = "✨" if optional else default_emoji
+                if str(item.get("kind") or "") == "google":
+                    google_progress = track_snapshot.get("google", {})
+                    detail = (
+                        f"Weekly target {google_progress.get('weekly_completed', 0)}/"
+                        f"{google_progress.get('weekly_target', 0)}"
+                    )
                 duration = (
                     f"{int(item['estimated_minutes'])}m"
                 )
@@ -7476,7 +5731,7 @@ class CareerAccelerator(QMainWindow):
                 )
 
             focus_row = FocusRow(
-                emoji,
+                icon_path,
                 title,
                 detail,
                 duration,
@@ -7488,6 +5743,7 @@ class CareerAccelerator(QMainWindow):
                     action_callback
                 ),
                 completed=completed,
+                icon_fallback=icon_fallback,
             )
             self.focus_layout.addWidget(focus_row)
             self.dashboard_focus_density_widgets.append(focus_row)
@@ -8082,262 +6338,28 @@ class CareerAccelerator(QMainWindow):
         )
         dialog.exec()
 
-    def refresh_planner(self):
-        self.build_plan()
-        self.refresh_backlog()
-
-    def refresh_backlog(self):
-        selected_task_id = self.selected_task_id(self.backlog_list)
-        self.backlog_list.blockSignals(True)
-        self.backlog_list.clear()
-
-        ready = planner.next_tasks(self.conn, self.state["current_week"])
-        for row in ready:
-            catch_up = "Catch-Up • " if row.get("is_catch_up") else ""
-            self.backlog_list.addItem(
-                f"#{row['id']} • READY • {row['estimated_minutes']}m • "
-                f"{catch_up}{row.get('display_source') or row['category']} • "
-                f"{row['label']}"
-            )
-            item = self.backlog_list.item(self.backlog_list.count() - 1)
-            item.setData(Qt.ItemDataRole.UserRole, int(row["id"]))
-            if selected_task_id == int(row["id"]):
-                self.backlog_list.setCurrentItem(item)
-
-        coming = planner.coming_up_tasks(
-            self.conn, self.state["current_week"], limit=3
-        )
-        if coming:
-            separator = QListWidgetItem("COMING UP — complete the listed prerequisite to unlock")
-            separator.setFlags(Qt.ItemFlag.NoItemFlags)
-            self.backlog_list.addItem(separator)
-            for row in coming:
-                reason = str(row.get("prerequisite_reason") or "Complete the prerequisite first.")
-                item = QListWidgetItem(f"🔒 {row['label']} • {reason}")
-                item.setFlags(Qt.ItemFlag.NoItemFlags)
-                item.setToolTip(reason)
-                self.backlog_list.addItem(item)
-
-        if not ready and not coming:
-            empty = QListWidgetItem("No remaining roadmap tasks were found.")
-            empty.setFlags(Qt.ItemFlag.NoItemFlags)
-            self.backlog_list.addItem(empty)
-        self.backlog_list.blockSignals(False)
-
     def refresh_learning(self):
-        track_data = tracks.snapshot(
-            self.conn,
-            self.state,
-        )
-
-        google = track_data["google"]
-        academy = track_data.get("academy", {
-            "metadata": {}, "weekly_completed": 0, "weekly_target": 2,
-            "status": "Active", "task_label": None,
+        track_data = tracks.snapshot(self.conn, self.state)
+        google = track_data.get("google", {
+            "metadata": {}, "weekly_completed": 0, "weekly_target": 0,
         })
-        sql = track_data["sql"]
-        portfolio = track_data["portfolio"]
-        applied = track_data["applied"]
-
-        google_meta = google["metadata"]
-        google_detail = (
-            f"Module {self.state['google_module']} • "
-            f"Today "
-            f"{google_meta.get('today_completed', 0)} / "
-            f"{google_meta.get('today_target', 0)} • "
-            f"Week "
-            f"{google['weekly_completed']} / "
-            f"{google['weekly_target']} • "
-            f"{google_meta.get('pace_status', 'On pace')}"
-        )
-
-        academy_title = academy["metadata"].get(
-            "title",
-            academy.get("task_label") or "Resume your guided learning path",
-        )
-        academy_detail = (
-            f"{academy_title} • "
-            f"Today {academy['metadata'].get('today_completed', 0)} / "
-            f"{academy['metadata'].get('today_target', 1)} • "
-            f"Week {academy.get('weekly_completed', 0)} / "
-            f"{academy.get('weekly_target', 2)}"
-        )
-
-        sql_count = self.conn.execute(
-            """SELECT COUNT(*)
-               FROM sql_practice
-               WHERE status='Completed'"""
-        ).fetchone()[0]
-        sql_next = sql["metadata"].get(
-            "title",
-            "Track complete",
-        )
-        sql_detail = (
-            f"Next: {sql_next} • "
-            f"Today "
-            f"{sql['metadata'].get('today_completed', 0)} / "
-            f"{sql['metadata'].get('today_target', 0)} • "
-            f"Week "
-            f"{sql['weekly_completed']} / "
-            f"{sql['weekly_target']}"
-        )
-
-        project_rows = self.conn.execute(
-            """SELECT completed
-               FROM project_tasks
-               WHERE project_id=?""",
-            (self.state["current_project"],),
-        ).fetchall()
-        project_done = sum(
-            int(row["completed"])
-            for row in project_rows
-        )
-        portfolio_next = portfolio["metadata"].get(
-            "milestone",
-            "Project complete",
-        )
-        if portfolio["status"] == "Locked":
-            portfolio_detail = (
-                portfolio["metadata"].get(
-                    "blocked_reason",
-                    "Waiting for prerequisite skills.",
-                )
+        google_meta = google.get("metadata", {})
+        if hasattr(self, "google_certificate_status"):
+            self.google_certificate_status.setText(
+                f"Course {self.state['google_course']} • Module {self.state['google_module']} • "
+                f"Weekly target {google.get('weekly_completed', 0)}/{google.get('weekly_target', 0)} • "
+                f"{google_meta.get('pace_status', 'On pace')}"
             )
-        else:
-            portfolio_detail = (
-                f"Next: {portfolio_next} • "
-                f"Today "
-                f"{portfolio['metadata'].get('today_completed', 0)} / "
-                f"{portfolio['metadata'].get('today_target', 0)} • "
-                f"Week "
-                f"{portfolio['weekly_completed']} / "
-                f"{portfolio['weekly_target']}"
-            )
-
-        completed_applied = set(
-            tracks.completed_applied_numbers(
-                self.conn
-            )
-        )
-        power_bi_done = len(
-            completed_applied
-            & {
-                1, 2, 3, 4, 5, 6, 36
-            }
-        )
-        python_done = len(
-            completed_applied
-            & set(range(8, 12))
-        )
-        statistics_done = len(
-            completed_applied
-            & set(range(22, 29))
-        )
-
-        applied_meta = applied[
-            "metadata"
-        ]
-        applied_next = applied_meta.get(
-            "title",
-            "No eligible lab yet",
-        )
-        applied_branch = applied_meta.get(
-            "branch",
-            "Auto",
-        )
-        applied_detail = (
-            f"Next: {applied_next} • "
-            f"Branch {applied_branch} • "
-            f"Today "
-            f"{applied_meta.get('today_completed', 0)} / "
-            f"{applied_meta.get('today_target', 0)} • "
-            f"Week "
-            f"{applied['weekly_completed']} / "
-            f"{applied['weekly_target']}"
-        )
-
-        data = {
-            "Google": (
-                f"Course {self.state['google_course']}",
-                google_detail,
-            ),
-            "Academy": (
-                "Guided learning",
-                academy_detail,
-            ),
-            "SQL": (
-                f"{sql_count}/{self.state['sql_target']}",
-                sql_detail,
-            ),
-            "Power BI": (
-                f"{power_bi_done}/7 labs",
-                (
-                    "Complete the branched Power BI lab sequence "
-                    "as prerequisites unlock."
-                ),
-            ),
-            "Python": (
-                f"{python_done}/4 labs",
-                (
-                    "Complete the compact pandas bridge after "
-                    "Python instruction begins."
-                ),
-            ),
-            "Portfolio": (
-                f"{project_done}/{len(project_rows)}",
-                portfolio_detail,
-            ),
-            "Statistics": (
-                f"{statistics_done}/7 labs",
-                (
-                    "Progress from descriptive statistics through "
-                    "experiments, causal reasoning, and regression."
-                ),
-            ),
-            "Applied Labs": (
-                (
-                    f"{applied_meta.get('completed_items', 0)}"
-                    f"/{len(APPLIED_EXERCISES)}"
-                ),
-                applied_detail,
-            ),
-        }
-
-        for key, (value, detail) in data.items():
-            self.learning_cards[key][0].setText(
-                value
-            )
-            self.learning_cards[key][1].setText(
-                detail
-            )
-
-        self.week_input.setValue(
-            self.state["current_week"]
-        )
-        self.course_input.setValue(
-            self.state["google_course"]
-        )
-        self.update_google_module_range(
-            self.state["google_course"]
-        )
-        self.module_input.setValue(
-            self.state["google_module"]
-        )
-        self.hours_input.setValue(
-            int(self.state["weekly_target_hours"])
-        )
-        # BEGIN EXERCISE PACKS
+        if hasattr(self, "week_input"):
+            self.week_input.setValue(self.state["current_week"])
+            self.course_input.setValue(self.state["google_course"])
+            self.update_google_module_range(self.state["google_course"])
+            self.module_input.setValue(self.state["google_module"])
+            self.hours_input.setValue(int(self.state["weekly_target_hours"]))
+        if hasattr(self, "academy_widget"):
+            self.academy_widget.refresh_all()
         if hasattr(self, "applied_labs_widget"):
             self.applied_labs_widget.refresh()
-        else:
-            self.refresh_applied_exercises()
-        # END EXERCISE PACKS
-        # BEGIN EXERCISE PACKS
-        if hasattr(self, "exercise_packs_widget"):
-            self.exercise_packs_widget.refresh()
-        # END EXERCISE PACKS
-
-
 
     def refresh_project(self):
         self.project_combo.blockSignals(True)
@@ -8498,8 +6520,6 @@ class CareerAccelerator(QMainWindow):
             )
         if hasattr(self, "duckdb_exercises_widget"):
             self.duckdb_exercises_widget.refresh()
-        else:
-            self.refresh_duckdb_exercises()
 
 
     def refresh_session_task_choices(self):
@@ -8784,7 +6804,7 @@ class CareerAccelerator(QMainWindow):
             f"{len(learned)} learned • "
             f"{len(progress)} in progress • "
             f"{len(locked)} locked • "
-            "Updated automatically from Google, Accelerator Academy, DuckDB, and SQL Companion."
+            "Updated automatically from Google, Academy, DuckDB, and SQL practice."
         )
         self.skills_tabs.setTabText(0, f"Learned ({len(learned)})")
         self.skills_tabs.setTabText(1, f"In Progress ({len(progress)})")
@@ -8860,19 +6880,6 @@ class CareerAccelerator(QMainWindow):
             column.layout.addStretch()
             self.kanban_layout.addWidget(column)
 
-    def refresh_summaries(self):
-        if hasattr(self, "review_current_week"):
-            self.review_current_week.setText(
-                f"Current program week: {int(self.state['current_week'])}"
-            )
-        self.summary_list.clear()
-        rows = self.conn.execute(
-            "SELECT week,summary FROM weekly_summaries ORDER BY week DESC"
-        ).fetchall()
-        for row in rows:
-            self.summary_list.addItem(f"Week {row['week']}: {row['summary']}")
-
-    # ---------- Actions ----------
     def queue_dashboard_task_completion(
         self,
         task_row,
@@ -8943,9 +6950,9 @@ class CareerAccelerator(QMainWindow):
                     saved_path = ROOT / saved_path
                 if saved_path is None or not saved_path.is_file():
                     raise ValueError(
-                        f"Save your {title} SQL submission in SQL Companion before "
+                        f"Save your {title} SQL submission in Learning Practice before "
                         "marking this task complete. Open the task workspace and use "
-                        "the SQL Companion button to continue."
+                        "the Learning Practice button to continue."
                     )
                 try:
                     saved_sql = saved_path.read_text(encoding="utf-8")
@@ -8956,7 +6963,7 @@ class CareerAccelerator(QMainWindow):
                 if not self._sql_submission_has_original_query(saved_sql):
                     raise ValueError(
                         f"The saved {title} file still looks like the starter template. "
-                        "Write and save your own query in SQL Companion first."
+                        "Write and save your own query in Learning Practice first."
                     )
 
             result = tracks.complete_track_task(
@@ -9137,95 +7144,22 @@ class CareerAccelerator(QMainWindow):
             ),
         )
 
-    def build_plan(self):
-        rows = planner.intelligent_focus_plan(
-            self.conn,
-            self.state["current_week"],
-            WEEKLY_GUIDANCE.get(self.state["current_week"], ()),
-            self.state,
-            max_items=5,
-        )
-        self.plan_list.clear()
-        for row in rows:
-            catch_up = "Catch-Up • " if row.get("is_catch_up") else ""
-            self.plan_list.addItem(
-                f"#{row['id']} • {row['estimated_minutes']}m • "
-                f"{catch_up}{row.get('display_source') or row['category']} • "
-                f"{row['label']}"
-            )
-            item = self.plan_list.item(self.plan_list.count() - 1)
-            item.setData(Qt.ItemDataRole.UserRole, int(row["id"]))
+    def continue_highest_impact(self):
+        rows = planner.available(self.conn, self.state["current_week"])
         if not rows:
-            self.plan_list.addItem(
-                "No prerequisite-ready task is available. Review Coming Up for the next unlock."
+            QMessageBox.information(
+                self,
+                "All Clear",
+                "No prerequisite-ready sprint task remains.",
             )
-
-    def selected_task_id(self, widget):
-        item = widget.currentItem()
-        if not item:
-            return None
-
-        stored_id = item.data(
-            Qt.ItemDataRole.UserRole
-        )
-        if stored_id is not None:
-            try:
-                return int(stored_id)
-            except (TypeError, ValueError):
-                pass
-
-        match = re.search(
-            r"#(\d+)",
-            item.text(),
-        )
-        return (
-            int(match.group(1))
-            if match
-            else None
-        )
-
-    def continue_plan(self):
-        task_id = self.selected_task_id(self.plan_list)
-        if not task_id and self.plan_list.count():
-            self.plan_list.setCurrentRow(0)
-            task_id = self.selected_task_id(self.plan_list)
-        if not task_id:
             return
-        row = self.conn.execute(
-            "SELECT destination FROM task_metadata WHERE task_id=?", (task_id,)
-        ).fetchone()
+        task_id = int(rows[0]["id"])
         self.conn.execute(
             "UPDATE task_metadata SET status='In Progress',deferred_until=NULL WHERE task_id=?",
             (task_id,),
         )
         self.conn.commit()
-        if row:
-            portfolio_link = self.conn.execute(
-                """SELECT linked_entity_id
-                   FROM track_tasks
-                   WHERE task_id=? AND track_key='portfolio'""",
-                (int(task_id),),
-            ).fetchone()
-            if portfolio_link is not None and portfolio_link["linked_entity_id"] is not None:
-                self.open_portfolio_task_workspace(
-                    int(portfolio_link["linked_entity_id"])
-                )
-            else:
-                self.navigate(int(row["destination"]))
-
-    def continue_highest_impact(self):
-        rows = planner.available(self.conn, self.state["current_week"])
-        if not rows:
-            QMessageBox.information(self, "All Clear", "No available sprint tasks remain.")
-            return
-        task_id = rows[0]["id"]
-        self.plan_list.clear()
-        self.plan_list.addItem(
-            f"#{task_id} • {rows[0]['estimated_minutes']}m • "
-            f"{rows[0]['energy']} • {rows[0]['category']} • {rows[0]['label']}"
-        )
-        self.continue_plan()
-
+        self.open_task_workspace(task_id=task_id)
 
     def edit_task(self, task_id=None):
         if isinstance(task_id, bool):
@@ -9233,11 +7167,11 @@ class CareerAccelerator(QMainWindow):
         task_id = (
             int(task_id)
             if task_id is not None
-            else self.selected_task_id(self.backlog_list)
+            else self.selected_workspace_task_id()
         )
         if not task_id:
             self._notify(
-                "Select a backlog task first.",
+                "Select a task workspace first.",
                 3200,
             )
             return
@@ -9542,12 +7476,6 @@ class CareerAccelerator(QMainWindow):
                 )
             )
 
-            # Keep the exact edited task selected after rebuilding the backlog.
-            self.backlog_list.setProperty(
-                "pendingSelectedTaskId",
-                effective_task_id,
-            )
-
             # Refresh widgets from the values just verified without a hidden
             # second adaptive synchronization.
             self.refresh_all(
@@ -9726,12 +7654,12 @@ class CareerAccelerator(QMainWindow):
         starter = str(row["starter_path"] or "") if row else ""
         if starter.startswith("academy:lesson:"):
             lesson_id = starter.split(":", 2)[2]
-            self.navigate(12)
+            self.open_learning_section("Path")
             self.academy_widget.open_lesson(lesson_id)
             return True
         if starter.startswith("academy:assessment:"):
             assessment_id = starter.split(":", 2)[2]
-            self.navigate(12)
+            self.open_learning_section("Path")
             self.academy_widget.open_assessment(assessment_id)
             return True
         return False
@@ -9753,7 +7681,7 @@ class CareerAccelerator(QMainWindow):
                 return
         # Guided DuckDB tasks still open directly in their native workspace.
         # DataLemur interview tasks open the Task Workspace first, where a
-        # prominent button routes to the exact SQL Companion problem.
+        # prominent button routes to the exact Learning Practice problem.
         if task_id is not None:
             try:
                 sql_task_row = task_workspace.task_record(self.conn, int(task_id))
@@ -9793,20 +7721,6 @@ class CareerAccelerator(QMainWindow):
                 "Could Not Open Task Workspace",
                 str(exc),
             )
-
-    def open_plan_workspace(self):
-        task_id = self.selected_task_id(self.plan_list)
-        if task_id is None:
-            self._notify("Select a planned task first.", 3200)
-            return
-        self.open_task_workspace(task_id=task_id)
-
-    def open_backlog_workspace(self):
-        task_id = self.selected_task_id(self.backlog_list)
-        if task_id is None:
-            self._notify("Select a backlog task first.", 3200)
-            return
-        self.open_task_workspace(task_id=task_id)
 
     def selected_workspace_task_id(self):
         if not hasattr(self, "workspace_task_list"):
@@ -9858,7 +7772,7 @@ class CareerAccelerator(QMainWindow):
         task_workspace.mark_in_progress(self.conn, task_id)
         self.session_task.setProperty("pendingTaskId", task_id)
         self.refresh_session_task_choices()
-        self.navigate(5)
+        self.navigate(PAGE_STUDY)
         self.start_study_timer()
         self._notify(
             "Study timer started and will be linked to the selected task when logged.",
@@ -9913,6 +7827,15 @@ class CareerAccelerator(QMainWindow):
                 self.workspace_task_list.count() - 1
             )
             item.setData(Qt.ItemDataRole.UserRole, int(row["id"]))
+            item.setIcon(
+                QIcon(
+                    str(
+                        task_icons.path_for_task(
+                            ASSET_ROOT, dict(row), int(row["week"])
+                        )
+                    )
+                )
+            )
             item.setToolTip(
                 f"Priority {row['priority']} • {row['estimated_minutes']} minutes • "
                 f"{row['energy']} energy • {row['prerequisite_state']}"
@@ -10802,7 +8725,7 @@ class CareerAccelerator(QMainWindow):
         self.session_hours.setText(
             f"{self.elapsed_seconds / 3600:.2f}"
         )
-        self.navigate(5)
+        self.navigate(PAGE_STUDY)
 
     def save_session(self):
         try:
@@ -11189,7 +9112,6 @@ class CareerAccelerator(QMainWindow):
                 max_items=5,
             )
             self.refresh_dashboard(sync_tracks=False)
-            self.refresh_planner()
             message = (
                 f"Today's snapshot rebuilt: {report['created']} focus "
                 f"item(s) generated for {report['focus_date']}."
@@ -11339,12 +9261,12 @@ class CareerAccelerator(QMainWindow):
         search.setPlaceholderText("Type a command…")
         commands = QListWidget()
         command_items = [
-            ("🏠 Open Dashboard", lambda: self.navigate(0)),
-            ("🚀 Build Adaptive Plan", lambda: self.navigate(1)),
-            ("📁 Open Portfolio Workspace", lambda: self.navigate(3)),
-            ("💻 Open SQL Companion", lambda: self.navigate(4)),
+            ("🏠 Open Dashboard", lambda: self.navigate(PAGE_DASHBOARD)),
+            ("📚 Open Learning Path", lambda: self.open_learning_section("Path")),
+            ("🧩 Open Learning Practice", lambda: self.open_learning_section("Practice")),
+            ("📁 Open Portfolio Workspace", lambda: self.navigate(PAGE_PORTFOLIO)),
             ("⏱️ Start Study Timer", self.start_study_timer),
-            ("📝 Open Weekly Review", lambda: self.navigate(8)),
+            ("📝 Open Current Retrospective", lambda: self.open_weekly_workspace("retrospective")),
             ("🚀 Publish Progress", self.publish_progress),
             ("💾 Create Backup", self.backup_database),
         ]
@@ -11451,7 +9373,7 @@ def run():
                 "Loading curriculum and learning tracks",
                 76,
                 5,
-                "Preparing Accelerator Academy, practice, and learning progress.",
+                "Preparing Academy, practice, and learning progress.",
             )
         else:
             splash.update_stage(

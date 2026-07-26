@@ -5,6 +5,7 @@ import sqlite3
 from pathlib import Path
 
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+from career_app.navigation import PAGE_LEARNING
 
 # Each passing cumulative check creates validated Academy evidence. The final
 # readiness assessment also proves the Python/pandas requirement used by the
@@ -635,7 +636,7 @@ def reconcile(conn, root=None) -> dict:
                 key=key,
                 title=title,
                 current_week=current_week,
-                destination=12,
+                destination=PAGE_LEARNING,
                 category="Learning",
                 reason=f"Expected by Week {due_week}. Complete and master this spreadsheet lesson.",
                 minutes=minutes,
@@ -661,7 +662,7 @@ def reconcile(conn, root=None) -> dict:
                 key=key,
                 title=title,
                 current_week=current_week,
-                destination=12,
+                destination=PAGE_LEARNING,
                 category="Learning",
                 reason=f"Expected by Week {due_week}. This mastery check gates later learning.",
                 minutes=45,
@@ -692,7 +693,7 @@ def reconcile(conn, root=None) -> dict:
                 key=key,
                 title=item["label"],
                 current_week=current_week,
-                destination=2,
+                destination=PAGE_LEARNING,
                 category="SQL",
                 reason=f"Expected by Week {due_week}. Complete this skill-gated DuckDB exercise.",
                 minutes=int(item.get("minutes", 40)),
@@ -722,9 +723,9 @@ def reconcile(conn, root=None) -> dict:
                 key=key,
                 title=f"Solve {title}",
                 current_week=current_week,
-                destination=4,
+                destination=PAGE_LEARNING,
                 category="SQL",
-                reason=f"Expected by Week {due_week}. Complete this skill-gated SQL Companion problem.",
+                reason=f"Expected by Week {due_week}. Complete this skill-gated SQL interview problem in Learning Practice.",
                 minutes=35,
                 starter_path=f"sql-problem:{title}",
                 prerequisite_state="Ready" if readiness["ready"] else "Blocked",

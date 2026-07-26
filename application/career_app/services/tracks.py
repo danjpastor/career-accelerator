@@ -18,6 +18,7 @@ from career_app.data.duckdb_exercises import (
     exercise_number_for_label,
 )
 from career_app.data.roadmap import SQL_COMPANION
+from career_app.navigation import PAGE_LEARNING, PAGE_PORTFOLIO
 
 
 def _coerce_task_id(value):
@@ -34,7 +35,7 @@ TRACK_CONFIG = {
     "google": {
         "display_name": "Google Certificate",
         "category": "Learning",
-        "destination": 2,
+        "destination": PAGE_LEARNING,
         "priority": 0,
         "sort_band": -400000,
         "role": "Primary",
@@ -42,7 +43,7 @@ TRACK_CONFIG = {
     "academy": {
         "display_name": "Accelerator Academy",
         "category": "Learning",
-        "destination": 12,
+        "destination": PAGE_LEARNING,
         "priority": 1,
         "sort_band": -300000,
         "role": "Supplemental",
@@ -51,7 +52,7 @@ TRACK_CONFIG = {
     "datacamp": {
         "display_name": "External Learning History",
         "category": "Learning",
-        "destination": 2,
+        "destination": PAGE_LEARNING,
         "priority": 9,
         "sort_band": -900000,
         "role": "Historical",
@@ -59,7 +60,7 @@ TRACK_CONFIG = {
     "sql": {
         "display_name": "SQL Practice",
         "category": "SQL",
-        "destination": 4,
+        "destination": PAGE_LEARNING,
         "priority": 1,
         "sort_band": -200000,
         "role": "Supplemental",
@@ -67,7 +68,7 @@ TRACK_CONFIG = {
     "portfolio": {
         "display_name": "Portfolio",
         "category": "Portfolio",
-        "destination": 3,
+        "destination": PAGE_PORTFOLIO,
         "priority": 2,
         "sort_band": -100000,
         "role": "Application",
@@ -75,7 +76,7 @@ TRACK_CONFIG = {
     "applied": {
         "display_name": "Applied Labs",
         "category": "Learning",
-        "destination": 2,
+        "destination": PAGE_LEARNING,
         "priority": 3,
         "sort_band": -50000,
         "role": "Supplemental",
@@ -2322,7 +2323,7 @@ def _sql_target(
                 required
             ),
             "description": (
-                f"Open {title} in SQL Companion, write and save your own SQL "
+                f"Open {title} in Learning Practice, write and save your own SQL "
                 "solution, then mark the problem complete. Use the notes area "
                 "to record your approach, checks, or anything you want to review."
             ),
@@ -4111,7 +4112,7 @@ def completion_history(conn):
                 "task_id": None,
                 "week": None,
                 "label": (
-                    f"SQL Companion: "
+                    f"Learning Practice: "
                     f"{row['title']}"
                 ),
                 "category": "SQL",
@@ -4464,7 +4465,7 @@ def undo_completion(
     label = (
         task_row["label"]
         if task_row is not None
-        else f"SQL Companion: {sql_title}"
+        else f"Learning Practice: {sql_title}"
     )
     return {
         "message": (

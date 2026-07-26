@@ -1,4 +1,4 @@
-"""Shared native course-style widgets for Exercise Packs and Applied Labs.
+"""Shared native course-style widgets for Academy and Skills Lab learning.
 
 The learning pages intentionally use normal Qt widgets rather than a monolithic
 QTextEdit document. This keeps spacing, cards, tables, code controls, and
@@ -11,9 +11,9 @@ import re
 from dataclasses import dataclass
 from typing import Callable, Iterable
 
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import Qt, QTimer, Signal, QSize
 from PySide6.QtGui import (
-    QColor, QFont, QFontDatabase, QSyntaxHighlighter, QTextCharFormat,
+    QColor, QFont, QFontDatabase, QPainter, QSyntaxHighlighter, QTextCharFormat,
     QTextCursor, QTextFormat,
 )
 from PySide6.QtWidgets import (
@@ -45,6 +45,72 @@ MUTED = COLORS.get("muted", "#b5b7ca")
 BORDER = COLORS.get("border", "#263754")
 SURFACE = COLORS.get("surface", "#0C1627")
 SURFACE_ALT = COLORS.get("surface_alt", "#111D31")
+
+
+class RotatedLabel(QLabel):
+    """A compact counterclockwise title for collapsed library rails."""
+
+    def __init__(self, text: str, parent: QWidget | None = None):
+        super().__init__(text, parent)
+        self.setAlignment(Qt.AlignCenter)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+    def sizeHint(self) -> QSize:  # noqa: N802 - Qt API
+        hint = super().sizeHint()
+        return QSize(hint.height(), hint.width())
+
+    def minimumSizeHint(self) -> QSize:  # noqa: N802 - Qt API
+        hint = super().minimumSizeHint()
+        return QSize(hint.height(), hint.width())
+
+    def paintEvent(self, _event) -> None:  # noqa: N802 - Qt API
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+        painter.translate(0, self.height())
+        painter.rotate(-90)
+        painter.setFont(self.font())
+        painter.setPen(self.palette().color(self.foregroundRole()))
+        painter.drawText(
+            0, 0, self.height(), self.width(),
+            int(self.alignment().value), self.text(),
+        )
+
+
+class FeedbackLabel(QLabel):
+    """A compact state-aware banner for hints, errors, and success feedback."""
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setMinimumWidth(0)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
+        self.setWordWrap(True)
+        self.setMinimumHeight(46)
+        self.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        self.setContentsMargins(12, 8, 12, 8)
+        self.setText("")
+
+    def setText(self, text: str) -> None:  # noqa: N802 - Qt API
+        super().setText(text)
+        purple = COLORS.get("purple", "#8A5CFF")
+        if text.startswith("✅"):
+            background, border, foreground = "#15382d", "#2fa67d", "#d8fff0"
+        elif text.startswith("❌") or text.startswith("Not quite"):
+            background, border, foreground = "#3a2028", "#d25b76", "#ffe4ea"
+        elif text.startswith("💡"):
+            background, border, foreground = "#251737", purple, "#f2eaff"
+        elif text:
+            background, border, foreground = "#14233B", "#52627f", "#e7ecf8"
+        else:
+            background, border, foreground = (
+                "transparent", "transparent", COLORS.get("muted", "#A8B4C8")
+            )
+        self.setStyleSheet(
+            "QLabel {"
+            f"background:{background};color:{foreground};border:1px solid {border};"
+            "border-radius:8px;font-size:9.5pt;"
+            "}"
+        )
+        self.setVisible(bool(text))
 
 
 def clear_layout(layout: QVBoxLayout | QHBoxLayout) -> None:

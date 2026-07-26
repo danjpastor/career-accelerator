@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Canonical task/readiness/planning service for Career Accelerator v10.27.
+"""Canonical task/readiness/planning service for Career Accelerator v10.28.
 
 The application historically accumulated several independent recommendation
 systems.  This module is the single runtime source for:
@@ -29,6 +29,7 @@ from career_app.data.duckdb_exercises import exercise_for_label as duckdb_for_la
 from career_app.data.duckdb_exercises import exercise_number_for_label
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.services import roadmap_mastery
+from career_app.navigation import PAGE_LEARNING, PAGE_PORTFOLIO, PAGE_WORKSPACES
 
 
 GOOGLE_TRACK = "google"
@@ -279,7 +280,7 @@ def _source(task: dict) -> str:
         item = duckdb_for_label(task.get("label"))
         return f"DuckDB Exercise • {item['title']}" if item else "DuckDB Exercise"
     if kind == "interview_problem":
-        return "SQL Companion • Interview Practice"
+        return "Learning • SQL Interview Practice"
     if kind == "applied_lab":
         return "Accelerator Academy • Applied Lab"
     if kind == "portfolio_preparation":
@@ -661,9 +662,55 @@ def completion_summary(conn: sqlite3.Connection, active_items: list[dict]) -> di
     }
 
 
+def _migrate_navigation_destinations(conn: sqlite3.Connection) -> int:
+    """Align persisted task routes with the consolidated nine-page shell."""
+    if not _table_exists(conn, "task_metadata"):
+        return 0
+    changed = 0
+    statements = (
+        (
+            """UPDATE task_metadata SET destination=?
+               WHERE LOWER(COALESCE(category,'')) IN ('learning','sql')
+                 AND destination<>?""",
+            (PAGE_LEARNING, PAGE_LEARNING),
+        ),
+        (
+            """UPDATE task_metadata SET destination=?
+               WHERE LOWER(COALESCE(category,''))='portfolio'
+                 AND destination<>?""",
+            (PAGE_PORTFOLIO, PAGE_PORTFOLIO),
+        ),
+        (
+            """UPDATE task_metadata SET destination=?
+               WHERE LOWER(COALESCE(category,''))='review'
+                 AND destination<>?""",
+            (PAGE_WORKSPACES, PAGE_WORKSPACES),
+        ),
+        (
+            """UPDATE task_metadata SET destination=?
+               WHERE task_id IN (
+                   SELECT task_id FROM track_tasks
+                   WHERE LOWER(track_key) IN ('google','academy','sql','applied')
+               ) AND destination<>?""",
+            (PAGE_LEARNING, PAGE_LEARNING),
+        ),
+        (
+            """UPDATE task_metadata SET destination=?
+               WHERE task_id IN (
+                   SELECT task_id FROM track_tasks
+                   WHERE LOWER(track_key)='portfolio'
+               ) AND destination<>?""",
+            (PAGE_PORTFOLIO, PAGE_PORTFOLIO),
+        ),
+    )
+    for sql, params in statements:
+        changed += max(0, conn.execute(sql, params).rowcount)
+    return changed
+
+
 def migrate_runtime(conn: sqlite3.Connection, current_week: int) -> dict:
     """Retire active legacy planners without deleting learner history."""
-    removed = {"datacamp_tasks": 0, "manual_focus": 0, "duplicate_google": 0}
+    removed = {"datacamp_tasks": 0, "manual_focus": 0, "duplicate_google": 0, "navigation_routes": 0}
 
     # DataCamp remains in historical study-session/event rows only.
     datacamp_ids = [
@@ -732,8 +779,13 @@ def migrate_runtime(conn: sqlite3.Connection, current_week: int) -> dict:
         conn.execute("DELETE FROM sprint_tasks WHERE id=?", (task_id,))
         removed["duplicate_google"] += 1
 
+    removed["navigation_routes"] = _migrate_navigation_destinations(conn)
     conn.execute(
-        """INSERT INTO settings(key,value) VALUES('unified_planner_version','10.27.0')
+        """INSERT INTO settings(key,value) VALUES('unified_planner_version','10.28.0')
+           ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
+    )
+    conn.execute(
+        """INSERT INTO settings(key,value) VALUES('navigation_layout_version','10.28.0')
            ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
     )
     conn.commit()

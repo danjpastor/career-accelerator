@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from career_app.navigation import (
+    PAGE_DASHBOARD, PAGE_LEARNING, PAGE_PORTFOLIO, PAGE_WORKSPACES,
+)
+
 from datetime import date, datetime, timedelta
 import os
 from pathlib import Path
@@ -478,12 +482,12 @@ def current_sprint_items(conn, week: int) -> list[dict]:
         destination = row["destination"]
         if destination is None:
             destination = {
-                "Google Course": 2,
-                "SQL": 4,
-                "Portfolio": 3,
-                "Accelerator Academy": 12,
-                "Review": 8,
-            }.get(section, 1)
+                "Google Course": PAGE_LEARNING,
+                "SQL": PAGE_LEARNING,
+                "Portfolio": PAGE_PORTFOLIO,
+                "Accelerator Academy": PAGE_LEARNING,
+                "Review": PAGE_WORKSPACES,
+            }.get(section, PAGE_DASHBOARD)
         item = {
             "week": week,
             "task_id": int(row["task_id"]),
@@ -534,12 +538,12 @@ def current_sprint_items(conn, week: int) -> list[dict]:
             label,
         )
         destination = {
-            "Google Course": 2,
-            "SQL": 4,
-            "Portfolio": 3,
-            "Accelerator Academy": 12,
-            "Applied Labs": 2,
-        }.get(section, 1)
+            "Google Course": PAGE_LEARNING,
+            "SQL": PAGE_LEARNING,
+            "Portfolio": PAGE_PORTFOLIO,
+            "Accelerator Academy": PAGE_LEARNING,
+            "Applied Labs": PAGE_LEARNING,
+        }.get(section, PAGE_DASHBOARD)
         item = {
             "week": week,
             "task_id": None,
@@ -564,7 +568,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
 
     section_order = {
         "Google Course": 0,
-        "Accelerator Academy": 1,
+        "Accelerator Academy": PAGE_LEARNING,
         "SQL": 2,
         "Portfolio": 3,
         "Applied Labs": 4,

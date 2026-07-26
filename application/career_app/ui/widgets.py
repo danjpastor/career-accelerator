@@ -8,7 +8,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import (
     QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPen, QBrush,
-    QLinearGradient, QPixmap, QImage
+    QLinearGradient, QPixmap, QImage, QIcon
 )
 from PySide6.QtWidgets import (
     QCheckBox, QFrame, QLabel, QHBoxLayout, QPushButton, QScrollArea,
@@ -1126,6 +1126,43 @@ class ElidedLabel(QLabel):
 
 
 
+
+
+class TaskIconLabel(QLabel):
+    """Render a task SVG/PNG icon with a text fallback."""
+
+    def __init__(self, icon_value=None, fallback="•", size=26, parent=None):
+        super().__init__(parent)
+        self._icon_value = icon_value
+        self._fallback = str(fallback or "•")
+        self._icon_size = max(16, int(size or 26))
+        self.setFixedWidth(self._icon_size + 8)
+        self.setMinimumHeight(self._icon_size)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setStyleSheet("background:transparent;border:none;")
+        self._render_icon()
+
+    def _render_icon(self):
+        value = self._icon_value
+        if value:
+            icon = QIcon(str(value))
+            if not icon.isNull():
+                self.setPixmap(icon.pixmap(self._icon_size, self._icon_size))
+                self.setText("")
+                return
+        self.setPixmap(QPixmap())
+        self.setText(self._fallback)
+        self.setStyleSheet(
+            f"font-size:{max(13, round(self._icon_size * 0.68))}pt;"
+            "background:transparent;border:none;"
+        )
+
+    def set_icon(self, icon_value=None, fallback=None):
+        self._icon_value = icon_value
+        if fallback is not None:
+            self._fallback = str(fallback or "•")
+        self._render_icon()
+
 class TaskRow(QWidget):
     def __init__(
         self,
@@ -1135,6 +1172,8 @@ class TaskRow(QWidget):
         status_text="",
         category_text="",
         category_color=None,
+        icon=None,
+        icon_fallback="•",
         on_toggle=None,
         action_text=None,
         on_action=None,
@@ -1159,6 +1198,15 @@ class TaskRow(QWidget):
             self.checkbox.stateChanged.connect(on_toggle)
         layout.addWidget(
             self.checkbox,
+            0,
+            Qt.AlignVCenter,
+        )
+
+        self.icon_label = TaskIconLabel(
+            icon, fallback=icon_fallback, size=24, parent=self
+        )
+        layout.addWidget(
+            self.icon_label,
             0,
             Qt.AlignVCenter,
         )
@@ -1326,7 +1374,7 @@ class TaskRow(QWidget):
 class FocusRow(QWidget):
     def __init__(
         self,
-        emoji,
+        icon,
         title,
         detail,
         duration,
@@ -1334,6 +1382,7 @@ class FocusRow(QWidget):
         action_text=None,
         on_action=None,
         completed=False,
+        icon_fallback="•",
     ):
         super().__init__()
         self._forced_density = "comfortable"
@@ -1349,12 +1398,12 @@ class FocusRow(QWidget):
         layout.setContentsMargins(0, 3, 0, 3)
         layout.setSpacing(9)
 
-        self.icon_label = QLabel(emoji)
-        icon = self.icon_label
-        icon.setStyleSheet("font-size:18pt;")
-        icon.setFixedWidth(34)
-        icon.setAlignment(Qt.AlignCenter)
-        layout.addWidget(icon, 0, Qt.AlignVCenter)
+        self.icon_label = TaskIconLabel(
+            icon, fallback=icon_fallback, size=27, parent=self
+        )
+        layout.addWidget(
+            self.icon_label, 0, Qt.AlignVCenter
+        )
 
         text = QVBoxLayout()
         self.text_layout = text

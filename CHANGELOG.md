@@ -1,3 +1,18 @@
+# Career Accelerator v10.28.0
+
+## Navigation and learning-workspace consolidation
+
+- Consolidated the learner experience into nine purposeful destinations: Dashboard, Learning, Portfolio Workspace, Study Session, Job Readiness, Applications, Publish & Git, Task Workspaces, and Settings.
+- Removed the redundant Daily Plan, standalone Accelerator Academy, SQL Companion, and Weekly Summary pages from navigation.
+- Made Learning the single home for the Academy path, Google Certificate tracking, SQL interview practice, DuckDB exercises, and Skills Lab work.
+- Retired the legacy Exercise Packs interface and engine after moving shared UI controls into the active Academy/Skills Lab component library; historical learner records and local pack files remain untouched.
+- Kept weekly retrospective and summary generation inside Task Workspaces while preserving dashboard metrics and historical weekly records.
+- Added a central navigation registry so task producers, migrations, and workspace routes cannot drift to removed page indexes.
+- Added a central task-icon registry and dedicated Google, spreadsheet, SQL, Power BI, Python, portfolio, review, assessment, lab, and career icons.
+- Applied task-specific icons to Today’s Focus, Next Tasks, Coming Up, Optional Practice, and Task Workspaces.
+- Preserved the Google weekly target on its Today’s Focus row while keeping every focus task to two visible text lines.
+- Migrated persisted Learning, SQL, Portfolio, and Review task destinations to the consolidated shell without changing learner completion or progress.
+
 # Career Accelerator v10.27.0
 
 ## Unified learning and planning system

@@ -132,7 +132,7 @@ class TaskWorkspaceDialog(QDialog):
 
         context_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self._responsive_rows.append(context_actions)
-        self.sql_problem_button = QPushButton("Open in SQL Companion")
+        self.sql_problem_button = QPushButton("Open in Learning Practice")
         self.sql_problem_button.setObjectName("Primary")
         self.sql_problem_button.clicked.connect(self.open_sql_problem)
         self.sql_problem_button.setVisible(False)
@@ -251,7 +251,7 @@ class TaskWorkspaceDialog(QDialog):
         note = QLabel(
             "Complete every required prompt here. Answers autosave as you work; "
             "Save Retrospective Progress refreshes the generated record, and "
-            "the Weekly Summary is created once every required prompt is filled. "
+            "the saved weekly summary is generated once every required prompt is filled. "
             "No external document is required."
         )
         note.setWordWrap(True)
@@ -620,9 +620,9 @@ class TaskWorkspaceDialog(QDialog):
             problem_title = workspace_service.sql_problem_title(task)
             self.sql_problem_button.setVisible(bool(problem_title))
             self.sql_problem_button.setText(
-                f"Open {problem_title} in SQL Companion"
+                f"Open {problem_title} in Learning Practice"
                 if problem_title
-                else "Open in SQL Companion"
+                else "Open in Learning Practice"
             )
             self.sql_problem_button.setProperty("problem_title", problem_title or "")
             if task is not None and self.workspace["is_current"]:
@@ -823,13 +823,13 @@ class TaskWorkspaceDialog(QDialog):
         try:
             opened = bool(self.open_sql_problem_callback(int(self.task_id)))
         except Exception as exc:
-            QMessageBox.warning(self, "Could Not Open SQL Companion", str(exc))
+            QMessageBox.warning(self, "Could Not Open Learning Practice", str(exc))
             return
         if not opened:
             QMessageBox.warning(
                 self,
                 "Problem Not Found",
-                "The linked DataLemur problem could not be matched in SQL Companion.",
+                "The linked DataLemur problem could not be matched in Learning Practice.",
             )
             return
         self.accept()

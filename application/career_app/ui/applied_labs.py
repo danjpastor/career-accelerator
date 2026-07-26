@@ -35,8 +35,9 @@ from career_app.data.applied_exercises import APPLIED_EXERCISES, CATEGORY_ORDER
 from career_app.database import save_setting, state
 from career_app.services import applied_lab_runner, applied_workspace, tracks
 from career_app.theme import COLORS
-from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
-from career_app.ui.exercise_packs import FeedbackLabel, RotatedLabel
+from career_app.ui.course_ui import (
+    CoursePageWidget, FeedbackLabel, RotatedLabel, SqlCodeEditor,
+)
 from career_app.ui.widgets import Card
 
 

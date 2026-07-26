@@ -1,4 +1,4 @@
-"""Native course workspace for SQL Companion's guided DuckDB exercises."""
+"""Native course workspace for Learning Practice guided DuckDB exercises."""
 from __future__ import annotations
 
 import hashlib
@@ -110,7 +110,7 @@ class DuckDBExercisesWidget(QWidget):
         self.back_button.setFixedSize(36, 34)
         self.back_button.clicked.connect(self.previous_exercise)
         toolbar_layout.addWidget(self.back_button)
-        self.breadcrumb = QLabel("SQL Companion  ›  DuckDB Exercises")
+        self.breadcrumb = QLabel("Learning  ›  Practice  ›  DuckDB Exercises")
         self.breadcrumb.setStyleSheet("color:#c4cde0;font-size:9.5pt;")
         toolbar_layout.addWidget(self.breadcrumb, 1)
         open_folder = QPushButton("Open Practice Folder")
@@ -667,7 +667,7 @@ class DuckDBExercisesWidget(QWidget):
             continue_text="Next Exercise  →",
         )
         self.breadcrumb.setText(
-            f"SQL Companion  ›  DuckDB Exercises  ›  Exercise {number:02d}  ›  {item['title']}"
+            f"Learning  ›  Practice  ›  DuckDB Exercises  ›  Exercise {number:02d}  ›  {item['title']}"
         )
 
         self._question_notes = {}

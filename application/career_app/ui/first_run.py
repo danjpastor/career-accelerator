@@ -70,63 +70,43 @@ TOUR_STEPS = (
     ),
     (
         1,
-        "Daily Plan",
-        "The Daily Plan keeps the Google Certificate first, then selects up to five prerequisite-ready Academy, practice, assessment, or portfolio tasks. Locked work stays under Coming Up until it is ready.",
+        "Learning",
+        "Learning now contains the complete learner journey: the Academy path, Google Certificate tracking, SQL and DuckDB practice, and Skills Lab work. Separate duplicate learning pages are no longer needed.",
     ),
     (
         2,
-        "Learning",
-        "Use Learning to update pathway progress, open guided lessons, practice concepts, and work through applied exercises without losing track of the broader plan.",
-    ),
-    (
-        12,
-        "Accelerator Academy",
-        "Accelerator Academy contains program-neutral learning paths, courses, practice, Skills Lab work, assessments, and demonstrated evidence. The selected pathway supplies the curriculum.",
-    ),
-    (
-        3,
         "Portfolio Workspace",
         "Your imported projects appear here. Complete milestones, inspect project data, open real files, document findings, and build evidence that can be discussed in interviews.",
     ),
     (
-        4,
-        "SQL Companion",
-        "SQL Companion organizes interview problems and local DuckDB practice. Save learner-written solutions, request hints, validate work, and keep completed evidence connected to the plan.",
-    ),
-    (
-        5,
+        3,
         "Study Session",
         "Start or log focused work sessions, attach notes to the task you worked on, and use the history to understand consistency and workload.",
     ),
     (
-        6,
+        4,
         "Job Readiness",
         "This page turns completed learning and project work into evidence. It helps identify gaps before applications and interviews.",
     ),
     (
-        7,
+        5,
         "Applications",
         "Track roles, companies, status, follow-up dates, contacts, and notes in one place once the application phase begins.",
     ),
     (
-        8,
-        "Weekly Summary",
-        "Review completed work, study time, lessons learned, blockers, and the next week’s priorities. Retrospectives keep the plan realistic.",
-    ),
-    (
-        9,
+        6,
         "Publish & Git",
         "Use publishing tools to check repository status and prepare portfolio progress for Git without mixing application state into public work.",
     ),
     (
-        11,
+        7,
         "Task Workspaces",
-        "Task Workspaces preserve notes, starter artifacts, and the exact files associated with individual assignments.",
+        "Task Workspaces preserve notes, starter artifacts, weekly study plans, retrospectives, generated summaries, and the exact files associated with individual assignments.",
     ),
     (
-        10,
-        "Settings and Setup",
-        "Settings controls pacing and technical preferences. The Setup menu can reopen portfolio import, restart this tour, or perform an explicit full first-run reset.",
+        8,
+        "Settings",
+        "Manage display scale, backups, repository access, task rebuilding, and first-run reset tools.",
     ),
 )
 
@@ -179,7 +159,7 @@ class FullResetConfirmationDialog(QDialog):
             "• DuckDB exercise progress, learner databases, SQL solutions, and submissions<br>"
             "• Demonstrated evidence, achievements, skills, concepts, and tracked completion<br>"
             "• Study sessions, applications, task workspaces, career materials, and reflections<br>"
-            "• Preferences, snapshots, installed optional packs, local backups, and archives"
+            "• Preferences, snapshots, legacy practice records, local backups, and archives"
         )
         removed_text.setWordWrap(True)
         removed_layout.addWidget(removed_text)
@@ -197,7 +177,7 @@ class FullResetConfirmationDialog(QDialog):
         preserved_text = QLabel(
             "• Application source code and required folder structure<br>"
             "• Pathway definitions, approved logos, and onboarding files<br>"
-            "• Accelerator Academy curricula and bundled exercise packs<br>"
+            "• Accelerator Academy curricula and integrated practice libraries<br>"
             "• Starter templates, static datasets, exercises, and validation guides<br>"
             "• Repository documentation, setup scripts, and build files"
         )

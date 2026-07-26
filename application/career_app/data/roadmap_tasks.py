@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import re
 
+from career_app.navigation import PAGE_APPLICATIONS, PAGE_READINESS, PAGE_WORKSPACES
+
 
 @dataclass(frozen=True)
 class RoadmapTaskSpec:
@@ -18,7 +20,7 @@ class RoadmapTaskSpec:
     definition_of_done: str
     starter_path: str
     category: str = "General"
-    destination: int = 6
+    destination: int = PAGE_READINESS
     estimated_minutes: int = 35
     priority: int = 2
     energy: str = "Normal"
@@ -37,7 +39,7 @@ _WEEKLY_RETROSPECTIVE = RoadmapTaskSpec(
     ),
     starter_path="roadmap_starters/weekly_retrospective.md",
     category="Review",
-    destination=8,
+    destination=PAGE_WORKSPACES,
     estimated_minutes=20,
     priority=2,
     energy="Low",
@@ -58,7 +60,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/sql_solution_explanation.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=25,
         priority=2,
     ),
@@ -75,7 +77,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/project_resume_entry.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=40,
         priority=2,
     ),
@@ -92,7 +94,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/project_interview_walkthrough.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=45,
         priority=2,
     ),
@@ -109,7 +111,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/linkedin_project_update.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=35,
         priority=2,
     ),
@@ -126,7 +128,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/project_resume_entry.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=35,
         priority=2,
     ),
@@ -143,7 +145,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/project_interview_practice.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=35,
         priority=2,
     ),
@@ -160,7 +162,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/portfolio_evidence_audit.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=45,
         priority=2,
     ),
@@ -177,7 +179,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/repository_polish_checklist.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=60,
         priority=1,
     ),
@@ -193,7 +195,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/resume_final_review.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=75,
         priority=1,
         energy="High",
@@ -210,7 +212,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/linkedin_final_review.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=60,
         priority=1,
     ),
@@ -226,7 +228,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/star_story_bank.md",
         category="General",
-        destination=6,
+        destination=PAGE_READINESS,
         estimated_minutes=75,
         priority=1,
         energy="High",
@@ -244,7 +246,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/application_tracking_workflow.md",
         category="General",
-        destination=7,
+        destination=PAGE_APPLICATIONS,
         estimated_minutes=45,
         priority=1,
     ),
@@ -261,7 +263,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/targeted_application_batch.md",
         category="General",
-        destination=7,
+        destination=PAGE_APPLICATIONS,
         estimated_minutes=90,
         priority=1,
         energy="High",
@@ -278,7 +280,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/application_followups.md",
         category="General",
-        destination=7,
+        destination=PAGE_APPLICATIONS,
         estimated_minutes=25,
         priority=2,
         energy="Low",
@@ -296,7 +298,7 @@ EXACT_TASK_SPECS: dict[str, RoadmapTaskSpec] = {
         ),
         starter_path="roadmap_starters/program_retrospective.md",
         category="Review",
-        destination=8,
+        destination=PAGE_WORKSPACES,
         estimated_minutes=60,
         priority=1,
     ),

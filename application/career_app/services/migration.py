@@ -5,6 +5,7 @@ from pathlib import Path
 
 from career_app.services import roadmap_mastery
 from career_app.data.applied_exercises import APPLIED_EXERCISES
+from career_app.navigation import PAGE_LEARNING
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 from career_app.data.roadmap_tasks import task_key, task_spec
 from career_app.data.portfolio_tasks import task_spec as portfolio_task_spec
@@ -296,7 +297,7 @@ def _update_duckdb_exercise_tasks(conn):
                        priority=?,
                        estimated_minutes=?,
                        energy='Normal',
-                       destination=4
+                       destination=PAGE_LEARNING
                    WHERE task_id=?""",
                 (
                     exercise["priority"],

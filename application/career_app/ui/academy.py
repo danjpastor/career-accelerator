@@ -44,8 +44,7 @@ from career_app.academy.models import (
 )
 from career_app.services import completion_contract
 from career_app.theme import COLORS
-from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
-from career_app.ui.exercise_packs import FeedbackLabel
+from career_app.ui.course_ui import CoursePageWidget, FeedbackLabel, SqlCodeEditor
 from career_app.ui.widgets import Card
 from career_app.academy.task_clarity import build_activity_clarity
 
