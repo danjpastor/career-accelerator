@@ -1,3 +1,14 @@
+# Career Accelerator v10.28.1
+
+## Sprint tracking and task metadata alignment
+
+- Rebuilt Current Sprint progress from the canonical named task inventory so new Academy, DuckDB, SQL interview, assessment, review, and active carryover tasks are included.
+- Replaced the stale SQL target display with catalog-based SQL interview-problem progress and current-week completion context.
+- Corrected catch-up status so a task remains current throughout its scheduled week and becomes catch-up only after the next week begins.
+- Added task-specific metadata labels such as Sheets, SQL, Power BI, Python, Skills Lab, Portfolio, Review, and Career.
+- Updated Today’s Focus supporting lines to show task type and scheduled week, while keeping the Google weekly target visible.
+- Removed the trailing stretch and synchronized the Next Tasks content height so the list cannot scroll far below its final entry.
+
 # Career Accelerator v10.28.0
 
 ## Navigation and learning-workspace consolidation

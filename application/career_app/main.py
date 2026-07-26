@@ -1418,7 +1418,7 @@ class CareerAccelerator(QMainWindow):
         )
         self.dashboard_tasks_rows_host.setSizePolicy(
             QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Minimum,
+            QSizePolicy.Policy.Fixed,
         )
         self.dashboard_tasks_layout = QVBoxLayout(
             self.dashboard_tasks_rows_host
@@ -2203,6 +2203,8 @@ class CareerAccelerator(QMainWindow):
             [],
         ):
             row.setVisible(True)
+
+        QTimer.singleShot(0, self._sync_dashboard_tasks_scroll_extent)
 
         for divider in self.dashboard_focus_card.findChildren(Divider):
             if divider is not self.focus_footer_divider:
@@ -4860,134 +4862,26 @@ class CareerAccelerator(QMainWindow):
 
     # BEGIN CURRENT SPRINT PROGRESS FIX
     def _current_sprint_progress(self, week=None):
-        """Return completed and planned work for the live weekly sprint."""
+        """Return completed and planned named work for the live sprint.
+
+        Current Sprint now uses the same canonical task inventory as the sprint
+        dialog. This includes current-week requirements, active carryover,
+        Academy lessons, DuckDB work, and SQL interview problems instead of
+        relying on stale aggregate track targets.
+        """
         sprint_week = int(
             week
             if week is not None
             else self.state["current_week"]
         )
-
-        today = date.today()
-        week_start = today - timedelta(days=today.weekday())
-        week_end = week_start + timedelta(days=6)
-
-        completed_total = 0
-        planned_total = 0
-
-        try:
-            track_rows = self.conn.execute(
-                """
-                SELECT
-                    ts.track_key,
-                    ts.weekly_target,
-                    ts.status,
-                    COUNT(te.id) AS weekly_completed
-                FROM track_state AS ts
-                LEFT JOIN track_events AS te
-                    ON te.track_key = ts.track_key
-                   AND te.completed_date BETWEEN ? AND ?
-                GROUP BY
-                    ts.track_key,
-                    ts.weekly_target,
-                    ts.status
-                ORDER BY ts.track_key
-                """,
-                (
-                    week_start.isoformat(),
-                    week_end.isoformat(),
-                ),
-            ).fetchall()
-
-            known_track_keys = {
-                str(row["track_key"])
-                for row in track_rows
-            }
-
-            for row in track_rows:
-                completed = max(
-                    0,
-                    int(row["weekly_completed"] or 0),
-                )
-                target = max(
-                    0,
-                    int(row["weekly_target"] or 0),
-                )
-                status = str(row["status"] or "").casefold()
-
-                if (
-                    status in {"locked", "paused", "completed"}
-                    and completed == 0
-                ):
-                    target = 0
-
-                completed_total += completed
-                planned_total += max(target, completed)
-
-            event_only_rows = self.conn.execute(
-                """
-                SELECT
-                    track_key,
-                    COUNT(*) AS weekly_completed
-                FROM track_events
-                WHERE completed_date BETWEEN ? AND ?
-                GROUP BY track_key
-                """,
-                (
-                    week_start.isoformat(),
-                    week_end.isoformat(),
-                ),
-            ).fetchall()
-
-            for row in event_only_rows:
-                track_key = str(row["track_key"])
-                if track_key in known_track_keys:
-                    continue
-
-                completed = max(
-                    0,
-                    int(row["weekly_completed"] or 0),
-                )
-                completed_total += completed
-                planned_total += completed
-
-        except sqlite3.OperationalError:
-            pass
-
-        try:
-            standalone_rows = self.conn.execute(
-                """
-                SELECT s.completed
-                FROM sprint_tasks AS s
-                WHERE s.week = ?
-                  AND s.sort_order >= 0
-                  AND NOT EXISTS (
-                      SELECT 1
-                      FROM track_tasks AS tt
-                      WHERE tt.task_id = s.id
-                  )
-                ORDER BY s.sort_order
-                """,
-                (sprint_week,),
-            ).fetchall()
-        except sqlite3.OperationalError:
-            standalone_rows = self.conn.execute(
-                """
-                SELECT completed
-                FROM sprint_tasks
-                WHERE week = ?
-                  AND sort_order >= 0
-                ORDER BY sort_order
-                """,
-                (sprint_week,),
-            ).fetchall()
-
-        completed_total += sum(
-            int(row["completed"] or 0)
-            for row in standalone_rows
+        items = task_workspace.current_sprint_items(
+            self.conn,
+            sprint_week,
         )
-        planned_total += len(standalone_rows)
-
-        return completed_total, planned_total
+        completed_total = sum(
+            1 for item in items if bool(item.get("completed"))
+        )
+        return completed_total, len(items)
 
     def open_current_sprint_dialog(self):
         try:
@@ -5024,8 +4918,8 @@ class CareerAccelerator(QMainWindow):
 
         summary = QLabel(
             f"Sprint progress: {done} / {total} tasks. "
-            "This list includes every named assignment still active in the "
-            "sprint plus adaptive-track tasks completed during the week."
+            "This list includes every named current-week requirement, active "
+            "carryover item, and task completed during the sprint."
         )
         summary.setObjectName("Muted")
         summary.setWordWrap(True)
@@ -5280,12 +5174,34 @@ class CareerAccelerator(QMainWindow):
 
         QTimer.singleShot(0, repaint_visible_actions)
 
+    def _sync_dashboard_tasks_scroll_extent(self):
+        """Shrink the Next Tasks content host to its real final row."""
+        if not hasattr(self, "dashboard_tasks_rows_host"):
+            return
+        self.dashboard_tasks_layout.invalidate()
+        self.dashboard_tasks_layout.activate()
+        content_height = max(
+            0,
+            int(self.dashboard_tasks_layout.sizeHint().height()),
+        )
+        self.dashboard_tasks_rows_host.setMinimumHeight(content_height)
+        self.dashboard_tasks_rows_host.setMaximumHeight(content_height)
+        self.dashboard_tasks_rows_host.updateGeometry()
+        self.dashboard_tasks_scroll.widget().updateGeometry()
+
     def _refresh_dashboard_next_tasks(self, week):
         self.clear_layout(self.dashboard_tasks_layout)
         self.dashboard_task_density_widgets = []
 
         ready = [dict(row) for row in planner.next_tasks(self.conn, int(week))]
-        coming_up = [dict(row) for row in planner.coming_up_tasks(self.conn, int(week), limit=3)]
+        coming_up = [
+            dict(row)
+            for row in planner.coming_up_tasks(
+                self.conn,
+                int(week),
+                limit=3,
+            )
+        ]
         task_category_colors = {
             "Learning": COLORS["blue"],
             "SQL": COLORS["purple"],
@@ -5298,10 +5214,24 @@ class CareerAccelerator(QMainWindow):
             for index, item in enumerate(ready):
                 task_id = self._get_ahead_task_id(item)
                 category = str(item.get("category") or "General")
-                category_text = f"Catch-Up • {category}" if item.get("is_catch_up") else category
+                metadata_label = str(
+                    item.get("metadata_label")
+                    or unified_tasks.task_type_label(item, int(week))
+                    or category
+                )
+                scheduled_week = int(item.get("week") or week)
+                is_catch_up = scheduled_week < int(week)
+                category_text = (
+                    f"Catch-Up • {metadata_label}"
+                    if is_catch_up
+                    else metadata_label
+                )
                 workspace_available = (
                     task_id is not None
-                    and task_workspace.workspace_supported_task_id(self.conn, task_id)
+                    and task_workspace.workspace_supported_task_id(
+                        self.conn,
+                        task_id,
+                    )
                 )
                 task_row = TaskRow(
                     title=str(item.get("label") or "Task"),
@@ -5309,13 +5239,24 @@ class CareerAccelerator(QMainWindow):
                     checked=False,
                     status_text="",
                     category_text=category_text,
-                    category_color=task_category_colors.get(category, COLORS["muted"]),
-                    icon=task_icons.path_for_task(ASSET_ROOT, item, int(week)),
+                    category_color=task_category_colors.get(
+                        category,
+                        COLORS["muted"],
+                    ),
+                    icon=task_icons.path_for_task(
+                        ASSET_ROOT,
+                        item,
+                        int(week),
+                    ),
                     icon_fallback="•",
                     action_text="Open" if workspace_available else None,
                     on_action=(
-                        (lambda _checked=False, task_id=task_id: self.open_task_workspace(task_id=task_id))
-                        if workspace_available else None
+                        (
+                            lambda _checked=False, task_id=task_id:
+                            self.open_task_workspace(task_id=task_id)
+                        )
+                        if workspace_available
+                        else None
                     ),
                     completed=False,
                 )
@@ -5324,14 +5265,20 @@ class CareerAccelerator(QMainWindow):
                 else:
                     task_row.checkbox.stateChanged.connect(
                         lambda state_value, task_row=task_row, task_id=task_id:
-                        self.queue_dashboard_task_completion(task_row, task_id, state_value)
+                        self.queue_dashboard_task_completion(
+                            task_row,
+                            task_id,
+                            state_value,
+                        )
                     )
                 self.dashboard_tasks_layout.addWidget(task_row)
                 self.dashboard_task_density_widgets.append(task_row)
                 if index < len(ready) - 1:
                     self.dashboard_tasks_layout.addWidget(Divider())
         else:
-            empty = QLabel("No prerequisite-ready task is available right now.")
+            empty = QLabel(
+                "No prerequisite-ready task is available right now."
+            )
             empty.setObjectName("Muted")
             empty.setWordWrap(True)
             self.dashboard_tasks_layout.addWidget(empty)
@@ -5342,26 +5289,37 @@ class CareerAccelerator(QMainWindow):
             heading.setStyleSheet("font-weight:700;")
             self.dashboard_tasks_layout.addWidget(heading)
             for item in coming_up:
-                reason = str(item.get("prerequisite_reason") or "Complete the prerequisite first.")
+                reason = str(
+                    item.get("prerequisite_reason")
+                    or "Complete the prerequisite first."
+                )
                 locked = TaskRow(
                     title=str(item.get("label") or "Locked task"),
                     source=reason,
                     checked=False,
-                    category_text="Locked",
+                    category_text=str(
+                        item.get("metadata_label")
+                        or unified_tasks.task_type_label(item, int(week))
+                        or "Locked"
+                    ),
                     category_color=COLORS["muted"],
-                    icon=task_icons.path_for_task(ASSET_ROOT, item, int(week)),
+                    icon=task_icons.path_for_task(
+                        ASSET_ROOT,
+                        item,
+                        int(week),
+                    ),
                     icon_fallback="🔒",
                     completed=False,
                 )
                 locked.checkbox.hide()
                 locked.setToolTip(reason)
                 self.dashboard_tasks_layout.addWidget(locked)
+                self.dashboard_task_density_widgets.append(locked)
 
-        self.dashboard_tasks_layout.addStretch(1)
-
-
-
-
+        # Do not add a stretch inside the scroll host. A stretch preserved the
+        # previous larger height and allowed scrolling far below the final row.
+        self._sync_dashboard_tasks_scroll_extent()
+        QTimer.singleShot(0, self._sync_dashboard_tasks_scroll_extent)
 
     def refresh_dashboard(
         self,
@@ -5396,11 +5354,9 @@ class CareerAccelerator(QMainWindow):
         )
 
         done, total = self._current_sprint_progress(week)
-        sql_count = (
-            achievements.completed_sql_count(
-                self.conn
-            )
-        )
+        sql_progress = tracks.sql_problem_progress(self.conn)
+        sql_count = int(sql_progress["completed"])
+        sql_target = int(sql_progress["target"])
 
         project_rows = self.conn.execute(
             "SELECT completed FROM project_tasks WHERE project_id=?",
@@ -5430,9 +5386,13 @@ class CareerAccelerator(QMainWindow):
                 "●  In Progress",
             ),
             (
-                min(100, sql_count / self.state["sql_target"] * 100),
-                f"{sql_count} / {self.state['sql_target']} problems",
-                "●  Keep Going",
+                min(100, sql_count / sql_target * 100) if sql_target else 0,
+                f"{sql_count} / {sql_target} problems",
+                (
+                    f"●  {sql_progress['weekly_completed']} completed this week"
+                    if sql_progress["weekly_completed"]
+                    else "○  Ready in Learning Practice"
+                ),
             ),
             (
                 project_done / project_total * 100 if project_total else 0,
@@ -5630,6 +5590,7 @@ class CareerAccelerator(QMainWindow):
                 if str(item.get("kind") or "") == "google":
                     google_progress = track_snapshot.get("google", {})
                     detail = (
+                        "Google Certification • "
                         f"Weekly target {google_progress.get('weekly_completed', 0)}/"
                         f"{google_progress.get('weekly_target', 0)}"
                     )
@@ -6103,14 +6064,17 @@ class CareerAccelerator(QMainWindow):
         session_count = analytics.weekly_session_count(
             self.conn
         )
-        weekly_sql = analytics.weekly_sql_count(self.conn)
         focus_score = analytics.weekly_focus_score(self.conn)
 
         summary_items = [
             ("⏱️", "Study Time", f"{week_hours:g}h"),
             ("📅", "Sessions", str(session_count)),
             ("✅", "Tasks Completed", f"{done} / {total}"),
-            ("💾", "SQL Problems", str(weekly_sql)),
+            (
+                "💾",
+                "SQL Problems",
+                f"{sql_count} / {sql_target}",
+            ),
             (
                 "⭐",
                 "Focus Score",

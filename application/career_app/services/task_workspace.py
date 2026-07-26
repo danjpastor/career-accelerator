@@ -350,10 +350,10 @@ def _sprint_item_category(track_key, category, label) -> tuple[str, str]:
 def current_sprint_items(conn, week: int) -> list[dict]:
     """Return every named assignment or completion in one sprint week.
 
-    Adaptive track task rows are reused as the learner advances.  The current
-    rows are therefore combined with the immutable completion-event history so
-    completed Google, SQL, Portfolio, Academy, and Applied items remain visible
-    by name in the sprint review.
+    Adaptive track task rows are reused as the learner advances. The current
+    rows are combined with immutable completion-event history and the active
+    unified task pool so every named Google, Academy, SQL, DuckDB, portfolio,
+    assessment, and review requirement is represented in the sprint.
     """
     week = max(1, int(week))
     week_start, week_end = _retrospective_week_bounds(conn, week)
@@ -565,6 +565,75 @@ def current_sprint_items(conn, week: int) -> list[dict]:
         item_by_exact_key[exact_key] = item
         if label_key:
             item_by_label[label_key] = item
+
+    # Add every active prerequisite-managed task that belongs to this sprint
+    # or is carrying into it. The old tracker only counted adaptive targets,
+    # which omitted newly generated Academy and practice requirements.
+    try:
+        from career_app.services import unified_tasks
+
+        existing_task_ids = {
+            int(item["task_id"])
+            for item in items
+            if item.get("task_id") is not None
+        }
+        existing_identity = {
+            (
+                str(item.get("track_key") or "").casefold(),
+                str(item.get("target_key") or ""),
+            )
+            for item in items
+            if item.get("track_key") and item.get("target_key")
+        }
+        for task in unified_tasks.all_tasks(conn, week):
+            task_id = int(task.get("task_id") or task.get("id") or 0)
+            task_week = int(task.get("week") or week)
+            if not task_id or bool(task.get("completed")) or task_week > week:
+                continue
+
+            identity = (
+                str(task.get("track_key") or "").casefold(),
+                str(task.get("target_key") or ""),
+            )
+            if task_id in existing_task_ids or (identity[0] and identity[1] and identity in existing_identity):
+                continue
+
+            label = str(task.get("label") or "").strip()
+            if not label:
+                continue
+            section, normalized_track = _sprint_item_category(
+                task.get("track_key"),
+                task.get("category"),
+                label,
+            )
+            status = "In Progress" if task.get("ready") else "Planned"
+            item = {
+                "week": week,
+                "task_id": task_id,
+                "label": label,
+                "section": section,
+                "category": (
+                    "Learning" if section == "Google Course" else section
+                ),
+                "track_key": normalized_track or task.get("track_key") or None,
+                "target_key": task.get("target_key") or None,
+                "destination": int(task.get("destination") or PAGE_DASHBOARD),
+                "linked_entity_id": task.get("linked_entity_id"),
+                "status": status,
+                "completed": False,
+                "sort_order": int(task.get("sort_order") or 0),
+                "completed_date": "",
+                "scheduled_week": task_week,
+                "is_catch_up": task_week < week,
+            }
+            items.append(item)
+            existing_task_ids.add(task_id)
+            if identity[0] and identity[1]:
+                existing_identity.add(identity)
+    except Exception:
+        # The named sprint rows above remain a safe fallback if the unified
+        # planner is unavailable during an older database migration.
+        pass
 
     section_order = {
         "Google Course": 0,

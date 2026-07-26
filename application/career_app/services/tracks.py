@@ -4833,6 +4833,58 @@ def task_detail(conn, task_id):
     )
 
 
+def sql_problem_progress(conn, reference=None):
+    """Return catalog-based SQL interview-problem progress.
+
+    The consolidated Learning Practice catalog is the source of truth. This
+    avoids stale program-state targets and excludes unrelated historical SQL
+    rows from the visible progress meter.
+    """
+    titles = tuple(str(item[0]) for item in SQL_COMPANION)
+    if not titles:
+        return {
+            "completed": 0,
+            "target": 0,
+            "weekly_completed": 0,
+        }
+
+    placeholders = ",".join("?" for _ in titles)
+    completed = int(
+        conn.execute(
+            f"""SELECT COUNT(DISTINCT title)
+                 FROM sql_practice
+                 WHERE platform='DataLemur'
+                   AND status='Completed'
+                   AND title IN ({placeholders})""",
+            titles,
+        ).fetchone()[0]
+        or 0
+    )
+
+    reference_day = reference or date.today()
+    if isinstance(reference_day, str):
+        reference_day = date.fromisoformat(reference_day)
+    week_start = reference_day - timedelta(days=reference_day.weekday())
+    week_end = week_start + timedelta(days=6)
+    weekly_completed = int(
+        conn.execute(
+            f"""SELECT COUNT(DISTINCT title)
+                 FROM sql_practice
+                 WHERE platform='DataLemur'
+                   AND status='Completed'
+                   AND completed_date BETWEEN ? AND ?
+                   AND title IN ({placeholders})""",
+            (week_start.isoformat(), week_end.isoformat(), *titles),
+        ).fetchone()[0]
+        or 0
+    )
+    return {
+        "completed": completed,
+        "target": len(titles),
+        "weekly_completed": weekly_completed,
+    }
+
+
 def focus_presentation(conn, item):
     """Build one uniform Today’s Focus title and detail."""
     category = str(

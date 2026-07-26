@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Canonical task/readiness/planning service for Career Accelerator v10.28.
+"""Canonical task/readiness/planning service for Career Accelerator v10.28.1.
 
 The application historically accumulated several independent recommendation
 systems.  This module is the single runtime source for:
@@ -209,6 +209,107 @@ def _phase_for_week(week: int) -> str:
     return "portfolio"
 
 
+def _learning_area(task: dict) -> str:
+    """Return the specific Academy/learning area represented by a task."""
+    haystack = " ".join(
+        str(task.get(key) or "")
+        for key in (
+            "managed_key",
+            "target_key",
+            "label",
+            "source_label",
+            "display_source",
+        )
+    ).casefold()
+
+    if any(token in haystack for token in (
+        "spreadsheet", "google sheets", "cell reference", "pivot table",
+        "vlookup", "countif", "sumif",
+    )):
+        return "spreadsheets"
+    if any(token in haystack for token in (
+        "power_bi", "power bi", "power query", "dax",
+    )):
+        return "power_bi"
+    if any(token in haystack for token in (
+        "python", "pandas", "dataframe",
+    )):
+        return "python"
+    if any(token in haystack for token in (
+        "sql", "duckdb", "select ", "join", "group by", "cte",
+        "window function",
+    )):
+        return "sql"
+
+    return _phase_for_week(_safe_int(task.get("week"), 1))
+
+
+def _area_labels(task: dict) -> tuple[str, str]:
+    area = _learning_area(task)
+    return {
+        "spreadsheets": ("Sheets", "Spreadsheets"),
+        "sql": ("SQL", "SQL"),
+        "power_bi": ("Power BI", "Power BI"),
+        "python": ("Python", "Python"),
+        "portfolio": ("Portfolio", "Portfolio"),
+    }.get(area, ("Learning", "Learning"))
+
+
+def task_type_label(task: dict, current_week: int | None = None) -> str:
+    """Return the compact metadata label used by task lists."""
+    kind = str(task.get("kind") or "general")
+    short_area, _full_area = _area_labels(task)
+    if kind == "google":
+        return "Google"
+    if kind in {"academy_lesson", "academy_practice"}:
+        return short_area
+    if kind == "knowledge_check":
+        return f"{short_area} Check" if short_area != "Learning" else "Assessment"
+    if kind in {"duckdb", "interview_problem", "sql_practice"}:
+        return "SQL"
+    if kind == "applied_lab":
+        return "Skills Lab"
+    if kind in {"portfolio_preparation", "portfolio_execution"}:
+        return "Portfolio"
+    if kind == "review":
+        return "Review"
+    if kind == "career_readiness":
+        return "Career"
+    category = str(task.get("category") or "General").strip()
+    return {"Learning": short_area, "SQL": "SQL"}.get(category, category or "General")
+
+
+def focus_context(task: dict, current_week: int) -> str:
+    """Return the concise task-type line shown under a focus title."""
+    kind = str(task.get("kind") or "general")
+    week = max(1, _safe_int(task.get("week"), current_week))
+    short_area, full_area = _area_labels(task)
+
+    if kind == "google":
+        return "Google Certification"
+    if kind in {"academy_lesson", "academy_practice"}:
+        return f"{full_area} • Week {week}"
+    if kind == "knowledge_check":
+        area = full_area if full_area != "Learning" else "Weekly"
+        return f"{area} Assessment • Week {week}"
+    if kind == "duckdb":
+        return f"DuckDB SQL • Week {week}"
+    if kind == "interview_problem":
+        return f"SQL Interview Practice • Week {week}"
+    if kind == "sql_practice":
+        return f"SQL Practice • Week {week}"
+    if kind == "applied_lab":
+        return f"Skills Lab • Week {week}"
+    if kind in {"portfolio_preparation", "portfolio_execution"}:
+        return f"Portfolio • Week {week}"
+    if kind == "review":
+        return f"Weekly Review • Week {week}"
+    if kind == "career_readiness":
+        return f"Career Readiness • Week {week}"
+    label = task_type_label(task, current_week)
+    return f"{label} • Week {week}"
+
+
 def _assessment_id_from_managed_key(managed_key: str) -> str | None:
     prefix = "roadmap_v1026:assessment:"
     text = str(managed_key or "")
@@ -273,16 +374,18 @@ def _source(task: dict) -> str:
     if kind == "google":
         return str(task.get("source_label") or "Google Certificate")
     if kind in {"academy_lesson", "academy_practice"}:
-        return "Accelerator Academy"
+        _short, full = _area_labels(task)
+        return f"Accelerator Academy • {full}"
     if kind == "knowledge_check":
-        return "Weekly Mastery Check"
+        _short, full = _area_labels(task)
+        return f"{full} Mastery Check"
     if kind == "duckdb":
         item = duckdb_for_label(task.get("label"))
         return f"DuckDB Exercise • {item['title']}" if item else "DuckDB Exercise"
     if kind == "interview_problem":
-        return "Learning • SQL Interview Practice"
+        return "SQL Interview Practice"
     if kind == "applied_lab":
-        return "Accelerator Academy • Applied Lab"
+        return "Accelerator Academy • Skills Lab"
     if kind == "portfolio_preparation":
         return "Portfolio Preparation"
     if kind == "portfolio_execution":
@@ -314,25 +417,9 @@ def _display_title(task: dict) -> str:
 
 
 def _reason(task: dict, current_week: int) -> str:
-    if task.get("is_catch_up"):
-        task_week = _safe_int(task.get("week"), current_week)
-        return f"Catch-up from Week {task_week}"
-    kind = str(task.get("kind") or "")
-    if kind == "google":
-        return "Highest-priority unfinished requirement"
-    if kind in {"academy_lesson", "academy_practice"}:
-        return f"Next ready {_phase_for_week(current_week).replace('_', ' ')} lesson"
-    if kind in {"duckdb", "interview_problem", "sql_practice", "applied_lab"}:
-        return "Prerequisite-ready practice for the current learning phase"
-    if kind == "knowledge_check":
-        return "Proves mastery before later learning unlocks"
-    if kind == "portfolio_preparation":
-        return "Safe early project preparation; no analysis or cleaning required"
-    if kind == "portfolio_execution":
-        return "Current portfolio execution milestone"
-    if kind == "review":
-        return "Review unfinished work and plan next week"
-    return _source(task)
+    # Today’s Focus uses task type and scheduled week. Catch-up remains a
+    # separate metadata state in Next Tasks and only begins after the week ends.
+    return focus_context(task, current_week)
 
 
 def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> dict:
@@ -344,13 +431,19 @@ def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> d
     task["estimated_minutes"] = max(5, _safe_int(task.get("estimated_minutes"), 30))
     task["label"] = _normalize_label(task.get("label"))
     task["kind"] = _kind(conn, task)
-    task["is_catch_up"] = str(task.get("managed_key") or "").startswith("roadmap_v1026:")
+    # A task is catch-up only after its scheduled week has ended. Missing an
+    # earlier day in the same week does not change its status.
+    task["is_catch_up"] = (
+        task["week"] < int(current_week)
+        and not bool(task.get("completed"))
+    )
     readiness = _readiness(conn, task, current_week)
     task["ready"] = readiness.ready
     task["prerequisite_state"] = "Ready" if readiness.ready else "Locked"
     task["prerequisite_reason"] = readiness.reason or None
     task["display_source"] = _source(task)
     task["display_title"] = _display_title(task)
+    task["metadata_label"] = task_type_label(task, current_week)
     task["detail"] = _reason(task, current_week)
     task["roadmap_fallback"] = True
     return task
