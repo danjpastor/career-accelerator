@@ -2,7 +2,8 @@ lesson_id: spreadsheet_cleaning
 title: Text, Dates, Numbers & Duplicates
 order: 1
 difficulty: beginner
-description: Clean inconsistent customer names, phone numbers, and date text while preserving the original fields.
+description: Clean inconsistent customer names, phone numbers, and date text while preserving the original
+  fields.
 estimated_minutes: 40
 content: lesson.md
 objectives:
@@ -11,7 +12,7 @@ objectives:
 key_takeaways:
 - Preserve the raw column and add a clean column beside it.
 - Cleaning formulas should be repeatable across every row.
-teaches: &id001
+teaches:
 - spreadsheet.cleaning
 requires:
 - spreadsheet.conditional_aggregation
@@ -28,34 +29,22 @@ activities:
   title: Learn — Quick concept check
   type: recognition
   runtime: recognition
-  prompt: 'What is the safest way to clean a raw customer-name field?
-
+  prompt: |-
+    What is the safest way to clean a raw customer-name field?
 
     <!-- DCA GOOGLE SHEETS STEPS START -->
-
     ### Complete this task in Google Sheets
 
-
     1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
     2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Create the cleaned value in the designated output column instead of overwriting the source unless the task
-    explicitly says otherwise.
-
+    3. Create the cleaned value in the designated output column instead of overwriting the source unless the task explicitly says otherwise.
     4. Use the function named in the task, such as `TRIM`, `CLEAN`, `PROPER`, `SUBSTITUTE`, or `SPLIT`.
-
     5. Fill the formula through the required rows and compare several cleaned values with the originals.
-
     6. Keep blanks blank unless the task gives a replacement rule.
-
     7. Confirm the finished workbook matches this result: **One selected answer.**
-
     8. Wait until Google Sheets shows that saving is complete.
-
     9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    <!-- DCA GOOGLE SHEETS STEPS END -->
   answer_options:
   - Keep the raw field and add a clean field
   - Overwrite every raw value immediately
@@ -90,16 +79,16 @@ activities:
     title: Learn — Text, Dates, Numbers & Duplicates
     objective: What is the safest way to clean a raw customer-name field?
     action_label: Choose the best answer
-    body: Reliable cleaning is reversible. Keep the raw value, add a new clean column, and use formulas such as
-      `TRIM`, `PROPER`, `SUBSTITUTE`, or `DATEVALUE` so the transformation is visible.
+    body: Reliable cleaning is reversible. Keep the raw value, add a new clean column, and use formulas such
+      as `TRIM`, `PROPER`, `SUBSTITUTE`, or `DATEVALUE` so the transformation is visible.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
     - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
     - Open **the worksheet named in the task** and work in the worksheet named in the task.
-    - Create the cleaned value in the designated output column instead of overwriting the source unless the task
-      explicitly says otherwise.
+    - Create the cleaned value in the designated output column instead of overwriting the source unless the
+      task explicitly says otherwise.
     - Use the function named in the task, such as `TRIM`, `CLEAN`, `PROPER`, `SUBSTITUTE`, or `SPLIT`.
     - Fill the formula through the required rows and compare several cleaned values with the originals.
     - Keep blanks blank unless the task gives a replacement rule.
@@ -114,42 +103,24 @@ activities:
   title: Try It — Standardize customer names
   type: guided
   runtime: workbook
-  prompt: 'On Customers, add Clean Customer Name in I1. Use a formula that removes extra spaces and applies consistent
-    capitalization, then fill through I13.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    On Customers, add Clean Customer Name in I1. Use a formula that removes extra spaces and applies consistent capitalization, then fill through I13.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Customers** and work in Customers, range I2:I13.
-
-    3. Use these columns for this task: **Customer Name Raw, Clean Customer Name**.
-
-    4. Create the cleaned value in the designated output column instead of overwriting the source unless the task
-    explicitly says otherwise.
-
-    5. Use the function named in the task, such as `TRIM`, `CLEAN`, `PROPER`, `SUBSTITUTE`, or `SPLIT`.
-
-    6. Fill the formula through the required rows and compare several cleaned values with the originals.
-
-    7. Keep blanks blank unless the task gives a replacement rule.
-
-    8. Confirm the finished workbook matches this result: **I2:I13 contains formulas using TRIM and PROPER.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Customers**.
+    2. In **I1**, type the header `Clean Customer Name`.
+    3. In **I2**, enter `=PROPER(TRIM(B2))` and press **Enter**.
+    4. TRIM removes extra spaces. PROPER applies consistent title capitalization.
+    5. Fill I2 through **I13**.
+    6. Compare the raw name in B2 with the cleaned name in I2, then spot-check at least two more rows.
+    7. Wait until Google Sheets shows that all changes are saved.
+    8. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: I2:I13 contains formulas using TRIM and PROPER.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -170,8 +141,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Customers
     columns:
     - Customer Name Raw
@@ -192,19 +163,22 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: On Customers, add Clean Customer Name in I1. Use a formula that removes extra spaces and applies consistent
-      capitalization, then fill through I13.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: On Customers, add Clean Customer Name in I1. Use a formula that removes extra spaces and applies
+      consistent capitalization, then fill through I13.
     requirements:
     - Do not change Customer Name Raw.
     - Use a formula, not manual retyping.
     - Fill through row 13 and save.
     expected_output: I2:I13 contains formulas using TRIM and PROPER.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.cleaning
     after_correct: Customer names are standardized while the raw source remains intact.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
@@ -212,69 +186,52 @@ activities:
     title: Try It — Standardize customer names
     objective: On Customers, add Clean Customer Name in I1. Use a formula that removes extra spaces and applies
       consistent capitalization, then fill through I13.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Customers** and work in Customers, range I2:I13.
-    - 'Use these columns for this task: **Customer Name Raw, Clean Customer Name**.'
-    - Create the cleaned value in the designated output column instead of overwriting the source unless the task
-      explicitly says otherwise.
-    - Use the function named in the task, such as `TRIM`, `CLEAN`, `PROPER`, `SUBSTITUTE`, or `SPLIT`.
-    - Fill the formula through the required rows and compare several cleaned values with the originals.
-    - Keep blanks blank unless the task gives a replacement rule.
-    - 'Confirm the finished workbook matches this result: **I2:I13 contains formulas using TRIM and PROPER.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Customers**.
+    - In **I1**, type the header `Clean Customer Name`.
+    - In **I2**, enter `=PROPER(TRIM(B2))` and press **Enter**.
+    - TRIM removes extra spaces. PROPER applies consistent title capitalization.
+    - Fill I2 through **I13**.
+    - Compare the raw name in B2 with the cleaned name in I2, then spot-check at least two more rows.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
 - activity_id: spreadsheet_cleaning_workbook_practice
   title: Practice — Create clean phone and join-date fields
   type: mastery
   runtime: workbook
-  prompt: 'Add Clean Phone in J1 and Clean Join Date in K1. Use formulas to standardize the phone text and convert
-    the join-date text into usable dates. Fill both columns through row 13.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    Add Clean Phone in J1 and Clean Join Date in K1. Use formulas to standardize the phone text and convert the join-date text into usable dates. Fill both columns through row 13.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Customers** and work in Customers, range J2:J13.
-
-    3. Use these columns for this task: **Phone Raw, Join Date Raw, Clean Phone, Clean Join Date**.
-
-    4. Create the cleaned value in the designated output column instead of overwriting the source unless the task
-    explicitly says otherwise.
-
-    5. Use the function named in the task, such as `TRIM`, `CLEAN`, `PROPER`, `SUBSTITUTE`, or `SPLIT`.
-
-    6. Fill the formula through the required rows and compare several cleaned values with the originals.
-
-    7. Keep blanks blank unless the task gives a replacement rule.
-
-    8. Confirm the finished workbook matches this result: **J2:J13 and K2:K13 contain saved cleaning formulas.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Customers**.
+    2. In **J1**, type `Clean Phone`. In **K1**, type `Clean Join Date`.
+    3. In **J2**, enter `=SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(G2,"(",""),")",""),"-",""),".","")," ","")`.
+    4. The nested SUBSTITUTE functions remove parentheses, hyphens, periods, and spaces while preserving the digits.
+    5. In **K2**, enter `=DATEVALUE(H2)`.
+    6. Fill J2:J13 and K2:K13 down through row 13.
+    7. Select K2:K13 and choose **Format → Number → Date**.
+    8. Spot-check several raw phone and date formats to confirm they now follow one consistent structure.
+    9. Wait until Google Sheets shows that all changes are saved.
+    10. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: J2:J13 and K2:K13 contain saved cleaning formulas.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -303,8 +260,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Customers
     columns:
     - Phone Raw
@@ -331,7 +288,8 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
     task: Add Clean Phone in J1 and Clean Join Date in K1. Use formulas to standardize the phone text and convert
       the join-date text into usable dates. Fill both columns through row 13.
     requirements:
@@ -340,38 +298,43 @@ activities:
     - Format Clean Join Date as a date.
     - Fill both columns through row 13 and save.
     expected_output: J2:J13 and K2:K13 contain saved cleaning formulas.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.cleaning
     after_correct: The customer table now has clean, analysis-ready phone and date fields.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Practice — Create clean phone and join-date fields
-    objective: Add Clean Phone in J1 and Clean Join Date in K1. Use formulas to standardize the phone text and convert
-      the join-date text into usable dates. Fill both columns through row 13.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: Add Clean Phone in J1 and Clean Join Date in K1. Use formulas to standardize the phone text
+      and convert the join-date text into usable dates. Fill both columns through row 13.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Customers** and work in Customers, range J2:J13.
-    - 'Use these columns for this task: **Phone Raw, Join Date Raw, Clean Phone, Clean Join Date**.'
-    - Create the cleaned value in the designated output column instead of overwriting the source unless the task
-      explicitly says otherwise.
-    - Use the function named in the task, such as `TRIM`, `CLEAN`, `PROPER`, `SUBSTITUTE`, or `SPLIT`.
-    - Fill the formula through the required rows and compare several cleaned values with the originals.
-    - Keep blanks blank unless the task gives a replacement rule.
-    - 'Confirm the finished workbook matches this result: **J2:J13 and K2:K13 contain saved cleaning formulas.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Customers**.
+    - In **J1**, type `Clean Phone`. In **K1**, type `Clean Join Date`.
+    - In **J2**, enter `=SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(G2,"(",""),")",""),"-",""),".",""),"
+      ","")`.
+    - The nested SUBSTITUTE functions remove parentheses, hyphens, periods, and spaces while preserving the
+      digits.
+    - In **K2**, enter `=DATEVALUE(H2)`.
+    - Fill J2:J13 and K2:K13 down through row 13.
+    - Select K2:K13 and choose **Format → Number → Date**.
+    - Spot-check several raw phone and date formats to confirm they now follow one consistent structure.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true

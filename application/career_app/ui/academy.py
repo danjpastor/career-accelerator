@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -10,13 +11,16 @@ from PySide6.QtGui import QColor, QBrush, QDesktopServices, QPainter, QPen, QFon
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
+    QFileDialog,
     QBoxLayout,
     QButtonGroup,
     QComboBox,
     QFrame,
     QHBoxLayout,
     QHeaderView,
+    QInputDialog,
     QLabel,
+    QLineEdit,
     QListWidget,
     QListWidgetItem,
     QMessageBox,
@@ -577,10 +581,10 @@ class AcceleratorAcademyWidget(QWidget):
         workbook_actions.setSpacing(7)
         workbook_row_one = QHBoxLayout()
         workbook_row_one.setSpacing(7)
-        self.workbook_open_button = QPushButton("Open Practice Workbook")
+        self.workbook_open_button = QPushButton("Open Google Sheet")
         self.workbook_open_button.setObjectName("Primary")
         self.workbook_open_button.clicked.connect(self._open_practice_workbook)
-        self.workbook_google_button = QPushButton("Use in Google Sheets")
+        self.workbook_google_button = QPushButton("Paste Google Sheet Link")
         self.workbook_google_button.setObjectName("Secondary")
         self.workbook_google_button.clicked.connect(self._use_in_google_sheets)
         workbook_row_one.addWidget(self.workbook_open_button, 1)
@@ -589,10 +593,10 @@ class AcceleratorAcademyWidget(QWidget):
 
         workbook_row_two = QHBoxLayout()
         workbook_row_two.setSpacing(7)
-        self.workbook_reset_button = QPushButton("Reset Lesson Workbook")
+        self.workbook_reset_button = QPushButton("Get Starter Workbook")
         self.workbook_reset_button.setObjectName("Secondary")
         self.workbook_reset_button.clicked.connect(self._reset_lesson_workbook)
-        self.workbook_instructions_button = QPushButton("Open Lesson Instructions")
+        self.workbook_instructions_button = QPushButton("Google Sheets Setup")
         self.workbook_instructions_button.setObjectName("Secondary")
         self.workbook_instructions_button.clicked.connect(self._open_lesson_instructions)
         workbook_row_two.addWidget(self.workbook_reset_button, 1)
@@ -1700,9 +1704,7 @@ class AcceleratorAcademyWidget(QWidget):
             f"<b>Rows:</b> {row_range}<br>"
             f"<b>Finished result:</b> {expected}"
         )
-        path = self.service.workbook_path(lesson, activity)
-        state = "Ready" if path.exists() else "A personal copy will be created when you open it"
-        self.step_workbook_location.setText(f"{state}\n{path}")
+        self._refresh_workbook_link_status()
         evidence_prompt = str(metadata.get("evidence_prompt") or "").strip()
         self.step_workbook_evidence_label.setVisible(bool(evidence_prompt))
         self.step_workbook_answer.setVisible(bool(evidence_prompt))
@@ -1710,96 +1712,143 @@ class AcceleratorAcademyWidget(QWidget):
             self.step_workbook_evidence_label.setText("Check Your Work")
             self.step_workbook_answer.setPlaceholderText(evidence_prompt)
 
-    def _open_practice_workbook(self) -> None:
-        if self._current_lesson is None or self._current_activity is None:
-            return
-        try:
-            path = self.service.ensure_workbook(
-                self._current_lesson,
-                self._current_activity,
+    def _refresh_workbook_link_status(self) -> None:
+        link = self.service.spreadsheet_share_link
+        if link.linked:
+            self.workbook_google_button.setText("Replace Google Sheet Link")
+            self.step_workbook_location.setText(
+                "Linked Google Sheet\n" + str(link.share_url)
             )
-        except Exception as exc:
-            QMessageBox.critical(self, "Practice Workbook", str(exc))
+        else:
+            self.workbook_google_button.setText("Paste Google Sheet Link")
+            self.step_workbook_location.setText(
+                "No Google Sheet is linked yet. Get the starter workbook, "
+                "import it into Google Sheets, share it as Anyone with the "
+                "link → Viewer, then paste the share link here."
+            )
+
+    def _open_practice_workbook(self) -> None:
+        link = self.service.spreadsheet_share_link
+        if not link.linked:
+            self._use_in_google_sheets()
             return
-        self.step_workbook_location.setText(f"Working copy\n{path}")
-        if not QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.resolve()))):
+        url = QUrl(str(link.share_url))
+        if not QDesktopServices.openUrl(url):
             QMessageBox.warning(
                 self,
-                "Practice Workbook",
-                f"The workbook could not be opened automatically. Open it from:\n\n{path}",
+                "Open Google Sheet",
+                "The linked Google Sheet could not be opened automatically.\n\n"
+                + str(link.share_url),
             )
 
     def _use_in_google_sheets(self) -> None:
-        if self._current_lesson is None or self._current_activity is None:
+        link = self.service.spreadsheet_share_link
+        current = str(link.share_url or "")
+        value, accepted = QInputDialog.getText(
+            self,
+            "Paste Google Sheet Link",
+            (
+                "In Google Sheets, choose Share and set General access to "
+                "Anyone with the link with Viewer access. Then paste the "
+                "copied share link below:"
+            ),
+            QLineEdit.EchoMode.Normal,
+            current,
+        )
+        if not accepted:
             return
         try:
-            path = self.service.ensure_workbook(
-                self._current_lesson,
-                self._current_activity,
-            )
+            saved_url = link.save_link(value, verify=True)
+            if self._current_lesson is not None and self._current_activity is not None:
+                destination = self.service.ensure_workbook(
+                    self._current_lesson,
+                    self._current_activity,
+                )
+                link.sync_to(destination)
         except Exception as exc:
-            QMessageBox.critical(self, "Google Sheets", str(exc))
+            QMessageBox.warning(self, "Could Not Link Google Sheet", str(exc))
             return
-        QApplication.clipboard().setText(str(path))
-        QDesktopServices.openUrl(QUrl("https://sheets.google.com"))
+        self._refresh_workbook_link_status()
         QMessageBox.information(
             self,
-            "Use in Google Sheets",
-            "The workbook path has been copied to your clipboard.\n\n"
-            "1. In Google Sheets, choose File → Import → Upload.\n"
-            "2. Browse to or drag in the copied .xlsx file.\n"
-            "3. Complete the lesson and download it again as Microsoft Excel (.xlsx).\n"
-            "4. Replace the working copy at the path below before checking your work.\n\n"
-            f"{path}",
+            "Google Sheet Linked",
+            (
+                "Career Accelerator can now download the latest saved version "
+                "of this workbook whenever you select Check My Work.\n\n"
+                f"{saved_url}"
+            ),
         )
 
     def _reset_lesson_workbook(self) -> None:
         if self._current_lesson is None or self._current_activity is None:
             return
-        answer = QMessageBox.question(
-            self,
-            "Reset Practice Workbook",
-            "Create a clean workbook copy? Your current workbook will be moved to the "
-            "Academy archive so none of your work is overwritten.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel,
-            QMessageBox.StandardButton.Cancel,
-        )
-        if answer != QMessageBox.StandardButton.Yes:
-            return
         try:
-            path, archived = self.service.reset_workbook(
+            template = self.service.workbook_template_path(
                 self._current_lesson,
                 self._current_activity,
             )
         except Exception as exc:
-            QMessageBox.critical(self, "Reset Practice Workbook", str(exc))
+            QMessageBox.critical(self, "Starter Workbook", str(exc))
             return
-        archive_note = f"\n\nPrevious work archived at:\n{archived}" if archived else ""
-        self.step_workbook_location.setText(f"Clean working copy\n{path}")
+
+        downloads = Path.home() / "Downloads"
+        default_dir = downloads if downloads.is_dir() else Path.home()
+        selected, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Northstar Operations Starter Workbook",
+            str(default_dir / template.name),
+            "Excel workbooks (*.xlsx)",
+        )
+        if not selected:
+            return
+        destination = Path(selected)
+        if destination.suffix.casefold() != ".xlsx":
+            destination = destination.with_suffix(".xlsx")
+        try:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(template, destination)
+        except OSError as exc:
+            QMessageBox.critical(self, "Starter Workbook", str(exc))
+            return
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(destination.parent.resolve())))
         QMessageBox.information(
             self,
-            "Practice Workbook Reset",
-            f"A clean working copy is ready at:\n{path}{archive_note}",
+            "Starter Workbook Saved",
+            (
+                "The clean Northstar Operations workbook is ready. This is a "
+                "one-time setup step.\n\n"
+                "1. Open Google Sheets.\n"
+                "2. Choose File → Import → Upload.\n"
+                "3. Import this .xlsx workbook as a new spreadsheet.\n"
+                "4. Choose Share and set General access to Anyone with the "
+                "link with Viewer access.\n"
+                "5. Return here and select Paste Google Sheet Link.\n\n"
+                f"Saved at:\n{destination}"
+            ),
         )
 
     def _open_lesson_instructions(self) -> None:
-        if self._current_lesson is None or self._current_activity is None:
-            return
-        try:
-            path = self.service.write_workbook_instructions(
-                self._current_lesson,
-                self._current_activity,
-                self._current_instruction_text,
-            )
-        except Exception as exc:
-            QMessageBox.critical(self, "Lesson Instructions", str(exc))
-            return
-        if not QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.resolve()))):
-            QMessageBox.warning(
-                self,
-                "Lesson Instructions",
-                f"The instructions could not be opened automatically. Open:\n\n{path}",
-            )
+        linked_text = (
+            "A Google Sheet is currently linked."
+            if self.service.spreadsheet_share_link.linked
+            else "No Google Sheet is linked yet."
+        )
+        QMessageBox.information(
+            self,
+            "Google Sheets Setup",
+            (
+                f"{linked_text}\n\n"
+                "One-time setup:\n"
+                "1. Select Get Starter Workbook.\n"
+                "2. In Google Sheets, choose File → Import → Upload and import "
+                "the starter .xlsx file as a new spreadsheet.\n"
+                "3. Choose Share. Under General access, select Anyone with the "
+                "link and Viewer.\n"
+                "4. Copy the share link and select Paste Google Sheet Link.\n\n"
+                "For every lesson after that, use Open Google Sheet, complete "
+                "the task, wait for Google Sheets to save, and select Check My Work."
+            ),
+        )
 
     def _lesson_answer(self) -> str:
         if self._current_activity is None:
@@ -1852,14 +1901,14 @@ class AcceleratorAcademyWidget(QWidget):
             label_sets = (
                 {
                     self.step_run: "▶ Run",
-                    self.step_check: "✓ Check Workbook",
+                    self.step_check: "✓ Check My Work",
                     self.step_hint: "💡 Show Hint",
                     self.step_solution: "Expected Result",
                     self.lesson_continue: "Continue to Checkpoint  →" if checkpoint_next else "Continue  →",
                 },
                 {
                     self.step_run: "Run",
-                    self.step_check: "✓ Check File",
+                    self.step_check: "✓ Check",
                     self.step_hint: "💡 Hint",
                     self.step_solution: "Expected",
                     self.lesson_continue: "Checkpoint  →" if checkpoint_next else "Continue  →",
@@ -2692,7 +2741,7 @@ class AcceleratorAcademyWidget(QWidget):
             )
             save_instructions = str(
                 metadata.get("save_instructions")
-                or "Save the working .xlsx file before selecting Check Workbook."
+                or "Wait for Google Sheets to save, then select Check My Work."
             )
             descriptions = metadata.get("column_descriptions") or {}
             description_lines = ""

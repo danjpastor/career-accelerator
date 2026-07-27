@@ -9337,12 +9337,6 @@ def run():
 
         window = CareerAccelerator()
 
-
-        # DCA GOOGLE SHEETS ACADEMY V10.30.1
-
-        from career_app.ui.google_sheets_academy import install_google_sheets_academy
-
-        install_google_sheets_academy(window, ROOT)
         if external_splash:
             _update_external_startup_splash(
                 "Loading curriculum and learning tracks",

@@ -16,4 +16,4 @@ In B9, count orders with Status equal to Delivered. In B10, calculate West reven
 
 ## Check Your Work
 
-Save the **Northstar Operations Practice Workbook.xlsx** working copy, return to Accelerator Academy, and select **Check Workbook**. The application checks the saved workbook structure and asks for a short evidence answer only when the result cannot be validated reliably across both Excel and Google Sheets.
+Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.

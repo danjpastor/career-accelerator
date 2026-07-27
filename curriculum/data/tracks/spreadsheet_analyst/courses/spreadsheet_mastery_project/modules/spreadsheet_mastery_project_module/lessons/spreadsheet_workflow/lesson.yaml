@@ -12,7 +12,7 @@ objectives:
 key_takeaways:
 - A reproducible workbook explains where data came from and how outputs were produced.
 - A final QA checklist reduces silent errors.
-teaches: &id001
+teaches:
 - spreadsheet.reconciliation
 requires:
 - spreadsheet.kpis
@@ -68,42 +68,23 @@ activities:
   title: Try It — Complete the workflow checklist
   type: guided
   runtime: workbook
-  prompt: 'On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw data
-    preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Analysis Workspace** and work in Analysis Workspace, range B46:B50.
-
-    3. Use these columns for this task: **Reproducible Workflow Checklist, Status / Note**.
-
-    4. Select the source date cells and choose **Format → Number → Date** if they are not recognized as dates.
-
-    5. Enter the required date formula using the function named in the task, such as `DATE`, `YEAR`, `MONTH`, `TEXT`,
-    or `WEEKDAY`.
-
-    6. Fill the formula down and verify the result across several different dates.
-
-    7. Correct any `#VALUE!`, `#N/A`, or unexpected serial-number result.
-
-    8. Confirm the finished workbook matches this result: **Every checklist row has a clear status or note.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
+    2. Review the five workflow labels in A46:A50.
+    3. In B46:B50, enter a short specific status for each item, such as `Preserved`, `Documented`, `Checked`, `Refreshed`, or `Saved`.
+    4. Use one status or note in every row; do not leave any checklist item blank.
+    5. Make each note accurate for the current workbook rather than copying the same word into all five cells.
+    6. Wait until Google Sheets shows that all changes are saved.
+    7. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: Every checklist row has a clear status or note.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -116,8 +97,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Analysis Workspace
     columns:
     - Reproducible Workflow Checklist
@@ -138,89 +119,72 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: 'On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw data
-      preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.'
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: 'On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw
+      data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.'
     requirements:
     - Complete all five rows.
     - Use specific notes such as Complete, Checked, or the location of documentation.
     - Save the workbook.
     expected_output: Every checklist row has a clear status or note.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.reconciliation
     after_correct: The workbook now records the core reproducibility and QA steps.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Try It — Complete the workflow checklist
-    objective: 'On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw
-      data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.'
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: 'On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item:
+      raw data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.'
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Analysis Workspace** and work in Analysis Workspace, range B46:B50.
-    - 'Use these columns for this task: **Reproducible Workflow Checklist, Status / Note**.'
-    - Select the source date cells and choose **Format → Number → Date** if they are not recognized as dates.
-    - Enter the required date formula using the function named in the task, such as `DATE`, `YEAR`, `MONTH`, `TEXT`,
-      or `WEEKDAY`.
-    - Fill the formula down and verify the result across several different dates.
-    - Correct any `#VALUE!`, `#N/A`, or unexpected serial-number result.
-    - 'Confirm the finished workbook matches this result: **Every checklist row has a clear status or note.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Analysis Workspace**.
+    - Review the five workflow labels in A46:A50.
+    - In B46:B50, enter a short specific status for each item, such as `Preserved`, `Documented`, `Checked`,
+      `Refreshed`, or `Saved`.
+    - Use one status or note in every row; do not leave any checklist item blank.
+    - Make each note accurate for the current workbook rather than copying the same word into all five cells.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
 - activity_id: spreadsheet_workflow_workbook_practice
   title: Practice — Add a concise analyst handoff note
   type: mastery
   runtime: workbook
-  prompt: 'In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which sheet
-    contains the final analysis, and what another analyst should refresh first.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which sheet contains the final analysis, and what another analyst should refresh first.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Analysis Workspace** and work in Analysis Workspace, range A52:B52.
-
-    3. Use these columns for this task: **Handoff note**.
-
-    4. Open the worksheet or documentation area named in the task.
-
-    5. Record the source, purpose, steps, assumptions, checks, and unresolved issues in plain language.
-
-    6. Include enough detail for another analyst to repeat the work without asking what changed.
-
-    7. Review the workbook for clear sheet names, readable headers, and no unexplained temporary output.
-
-    8. Confirm the finished workbook matches this result: **B52 contains a concise note mentioning source data,
-    Analysis Workspace, and refresh or validation.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
+    2. Click **B52**.
+    3. Write a concise handoff note that identifies the source-data sheets, names **Analysis Workspace** as the final analysis sheet, and states what another analyst should refresh or validate first.
+    4. Use complete sentences and keep the note short enough to scan quickly.
+    5. Confirm the note contains the words `Analysis Workspace` before checking your work.
+    6. Wait until Google Sheets shows that all changes are saved.
+    7. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or validation.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -235,14 +199,15 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Analysis Workspace
     columns:
     - Handoff note
     row_range: A52:B52
     starting_state: Row 52 is available for a final handoff note.
-    expected_result: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or validation.
+    expected_result: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or
+      validation.
     column_descriptions:
       Handoff note: Instructions that help another analyst understand and reuse the workbook.
     sample_values:
@@ -254,47 +219,50 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which sheet
-      contains the final analysis, and what another analyst should refresh first.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which
+      sheet contains the final analysis, and what another analyst should refresh first.
     requirements:
     - Mention the source-data sheets.
     - Name Analysis Workspace.
     - State what should be refreshed or checked first.
     - Save the workbook.
-    expected_output: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or validation.
-    skills_practiced: *id001
+    expected_output: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or
+      validation.
+    skills_practiced:
+    - spreadsheet.reconciliation
     after_correct: The workbook includes a useful handoff note for the next analyst.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Practice — Add a concise analyst handoff note
-    objective: In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which
-      sheet contains the final analysis, and what another analyst should refresh first.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: In Analysis Workspace B52, write a short handoff note explaining where the source data lives,
+      which sheet contains the final analysis, and what another analyst should refresh first.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Analysis Workspace** and work in Analysis Workspace, range A52:B52.
-    - 'Use these columns for this task: **Handoff note**.'
-    - Open the worksheet or documentation area named in the task.
-    - Record the source, purpose, steps, assumptions, checks, and unresolved issues in plain language.
-    - Include enough detail for another analyst to repeat the work without asking what changed.
-    - Review the workbook for clear sheet names, readable headers, and no unexplained temporary output.
-    - 'Confirm the finished workbook matches this result: **B52 contains a concise note mentioning source data,
-      Analysis Workspace, and refresh or validation.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Analysis Workspace**.
+    - Click **B52**.
+    - Write a concise handoff note that identifies the source-data sheets, names **Analysis Workspace** as
+      the final analysis sheet, and states what another analyst should refresh or validate first.
+    - Use complete sentences and keep the note short enough to scan quickly.
+    - Confirm the note contains the words `Analysis Workspace` before checking your work.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true

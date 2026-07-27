@@ -11,7 +11,7 @@ objectives:
 key_takeaways:
 - Conditional summary functions aggregate only qualifying rows.
 - A variance explains how actual performance compares with a target.
-teaches: &id001
+teaches:
 - spreadsheet.conditional_aggregation
 requires:
 - spreadsheet.conditional_logic
@@ -60,49 +60,31 @@ activities:
     title: Learn — COUNTIFS, SUMIFS & Variance
     objective: Which function is designed to sum values that meet one or more conditions?
     action_label: Choose the best answer
-    body: '`SUMIFS` adds a measure for rows that meet conditions. `COUNTIFS` counts qualifying rows. Keep the criteria
-      explicit so another analyst can audit the calculation.'
+    body: '`SUMIFS` adds a measure for rows that meet conditions. `COUNTIFS` counts qualifying rows. Keep the
+      criteria explicit so another analyst can audit the calculation.'
   required_for_completion: true
 - activity_id: conditional_summaries_workbook_guided
   title: Try It — Calculate West-region revenue
   type: guided
   runtime: workbook
-  prompt: 'On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the target
-    in B7 unchanged.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the target in B7 unchanged.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Analysis Workspace** and work in Analysis Workspace, range A7:B8.
-
-    3. Use these columns for this task: **West revenue target, West revenue**.
-
-    4. Click the first required output cell and type `=` to begin the formula.
-
-    5. Build the formula with the source cells from the current row, then press **Enter**.
-
-    6. Drag the blue fill handle through the full required range.
-
-    7. Spot-check the first, middle, and last result before checking your work.
-
-    8. Confirm the finished workbook matches this result: **B8 contains a conditional-sum formula that returns West
-    revenue.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
+    2. Click **B8** beside West revenue.
+    3. Enter `=SUMIF(Orders!D2:D37,"West",Orders!K2:K37)` and press **Enter**.
+    4. The first range contains the Region criteria, `West` is the condition, and the last range contains Revenue to add.
+    5. Leave the target in B7 unchanged.
+    6. Format B8 as currency using **Format → Number → Currency**.
+    7. Wait until Google Sheets shows that all changes are saved.
+    8. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: B8 contains a conditional-sum formula that returns West revenue.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -118,8 +100,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Analysis Workspace
     columns:
     - West revenue target
@@ -140,89 +122,73 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the target
-      in B7 unchanged.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the
+      target in B7 unchanged.
     requirements:
     - Use the Orders Region and Revenue columns.
     - Use West as the criterion.
     - Format B8 as US dollars and save.
     expected_output: B8 contains a conditional-sum formula that returns West revenue.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
     after_correct: The West revenue summary is formula-driven and auditable.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Try It — Calculate West-region revenue
-    objective: On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the
-      target in B7 unchanged.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep
+      the target in B7 unchanged.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Analysis Workspace** and work in Analysis Workspace, range A7:B8.
-    - 'Use these columns for this task: **West revenue target, West revenue**.'
-    - Click the first required output cell and type `=` to begin the formula.
-    - Build the formula with the source cells from the current row, then press **Enter**.
-    - Drag the blue fill handle through the full required range.
-    - Spot-check the first, middle, and last result before checking your work.
-    - 'Confirm the finished workbook matches this result: **B8 contains a conditional-sum formula that returns West
-      revenue.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Analysis Workspace**.
+    - Click **B8** beside West revenue.
+    - Enter `=SUMIF(Orders!D2:D37,"West",Orders!K2:K37)` and press **Enter**.
+    - The first range contains the Region criteria, `West` is the condition, and the last range contains Revenue
+      to add.
+    - Leave the target in B7 unchanged.
+    - Format B8 as currency using **Format → Number → Currency**.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
 - activity_id: conditional_summaries_workbook_practice
   title: Practice — Count delivered orders and calculate variance
   type: mastery
   runtime: workbook
-  prompt: 'In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target in
-    B7.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target in B7.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Analysis Workspace** and work in Analysis Workspace, range A9:B10.
-
-    3. Use these columns for this task: **Delivered orders, Variance to target**.
-
-    4. Click the first required output cell and type `=` to begin the formula.
-
-    5. Build the formula with the source cells from the current row, then press **Enter**.
-
-    6. Drag the blue fill handle through the full required range.
-
-    7. Spot-check the first, middle, and last result before checking your work.
-
-    8. Confirm the finished workbook matches this result: **B9 contains a COUNTIF or COUNTIFS formula and B10 contains
-    a variance formula.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
+    2. In **B9**, enter `=COUNTIF(Orders!J2:J37,"Delivered")` to count delivered orders.
+    3. In **B10**, enter `=B8-B7` to calculate actual West revenue minus the target.
+    4. Format B10 as currency.
+    5. Confirm B9 is a whole-number count and B10 is positive when actual revenue is above target.
+    6. Wait until Google Sheets shows that all changes are saved.
+    7. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: B9 contains a COUNTIF or COUNTIFS formula and B10 contains a variance formula.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -245,8 +211,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Analysis Workspace
     columns:
     - Delivered orders
@@ -267,46 +233,47 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target in
-      B7.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target
+      in B7.
     requirements:
     - Count only Delivered orders.
     - Calculate actual minus target.
     - Format B10 as US dollars and save.
     expected_output: B9 contains a COUNTIF or COUNTIFS formula and B10 contains a variance formula.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
     after_correct: The summary now shows both delivered-order volume and performance against target.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Practice — Count delivered orders and calculate variance
-    objective: In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target
-      in B7.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the
+      target in B7.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Analysis Workspace** and work in Analysis Workspace, range A9:B10.
-    - 'Use these columns for this task: **Delivered orders, Variance to target**.'
-    - Click the first required output cell and type `=` to begin the formula.
-    - Build the formula with the source cells from the current row, then press **Enter**.
-    - Drag the blue fill handle through the full required range.
-    - Spot-check the first, middle, and last result before checking your work.
-    - 'Confirm the finished workbook matches this result: **B9 contains a COUNTIF or COUNTIFS formula and B10 contains
-      a variance formula.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Analysis Workspace**.
+    - In **B9**, enter `=COUNTIF(Orders!J2:J37,"Delivered")` to count delivered orders.
+    - In **B10**, enter `=B8-B7` to calculate actual West revenue minus the target.
+    - Format B10 as currency.
+    - Confirm B9 is a whole-number count and B10 is positive when actual revenue is above target.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true

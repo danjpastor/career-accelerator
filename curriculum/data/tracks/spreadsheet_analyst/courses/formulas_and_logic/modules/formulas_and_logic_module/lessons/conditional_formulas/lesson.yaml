@@ -11,7 +11,7 @@ objectives:
 key_takeaways:
 - IF converts a business rule into a repeatable classification.
 - AND requires every included condition to be true.
-teaches: &id001
+teaches:
 - spreadsheet.conditional_logic
 requires:
 - spreadsheet.formulas
@@ -28,33 +28,22 @@ activities:
   title: Learn — Quick concept check
   type: recognition
   runtime: recognition
-  prompt: 'Which formula structure returns one result when a condition is true and another when it is false?
-
+  prompt: |-
+    Which formula structure returns one result when a condition is true and another when it is false?
 
     <!-- DCA GOOGLE SHEETS STEPS START -->
-
     ### Complete this task in Google Sheets
 
-
     1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
     2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
     3. Click the first required output cell and start an `IF` formula with `=`.
-
     4. Enter the condition, the result when TRUE, and the result when FALSE.
-
     5. Use `AND(...)` inside the condition when every listed requirement must be true.
-
     6. Fill the formula down and test at least one TRUE row and one FALSE row.
-
     7. Confirm the finished workbook matches this result: **One selected answer.**
-
     8. Wait until Google Sheets shows that saving is complete.
-
     9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    <!-- DCA GOOGLE SHEETS STEPS END -->
   answer_options:
   - IF
   - SUM
@@ -89,8 +78,8 @@ activities:
     title: Learn — IF, AND, OR & Error Handling
     objective: Which formula structure returns one result when a condition is true and another when it is false?
     action_label: Choose the best answer
-    body: Conditional formulas let a spreadsheet apply the same business rule to every row. `IF` handles two outcomes,
-      while `AND` or `OR` combines several tests.
+    body: Conditional formulas let a spreadsheet apply the same business rule to every row. `IF` handles two
+      outcomes, while `AND` or `OR` combines several tests.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
@@ -112,42 +101,24 @@ activities:
   title: Try It — Flag completed orders
   type: guided
   runtime: workbook
-  prompt: 'On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return Open.
-    Fill the formula through M37.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return Open. Fill the formula through M37.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Orders** and work in Orders, range M2:M37.
-
-    3. Use these columns for this task: **Status, Fulfillment Flag**.
-
-    4. Click the first required output cell and begin the lookup formula with `=`.
-
-    5. Use the current row''s key as the search key and the named lookup table as the lookup range.
-
-    6. Use an exact match and lock the lookup range with `$` references before filling down.
-
-    7. Verify at least three results against the source table and correct unexpected `#N/A` values.
-
-    8. Confirm the finished workbook matches this result: **Every row in M2:M37 contains an IF formula returning
-    Complete or Open.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Orders**.
+    2. In **M1**, type the header `Fulfillment Flag`.
+    3. In **M2**, enter `=IF(J2="Delivered","Complete","Open")` and press **Enter**.
+    4. The IF test checks the Status in the same row. Delivered returns Complete; every other status returns Open.
+    5. Fill M2 through **M37**.
+    6. Filter or spot-check several Delivered and non-Delivered rows to confirm both results appear correctly.
+    7. Wait until Google Sheets shows that all changes are saved.
+    8. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: Every row in M2:M37 contains an IF formula returning Complete or Open.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -170,8 +141,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Orders
     columns:
     - Status
@@ -192,19 +163,22 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return Open.
-      Fill the formula through M37.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return
+      Open. Fill the formula through M37.
     requirements:
     - Test the Status value from the same row.
     - Use the exact outputs Complete and Open.
     - Fill through row 37 and save.
     expected_output: Every row in M2:M37 contains an IF formula returning Complete or Open.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.conditional_logic
     after_correct: Every order now has a consistent fulfillment classification.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
@@ -212,69 +186,51 @@ activities:
     title: Try It — Flag completed orders
     objective: On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return
       Open. Fill the formula through M37.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Orders** and work in Orders, range M2:M37.
-    - 'Use these columns for this task: **Status, Fulfillment Flag**.'
-    - Click the first required output cell and begin the lookup formula with `=`.
-    - Use the current row's key as the search key and the named lookup table as the lookup range.
-    - Use an exact match and lock the lookup range with `$` references before filling down.
-    - Verify at least three results against the source table and correct unexpected `#N/A` values.
-    - 'Confirm the finished workbook matches this result: **Every row in M2:M37 contains an IF formula returning
-      Complete or Open.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Orders**.
+    - In **M1**, type the header `Fulfillment Flag`.
+    - In **M2**, enter `=IF(J2="Delivered","Complete","Open")` and press **Enter**.
+    - The IF test checks the Status in the same row. Delivered returns Complete; every other status returns
+      Open.
+    - Fill M2 through **M37**.
+    - Filter or spot-check several Delivered and non-Delivered rows to confirm both results appear correctly.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
 - activity_id: conditional_formulas_workbook_practice
   title: Practice — Identify large orders for review
   type: mastery
   runtime: workbook
-  prompt: 'Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000;
-    otherwise return Standard. Fill through N37.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000; otherwise return Standard. Fill through N37.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Orders** and work in Orders, range N2:N37.
-
-    3. Use these columns for this task: **Units, Revenue, Large Order Flag**.
-
-    4. Click the first required output cell and start an `IF` formula with `=`.
-
-    5. Enter the condition, the result when TRUE, and the result when FALSE.
-
-    6. Use `AND(...)` inside the condition when every listed requirement must be true.
-
-    7. Fill the formula down and test at least one TRUE row and one FALSE row.
-
-    8. Confirm the finished workbook matches this result: **N2:N37 uses IF with AND to classify each order as Review
-    or Standard.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Orders**.
+    2. In **N1**, type the header `Large Order Flag`.
+    3. In **N2**, enter `=IF(AND(G2>=20,K2>=1000),"Review","Standard")` and press **Enter**.
+    4. AND requires both conditions to be true: Units must be at least 20 and Revenue must be at least $1,000.
+    5. Fill N2 through **N37**.
+    6. Spot-check one Review row and one Standard row against the Units and Revenue values.
+    7. Wait until Google Sheets shows that all changes are saved.
+    8. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: N2:N37 uses IF with AND to classify each order as Review or Standard.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -295,8 +251,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Orders
     columns:
     - Units
@@ -320,46 +276,48 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000; otherwise
-      return Standard. Fill through N37.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000;
+      otherwise return Standard. Fill through N37.
     requirements:
     - Require both conditions.
     - Use the exact outputs Review and Standard.
     - Fill through row 37 and save.
     expected_output: N2:N37 uses IF with AND to classify each order as Review or Standard.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.conditional_logic
     after_correct: The workbook consistently identifies large orders that need review.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Practice — Identify large orders for review
-    objective: Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000;
-      otherwise return Standard. Fill through N37.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least
+      $1,000; otherwise return Standard. Fill through N37.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Orders** and work in Orders, range N2:N37.
-    - 'Use these columns for this task: **Units, Revenue, Large Order Flag**.'
-    - Click the first required output cell and start an `IF` formula with `=`.
-    - Enter the condition, the result when TRUE, and the result when FALSE.
-    - Use `AND(...)` inside the condition when every listed requirement must be true.
-    - Fill the formula down and test at least one TRUE row and one FALSE row.
-    - 'Confirm the finished workbook matches this result: **N2:N37 uses IF with AND to classify each order as Review
-      or Standard.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Orders**.
+    - In **N1**, type the header `Large Order Flag`.
+    - In **N2**, enter `=IF(AND(G2>=20,K2>=1000),"Review","Standard")` and press **Enter**.
+    - 'AND requires both conditions to be true: Units must be at least 20 and Revenue must be at least $1,000.'
+    - Fill N2 through **N37**.
+    - Spot-check one Review row and one Standard row against the Units and Revenue values.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true

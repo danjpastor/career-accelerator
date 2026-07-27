@@ -11,7 +11,7 @@ objectives:
 key_takeaways:
 - A KPI should answer a business question, not merely display a number.
 - Charts should emphasize comparison and use a specific title.
-teaches: &id001
+teaches:
 - spreadsheet.kpis
 requires:
 - spreadsheet.pivots
@@ -28,33 +28,22 @@ activities:
   title: Learn — Quick concept check
   type: recognition
   runtime: recognition
-  prompt: 'Which chart is usually best for comparing revenue across regions?
-
+  prompt: |-
+    Which chart is usually best for comparing revenue across regions?
 
     <!-- DCA GOOGLE SHEETS STEPS START -->
-
     ### Complete this task in Google Sheets
 
-
     1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
     2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
     3. Select the completed summary range, including its labels.
-
     4. Choose **Insert → Chart**.
-
     5. Select the chart type named in the task and verify the data range, X-axis, and series.
-
     6. Add the required title and confirm no requested category is hidden.
-
     7. Confirm the finished workbook matches this result: **One selected answer.**
-
     8. Wait until Google Sheets shows that saving is complete.
-
     9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    <!-- DCA GOOGLE SHEETS STEPS END -->
   answer_options:
   - Column chart
   - Scatter plot
@@ -112,44 +101,27 @@ activities:
   title: Try It — Build the KPI block
   type: guided
   runtime: workbook
-  prompt: 'In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate
-    in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so a delivered
-    rate below 60% is clearly flagged for attention.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so a delivered rate below 60% is clearly flagged for attention.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Analysis Workspace** and work in Analysis Workspace, range I3:I6.
-
-    3. Use these columns for this task: **Total Revenue, Average Order Value, Total Units, Delivered Rate**.
-
-    4. Select the full target range without the header unless the task says otherwise.
-
-    5. Choose **Format → Conditional formatting**.
-
-    6. Create the required single-color rule, color scale, or custom formula and select the requested formatting.
-
-    7. Click **Done** and verify both a matching and a non-matching cell.
-
-    8. Confirm the finished workbook matches this result: **I3:I6 contains four formula-driven KPIs, and I6 has
-    a saved conditional-formatting rule that flags performance below 60%.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
+    2. In **I3**, enter `=SUM(Orders!K2:K37)` for Total Revenue.
+    3. In **I4**, enter `=AVERAGE(Orders!K2:K37)` for Average Order Value.
+    4. In **I5**, enter `=SUM(Orders!G2:G37)` for Total Units.
+    5. In **I6**, enter `=COUNTIF(Orders!J2:J37,"Delivered")/COUNTA(Orders!A2:A37)` for Delivered Rate.
+    6. Format I3:I4 as currency, I5 as a whole number, and I6 as a percentage.
+    7. Select I6 and choose **Format → Conditional formatting**.
+    8. Create a rule for **Less than 0.60**, choose a clear warning style, and select **Done**.
+    9. Wait until Google Sheets shows that all changes are saved.
+    10. Return to Career Accelerator and select **Check My Work**.
   starter: ''
-  solution: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule that flags performance
-    below 60%.
+  solution: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule that flags
+    performance below 60%.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -161,14 +133,14 @@ activities:
       sheet: Analysis Workspace
       range: I6
       message: Add a conditional-formatting rule to I6 that flags a Delivered Rate below 60%.
-    success_feedback: The KPI block is formula-driven, formatted for the business audience, and flags a low delivered
-      rate.
+    success_feedback: The KPI block is formula-driven, formatted for the business audience, and flags a low
+      delivered rate.
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Analysis Workspace
     columns:
     - Total Revenue
@@ -177,8 +149,8 @@ activities:
     - Delivered Rate
     row_range: H3:I6
     starting_state: The KPI labels exist in H3:H6, while I3:I6 is blank and has no conditional formatting.
-    expected_result: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule that
-      flags performance below 60%.
+    expected_result: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule
+      that flags performance below 60%.
     column_descriptions:
       Total Revenue: Revenue across all orders in the workbook.
       Average Order Value: Average revenue produced by one order.
@@ -196,95 +168,83 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate in
-      I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so a delivered
-      rate below 60% is clearly flagged for attention.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate
+      in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so
+      a delivered rate below 60% is clearly flagged for attention.
     requirements:
     - Use formulas in all four KPI value cells.
     - Format Total Revenue and Average Order Value as U.S. currency.
     - Format Delivered Rate as a percentage.
     - Add conditional formatting to I6 that flags a result below 60%.
     - Save the workbook before checking it.
-    expected_output: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule that
-      flags performance below 60%.
-    skills_practiced: *id001
+    expected_output: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule
+      that flags performance below 60%.
+    skills_practiced:
+    - spreadsheet.kpis
     after_correct: The KPI block is formula-driven, formatted for the business audience, and flags a low delivered
       rate.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Try It — Build the KPI block
-    objective: In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate
-      in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so a delivered
-      rate below 60% is clearly flagged for attention.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered
+      Rate in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to
+      I6 so a delivered rate below 60% is clearly flagged for attention.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Analysis Workspace** and work in Analysis Workspace, range I3:I6.
-    - 'Use these columns for this task: **Total Revenue, Average Order Value, Total Units, Delivered Rate**.'
-    - Select the full target range without the header unless the task says otherwise.
-    - Choose **Format → Conditional formatting**.
-    - Create the required single-color rule, color scale, or custom formula and select the requested formatting.
-    - Click **Done** and verify both a matching and a non-matching cell.
-    - 'Confirm the finished workbook matches this result: **I3:I6 contains four formula-driven KPIs, and I6 has
-      a saved conditional-formatting rule that flags performance below 60%.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Analysis Workspace**.
+    - In **I3**, enter `=SUM(Orders!K2:K37)` for Total Revenue.
+    - In **I4**, enter `=AVERAGE(Orders!K2:K37)` for Average Order Value.
+    - In **I5**, enter `=SUM(Orders!G2:G37)` for Total Units.
+    - In **I6**, enter `=COUNTIF(Orders!J2:J37,"Delivered")/COUNTA(Orders!A2:A37)` for Delivered Rate.
+    - Format I3:I4 as currency, I5 as a whole number, and I6 as a percentage.
+    - Select I6 and choose **Format → Conditional formatting**.
+    - Create a rule for **Less than 0.60**, choose a clear warning style, and select **Done**.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
 - activity_id: spreadsheet_kpis_workbook_practice
   title: Practice — Create a revenue-by-region chart
   type: mastery
   runtime: workbook
-  prompt: 'Create a column or bar chart from the region summary. Give it the title Revenue by Region and place it
-    near the KPI block without covering the data.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    Create a column or bar chart from the region summary. Give it the title Revenue by Region and place it near the KPI block without covering the data.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Analysis Workspace** and work in Analysis Workspace, range A28:J44.
-
-    3. Use these columns for this task: **Region, Revenue**.
-
-    4. Select the completed summary range, including its labels.
-
-    5. Choose **Insert → Chart**.
-
-    6. Select the chart type named in the task and verify the data range, X-axis, and series.
-
-    7. Add the required title and confirm no requested category is hidden.
-
-    8. Confirm the finished workbook matches this result: **A readable chart titled Revenue by Region is saved near
-    the KPI block.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
+    2. Select the Region and Revenue values in the region summary, excluding any grand-total row.
+    3. Choose **Insert → Chart**.
+    4. In Chart editor → Setup, choose a **Column chart** or **Bar chart**.
+    5. Confirm Region is used as the category axis and Revenue is the series.
+    6. In Customize → Chart & axis titles, set the chart title exactly to `Revenue by Region`.
+    7. Drag the chart near the KPI block without covering the KPI values or source summary.
+    8. If Career Accelerator asks for evidence, enter the exact chart title `Revenue by Region`.
+    9. Wait until Google Sheets shows that all changes are saved.
+    10. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: A readable chart titled Revenue by Region is saved near the KPI block.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -300,8 +260,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Analysis Workspace
     columns:
     - Region
@@ -323,47 +283,51 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: Create a column or bar chart from the region summary. Give it the title Revenue by Region and place it
-      near the KPI block without covering the data.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: Create a column or bar chart from the region summary. Give it the title Revenue by Region and place
+      it near the KPI block without covering the data.
     requirements:
     - Use Region as the category axis.
     - Use Revenue as the value.
     - Use the exact title Revenue by Region.
     - Keep the source data visible and save.
     expected_output: A readable chart titled Revenue by Region is saved near the KPI block.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.kpis
     after_correct: The chart communicates regional revenue clearly.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Practice — Create a revenue-by-region chart
-    objective: Create a column or bar chart from the region summary. Give it the title Revenue by Region and place
-      it near the KPI block without covering the data.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: Create a column or bar chart from the region summary. Give it the title Revenue by Region and
+      place it near the KPI block without covering the data.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Analysis Workspace** and work in Analysis Workspace, range A28:J44.
-    - 'Use these columns for this task: **Region, Revenue**.'
-    - Select the completed summary range, including its labels.
+    - Select **Open Google Sheet**, then open **Analysis Workspace**.
+    - Select the Region and Revenue values in the region summary, excluding any grand-total row.
     - Choose **Insert → Chart**.
-    - Select the chart type named in the task and verify the data range, X-axis, and series.
-    - Add the required title and confirm no requested category is hidden.
-    - 'Confirm the finished workbook matches this result: **A readable chart titled Revenue by Region is saved near
-      the KPI block.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - In Chart editor → Setup, choose a **Column chart** or **Bar chart**.
+    - Confirm Region is used as the category axis and Revenue is the series.
+    - In Customize → Chart & axis titles, set the chart title exactly to `Revenue by Region`.
+    - Drag the chart near the KPI block without covering the KPI values or source summary.
+    - If Career Accelerator asks for evidence, enter the exact chart title `Revenue by Region`.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true

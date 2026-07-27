@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import html
 import json
 import re
 import shutil
@@ -10,6 +9,10 @@ from pathlib import Path
 from typing import Any
 
 from career_app.navigation import PAGE_LEARNING
+from career_app.services.spreadsheet_share_link import (
+    SpreadsheetShareLink,
+    SpreadsheetShareLinkError,
+)
 
 from .catalog import CatalogIndex
 from .loader import load_catalog
@@ -36,6 +39,7 @@ class AcademyService:
         self.conn = conn
         self.repository_root = Path(repository_root).resolve()
         self.curriculum_root = self.repository_root / "curriculum" / "data"
+        self.spreadsheet_share_link = SpreadsheetShareLink(self.repository_root)
         ensure_academy_schema(conn)
         self.catalog = load_catalog(self.curriculum_root)
         self.index = CatalogIndex(self.catalog)
@@ -449,6 +453,14 @@ class AcademyService:
             )
         return candidate
 
+    def workbook_template_path(
+        self,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+    ) -> Path:
+        """Return the read-only starter workbook used for a lesson."""
+        return self._workbook_template_path(self.workbook_metadata(lesson, activity))
+
     def workbook_workspace_dir(self) -> Path:
         path = self.repository_root / "academy_workspace" / "spreadsheets"
         path.mkdir(parents=True, exist_ok=True)
@@ -482,57 +494,6 @@ class AcademyService:
             shutil.copy2(template, destination)
         return destination
 
-    def reset_workbook(
-        self,
-        lesson: LessonDefinition,
-        activity: ActivityDefinition,
-    ) -> tuple[Path, Path | None]:
-        """Archive the active workbook, then create a clean working copy."""
-        metadata = self.workbook_metadata(lesson, activity)
-        template = self._workbook_template_path(metadata)
-        destination = self.workbook_path(lesson, activity)
-        archived: Path | None = None
-        if destination.exists():
-            archive_dir = self.workbook_workspace_dir() / "archive"
-            archive_dir.mkdir(parents=True, exist_ok=True)
-            stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            archived = archive_dir / f"{destination.stem} - {stamp}{destination.suffix}"
-            shutil.move(str(destination), str(archived))
-        shutil.copy2(template, destination)
-        return destination, archived
-
-    def write_workbook_instructions(
-        self,
-        lesson: LessonDefinition,
-        activity: ActivityDefinition,
-        instruction_text: str,
-    ) -> Path:
-        metadata = self.workbook_metadata(lesson, activity)
-        workbook = self.ensure_workbook(lesson, activity)
-        title = f"{lesson.title} — {activity.title}"
-        sheet = str(metadata.get("sheet") or "See the lesson")
-        html_path = self.workbook_workspace_dir() / "current-lesson-instructions.html"
-        html_path.write_text(
-            "<!doctype html><html><head><meta charset='utf-8'>"
-            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-            "<title>" + html.escape(title) + "</title>"
-            "<style>body{font-family:Segoe UI,Arial,sans-serif;max-width:920px;"
-            "margin:32px auto;padding:0 24px;line-height:1.55;color:#172033;}"
-            "h1{color:#4b2b85} .meta{background:#f3effb;border:1px solid #d7c8f0;"
-            "padding:14px 16px;border-radius:10px;margin-bottom:20px;}"
-            "pre{white-space:pre-wrap;font-family:Segoe UI,Arial,sans-serif;"
-            "background:#f7f8fb;border:1px solid #d9deea;padding:18px;border-radius:10px;}"
-            "code{background:#eef1f7;padding:2px 4px;border-radius:4px}</style></head><body>"
-            f"<h1>{html.escape(title)}</h1>"
-            f"<div class='meta'><strong>Workbook:</strong> {html.escape(workbook.name)}<br>"
-            f"<strong>Sheet:</strong> {html.escape(sheet)}<br>"
-            f"<strong>Location:</strong> {html.escape(str(workbook))}</div>"
-            f"<pre>{html.escape(instruction_text)}</pre>"
-            "</body></html>",
-            encoding="utf-8",
-        )
-        return html_path
-
     def validate_activity(
         self,
         lesson: LessonDefinition,
@@ -549,6 +510,8 @@ class AcademyService:
         elif activity.runtime == "workbook":
             try:
                 workbook = self.ensure_workbook(lesson, activity)
+                if self.spreadsheet_share_link.linked:
+                    self.spreadsheet_share_link.sync_to(workbook)
                 with WorkbookValidator(workbook) as validator:
                     result = validator.validate(answer, dict(activity.validator))
                 if result.passed and activity.evidence_eligible:
@@ -558,7 +521,7 @@ class AcademyService:
                         workbook=workbook,
                         result=result,
                     )
-            except WorkbookValidationError as exc:
+            except (WorkbookValidationError, SpreadsheetShareLinkError) as exc:
                 result = ValidationResult(False, str(exc))
         else:
             result = ValidationResult(False, f"Unsupported activity runtime: {activity.runtime}")
@@ -579,7 +542,7 @@ class AcademyService:
         if activity.runtime == "workbook":
             return ValidationResult(
                 False,
-                "Save the workbook, then use Check Workbook to validate the practical task.",
+                "Wait for Google Sheets to save, then use Check My Work to validate the practical task.",
             )
         if activity.runtime != "sql":
             return ValidationResult(False, "Run is available for executable activities.")

@@ -19,14 +19,7 @@ from career_app.theme import COLORS
 
 
 class ContentSizedScrollArea(QScrollArea):
-    """A vertical scroll area whose content ends at its final rendered row.
-
-    ``QScrollArea`` with ``widgetResizable=True`` expands a short content widget
-    to the viewport height. After rows are removed, Qt can also retain an older
-    size hint long enough for the vertical range to include empty space. This
-    class keeps the content widget at the exact height requested by its layout
-    and recalculates that height after layout changes and viewport resizing.
-    """
+    """Scroll only through real rows, never through stale blank space."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -46,7 +39,8 @@ class ContentSizedScrollArea(QScrollArea):
         super().setWidget(widget)
         if widget is not None:
             widget.installEventFilter(self)
-            widget.setMinimumWidth(0)
+            widget.setMinimumSize(0, 0)
+            widget.setMaximumHeight(16777215)
             widget.setSizePolicy(
                 QSizePolicy.Policy.Fixed,
                 QSizePolicy.Policy.Fixed,
@@ -63,31 +57,90 @@ class ContentSizedScrollArea(QScrollArea):
         self._extent_sync_pending = False
         self.sync_content_extent()
 
+    @staticmethod
+    def _item_height(item, available_width: int) -> int | None:
+        widget = item.widget()
+        if widget is not None:
+            if widget.isHidden():
+                return None
+            widget.ensurePolished()
+            candidate = int(widget.sizeHint().height())
+            child_layout = widget.layout()
+            if child_layout is not None and child_layout.hasHeightForWidth():
+                calculated = int(child_layout.heightForWidth(available_width))
+                if calculated >= 0:
+                    candidate = max(candidate, calculated)
+            elif widget.hasHeightForWidth():
+                calculated = int(widget.heightForWidth(available_width))
+                if calculated >= 0:
+                    candidate = max(candidate, calculated)
+            candidate = max(candidate, int(widget.minimumHeight()))
+            maximum = int(widget.maximumHeight())
+            if maximum < 16777215:
+                candidate = min(candidate, maximum)
+            return max(0, candidate)
+
+        child_layout = item.layout()
+        if child_layout is not None:
+            if child_layout.hasHeightForWidth():
+                calculated = int(child_layout.heightForWidth(available_width))
+                if calculated >= 0:
+                    return max(0, calculated)
+            return max(0, int(child_layout.sizeHint().height()))
+
+        spacer = item.spacerItem()
+        if spacer is not None:
+            if spacer.expandingDirections() & Qt.Orientation.Vertical:
+                return None
+            return max(0, int(spacer.sizeHint().height()))
+        return None
+
+    @classmethod
+    def _exact_layout_height(cls, layout, width: int) -> int:
+        margins = layout.contentsMargins()
+        available_width = max(0, width - margins.left() - margins.right())
+        heights: list[int] = []
+        for index in range(layout.count()):
+            height = cls._item_height(layout.itemAt(index), available_width)
+            if height is not None:
+                heights.append(height)
+        spacing = max(0, int(layout.spacing()))
+        return max(
+            0,
+            margins.top()
+            + margins.bottom()
+            + sum(heights)
+            + spacing * max(0, len(heights) - 1),
+        )
+
     def sync_content_extent(self) -> None:
         content = self.widget()
-        if content is None:
+        if content is None or content.layout() is None:
             return
-        layout = content.layout()
-        if layout is None:
-            return
-
         viewport_width = max(0, int(self.viewport().width()))
         if viewport_width <= 0:
             self.schedule_content_extent_sync()
             return
 
-        # Width must be known before querying the layout height so wrapped text
-        # and scaled row metrics contribute their current, not stale, size.
+        layout = content.layout()
+        # Remove constraints left by an earlier, taller task list before asking
+        # child rows for their current size. This is the key step that prevents
+        # the old height from becoming the new scroll range.
+        content.setMinimumHeight(0)
+        content.setMaximumHeight(16777215)
         content.setFixedWidth(viewport_width)
         layout.invalidate()
         layout.activate()
-        content_height = max(0, int(layout.sizeHint().height()))
+        content_height = self._exact_layout_height(layout, viewport_width)
         content.setFixedSize(viewport_width, content_height)
         content.updateGeometry()
+        self.verticalScrollBar().setValue(
+            min(self.verticalScrollBar().value(), self.verticalScrollBar().maximum())
+        )
         self.viewport().update()
 
-        # Showing or hiding the vertical scrollbar changes viewport width. A
-        # second queued pass settles that one-pixel/layout-cycle difference.
+        # Scrollbar visibility can change the viewport width. Recalculate once
+        # after Qt applies that change.
         QTimer.singleShot(0, self._settle_content_extent)
 
     def _settle_content_extent(self) -> None:
@@ -98,14 +151,14 @@ class ContentSizedScrollArea(QScrollArea):
         if viewport_width <= 0:
             return
         layout = content.layout()
-        if content.width() != viewport_width:
-            content.setFixedWidth(viewport_width)
-            layout.invalidate()
-            layout.activate()
-        content_height = max(0, int(layout.sizeHint().height()))
-        if content.size() != QSize(viewport_width, content_height):
-            content.setFixedSize(viewport_width, content_height)
-            content.updateGeometry()
+        content.setMinimumHeight(0)
+        content.setMaximumHeight(16777215)
+        content.setFixedWidth(viewport_width)
+        layout.invalidate()
+        layout.activate()
+        content_height = self._exact_layout_height(layout, viewport_width)
+        content.setFixedSize(viewport_width, content_height)
+        content.updateGeometry()
         self.viewport().update()
 
     def eventFilter(self, watched, event):  # noqa: N802 - Qt API
@@ -113,6 +166,8 @@ class ContentSizedScrollArea(QScrollArea):
             QEvent.Type.LayoutRequest,
             QEvent.Type.FontChange,
             QEvent.Type.StyleChange,
+            QEvent.Type.Show,
+            QEvent.Type.Hide,
         ):
             self.schedule_content_extent_sync()
         return super().eventFilter(watched, event)

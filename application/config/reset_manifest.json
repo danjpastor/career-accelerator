@@ -42,10 +42,6 @@
       "template": "submissions"
     },
     {
-      "path": "exercise_packs/installed",
-      "template": "empty"
-    },
-    {
       "path": "archive",
       "template": "empty"
     },
@@ -111,7 +107,6 @@
     "practice/duckdb/submissions",
     "practice/applied/submissions",
     "practice/duckdb/career_practice.duckdb",
-    "exercise_packs/installed",
     "weeks",
     "data/portfolio_catalog.json",
     "data/career_private.db",

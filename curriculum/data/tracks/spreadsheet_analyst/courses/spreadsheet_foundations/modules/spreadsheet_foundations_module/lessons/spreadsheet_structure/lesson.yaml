@@ -2,8 +2,8 @@ lesson_id: spreadsheet_structure
 title: Rows, Columns, Tables & Data Types
 order: 1
 difficulty: beginner
-description: Learn how a real operations workbook is organized, identify the grain of a table, and prepare the Orders
-  data for analysis.
+description: Learn how a real operations workbook is organized, identify the grain of a table, and prepare
+  the Orders data for analysis.
 estimated_minutes: 40
 content: lesson.md
 objectives:
@@ -12,7 +12,7 @@ objectives:
 key_takeaways:
 - A reliable spreadsheet starts with a clear table grain and one header row.
 - Identifiers such as Order ID and Customer ID should remain text.
-teaches: &id001
+teaches:
 - spreadsheet.structure
 - spreadsheet.data_types
 requires: []
@@ -62,50 +62,31 @@ activities:
     objective: What does one row in the Orders sheet represent?
     action_label: Choose the best answer
     body: A table is easiest to analyze when every row represents the same kind of business event. In the Orders
-      sheet, the grain is one customer order. Order ID and Customer ID are identifiers, while Units and Unit Price
-      are measures.
+      sheet, the grain is one customer order. Order ID and Customer ID are identifiers, while Units and Unit
+      Price are measures.
   required_for_completion: true
 - activity_id: spreadsheet_structure_workbook_guided
   title: Try It — Prepare the Orders table
   type: guided
   runtime: workbook
-  prompt: 'Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter to the
-    header row. Keep every existing row and column unchanged.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter to the header row. Keep every existing row and column unchanged.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Orders** and work in Orders, range A2:J37.
-
-    3. Use these columns for this task: **Order ID, Order Date, Customer ID, Region, Sales Rep, Product ID, Units,
-    Unit Price, Discount, Status**.
-
-    4. Click the first required output cell and begin the lookup formula with `=`.
-
-    5. Use the current row''s key as the search key and the named lookup table as the lookup range.
-
-    6. Use an exact match and lock the lookup range with `$` references before filling down.
-
-    7. Verify at least three results against the source table and correct unexpected `#N/A` values.
-
-    8. Confirm the finished workbook matches this result: **The full Orders range is filterable and still contains
-    all 36 order records.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open the **Orders** sheet.
+    2. Click cell **A1**, hold **Shift**, and click **J37** so the complete Orders range is selected.
+    3. Choose **Data → Create a filter** from the Google Sheets menu.
+    4. Confirm that a filter icon appears in every header cell from **A1 through J1**.
+    5. Confirm that row 1 is still the header row and that rows 2 through 37 are still present.
+    6. Do not rename, move, sort, or delete any source columns for this task.
+    7. Wait until Google Sheets shows that all changes are saved.
+    8. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: The full Orders range is filterable and still contains all 36 order records.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -137,8 +118,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Orders
     columns:
     - Order ID
@@ -178,21 +159,25 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
-    task: Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter to the
-      header row. Keep every existing row and column unchanged.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
+    task: Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter
+      to the header row. Keep every existing row and column unchanged.
     requirements:
     - Use row 1 as the header row.
     - Include all records through row 37.
     - Do not delete, rename, or reorder the source columns.
     - Save the workbook before checking it.
     expected_output: The full Orders range is filterable and still contains all 36 order records.
-    skills_practiced: *id001
-    after_correct: 'The Orders sheet is ready for real analysis: the headers are intact, every record remains, and
-      the range is filterable.'
+    skills_practiced:
+    - spreadsheet.structure
+    - spreadsheet.data_types
+    after_correct: 'The Orders sheet is ready for real analysis: the headers are intact, every record remains,
+      and the range is filterable.'
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
@@ -200,70 +185,49 @@ activities:
     title: Try It — Prepare the Orders table
     objective: Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter
       to the header row. Keep every existing row and column unchanged.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Orders** and work in Orders, range A2:J37.
-    - 'Use these columns for this task: **Order ID, Order Date, Customer ID, Region, Sales Rep, Product ID, Units,
-      Unit Price, Discount, Status**.'
-    - Click the first required output cell and begin the lookup formula with `=`.
-    - Use the current row's key as the search key and the named lookup table as the lookup range.
-    - Use an exact match and lock the lookup range with `$` references before filling down.
-    - Verify at least three results against the source table and correct unexpected `#N/A` values.
-    - 'Confirm the finished workbook matches this result: **The full Orders range is filterable and still contains
-      all 36 order records.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open the **Orders** sheet.
+    - Click cell **A1**, hold **Shift**, and click **J37** so the complete Orders range is selected.
+    - Choose **Data → Create a filter** from the Google Sheets menu.
+    - Confirm that a filter icon appears in every header cell from **A1 through J1**.
+    - Confirm that row 1 is still the header row and that rows 2 through 37 are still present.
+    - Do not rename, move, sort, or delete any source columns for this task.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
 - activity_id: spreadsheet_structure_workbook_practice
   title: Practice — Document the table grain
   type: mastery
   runtime: workbook
-  prompt: 'Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row in Orders
-    represents.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
+  prompt: |-
+    Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row in Orders represents.
 
     ### Complete this task in Google Sheets
 
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **Analysis Workspace** and work in Analysis Workspace, range A4:B4.
-
-    3. Use these columns for this task: **Orders table grain, Your Result**.
-
-    4. Click the first required output cell and type `=` to begin the formula.
-
-    5. Build the formula with the source cells from the current row, then press **Enter**.
-
-    6. Drag the blue fill handle through the full required range.
-
-    7. Spot-check the first, middle, and last result before checking your work.
-
-    8. Confirm the finished workbook matches this result: **B4 clearly states that one row represents one customer
-    order.**
-
-    9. Wait until Google Sheets shows that saving is complete.
-
-    10. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
+    2. Click cell **B4** beside the label **Orders table grain**.
+    3. Type one complete sentence explaining what a single row in Orders represents.
+    4. Include both words **customer** and **order**. A suitable structure is: `One row represents one customer order.`
+    5. Press **Enter** and confirm the sentence is visible in B4.
+    6. Wait until Google Sheets shows that all changes are saved.
+    7. Return to Career Accelerator and select **Check My Work**.
   starter: ''
   solution: B4 clearly states that one row represents one customer order.
   hints:
-  - Open the practice workbook and use the exact sheet, columns, and rows listed in the lesson.
-  - Save the .xlsx working copy before selecting Check Workbook.
+  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
+  - Wait until Google Sheets finishes saving, then select Check My Work.
   validator:
     type: workbook
     checks:
@@ -278,8 +242,8 @@ activities:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-      Check Workbook.
+    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
+      automatically when Check My Work is selected.
     sheet: Analysis Workspace
     columns:
     - Orders table grain
@@ -300,7 +264,8 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in Excel or Google Sheets using your continuing workbook.
+    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
+      use Google Sheets as the source of truth.
     task: Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row in Orders
       represents.
     requirements:
@@ -308,38 +273,40 @@ activities:
     - Include the words customer and order.
     - Save the workbook before checking it.
     expected_output: B4 clearly states that one row represents one customer order.
-    skills_practiced: *id001
+    skills_practiced:
+    - spreadsheet.structure
+    - spreadsheet.data_types
     after_correct: Your workbook now documents the Orders table grain.
     common_errors:
-    - Editing the template instead of the personal working copy.
-    - Checking the task before saving the .xlsx file.
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
   instruction:
     title: Practice — Document the table grain
-    objective: Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row in Orders
-      represents.
-    action_label: Open the workbook and complete the task
-    body: Use the continuing Northstar Operations workbook. The left panel gives the business context, sheet, columns,
-      starting state, and finished result. The workbook controls on the right create or open your personal copy
-      without changing the original template.
+    objective: Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row
+      in Orders represents.
+    action_label: Open the linked Google Sheet and complete the numbered task
+    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
+      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
+      Check My Work.
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
     steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **Analysis Workspace** and work in Analysis Workspace, range A4:B4.
-    - 'Use these columns for this task: **Orders table grain, Your Result**.'
-    - Click the first required output cell and type `=` to begin the formula.
-    - Build the formula with the source cells from the current row, then press **Enter**.
-    - Drag the blue fill handle through the full required range.
-    - Spot-check the first, middle, and last result before checking your work.
-    - 'Confirm the finished workbook matches this result: **B4 clearly states that one row represents one customer
-      order.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
+    - Select **Open Google Sheet**, then open **Analysis Workspace**.
+    - Click cell **B4** beside the label **Orders table grain**.
+    - Type one complete sentence explaining what a single row in Orders represents.
+    - 'Include both words **customer** and **order**. A suitable structure is: `One row represents one customer
+      order.`'
+    - Press **Enter** and confirm the sentence is visible in B4.
+    - Wait until Google Sheets shows that all changes are saved.
+    - Return to Career Accelerator and select **Check My Work**.
+    workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
+    link_action: Paste Google Sheet Link
     check_action: Check My Work
+    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true

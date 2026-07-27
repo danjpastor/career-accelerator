@@ -1,3 +1,17 @@
+# Career Accelerator v10.31.0
+
+## Shared Google Sheet workflow, exact Next Tasks scrolling, and repository cleanup
+
+- Replaced Spreadsheet Academy OAuth, client-ID, token, and credentials-JSON setup with a saved public Google Sheets share-link workflow.
+- Added direct share-link verification and automatic `.xlsx` synchronization before every workbook validation.
+- Kept one continuing Northstar Operations workbook across all spreadsheet lessons and preserved the existing workbook validators, mastery check, capstone, and Demonstrated Evidence behavior.
+- Rewrote all 24 workbook activities with task-specific, numbered Google Sheets procedures instead of generic or mismatched instructions.
+- Added **Open Google Sheet**, **Paste/Replace Google Sheet Link**, **Get Starter Workbook**, and **Check My Work** controls.
+- Repaired the native Next Tasks content-sized scroll area so its range is calculated from visible rendered rows only, disappears when all rows fit, and shrinks correctly after task refreshes and interface scaling.
+- Removed the retired Exercise Packs tree and its reset-manifest references.
+- Removed historical patch backups, Exercise Pack patch backups, obsolete patch installers, duplicate changelog/release records, stale audit files, generated caches, old diagnostic logs, and retired Spreadsheet Academy OAuth artifacts.
+- Preserved learner databases, progress, portfolio work, submissions, career files, current database backups, `.git`, `.venv`, and the separate Portfolio Studio Google OAuth feature.
+
 # Career Accelerator v10.29.0
 
 ## Spreadsheet Academy workbook overhaul
