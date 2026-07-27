@@ -1,19 +1,36 @@
 # Pivot Tables, Dimensions & Measures
 
-Use pivot tables—or equivalent grouped summaries—to explore revenue by region and units by category.
+Use pivot tables to group measures by business dimensions and compare categories quickly.
 
-## Learn
+## What you will learn
 
-Dimensions such as Region or Category define groups. Measures such as Revenue or Units are summed, counted, or averaged for those groups.
+- Distinguish dimensions from measures.
+- Create and sort a revenue-by-region pivot.
+- Create a second summary of units by product category.
 
-## Try It
+## Main idea
 
-Create a pivot table from Orders with Region in Rows and Sum of Revenue in Values. Place it in Analysis Workspace starting at A28. Sort the values largest to smallest.
+# Pivot Tables, Dimensions & Measures
 
-## Practice
+## What this lesson teaches
 
-Create a second pivot or grouped summary with Category in Rows and Sum of Units in Values. Place it in Analysis Workspace starting at G28 and sort largest to smallest.
+Use pivot tables to group measures by business dimensions and compare categories quickly.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- Dimensions define the groups in a pivot table.
+- Measures are aggregated as sums, counts, averages, or other calculations.
+- A pivot can answer a new grouping question without changing the source data.
+
+## Key takeaways
+
+- Dimensions define the groups in a pivot table.
+- Measures are aggregated as sums, counts, averages, or other calculations.
+- A pivot can answer a new grouping question without changing the source data.

@@ -1,7 +1,7 @@
 course_id: spreadsheet_mastery_project
-title: Spreadsheet Mastery Project
+title: Analyst Workflow & Spreadsheet Capstone
 order: 6
-description: Finish, validate, and document a portfolio-ready Northstar operations analysis workbook.
+description: Document a reproducible workflow, run final QA, and validate a complete analytical workbook.
 estimated_minutes: 240
 outcomes:
 - Complete real spreadsheet work in Excel or Google Sheets.

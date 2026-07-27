@@ -1,16 +1,18 @@
-lesson_id: conditional_summaries
+lesson_id: academy2_conditional_summaries
 title: COUNTIFS, SUMIFS & Variance
 order: 2
 difficulty: beginner
-description: Summarize the order table with SUMIFS, COUNTIFS, and a simple variance calculation.
-estimated_minutes: 40
+description: Summarize records that meet business conditions and compare actual results with targets.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Calculate revenue for one region.
-- Count orders that meet a status condition and compare performance with a target.
+- Use SUMIF or SUMIFS to total values that meet criteria.
+- Use COUNTIF or COUNTIFS to count matching records.
+- Calculate and interpret variance from a target.
 key_takeaways:
-- Conditional summary functions aggregate only qualifying rows.
-- A variance explains how actual performance compares with a target.
+- Conditional summary functions separate the values being summarized from the conditions used to select rows.
+- COUNTIFS and SUMIFS support multiple criteria.
+- Variance is commonly calculated as actual minus target.
 teaches:
 - spreadsheet.conditional_aggregation
 requires:
@@ -19,72 +21,156 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: conditional_summaries_1
-  title: Learn — Quick concept check
+- activity_id: academy2_conditional_summaries_learn
+  title: Learn — COUNTIFS, SUMIFS & Variance
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — COUNTIFS, SUMIFS & Variance
+    objective: Use SUMIF or SUMIFS to total values that meet criteria.
+    body: '# Summarize rows that meet several conditions
+
+
+      `COUNTIFS` counts rows that meet all of the conditions you provide. `SUMIFS` adds values from rows that meet all of
+      those conditions.
+
+
+      Each condition uses a **criteria range** and a **criterion**. The ranges should cover the same rows. A mismatch can
+      produce a wrong result or an error.
+
+
+      **Variance** compares an actual value with a target or budget. A common calculation is actual minus target, but the
+      business meaning depends on the measure: a positive sales variance may be good, while a positive cost variance may be
+      bad.
+
+
+      In this lesson, you will create conditional counts and totals, then explain what a variance means instead of reporting
+      a number without context.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_conditional_summaries_check
+  title: Learn & Predict — Conditional totals and counts
   type: recognition
   runtime: recognition
-  prompt: Which function is designed to sum values that meet one or more conditions?
-  answer_options:
-  - SUMIFS
-  - COUNT
-  - LEFT
-  - SORT
+  prompt: Which function is designed to count rows that meet two conditions?
   starter: ''
-  solution: SUMIFS
+  solution: COUNTIFS
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - The question asks for a count, not a sum.
+  - More than one condition must be evaluated.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
-    expected_answer: SUMIFS
+    expected_answer: COUNTIFS
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
-    task: Which function is designed to sum values that meet one or more conditions?
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    task: Which function is designed to count rows that meet two conditions?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.conditional_aggregation
-    after_correct: You are ready to apply the idea in the Northstar workbook.
+    after_correct: COUNTIFS evaluates multiple criteria ranges and counts rows that satisfy all conditions.
   instruction:
-    title: Learn — COUNTIFS, SUMIFS & Variance
-    objective: Which function is designed to sum values that meet one or more conditions?
-    action_label: Choose the best answer
-    body: '`SUMIFS` adds a measure for rows that meet conditions. `COUNTIFS` counts qualifying rows. Keep the
-      criteria explicit so another analyst can audit the calculation.'
+    phase: LEARN & PREDICT
+    title: Learn & Predict — Conditional totals and counts
+    objective: Match a business question to SUMIFS, COUNTIFS, or a variance calculation.
+    why_it_matters: Analysts rarely need only a grand total. They need answers such as revenue for one region, open cases
+      for one team, or the gap between actual performance and a target.
+    concept: '`SUMIF` and `SUMIFS` add values for rows that meet conditions. `COUNTIF` and `COUNTIFS` count matching rows.
+      A variance compares actual performance with a benchmark, usually as Actual − Target.'
+    worked_example: A support manager wants the total handling time for Priority tickets assigned to Billing. The handling-time
+      column is the sum range; the Priority and Team columns are criteria ranges. Because two conditions are required, SUMIFS
+      is the appropriate structure.
+    action_label: Make a prediction
   required_for_completion: true
-- activity_id: conditional_summaries_workbook_guided
+  answer_options:
+  - COUNTIFS
+  - SUM
+  - AVERAGE
+  - XLOOKUP
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_conditional_summaries_example
+  title: Example — See countifs, sumifs & variance in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See countifs, sumifs & variance in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A recruiting team wants the number of open roles in the East region and the total planned salary for those roles. The
+      analyst uses Region and Status as criteria ranges.
+
+
+      The result is compared with the quarterly hiring budget. The analyst does not stop at “$12,000 variance”; they explain
+      whether the team is above or below its plan.
+
+
+      **What to notice:** The criteria describe which rows belong in the calculation, and the interpretation explains why
+      the result matters.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_conditional_summaries_guided
   title: Try It — Calculate West-region revenue
   type: guided
   runtime: workbook
-  prompt: |-
-    On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the target in B7 unchanged.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. Click **B8** beside West revenue.
-    3. Enter `=SUMIF(Orders!D2:D37,"West",Orders!K2:K37)` and press **Enter**.
-    4. The first range contains the Region criteria, `West` is the condition, and the last range contains Revenue to add.
-    5. Leave the target in B7 unchanged.
-    6. Format B8 as currency using **Format → Number → Currency**.
-    7. Wait until Google Sheets shows that all changes are saved.
-    8. Return to Career Accelerator and select **Check My Work**.
+  prompt: Calculate total Revenue for West-region orders in Analysis Workspace cell B8.
   starter: ''
-  solution: B8 contains a conditional-sum formula that returns West revenue.
+  solution: In B8 use `=SUMIF(Orders!D2:D37,"West",Orders!K2:K37)` or an equivalent SUMIFS formula.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - Identify the range containing Region and the range containing Revenue.
+  - The condition is West; the values to add are in the Revenue column.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -95,26 +181,8 @@ activities:
       contains_any:
       - sumif
       - sumifs
-    success_feedback: The West revenue summary is formula-driven and auditable.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - West revenue target
-    - West revenue
-    row_range: A7:B8
-    starting_state: B7 contains the $15,000 target and B8 is blank.
-    expected_result: B8 contains a conditional-sum formula that returns West revenue.
-    column_descriptions:
-      West revenue target: Management target used to compare West-region revenue.
-      West revenue: Revenue total for orders assigned to the West region.
-    sample_values:
-    - 'West revenue target: $15,000.00'
-    - 'West revenue: $115,106.00'
+      message: 'The workbook does not yet meet this requirement: B8 contains a formula-driven total for West-region Revenue.'
+    success_feedback: You summarized a measure for only the records that met a regional condition.
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
@@ -122,18 +190,17 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the
-      target in B7 unchanged.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Calculate total Revenue for West-region orders in Analysis Workspace cell B8.
     requirements:
-    - Use the Orders Region and Revenue columns.
-    - Use West as the criterion.
-    - Format B8 as US dollars and save.
-    expected_output: B8 contains a conditional-sum formula that returns West revenue.
+    - Use a conditional-sum function rather than manually selecting rows.
+    - Use the complete Orders data ranges.
+    - Keep the target value in B7 unchanged.
+    expected_output: B8 contains a formula-driven total for West-region Revenue.
     skills_practiced:
     - spreadsheet.conditional_aggregation
-    after_correct: The West revenue summary is formula-driven and auditable.
+    after_correct: You summarized a measure for only the records that met a regional condition.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -141,54 +208,62 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: B8 contains a formula-driven total for West-region Revenue.
+    hide_exact_result: true
   instruction:
+    phase: TRY IT
     title: Try It — Calculate West-region revenue
-    objective: On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep
-      the target in B7 unchanged.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    objective: Use a conditional sum to answer a focused regional question.
+    approach: In Analysis Workspace, use the Orders Region field as the condition and the Revenue field as the values to add.
+      The formula should update automatically if order values change.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - West revenue target
+    - West revenue
+    row_range: A7:B8
+    starting_state: B7 contains the $15,000 target and B8 is blank.
+    expected_result: B8 contains a formula-driven total for West-region Revenue.
+    column_descriptions:
+      West revenue target: Management target used to compare West-region revenue.
+      West revenue: Revenue total for orders assigned to the West region.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - Click **B8** beside West revenue.
-    - Enter `=SUMIF(Orders!D2:D37,"West",Orders!K2:K37)` and press **Enter**.
-    - The first range contains the Region criteria, `West` is the condition, and the last range contains Revenue
-      to add.
-    - Leave the target in B7 unchanged.
-    - Format B8 as currency using **Format → Number → Currency**.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: conditional_summaries_workbook_practice
-  title: Practice — Count delivered orders and calculate variance
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A7:B8**.
+    - In Analysis Workspace, use the Orders Region field as the condition and the Revenue field as the values to add. The
+      formula should update automatically if order values change.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_conditional_summaries_independent
+  title: Challenge — Count delivered orders and calculate variance
+  type: independent
   runtime: workbook
-  prompt: |-
-    In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target in B7.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. In **B9**, enter `=COUNTIF(Orders!J2:J37,"Delivered")` to count delivered orders.
-    3. In **B10**, enter `=B8-B7` to calculate actual West revenue minus the target.
-    4. Format B10 as currency.
-    5. Confirm B9 is a whole-number count and B10 is positive when actual revenue is above target.
-    6. Wait until Google Sheets shows that all changes are saved.
-    7. Return to Career Accelerator and select **Check My Work**.
+  prompt: Calculate the delivered-order count in B9 and the West revenue variance to target in B10.
   starter: ''
-  solution: B9 contains a COUNTIF or COUNTIFS formula and B10 contains a variance formula.
+  solution: In B9 use `=COUNTIF(Orders!J2:J37,"Delivered")`. In B10 use `=B8-B7`.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The first result asks how many rows meet a text condition.
+  - The second result compares the actual value already calculated in B8 with the target in B7.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -199,6 +274,8 @@ activities:
       contains_any:
       - countif
       - countifs
+      message: 'The workbook does not yet meet this requirement: B9 contains a conditional count and B10 contains the actual-minus-target
+        variance.'
     - type: formula_present
       sheet: Analysis Workspace
       cell: B10
@@ -206,26 +283,10 @@ activities:
       contains_all:
       - b8
       - b7
-    success_feedback: The summary now shows both delivered-order volume and performance against target.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Delivered orders
-    - Variance to target
-    row_range: A9:B10
-    starting_state: B9 and B10 are blank. B7 contains the target and B8 contains West revenue.
-    expected_result: B9 contains a COUNTIF or COUNTIFS formula and B10 contains a variance formula.
-    column_descriptions:
-      Delivered orders: Count of orders whose status is Delivered.
-      Variance to target: Difference between West revenue and its target.
-    sample_values:
-    - 'Delivered orders: 19'
-    - 'Variance to target: $100,106.00'
+      message: 'The workbook does not yet meet this requirement: B9 contains a conditional count and B10 contains the actual-minus-target
+        variance.'
+    success_feedback: You paired a conditional operational count with a target variance that can be interpreted as favorable
+      or unfavorable.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
@@ -233,18 +294,18 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target
-      in B7.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Calculate the delivered-order count in B9 and the West revenue variance to target in B10.
     requirements:
-    - Count only Delivered orders.
-    - Calculate actual minus target.
-    - Format B10 as US dollars and save.
-    expected_output: B9 contains a COUNTIF or COUNTIFS formula and B10 contains a variance formula.
+    - Count orders whose Status equals Delivered.
+    - Calculate variance as actual West revenue minus the target in B7.
+    - Keep both results formula-driven.
+    expected_output: B9 contains a conditional count and B10 contains the actual-minus-target variance.
     skills_practiced:
     - spreadsheet.conditional_aggregation
-    after_correct: The summary now shows both delivered-order volume and performance against target.
+    after_correct: You paired a conditional operational count with a target variance that can be interpreted as favorable
+      or unfavorable.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -252,28 +313,137 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: B9 contains a conditional count and B10 contains the actual-minus-target variance.
+    hide_exact_result: true
   instruction:
-    title: Practice — Count delivered orders and calculate variance
-    objective: In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the
-      target in B7.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Count delivered orders and calculate variance
+    objective: Combine a conditional count with a target comparison.
+    approach: Use a counting function to determine how many Orders records have Delivered status. Then compare actual West
+      revenue with the target by subtracting the target from the actual amount.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Delivered orders
+    - Variance to target
+    row_range: A9:B10
+    starting_state: B9 and B10 are blank. B7 contains the target and B8 contains West revenue.
+    expected_result: B9 contains a conditional count and B10 contains the actual-minus-target variance.
+    column_descriptions:
+      Delivered orders: Count of orders whose status is Delivered.
+      Variance to target: Difference between West revenue and its target.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - In **B9**, enter `=COUNTIF(Orders!J2:J37,"Delivered")` to count delivered orders.
-    - In **B10**, enter `=B8-B7` to calculate actual West revenue minus the target.
-    - Format B10 as currency.
-    - Confirm B9 is a whole-number count and B10 is positive when actual revenue is above target.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A9:B10**.
+    - Use a counting function to determine how many Orders records have Delivered status. Then compare actual West revenue
+      with the target by subtracting the target from the actual amount.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_conditional_summaries_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: You need total revenue for East-region orders that are also Delivered. Which function is the best fit?
+  answer_options:
+  - SUMIFS
+  - SUM
+  - COUNTIFS
+  - AVERAGE
+  starter: ''
+  solution: SUMIFS
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: SUMIFS
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You need total revenue for East-region orders that are also Delivered. Which function is the best fit?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.conditional_aggregation
+    after_correct: Use SUMIFS when you need to add a measure for records that meet multiple criteria.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: 'The task adds Revenue while enforcing two conditions: Region and Status.'
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_conditional_summaries_recap
+  title: Recap — COUNTIFS, SUMIFS & Variance
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — COUNTIFS, SUMIFS & Variance
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: COUNTIFS, SUMIFS & Variance
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Conditional summary functions separate the values being summarized from the conditions used to select rows.
+
+      - COUNTIFS and SUMIFS support multiple criteria.
+
+      - Variance is commonly calculated as actual minus target.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

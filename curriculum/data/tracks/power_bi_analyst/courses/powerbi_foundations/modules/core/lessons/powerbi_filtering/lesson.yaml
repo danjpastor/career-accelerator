@@ -1,9 +1,11 @@
-lesson_id: powerbi_filtering
+lesson_id: academy2_powerbi_filtering
 title: Filtering and Interaction
 order: 4
 difficulty: beginner
-description: Build practical fluency with filtering and interaction.
-estimated_minutes: 15
+description: 'Filters narrow the data used by a visual or report. Power BI supports filters at several levels: one visual,
+  one page, or the entire report. A **slicer** is a filter control placed directly on the report so the reader can change
+  the view.'
+estimated_minutes: 36
 content: lesson.md
 objectives:
 - Explain the purpose of filtering and interaction.
@@ -17,7 +19,44 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: powerbi_filtering_step_1
+- activity_id: academy2_powerbi_filtering_learn
+  title: Learn — Filtering and Interaction
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Filtering and Interaction
+    objective: Explain the purpose of filtering and interaction.
+    body: 'Filters narrow the data used by a visual or report. Power BI supports filters at several levels: one visual, one
+      page, or the entire report. A **slicer** is a filter control placed directly on the report so the reader can change
+      the view.
+
+
+      Visual interactions determine whether selecting one chart filters, highlights, or leaves another visual unchanged. When
+      a number looks unexpectedly small, check every active filter and slicer before assuming records are missing.
+
+
+      A useful report makes its filter state easy to understand. Clear labels and sensible default selections help the reader
+      know what the numbers represent.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - powerbi.filters
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_powerbi_filtering_check
   title: 'Practice 1: Filtering and Interaction'
   type: recognition
   runtime: recognition
@@ -27,7 +66,10 @@ activities:
   - A new source table
   - A relationship key
   - A data type conversion
-  hints: []
+  hints:
+  - Read the task again and identify where **Filtering and Interaction** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: What does a slicer provide?'
   validator:
     type: exact_answer
     expected_answer: A visible report control for filtering
@@ -54,46 +96,147 @@ activities:
     action_label: Choose the best answer
     body: Slicers expose selected filter fields directly to the report user.
   required_for_completion: true
-- activity_id: powerbi_filtering_step_2
-  title: 'Practice 2: Filtering and Interaction'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: A visible report control for filtering
+- activity_id: academy2_powerbi_filtering_example
+  title: Example — See filtering and interaction in context
   type: recognition
-  runtime: recognition
-  prompt: Why test cross-filter interactions?
-  answer_options:
-  - To confirm selecting one visual affects others as intended
-  - To increase file size
-  - To replace measures
-  - To rename tables
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See filtering and interaction in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A recruitment report has a card for total applications and a slicer for Department. Selecting Engineering updates the
+      card and interview chart together. The analyst tests the selection, clears it, and confirms the report returns to the
+      company-wide total before publishing.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - powerbi.filters
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: To confirm selecting one visual affects others as intended
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: Why test cross-filter interactions?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Filtering and Interaction
-    after_correct: You identified the core idea behind filtering and interaction.
-    common_errors: []
-  instruction:
-    title: Filtering and Interaction
-    objective: Build a practical understanding of filtering and interaction.
-    action_label: Choose the best answer
-    body: Default interactions are not always appropriate. Test each important selection path.
+- activity_id: academy2_powerbi_filtering_guided
+  title: Try It — Control a report with a slicer
+  type: guided
+  runtime: response
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 8
+  prompt: Create a Card showing Sum of `order_total`, then add a slicer using `status`. Select **Completed**. What value does
+    the Card show?
+  starter: ''
+  solution: '878'
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: numeric
+    expected: 878
+    tolerance: 0.01
+    success_feedback: Correct. Completed orders total 878.
+    failure_feedback: Confirm the slicer is filtering the Card and only Completed is selected.
   required_for_completion: true
-- activity_id: powerbi_filtering_step_3
-  title: 'Practice 3: Filtering and Interaction'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: Create a Card showing Sum of `order_total`, then add a slicer using `status`. Select **Completed**. What value does
+      the Card show?
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    after_correct: Correct. Completed orders total 878.
+  instruction:
+    title: Try It — Control a report with a slicer
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_filtering_independent
+  title: Practice — Test a different filter state
+  type: independent
+  runtime: response
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: Change the slicer selection to **Processing**. Enter the updated Card value.
+  starter: ''
+  solution: '210'
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: numeric
+    expected: 210
+    tolerance: 0.01
+    success_feedback: Correct. The Processing selection changes the total to 210.
+    failure_feedback: Clear the previous selection, choose Processing, and confirm the Card responds to the slicer.
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: Change the slicer selection to **Processing**. Enter the updated Card value.
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    after_correct: Correct. The Processing selection changes the total to 210.
+  instruction:
+    title: Practice — Test a different filter state
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_filtering_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: What is the safest filter design?
   answer_options:
@@ -101,30 +244,75 @@ activities:
   - Hide every filter state
   - Use identical colors for selected and unselected values
   - Depend on memory
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: Make active filters visible and easy to reset
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: What is the safest filter design?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Filtering and Interaction
     after_correct: You identified the core idea behind filtering and interaction.
     common_errors: []
   instruction:
-    title: Filtering and Interaction
-    objective: Build a practical understanding of filtering and interaction.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: Users should understand the current report context and have an obvious way to return to a baseline view.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: Make active filters visible and easy to reset
+- activity_id: academy2_powerbi_filtering_recap
+  title: Recap — Filtering and Interaction
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Filtering and Interaction
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Filtering and Interaction
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Filtering and Interaction supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

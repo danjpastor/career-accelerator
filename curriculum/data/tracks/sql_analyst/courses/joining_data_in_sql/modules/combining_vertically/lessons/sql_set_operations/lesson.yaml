@@ -1,4 +1,4 @@
-lesson_id: sql_set_operations
+lesson_id: academy2_sql_set_operations
 title: Stacking Rows with UNION
 order: 1
 difficulty: intermediate
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: union_recognition
+- activity_id: academy2_sql_set_operations_learn
+  title: Learn — Stacking Rows with UNION
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Stacking Rows with UNION
+    objective: Explain combining results with union.
+    body: '# Combine compatible result sets vertically
+
+
+      `UNION` stacks the rows from one query below the rows from another. The queries must return the same number of columns
+      in the same order, with compatible data types.
+
+
+      `UNION` removes duplicate rows. `UNION ALL` keeps them and is usually faster. Choose deliberately based on whether duplicates
+      are meaningful.
+
+
+      In this lesson, you will align two result sets and preserve or remove duplicates for a stated reason.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.set_operations
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_set_operations_check
   title: Choose a set operation
   type: recognition
   runtime: recognition
@@ -28,7 +66,11 @@ activities:
   - LEFT JOIN
   - GROUP BY
   - CASE
-  hints: []
+  hints:
+  - Read the task again and identify where **Stack compatible results** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which operator combines compatible result
+    sets and removes duplicate rows?'
   validator:
     type: exact_answer
     expected_answer: UNION
@@ -55,7 +97,55 @@ activities:
     action_label: Choose the best answer
     body: '`UNION` combines rows from two compatible queries and removes duplicates. `UNION ALL` keeps every row.'
   required_for_completion: true
-- activity_id: union_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: UNION
+- activity_id: academy2_sql_set_operations_example
+  title: Example — See stacking rows with union in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See stacking rows with union in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      Two regional systems store the same fields.
+
+
+      ```sql
+
+      SELECT customer_id, signup_date, ''East'' AS source_region FROM east_customers
+
+      UNION ALL
+
+      SELECT customer_id, signup_date, ''West'' AS source_region FROM west_customers;
+
+      ```
+
+
+      **What to notice:** The source label keeps the origin visible, and `UNION ALL` preserves every record.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.set_operations
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_set_operations_guided
   title: Create a shared region list
   type: guided
   runtime: sql
@@ -67,6 +157,7 @@ activities:
   hints:
   - Focus on UNION.
   - Build the result one clause at a time.
+  - Read the task again and identify where **UNION** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -100,12 +191,14 @@ activities:
     title: Combine compatible result sets
     objective: Use UNION in a realistic analyst query.
     action_label: Write and validate the query
-    body: Both queries must return the same number of columns with compatible meanings. Add `ORDER BY` after the
-      final query.
+    body: Both queries must return the same number of columns with compatible meanings. Add `ORDER BY` after the final query.
   required_for_completion: true
-- activity_id: union_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_set_operations_independent
   title: Combine customer identifiers
-  type: mastery
+  type: independent
   runtime: sql
   prompt: Return one sorted list of customer_id values found in orders or support_tickets.
   starter: SELECT customer_id FROM orders;
@@ -113,6 +206,7 @@ activities:
   hints:
   - Focus on UNION.
   - Build the result one clause at a time.
+  - Read the task again and identify where **UNION** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -148,3 +242,90 @@ activities:
     action_label: Write and validate the query
     body: Use the same column meaning on both sides of the set operation.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_set_operations_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: January and February files have the same columns, and you need one result containing rows from both. Which operation
+    fits?
+  answer_options:
+  - UNION ALL
+  - INNER JOIN
+  - GROUP BY
+  - CASE
+  solution: UNION ALL
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: UNION ALL
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: January and February files have the same columns, and you need one result containing rows from both. Which operation
+      fits?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.set_operations
+    after_correct: UNION ALL stacks compatible rows and keeps duplicates that may represent real records.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_set_operations_recap
+  title: Recap — Stacking Rows with UNION
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Stacking Rows with UNION
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Stacking Rows with UNION
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Combine compatible query results vertically.
+
+      - Validate the result rather than relying only on query syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

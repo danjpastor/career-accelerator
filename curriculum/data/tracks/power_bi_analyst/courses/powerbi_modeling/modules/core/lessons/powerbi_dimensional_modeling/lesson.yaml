@@ -1,9 +1,11 @@
-lesson_id: powerbi_dimensional_modeling
+lesson_id: academy2_powerbi_dimensional_modeling
 title: Dimensional Modeling
 order: 3
 difficulty: beginner
-description: Build practical fluency with dimensional modeling.
-estimated_minutes: 15
+description: A dimensional model separates measurable business events from descriptive context. A **fact table** contains
+  events and numbers, such as orders and revenue. A **dimension table** contains descriptive fields, such as customer segment,
+  product category, or calendar month.
+estimated_minutes: 36
 content: lesson.md
 objectives:
 - Explain the purpose of dimensional modeling.
@@ -17,7 +19,44 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: powerbi_dimensional_modeling_step_1
+- activity_id: academy2_powerbi_dimensional_modeling_learn
+  title: Learn — Dimensional Modeling
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Dimensional Modeling
+    objective: Explain the purpose of dimensional modeling.
+    body: 'A dimensional model separates measurable business events from descriptive context. A **fact table** contains events
+      and numbers, such as orders and revenue. A **dimension table** contains descriptive fields, such as customer segment,
+      product category, or calendar month.
+
+
+      Relationships allow dimension selections to filter the fact table. For a simple star model, single-direction filtering
+      from dimension to fact is usually the easiest behavior to understand. Bidirectional filtering can be useful in special
+      cases, but it can also create confusing or ambiguous paths.
+
+
+      Good models make measures easier to write and totals easier to trust.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - powerbi.dimensional_modeling
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_powerbi_dimensional_modeling_check
   title: 'Practice 1: Dimensional Modeling'
   type: recognition
   runtime: recognition
@@ -27,7 +66,11 @@ activities:
   - Many-to-many by default
   - No relationship
   - One-to-one for every table
-  hints: []
+  hints:
+  - Read the task again and identify where **Dimensional Modeling** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: What relationship is most common from
+    a dimension to a fact?'
   validator:
     type: exact_answer
     expected_answer: One-to-many
@@ -54,46 +97,151 @@ activities:
     action_label: Choose the best answer
     body: A unique dimension key relates to many fact rows.
   required_for_completion: true
-- activity_id: powerbi_dimensional_modeling_step_2
-  title: 'Practice 2: Dimensional Modeling'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: One-to-many
+- activity_id: academy2_powerbi_dimensional_modeling_example
+  title: Example — See dimensional modeling in context
   type: recognition
-  runtime: recognition
-  prompt: Why use a dedicated date dimension?
-  answer_options:
-  - To support consistent time filtering and time intelligence
-  - To store report colors
-  - To replace every source date
-  - To hide measures
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See dimensional modeling in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A training model uses `Attendance` as a fact table and `Employees`, `Courses`, and `Calendar` as dimensions. Choosing
+      a department in Employees filters attendance records, while attendance does not automatically rewrite the list of employees.
+      This one-way flow keeps the model predictable.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - powerbi.dimensional_modeling
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: To support consistent time filtering and time intelligence
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: Why use a dedicated date dimension?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Dimensional Modeling
-    after_correct: You identified the core idea behind dimensional modeling.
-    common_errors: []
-  instruction:
-    title: Dimensional Modeling
-    objective: Build a practical understanding of dimensional modeling.
-    action_label: Choose the best answer
-    body: A complete date table provides stable calendar attributes and one shared time filter path.
+- activity_id: academy2_powerbi_dimensional_modeling_guided
+  title: Try It — Set a safe relationship direction
+  type: guided
+  runtime: response
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 8
+  prompt: 'Create a one-to-many relationship from customers to orders. For this simple star-style model, which cross-filter
+    direction should you choose: **Single** or **Both**?'
+  starter: ''
+  solution: Single
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: one_of
+    accepted:
+    - Single
+    - single direction
+    - single
+    success_feedback: Correct. Single-direction filtering keeps the model easier to reason about.
+    failure_feedback: Use the simplest direction that lets the customer table filter the orders table.
   required_for_completion: true
-- activity_id: powerbi_dimensional_modeling_step_3
-  title: 'Practice 3: Dimensional Modeling'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: 'Create a one-to-many relationship from customers to orders. For this simple star-style model, which cross-filter
+      direction should you choose: **Single** or **Both**?'
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/customers.csv
+    - datasets/orders.csv
+    after_correct: Correct. Single-direction filtering keeps the model easier to reason about.
+  instruction:
+    title: Try It — Set a safe relationship direction
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_dimensional_modeling_independent
+  title: Practice — Use the model to summarize a segment
+  type: independent
+  runtime: response
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: Build a visual showing Sum of `order_total` by customer `segment`. What total is shown for the **Enterprise** segment?
+  starter: ''
+  solution: '330'
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: numeric
+    expected: 330
+    tolerance: 0.01
+    success_feedback: Correct. Known Enterprise customers account for 330 in order value.
+    failure_feedback: Use segment from customers and order_total from orders, then make sure the relationship is active.
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: Build a visual showing Sum of `order_total` by customer `segment`. What total is shown for the **Enterprise** segment?
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/customers.csv
+    - datasets/orders.csv
+    after_correct: Correct. Known Enterprise customers account for 330 in order value.
+  instruction:
+    title: Practice — Use the model to summarize a segment
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_dimensional_modeling_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: What should you check before creating a one-side relationship?
   answer_options:
@@ -101,30 +249,75 @@ activities:
   - The visual theme
   - The report title
   - The number of bookmarks
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: The key is unique and nonblank
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: What should you check before creating a one-side relationship?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Dimensional Modeling
     after_correct: You identified the core idea behind dimensional modeling.
     common_errors: []
   instruction:
-    title: Dimensional Modeling
-    objective: Build a practical understanding of dimensional modeling.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: Duplicate or blank keys on the one side can invalidate the relationship design.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: The key is unique and nonblank
+- activity_id: academy2_powerbi_dimensional_modeling_recap
+  title: Recap — Dimensional Modeling
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Dimensional Modeling
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Dimensional Modeling
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Dimensional Modeling supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

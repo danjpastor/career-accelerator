@@ -1,9 +1,10 @@
-lesson_id: powerbi_shaping_tables
+lesson_id: academy2_powerbi_shaping_tables
 title: Shaping Tables
 order: 2
 difficulty: beginner
-description: Build practical fluency with shaping tables.
-estimated_minutes: 15
+description: Shaping data means changing its structure so it is easier to analyze. In Power Query, you can rename fields,
+  remove columns, split text, pivot or unpivot values, append similar tables, and merge related tables.
+estimated_minutes: 36
 content: lesson.md
 objectives:
 - Explain the purpose of shaping tables.
@@ -17,7 +18,40 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: powerbi_shaping_tables_step_1
+- activity_id: academy2_powerbi_shaping_tables_learn
+  title: Learn — Shaping Tables
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Shaping Tables
+    objective: Explain the purpose of shaping tables.
+    body: 'Shaping data means changing its structure so it is easier to analyze. In Power Query, you can rename fields, remove
+      columns, split text, pivot or unpivot values, append similar tables, and merge related tables.
+
+
+      **Append** stacks rows from tables with the same kind of records. **Merge** matches columns between related tables.
+      A left outer merge keeps every row from the first table and brings in matching values from the second. Always compare
+      row counts before and after a merge so you can spot lost or duplicated records.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - powerbi.shaping
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_powerbi_shaping_tables_check
   title: 'Practice 1: Shaping Tables'
   type: recognition
   runtime: recognition
@@ -27,7 +61,11 @@ activities:
   - When it already has one date column
   - When it has no data
   - Only after publishing
-  hints: []
+  hints:
+  - Read the task again and identify where **Shaping Tables** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: When should a wide repeated-month table
+    usually be unpivoted?'
   validator:
     type: exact_answer
     expected_answer: When month names are columns and should become row values
@@ -52,49 +90,149 @@ activities:
     title: Shaping Tables
     objective: Build a practical understanding of shaping tables.
     action_label: Choose the best answer
-    body: Unpivoting converts repeated columns into a consistent attribute-value structure that models and visuals
-      can use.
+    body: Unpivoting converts repeated columns into a consistent attribute-value structure that models and visuals can use.
   required_for_completion: true
-- activity_id: powerbi_shaping_tables_step_2
-  title: 'Practice 2: Shaping Tables'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: When month names are columns and should become row values
+- activity_id: academy2_powerbi_shaping_tables_example
+  title: Example — See shaping tables in context
   type: recognition
-  runtime: recognition
-  prompt: Why remove unused high-cardinality columns?
-  answer_options:
-  - To simplify the model and reduce memory pressure
-  - To add more colors
-  - To create ambiguity
-  - To replace validation
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See shaping tables in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A company receives one monthly expense file per office. The analyst appends the files because every file contains the
+      same columns. They later merge the combined expenses with an office lookup table to add region names. A left outer merge
+      keeps every expense even when one office code is missing from the lookup.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - powerbi.shaping
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: To simplify the model and reduce memory pressure
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: Why remove unused high-cardinality columns?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Shaping Tables
-    after_correct: You identified the core idea behind shaping tables.
-    common_errors: []
-  instruction:
-    title: Shaping Tables
-    objective: Build a practical understanding of shaping tables.
-    action_label: Choose the best answer
-    body: Only load fields that support relationships, measures, filters, or required detail.
+- activity_id: academy2_powerbi_shaping_tables_guided
+  title: Try It — Merge without losing orders
+  type: guided
+  runtime: response
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 8
+  prompt: In Power Query, merge `orders` with `customers` using `customer_id`. Use a Left Outer join so every order stays
+    in the result. After expanding `customer_name`, how many rows remain?
+  starter: ''
+  solution: '8'
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: numeric
+    expected: 8
+    success_feedback: Correct. A left outer merge preserves all 8 orders.
+    failure_feedback: Check the join kind. A left outer merge should keep every row from orders.
   required_for_completion: true
-- activity_id: powerbi_shaping_tables_step_3
-  title: 'Practice 3: Shaping Tables'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: In Power Query, merge `orders` with `customers` using `customer_id`. Use a Left Outer join so every order stays
+      in the result. After expanding `customer_name`, how many rows remain?
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    - datasets/customers.csv
+    after_correct: Correct. A left outer merge preserves all 8 orders.
+  instruction:
+    title: Try It — Merge without losing orders
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_shaping_tables_independent
+  title: Practice — Check the result of a merge
+  type: independent
+  runtime: response
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: In the merged query, how many rows have a blank `customer_name` after the column is expanded?
+  starter: ''
+  solution: '1'
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: numeric
+    expected: 1
+    success_feedback: Correct. The merge exposes one unmatched customer ID.
+    failure_feedback: Filter customer_name to blanks and count the remaining rows.
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: In the merged query, how many rows have a blank `customer_name` after the column is expanded?
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    - datasets/customers.csv
+    after_correct: Correct. The merge exposes one unmatched customer ID.
+  instruction:
+    title: Practice — Check the result of a merge
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_shaping_tables_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: What is the best place to standardize category labels?
   answer_options:
@@ -102,30 +240,75 @@ activities:
   - Inside every visual title
   - In a screenshot
   - After export only
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: A repeatable transformation step before modeling
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: What is the best place to standardize category labels?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Shaping Tables
     after_correct: You identified the core idea behind shaping tables.
     common_errors: []
   instruction:
-    title: Shaping Tables
-    objective: Build a practical understanding of shaping tables.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: Standardizing categories upstream prevents fragmented filter values and inconsistent totals.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: A repeatable transformation step before modeling
+- activity_id: academy2_powerbi_shaping_tables_recap
+  title: Recap — Shaping Tables
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Shaping Tables
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Shaping Tables
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Shaping Tables supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

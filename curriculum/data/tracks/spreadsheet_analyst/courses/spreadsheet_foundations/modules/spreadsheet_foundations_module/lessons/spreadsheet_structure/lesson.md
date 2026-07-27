@@ -1,19 +1,36 @@
 # Rows, Columns, Tables & Data Types
 
-Learn how a real operations workbook is organized, identify the grain of a table, and prepare the Orders data for analysis.
+Understand spreadsheet structure, table grain, and filters before changing or analyzing data.
 
-## Learn
+## What you will learn
 
-A table is easiest to analyze when every row represents the same kind of business event. In the Orders sheet, the grain is one customer order. Order ID and Customer ID are identifiers, while Units and Unit Price are measures.
+- Identify what one row and one column represent in a well-structured table.
+- Make a Google Sheets table filterable without changing its source records.
+- Document table grain in clear analyst language.
 
-## Try It
+## Main idea
 
-Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter to the header row. Keep every existing row and column unchanged.
+# Rows, Columns, Tables & Data Types
 
-## Practice
+## What this lesson teaches
 
-Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row in Orders represents.
+Understand spreadsheet structure, table grain, and filters before changing or analyzing data.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- A reliable table has one consistent type of record per row.
+- Filters change what is visible; they do not delete the hidden rows.
+- Summary values should not be mixed into the middle of transaction data.
+
+## Key takeaways
+
+- A reliable table has one consistent type of record per row.
+- Filters change what is visible; they do not delete the hidden rows.
+- Summary values should not be mixed into the middle of transaction data.

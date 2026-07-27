@@ -1,7 +1,7 @@
 course_id: lookups_and_related_data
-title: Lookups & Related Data
+title: Lookups & Data Relationships
 order: 4
-description: Connect Orders to Products and Customers with exact lookups and relationship checks.
+description: Connect related tables with exact keys, validate matches, and summarize data at the correct grain.
 estimated_minutes: 240
 outcomes:
 - Complete real spreadsheet work in Excel or Google Sheets.

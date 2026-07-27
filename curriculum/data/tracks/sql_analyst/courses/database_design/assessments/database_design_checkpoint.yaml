@@ -52,6 +52,7 @@ activities:
       the situation, identify what the result must preserve, and then choose the option that best matches that goal.
       This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
+  solution: A star schema
 - activity_id: db_cp_2_mastery
   title: Choose a reusable interface
   type: mastery
@@ -91,6 +92,7 @@ activities:
       identify what the result must preserve, and then choose the option that best matches that goal. This check
       is intentionally short so you can test the idea immediately.
   required_for_completion: true
+  solution: A view
 - activity_id: db_cp_3_mastery
   title: Choose an access policy
   type: mastery
@@ -130,3 +132,4 @@ activities:
       identify what the result must preserve, and then choose the option that best matches that goal. This check
       is intentionally short so you can test the idea immediately.
   required_for_completion: true
+  solution: Grant only SELECT on the approved views

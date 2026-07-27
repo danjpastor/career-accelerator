@@ -1,9 +1,9 @@
-lesson_id: sql_search_extensions
+lesson_id: academy2_sql_search_extensions
 title: Full-Text Search and PostgreSQL Extensions
 order: 1
 difficulty: intermediate
 description: Understand when search indexes, extensions, user-defined functions, and similarity measures are appropriate.
-estimated_minutes: 18
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain full-text search and postgresql extensions.
@@ -18,12 +18,50 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: sql_search_extensions_1_recognition
+- activity_id: academy2_sql_search_extensions_learn
+  title: Learn — Full-Text Search and PostgreSQL Extensions
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Full-Text Search and PostgreSQL Extensions
+    objective: Explain full-text search and postgresql extensions.
+    body: '# Understand specialized database features
+
+
+      Simple `LIKE` searches scan text for a pattern. Full-text search breaks documents into searchable terms and can rank
+      results by relevance. Database extensions add optional features that are not part of the basic SQL language.
+
+
+      These tools can be powerful, but they are dialect-specific. An analyst should understand what the feature does, whether
+      it is available, and how portable the query needs to be.
+
+
+      In this lesson, you will choose between basic text matching and specialized search features.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.search_extensions
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_search_extensions_check
   title: 'Full-Text Search and PostgreSQL Extensions: decision 1'
   type: recognition
   runtime: recognition
-  prompt: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed
-    for that workload?
+  prompt: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed for
+    that workload?
   answer_options:
   - Full-text search with an indexed document representation
   - A simple ORDER BY only
@@ -31,6 +69,8 @@ activities:
   - A CROSS JOIN
   hints:
   - Focus on how full-text search and postgresql extensions changes the result or database behavior.
+  - Read the task again and identify where **full-text search and postgresql extensions** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: Full-text search with an indexed document representation
@@ -42,8 +82,8 @@ activities:
   presentation:
     scenario: Quick analyst decision
     introduction: Use the concept from this step to choose the strongest answer.
-    task: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed
-      for that workload?
+    task: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed for
+      that workload?
     requirements:
     - Choose one answer.
     - Check your answer before continuing.
@@ -56,13 +96,52 @@ activities:
     title: 'Full-Text Search and PostgreSQL Extensions: decision 1'
     objective: Use full-text search and postgresql extensions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable,
-      and useful. Read the situation, identify what the result must preserve, and then choose the option that best
-      matches that goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: sql_search_extensions_2_recognition
-  title: 'Full-Text Search and PostgreSQL Extensions: decision 2'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: Full-text search with an indexed document representation
+- activity_id: academy2_sql_search_extensions_example
+  title: Example — See full-text search and postgresql extensions in context
   type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See full-text search and postgresql extensions in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      Searching support notes for `%ship%` may match “shipping,” “shipment,” and unrelated character sequences. A full-text
+      index can search normalized words and rank the most relevant notes.
+
+
+      **What to notice:** Specialized search improves behavior for large text collections, but it requires database-specific
+      setup and syntax.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.search_extensions
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_search_extensions_guided
+  title: 'Full-Text Search and PostgreSQL Extensions: decision 2'
+  type: guided
   runtime: recognition
   prompt: What is the main reason to review a database extension before enabling it?
   answer_options:
@@ -72,6 +151,8 @@ activities:
   - Extensions replace every table
   hints:
   - Focus on how full-text search and postgresql extensions changes the result or database behavior.
+  - Read the task again and identify where **full-text search and postgresql extensions** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: It adds capabilities and operational or security considerations
@@ -96,13 +177,17 @@ activities:
     title: 'Full-Text Search and PostgreSQL Extensions: decision 2'
     objective: Use full-text search and postgresql extensions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable,
-      and useful. Read the situation, identify what the result must preserve, and then choose the option that best
-      matches that goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: sql_search_extensions_3_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  solution: It adds capabilities and operational or security considerations
+- activity_id: academy2_sql_search_extensions_independent
   title: 'Full-Text Search and PostgreSQL Extensions: decision 3'
-  type: mastery
+  type: independent
   runtime: recognition
   prompt: Which measure describes the number of single-character edits needed to transform one string into another?
   answer_options:
@@ -110,12 +195,16 @@ activities:
   - Running total
   - Cardinality
   - Foreign key
-  hints: []
+  hints:
+  - Read the task again and identify where **full-text search and postgresql extensions** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which measure describes the number of
+    single-character edits needed to transform one string into another?'
   validator:
     type: exact_answer
     expected_answer: Levenshtein distance
   required_for_practice: false
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: intermediate
   estimated_minutes: 5
@@ -135,7 +224,95 @@ activities:
     title: 'Full-Text Search and PostgreSQL Extensions: decision 3'
     objective: Use full-text search and postgresql extensions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable,
-      and useful. Read the situation, identify what the result must preserve, and then choose the option that best
-      matches that goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  solution: Levenshtein distance
+- activity_id: academy2_sql_search_extensions_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: Which measure describes the number of single-character edits needed to transform one string into another?
+  answer_options:
+  - Levenshtein distance
+  - Running total
+  - Cardinality
+  - Foreign key
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Levenshtein distance
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: Which measure describes the number of single-character edits needed to transform one string into another?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One correct selection.
+    skills_practiced:
+    - full-text search and postgresql extensions
+    after_correct: You correctly applied full-text search and postgresql extensions to the decision.
+    common_errors: []
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    action_label: Choose the best answer
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: Levenshtein distance
+- activity_id: academy2_sql_search_extensions_recap
+  title: Recap — Full-Text Search and PostgreSQL Extensions
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Full-Text Search and PostgreSQL Extensions
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Full-Text Search and PostgreSQL Extensions
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Understand when search indexes, extensions, user-defined functions, and similarity measures are appropriate.
+
+      - Choose designs based on workload, grain, integrity, and maintainability.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

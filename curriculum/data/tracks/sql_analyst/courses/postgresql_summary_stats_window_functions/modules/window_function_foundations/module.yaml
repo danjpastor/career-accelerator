@@ -1,5 +1,5 @@
 module_id: window_function_foundations
-title: Introduction to Window Functions
+title: Keep Detail Rows While Calculating
 order: 1
 description: Compare windows with grouped queries and use OVER, ORDER BY, and PARTITION BY.
 lessons:

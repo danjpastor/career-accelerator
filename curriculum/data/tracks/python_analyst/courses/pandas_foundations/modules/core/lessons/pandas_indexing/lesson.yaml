@@ -1,9 +1,9 @@
-lesson_id: pandas_indexing
+lesson_id: academy2_pandas_indexing
 title: Slicing and Indexing DataFrames
 order: 3
 difficulty: beginner
-description: Build practical fluency with slicing and indexing dataframes.
-estimated_minutes: 15
+description: Filtering selects rows that meet a condition. Column selection keeps only the fields needed for the next task.
+estimated_minutes: 35
 content: lesson.md
 objectives:
 - Explain the purpose of slicing and indexing dataframes.
@@ -17,7 +17,47 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: pandas_indexing_step_1
+- activity_id: academy2_pandas_indexing_learn
+  title: Learn — Slicing and Indexing DataFrames
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Slicing and Indexing DataFrames
+    objective: Explain the purpose of slicing and indexing dataframes.
+    body: 'Filtering selects rows that meet a condition. Column selection keeps only the fields needed for the next task.
+
+
+      ```python
+
+      open_high = tickets[(tickets["status"] == "Open") & (tickets["priority"] == "High")]
+
+      review = open_high[["ticket_id", "team", "opened_date"]]
+
+      ```
+
+
+      Use `&` for AND and `|` for OR, with each condition inside parentheses. `.loc` can select rows and columns explicitly.
+      A focused result is easier to review than carrying every source column into every step.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - pandas.indexing
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_pandas_indexing_check
   title: 'Practice 1: Slicing and Indexing DataFrames'
   type: recognition
   runtime: recognition
@@ -27,7 +67,10 @@ activities:
   - iloc
   - append
   - plot
-  hints: []
+  hints:
+  - Read the task again and identify where **Slicing and Indexing DataFrames** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which indexer selects by label?'
   validator:
     type: exact_answer
     expected_answer: loc
@@ -54,46 +97,158 @@ activities:
     action_label: Choose the best answer
     body: '`loc` selects rows and columns using labels or Boolean conditions.'
   required_for_completion: true
-- activity_id: pandas_indexing_step_2
-  title: 'Practice 2: Slicing and Indexing DataFrames'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: loc
+- activity_id: academy2_pandas_indexing_example
+  title: Example — See slicing and indexing dataframes in context
   type: recognition
-  runtime: recognition
-  prompt: Which indexer selects by integer position?
-  answer_options:
-  - iloc
-  - loc
-  - merge
-  - astype
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See slicing and indexing dataframes in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A staffing analyst filters employees to one location and then selects only employee ID, role, and available hours for
+      a scheduling review. The source DataFrame remains unchanged. The graded exercise creates a support-ticket review queue.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - pandas.indexing
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: iloc
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: Which indexer selects by integer position?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Slicing and Indexing DataFrames
-    after_correct: You identified the core idea behind slicing and indexing dataframes.
-    common_errors: []
-  instruction:
-    title: Slicing and Indexing DataFrames
-    objective: Build a practical understanding of slicing and indexing dataframes.
-    action_label: Choose the best answer
-    body: '`iloc` uses zero-based row and column positions.'
+- activity_id: academy2_pandas_indexing_guided
+  title: Try It — Filter rows with more than one condition
+  type: guided
+  runtime: python
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 7
+  prompt: The `support_tickets` DataFrame is loaded. Create `urgent_active` containing tickets whose priority is Urgent and
+    whose status is not Closed.
+  starter: '# support_tickets is already loaded.
+
+    # Create urgent_active.'
+  solution: urgent_active = support_tickets[(support_tickets['priority'] == 'Urgent') & (support_tickets['status'] != 'Closed')]
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: len(urgent_active) == 2
+      feedback: Combine the Urgent priority condition with status not equal to Closed.
+    - expression: set(urgent_active['ticket_id']) == {'T1003', 'T1006'}
+      feedback: Check both conditions and keep the matching ticket rows.
+    display_variable: urgent_active
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+    dataset_id: sql_foundations
   required_for_completion: true
-- activity_id: pandas_indexing_step_3
-  title: 'Practice 3: Slicing and Indexing DataFrames'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: The `support_tickets` DataFrame is loaded. Create `urgent_active` containing tickets whose priority is Urgent and
+      whose status is not Closed.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Try It — Filter rows with more than one condition
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_pandas_indexing_independent
+  title: Practice — Select only the fields a reviewer needs
+  type: independent
+  runtime: python
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: From `urgent_active`, create `review_queue` containing only `ticket_id`, `assigned_team`, and `opened_date`, in
+    that order.
+  starter: 'urgent_active = support_tickets[(support_tickets[''priority''] == ''Urgent'') & (support_tickets[''status''] !=
+    ''Closed'')]
+
+    # Create review_queue.'
+  solution: 'urgent_active = support_tickets[(support_tickets[''priority''] == ''Urgent'') & (support_tickets[''status'']
+    != ''Closed'')]
+
+    review_queue = urgent_active[[''ticket_id'', ''assigned_team'', ''opened_date'']]'
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: list(review_queue.columns) == ['ticket_id', 'assigned_team', 'opened_date']
+      feedback: Select the three requested columns in the order shown.
+    - expression: len(review_queue) == 2
+      feedback: Keep both rows from urgent_active.
+    display_variable: review_queue
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+    dataset_id: sql_foundations
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: From `urgent_active`, create `review_queue` containing only `ticket_id`, `assigned_team`, and `opened_date`, in
+      that order.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Practice — Select only the fields a reviewer needs
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_pandas_indexing_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: Why reset an index after filtering in some workflows?
   answer_options:
@@ -101,30 +256,75 @@ activities:
   - To delete every column
   - To convert numbers to text
   - To aggregate automatically
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: To create a clean sequential index when the old labels no longer help
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: Why reset an index after filtering in some workflows?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Slicing and Indexing DataFrames
     after_correct: You identified the core idea behind slicing and indexing dataframes.
     common_errors: []
   instruction:
-    title: Slicing and Indexing DataFrames
-    objective: Build a practical understanding of slicing and indexing dataframes.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: Keep the original index when it has analytical meaning; reset it when a simple row sequence is clearer.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: To create a clean sequential index when the old labels no longer help
+- activity_id: academy2_pandas_indexing_recap
+  title: Recap — Slicing and Indexing DataFrames
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Slicing and Indexing DataFrames
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Slicing and Indexing DataFrames
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Slicing and Indexing DataFrames supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

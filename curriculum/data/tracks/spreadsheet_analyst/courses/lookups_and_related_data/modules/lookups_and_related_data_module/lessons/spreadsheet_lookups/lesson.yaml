@@ -1,16 +1,18 @@
-lesson_id: spreadsheet_lookups
+lesson_id: academy2_spreadsheet_lookups
 title: Exact Lookups with XLOOKUP
 order: 1
 difficulty: beginner
-description: Bring product attributes into Orders with exact lookups and make missing matches visible.
-estimated_minutes: 40
+description: Use stable identifiers and exact lookups to bring related product details into the Orders table.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Return product names from a related table.
-- Return category and unit-cost attributes with exact matching.
+- Identify the key that connects Orders to Products.
+- Use an exact lookup to return one related field.
+- Reuse the lookup pattern to return multiple product attributes.
 key_takeaways:
-- Exact lookups connect related tables by a shared key.
-- A missing match should be handled visibly, not hidden.
+- A lookup key should represent the same entity in both tables.
+- Exact matching is safest for IDs and codes.
+- Unexpected missing matches should be investigated rather than hidden.
 teaches:
 - spreadsheet.lookups
 requires:
@@ -19,40 +21,64 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_lookups_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_lookups_learn
+  title: Learn — Exact Lookups with XLOOKUP
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Exact Lookups with XLOOKUP
+    objective: Identify the key that connects Orders to Products.
+    body: '# Bring related information into a table
+
+
+      A lookup finds a value in one table and returns related information from another. `XLOOKUP` is especially useful when
+      the two tables share a stable identifier such as Product ID or Customer ID.
+
+
+      An **exact match** means the identifier must be the same in both tables. Names are usually poor lookup keys because
+      spelling and formatting can change. IDs are safer when they are unique and complete.
+
+
+      A lookup formula needs a value to find, a range to search, and a range to return from. Before filling it down, check
+      a few known records and decide how unmatched IDs should appear.
+
+
+      In this lesson, you will connect related tables without manually copying values.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.lookups
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_lookups_check
+  title: Learn & Predict — Connecting tables with exact lookups
   type: recognition
   runtime: recognition
-  prompt: |-
-    Which field should connect Orders to Products?
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-    ### Complete this task in Google Sheets
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-    3. Click the first required output cell and begin the lookup formula with `=`.
-    4. Use the current row's key as the search key and the named lookup table as the lookup range.
-    5. Use an exact match and lock the lookup range with `$` references before filling down.
-    6. Verify at least three results against the source table and correct unexpected `#N/A` values.
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-    8. Wait until Google Sheets shows that saving is complete.
-    9. Return to Career Accelerator and click **Check My Work**.
-    <!-- DCA GOOGLE SHEETS STEPS END -->
-  answer_options:
-  - Product ID
-  - Product Name
-  - Region
-  - Order Date
+  prompt: Which field should connect Orders to Products?
   starter: ''
   solution: Product ID
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - Look for a field that exists in both tables.
+  - The field should identify a product, not describe an order outcome.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
     expected_answer: Product ID
@@ -62,63 +88,88 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
     task: Which field should connect Orders to Products?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.lookups
-    after_correct: You are ready to apply the idea in the Northstar workbook.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
+    after_correct: Product ID identifies the same product entity in both tables and is the stable lookup key.
   instruction:
-    title: Learn — Exact Lookups with XLOOKUP
-    objective: Which field should connect Orders to Products?
-    action_label: Choose the best answer
-    body: A lookup should use a stable key shared by both tables. Orders and Products both contain Product
-      ID, so it is the reliable match field.
+    phase: LEARN & PREDICT
+    title: Learn & Predict — Connecting tables with exact lookups
+    objective: Identify lookup keys, return ranges, and exact-match behavior.
+    why_it_matters: Analysts often keep transaction data separate from reference data. A lookup can enrich each transaction
+      with attributes from the related reference table without copying values manually.
+    concept: A lookup uses a **search key**, a **lookup range**, and a **return range**. IDs are usually matched exactly.
+      XLOOKUP directly specifies the search and return ranges; VLOOKUP uses a table range and column position.
+    worked_example: A ticket table stores Agent ID, while an agent directory stores Agent ID, Agent Name, and Team. The ticket
+      table can use Agent ID to return the Agent Name. Matching on the name itself would be less reliable because names can
+      be duplicated or changed.
+    action_label: Make a prediction
   required_for_completion: true
-  google_sheets:
-    source_of_truth: Google Sheets
-    steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **the worksheet named in the task** and work in the worksheet named in the task.
-    - Click the first required output cell and begin the lookup formula with `=`.
-    - Use the current row's key as the search key and the named lookup table as the lookup range.
-    - Use an exact match and lock the lookup range with `$` references before filling down.
-    - Verify at least three results against the source table and correct unexpected `#N/A` values.
-    - 'Confirm the finished workbook matches this result: **One selected answer.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
-    primary_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-- activity_id: spreadsheet_lookups_workbook_guided
+  answer_options:
+  - Product ID
+  - Unit Price
+  - Order Date
+  - Region
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_lookups_example
+  title: Example — See exact lookups with xlookup in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See exact lookups with xlookup in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A repair table contains Equipment ID, while an equipment directory contains Equipment ID, Model, and Site. The analyst
+      uses Equipment ID to return the Site for each repair.
+
+
+      One Equipment ID has no match. Instead of silently returning a blank, the analyst displays “ID not found” and investigates
+      the reference table.
+
+
+      **What to notice:** The ID defines the relationship. A missing match is useful quality information, not something to
+      hide.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.lookups
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_lookups_guided
   title: Try It — Return the product name
   type: guided
   runtime: workbook
-  prompt: |-
-    On Orders, add Product Name in O1. Use XLOOKUP or an exact-match VLOOKUP to return the product name from Products for each Product ID. Fill through O37.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Orders**.
-    2. In **O1**, type the header `Product Name`.
-    3. In **O2**, enter `=XLOOKUP(F2,Products!$A$2:$A$9,Products!$B$2:$B$9,"Not found")`.
-    4. F2 is the Product ID to find. Products A2:A9 is the locked key range, and Products B2:B9 is the return range.
-    5. Fill O2 through **O37**.
-    6. Compare at least three returned product names with the Products sheet and investigate any Not found result.
-    7. Wait until Google Sheets shows that all changes are saved.
-    8. Return to Career Accelerator and select **Check My Work**.
+  prompt: Use XLOOKUP or an exact-match VLOOKUP to return Product Name in O2:O37.
   starter: ''
-  solution: O2:O37 contains exact-match lookup formulas.
+  solution: In O2 use `=XLOOKUP(F2,Products!$A$2:$A$9,Products!$B$2:$B$9,"Not found",0)` or an exact-match VLOOKUP, then fill
+    through O37.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The search key is the current row’s Product ID.
+  - The lookup range is Products Product ID; the return range is Products Product.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -127,6 +178,8 @@ activities:
       row: 1
       expected:
       - Product Name
+      message: 'The workbook does not yet meet this requirement: Every order has a formula-driven product name that matches
+        the Products table.'
     - type: formula_present
       sheet: Orders
       range: O2:O37
@@ -135,26 +188,9 @@ activities:
       - xlookup
       - vlookup
       - index
-    success_feedback: Every order now shows the related product name.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Orders
-    columns:
-    - Product ID
-    - Product Name
-    row_range: F1:O37
-    starting_state: Product ID is in Orders column F. Products contains Product ID in A and Product in B.
-    expected_result: O2:O37 contains exact-match lookup formulas.
-    column_descriptions:
-      Product ID: Identifier that connects an order to the Products sheet.
-      Product Name: Product description returned from the Products sheet.
-    sample_values:
-    - 'Product ID: P002'
-    - 'Product Name: Standing Desk'
+      message: 'The workbook does not yet meet this requirement: Every order has a formula-driven product name that matches
+        the Products table.'
+    success_feedback: You enriched transaction rows from a separate reference table using a stable identifier.
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
@@ -162,19 +198,17 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: On Orders, add Product Name in O1. Use XLOOKUP or an exact-match VLOOKUP to return the product name
-      from Products for each Product ID. Fill through O37.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Use XLOOKUP or an exact-match VLOOKUP to return Product Name in O2:O37.
     requirements:
-    - Match on Product ID.
-    - Return the Product field.
-    - Use exact matching and fill through row 37.
-    - Save the workbook.
-    expected_output: O2:O37 contains exact-match lookup formulas.
+    - Add Product Name in O1.
+    - Search with the current order’s Product ID.
+    - Use exact matching and fill the formula through row 37.
+    expected_output: Every order has a formula-driven product name that matches the Products table.
     skills_practiced:
     - spreadsheet.lookups
-    after_correct: Every order now shows the related product name.
+    after_correct: You enriched transaction rows from a separate reference table using a stable identifier.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -182,56 +216,63 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: Every order has a formula-driven product name that matches the Products table.
+    hide_exact_result: true
   instruction:
+    phase: TRY IT
     title: Try It — Return the product name
-    objective: On Orders, add Product Name in O1. Use XLOOKUP or an exact-match VLOOKUP to return the product
-      name from Products for each Product ID. Fill through O37.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    objective: Use an exact lookup to enrich each order with its related product name.
+    approach: Add Product Name to Orders. Use the current row’s Product ID as the search key and the Products table as the
+      reference. Return the Product field, use exact matching, fill the formula down, and verify several results against Products.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Orders
+    columns:
+    - Product ID
+    - Product Name
+    row_range: F1:O37
+    starting_state: Product ID is in Orders column F. Products contains Product ID in A and Product in B.
+    expected_result: Every order has a formula-driven product name that matches the Products table.
+    column_descriptions:
+      Product ID: Identifier that connects an order to the Products sheet.
+      Product Name: Product description returned from the Products sheet.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Orders**.
-    - In **O1**, type the header `Product Name`.
-    - In **O2**, enter `=XLOOKUP(F2,Products!$A$2:$A$9,Products!$B$2:$B$9,"Not found")`.
-    - F2 is the Product ID to find. Products A2:A9 is the locked key range, and Products B2:B9 is the return
-      range.
-    - Fill O2 through **O37**.
-    - Compare at least three returned product names with the Products sheet and investigate any Not found result.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_lookups_workbook_practice
-  title: Practice — Return category and unit cost
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Orders** and locate **F1:O37**.
+    - Add Product Name to Orders. Use the current row’s Product ID as the search key and the Products table as the reference.
+      Return the Product field, use exact matching, fill the formula down, and verify several results against Products.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_lookups_independent
+  title: Challenge — Return category and unit cost
+  type: independent
   runtime: workbook
-  prompt: |-
-    Add Category in P1 and Unit Cost in Q1. Use exact lookups from Products and fill both columns through row 37.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Orders**.
-    2. In **P1**, type `Category`. In **Q1**, type `Unit Cost`.
-    3. In **P2**, use XLOOKUP with F2 as the key, Products A2:A9 as the locked lookup range, and Products C2:C9 as the return range.
-    4. In **Q2**, use the same key and lookup range, but return Products D2:D9.
-    5. Use exact matching and an optional Not found result so unmatched keys are obvious.
-    6. Fill P2:P37 and Q2:Q37 down through row 37.
-    7. Format Q2:Q37 as currency and verify several results against Products.
-    8. Wait until Google Sheets shows that all changes are saved.
-    9. Return to Career Accelerator and select **Check My Work**.
+  prompt: Create Category in P2:P37 and Unit Cost in Q2:Q37 using exact lookups from Products.
   starter: ''
-  solution: P2:P37 and Q2:Q37 contain exact-match lookup formulas.
+  solution: In P2 return Products Category (column C) with an exact lookup. In Q2 return Products Unit Cost (column D). Lock
+    the lookup ranges and fill both formulas through row 37.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - Both formulas use the same search key and lookup ID range.
+  - 'Only the return range changes: Category for one formula and Unit Cost for the other.'
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -241,6 +282,8 @@ activities:
       expected:
       - Category
       - Unit Cost
+      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit
+        cost from Products.'
     - type: formula_present
       sheet: Orders
       range: P2:P37
@@ -249,6 +292,8 @@ activities:
       - xlookup
       - vlookup
       - index
+      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit
+        cost from Products.'
     - type: formula_present
       sheet: Orders
       range: Q2:Q37
@@ -257,29 +302,9 @@ activities:
       - xlookup
       - vlookup
       - index
-    success_feedback: Orders now carries the related category and cost attributes needed for analysis.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Orders
-    columns:
-    - Product ID
-    - Category
-    - Unit Cost
-    row_range: F1:Q37
-    starting_state: Products includes Category and Unit Cost for each Product ID. Columns P and Q are available.
-    expected_result: P2:P37 and Q2:Q37 contain exact-match lookup formulas.
-    column_descriptions:
-      Product ID: Identifier that connects an order to the Products sheet.
-      Category: Product category returned from the Products sheet.
-      Unit Cost: Internal cost per unit returned from the Products sheet.
-    sample_values:
-    - 'Product ID: P002'
-    - 'Category: Furniture'
-    - 'Unit Cost: $310.00'
+      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit
+        cost from Products.'
+    success_feedback: You reused one relationship to add multiple trusted reference attributes to the transaction table.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
@@ -287,19 +312,17 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: Add Category in P1 and Unit Cost in Q1. Use exact lookups from Products and fill both columns through
-      row 37.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Create Category in P2:P37 and Unit Cost in Q2:Q37 using exact lookups from Products.
     requirements:
-    - Use Product ID as the key.
-    - Return Category and Unit Cost in separate columns.
-    - Format Unit Cost as US dollars.
-    - Fill through row 37 and save.
-    expected_output: P2:P37 and Q2:Q37 contain exact-match lookup formulas.
+    - Add both requested headers.
+    - Use Product ID as the search key for both formulas.
+    - Return Category and Unit Cost from their correct source columns.
+    expected_output: Every order contains the correct product category and unit cost from Products.
     skills_practiced:
     - spreadsheet.lookups
-    after_correct: Orders now carries the related category and cost attributes needed for analysis.
+    after_correct: You reused one relationship to add multiple trusted reference attributes to the transaction table.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -307,31 +330,140 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: Every order contains the correct product category and unit cost from Products.
+    hide_exact_result: true
   instruction:
-    title: Practice — Return category and unit cost
-    objective: Add Category in P1 and Unit Cost in Q1. Use exact lookups from Products and fill both columns
-      through row 37.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Return category and unit cost
+    objective: Extend the exact-lookup pattern to multiple related fields.
+    approach: Use the same Product ID relationship to return Category and Unit Cost into separate columns. Keep the lookup
+      ranges fixed and verify that one Product ID returns the same attributes shown in Products.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Orders
+    columns:
+    - Product ID
+    - Category
+    - Unit Cost
+    row_range: F1:Q37
+    starting_state: Products includes Category and Unit Cost for each Product ID. Columns P and Q are available.
+    expected_result: Every order contains the correct product category and unit cost from Products.
+    column_descriptions:
+      Product ID: Identifier that connects an order to the Products sheet.
+      Category: Product category returned from the Products sheet.
+      Unit Cost: Internal cost per unit returned from the Products sheet.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Orders**.
-    - In **P1**, type `Category`. In **Q1**, type `Unit Cost`.
-    - In **P2**, use XLOOKUP with F2 as the key, Products A2:A9 as the locked lookup range, and Products C2:C9
-      as the return range.
-    - In **Q2**, use the same key and lookup range, but return Products D2:D9.
-    - Use exact matching and an optional Not found result so unmatched keys are obvious.
-    - Fill P2:P37 and Q2:Q37 down through row 37.
-    - Format Q2:Q37 as currency and verify several results against Products.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Orders** and locate **F1:Q37**.
+    - Use the same Product ID relationship to return Category and Unit Cost into separate columns. Keep the lookup ranges
+      fixed and verify that one Product ID returns the same attributes shown in Products.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_lookups_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: Why is exact matching usually preferred when looking up an ID such as P004?
+  answer_options:
+  - An ID should match one specific record
+  - Approximate matching is always faster
+  - Exact matching changes the source table
+  - IDs are stored as dates
+  starter: ''
+  solution: An ID should match one specific record
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: An ID should match one specific record
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: Why is exact matching usually preferred when looking up an ID such as P004?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.lookups
+    after_correct: Use exact matching for IDs, codes, account numbers, and other discrete keys.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: Identifiers are discrete keys. An approximate match could return the wrong entity without making the error
+      obvious.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_lookups_recap
+  title: Recap — Exact Lookups with XLOOKUP
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Exact Lookups with XLOOKUP
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Exact Lookups with XLOOKUP
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - A lookup key should represent the same entity in both tables.
+
+      - Exact matching is safest for IDs and codes.
+
+      - Unexpected missing matches should be investigated rather than hidden.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

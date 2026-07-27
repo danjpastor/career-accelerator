@@ -21,11 +21,13 @@ from .progress import ProgressRepository
 from .recommendations import AcademyRecommendation, RecommendationEngine
 from .schema import ensure_academy_schema
 from .validators import (
+    PythonValidator,
     SqlValidator,
     ValidationResult,
     WorkbookValidationError,
     WorkbookValidator,
     validate_recognition,
+    validate_response,
 )
 
 
@@ -43,6 +45,7 @@ class AcademyService:
         ensure_academy_schema(conn)
         self.catalog = load_catalog(self.curriculum_root)
         self.index = CatalogIndex(self.catalog)
+        self._academy_progress_was_reset = self._reset_replaced_curriculum_progress()
         self.progress = ProgressRepository(
             conn,
             self.catalog.program.content_version,
@@ -60,6 +63,95 @@ class AcademyService:
         self._retire_datacamp_recommendations()
         self.sync_planner_task()
 
+
+    def _reset_replaced_curriculum_progress(self) -> bool:
+        """Reset only Academy-owned progress when a replacement curriculum arrives.
+
+        Version 2 is a new course system rather than an edit to the old lessons.
+        Carrying old passed rows forward would make new steps appear complete and
+        could unlock later material incorrectly.  The reset is intentionally
+        limited to Academy tables and Academy-generated planner rows. Portfolio
+        work, applications, settings, study history, and every non-Academy table
+        remain untouched.
+        """
+        current_version = str(self.catalog.program.content_version or "")
+        try:
+            progress_versions = {
+                str(row[0] or "")
+                for row in self.conn.execute(
+                    "SELECT DISTINCT content_version FROM academy_lesson_progress"
+                ).fetchall()
+            }
+            active_versions = {
+                str(row[0] or "")
+                for row in self.conn.execute(
+                    "SELECT DISTINCT content_version FROM academy_packages WHERE active=1"
+                ).fetchall()
+            }
+        except sqlite3.OperationalError:
+            return False
+
+        known_versions = {value for value in (*progress_versions, *active_versions) if value}
+        if not known_versions or known_versions == {current_version}:
+            return False
+        if current_version in known_versions and all(
+            value == current_version for value in progress_versions
+        ):
+            return False
+
+        try:
+            self.conn.execute("BEGIN")
+            for table in (
+                "academy_activity_progress",
+                "academy_lesson_progress",
+                "academy_assessment_attempts",
+                "academy_assessment_drafts",
+                "academy_skill_evidence",
+                "academy_submissions",
+                "academy_enrollments",
+            ):
+                self.conn.execute(f"DELETE FROM {table}")
+
+            # Remove only the generated Academy planning rows. The next call to
+            # sync_planner_task() creates one clean task for the new curriculum.
+            task_ids = {
+                int(row[0])
+                for row in self.conn.execute(
+                    "SELECT task_id FROM track_tasks WHERE LOWER(track_key)='academy'"
+                ).fetchall()
+            }
+            task_ids.update(
+                int(row[0])
+                for row in self.conn.execute(
+                    """SELECT id FROM sprint_tasks
+                       WHERE completed=0 AND sort_order<0
+                         AND LOWER(label) LIKE '%academy%'"""
+                ).fetchall()
+            )
+            self.conn.execute("DELETE FROM daily_focus WHERE LOWER(COALESCE(track_key,''))='academy' OR LOWER(COALESCE(source_key,''))='roadmap:academy'")
+            self.conn.execute("DELETE FROM track_events WHERE LOWER(track_key)='academy'")
+            self.conn.execute("DELETE FROM track_tasks WHERE LOWER(track_key)='academy'")
+            if task_ids:
+                placeholders = ",".join("?" for _ in task_ids)
+                values = tuple(sorted(task_ids))
+                self.conn.execute(
+                    f"DELETE FROM task_metadata WHERE task_id IN ({placeholders})",
+                    values,
+                )
+                self.conn.execute(
+                    f"DELETE FROM sprint_tasks WHERE id IN ({placeholders})",
+                    values,
+                )
+            self.conn.execute(
+                """UPDATE track_state SET position=0,subposition=0,status='Active',
+                   metadata='{}',updated_at=CURRENT_TIMESTAMP
+                   WHERE LOWER(track_key)='academy'"""
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.OperationalError:
+            self.conn.rollback()
+            return False
 
     @staticmethod
     def _activity_target_key(lesson_id: str, activity_id: str) -> str:
@@ -501,12 +593,20 @@ class AcademyService:
         answer: str,
     ) -> ValidationResult:
         self.progress.save_answer(lesson.lesson_id, activity, answer)
-        if activity.runtime == "recognition":
+        if activity.completion_mode == "continue" or activity.runtime == "content":
+            result = ValidationResult(True, "Step complete. Continue when you are ready.")
+        elif activity.runtime == "recognition":
             result = validate_recognition(answer, dict(activity.validator))
+        elif activity.runtime == "response":
+            result = validate_response(answer, dict(activity.validator))
         elif activity.runtime == "sql":
             dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
             dataset = self.catalog.datasets[dataset_id]
             result = SqlValidator(dataset).validate(answer, dict(activity.validator))
+        elif activity.runtime == "python":
+            dataset_id = str(activity.validator.get("dataset_id") or "").strip()
+            dataset = self.catalog.datasets.get(dataset_id) if dataset_id else None
+            result = PythonValidator(dataset).validate(answer, dict(activity.validator))
         elif activity.runtime == "workbook":
             try:
                 workbook = self.ensure_workbook(lesson, activity)
@@ -544,10 +644,30 @@ class AcademyService:
                 False,
                 "Wait for Google Sheets to save, then use Check My Work to validate the practical task.",
             )
-        if activity.runtime != "sql":
-            return ValidationResult(False, "Run is available for executable activities.")
-        dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
-        return SqlValidator(self.catalog.datasets[dataset_id]).execute(answer)
+        if activity.runtime == "sql":
+            dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
+            return SqlValidator(self.catalog.datasets[dataset_id]).execute(answer)
+        if activity.runtime == "python":
+            dataset_id = str(activity.validator.get("dataset_id") or "").strip()
+            dataset = self.catalog.datasets.get(dataset_id) if dataset_id else None
+            return PythonValidator(dataset).execute(answer)
+        return ValidationResult(False, "Run is available for SQL and Python exercises.")
+
+    def complete_learning_step(
+        self,
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+    ) -> ValidationResult:
+        """Mark a reading, example, or recap step complete when Continue is chosen."""
+        if activity.completion_mode != "continue" and activity.runtime != "content":
+            return ValidationResult(False, "Complete and check the activity before continuing.")
+        result = ValidationResult(True, "Step complete. Continue when you are ready.")
+        self.progress.record_validation(lesson, activity, "", result.as_dict())
+        current_row = self.progress.activity_row(lesson.lesson_id, activity.activity_id)
+        self._insert_activity_event(lesson, activity, current_row)
+        self._reconcile_today_focus_progress()
+        self.sync_planner_task()
+        return result
 
     def activity_table_schemas(
         self,
@@ -626,6 +746,28 @@ class AcademyService:
         ).fetchall()
         return {str(row["activity_id"]): str(row["answer_text"] or "") for row in rows}
 
+    def _validate_answer(
+        self,
+        activity: ActivityDefinition,
+        answer: str,
+    ) -> ValidationResult:
+        """Run the validator that belongs to one Academy activity runtime."""
+        if activity.runtime == "recognition":
+            return validate_recognition(answer, dict(activity.validator))
+        if activity.runtime == "response":
+            return validate_response(answer, dict(activity.validator))
+        if activity.runtime == "sql":
+            dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
+            return SqlValidator(self.catalog.datasets[dataset_id]).validate(
+                answer,
+                dict(activity.validator),
+            )
+        if activity.runtime == "python":
+            dataset_id = str(activity.validator.get("dataset_id") or "").strip()
+            dataset = self.catalog.datasets.get(dataset_id) if dataset_id else None
+            return PythonValidator(dataset).validate(answer, dict(activity.validator))
+        return ValidationResult(False, f"Unsupported activity runtime: {activity.runtime}")
+
     def validate_assessment_activity(
         self,
         assessment: AssessmentDefinition,
@@ -635,16 +777,7 @@ class AcademyService:
         unlocked, missing = self.assessment_unlocked(assessment)
         if not unlocked:
             return ValidationResult(False, "Prerequisites not yet mastered: " + ", ".join(missing))
-        if activity.runtime == "recognition":
-            result = validate_recognition(answer, dict(activity.validator))
-        elif activity.runtime == "sql":
-            dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
-            result = SqlValidator(self.catalog.datasets[dataset_id]).validate(
-                answer,
-                dict(activity.validator),
-            )
-        else:
-            result = ValidationResult(False, f"Unsupported activity runtime: {activity.runtime}")
+        result = self._validate_answer(activity, answer)
         self.save_assessment_draft(
             assessment.assessment_id,
             activity.activity_id,
@@ -683,11 +816,7 @@ class AcademyService:
         solution_assisted = False
         for activity in assessment.activities:
             answer = answers.get(activity.activity_id, "")
-            if activity.runtime == "recognition":
-                result = validate_recognition(answer, dict(activity.validator))
-            else:
-                dataset_id = str(activity.validator.get("dataset_id") or "sql_foundations")
-                result = SqlValidator(self.catalog.datasets[dataset_id]).validate(answer, dict(activity.validator))
+            result = self._validate_answer(activity, answer)
             results[activity.activity_id] = result.as_dict()
             earned += int(result.passed)
         score = earned / max(1, len(assessment.activities))

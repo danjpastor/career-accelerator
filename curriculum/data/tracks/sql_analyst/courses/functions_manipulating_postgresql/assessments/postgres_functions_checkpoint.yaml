@@ -140,3 +140,4 @@ activities:
       situation, identify what the result must preserve, and then choose the option that best matches that goal.
       This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
+  solution: Full-text search

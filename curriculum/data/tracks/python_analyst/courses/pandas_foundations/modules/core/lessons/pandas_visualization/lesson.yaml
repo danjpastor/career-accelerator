@@ -1,9 +1,10 @@
-lesson_id: pandas_visualization
+lesson_id: academy2_pandas_visualization
 title: Creating and Visualizing DataFrames
 order: 4
 difficulty: beginner
-description: Build practical fluency with creating and visualizing dataframes.
-estimated_minutes: 15
+description: A useful chart begins with a clear question and chart-ready data. Usually you summarize or filter the DataFrame
+  first, then plot the smaller result.
+estimated_minutes: 35
 content: lesson.md
 objectives:
 - Explain the purpose of creating and visualizing dataframes.
@@ -17,7 +18,43 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: pandas_visualization_step_1
+- activity_id: academy2_pandas_visualization_learn
+  title: Learn — Creating and Visualizing DataFrames
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Creating and Visualizing DataFrames
+    objective: Explain the purpose of creating and visualizing dataframes.
+    body: 'A useful chart begins with a clear question and chart-ready data. Usually you summarize or filter the DataFrame
+      first, then plot the smaller result.
+
+
+      Bar charts compare categories, line charts show change over time, histograms show a numeric distribution, and scatter
+      plots compare two numeric measures. Labels and sorting should help the reader understand the result without guessing.
+
+
+      pandas plotting returns a Matplotlib axes object. Saving that object in a variable lets you adjust labels or inspect
+      the chart later.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - pandas.visualization
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_pandas_visualization_check
   title: 'Practice 1: Creating and Visualizing DataFrames'
   type: recognition
   runtime: recognition
@@ -27,7 +64,11 @@ activities:
   - Mix unrelated shapes without checking
   - Rely on column order only
   - Skip type inspection
-  hints: []
+  hints:
+  - Read the task again and identify where **Creating and Visualizing DataFrames** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: What is the safest way to build a DataFrame
+    from records?'
   validator:
     type: exact_answer
     expected_answer: Use consistently named fields for each record
@@ -54,46 +95,158 @@ activities:
     action_label: Choose the best answer
     body: Consistent record keys become predictable DataFrame columns.
   required_for_completion: true
-- activity_id: pandas_visualization_step_2
-  title: 'Practice 2: Creating and Visualizing DataFrames'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: Use consistently named fields for each record
+- activity_id: academy2_pandas_visualization_example
+  title: Example — See creating and visualizing dataframes in context
   type: recognition
-  runtime: recognition
-  prompt: Which chart is usually strongest for a continuous distribution?
-  answer_options:
-  - Histogram
-  - Pie chart
-  - Single KPI card
-  - Relationship diagram
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See creating and visualizing dataframes in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A service analyst groups ticket count by channel, sorts the summary, and creates a horizontal bar chart. They use channel
+      names as labels and ticket count as the numeric axis. The graded exercise prepares and charts regional order totals.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - pandas.visualization
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: Histogram
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: Which chart is usually strongest for a continuous distribution?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Creating and Visualizing DataFrames
-    after_correct: You identified the core idea behind creating and visualizing dataframes.
-    common_errors: []
-  instruction:
-    title: Creating and Visualizing DataFrames
-    objective: Build a practical understanding of creating and visualizing dataframes.
-    action_label: Choose the best answer
-    body: Histograms show how numeric observations are distributed across ranges.
+- activity_id: academy2_pandas_visualization_guided
+  title: Try It — Prepare chart-ready data
+  type: guided
+  runtime: python
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 7
+  prompt: Use `orders` to create `regional_totals` with one row per region and the sum of `order_total`. Sort the result from
+    highest to lowest total.
+  starter: '# orders is already loaded.
+
+    # Create and sort regional_totals.'
+  solution: regional_totals = (orders.groupby('region', as_index=False)['order_total'].sum().sort_values('order_total', ascending=False))
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: list(regional_totals['region']) == ['West', 'South', 'East', 'North']
+      feedback: Group by region and sort order_total from largest to smallest.
+    - expression: list(regional_totals['order_total']) == [514.0, 309.0, 265.0, 35.0]
+      feedback: Use the sum of order_total for each region.
+    display_variable: regional_totals
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+    dataset_id: sql_foundations
   required_for_completion: true
-- activity_id: pandas_visualization_step_3
-  title: 'Practice 3: Creating and Visualizing DataFrames'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: Use `orders` to create `regional_totals` with one row per region and the sum of `order_total`. Sort the result from
+      highest to lowest total.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Try It — Prepare chart-ready data
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_pandas_visualization_independent
+  title: Practice — Create a clear bar chart
+  type: independent
+  runtime: python
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: Create a horizontal bar chart from `regional_totals` with region labels and order total values. Store the returned
+    chart object in a variable named `ax`.
+  starter: 'regional_totals = (orders.groupby(''region'', as_index=False)[''order_total''].sum().sort_values(''order_total'',
+    ascending=False))
+
+    # Create the chart and store it as ax.'
+  solution: 'regional_totals = (orders.groupby(''region'', as_index=False)[''order_total''].sum().sort_values(''order_total'',
+    ascending=False))
+
+    ax = regional_totals.plot.barh(x=''region'', y=''order_total'')'
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: ax is not None
+      feedback: Store the object returned by the plotting method in ax.
+    - expression: len(ax.patches) == 4
+      feedback: The chart should contain one bar for each of the four regions.
+    display_variable: ''
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+    dataset_id: sql_foundations
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: Create a horizontal bar chart from `regional_totals` with region labels and order total values. Store the returned
+      chart object in a variable named `ax`.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Practice — Create a clear bar chart
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_pandas_visualization_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: What should happen before sharing a chart?
   answer_options:
@@ -101,30 +254,75 @@ activities:
   - Remove every axis label
   - Use as many colors as possible
   - Hide the metric definition
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: Validate the underlying data and label the chart clearly
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: What should happen before sharing a chart?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Creating and Visualizing DataFrames
     after_correct: You identified the core idea behind creating and visualizing dataframes.
     common_errors: []
   instruction:
-    title: Creating and Visualizing DataFrames
-    objective: Build a practical understanding of creating and visualizing dataframes.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: A chart is only trustworthy when its data, aggregation, and labels are correct.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: Validate the underlying data and label the chart clearly
+- activity_id: academy2_pandas_visualization_recap
+  title: Recap — Creating and Visualizing DataFrames
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Creating and Visualizing DataFrames
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Creating and Visualizing DataFrames
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Creating and Visualizing DataFrames supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

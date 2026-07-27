@@ -1,9 +1,9 @@
-lesson_id: sql_foundations_select_alias
+lesson_id: academy2_sql_foundations_select_alias
 title: Write Your First SQL
 order: 2
 difficulty: beginner
 description: Shape readable result sets with explicit columns and stakeholder-friendly aliases.
-estimated_minutes: 35
+estimated_minutes: 37
 content: lesson.md
 objectives:
 - Choose only the columns required by a question.
@@ -22,7 +22,74 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: select_projection_recognition
+- activity_id: academy2_sql_foundations_select_alias_learn
+  title: Learn — Write Your First SQL
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Write Your First SQL
+    objective: Understand the idea in plain language before writing a query.
+    body: '# Choose the columns your result needs
+
+
+      `SELECT` controls which columns appear in a query result. A table may contain many fields, but a clear analysis usually
+      returns only the ones needed for the question.
+
+
+      ```sql
+
+      SELECT customer_id, signup_date, plan_name
+
+      FROM customers;
+
+      ```
+
+
+      The order of the names in `SELECT` becomes the order of the result columns.
+
+
+      An **alias** gives a result column a clearer heading. Use `AS` followed by the new name:
+
+
+      ```sql
+
+      SELECT annual_value AS contract_value
+
+      FROM contracts;
+
+      ```
+
+
+      The source column is still named `annual_value`. The alias only changes the heading in this result.
+
+
+      Clear aliases help another person understand technical field names and calculated values. Prefer names such as `monthly_revenue`
+      instead of vague names such as `value`.
+
+
+      `SELECT *` returns every column. It is useful for a quick first look, but a saved analysis should usually name the columns
+      it depends on.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.column_selection
+    - sql.aliases
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_foundations_select_alias_check
   title: Recognize projection
   type: recognition
   runtime: recognition
@@ -32,7 +99,11 @@ activities:
   - Filtering with WHERE
   - Sorting with ORDER BY
   - Removing duplicates with DISTINCT
-  hints: []
+  hints:
+  - Read the task again and identify where **projection** fits into the requested result.
+  - Focus on the named table or source (products) and check each requirement one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which query operation changes which
+    columns appear while keeping all source rows?'
   validator:
     type: exact_answer
     expected_answer: Selecting an explicit column list
@@ -58,8 +129,8 @@ activities:
     title: Understand projection
     objective: Recognize the operation that changes result columns without filtering rows.
     action_label: Choose the operation
-    body: 'In relational terminology, choosing columns is called **projection**. Projection changes the shape of
-      the result horizontally: it controls which attributes appear. It does not determine which records qualify.
+    body: 'In relational terminology, choosing columns is called **projection**. Projection changes the shape of the result
+      horizontally: it controls which attributes appear. It does not determine which records qualify.
 
 
       ```sql
@@ -71,8 +142,8 @@ activities:
       ```
 
 
-      If the source contains seven rows and no filter is present, the result still contains seven rows. It simply
-      contains fewer columns.
+      If the source contains seven rows and no filter is present, the result still contains seven rows. It simply contains
+      fewer columns.
 
 
       This differs from **filtering**, which changes the result vertically by keeping only rows that satisfy a condition.
@@ -93,10 +164,45 @@ activities:
       Here, `SELECT` projects columns and `WHERE` filters rows.
 
 
-      The question asks specifically about changing which columns appear while retaining all source rows. Choose
-      the operation that describes that behavior.'
+      The question asks specifically about changing which columns appear while retaining all source rows. Choose the operation
+      that describes that behavior.'
   required_for_completion: true
-- activity_id: select_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: Selecting an explicit column list
+- activity_id: academy2_sql_foundations_select_alias_example
+  title: Example — See write your first sql in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See write your first sql in context
+    objective: Study a separate example, then use the method on different data.
+    body: "## A separate example\n\nA clinic table stores `appt_id`, `patient_display_name`, and `scheduled_at`. A daily schedule\
+      \ should use clearer headings:\n\n```sql\nSELECT appt_id AS appointment_id,\n       patient_display_name AS patient_name,\n\
+      \       scheduled_at AS appointment_time\nFROM clinic_appointments;\n```\n\n**What to notice:** The query chooses only\
+      \ the useful columns and changes their result headings without renaming anything in the database."
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.column_selection
+    - sql.aliases
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_foundations_select_alias_guided
   title: Build a compact product catalog
   type: guided
   runtime: sql
@@ -108,6 +214,7 @@ activities:
   hints:
   - Begin with product_id so each row stays identifiable.
   - Separate product_id, product_name, and unit_price with commas.
+  - Read the task again and identify where **SELECT** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -144,8 +251,8 @@ activities:
     title: Design the result for its reader
     objective: Select a compact, stakeholder-ready set of fields.
     action_label: Build the catalog view
-    body: 'Most business questions do not need every field in a table. A focused result is easier to inspect, export,
-      explain, and validate.
+    body: 'Most business questions do not need every field in a table. A focused result is easier to inspect, export, explain,
+      and validate.
 
 
       When choosing a column order, consider how a reader will scan the result:
@@ -173,12 +280,15 @@ activities:
       The identifier supports traceability, the name supports interpretation, and the measure supports comparison.
 
 
-      The product table contains more fields than the catalog view needs. Return exactly `product_id`, `product_name`,
-      and `unit_price` in that order. Do not add a filter, because the request covers every product.'
+      The product table contains more fields than the catalog view needs. Return exactly `product_id`, `product_name`, and
+      `unit_price` in that order. Do not add a filter, because the request covers every product.'
   required_for_completion: true
-- activity_id: alias_guided
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_foundations_select_alias_independent
   title: Rename order_total for reporting
-  type: guided
+  type: independent
   runtime: sql
   prompt: Return order_id and order_total renamed as order_value from orders.
   starter: 'SELECT order_id, order_total
@@ -190,6 +300,7 @@ activities:
   hints:
   - Keep order_id unchanged.
   - Place AS order_value immediately after order_total.
+  - Read the task again and identify where **aliases** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -225,18 +336,21 @@ activities:
     title: Rename result columns with AS
     objective: Use an alias to make a source field clearer to a report reader.
     action_label: Add the reporting alias
-    body: "An alias changes a column heading in the query result without renaming the source column.\n\n```sql\n\
-      SELECT annual_value AS contract_value\nFROM contracts;\n```\n\nThe table still contains `annual_value`; only\
-      \ the displayed heading becomes `contract_value`. Aliases are useful when a source name is technical, abbreviated,\
-      \ or too vague for the audience.\n\nUse the explicit `AS` keyword while learning. Some SQL dialects allow\
-      \ a space alone, but `AS` makes the intention unmistakable and reduces confusion during review.\n\nAliases\
-      \ apply to individual expressions, so the comma belongs after the complete expression:\n\n```sql\nSELECT order_id,\n\
-      \       order_total AS order_value\nFROM orders;\n```\n\nComplete the query so the monetary field appears\
-      \ under the report-friendly heading `order_value`. Keep `order_id` unchanged."
+    body: "An alias changes a column heading in the query result without renaming the source column.\n\n```sql\nSELECT annual_value\
+      \ AS contract_value\nFROM contracts;\n```\n\nThe table still contains `annual_value`; only the displayed heading becomes\
+      \ `contract_value`. Aliases are useful when a source name is technical, abbreviated, or too vague for the audience.\n\
+      \nUse the explicit `AS` keyword while learning. Some SQL dialects allow a space alone, but `AS` makes the intention\
+      \ unmistakable and reduces confusion during review.\n\nAliases apply to individual expressions, so the comma belongs\
+      \ after the complete expression:\n\n```sql\nSELECT order_id,\n       order_total AS order_value\nFROM orders;\n```\n\
+      \nComplete the query so the monetary field appears under the report-friendly heading `order_value`. Keep `order_id`\
+      \ unchanged."
   required_for_completion: true
-- activity_id: alias_debug
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_foundations_select_alias_challenge
   title: Repair an incomplete alias
-  type: debugging
+  type: mastery
   runtime: sql
   prompt: Repair the query so monthly_fee is returned as recurring_revenue.
   starter: 'SELECT subscriber_id, monthly_fee AS
@@ -248,6 +362,7 @@ activities:
   hints:
   - AS must be followed by the new result-column name.
   - Use recurring_revenue as the alias.
+  - Read the task again and identify where **debugging** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -282,8 +397,8 @@ activities:
     title: Treat an alias as a complete expression
     objective: Repair an alias that is missing its result name.
     action_label: Fix the alias
-    body: 'Each item in a `SELECT` list must be a complete expression. When you use `AS`, the database expects a
-      result name immediately after it.
+    body: 'Each item in a `SELECT` list must be a complete expression. When you use `AS`, the database expects a result name
+      immediately after it.
 
 
       ```sql
@@ -295,8 +410,8 @@ activities:
       ```
 
 
-      A dangling `AS` is incomplete, just as a comma with no following column is incomplete. When an alias query
-      fails, inspect the expression from left to right:
+      A dangling `AS` is incomplete, just as a comma with no following column is incomplete. When an alias query fails, inspect
+      the expression from left to right:
 
 
       - Source expression: `monthly_fee`
@@ -306,16 +421,19 @@ activities:
       - Result heading: `recurring_revenue`
 
 
-      The alias should be a valid, readable identifier. Avoid punctuation and unnecessary spaces unless the dialect
-      and reporting need explicitly require quoted aliases.
+      The alias should be a valid, readable identifier. Avoid punctuation and unnecessary spaces unless the dialect and reporting
+      need explicitly require quoted aliases.
 
 
-      Repair the starter query by supplying the requested alias. Do not rename the source field elsewhere or remove
-      the other selected columns.'
+      Repair the starter query by supplying the requested alias. Do not rename the source field elsewhere or remove the other
+      selected columns.'
   required_for_completion: true
-- activity_id: alias_mastery
+  step_kind: combined_challenge
+  completion_mode: validated
+  xp: 150
+- activity_id: academy2_sql_foundations_select_alias_transfer_1
   title: Create an account-plan view
-  type: mastery
+  type: transfer
   runtime: sql
   prompt: Return subscriber_id as account_id and plan_name as subscription_plan from subscriptions.
   starter: 'SELECT
@@ -327,6 +445,7 @@ activities:
   hints:
   - Alias each selected source column separately.
   - Use a comma between the two aliased expressions.
+  - Read the task again and identify where **independent SELECT** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -357,19 +476,65 @@ activities:
     skills_practiced:
     - independent SELECT
     - multiple aliases
-    after_correct: The result is concise, readable, and stable because both source fields are explicitly selected
-      and clearly renamed.
+    after_correct: The result is concise, readable, and stable because both source fields are explicitly selected and clearly
+      renamed.
     common_errors: []
   instruction:
     title: Create a reader-friendly two-column view
     objective: Independently select and alias multiple fields.
     action_label: Build the account-plan view
-    body: "A strong result set balances source traceability with reader-friendly headings. You can alias more than\
-      \ one selected field:\n\n```sql\nSELECT member_id AS account_id,\n       membership_tier AS plan_name\nFROM\
-      \ memberships;\n```\n\nEach alias applies only to the expression directly before it. Commas still separate\
-      \ the complete expressions.\n\nBefore writing, translate the request into a small output contract:\n\n- First\
-      \ result column: source `subscriber_id`, displayed as `account_id`\n- Second result column: source `plan_name`,\
-      \ displayed as `subscription_plan`\n- Source table: `subscriptions`\n- Rows: all subscriptions\n\nThis is\
-      \ the lesson’s independent mastery step. Build the query without copying a previous solution. If you view\
-      \ the full solution, you can still practice, but you must pass a later unassisted attempt to demonstrate mastery."
+    body: "A strong result set balances source traceability with reader-friendly headings. You can alias more than one selected\
+      \ field:\n\n```sql\nSELECT member_id AS account_id,\n       membership_tier AS plan_name\nFROM memberships;\n```\n\n\
+      Each alias applies only to the expression directly before it. Commas still separate the complete expressions.\n\nBefore\
+      \ writing, translate the request into a small output contract:\n\n- First result column: source `subscriber_id`, displayed\
+      \ as `account_id`\n- Second result column: source `plan_name`, displayed as `subscription_plan`\n- Source table: `subscriptions`\n\
+      - Rows: all subscriptions\n\nThis is the lesson’s independent mastery step. Build the query without copying a previous\
+      \ solution. If you view the full solution, you can still practice, but you must pass a later unassisted attempt to demonstrate\
+      \ mastery."
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_foundations_select_alias_recap
+  title: Recap — Write Your First SQL
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Write Your First SQL
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Write Your First SQL
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Explicit columns make saved queries safer.
+
+      - Aliases describe the result without changing the source.
+
+      - Readable names should preserve business meaning.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

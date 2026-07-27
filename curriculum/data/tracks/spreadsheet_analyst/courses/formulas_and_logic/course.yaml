@@ -1,7 +1,7 @@
 course_id: formulas_and_logic
-title: Formulas & Conditional Logic
+title: Formulas, Logic & Conditional Analysis
 order: 2
-description: Apply IF, AND, SUMIFS, COUNTIFS, and variance formulas to Northstar operations data.
+description: Build reliable row-level logic and conditional summaries without copying completed answers.
 estimated_minutes: 240
 outcomes:
 - Complete real spreadsheet work in Excel or Google Sheets.

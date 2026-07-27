@@ -1,16 +1,18 @@
-lesson_id: spreadsheet_validation
+lesson_id: academy2_spreadsheet_validation
 title: Validation Rules & Reconciliation
 order: 2
 difficulty: beginner
-description: Prevent invalid status values and reconcile the workbook before relying on its results.
-estimated_minutes: 40
+description: Prevent invalid entries and reconcile row counts, unique identifiers, and duplicates.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Create a controlled status drop-down.
-- Reconcile record counts and duplicate identifiers.
+- Create a data-validation dropdown from an approved lookup list.
+- Count source records without counting the header.
+- Detect duplicate identifiers with formula-driven reconciliation checks.
 key_takeaways:
-- Validation rules prevent new errors at data entry.
-- Reconciliation checks make silent data loss visible.
+- Data validation reduces future entry errors but does not replace quality checks.
+- Reconciliation confirms that record counts and identifiers behave as expected.
+- A duplicate check compares populated IDs with unique IDs.
 teaches:
 - spreadsheet.validation
 - spreadsheet.reconciliation
@@ -20,40 +22,65 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_validation_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_validation_learn
+  title: Learn — Validation Rules & Reconciliation
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Validation Rules & Reconciliation
+    objective: Create a data-validation dropdown from an approved lookup list.
+    body: '# Prevent bad entries and prove the table is complete
+
+
+      **Data validation** controls what a user may enter in a cell. A dropdown can restrict a status to approved values; a
+      number rule can prevent negative quantities.
+
+
+      Validation prevents new errors, but it does not prove that existing data is complete. Analysts also **reconcile** a
+      table by comparing row counts, unique identifier counts, blank keys, duplicates, and totals before and after cleaning.
+
+
+      A good reconciliation explains why any count changed. “The cleaned table has five fewer rows” is not enough unless you
+      can show which rows were removed and why.
+
+
+      In this lesson, you will add sensible input rules and build checks that make the workbook easier to trust.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.validation
+    - spreadsheet.reconciliation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_validation_check
+  title: Learn & Predict — Preventing and detecting data-quality problems
   type: recognition
   runtime: recognition
-  prompt: |-
-    What is the main purpose of a data-validation drop-down?
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-    ### Complete this task in Google Sheets
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-    3. Select the complete target range without the header.
-    4. Choose **Data → Data validation → Add rule**.
-    5. Set the required criterion or dropdown values and enable rejection of invalid input when requested.
-    6. Click **Done**, then test one allowed value and one invalid value.
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-    8. Wait until Google Sheets shows that saving is complete.
-    9. Return to Career Accelerator and click **Check My Work**.
-    <!-- DCA GOOGLE SHEETS STEPS END -->
-  answer_options:
-  - Limit entries to approved values
-  - Hide formulas
-  - Delete duplicates automatically
-  - Create a chart
+  prompt: What is the main purpose of a data-validation dropdown?
   starter: ''
   solution: Limit entries to approved values
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - Think about what happens when a user edits a cell.
+  - A dropdown limits the choices available for entry.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
     expected_answer: Limit entries to approved values
@@ -63,87 +90,96 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
-    task: What is the main purpose of a data-validation drop-down?
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    task: What is the main purpose of a data-validation dropdown?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.validation
-    after_correct: You are ready to apply the idea in the Northstar workbook.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
+    after_correct: Validation controls future entry; reconciliation checks the dataset that already exists.
   instruction:
-    title: Learn — Validation Rules & Reconciliation
-    objective: What is the main purpose of a data-validation drop-down?
-    action_label: Choose the best answer
-    body: Data validation prevents inconsistent entries before they spread. Reconciliation then checks that
-      the number of records and unique identifiers still match expectations.
+    phase: LEARN & PREDICT
+    title: Learn & Predict — Preventing and detecting data-quality problems
+    objective: Distinguish preventive validation rules from reconciliation checks.
+    why_it_matters: A dropdown can prevent new invalid values, while reconciliation checks reveal problems already present
+      in the dataset. Reliable workbooks use both.
+    concept: Data validation restricts what users may enter. A record-count check confirms the expected number of rows. A
+      duplicate-ID check compares the number of populated IDs with the number of unique IDs.
+    worked_example: A service log uses an approved Status list of New, Assigned, Resolved, and Closed. A dropdown prevents
+      entries such as “done-ish,” while a separate duplicate-ticket check confirms that each Ticket ID appears only once.
+    action_label: Make a prediction
   required_for_completion: true
-  google_sheets:
-    source_of_truth: Google Sheets
-    steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **the worksheet named in the task** and work in the worksheet named in the task.
-    - Select the complete target range without the header.
-    - Choose **Data → Data validation → Add rule**.
-    - Set the required criterion or dropdown values and enable rejection of invalid input when requested.
-    - Click **Done**, then test one allowed value and one invalid value.
-    - 'Confirm the finished workbook matches this result: **One selected answer.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
-    primary_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-- activity_id: spreadsheet_validation_workbook_guided
+  answer_options:
+  - Limit entries to approved values
+  - Calculate a total automatically
+  - Remove existing duplicates
+  - Sort the table permanently
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_validation_example
+  title: Example — See validation rules & reconciliation in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See validation rules & reconciliation in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A maintenance log uses a Status dropdown with Open, In Progress, and Closed. This prevents someone from entering “complete,”
+      “done,” or another inconsistent value.
+
+
+      After cleaning, the analyst confirms that the number of unique Work Order IDs is unchanged and that no Work Order ID
+      is blank. Two exact duplicate rows were removed and documented.
+
+
+      **What to notice:** Validation protects future entries; reconciliation explains what happened to the existing records.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.validation
+    - spreadsheet.reconciliation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_validation_guided
   title: Try It — Control order-status entries
   type: guided
   runtime: workbook
-  prompt: |-
-    On Orders, add a list validation rule to J2:J37 using the approved statuses on Lookup Tables. Existing status values should remain unchanged.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Orders**.
-    2. Select the complete status-entry range **J2:J37**.
-    3. Choose **Data → Data validation → Add rule**.
-    4. For Criteria, choose **Dropdown (from a range)** and enter `'Lookup Tables'!C2:C5`.
-    5. Keep the existing values in J2:J37. Do not replace or clear them.
-    6. Select **Done**, then click one status cell and confirm the approved four choices are available.
-    7. Wait until Google Sheets shows that all changes are saved.
-    8. Return to Career Accelerator and select **Check My Work**.
+  prompt: Apply a list-based data-validation rule to Orders J2:J37 using the approved Order Status values from Lookup Tables.
   starter: ''
-  solution: J2:J37 has a saved list or drop-down validation rule.
+  solution: Select J2:J37, choose Data → Data validation → Add rule, select Dropdown (from a range), use `'Lookup Tables'!C2:C5`,
+    and save the rule.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The approved choices already exist on Lookup Tables.
+  - Use a Dropdown from a range rather than typing a separate list manually.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
     - type: data_validation
       sheet: Orders
       range: J2:J37
-    success_feedback: Future order-status entries are constrained to the approved list.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Orders
-    columns:
-    - Status
-    row_range: J2:J37
-    starting_state: 'Lookup Tables contains the approved status list: Delivered, Processing, Backordered, and
-      Cancelled.'
-    expected_result: J2:J37 has a saved list or drop-down validation rule.
-    column_descriptions:
-      Status: Current order status from the approved lookup list.
-    sample_values:
-    - 'Status: Delivered'
+      message: 'The workbook does not yet meet this requirement: Every Status cell offers only the approved order-status choices.'
+    success_feedback: You reduced the risk of future spelling and category inconsistencies by linking entry choices to a controlled
+      list.
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
@@ -151,20 +187,19 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: On Orders, add a list validation rule to J2:J37 using the approved statuses on Lookup Tables. Existing
-      status values should remain unchanged.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Apply a list-based data-validation rule to Orders J2:J37 using the approved Order Status values from Lookup Tables.
     requirements:
-    - Use the approved status list.
-    - Apply the rule to every order row.
-    - Do not replace existing status values.
-    - Save the workbook.
-    expected_output: J2:J37 has a saved list or drop-down validation rule.
+    - Apply the rule to every order-status entry cell.
+    - Use the existing approved status list as the dropdown source.
+    - Do not clear or replace current Status values.
+    expected_output: Every Status cell offers only the approved order-status choices.
     skills_practiced:
     - spreadsheet.validation
     - spreadsheet.reconciliation
-    after_correct: Future order-status entries are constrained to the approved list.
+    after_correct: You reduced the risk of future spelling and category inconsistencies by linking entry choices to a controlled
+      list.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -172,53 +207,60 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: Every Status cell offers only the approved order-status choices.
+    hide_exact_result: true
   instruction:
+    phase: TRY IT
     title: Try It — Control order-status entries
-    objective: On Orders, add a list validation rule to J2:J37 using the approved statuses on Lookup Tables.
-      Existing status values should remain unchanged.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    objective: Create a dropdown that uses the approved status list already stored in the workbook.
+    approach: Select the Status entry range on Orders, choose **Data → Data validation**, and create a dropdown from the approved
+      statuses on Lookup Tables. Keep the existing order values unchanged and test one cell to confirm the choices appear.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Orders
+    columns:
+    - Status
+    row_range: J2:J37
+    starting_state: 'Lookup Tables contains the approved status list: Delivered, Processing, Backordered, and Cancelled.'
+    expected_result: Every Status cell offers only the approved order-status choices.
+    column_descriptions:
+      Status: Current order status from the approved lookup list.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Orders**.
-    - Select the complete status-entry range **J2:J37**.
-    - Choose **Data → Data validation → Add rule**.
-    - For Criteria, choose **Dropdown (from a range)** and enter `'Lookup Tables'!C2:C5`.
-    - Keep the existing values in J2:J37. Do not replace or clear them.
-    - Select **Done**, then click one status cell and confirm the approved four choices are available.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_validation_workbook_practice
-  title: Practice — Reconcile the Orders table
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Orders** and locate **J2:J37**.
+    - Select the Status entry range on Orders, choose **Data → Data validation**, and create a dropdown from the approved
+      statuses on Lookup Tables. Keep the existing order values unchanged and test one cell to confirm the choices appear.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_validation_independent
+  title: Challenge — Reconcile order records and duplicate IDs
+  type: independent
   runtime: workbook
-  prompt: |-
-    On Analysis Workspace, calculate the number of order records in B13 and the number of duplicate Order IDs in B14.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. In **B13**, enter `=COUNTA(Orders!A2:A37)` to count data rows without counting the header.
-    3. In **B14**, enter `=COUNTA(Orders!A2:A37)-COUNTUNIQUE(Orders!A2:A37)`.
-    4. The duplicate check subtracts the number of unique Order IDs from the number of populated Order IDs.
-    5. Confirm B13 returns the number of order records and B14 returns zero when every Order ID is unique.
-    6. Wait until Google Sheets shows that all changes are saved.
-    7. Return to Career Accelerator and select **Check My Work**.
+  prompt: Calculate the order record count in B13 and the duplicate Order ID count in B14 on Analysis Workspace.
   starter: ''
-  solution: B13 uses a counting formula and B14 uses a duplicate-check formula.
+  solution: In B13 use `=COUNTA(Orders!A2:A37)`. In B14 use `=COUNTA(Orders!A2:A37)-COUNTUNIQUE(Orders!A2:A37)`.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The header should not be included in the record count.
+  - Duplicates equal populated IDs minus unique IDs.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -229,6 +271,8 @@ activities:
       contains_any:
       - counta
       - count
+      message: 'The workbook does not yet meet this requirement: B13 reports the number of orders and B14 reports the number
+        of duplicate Order IDs.'
     - type: formula_present
       sheet: Analysis Workspace
       cell: B14
@@ -237,26 +281,9 @@ activities:
       - countif
       - countifs
       - unique
-    success_feedback: The workbook now exposes record-count and duplicate-ID reconciliation checks.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Order record count
-    - Duplicate Order IDs
-    row_range: A13:B14
-    starting_state: B13 and B14 are blank. Orders contains 36 records with an Order ID in column A.
-    expected_result: B13 uses a counting formula and B14 uses a duplicate-check formula.
-    column_descriptions:
-      Order record count: Count of source order records used for reconciliation.
-      Duplicate Order IDs: Count of Order IDs that appear more than once.
-    sample_values:
-    - 'Order record count: 36'
-    - 'Duplicate Order IDs: 0'
+      message: 'The workbook does not yet meet this requirement: B13 reports the number of orders and B14 reports the number
+        of duplicate Order IDs.'
+    success_feedback: You created compact QA checks that immediately reveal missing or duplicate identifiers.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
@@ -264,19 +291,18 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: On Analysis Workspace, calculate the number of order records in B13 and the number of duplicate Order
-      IDs in B14.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Calculate the order record count in B13 and the duplicate Order ID count in B14 on Analysis Workspace.
     requirements:
-    - Count only data rows, not the header.
-    - Use a formula that would reveal duplicate Order IDs.
-    - Save before checking.
-    expected_output: B13 uses a counting formula and B14 uses a duplicate-check formula.
+    - Count only the data rows in Orders.
+    - Use Order ID as the uniqueness field.
+    - Keep both checks formula-driven so they update with the data.
+    expected_output: B13 reports the number of orders and B14 reports the number of duplicate Order IDs.
     skills_practiced:
     - spreadsheet.validation
     - spreadsheet.reconciliation
-    after_correct: The workbook now exposes record-count and duplicate-ID reconciliation checks.
+    after_correct: You created compact QA checks that immediately reveal missing or duplicate identifiers.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -284,28 +310,139 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: B13 reports the number of orders and B14 reports the number of duplicate Order IDs.
+    hide_exact_result: true
   instruction:
-    title: Practice — Reconcile the Orders table
-    objective: On Analysis Workspace, calculate the number of order records in B13 and the number of duplicate
-      Order IDs in B14.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Reconcile order records and duplicate IDs
+    objective: Create formula-driven checks for row count and identifier uniqueness.
+    approach: Count the populated Order IDs without including the header. Then compare the populated-ID count with the unique-ID
+      count to determine how many duplicates exist.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Order record count
+    - Duplicate Order IDs
+    row_range: A13:B14
+    starting_state: B13 and B14 are blank. Orders contains 36 records with an Order ID in column A.
+    expected_result: B13 reports the number of orders and B14 reports the number of duplicate Order IDs.
+    column_descriptions:
+      Order record count: Count of source order records used for reconciliation.
+      Duplicate Order IDs: Count of Order IDs that appear more than once.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - In **B13**, enter `=COUNTA(Orders!A2:A37)` to count data rows without counting the header.
-    - In **B14**, enter `=COUNTA(Orders!A2:A37)-COUNTUNIQUE(Orders!A2:A37)`.
-    - The duplicate check subtracts the number of unique Order IDs from the number of populated Order IDs.
-    - Confirm B13 returns the number of order records and B14 returns zero when every Order ID is unique.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A13:B14**.
+    - Count the populated Order IDs without including the header. Then compare the populated-ID count with the unique-ID count
+      to determine how many duplicates exist.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_validation_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: A dropdown has been added today, but the column already contains several misspelled values. What should the analyst
+    do next?
+  answer_options:
+  - Run a reconciliation or cleaning check on existing values
+  - Assume the dropdown fixes old values automatically
+  - Delete the entire column
+  - Convert the dropdown to free text
+  starter: ''
+  solution: Run a reconciliation or cleaning check on existing values
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Run a reconciliation or cleaning check on existing values
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A dropdown has been added today, but the column already contains several misspelled values. What should the analyst
+      do next?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.validation
+    after_correct: Pair preventive controls with checks that evaluate existing data.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: Validation prevents future errors; it does not automatically repair values entered before the rule existed.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_validation_recap
+  title: Recap — Validation Rules & Reconciliation
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Validation Rules & Reconciliation
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Validation Rules & Reconciliation
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Data validation reduces future entry errors but does not replace quality checks.
+
+      - Reconciliation confirms that record counts and identifiers behave as expected.
+
+      - A duplicate check compares populated IDs with unique IDs.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -1,3 +1,16 @@
+# Complete Your SQL Foundation
+
+Order results intentionally and combine foundation clauses into complete business queries.
+
+## What you will learn
+
+- Sort text, numeric, and date values in either direction.
+- Use multiple sort keys.
+- Place SQL clauses in valid order.
+- Build top-N queries with filtering, sorting, and limiting.
+
+## Main idea
+
 # Sorting and Combining Foundation Clauses
 
 > **Learning goal:** Produce decision-ready result sets by ordering rows, applying multiple sort keys, and combining `SELECT`, `WHERE`, `ORDER BY`, and `LIMIT` in the correct clause order.
@@ -147,3 +160,9 @@ This incremental workflow makes errors easier to isolate.
 - Multiple sort keys apply from left to right.
 - Foundation clause order is `SELECT`, `FROM`, `WHERE`, `ORDER BY`, `LIMIT`.
 - Top-N queries combine filtering, sorting, and limiting.
+
+## Key takeaways
+
+- A meaningful top-N result requires ORDER BY before LIMIT.
+- Multiple sort keys apply from left to right.
+- Build and test complex queries incrementally.

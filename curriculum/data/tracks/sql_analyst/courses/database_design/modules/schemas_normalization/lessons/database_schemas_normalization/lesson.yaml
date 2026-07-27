@@ -1,9 +1,9 @@
-lesson_id: database_schemas_normalization
+lesson_id: academy2_database_schemas_normalization
 title: Schemas and Normalization
 order: 1
 difficulty: intermediate
 description: Balance integrity, duplication, readability, and analytical performance.
-estimated_minutes: 18
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain schemas and normalization.
@@ -18,7 +18,44 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: database_schemas_normalization_1_recognition
+- activity_id: academy2_database_schemas_normalization_learn
+  title: Learn — Schemas and Normalization
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Schemas and Normalization
+    objective: Explain schemas and normalization.
+    body: '# Organize database objects and reduce repeated facts
+
+
+      A **schema** is a named area that groups database objects, such as `raw`, `staging`, or `analytics` tables.
+
+
+      **Normalization** separates repeated facts into related tables. For example, customer details belong in one customer
+      table instead of being copied into every order row. This reduces inconsistent updates, but analysis often requires joins.
+
+
+      In this lesson, you will identify table responsibilities, keys, and repeated information.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - database.schemas_normalization
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_database_schemas_normalization_check
   title: 'Schemas and Normalization: decision 1'
   type: recognition
   runtime: recognition
@@ -30,6 +67,8 @@ activities:
   - Flat log only
   hints:
   - Focus on how schemas and normalization changes the result or database behavior.
+  - Read the task again and identify where **schemas and normalization** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: Star schema
@@ -54,13 +93,51 @@ activities:
     title: 'Schemas and Normalization: decision 1'
     objective: Use schemas and normalization in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
+      short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: database_schemas_normalization_2_recognition
-  title: 'Schemas and Normalization: decision 2'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: Star schema
+- activity_id: academy2_database_schemas_normalization_example
+  title: Example — See schemas and normalization in context
   type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See schemas and normalization in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      If a customer''s email appears in 40 order rows, changing it requires 40 updates and may leave conflicting values. A
+      normalized design stores the email once in Customers and connects Orders through Customer ID.
+
+
+      **What to notice:** The design protects consistency, while the relationship preserves access to the customer details.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - database.schemas_normalization
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_database_schemas_normalization_guided
+  title: 'Schemas and Normalization: decision 2'
+  type: guided
   runtime: recognition
   prompt: What is a primary goal of normalization?
   answer_options:
@@ -70,6 +147,8 @@ activities:
   - Prevent SELECT queries
   hints:
   - Focus on how schemas and normalization changes the result or database behavior.
+  - Read the task again and identify where **schemas and normalization** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: Reduce avoidable duplication and update anomalies
@@ -94,13 +173,17 @@ activities:
     title: 'Schemas and Normalization: decision 2'
     objective: Use schemas and normalization in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
+      short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: database_schemas_normalization_3_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  solution: Reduce avoidable duplication and update anomalies
+- activity_id: academy2_database_schemas_normalization_independent
   title: 'Schemas and Normalization: decision 3'
-  type: mastery
+  type: independent
   runtime: recognition
   prompt: Which relationship should a foreign key enforce?
   answer_options:
@@ -108,12 +191,16 @@ activities:
   - Every number is positive
   - Every table has the same row count
   - Every column is text
-  hints: []
+  hints:
+  - Read the task again and identify where **schemas and normalization** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which relationship should a foreign
+    key enforce?'
   validator:
     type: exact_answer
     expected_answer: A child value references an existing parent key
   required_for_practice: false
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: intermediate
   estimated_minutes: 5
@@ -133,7 +220,95 @@ activities:
     title: 'Schemas and Normalization: decision 3'
     objective: Use schemas and normalization in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
+      short so you can test the idea immediately.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  solution: A child value references an existing parent key
+- activity_id: academy2_database_schemas_normalization_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: Which relationship should a foreign key enforce?
+  answer_options:
+  - A child value references an existing parent key
+  - Every number is positive
+  - Every table has the same row count
+  - Every column is text
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: A child value references an existing parent key
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: Which relationship should a foreign key enforce?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One correct selection.
+    skills_practiced:
+    - schemas and normalization
+    after_correct: You correctly applied schemas and normalization to the decision.
+    common_errors: []
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    action_label: Choose the best answer
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: A child value references an existing parent key
+- activity_id: academy2_database_schemas_normalization_recap
+  title: Recap — Schemas and Normalization
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Schemas and Normalization
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Schemas and Normalization
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Balance integrity, duplication, readability, and analytical performance.
+
+      - Choose designs based on workload, grain, integrity, and maintainability.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

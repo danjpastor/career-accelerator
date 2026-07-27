@@ -1,5 +1,5 @@
 module_id: data_aggregation
-title: Data Aggregation
+title: Summarize Data
 order: 1
 description: Create summary values and grouped business metrics.
 lessons:

@@ -47,7 +47,7 @@ activity:
     by program_area and region.
   starter: 'SELECT
 
-    FROM '
+    FROM'
   solution: SELECT p.program_area, p.region, COUNT(DISTINCT p.project_id) AS project_count, SUM(f.amount_usd) AS
     total_funding, SUM(o.people_reached) AS total_people_reached, ROUND(SUM(f.amount_usd) / NULLIF(SUM(o.people_reached),
     0), 2) AS cost_per_person FROM ngo_projects p LEFT JOIN ngo_funding f ON p.project_id = f.project_id LEFT JOIN

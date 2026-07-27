@@ -1,5 +1,5 @@
 module_id: aggregate_frames
-title: Aggregate Window Functions and Frames
+title: Running and Moving Calculations
 order: 3
 description: Use aggregate windows and frames for running and moving calculations.
 lessons:

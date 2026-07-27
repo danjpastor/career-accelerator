@@ -1,5 +1,5 @@
 module_id: short_subqueries
-title: Short and Simple Subqueries
+title: Build a Result Inside a Query
 order: 2
 description: Use scalar, list-returning, FROM, and SELECT subqueries.
 lessons:

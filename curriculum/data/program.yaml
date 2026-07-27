@@ -1,6 +1,6 @@
 program_id: data_career_accelerator
-schema_version: 1
-content_version: 1.7.0
+schema_version: 2
+content_version: 2.0.0
 brand:
   family_name: Career Accelerator
   program_name: Data
@@ -11,5 +11,6 @@ learning:
   learner_noun: analyst
   evidence_label: Demonstrated Evidence
   skills_lab_label: Skills Lab
+  lesson_model: learn-check-example-guided-independent-recap
 paths:
 - paths/data_analytics/path.yaml

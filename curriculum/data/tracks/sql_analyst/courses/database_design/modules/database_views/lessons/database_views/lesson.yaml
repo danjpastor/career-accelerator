@@ -1,9 +1,9 @@
-lesson_id: database_views
+lesson_id: academy2_database_views
 title: Views and Materialized Views
 order: 1
 difficulty: intermediate
 description: Use saved query definitions to simplify access while understanding refresh behavior.
-estimated_minutes: 18
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain views and materialized views.
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: database_views_1_recognition
+- activity_id: academy2_database_views_learn
+  title: Learn — Views and Materialized Views
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Views and Materialized Views
+    objective: Explain views and materialized views.
+    body: '# Save a useful query as a reusable database object
+
+
+      A **view** stores a query definition. Each time it is used, the database runs the underlying logic against current data.
+
+
+      A **materialized view** stores the query result and must be refreshed. It can speed up expensive summaries, but the
+      result may be out of date between refreshes.
+
+
+      In this lesson, you will choose between current results, faster stored results, and a regular table based on the reporting
+      need.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - database.views
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_database_views_check
   title: 'Views and Materialized Views: decision 1'
   type: recognition
   runtime: recognition
@@ -30,6 +68,8 @@ activities:
   - A CSV path only
   hints:
   - Focus on how views and materialized views changes the result or database behavior.
+  - Read the task again and identify where **views and materialized views** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: A query definition
@@ -54,13 +94,51 @@ activities:
     title: 'Views and Materialized Views: decision 1'
     objective: Use views and materialized views in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful. Read the
+      situation, identify what the result must preserve, and then choose the option that best matches that goal. This check
+      is intentionally short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: database_views_2_recognition
-  title: 'Views and Materialized Views: decision 2'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: A query definition
+- activity_id: academy2_database_views_example
+  title: Example — See views and materialized views in context
   type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See views and materialized views in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A view provides a current list of open tickets. A materialized view stores a large monthly performance summary that
+      is refreshed every morning.
+
+
+      **What to notice:** The materialized result is faster to read but has a freshness schedule that users must understand.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - database.views
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_database_views_guided
+  title: 'Views and Materialized Views: decision 2'
+  type: guided
   runtime: recognition
   prompt: Why might a team use a materialized view?
   answer_options:
@@ -70,6 +148,8 @@ activities:
   - To replace every index
   hints:
   - Focus on how views and materialized views changes the result or database behavior.
+  - Read the task again and identify where **views and materialized views** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: To cache an expensive result that can be refreshed
@@ -94,13 +174,17 @@ activities:
     title: 'Views and Materialized Views: decision 2'
     objective: Use views and materialized views in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful. Read the
+      situation, identify what the result must preserve, and then choose the option that best matches that goal. This check
+      is intentionally short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: database_views_3_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  solution: To cache an expensive result that can be refreshed
+- activity_id: academy2_database_views_independent
   title: 'Views and Materialized Views: decision 3'
-  type: mastery
+  type: independent
   runtime: recognition
   prompt: What should happen when a materialized view must reflect new source data?
   answer_options:
@@ -108,12 +192,16 @@ activities:
   - Rename every column
   - Drop the source database
   - Convert it to a text file
-  hints: []
+  hints:
+  - Read the task again and identify where **views and materialized views** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: What should happen when a materialized
+    view must reflect new source data?'
   validator:
     type: exact_answer
     expected_answer: Refresh it according to the required freshness policy
   required_for_practice: false
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: intermediate
   estimated_minutes: 5
@@ -133,7 +221,95 @@ activities:
     title: 'Views and Materialized Views: decision 3'
     objective: Use views and materialized views in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **views and materialized views** to make database work more accurate, readable, and useful. Read the
+      situation, identify what the result must preserve, and then choose the option that best matches that goal. This check
+      is intentionally short so you can test the idea immediately.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  solution: Refresh it according to the required freshness policy
+- activity_id: academy2_database_views_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: What should happen when a materialized view must reflect new source data?
+  answer_options:
+  - Refresh it according to the required freshness policy
+  - Rename every column
+  - Drop the source database
+  - Convert it to a text file
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Refresh it according to the required freshness policy
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: What should happen when a materialized view must reflect new source data?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One correct selection.
+    skills_practiced:
+    - views and materialized views
+    after_correct: You correctly applied views and materialized views to the decision.
+    common_errors: []
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    action_label: Choose the best answer
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: Refresh it according to the required freshness policy
+- activity_id: academy2_database_views_recap
+  title: Recap — Views and Materialized Views
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Views and Materialized Views
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Views and Materialized Views
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Use saved query definitions to simplify access while understanding refresh behavior.
+
+      - Choose designs based on workload, grain, integrity, and maintainability.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -243,13 +243,13 @@ activities:
   title: Rank inventory within category
   type: mastery
   runtime: sql
-  prompt: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to
-    lowest within category. Sort category, stock_rank, item_name.
+  prompt: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to lowest
+    within category. Sort category, stock_rank, item_name.
   starter: 'SELECT
 
     FROM inventory;'
-  solution: "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category ORDER\
-    \ BY units_on_hand DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
+  solution: "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category ORDER BY\
+    \ units_on_hand DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
   hints: []
   validator:
     type: sql_result
@@ -271,8 +271,8 @@ activities:
   presentation:
     scenario: Weekly cumulative knowledge check
     introduction: Write the complete query independently.
-    task: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to
-      lowest within category. Sort category, stock_rank, item_name.
+    task: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to lowest
+      within category. Sort category, stock_rank, item_name.
     requirements:
     - Return only the requested columns.
     - Use the required SQL concepts.

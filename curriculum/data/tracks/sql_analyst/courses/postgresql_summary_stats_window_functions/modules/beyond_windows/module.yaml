@@ -1,5 +1,5 @@
 module_id: beyond_windows
-title: Beyond Window Functions
+title: Compare Rows Across Time
 order: 4
 description: Use pivot-like summaries, grouping sets, and cleanup patterns.
 lessons:

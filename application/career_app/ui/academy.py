@@ -45,6 +45,7 @@ from career_app.academy.models import (
     ActivityDefinition,
     AssessmentDefinition,
     LessonDefinition,
+    LessonStepKind,
     SkillsLabDefinition,
 )
 from career_app.services import completion_contract
@@ -428,8 +429,8 @@ class AcceleratorAcademyWidget(QWidget):
 
         sequence = Card("How the path works", "Learn, practice, and projects all stay in the same flow.")
         flow = QLabel(
-            "Learn a focused concept  →  Try it immediately  →  Check your work  →  Continue  →  "
-            "Complete the checkpoint  →  Finish the applied project"
+            "Learn the idea  →  Study a worked example  →  Try it with guidance  →  "
+            "Solve an independent challenge  →  Transfer the skill"
         )
         flow.setWordWrap(True)
         flow.setStyleSheet(
@@ -438,7 +439,7 @@ class AcceleratorAcademyWidget(QWidget):
         )
         sequence.layout.addWidget(flow)
         rule = QLabel(
-            "Every step gives you something to try. Finish the activity, check your work, and the next step will open."
+            "Examples use different data from the workbook challenge. Exact answers stay hidden until you choose View Solution."
         )
         rule.setWordWrap(True)
         rule.setObjectName("Muted")
@@ -637,13 +638,63 @@ class AcceleratorAcademyWidget(QWidget):
         workbook_layout.addWidget(self.step_workbook_explanation)
         workbook_layout.addStretch(1)
 
-        # SQL steps use an editor/output splitter. Recognition steps use a
+        self.step_response_host = QWidget()
+        response_layout = QVBoxLayout(self.step_response_host)
+        response_layout.setContentsMargins(0, 4, 0, 4)
+        response_layout.setSpacing(9)
+        response_help = QLabel(
+            "Complete the task in the named tool, then enter the result or short explanation requested by the lesson."
+        )
+        response_help.setObjectName("Muted")
+        response_help.setWordWrap(True)
+        response_layout.addWidget(response_help)
+        self.step_response_open_files = QPushButton("Open Practice Files")
+        self.step_response_open_files.setObjectName("Secondary")
+        self.step_response_open_files.clicked.connect(self._open_activity_source_files)
+        response_layout.addWidget(self.step_response_open_files)
+        self.step_response_answer = QTextEdit()
+        self.step_response_answer.setMinimumHeight(180)
+        self.step_response_answer.setPlaceholderText("Enter the result requested by the task…")
+        response_layout.addWidget(self.step_response_answer, 1)
+        self.step_response_feedback = FeedbackLabel()
+        response_layout.addWidget(self.step_response_feedback)
+        self.step_response_explanation = QLabel()
+        self.step_response_explanation.setWordWrap(True)
+        self.step_response_explanation.setStyleSheet(
+            "background:#14233B;border:1px solid #52627F;border-radius:8px;"
+            "padding:9px;color:#E7ECF8;"
+        )
+        self.step_response_explanation.hide()
+        response_layout.addWidget(self.step_response_explanation)
+
+        self.step_content_host = QWidget()
+        content_layout = QVBoxLayout(self.step_content_host)
+        content_layout.setContentsMargins(0, 8, 0, 8)
+        content_layout.setSpacing(12)
+        self.step_content_heading = QLabel("Read the lesson, then continue when the idea makes sense.")
+        self.step_content_heading.setWordWrap(True)
+        self.step_content_heading.setStyleSheet(
+            "background:#111D31;border:1px solid #31415F;border-radius:9px;"
+            "padding:14px;color:#E4EAF5;font-size:11pt;font-weight:700;"
+        )
+        content_layout.addWidget(self.step_content_heading)
+        self.step_content_note = QLabel(
+            "There is nothing to submit on this screen. The next step will ask you to use or explain what you just learned."
+        )
+        self.step_content_note.setWordWrap(True)
+        self.step_content_note.setObjectName("Muted")
+        content_layout.addWidget(self.step_content_note)
+        content_layout.addStretch(1)
+
+        # Executable steps use an editor/output splitter. Other steps use a
         # single uninterrupted answer surface so an empty editor/output divider
         # never persists when neither SQL pane is present.
         self.step_workspace_stack = QStackedWidget()
-        self.step_workspace_stack.addWidget(self.lesson_work_splitter)
-        self.step_workspace_stack.addWidget(self.step_choice_host)
-        self.step_workspace_stack.addWidget(self.step_workbook_host)
+        self.step_workspace_stack.addWidget(self.lesson_work_splitter)  # 0: SQL/Python
+        self.step_workspace_stack.addWidget(self.step_choice_host)      # 1: choice
+        self.step_workspace_stack.addWidget(self.step_workbook_host)    # 2: Google Sheets
+        self.step_workspace_stack.addWidget(self.step_response_host)    # 3: Power BI/short response
+        self.step_workspace_stack.addWidget(self.step_content_host)     # 4: learn/example/recap
         workspace_layout.addWidget(self.step_workspace_stack, 1)
         self.step_workspace_card.layout.addWidget(workspace_body, 1)
         self.lesson_splitter.addWidget(self.step_workspace_card)
@@ -696,7 +747,7 @@ class AcceleratorAcademyWidget(QWidget):
         self.step_solution.clicked.connect(self._show_step_solution)
         self.lesson_continue = QPushButton("Continue  →")
         self.lesson_continue.setObjectName("Primary")
-        self.lesson_continue.clicked.connect(self._open_next_node)
+        self.lesson_continue.clicked.connect(self._lesson_continue_clicked)
         for button in (
             self.step_run,
             self.step_check,
@@ -1587,6 +1638,49 @@ class AcceleratorAcademyWidget(QWidget):
         self.open_target(next_target)
 
     # -------------------------------------------------------------- lesson flow
+    @staticmethod
+    def _lesson_instruction_content(
+        lesson: LessonDefinition,
+        activity: ActivityDefinition,
+    ) -> tuple[str, str, str, str]:
+        """Build a consistent teaching sequence without leaking task answers.
+
+        Spreadsheet lessons can declare structured teaching fields while older SQL
+        and assessment content continues to use the legacy ``body`` field.
+        """
+        instruction = dict(activity.instruction)
+        title = str(instruction.get("title") or activity.title)
+        objective = str(
+            instruction.get("objective")
+            or "Understand the idea, then apply it in the active task."
+        )
+        phase = str(
+            instruction.get("phase")
+            or activity.activity_type.value.replace("_", " ").upper()
+        )
+        sections: list[str] = []
+        structured_fields = (
+            ("why_it_matters", "## Why this matters"),
+            ("concept", "## Learn the idea"),
+            ("worked_example", "## Worked example"),
+            ("approach", "## How to approach the task"),
+            ("watch_for", "## Before you check your work"),
+        )
+        for key, heading in structured_fields:
+            value = str(instruction.get(key) or "").strip()
+            if value:
+                sections.append(f"{heading}\n\n{value}")
+
+        body = str(instruction.get("body") or "").strip()
+        if body:
+            if sections:
+                sections.append(f"## Additional context\n\n{body}")
+            else:
+                sections.append(body)
+        if not sections:
+            sections.append(lesson.content_markdown)
+        return title, objective, "\n\n".join(sections), phase
+
     def _open_lesson_node(self, node: JourneyNode) -> None:
         lesson = self.catalog.lesson(str(node.lesson_id))
         activity = next(item for item in lesson.activities if item.activity_id == node.activity_id)
@@ -1601,24 +1695,28 @@ class AcceleratorAcademyWidget(QWidget):
             f"Lesson {lesson.order}: {lesson.title}"
         )
         self.lesson_step_pill.setText(f"Step {step_index} of {len(lesson.activities)}")
-        instruction = dict(activity.instruction)
-        title = str(instruction.get("title") or activity.title)
-        objective = str(instruction.get("objective") or "Learn the concept, then apply it immediately.")
-        body = str(instruction.get("body") or lesson.content_markdown)
+        title, objective, body, phase = self._lesson_instruction_content(
+            lesson,
+            activity,
+        )
+        activity_section = (
+            ""
+            if activity.runtime == "content" or activity.completion_mode == "continue"
+            else "\n\n---\n\n" + self._activity_markdown(activity, embedded=True)
+        )
         learn_markdown = (
             f"# {title}\n\n"
             f"> **Step goal:** {objective}\n\n"
-            f"{body}\n\n"
-            "---\n\n"
-            f"{self._activity_markdown(activity, embedded=True)}"
+            f"{body}"
+            f"{activity_section}"
         )
         self._current_instruction_text = learn_markdown
         self.step_learn_view.set_markdown(
             learn_markdown,
-            eyebrow=f"LESSON {lesson.order} • {activity.activity_type.value.upper()}",
+            eyebrow=f"LESSON {lesson.order} • {activity.step_kind.label.upper()}",
             subtitle=(
                 f"About {activity.estimated_minutes} minutes • "
-                f"{activity.difficulty.title()} interactive step"
+                f"{activity.xp} XP • {activity.difficulty.title()}"
             ),
             bookmarked=False,
         )
@@ -1629,12 +1727,23 @@ class AcceleratorAcademyWidget(QWidget):
             answer = activity.starter
         recognition = activity.runtime == "recognition"
         workbook_runtime = activity.runtime == "workbook"
-        if recognition:
+        response_runtime = activity.runtime == "response"
+        content_runtime = activity.runtime == "content" or activity.completion_mode == "continue"
+        if content_runtime:
+            workspace_title = activity.step_kind.label
+            workspace_index = 4
+        elif recognition:
             workspace_title = "Answer & Feedback"
             workspace_index = 1
         elif workbook_runtime:
-            workspace_title = "Practice Workbook & Check"
+            workspace_title = "Google Sheet & Feedback"
             workspace_index = 2
+        elif response_runtime:
+            workspace_title = "Your Result & Feedback"
+            workspace_index = 3
+        elif activity.runtime == "python":
+            workspace_title = "Python Editor & Output"
+            workspace_index = 0
         else:
             workspace_title = "SQL Editor & Output"
             workspace_index = 0
@@ -1663,18 +1772,40 @@ class AcceleratorAcademyWidget(QWidget):
             self.step_workbook_answer.setPlainText(answer)
             self.step_workbook_answer.blockSignals(False)
             self._configure_workbook_panel(lesson, activity)
+        elif response_runtime:
+            self.step_response_answer.blockSignals(True)
+            self.step_response_answer.setPlainText(answer)
+            self.step_response_answer.blockSignals(False)
+            self.step_response_open_files.setVisible(
+                bool(activity.presentation.get("source_files"))
+            )
+        elif content_runtime:
+            self.step_content_heading.setText(
+                "Read the lesson, then continue when the idea makes sense."
+                if activity.step_kind != LessonStepKind.RECAP
+                else "Review the main idea, then continue to the next lesson."
+            )
         else:
             self.step_sql.blockSignals(True)
             self.step_sql.setPlainText(answer)
+            self.step_sql.setPlaceholderText(
+                "Write your Python here…" if activity.runtime == "python" else "Write your SQL here…"
+            )
             self.step_sql.blockSignals(False)
-        self.step_run.setVisible(activity.runtime == "sql")
-        self.step_solution.setVisible(True)
+        if not response_runtime:
+            self.step_response_open_files.setVisible(False)
+        self.step_run.setVisible(activity.runtime in {"sql", "python"})
+        self.step_check.setVisible(not content_runtime)
+        self.step_hint.setVisible(not content_runtime and bool(activity.hints))
+        self.step_solution.setVisible(not content_runtime and bool(activity.solution))
         self.step_feedback.setText("")
         self.step_choice_feedback.setText("")
         self.step_workbook_feedback.setText("")
+        self.step_response_feedback.setText("")
         self.step_explanation.hide()
         self.step_choice_explanation.hide()
         self.step_workbook_explanation.hide()
+        self.step_response_explanation.hide()
         self._show_result(self.step_results, (), ())
         self._refresh_lesson_navigation()
         QTimer.singleShot(0, self._sync_lesson_footer_splitter)
@@ -1696,13 +1827,19 @@ class AcceleratorAcademyWidget(QWidget):
             columns = [item.strip() for item in columns.split(",") if item.strip()]
         column_text = ", ".join(str(item) for item in columns) or "See the lesson instructions"
         row_range = str(metadata.get("row_range") or "Configured lesson range")
-        expected = str(metadata.get("expected_result") or "Complete the requested workbook change.")
+        presentation = dict(activity.presentation)
+        expected = str(
+            presentation.get("success_criteria")
+            or presentation.get("expected_output")
+            or metadata.get("expected_result")
+            or "Complete the requested workbook change."
+        )
         self.step_workbook_summary.setText(
             f"<b>Workbook:</b> {workbook_name}<br>"
             f"<b>Sheet:</b> {sheet}<br>"
             f"<b>Columns:</b> {column_text}<br>"
             f"<b>Rows:</b> {row_range}<br>"
-            f"<b>Finished result:</b> {expected}"
+            f"<b>Success criteria:</b> {expected}"
         )
         self._refresh_workbook_link_status()
         evidence_prompt = str(metadata.get("evidence_prompt") or "").strip()
@@ -1850,6 +1987,29 @@ class AcceleratorAcademyWidget(QWidget):
             ),
         )
 
+    def _open_activity_source_files(self) -> None:
+        if self._current_activity is None:
+            return
+        configured = self._current_activity.presentation.get("source_files") or []
+        if isinstance(configured, str):
+            configured = [configured]
+        paths = []
+        for item in configured:
+            candidate = (self.service.curriculum_root / str(item)).resolve()
+            try:
+                candidate.relative_to(self.service.curriculum_root.resolve())
+            except ValueError:
+                continue
+            if candidate.exists():
+                paths.append(candidate)
+        target = paths[0].parent if paths else self.service.curriculum_root / "datasets"
+        if not QDesktopServices.openUrl(QUrl.fromLocalFile(str(target))):
+            QMessageBox.warning(
+                self,
+                "Practice Files",
+                f"The folder could not be opened automatically. Open it from:\n\n{target}",
+            )
+
     def _lesson_answer(self) -> str:
         if self._current_activity is None:
             return ""
@@ -1858,6 +2018,10 @@ class AcceleratorAcademyWidget(QWidget):
             return button.text() if button is not None else ""
         if self._current_activity.runtime == "workbook":
             return self.step_workbook_answer.toPlainText().strip()
+        if self._current_activity.runtime == "response":
+            return self.step_response_answer.toPlainText().strip()
+        if self._current_activity.runtime == "content":
+            return ""
         return self.step_sql.toPlainText()
 
     def _active_step_feedback(self) -> FeedbackLabel:
@@ -1865,6 +2029,8 @@ class AcceleratorAcademyWidget(QWidget):
             return self.step_choice_feedback
         if self._current_activity is not None and self._current_activity.runtime == "workbook":
             return self.step_workbook_feedback
+        if self._current_activity is not None and self._current_activity.runtime == "response":
+            return self.step_response_feedback
         return self.step_feedback
 
     def _active_step_explanation(self) -> QLabel:
@@ -1872,6 +2038,8 @@ class AcceleratorAcademyWidget(QWidget):
             return self.step_choice_explanation
         if self._current_activity is not None and self._current_activity.runtime == "workbook":
             return self.step_workbook_explanation
+        if self._current_activity is not None and self._current_activity.runtime == "response":
+            return self.step_response_explanation
         return self.step_explanation
 
     def _sync_lesson_footer_splitter(self, *_args) -> None:
@@ -1893,58 +2061,42 @@ class AcceleratorAcademyWidget(QWidget):
         """Use all editor-side footer space until each control reaches full size."""
 
         checkpoint_next = self.lesson_continue.text().startswith("Continue to Checkpoint")
-        workbook_runtime = bool(
-            self._current_activity is not None
-            and self._current_activity.runtime == "workbook"
+        runtime = (
+            self._current_activity.runtime
+            if self._current_activity is not None
+            else "sql"
         )
-        if workbook_runtime:
-            label_sets = (
-                {
-                    self.step_run: "▶ Run",
-                    self.step_check: "✓ Check My Work",
-                    self.step_hint: "💡 Show Hint",
-                    self.step_solution: "Expected Result",
-                    self.lesson_continue: "Continue to Checkpoint  →" if checkpoint_next else "Continue  →",
-                },
-                {
-                    self.step_run: "Run",
-                    self.step_check: "✓ Check",
-                    self.step_hint: "💡 Hint",
-                    self.step_solution: "Expected",
-                    self.lesson_continue: "Checkpoint  →" if checkpoint_next else "Continue  →",
-                },
-                {
-                    self.step_run: "Run",
-                    self.step_check: "Check",
-                    self.step_hint: "Hint",
-                    self.step_solution: "Result",
-                    self.lesson_continue: "Next  →",
-                },
-            )
+        if runtime == "workbook":
+            run_full, check_full, solution_full = "▶ Refresh", "✓ Check My Work", "View Solution"
+        elif runtime == "python":
+            run_full, check_full, solution_full = "▶ Run Python", "✓ Check Answer", "View Solution"
+        elif runtime == "sql":
+            run_full, check_full, solution_full = "▶ Run Query", "✓ Check Answer", "View Solution"
         else:
-            label_sets = (
-                {
-                    self.step_run: "▶ Run Query",
-                    self.step_check: "✓ Check Answer",
-                    self.step_hint: "💡 Show Hint",
-                    self.step_solution: "View Solution",
-                    self.lesson_continue: "Continue to Checkpoint  →" if checkpoint_next else "Continue  →",
-                },
-                {
-                    self.step_run: "▶ Run",
-                    self.step_check: "✓ Check",
-                    self.step_hint: "💡 Hint",
-                    self.step_solution: "Solution",
-                    self.lesson_continue: "Checkpoint  →" if checkpoint_next else "Continue  →",
-                },
-                {
-                    self.step_run: "Run",
-                    self.step_check: "Check",
-                    self.step_hint: "Hint",
-                    self.step_solution: "Answer",
-                    self.lesson_continue: "Next  →",
-                },
-            )
+            run_full, check_full, solution_full = "▶ Run", "✓ Check Answer", "View Solution"
+        label_sets = (
+            {
+                self.step_run: run_full,
+                self.step_check: check_full,
+                self.step_hint: "💡 Show Hint",
+                self.step_solution: solution_full,
+                self.lesson_continue: "Continue to Checkpoint  →" if checkpoint_next else "Continue  →",
+            },
+            {
+                self.step_run: "▶ Run",
+                self.step_check: "✓ Check",
+                self.step_hint: "💡 Hint",
+                self.step_solution: "Solution",
+                self.lesson_continue: "Checkpoint  →" if checkpoint_next else "Continue  →",
+            },
+            {
+                self.step_run: "Run",
+                self.step_check: "Check",
+                self.step_hint: "Hint",
+                self.step_solution: "Answer",
+                self.lesson_continue: "Next  →",
+            },
+        )
         visible_buttons = [
             button
             for button in (
@@ -2033,7 +2185,7 @@ class AcceleratorAcademyWidget(QWidget):
         result = self.service.run_activity(self._current_activity, self._lesson_answer())
         self._active_step_feedback().setText(("✅ " if result.passed else "❌ ") + result.feedback)
         self._show_result(self.step_results, result.columns, result.rows)
-        if not result.passed:
+        if not result.passed and self._current_activity.runtime in {"sql", "python"}:
             self.step_sql.navigate_to_error(result.feedback)
 
     def _check_lesson_step(self) -> None:
@@ -2045,7 +2197,7 @@ class AcceleratorAcademyWidget(QWidget):
             self._lesson_answer(),
         )
         self._active_step_feedback().setText(("✅ " if result.passed else "❌ ") + result.feedback)
-        if self._current_activity.runtime == "sql":
+        if self._current_activity.runtime in {"sql", "python"}:
             self._show_result(self.step_results, result.columns, result.rows)
         if result.passed:
             explanation = str(self._current_activity.presentation.get("after_correct") or "")
@@ -2053,7 +2205,7 @@ class AcceleratorAcademyWidget(QWidget):
                 active_explanation = self._active_step_explanation()
                 active_explanation.setText("Why this works\n\n" + explanation)
                 active_explanation.show()
-        elif self._current_activity.runtime == "sql":
+        elif self._current_activity.runtime in {"sql", "python"}:
             self.step_sql.navigate_to_error(result.feedback)
         self.refresh_all()
         self._refresh_lesson_navigation()
@@ -2098,15 +2250,42 @@ class AcceleratorAcademyWidget(QWidget):
         self.refresh_all()
         self._refresh_lesson_navigation()
 
+    def _lesson_continue_clicked(self) -> None:
+        if self._current_lesson is None or self._current_activity is None:
+            return
+        if (
+            self._current_activity.completion_mode == "continue"
+            or self._current_activity.runtime == "content"
+        ):
+            if not self.service.activity_complete(
+                self._current_lesson.lesson_id,
+                self._current_activity,
+            ):
+                self.service.complete_learning_step(
+                    self._current_lesson,
+                    self._current_activity,
+                )
+                self.refresh_all()
+                self.progressChanged.emit()
+            self._open_next_node()
+            return
+        self._open_next_node()
+
     def _refresh_lesson_navigation(self) -> None:
         if self._current_lesson is None or self._current_activity is None:
             return
+        content_step = (
+            self._current_activity.completion_mode == "continue"
+            or self._current_activity.runtime == "content"
+        )
         complete = self.service.activity_complete(self._current_lesson.lesson_id, self._current_activity)
-        self.lesson_continue.setEnabled(complete)
+        self.lesson_continue.setEnabled(content_step or complete)
         self.lesson_nav_status.setText(
-            "✓ Nice work! Continue when you’re ready."
+            "Continue when you’re ready."
+            if content_step and not complete
+            else "✓ Nice work! Continue when you’re ready."
             if complete
-            else "Complete the lesson to move on!"
+            else "Complete and check the activity to move on."
         )
         keys = [node.target_key for node in self._nodes]
         if self._current_target in keys:
@@ -2735,8 +2914,11 @@ class AcceleratorAcademyWidget(QWidget):
                 metadata.get("starting_state")
                 or "Use the current saved state of your continuing workbook."
             )
+            hide_exact_result = bool(presentation.get("hide_exact_result", False))
             expected_result = str(
-                metadata.get("expected_result")
+                presentation.get("success_criteria")
+                or presentation.get("expected_output")
+                or metadata.get("expected_result")
                 or clarity.expected_output
             )
             save_instructions = str(
@@ -2753,7 +2935,11 @@ class AcceleratorAcademyWidget(QWidget):
                 description_lines = f"\n\n**Column guide**\n{description_lines}"
             sample_values = metadata.get("sample_values") or []
             sample_text = ""
-            if isinstance(sample_values, (list, tuple)) and sample_values:
+            if (
+                bool(presentation.get("show_sample_values", False))
+                and isinstance(sample_values, (list, tuple))
+                and sample_values
+            ):
                 sample_text = "\n\n**Example values:** " + ", ".join(
                     f"`{item}`" for item in sample_values
                 )
@@ -2771,7 +2957,7 @@ class AcceleratorAcademyWidget(QWidget):
                 f"- **Columns:** {column_text}"
                 f"{description_lines}{sample_text}\n\n"
                 f"**Starting state:** {starting_state}\n\n"
-                f"**Finished result:** {expected_result}\n\n"
+                f"**Success criteria:** {expected_result}\n\n"
                 f"**Save or submit:** {save_instructions}"
                 f"{evidence_text}\n\n"
             )
@@ -2784,7 +2970,7 @@ class AcceleratorAcademyWidget(QWidget):
             f"{workbook_section}"
             f"### Your task\n> {clarity.task}\n\n"
             f"### Requirements\n{requirement_text}\n\n"
-            f"### Definition of done\n{clarity.expected_output}\n\n"
+            f"### Success criteria\n{presentation.get('success_criteria') or clarity.expected_output}\n\n"
             f"### You’re practicing\n{skill_text}"
         )
 

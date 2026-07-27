@@ -1,17 +1,18 @@
-lesson_id: spreadsheet_relationships
+lesson_id: academy2_spreadsheet_relationships
 title: Matching Tables & Understanding Grain
 order: 2
 difficulty: beginner
-description: Validate table relationships and build a customer-level summary without losing the Orders table
-  grain.
-estimated_minutes: 40
+description: Validate relationships between tables, find unmatched keys, and summarize data at a new grain.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Check for unmatched Product IDs.
-- Create a summary at customer grain.
+- Check whether every transaction key exists in the related reference table.
+- Explain how table grain affects combined data.
+- Build a one-row-per-customer summary.
 key_takeaways:
-- Joining data changes which fields are available, not the grain unless rows are duplicated.
-- Relationship checks should identify unmatched and duplicate keys.
+- Relationships are reliable only when keys and table grains are understood.
+- Unmatched-key checks reveal broken references.
+- A summary table intentionally changes the grain of the data.
 teaches:
 - spreadsheet.relationships
 requires:
@@ -20,25 +21,64 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_relationships_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_relationships_learn
+  title: Learn — Matching Tables & Understanding Grain
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Matching Tables & Understanding Grain
+    objective: Check whether every transaction key exists in the related reference table.
+    body: '# Match tables without changing what the numbers mean
+
+
+      Related tables often have different grains. A Customers table may have one row per customer, while an Orders table has
+      many rows for the same customer.
+
+
+      Before combining or summarizing them, check that the key on the reference side is unique and that every transaction
+      key has a match. An **unmatched-key check** finds values used in one table that do not exist in the related table.
+
+
+      When you create a customer summary from orders, you intentionally change the grain from one row per order to one row
+      per customer. Measures such as order count and revenue must be aggregated at that new grain.
+
+
+      In this lesson, you will validate a relationship and build a summary without duplicating values.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.relationships
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_relationships_check
+  title: Learn & Predict — Matching tables without changing the meaning
   type: recognition
   runtime: recognition
-  prompt: What should one row represent in a customer summary?
-  answer_options:
-  - One customer
-  - One order line
-  - One product
-  - One formula
+  prompt: What should one row represent in a customer revenue summary?
   starter: ''
   solution: One customer
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - The summary is organized around customers rather than transactions.
+  - A customer may have several orders, but the summary should consolidate them.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
     expected_answer: One customer
@@ -48,44 +88,89 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
-    task: What should one row represent in a customer summary?
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    task: What should one row represent in a customer revenue summary?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.relationships
-    after_correct: You are ready to apply the idea in the Northstar workbook.
+    after_correct: The summary’s grain is one customer, even though its measures are calculated from many order rows.
   instruction:
-    title: Learn — Matching Tables & Understanding Grain
-    objective: What should one row represent in a customer summary?
-    action_label: Choose the best answer
-    body: The Orders table is at order grain. A customer summary is at customer grain, so each customer should
-      appear once with aggregated order measures.
+    phase: LEARN & PREDICT
+    title: Learn & Predict — Matching tables without changing the meaning
+    objective: Reason about keys, unmatched records, and summary grain.
+    why_it_matters: Combining tables can duplicate or omit values when the relationship is misunderstood. Analysts should
+      identify each table’s grain and validate matching keys before trusting the result.
+    concept: Orders has one row per order, while Customers has one row per customer. A customer may therefore match many orders.
+      An unmatched-key check finds Orders values that have no corresponding record in the reference table. A customer summary
+      changes the grain to one row per customer.
+    worked_example: A project table has one row per project and a time-entry table has many rows per project. Summing project
+      budget after joining it to every time entry would duplicate the budget. The analyst must aggregate at the intended grain
+      or keep the measures separate.
+    action_label: Make a prediction
   required_for_completion: true
-- activity_id: spreadsheet_relationships_workbook_guided
+  answer_options:
+  - One customer
+  - One order line
+  - One product
+  - One calendar month only
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_relationships_example
+  title: Example — See matching tables & understanding grain in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See matching tables & understanding grain in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A Projects table has one row per project. A Time Entries table has many rows per project. If the project budget is joined
+      to every time entry and then summed, the budget is repeated and the total becomes too large.
+
+
+      The analyst first checks that every Project ID in Time Entries exists in Projects. They then summarize time by project
+      before comparing hours with the one-time project budget.
+
+
+      **What to notice:** A valid key match does not automatically guarantee a valid total. You must also protect the intended
+      grain.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.relationships
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_relationships_guided
   title: Try It — Check for unmatched Product IDs
   type: guided
   runtime: workbook
-  prompt: |-
-    On Analysis Workspace, calculate the number of Product IDs in Orders that do not appear in Products. Put the result in B17.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. Click **B17** beside Unmatched Product IDs.
-    3. Enter `=SUM(ARRAYFORMULA(--(COUNTIF(Products!$A$2:$A$9,Orders!F2:F37)=0)))`.
-    4. COUNTIF tests each Orders Product ID against Products. The `=0` test marks IDs that were not found, and SUM counts them.
-    5. Press **Enter** and confirm the result is a count rather than a list.
-    6. A result of 0 means every Orders Product ID has a matching Products row.
-    7. Wait until Google Sheets shows that all changes are saved.
-    8. Return to Career Accelerator and select **Check My Work**.
+  prompt: Calculate the number of Orders Product IDs that do not appear in Products and place the result in B17.
   starter: ''
-  solution: B17 contains a formula that counts unmatched Product IDs.
+  solution: One valid approach is `=SUM(ARRAYFORMULA(--ISNA(MATCH(Orders!F2:F37,Products!A2:A9,0))))` in B17. Equivalent COUNTIF-based
+    checks are acceptable.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - For each Orders Product ID, test whether an exact match exists in Products.
+  - MATCH can return a position, and ISNA can identify missing matches.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -97,23 +182,8 @@ activities:
       - countif
       - match
       - xlookup
-    success_feedback: The workbook now has a relationship-quality check for Product ID.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Unmatched Product IDs
-    row_range: A17:B17
-    starting_state: B17 is blank. Orders and Products share Product ID.
-    expected_result: B17 contains a formula that counts unmatched Product IDs.
-    column_descriptions:
-      Unmatched Product IDs: Count of order Product IDs not found in Products.
-    sample_values:
-    - 'Unmatched Product IDs: 0'
+      message: 'The workbook does not yet meet this requirement: B17 reports the number of unmatched Product IDs.'
+    success_feedback: You verified that the product relationship is complete before relying on the lookup results.
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
@@ -121,18 +191,17 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: On Analysis Workspace, calculate the number of Product IDs in Orders that do not appear in Products.
-      Put the result in B17.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Calculate the number of Orders Product IDs that do not appear in Products and place the result in B17.
     requirements:
-    - Compare Orders Product ID with Products Product ID.
-    - Return a count, not a list.
-    - Save before checking.
-    expected_output: B17 contains a formula that counts unmatched Product IDs.
+    - Compare the complete Orders Product ID range with Products Product ID.
+    - Count unmatched transaction keys rather than returning product names.
+    - Keep the check formula-driven.
+    expected_output: B17 reports the number of unmatched Product IDs.
     skills_practiced:
     - spreadsheet.relationships
-    after_correct: The workbook now has a relationship-quality check for Product ID.
+    after_correct: You verified that the product relationship is complete before relying on the lookup results.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -140,57 +209,62 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: B17 reports the number of unmatched Product IDs.
+    hide_exact_result: true
   instruction:
+    phase: TRY IT
     title: Try It — Check for unmatched Product IDs
-    objective: On Analysis Workspace, calculate the number of Product IDs in Orders that do not appear in Products.
-      Put the result in B17.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    objective: Create a quality check for broken relationships between Orders and Products.
+    approach: Compare every Product ID used in Orders with the Product ID list in Products. Count how many order keys do not
+      find a match and place the result in the prepared QA cell.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Unmatched Product IDs
+    row_range: A17:B17
+    starting_state: B17 is blank. Orders and Products share Product ID.
+    expected_result: B17 reports the number of unmatched Product IDs.
+    column_descriptions:
+      Unmatched Product IDs: Count of order Product IDs not found in Products.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - Click **B17** beside Unmatched Product IDs.
-    - Enter `=SUM(ARRAYFORMULA(--(COUNTIF(Products!$A$2:$A$9,Orders!F2:F37)=0)))`.
-    - COUNTIF tests each Orders Product ID against Products. The `=0` test marks IDs that were not found, and
-      SUM counts them.
-    - Press **Enter** and confirm the result is a count rather than a list.
-    - A result of 0 means every Orders Product ID has a matching Products row.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_relationships_workbook_practice
-  title: Practice — Build a customer revenue summary
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A17:B17**.
+    - Compare every Product ID used in Orders with the Product ID list in Products. Count how many order keys do not find
+      a match and place the result in the prepared QA cell.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_relationships_independent
+  title: Challenge — Build a customer revenue summary
+  type: independent
   runtime: workbook
-  prompt: |-
-    In Analysis Workspace A20:D26, create a customer summary with Customer ID, Customer Name, Order Count, and Revenue. Use one row per customer and include at least six customers.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. In **A20:D20**, enter these headers in order: `Customer ID`, `Customer Name`, `Order Count`, `Revenue`.
-    3. Copy at least six Customer IDs from Customers into A21:A26, using one ID per row.
-    4. In B21, look up the cleaned customer name from Customers using the Customer ID in A21.
-    5. In C21, use COUNTIF to count Orders whose Customer ID equals A21.
-    6. In D21, use SUMIF to add Orders Revenue for the Customer ID in A21.
-    7. Lock source ranges with `$`, then fill B21:D21 down through row 26.
-    8. Format D21:D26 as currency and confirm each summary row represents one customer.
-    9. Wait until Google Sheets shows that all changes are saved.
-    10. Return to Career Accelerator and select **Check My Work**.
+  prompt: Build a customer summary in Analysis Workspace A20:D26 with Customer ID, Customer Name, Order Count, and Revenue
+    for at least six customers.
   starter: ''
-  solution: Row 20 contains the four requested headers and rows below contain one record per customer.
+  solution: Create the four headers in A20:D20. List unique Customer IDs below, look up Customer Name from Customers, count
+    matching Orders with COUNTIF/COUNTIFS, and sum matching Revenue with SUMIF/SUMIFS.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - Start by listing unique Customer IDs.
+  - Use the customer ID to return the name and to calculate count and revenue from Orders.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -203,17 +277,59 @@ activities:
       - Order Count
       - Revenue
       exact: false
+      message: 'The workbook does not yet meet this requirement: The summary contains at least six unique customers with their
+        names, order counts, and total revenue.'
     - type: populated_range
       sheet: Analysis Workspace
       range: A20:D26
       min_count: 20
-    success_feedback: The customer summary uses a clear customer grain and contains the requested measures.
+      message: 'The workbook does not yet meet this requirement: The summary contains at least six unique customers with their
+        names, order counts, and total revenue.'
+    success_feedback: You intentionally changed the grain from one row per order to one row per customer.
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 18
+  presentation:
+    scenario: Northstar Operations practice workbook
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Build a customer summary in Analysis Workspace A20:D26 with Customer ID, Customer Name, Order Count, and Revenue
+      for at least six customers.
+    requirements:
+    - Use one row per customer.
+    - Include all four requested fields.
+    - Use formulas, a pivot, or a grouped summary that derives counts and revenue from Orders.
+    expected_output: The summary contains at least six unique customers with their names, order counts, and total revenue.
+    skills_practiced:
+    - spreadsheet.relationships
+    after_correct: You intentionally changed the grain from one row per order to one row per customer.
+    common_errors:
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    success_criteria: The summary contains at least six unique customers with their names, order counts, and total revenue.
+    hide_exact_result: true
+  instruction:
+    phase: CHALLENGE
+    title: Challenge — Build a customer revenue summary
+    objective: Aggregate transaction data to one row per customer.
+    approach: Create a compact summary with one customer per row. Return the customer name from Customers, count the customer’s
+      Orders records, and total the customer’s Revenue. Do not list individual orders.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
+  required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
     sheet: Analysis Workspace
     columns:
     - Customer ID
@@ -222,68 +338,115 @@ activities:
     - Revenue
     row_range: A20:D26
     starting_state: A20:D26 is reserved for a customer-level summary.
-    expected_result: Row 20 contains the four requested headers and rows below contain one record per customer.
+    expected_result: The summary contains at least six unique customers with their names, order counts, and total revenue.
     column_descriptions:
       Customer ID: Identifier that connects an order to the Customers sheet.
       Customer Name: The Customer Name field used in this workbook task.
       Order Count: Number of orders associated with one customer.
       Revenue: Calculated order value after applying the row discount.
-    sample_values:
-    - 'Customer ID: C001'
-    - 'Order Count: 4'
-    - 'Revenue: $9,450.00'
-  required_for_practice: false
-  required_for_mastery: true
-  evidence_eligible: false
-  difficulty: intermediate
-  estimated_minutes: 18
-  presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: In Analysis Workspace A20:D26, create a customer summary with Customer ID, Customer Name, Order Count,
-      and Revenue. Use one row per customer and include at least six customers.
-    requirements:
-    - Use one row per customer.
-    - Include the four requested columns in that order.
-    - Calculate Order Count and Revenue from Orders.
-    - Save the workbook.
-    expected_output: Row 20 contains the four requested headers and rows below contain one record per customer.
-    skills_practiced:
-    - spreadsheet.relationships
-    after_correct: The customer summary uses a clear customer grain and contains the requested measures.
-    common_errors:
-    - Working in a different Google Sheet than the link saved in Career Accelerator.
-    - Selecting Check My Work before Google Sheets finishes saving.
-    - Using different cells, ranges, labels, or output text than the lesson requires.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-  instruction:
-    title: Practice — Build a customer revenue summary
-    objective: In Analysis Workspace A20:D26, create a customer summary with Customer ID, Customer Name, Order
-      Count, and Revenue. Use one row per customer and include at least six customers.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
-  required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - 'In **A20:D20**, enter these headers in order: `Customer ID`, `Customer Name`, `Order Count`, `Revenue`.'
-    - Copy at least six Customer IDs from Customers into A21:A26, using one ID per row.
-    - In B21, look up the cleaned customer name from Customers using the Customer ID in A21.
-    - In C21, use COUNTIF to count Orders whose Customer ID equals A21.
-    - In D21, use SUMIF to add Orders Revenue for the Customer ID in A21.
-    - Lock source ranges with `$`, then fill B21:D21 down through row 26.
-    - Format D21:D26 as currency and confirm each summary row represents one customer.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A20:D26**.
+    - Create a compact summary with one customer per row. Return the customer name from Customers, count the customer’s Orders
+      records, and total the customer’s Revenue. Do not list individual orders.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_relationships_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: A customer budget appears once in Customers but is repeated after joining Customers to Orders. What caused the repetition?
+  answer_options:
+  - One customer can match many order rows
+  - The budget cell is formatted as currency
+  - The filter removed unique customers
+  - The lookup used an absolute reference
+  starter: ''
+  solution: One customer can match many order rows
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: One customer can match many order rows
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A customer budget appears once in Customers but is repeated after joining Customers to Orders. What caused the repetition?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.relationships
+    after_correct: Before combining measures from related tables, determine whether the relationship is one-to-one or one-to-many.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: 'The two tables have different grains: one row per customer versus many rows per customer in Orders.'
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_relationships_recap
+  title: Recap — Matching Tables & Understanding Grain
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Matching Tables & Understanding Grain
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Matching Tables & Understanding Grain
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Relationships are reliable only when keys and table grains are understood.
+
+      - Unmatched-key checks reveal broken references.
+
+      - A summary table intentionally changes the grain of the data.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

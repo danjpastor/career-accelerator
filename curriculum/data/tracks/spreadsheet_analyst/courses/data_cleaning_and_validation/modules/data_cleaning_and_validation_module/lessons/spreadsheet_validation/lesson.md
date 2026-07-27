@@ -1,19 +1,36 @@
 # Validation Rules & Reconciliation
 
-Prevent invalid status values and reconcile the workbook before relying on its results.
+Prevent invalid entries and reconcile row counts, unique identifiers, and duplicates.
 
-## Learn
+## What you will learn
 
-Data validation prevents inconsistent entries before they spread. Reconciliation then checks that the number of records and unique identifiers still match expectations.
+- Create a data-validation dropdown from an approved lookup list.
+- Count source records without counting the header.
+- Detect duplicate identifiers with formula-driven reconciliation checks.
 
-## Try It
+## Main idea
 
-On Orders, add a list validation rule to J2:J37 using the approved statuses on Lookup Tables. Existing status values should remain unchanged.
+# Validation Rules & Reconciliation
 
-## Practice
+## What this lesson teaches
 
-On Analysis Workspace, calculate the number of order records in B13 and the number of duplicate Order IDs in B14.
+Prevent invalid entries and reconcile row counts, unique identifiers, and duplicates.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- Data validation reduces future entry errors but does not replace quality checks.
+- Reconciliation confirms that record counts and identifiers behave as expected.
+- A duplicate check compares populated IDs with unique IDs.
+
+## Key takeaways
+
+- Data validation reduces future entry errors but does not replace quality checks.
+- Reconciliation confirms that record counts and identifiers behave as expected.
+- A duplicate check compares populated IDs with unique IDs.

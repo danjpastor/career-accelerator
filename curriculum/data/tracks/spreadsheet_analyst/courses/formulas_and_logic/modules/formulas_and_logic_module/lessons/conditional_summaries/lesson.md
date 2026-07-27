@@ -1,19 +1,36 @@
 # COUNTIFS, SUMIFS & Variance
 
-Summarize the order table with SUMIFS, COUNTIFS, and a simple variance calculation.
+Summarize records that meet business conditions and compare actual results with targets.
 
-## Learn
+## What you will learn
 
-`SUMIFS` adds a measure for rows that meet conditions. `COUNTIFS` counts qualifying rows. Keep the criteria explicit so another analyst can audit the calculation.
+- Use SUMIF or SUMIFS to total values that meet criteria.
+- Use COUNTIF or COUNTIFS to count matching records.
+- Calculate and interpret variance from a target.
 
-## Try It
+## Main idea
 
-On Analysis Workspace, calculate total West-region Revenue in B8 using the Orders sheet. Keep the target in B7 unchanged.
+# COUNTIFS, SUMIFS & Variance
 
-## Practice
+## What this lesson teaches
 
-In B9, count orders with Status equal to Delivered. In B10, calculate West revenue minus the target in B7.
+Summarize records that meet business conditions and compare actual results with targets.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- Conditional summary functions separate the values being summarized from the conditions used to select rows.
+- COUNTIFS and SUMIFS support multiple criteria.
+- Variance is commonly calculated as actual minus target.
+
+## Key takeaways
+
+- Conditional summary functions separate the values being summarized from the conditions used to select rows.
+- COUNTIFS and SUMIFS support multiple criteria.
+- Variance is commonly calculated as actual minus target.

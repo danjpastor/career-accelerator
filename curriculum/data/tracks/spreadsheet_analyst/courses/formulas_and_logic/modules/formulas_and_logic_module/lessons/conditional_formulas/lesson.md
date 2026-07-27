@@ -1,19 +1,36 @@
 # IF, AND, OR & Error Handling
 
-Turn operational rules into clear IF and AND formulas that classify each order.
+Use IF, AND, and OR to turn business rules into clear classifications.
 
-## Learn
+## What you will learn
 
-Conditional formulas let a spreadsheet apply the same business rule to every row. `IF` handles two outcomes, while `AND` or `OR` combines several tests.
+- Use IF to return different results for true and false conditions.
+- Combine conditions with AND or OR.
+- Create readable flags that support operational review.
 
-## Try It
+## Main idea
 
-On Orders, add Fulfillment Flag in M1. Return Complete when Status is Delivered; otherwise return Open. Fill the formula through M37.
+# IF, AND, OR & Error Handling
 
-## Practice
+## What this lesson teaches
 
-Add Large Order Flag in N1. Return Review when Units are at least 20 and Revenue is at least $1,000; otherwise return Standard. Fill through N37.
+Use IF, AND, and OR to turn business rules into clear classifications.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- IF evaluates a condition and returns one of two outcomes.
+- AND requires every condition to be true.
+- OR requires at least one condition to be true.
+
+## Key takeaways
+
+- IF evaluates a condition and returns one of two outcomes.
+- AND requires every condition to be true.
+- OR requires at least one condition to be true.

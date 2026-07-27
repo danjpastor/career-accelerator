@@ -1,5 +1,5 @@
 module_id: combining_horizontally
-title: Combining Data Horizontally
+title: Match Related Tables
 order: 2
 description: Use LEFT JOIN, INNER JOIN, and composite keys to enrich results safely.
 lessons:

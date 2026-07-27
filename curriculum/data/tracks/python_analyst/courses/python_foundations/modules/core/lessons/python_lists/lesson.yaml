@@ -1,9 +1,10 @@
-lesson_id: python_lists
+lesson_id: academy2_python_lists
 title: Python Lists
 order: 2
 difficulty: beginner
-description: Build practical fluency with python lists.
-estimated_minutes: 15
+description: A **list** stores several values in a specific order. Lists are useful for a small sequence such as daily counts,
+  region names, or review statuses.
+estimated_minutes: 35
 content: lesson.md
 objectives:
 - Explain the purpose of python lists.
@@ -17,7 +18,46 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: python_lists_step_1
+- activity_id: academy2_python_lists_learn
+  title: Learn — Python Lists
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Python Lists
+    objective: Explain the purpose of python lists.
+    body: 'A **list** stores several values in a specific order. Lists are useful for a small sequence such as daily counts,
+      region names, or review statuses.
+
+
+      ```python
+
+      wait_times = [4, 7, 3, 9]
+
+      ```
+
+
+      Python positions begin at 0, so `wait_times[0]` returns the first value. A **slice** selects part of a list: `wait_times[-2:]`
+      returns the final two values. Functions such as `sum()`, `len()`, `min()`, and `max()` can summarize numeric lists.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - python.lists
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_python_lists_check
   title: 'Practice 1: Python Lists'
   type: recognition
   runtime: recognition
@@ -27,7 +67,11 @@ activities:
   - '1'
   - '-2'
   - first
-  hints: []
+  hints:
+  - Read the task again and identify where **Python Lists** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which index accesses the first list
+    item?'
   validator:
     type: exact_answer
     expected_answer: '0'
@@ -54,46 +98,154 @@ activities:
     action_label: Choose the best answer
     body: Python sequences use zero-based indexing.
   required_for_completion: true
-- activity_id: python_lists_step_2
-  title: 'Practice 2: Python Lists'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: '0'
+- activity_id: academy2_python_lists_example
+  title: Example — See python lists in context
   type: recognition
-  runtime: recognition
-  prompt: What does values[-1] return?
-  answer_options:
-  - The last item
-  - The first item
-  - Every item
-  - An error in all cases
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See python lists in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A service analyst stores five daily wait times in a list and uses `sum(wait_times) / len(wait_times)` to calculate the
+      average. They use a slice to review only the most recent three days. The graded exercise uses order counts instead.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - python.lists
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: The last item
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: What does values[-1] return?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Python Lists
-    after_correct: You identified the core idea behind python lists.
-    common_errors: []
-  instruction:
-    title: Python Lists
-    objective: Build a practical understanding of python lists.
-    action_label: Choose the best answer
-    body: Negative indexes count backward from the end of a sequence.
+- activity_id: academy2_python_lists_guided
+  title: Try It — Summarize values stored in a list
+  type: guided
+  runtime: python
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 7
+  prompt: Create a list named `daily_orders` containing 12, 15, 9, 18, and 16. Use Python to calculate `weekly_orders` from
+    the list.
+  starter: 'daily_orders = []
+
+    # Calculate weekly_orders.'
+  solution: 'daily_orders = [12, 15, 9, 18, 16]
+
+    weekly_orders = sum(daily_orders)'
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: daily_orders == [12, 15, 9, 18, 16]
+      feedback: Add the five daily values to daily_orders in the order shown.
+    - expression: weekly_orders == 70
+      feedback: Use the values in daily_orders to calculate the weekly total.
+    display_variable: weekly_orders
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
   required_for_completion: true
-- activity_id: python_lists_step_3
-  title: 'Practice 3: Python Lists'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: Create a list named `daily_orders` containing 12, 15, 9, 18, and 16. Use Python to calculate `weekly_orders` from
+      the list.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Try It — Summarize values stored in a list
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_python_lists_independent
+  title: Practice — Select the most recent values
+  type: independent
+  runtime: python
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: Use the existing `daily_orders` list and create `recent_orders` containing only the final three values. Use list
+    slicing rather than writing a new list by hand.
+  starter: 'daily_orders = [12, 15, 9, 18, 16]
+
+    # Create recent_orders with a slice.'
+  solution: 'daily_orders = [12, 15, 9, 18, 16]
+
+    recent_orders = daily_orders[-3:]'
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: recent_orders == [9, 18, 16]
+      feedback: Slice from the third item through the end of the list.
+    display_variable: recent_orders
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: Use the existing `daily_orders` list and create `recent_orders` containing only the final three values. Use list
+      slicing rather than writing a new list by hand.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Practice — Select the most recent values
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_python_lists_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: Which operation adds one item to the end of a list?
   answer_options:
@@ -101,30 +253,75 @@ activities:
   - groupby
   - merge
   - astype
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: append
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: Which operation adds one item to the end of a list?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Python Lists
     after_correct: You identified the core idea behind python lists.
     common_errors: []
   instruction:
-    title: Python Lists
-    objective: Build a practical understanding of python lists.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: List methods change or inspect a collection of ordered values.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: append
+- activity_id: academy2_python_lists_recap
+  title: Recap — Python Lists
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Python Lists
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Python Lists
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Python Lists supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

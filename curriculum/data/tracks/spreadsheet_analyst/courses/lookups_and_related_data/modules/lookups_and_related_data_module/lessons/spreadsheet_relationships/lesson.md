@@ -1,19 +1,36 @@
 # Matching Tables & Understanding Grain
 
-Validate table relationships and build a customer-level summary without losing the Orders table grain.
+Validate relationships between tables, find unmatched keys, and summarize data at a new grain.
 
-## Learn
+## What you will learn
 
-The Orders table is at order grain. A customer summary is at customer grain, so each customer should appear once with aggregated order measures.
+- Check whether every transaction key exists in the related reference table.
+- Explain how table grain affects combined data.
+- Build a one-row-per-customer summary.
 
-## Try It
+## Main idea
 
-On Analysis Workspace, calculate the number of Product IDs in Orders that do not appear in Products. Put the result in B17.
+# Matching Tables & Understanding Grain
 
-## Practice
+## What this lesson teaches
 
-In Analysis Workspace A20:D26, create a customer summary with Customer ID, Customer Name, Order Count, and Revenue. Use one row per customer and include at least six customers.
+Validate relationships between tables, find unmatched keys, and summarize data at a new grain.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- Relationships are reliable only when keys and table grains are understood.
+- Unmatched-key checks reveal broken references.
+- A summary table intentionally changes the grain of the data.
+
+## Key takeaways
+
+- Relationships are reliable only when keys and table grains are understood.
+- Unmatched-key checks reveal broken references.
+- A summary table intentionally changes the grain of the data.

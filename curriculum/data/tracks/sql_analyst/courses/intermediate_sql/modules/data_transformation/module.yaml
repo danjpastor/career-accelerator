@@ -1,5 +1,5 @@
 module_id: data_transformation
-title: Data Transformation
+title: Create Useful Fields
 order: 2
 description: Create useful fields from raw values and calculations.
 lessons:

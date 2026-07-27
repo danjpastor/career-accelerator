@@ -1,19 +1,36 @@
 # Cell References, Sorting & Filtering
 
-Create calculated columns with relative references, then use an absolute reference for a shared business assumption.
+Build row-level formulas, understand relative references, lock shared assumptions, and investigate results with sorting and filtering.
 
-## Learn
+## What you will learn
 
-Relative references change with the row. Absolute references use dollar signs to keep a cell fixed. For example, `=K2*(1+'Lookup Tables'!$B$2)` changes K2 as it fills down but always uses the tax rate in B2.
+- Build a row-level arithmetic formula from fields in the same record.
+- Use an absolute reference for a shared rate or assumption.
+- Sort and filter calculated results to answer a business question.
 
-## Try It
+## Main idea
 
-On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 − Discount), then fill the formula through K37.
+# Cell References, Sorting & Filtering
 
-## Practice
+## What this lesson teaches
 
-Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in 'Lookup Tables'!$B$2. Fill the formula through row 37. Then filter Region to West and sort Revenue from largest to smallest. Enter the Order ID at the top of the filtered list in Check Your Work.
+Build row-level formulas, understand relative references, lock shared assumptions, and investigate results with sorting and filtering.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- Relative references move when formulas are filled to another row.
+- Absolute references keep a shared cell fixed with dollar signs.
+- A strong formula is written once, filled down, and spot-checked.
+
+## Key takeaways
+
+- Relative references move when formulas are filled to another row.
+- Absolute references keep a shared cell fixed with dollar signs.
+- A strong formula is written once, filled down, and spot-checked.

@@ -1,3 +1,16 @@
+# Write Your First SQL
+
+Shape readable result sets with explicit columns and stakeholder-friendly aliases.
+
+## What you will learn
+
+- Choose only the columns required by a question.
+- Control result-column order.
+- Create clear aliases with AS.
+- Explain why aliases do not modify the source table.
+
+## Main idea
+
 # Selecting Columns and Using Aliases
 
 > **Learning goal:** Build clear result sets by choosing only the columns a business question needs and giving those columns readable result names with aliases.
@@ -126,3 +139,9 @@ Prefer `order_value` over `value`, and `customer_region` over `region_name` when
 - `AS` gives a result column a readable alias.
 - Aliases change headings, not source schemas.
 - Good aliases preserve business meaning.
+
+## Key takeaways
+
+- Explicit columns make saved queries safer.
+- Aliases describe the result without changing the source.
+- Readable names should preserve business meaning.

@@ -1,5 +1,5 @@
 module_id: correlated_ctes
-title: Correlated Queries, Nested Queries, and Common Table Expressions
+title: Organize Multi-Step Queries
 order: 3
 description: Structure row-specific and multi-stage analysis.
 lessons:

@@ -1,4 +1,4 @@
-lesson_id: sql_foundations_sort_combine
+lesson_id: academy2_sql_foundations_sort_combine
 title: Complete Your SQL Foundation
 order: 5
 difficulty: beginner
@@ -23,7 +23,80 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: sort_direction_recognition
+- activity_id: academy2_sql_foundations_sort_combine_learn
+  title: Learn — Complete Your SQL Foundation
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Complete Your SQL Foundation
+    objective: Understand the idea in plain language before writing a query.
+    body: '# Sort a result and control its size
+
+
+      A query result has no guaranteed business order unless you use `ORDER BY`.
+
+
+      ```sql
+
+      SELECT request_id, submitted_date
+
+      FROM purchase_requests
+
+      ORDER BY submitted_date ASC;
+
+      ```
+
+
+      `ASC` sorts low to high, A to Z, or oldest to newest. `DESC` sorts high to low, Z to A, or newest to oldest.
+
+
+      You can sort by more than one field. SQL uses the first sort key, then the next key when values are tied.
+
+
+      Foundation clauses normally appear in this order:
+
+
+      ```sql
+
+      SELECT ...
+
+      FROM ...
+
+      WHERE ...
+
+      ORDER BY ...
+
+      LIMIT ...;
+
+      ```
+
+
+      For a top-five question, use `ORDER BY` to define which rows are highest or newest, then use `LIMIT 5`. A limit without
+      sorting is only a preview.
+
+
+      Build a query one clause at a time and run it after each meaningful change. This makes mistakes easier to find.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.order_by
+    - sql.clause_composition
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_foundations_sort_combine_check
   title: Choose the correct sort direction
   type: recognition
   runtime: recognition
@@ -33,7 +106,11 @@ activities:
   - ORDER BY opened_date DESC
   - LIMIT opened_date
   - WHERE opened_date FIRST
-  hints: []
+  hints:
+  - Read the task again and identify where **ORDER BY** fits into the requested result.
+  - Focus on the named table or source (support_tickets) and check each requirement one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which clause places the oldest opened_date
+    values first?'
   validator:
     type: exact_answer
     expected_answer: ORDER BY opened_date ASC
@@ -70,27 +147,79 @@ activities:
       - `DESC` usually means newest to oldest.
 
 
-      For numbers, ascending means lowest to highest and descending means highest to lowest. For text, ascending
-      generally means A–Z.
+      For numbers, ascending means lowest to highest and descending means highest to lowest. For text, ascending generally
+      means A–Z.
 
 
-      Translate the stakeholder’s words directly. “Oldest opened first” means the earliest date should appear at
-      the top, so the date must be sorted ascending.
+      Translate the stakeholder’s words directly. “Oldest opened first” means the earliest date should appear at the top,
+      so the date must be sorted ascending.
 
 
-      Choose the clause that places the oldest `opened_date` values first. Do not confuse “oldest” with “largest”
-      or assume descending is always more important.'
+      Choose the clause that places the oldest `opened_date` values first. Do not confuse “oldest” with “largest” or assume
+      descending is always more important.'
   required_for_completion: true
-- activity_id: sort_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: ORDER BY opened_date ASC
+- activity_id: academy2_sql_foundations_sort_combine_example
+  title: Example — See complete your sql foundation in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See complete your sql foundation in context
+    objective: Study a separate example, then use the method on different data.
+    body: '## A separate example
+
+
+      A recruiter wants the five oldest applications that still need review:
+
+
+      ```sql
+
+      SELECT application_id, role_name, submitted_date
+
+      FROM job_applications
+
+      WHERE status = ''Needs Review''
+
+      ORDER BY submitted_date ASC
+
+      LIMIT 5;
+
+      ```
+
+
+      **What to notice:** `WHERE` defines the eligible applications, `ORDER BY` places the oldest first, and `LIMIT` keeps
+      only five rows.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.order_by
+    - sql.clause_composition
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_foundations_sort_combine_guided
   title: Rank products by price
   type: guided
   runtime: sql
   prompt: Return product_name and unit_price from products, highest unit_price first.
   starter: 'SELECT product_name, unit_price
 
-    FROM products
-
-    '
+    FROM products'
   solution: 'SELECT product_name, unit_price
 
     FROM products
@@ -99,6 +228,7 @@ activities:
   hints:
   - Sort on unit_price.
   - Highest first requires DESC.
+  - Read the task again and identify where **ORDER BY** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -149,28 +279,28 @@ activities:
       ```
 
 
-      `DESC` puts the largest values first. `ASC` is the default, but writing the direction explicitly makes the
-      query easier to review.
+      `DESC` puts the largest values first. `ASC` is the default, but writing the direction explicitly makes the query easier
+      to review.
 
 
-      Sorting changes presentation order; it does not modify the table. If two rows share the same price, their
-      relative order may remain unspecified unless you add a second sort key.
+      Sorting changes presentation order; it does not modify the table. If two rows share the same price, their relative order
+      may remain unspecified unless you add a second sort key.
 
 
-      Complete the product query so the highest `unit_price` appears first. Keep the result to the requested two
-      columns.'
+      Complete the product query so the highest `unit_price` appears first. Keep the result to the requested two columns.'
   required_for_completion: true
-- activity_id: sort_multiple_keys
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_foundations_sort_combine_independent
   title: Sort subscriptions by region and fee
   type: independent
   runtime: sql
-  prompt: Return region, plan_name, and monthly_fee from subscriptions. Sort region A–Z, then monthly_fee highest
-    to lowest within each region.
+  prompt: Return region, plan_name, and monthly_fee from subscriptions. Sort region A–Z, then monthly_fee highest to lowest
+    within each region.
   starter: 'SELECT region, plan_name, monthly_fee
 
-    FROM subscriptions
-
-    '
+    FROM subscriptions'
   solution: 'SELECT region, plan_name, monthly_fee
 
     FROM subscriptions
@@ -179,6 +309,7 @@ activities:
   hints:
   - List the primary sort key first.
   - Use ASC for region and DESC for monthly_fee.
+  - Read the task again and identify where **multi-column sorting** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -209,8 +340,7 @@ activities:
     skills_practiced:
     - multi-column sorting
     - sort priority
-    after_correct: SQL groups equal region values through the first key and ranks fees within those groups through
-      the second.
+    after_correct: SQL groups equal region values through the first key and ranks fees within those groups through the second.
     common_errors: []
   instruction:
     title: Use left-to-right sort priority
@@ -226,12 +356,12 @@ activities:
       ```
 
 
-      SQL first arranges rows by region. Only among rows with the same region does it apply the second key, ranking
-      annual value from highest to lowest.
+      SQL first arranges rows by region. Only among rows with the same region does it apply the second key, ranking annual
+      value from highest to lowest.
 
 
-      This pattern is common in stakeholder reports: group by a familiar category, then prioritize the most important
-      records inside each category.
+      This pattern is common in stakeholder reports: group by a familiar category, then prioritize the most important records
+      inside each category.
 
 
       The requested order is:
@@ -242,20 +372,20 @@ activities:
       2. Within each region, `monthly_fee` highest to lowest.
 
 
-      Write both expressions in one `ORDER BY` clause, separated by a comma. Reversing the keys would answer a different
-      question.'
+      Write both expressions in one `ORDER BY` clause, separated by a comma. Reversing the keys would answer a different question.'
   required_for_completion: true
-- activity_id: combine_top_orders
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_foundations_sort_combine_challenge
   title: Build a top-order report
-  type: transfer
+  type: mastery
   runtime: sql
-  prompt: Return order_id, region, and order_total for Completed orders. Sort highest order_total first and return
-    only three rows.
+  prompt: Return order_id, region, and order_total for Completed orders. Sort highest order_total first and return only three
+    rows.
   starter: 'SELECT order_id, region, order_total
 
-    FROM orders
-
-    '
+    FROM orders'
   solution: 'SELECT order_id, region, order_total
 
     FROM orders
@@ -268,6 +398,7 @@ activities:
   hints:
   - Filter Completed rows before sorting.
   - Sort order_total DESC, then use LIMIT 3.
+  - Read the task again and identify where **WHERE** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -308,8 +439,8 @@ activities:
     - ORDER BY
     - LIMIT
     - top-N
-    after_correct: Filtering defines the eligible population, sorting identifies the largest values, and LIMIT returns
-      the requested top three.
+    after_correct: Filtering defines the eligible population, sorting identifies the largest values, and LIMIT returns the
+      requested top three.
     common_errors: []
   instruction:
     title: Build a true top-N query
@@ -343,16 +474,18 @@ activities:
       ```
 
 
-      For this report, only `Completed` orders are eligible. Rank those orders by `order_total` descending, then
-      keep the first three. If you apply `LIMIT` without sorting, you get an arbitrary preview rather than the largest
-      orders.
+      For this report, only `Completed` orders are eligible. Rank those orders by `order_total` descending, then keep the
+      first three. If you apply `LIMIT` without sorting, you get an arbitrary preview rather than the largest orders.
 
 
       Build the complete report one clause at a time and run it to confirm the highest value appears first.'
   required_for_completion: true
-- activity_id: combine_debug_clause_order
+  step_kind: combined_challenge
+  completion_mode: validated
+  xp: 150
+- activity_id: academy2_sql_foundations_sort_combine_transfer_1
   title: Repair clause order
-  type: debugging
+  type: transfer
   runtime: sql
   prompt: Repair the query so it returns Active subscriptions ordered by monthly_fee descending.
   starter: 'SELECT subscriber_id, plan_name, monthly_fee
@@ -372,6 +505,7 @@ activities:
   hints:
   - WHERE must appear before ORDER BY.
   - Move the status filter above the sorting clause.
+  - Read the task again and identify where **clause order** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -387,7 +521,7 @@ activities:
     forbidden_patterns: []
     order_sensitive: true
     column_sensitive: true
-  required_for_practice: false
+  required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
@@ -427,12 +561,12 @@ activities:
       ```
 
 
-      The starter places `ORDER BY` before `WHERE`, so the database encounters a filter where the grammar no longer
-      permits one.
+      The starter places `ORDER BY` before `WHERE`, so the database encounters a filter where the grammar no longer permits
+      one.
 
 
-      When debugging clause order, avoid rewriting the whole query. Identify each clause’s job, then place it in
-      the standard sequence:
+      When debugging clause order, avoid rewriting the whole query. Identify each clause’s job, then place it in the standard
+      sequence:
 
 
       - `FROM` identifies the source.
@@ -442,20 +576,21 @@ activities:
       - `ORDER BY` arranges the resulting rows.
 
 
-      Move the existing status condition above the existing sort clause. Preserve the selected columns and descending
-      fee order.'
+      Move the existing status condition above the existing sort clause. Preserve the selected columns and descending fee
+      order.'
   required_for_completion: true
-- activity_id: sort_mastery
+  step_kind: transfer
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_foundations_sort_combine_transfer_2
   title: Prioritize the oldest unresolved tickets
-  type: mastery
+  type: transfer
   runtime: sql
-  prompt: Return ticket_id, priority, status, assigned_team, and opened_date for Open or Pending tickets. Sort oldest
-    first and return only five rows.
+  prompt: Return ticket_id, priority, status, assigned_team, and opened_date for Open or Pending tickets. Sort oldest first
+    and return only five rows.
   starter: 'SELECT
 
-    FROM support_tickets
-
-    '
+    FROM support_tickets'
   solution: 'SELECT ticket_id, priority, status, assigned_team, opened_date
 
     FROM support_tickets
@@ -468,6 +603,7 @@ activities:
   hints:
   - Filter the accepted unresolved statuses first.
   - Oldest first means ASC; add LIMIT 5 last.
+  - Read the task again and identify where **query composition** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -507,15 +643,14 @@ activities:
     - query composition
     - top-N workflow
     - date sorting
-    after_correct: The query defines the unresolved population, places the oldest work first, and limits the result
-      to a manageable action list.
+    after_correct: The query defines the unresolved population, places the oldest work first, and limits the result to a manageable
+      action list.
     common_errors: []
   instruction:
     title: Create an operational priority list
     objective: Independently combine alternatives, chronological sorting, and a limit.
     action_label: Build the oldest-ticket queue
-    body: 'Operational queues often combine several foundation concepts. Translate the request into a query plan
-      before typing:
+    body: 'Operational queues often combine several foundation concepts. Translate the request into a query plan before typing:
 
 
       - Population: tickets whose status is `Open` or `Pending`
@@ -545,9 +680,55 @@ activities:
       ```
 
 
-      Use parentheses or `IN` to express the two accepted statuses. Ascending date order places the oldest unresolved
-      work first. Add the limit only after the order is defined.
+      Use parentheses or `IN` to express the two accepted statuses. Ascending date order places the oldest unresolved work
+      first. Add the limit only after the order is defined.
 
 
       This is the final lesson mastery step. Pass it without using the full solution to unlock the course checkpoint.'
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_foundations_sort_combine_recap
+  title: Recap — Complete Your SQL Foundation
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Complete Your SQL Foundation
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Complete Your SQL Foundation
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - A meaningful top-N result requires ORDER BY before LIMIT.
+
+      - Multiple sort keys apply from left to right.
+
+      - Build and test complex queries incrementally.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

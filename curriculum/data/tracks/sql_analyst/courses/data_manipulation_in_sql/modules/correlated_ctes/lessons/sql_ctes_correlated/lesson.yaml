@@ -1,9 +1,9 @@
-lesson_id: sql_ctes_correlated
+lesson_id: academy2_sql_ctes_correlated
 title: Correlated Queries and CTEs
 order: 1
 difficulty: intermediate
 description: Structure multi-step SQL and calculate row-specific group benchmarks.
-estimated_minutes: 28
+estimated_minutes: 30
 content: lesson.md
 objectives:
 - Explain correlated queries and ctes.
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: cte_recognition
+- activity_id: academy2_sql_ctes_correlated_learn
+  title: Learn — Correlated Queries and CTEs
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Correlated Queries and CTEs
+    objective: Explain correlated queries and ctes.
+    body: '# Organize multi-step SQL and calculate row-specific comparisons
+
+
+      A **common table expression**, or CTE, is a named query placed after `WITH`. It breaks a long query into understandable
+      steps.
+
+
+      A **correlated subquery** refers to a value from the outer row, so it is evaluated in that row''s context. It can be
+      useful, but may be harder to read or slower than a join or window function.
+
+
+      In this lesson, you will choose a structure that makes multi-step logic easier to explain and maintain.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.ctes_correlated
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_ctes_correlated_check
   title: Choose a readable query stage
   type: recognition
   runtime: recognition
@@ -28,7 +66,11 @@ activities:
   - HAVING
   - LIMIT
   - CAST
-  hints: []
+  hints:
+  - Read the task again and identify where **Organize multi-step logic** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which keyword introduces a named common
+    table expression?'
   validator:
     type: exact_answer
     expected_answer: WITH
@@ -55,23 +97,57 @@ activities:
     action_label: Choose the best answer
     body: A CTE names an intermediate result so later query stages can read like a sequence of analytical steps.
   required_for_completion: true
-- activity_id: cte_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: WITH
+- activity_id: academy2_sql_ctes_correlated_example
+  title: Example — See correlated queries and ctes in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See correlated queries and ctes in context
+    objective: Study a worked example before solving a different task.
+    body: "## A separate example\n\nAn analyst first summarizes sales by store in a CTE, then compares each store with the\
+      \ company average in the final query.\n\n```sql\nWITH store_sales AS (\n    SELECT store_id, SUM(amount) AS sales\n\
+      \    FROM transactions\n    GROUP BY store_id\n)\nSELECT store_id, sales\nFROM store_sales\nWHERE sales > (SELECT AVG(sales)\
+      \ FROM store_sales);\n```\n\n**What to notice:** The named step can be read and tested separately before the final comparison."
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.ctes_correlated
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_ctes_correlated_guided
   title: Summarize regional order totals
   type: guided
   runtime: sql
   prompt: Use a CTE named regional_orders to calculate total_order_value by region, then return it sorted by region.
-  starter: "WITH regional_orders AS (\n    -- build the regional summary\n)\nSELECT *\nFROM regional_orders\nORDER\
-    \ BY region;"
-  solution: WITH regional_orders AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY region)
-    SELECT region, total_order_value FROM regional_orders ORDER BY region;
+  starter: "WITH regional_orders AS (\n    -- build the regional summary\n)\nSELECT *\nFROM regional_orders\nORDER BY region;"
+  solution: WITH regional_orders AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY region) SELECT
+    region, total_order_value FROM regional_orders ORDER BY region;
   hints:
   - Focus on CTE.
   - Build the result one clause at a time.
+  - Read the task again and identify where **CTE** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: WITH regional_orders AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP
-      BY region) SELECT region, total_order_value FROM regional_orders ORDER BY region;
+    expected_query: WITH regional_orders AS (SELECT region, SUM(order_total) AS total_order_value FROM orders GROUP BY region)
+      SELECT region, total_order_value FROM regional_orders ORDER BY region;
     required_patterns:
     - ^\s*WITH\b
     - GROUP\s+BY
@@ -103,12 +179,14 @@ activities:
     action_label: Write and validate the query
     body: Keep the aggregation inside the CTE and make the final query responsible for presentation order.
   required_for_completion: true
-- activity_id: cte_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_ctes_correlated_independent
   title: Find orders above their regional average
-  type: mastery
+  type: independent
   runtime: sql
-  prompt: Return order_id, region, and order_total when an order is above the average for its own region. Sort by
-    order_id.
+  prompt: Return order_id, region, and order_total when an order is above the average for its own region. Sort by order_id.
   starter: 'SELECT o.order_id, o.region, o.order_total
 
     FROM orders AS o
@@ -121,6 +199,7 @@ activities:
   hints:
   - Focus on correlated subquery.
   - Build the result one clause at a time.
+  - Read the task again and identify where **correlated subquery** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -140,8 +219,7 @@ activities:
   presentation:
     scenario: Analyst practice request
     introduction: Translate the request into a clear, reviewable SQL result.
-    task: Return order_id, region, and order_total when an order is above the average for its own region. Sort by
-      order_id.
+    task: Return order_id, region, and order_total when an order is above the average for its own region. Sort by order_id.
     tables:
     - orders
     requirements:
@@ -158,3 +236,88 @@ activities:
     action_label: Write and validate the query
     body: The inner query references the outer row region, so the benchmark changes for each order.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_ctes_correlated_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: A long query has three meaningful stages that need clear names and separate checks. Which structure improves readability?
+  answer_options:
+  - A sequence of named CTEs.
+  - One unbroken line of SQL.
+  - More LIMIT clauses.
+  - A table rename in the database.
+  solution: A sequence of named CTEs.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: A sequence of named CTEs.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A long query has three meaningful stages that need clear names and separate checks. Which structure improves readability?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.ctes_correlated
+    after_correct: CTEs give intermediate result sets clear names so each stage can be read and tested.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_ctes_correlated_recap
+  title: Recap — Correlated Queries and CTEs
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Correlated Queries and CTEs
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Correlated Queries and CTEs
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Structure multi-step SQL and calculate row-specific group benchmarks.
+
+      - Validate the result rather than relying only on query syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

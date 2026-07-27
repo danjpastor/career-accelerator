@@ -1,9 +1,9 @@
-lesson_id: sql_window_basics_deep
+lesson_id: academy2_sql_window_basics_deep
 title: Window Functions versus GROUP BY
 order: 1
 difficulty: intermediate
 description: Keep row-level detail while calculating group-aware values.
-estimated_minutes: 24
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain window functions versus group by.
@@ -18,7 +18,44 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: win_basic_recognition
+- activity_id: academy2_sql_window_basics_deep_learn
+  title: Learn — Window Functions versus GROUP BY
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Window Functions versus GROUP BY
+    objective: Explain window functions versus group by.
+    body: '# Choose whether to collapse rows or keep them
+
+
+      `GROUP BY` returns one row per group. A window function returns calculations beside the existing rows.
+
+
+      Use `GROUP BY` when the required result itself is a summary. Use a window function when the detailed rows must remain
+      visible alongside a group total, average, or rank.
+
+
+      In this lesson, you will compare the two approaches and choose based on the intended result grain.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.window_basics
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_window_basics_deep_check
   title: Compare windows with GROUP BY
   type: recognition
   runtime: recognition
@@ -30,6 +67,8 @@ activities:
   - LIMIT by region
   hints:
   - Focus on how window versus aggregation changes the result or database behavior.
+  - Read the task again and identify where **window versus aggregation** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: AVG(order_total) OVER (PARTITION BY region)
@@ -54,27 +93,73 @@ activities:
     title: Compare windows with GROUP BY
     objective: Use window versus aggregation in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **window versus aggregation** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **window versus aggregation** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
+      short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: win_basic_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: AVG(order_total) OVER (PARTITION BY region)
+- activity_id: academy2_sql_window_basics_deep_example
+  title: Example — See window functions versus group by in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See window functions versus group by in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      One report needs one row per department with average salary; another needs every employee plus the department average.
+
+
+      ```sql
+
+      AVG(salary) OVER (PARTITION BY department_id)
+
+      ```
+
+
+      **What to notice:** The window version repeats the group benchmark beside each employee instead of reducing the result
+      to one row per department.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.window_basics
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_window_basics_deep_guided
   title: Add a regional average
   type: guided
   runtime: sql
   prompt: Return order_id, region, order_total, and regional_average rounded to 2 decimals. Sort by order_id.
-  starter: "SELECT order_id, region, order_total,\n       ROUND(AVG(order_total) OVER (PARTITION BY region), 2)\
-    \ AS regional_average\nFROM orders\nORDER BY order_id;"
+  starter: "SELECT order_id, region, order_total,\n       ROUND(AVG(order_total) OVER (PARTITION BY region), 2) AS regional_average\n\
+    FROM orders\nORDER BY order_id;"
   solution: SELECT order_id, region, order_total, ROUND(AVG(order_total) OVER (PARTITION BY region), 2) AS regional_average
     FROM orders ORDER BY order_id;
   hints:
   - Identify where partitioned window averages belongs in the query.
   - Build the query one clause at a time.
+  - Read the task again and identify where **partitioned window averages** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT order_id, region, order_total, ROUND(AVG(order_total) OVER (PARTITION BY region), 2)
-      AS regional_average FROM orders ORDER BY order_id;
+    expected_query: SELECT order_id, region, order_total, ROUND(AVG(order_total) OVER (PARTITION BY region), 2) AS regional_average
+      FROM orders ORDER BY order_id;
     required_patterns:
     - AVG\s*\([^)]*\)\s+OVER
     - PARTITION\s+BY\s+region
@@ -105,20 +190,25 @@ activities:
     objective: Apply partitioned window averages to a realistic analyst request.
     action_label: Write and validate the query
     body: In this step, you will use **partitioned window averages** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
-- activity_id: win_basic_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_window_basics_deep_independent
   title: Number orders within each region
-  type: mastery
+  type: independent
   runtime: sql
-  prompt: Return order_id, region, and regional_order_number using ROW_NUMBER ordered by order_date within each
-    region. Sort by region and regional_order_number.
+  prompt: Return order_id, region, and regional_order_number using ROW_NUMBER ordered by order_date within each region. Sort
+    by region and regional_order_number.
   starter: "SELECT order_id, region,\n       \nFROM orders\nORDER BY region, regional_order_number;"
   solution: SELECT order_id, region, ROW_NUMBER() OVER (PARTITION BY region ORDER BY order_date) AS regional_order_number
     FROM orders ORDER BY region, regional_order_number;
   hints:
   - Start from the requested result grain, then apply ROW_NUMBER with partitions.
+  - Read the task again and identify where **ROW_NUMBER with partitions** fits into the requested result.
+  - Focus on the named table or source (['orders']) and check each requirement one at a time.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -138,8 +228,8 @@ activities:
   presentation:
     scenario: Original analyst practice request
     introduction: Translate the business request into a focused, reviewable SQL result.
-    task: Return order_id, region, and regional_order_number using ROW_NUMBER ordered by order_date within each
-      region. Sort by region and regional_order_number.
+    task: Return order_id, region, and regional_order_number using ROW_NUMBER ordered by order_date within each region. Sort
+      by region and regional_order_number.
     tables:
     - orders
     requirements:
@@ -155,6 +245,93 @@ activities:
     objective: Apply ROW_NUMBER with partitions to a realistic analyst request.
     action_label: Write and validate the query
     body: In this step, you will use **ROW_NUMBER with partitions** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+      the result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_window_basics_deep_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: A report must show every employee row and the average salary for that employee’s department. Why is a window function
+    useful?
+  answer_options:
+  - It calculates the department average without collapsing employee rows.
+  - It permanently stores a new salary.
+  - It removes departments with one employee.
+  - It replaces the need for SELECT.
+  solution: It calculates the department average without collapsing employee rows.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: It calculates the department average without collapsing employee rows.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A report must show every employee row and the average salary for that employee’s department. Why is a window function
+      useful?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.window_basics
+    after_correct: Unlike GROUP BY, a window calculation can keep each original row in the result.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_window_basics_deep_recap
+  title: Recap — Window Functions versus GROUP BY
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Window Functions versus GROUP BY
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Window Functions versus GROUP BY
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Keep row-level detail while calculating group-aware values.
+
+      - Validate the result rather than relying only on valid syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

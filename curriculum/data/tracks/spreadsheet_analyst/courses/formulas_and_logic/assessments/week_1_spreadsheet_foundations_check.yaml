@@ -116,34 +116,7 @@ activities:
   title: Filter behavior
   type: mastery
   runtime: recognition
-  prompt: 'A filter should be understood as:
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Click any cell inside the complete data table.
-
-    4. Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
-
-    5. Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
-    and click **OK**.
-
-    6. Leave the filter active so Career Accelerator can verify the finished workbook.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: 'A filter should be understood as:'
   answer_options:
   - A temporary view of matching rows
   - Permanent deletion
@@ -195,33 +168,7 @@ activities:
   title: Core formula
   type: mastery
   runtime: recognition
-  prompt: 'Which function calculates the mean?
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Click the first required output cell and type `=` to begin the formula.
-
-    4. Build the formula with the source cells from the current row, then press **Enter**.
-
-    5. Drag the blue fill handle through the full required range.
-
-    6. Spot-check the first, middle, and last result before checking your work.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: Which function calculates the mean?
   answer_options:
   - AVERAGE
   - COUNT
@@ -304,33 +251,7 @@ activities:
   title: Formula diagnosis
   type: mastery
   runtime: recognition
-  prompt: 'A copied formula points to the wrong fixed target. What should you inspect?
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Enter the formula in the first required output cell.
-
-    4. Add `$` before the column letter and row number for every reference that must stay fixed, such as `$B$2`.
-
-    5. Press **Enter**, then fill the formula through the required rows.
-
-    6. Open a later formula and confirm the fixed reference did not move.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: A copied formula points to the wrong fixed target. What should you inspect?
   answer_options:
   - Relative versus absolute references
   - Worksheet color

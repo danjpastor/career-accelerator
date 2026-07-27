@@ -1,9 +1,9 @@
-lesson_id: sql_window_fetch_rank
+lesson_id: academy2_sql_window_fetch_rank
 title: Fetching, Ranking, and Paging
 order: 1
 difficulty: intermediate
 description: Compare rows across time, rank performance, and divide ordered results into groups.
-estimated_minutes: 24
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain fetching, ranking, and paging.
@@ -18,7 +18,44 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: win_rank_recognition
+- activity_id: academy2_sql_window_fetch_rank_learn
+  title: Learn — Fetching, Ranking, and Paging
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Fetching, Ranking, and Paging
+    objective: Explain fetching, ranking, and paging.
+    body: '# Compare nearby rows and return a controlled slice of results
+
+
+      Ranking functions assign positions based on an order. `LAG` and `LEAD` return values from a previous or next row in
+      that order. Paging patterns return a predictable portion of an ordered result.
+
+
+      A stable `ORDER BY` is essential. If tied rows have no additional sort key, the returned order may change between runs.
+
+
+      In this lesson, you will rank records, compare one period with another, and return results in a repeatable order.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.window_ranking
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_window_fetch_rank_check
   title: Choose the previous-row function
   type: recognition
   runtime: recognition
@@ -30,6 +67,8 @@ activities:
   - NTILE
   hints:
   - Focus on how offset window functions changes the result or database behavior.
+  - Read the task again and identify where **offset window functions** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: LAG
@@ -54,28 +93,72 @@ activities:
     title: Choose the previous-row function
     objective: Use offset window functions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **offset window functions** to make database work more accurate, readable, and useful. Read
-      the situation, identify what the result must preserve, and then choose the option that best matches that goal.
-      This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **offset window functions** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
+      short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: win_rank_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: LAG
+- activity_id: academy2_sql_window_fetch_rank_example
+  title: Example — See fetching, ranking, and paging in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See fetching, ranking, and paging in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A monthly report compares each month''s revenue with the prior month.
+
+
+      ```sql
+
+      LAG(revenue) OVER (ORDER BY month) AS prior_month_revenue
+
+      ```
+
+
+      **What to notice:** `LAG` depends on the specified sequence. It does not mean “previous row” until an order is defined.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.window_ranking
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_window_fetch_rank_guided
   title: Compare each month with the prior month
   type: guided
   runtime: sql
-  prompt: Return region, month_start, sales_total, and prior_sales using LAG within each region. Sort by region
-    and month_start.
-  starter: "SELECT region, month_start, sales_total,\n       LAG(sales_total) OVER (PARTITION BY region ORDER BY\
-    \ month_start) AS prior_sales\nFROM monthly_sales\nORDER BY region, month_start;"
-  solution: SELECT region, month_start, sales_total, LAG(sales_total) OVER (PARTITION BY region ORDER BY month_start)
-    AS prior_sales FROM monthly_sales ORDER BY region, month_start;
+  prompt: Return region, month_start, sales_total, and prior_sales using LAG within each region. Sort by region and month_start.
+  starter: "SELECT region, month_start, sales_total,\n       LAG(sales_total) OVER (PARTITION BY region ORDER BY month_start)\
+    \ AS prior_sales\nFROM monthly_sales\nORDER BY region, month_start;"
+  solution: SELECT region, month_start, sales_total, LAG(sales_total) OVER (PARTITION BY region ORDER BY month_start) AS prior_sales
+    FROM monthly_sales ORDER BY region, month_start;
   hints:
   - Identify where LAG comparisons belongs in the query.
   - Build the query one clause at a time.
+  - Read the task again and identify where **LAG comparisons** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT region, month_start, sales_total, LAG(sales_total) OVER (PARTITION BY region ORDER BY
-      month_start) AS prior_sales FROM monthly_sales ORDER BY region, month_start;
+    expected_query: SELECT region, month_start, sales_total, LAG(sales_total) OVER (PARTITION BY region ORDER BY month_start)
+      AS prior_sales FROM monthly_sales ORDER BY region, month_start;
     required_patterns:
     - LAG\s*\(
     - PARTITION\s+BY\s+region
@@ -90,8 +173,7 @@ activities:
   presentation:
     scenario: Original analyst practice request
     introduction: Translate the business request into a focused, reviewable SQL result.
-    task: Return region, month_start, sales_total, and prior_sales using LAG within each region. Sort by region
-      and month_start.
+    task: Return region, month_start, sales_total, and prior_sales using LAG within each region. Sort by region and month_start.
     tables:
     - monthly_sales
     requirements:
@@ -106,26 +188,31 @@ activities:
     title: Compare each month with the prior month
     objective: Apply LAG comparisons to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **LAG comparisons** inside a complete analyst query. Start by identifying the
-      result grain—what one row should represent—then select only the fields and calculations needed to answer the
-      request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **LAG comparisons** inside a complete analyst query. Start by identifying the result
+      grain—what one row should represent—then select only the fields and calculations needed to answer the request. Run the
+      query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
-- activity_id: win_rank_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_window_fetch_rank_independent
   title: Rank monthly sales
-  type: mastery
+  type: independent
   runtime: sql
-  prompt: Return region, month_start, sales_total, and sales_rank using DENSE_RANK across all rows by sales_total
-    descending. Sort by sales_rank and region.
+  prompt: Return region, month_start, sales_total, and sales_rank using DENSE_RANK across all rows by sales_total descending.
+    Sort by sales_rank and region.
   starter: "SELECT region, month_start, sales_total,\n       \nFROM monthly_sales\nORDER BY sales_rank, region;"
-  solution: SELECT region, month_start, sales_total, DENSE_RANK() OVER (ORDER BY sales_total DESC) AS sales_rank
-    FROM monthly_sales ORDER BY sales_rank, region;
+  solution: SELECT region, month_start, sales_total, DENSE_RANK() OVER (ORDER BY sales_total DESC) AS sales_rank FROM monthly_sales
+    ORDER BY sales_rank, region;
   hints:
   - Start from the requested result grain, then apply ranking windows.
+  - Read the task again and identify where **ranking windows** fits into the requested result.
+  - Focus on the named table or source (['monthly_sales']) and check each requirement one at a time.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT region, month_start, sales_total, DENSE_RANK() OVER (ORDER BY sales_total DESC) AS sales_rank
-      FROM monthly_sales ORDER BY sales_rank, region;
+    expected_query: SELECT region, month_start, sales_total, DENSE_RANK() OVER (ORDER BY sales_total DESC) AS sales_rank FROM
+      monthly_sales ORDER BY sales_rank, region;
     required_patterns:
     - DENSE_RANK\s*\(\s*\)\s+OVER
     forbidden_patterns: []
@@ -139,8 +226,8 @@ activities:
   presentation:
     scenario: Original analyst practice request
     introduction: Translate the business request into a focused, reviewable SQL result.
-    task: Return region, month_start, sales_total, and sales_rank using DENSE_RANK across all rows by sales_total
-      descending. Sort by sales_rank and region.
+    task: Return region, month_start, sales_total, and sales_rank using DENSE_RANK across all rows by sales_total descending.
+      Sort by sales_rank and region.
     tables:
     - monthly_sales
     requirements:
@@ -155,7 +242,92 @@ activities:
     title: Rank monthly sales
     objective: Apply ranking windows to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **ranking windows** inside a complete analyst query. Start by identifying the
-      result grain—what one row should represent—then select only the fields and calculations needed to answer the
-      request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **ranking windows** inside a complete analyst query. Start by identifying the result
+      grain—what one row should represent—then select only the fields and calculations needed to answer the request. Run the
+      query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_window_fetch_rank_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: You need the three highest-value orders in each region. Which pattern fits?
+  answer_options:
+  - Rank orders inside each region, then keep ranks 1 through 3.
+  - Limit the entire query to three rows before grouping.
+  - Use DISTINCT on region only.
+  - Cross join regions and orders.
+  solution: Rank orders inside each region, then keep ranks 1 through 3.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Rank orders inside each region, then keep ranks 1 through 3.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You need the three highest-value orders in each region. Which pattern fits?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.window_ranking
+    after_correct: Partitioned ranking creates a separate order within each region so a top-N filter can be applied per group.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_window_fetch_rank_recap
+  title: Recap — Fetching, Ranking, and Paging
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Fetching, Ranking, and Paging
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Fetching, Ranking, and Paging
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Compare rows across time, rank performance, and divide ordered results into groups.
+
+      - Validate the result rather than relying only on valid syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

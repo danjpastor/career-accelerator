@@ -1,4 +1,4 @@
-lesson_id: sql_conditional_metrics
+lesson_id: academy2_sql_conditional_metrics
 title: Conditional Aggregation
 order: 2
 difficulty: intermediate
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: cond_metric_recognition
+- activity_id: academy2_sql_conditional_metrics_learn
+  title: Learn — Conditional Aggregation
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Conditional Aggregation
+    objective: Explain conditional business metrics.
+    body: '# Calculate several business metrics in one grouped query
+
+
+      Conditional aggregation places a `CASE` expression inside an aggregate function. It lets you count or total only the
+      rows that meet a condition while keeping the intended grouped result.
+
+
+      This pattern is useful for measures such as open-ticket count, delayed-order revenue, or percentage of records meeting
+      a target.
+
+
+      In this lesson, you will build condition-specific metrics without filtering away the rows needed for other measures.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.conditional_aggregation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_conditional_metrics_check
   title: Recognize conditional aggregation
   type: recognition
   runtime: recognition
@@ -28,7 +66,11 @@ activities:
   - ORDER BY condition
   - DISTINCT condition
   - LIMIT condition
-  hints: []
+  hints:
+  - Read the task again and identify where **Count conditions inside an aggregate** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which pattern counts only rows that
+    meet a condition while keeping one summary row?'
   validator:
     type: exact_answer
     expected_answer: SUM(CASE WHEN condition THEN 1 ELSE 0 END)
@@ -53,10 +95,44 @@ activities:
     title: Count conditions inside an aggregate
     objective: Build a practical understanding of count conditions inside an aggregate.
     action_label: Choose the best answer
-    body: Conditional aggregation combines `CASE` with an aggregate so multiple business measures can be calculated
-      in one grouped result.
+    body: Conditional aggregation combines `CASE` with an aggregate so multiple business measures can be calculated in one
+      grouped result.
   required_for_completion: true
-- activity_id: cond_metric_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: SUM(CASE WHEN condition THEN 1 ELSE 0 END)
+- activity_id: academy2_sql_conditional_metrics_example
+  title: Example — See conditional aggregation in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See conditional aggregation in context
+    objective: Study a worked example before solving a different task.
+    body: "## A separate example\n\nA team summary needs total tickets and open tickets in the same row.\n\n```sql\nSELECT\n\
+      \    team,\n    COUNT(*) AS total_tickets,\n    SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) AS open_tickets\nFROM\
+      \ tickets\nGROUP BY team;\n```\n\n**What to notice:** A `WHERE status = 'Open'` filter would remove closed tickets and\
+      \ make the total count unusable. The condition stays inside the aggregate instead."
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.conditional_aggregation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_conditional_metrics_guided
   title: Count completed orders
   type: guided
   runtime: sql
@@ -64,16 +140,17 @@ activities:
   starter: 'SELECT
 
     FROM orders;'
-  solution: SELECT SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, COUNT(*) AS total_orders
-    FROM orders;
+  solution: SELECT SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, COUNT(*) AS total_orders FROM
+    orders;
   hints:
   - Focus on conditional aggregation.
   - Build the result one clause at a time.
+  - Read the task again and identify where **conditional aggregation** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, COUNT(*) AS
-      total_orders FROM orders;
+    expected_query: SELECT SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, COUNT(*) AS total_orders
+      FROM orders;
     required_patterns:
     - SUM\s*\(\s*CASE
     - COUNT\s*\(
@@ -103,12 +180,15 @@ activities:
     title: Calculate related KPIs together
     objective: Use conditional aggregation in a realistic analyst query.
     action_label: Write and validate the query
-    body: A `CASE` expression can return 1 for qualifying rows and 0 for all others. Summing those values produces
-      a conditional count.
+    body: A `CASE` expression can return 1 for qualifying rows and 0 for all others. Summing those values produces a conditional
+      count.
   required_for_completion: true
-- activity_id: cond_metric_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_conditional_metrics_independent
   title: Count unresolved tickets by team
-  type: mastery
+  type: independent
   runtime: sql
   prompt: Return assigned_team and unresolved_tickets for Open or Pending tickets, grouped and sorted by assigned_team.
   starter: 'SELECT assigned_team,
@@ -118,11 +198,12 @@ activities:
     GROUP BY assigned_team
 
     ORDER BY assigned_team;'
-  solution: SELECT assigned_team, SUM(CASE WHEN status IN ('Open', 'Pending') THEN 1 ELSE 0 END) AS unresolved_tickets
-    FROM support_tickets GROUP BY assigned_team ORDER BY assigned_team;
+  solution: SELECT assigned_team, SUM(CASE WHEN status IN ('Open', 'Pending') THEN 1 ELSE 0 END) AS unresolved_tickets FROM
+    support_tickets GROUP BY assigned_team ORDER BY assigned_team;
   hints:
   - Focus on conditional grouped metrics.
   - Build the result one clause at a time.
+  - Read the task again and identify where **conditional grouped metrics** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -159,3 +240,91 @@ activities:
     action_label: Write and validate the query
     body: Define the team as the result grain and count only tickets that remain unresolved.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_conditional_metrics_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: You need one result showing the number of delayed orders while keeping all orders in the calculation. What is the
+    strongest approach?
+  answer_options:
+  - Count a CASE expression that returns a value only for delayed orders.
+  - Filter out every delayed order before counting.
+  - Rename the status column.
+  - Use DISTINCT on the order total.
+  solution: Count a CASE expression that returns a value only for delayed orders.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Count a CASE expression that returns a value only for delayed orders.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You need one result showing the number of delayed orders while keeping all orders in the calculation. What is the
+      strongest approach?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.conditional_aggregation
+    after_correct: Conditional aggregation applies a rule inside an aggregate so several metrics can be calculated from the
+      same rows.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_conditional_metrics_recap
+  title: Recap — Conditional Aggregation
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Conditional Aggregation
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Conditional Aggregation
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Calculate business-specific measures without losing the intended result grain.
+
+      - Validate the result rather than relying only on query syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

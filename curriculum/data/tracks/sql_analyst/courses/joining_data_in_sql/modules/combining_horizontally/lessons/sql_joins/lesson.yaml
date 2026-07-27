@@ -1,9 +1,9 @@
-lesson_id: sql_joins
+lesson_id: academy2_sql_joins
 title: Keeping Matching Rows with INNER JOIN
 order: 2
 difficulty: intermediate
 description: Relate tables while protecting the intended row population and grain.
-estimated_minutes: 28
+estimated_minutes: 30
 content: lesson.md
 objectives:
 - Explain joining related tables.
@@ -18,7 +18,44 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: join_recognition
+- activity_id: academy2_sql_joins_learn
+  title: Learn — Keeping Matching Rows with INNER JOIN
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Keeping Matching Rows with INNER JOIN
+    objective: Explain joining related tables.
+    body: '# Combine rows that have a match in both tables
+
+
+      An `INNER JOIN` connects related tables and keeps only rows whose join condition matches on both sides.
+
+
+      The columns used to match are often IDs. Before joining, identify the grain and check whether the key is unique on either
+      side. A one-to-many relationship can produce several result rows for one record from the “one” table.
+
+
+      In this lesson, you will join related tables and validate the result row count instead of assuming the match is correct.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.joins
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_joins_check
   title: Choose the safe retention join
   type: recognition
   runtime: recognition
@@ -28,7 +65,11 @@ activities:
   - INNER JOIN only
   - CROSS JOIN
   - UNION
-  hints: []
+  hints:
+  - Read the task again and identify where **Match rows without losing the primary population** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which join keeps every order even when
+    no matching support ticket exists?'
   validator:
     type: exact_answer
     expected_answer: LEFT JOIN from orders to support_tickets
@@ -55,7 +96,41 @@ activities:
     action_label: Choose the best answer
     body: A `LEFT JOIN` keeps every row from the left table and adds matching values from the right table when available.
   required_for_completion: true
-- activity_id: join_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: LEFT JOIN from orders to support_tickets
+- activity_id: academy2_sql_joins_example
+  title: Example — See keeping matching rows with inner join in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See keeping matching rows with inner join in context
+    objective: Study a worked example before solving a different task.
+    body: "## A separate example\n\nA Repairs table contains Equipment ID, while Equipment contains the model name.\n\n```sql\n\
+      SELECT r.repair_id, e.model_name\nFROM repairs AS r\nINNER JOIN equipment AS e\n  ON r.equipment_id = e.equipment_id;\n\
+      ```\n\n**What to notice:** Repairs with an unknown Equipment ID do not appear. The join adds descriptive information\
+      \ to matching repair rows."
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.joins
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_joins_guided
   title: Connect orders to support tickets
   type: guided
   runtime: sql
@@ -70,11 +145,12 @@ activities:
   hints:
   - Focus on LEFT JOIN.
   - Build the result one clause at a time.
+  - Read the task again and identify where **LEFT JOIN** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT o.order_id, o.customer_id, t.ticket_id FROM orders AS o LEFT JOIN support_tickets AS
-      t ON o.customer_id = t.customer_id ORDER BY o.order_id, t.ticket_id;
+    expected_query: SELECT o.order_id, o.customer_id, t.ticket_id FROM orders AS o LEFT JOIN support_tickets AS t ON o.customer_id
+      = t.customer_id ORDER BY o.order_id, t.ticket_id;
     required_patterns:
     - LEFT\s+JOIN
     - \bON\b
@@ -105,26 +181,29 @@ activities:
     title: Join on a meaningful business key
     objective: Use LEFT JOIN in a realistic analyst query.
     action_label: Write and validate the query
-    body: The customer identifier links the two tables. Keep orders on the left because every order must remain
-      in the result.
+    body: The customer identifier links the two tables. Keep orders on the left because every order must remain in the result.
   required_for_completion: true
-- activity_id: join_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_joins_independent
   title: Count support tickets per ordering customer
-  type: mastery
+  type: independent
   runtime: sql
   prompt: Return customer_id and ticket_count for every customer in orders. Sort by customer_id.
   starter: "SELECT o.customer_id,\nFROM orders AS o\nLEFT JOIN support_tickets AS t\n  ON o.customer_id = t.customer_id\n\
     GROUP BY o.customer_id;"
-  solution: SELECT o.customer_id, COUNT(t.ticket_id) AS ticket_count FROM orders AS o LEFT JOIN support_tickets
-    AS t ON o.customer_id = t.customer_id GROUP BY o.customer_id ORDER BY o.customer_id;
+  solution: SELECT o.customer_id, COUNT(t.ticket_id) AS ticket_count FROM orders AS o LEFT JOIN support_tickets AS t ON o.customer_id
+    = t.customer_id GROUP BY o.customer_id ORDER BY o.customer_id;
   hints:
   - Focus on join validation and aggregation.
   - Build the result one clause at a time.
+  - Read the task again and identify where **join validation and aggregation** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT o.customer_id, COUNT(t.ticket_id) AS ticket_count FROM orders AS o LEFT JOIN support_tickets
-      AS t ON o.customer_id = t.customer_id GROUP BY o.customer_id ORDER BY o.customer_id;
+    expected_query: SELECT o.customer_id, COUNT(t.ticket_id) AS ticket_count FROM orders AS o LEFT JOIN support_tickets AS
+      t ON o.customer_id = t.customer_id GROUP BY o.customer_id ORDER BY o.customer_id;
     required_patterns:
     - LEFT\s+JOIN
     - COUNT\s*\(
@@ -158,3 +237,88 @@ activities:
     action_label: Write and validate the query
     body: Count a nullable right-table identifier so customers without tickets receive zero rather than one.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_joins_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: You only want orders that have a matching customer record. Which join should you choose?
+  answer_options:
+  - INNER JOIN
+  - LEFT JOIN from customers
+  - UNION ALL
+  - CROSS JOIN
+  solution: INNER JOIN
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: INNER JOIN
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You only want orders that have a matching customer record. Which join should you choose?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.joins
+    after_correct: INNER JOIN returns rows only when the join condition finds a match on both sides.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_joins_recap
+  title: Recap — Keeping Matching Rows with INNER JOIN
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Keeping Matching Rows with INNER JOIN
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Keeping Matching Rows with INNER JOIN
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Relate tables while protecting the intended row population and grain.
+
+      - Validate the result rather than relying only on query syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -1,17 +1,18 @@
-lesson_id: spreadsheet_workflow
+lesson_id: academy2_spreadsheet_workflow
 title: Plan a Reproducible Spreadsheet Workflow
 order: 1
 difficulty: beginner
-description: Document a reproducible spreadsheet workflow so another analyst can understand, refresh, and verify
-  the workbook.
-estimated_minutes: 40
+description: Document a repeatable refresh, validation, and handoff process for an analytical workbook.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Document the workbook process.
-- Confirm that raw data, formulas, outputs, and saving steps are complete.
+- Identify the steps that make a spreadsheet workflow reproducible.
+- Record the current status of core refresh and QA steps.
+- Write a concise handoff note for another analyst.
 key_takeaways:
-- A reproducible workbook explains where data came from and how outputs were produced.
-- A final QA checklist reduces silent errors.
+- A reproducible workbook records source locations, transformations, checks, and refresh order.
+- Handoff notes should explain where to start and what to validate.
+- Documentation should be specific enough to support reuse without becoming a long narrative.
 teaches:
 - spreadsheet.reconciliation
 requires:
@@ -20,25 +21,63 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_workflow_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_workflow_learn
+  title: Learn — Plan a Reproducible Spreadsheet Workflow
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Plan a Reproducible Spreadsheet Workflow
+    objective: Identify the steps that make a spreadsheet workflow reproducible.
+    body: '# Make the workbook repeatable
+
+
+      A reproducible workflow can be repeated with new data and produce the same type of result without rebuilding everything
+      by hand.
+
+
+      A clear workbook usually separates raw data, cleaned data, calculations, and presentation. It documents where new data
+      belongs, which steps should be refreshed, what quality checks must pass, and which outputs are ready to share.
+
+
+      Hardcoded totals, unexplained manual edits, and formulas that cover only today''s rows make a workbook fragile.
+
+
+      In this lesson, you will document a simple refresh and handoff process so another analyst can use the workbook safely.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.reconciliation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_workflow_check
+  title: Learn & Predict — Making a workbook reproducible
   type: recognition
   runtime: recognition
   prompt: Which item belongs in a reproducible spreadsheet workflow?
-  answer_options:
-  - A record of transformations and validation checks
-  - Only a screenshot of the final chart
-  - A hidden raw-data deletion step
-  - Unlabeled hard-coded totals
   starter: ''
   solution: A record of transformations and validation checks
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - Think about what another analyst needs to repeat and verify the work.
+  - The workflow should explain how data changes and how accuracy is checked.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
     expected_answer: A record of transformations and validation checks
@@ -48,43 +87,87 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
     task: Which item belongs in a reproducible spreadsheet workflow?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.reconciliation
-    after_correct: You are ready to apply the idea in the Northstar workbook.
+    after_correct: Reproducibility depends on documented inputs, transformations, checks, and outputs.
   instruction:
-    title: Learn — Plan a Reproducible Spreadsheet Workflow
-    objective: Which item belongs in a reproducible spreadsheet workflow?
-    action_label: Choose the best answer
-    body: A professional workbook should preserve raw data, document the major transformations, validate totals,
-      refresh outputs, and save a clear final file.
+    phase: LEARN & PREDICT
+    title: Learn & Predict — Making a workbook reproducible
+    objective: Recognize the documentation needed to refresh and audit analytical work.
+    why_it_matters: A workbook is more valuable when another analyst can refresh it, understand its assumptions, and verify
+      its output without relying on the original author’s memory.
+    concept: A reproducible workflow preserves the source, records transformations, validates formulas and relationships,
+      refreshes outputs in a known order, and documents where the final analysis lives.
+    worked_example: 'A monthly operations workbook documents: replace the Raw Export sheet, confirm row count, refresh lookup
+      formulas, review unmatched IDs, refresh pivots, and verify the KPI totals. A short handoff note identifies the final
+      Dashboard sheet and the first QA check.'
+    action_label: Make a prediction
   required_for_completion: true
-- activity_id: spreadsheet_workflow_workbook_guided
+  answer_options:
+  - A record of transformations and validation checks
+  - Only the final chart image
+  - A list of colors used in the workbook
+  - An undocumented copy of the source data
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_workflow_example
+  title: Example — See plan a reproducible spreadsheet workflow in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See plan a reproducible spreadsheet workflow in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A monthly staffing workbook has Raw Import, Clean Staff, QA Checks, and Dashboard sheets. The handoff note explains
+      how to paste the new export, extend formulas, refresh the pivot table, and confirm that blank Employee IDs equal zero.
+
+
+      A second analyst follows the note and reproduces the report without asking the original author which cells to edit.
+
+
+      **What to notice:** Reproducibility depends on structure, checks, and clear instructions—not only correct formulas.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.reconciliation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_workflow_guided
   title: Try It — Complete the workflow checklist
   type: guided
   runtime: workbook
-  prompt: |-
-    On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. Review the five workflow labels in A46:A50.
-    3. In B46:B50, enter a short specific status for each item, such as `Preserved`, `Documented`, `Checked`, `Refreshed`, or `Saved`.
-    4. Use one status or note in every row; do not leave any checklist item blank.
-    5. Make each note accurate for the current workbook rather than copying the same word into all five cells.
-    6. Wait until Google Sheets shows that all changes are saved.
-    7. Return to Career Accelerator and select **Check My Work**.
+  prompt: Complete B46:B50 with a status or note for each workflow item.
   starter: ''
-  solution: Every checklist row has a clear status or note.
+  solution: Enter a truthful status in each cell, such as “Preserved — raw sheets unchanged,” “Documented — clean columns
+    retained,” “Checked — formulas filled through row 37,” “Refreshed — pivots and chart updated,” and “Saved — Google Sheets
+    changes complete.”
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - Each note should answer whether the step is complete and how you know.
+  - Reference specific workbook evidence such as row counts, filled formulas, or refreshed pivots.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -92,26 +175,9 @@ activities:
       sheet: Analysis Workspace
       range: B46:B50
       min_count: 5
-    success_feedback: The workbook now records the core reproducibility and QA steps.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Reproducible Workflow Checklist
-    - Status / Note
-    row_range: A45:B50
-    starting_state: The five checklist labels are present in A46:A50 and B46:B50 is blank.
-    expected_result: Every checklist row has a clear status or note.
-    column_descriptions:
-      Reproducible Workflow Checklist: Documented sequence for refreshing and quality-checking the workbook.
-      Status / Note: Completion status or brief QA note for each workflow step.
-    sample_values:
-    - 'Reproducible Workflow Checklist: Confirm source row counts'
-    - 'Status / Note: Complete — 36 Orders rows'
+      message: 'The workbook does not yet meet this requirement: Every checklist item contains a clear, accurate status or
+        QA note.'
+    success_feedback: You turned an implicit process into a repeatable checklist another analyst can follow.
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
@@ -119,18 +185,17 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: 'On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw
-      data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.'
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Complete B46:B50 with a status or note for each workflow item.
     requirements:
-    - Complete all five rows.
-    - Use specific notes such as Complete, Checked, or the location of documentation.
-    - Save the workbook.
-    expected_output: Every checklist row has a clear status or note.
+    - Complete every checklist row.
+    - Use specific notes that reflect the current workbook.
+    - Cover source preservation, documentation, formula validation, refreshed outputs, and saving.
+    expected_output: Every checklist item contains a clear, accurate status or QA note.
     skills_practiced:
     - spreadsheet.reconciliation
-    after_correct: The workbook now records the core reproducibility and QA steps.
+    after_correct: You turned an implicit process into a repeatable checklist another analyst can follow.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -138,53 +203,64 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: Every checklist item contains a clear, accurate status or QA note.
+    hide_exact_result: true
   instruction:
+    phase: TRY IT
     title: Try It — Complete the workflow checklist
-    objective: 'On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item:
-      raw data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.'
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    objective: Document the current status of the workbook’s refresh and QA steps.
+    approach: Review each workflow item in Analysis Workspace and enter a short, specific status or note. The notes should
+      describe what is true in the current workbook rather than repeating the same generic word.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Reproducible Workflow Checklist
+    - Status / Note
+    row_range: A45:B50
+    starting_state: The five checklist labels are present in A46:A50 and B46:B50 is blank.
+    expected_result: Every checklist item contains a clear, accurate status or QA note.
+    column_descriptions:
+      Reproducible Workflow Checklist: Documented sequence for refreshing and quality-checking the workbook.
+      Status / Note: Completion status or brief QA note for each workflow step.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - Review the five workflow labels in A46:A50.
-    - In B46:B50, enter a short specific status for each item, such as `Preserved`, `Documented`, `Checked`,
-      `Refreshed`, or `Saved`.
-    - Use one status or note in every row; do not leave any checklist item blank.
-    - Make each note accurate for the current workbook rather than copying the same word into all five cells.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_workflow_workbook_practice
-  title: Practice — Add a concise analyst handoff note
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A45:B50**.
+    - Review each workflow item in Analysis Workspace and enter a short, specific status or note. The notes should describe
+      what is true in the current workbook rather than repeating the same generic word.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_workflow_independent
+  title: Challenge — Write an analyst handoff note
+  type: independent
   runtime: workbook
-  prompt: |-
-    In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which sheet contains the final analysis, and what another analyst should refresh first.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. Click **B52**.
-    3. Write a concise handoff note that identifies the source-data sheets, names **Analysis Workspace** as the final analysis sheet, and states what another analyst should refresh or validate first.
-    4. Use complete sentences and keep the note short enough to scan quickly.
-    5. Confirm the note contains the words `Analysis Workspace` before checking your work.
-    6. Wait until Google Sheets shows that all changes are saved.
-    7. Return to Career Accelerator and select **Check My Work**.
+  prompt: Write a concise handoff note in Analysis Workspace B52.
   starter: ''
-  solution: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or validation.
+  solution: 'Example: “Source data is stored in Orders, Customers, Products, Employees, and Inventory. Final KPIs, pivots,
+    and the chart are on Analysis Workspace. Start by confirming the Orders row count and unmatched Product ID check before
+    refreshing the summaries.”'
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - 'The note needs three parts: source location, final analysis location, and first refresh/check step.'
+  - Use the exact sheet name Analysis Workspace.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -194,24 +270,7 @@ activities:
       contains:
       - analysis workspace
       message: Write the handoff note in B52 and mention Analysis Workspace.
-    success_feedback: The workbook includes a useful handoff note for the next analyst.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Handoff note
-    row_range: A52:B52
-    starting_state: Row 52 is available for a final handoff note.
-    expected_result: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or
-      validation.
-    column_descriptions:
-      Handoff note: Instructions that help another analyst understand and reuse the workbook.
-    sample_values:
-    - 'Handoff note: Start with the KPI Dashboard on Analysis Workspace.'
+    success_feedback: You created documentation that helps another analyst reuse the workbook safely and efficiently.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
@@ -219,20 +278,17 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which
-      sheet contains the final analysis, and what another analyst should refresh first.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Write a concise handoff note in Analysis Workspace B52.
     requirements:
-    - Mention the source-data sheets.
-    - Name Analysis Workspace.
-    - State what should be refreshed or checked first.
-    - Save the workbook.
-    expected_output: B52 contains a concise note mentioning source data, Analysis Workspace, and refresh or
-      validation.
+    - Mention the source-data sheets or source-data area.
+    - Mention Analysis Workspace by name.
+    - State what the next analyst should refresh or validate first.
+    expected_output: B52 contains a concise, actionable handoff note for another analyst.
     skills_practiced:
     - spreadsheet.reconciliation
-    after_correct: The workbook includes a useful handoff note for the next analyst.
+    after_correct: You created documentation that helps another analyst reuse the workbook safely and efficiently.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -240,29 +296,136 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: B52 contains a concise, actionable handoff note for another analyst.
+    hide_exact_result: true
   instruction:
-    title: Practice — Add a concise analyst handoff note
-    objective: In Analysis Workspace B52, write a short handoff note explaining where the source data lives,
-      which sheet contains the final analysis, and what another analyst should refresh first.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Write an analyst handoff note
+    objective: Explain where the data and final analysis live and what should be refreshed first.
+    approach: Write a short note for the next analyst. Identify the source-data sheets, name Analysis Workspace as the final
+      analysis location, and state the first refresh or validation action.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Handoff note
+    row_range: A52:B52
+    starting_state: Row 52 is available for a final handoff note.
+    expected_result: B52 contains a concise, actionable handoff note for another analyst.
+    column_descriptions:
+      Handoff note: Instructions that help another analyst understand and reuse the workbook.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - Click **B52**.
-    - Write a concise handoff note that identifies the source-data sheets, names **Analysis Workspace** as
-      the final analysis sheet, and states what another analyst should refresh or validate first.
-    - Use complete sentences and keep the note short enough to scan quickly.
-    - Confirm the note contains the words `Analysis Workspace` before checking your work.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A52:B52**.
+    - Write a short note for the next analyst. Identify the source-data sheets, name Analysis Workspace as the final analysis
+      location, and state the first refresh or validation action.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_workflow_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: Another analyst receives the workbook with new Orders data. What should they do before refreshing charts?
+  answer_options:
+  - Validate the source rows and key checks first
+  - Delete the old formulas
+  - Recolor the dashboard
+  - Copy the chart into a new file
+  starter: ''
+  solution: Validate the source rows and key checks first
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Validate the source rows and key checks first
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: Another analyst receives the workbook with new Orders data. What should they do before refreshing charts?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: A reliable refresh order moves from source validation to calculations, summaries, and finally presentation
+      outputs.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: Charts should be refreshed only after the underlying data and relationships are confirmed.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_workflow_recap
+  title: Recap — Plan a Reproducible Spreadsheet Workflow
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Plan a Reproducible Spreadsheet Workflow
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Plan a Reproducible Spreadsheet Workflow
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - A reproducible workbook records source locations, transformations, checks, and refresh order.
+
+      - Handoff notes should explain where to start and what to validate.
+
+      - Documentation should be specific enough to support reuse without becoming a long narrative.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -1,9 +1,10 @@
-lesson_id: python_basics
+lesson_id: academy2_python_basics
 title: Python Basics
 order: 1
 difficulty: beginner
-description: Build practical fluency with python basics.
-estimated_minutes: 15
+description: Python lets an analyst describe a calculation as a series of repeatable instructions. A **variable** gives a
+  value a name so you can use it again later.
+estimated_minutes: 35
 content: lesson.md
 objectives:
 - Explain the purpose of python basics.
@@ -19,7 +20,51 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: python_basics_step_1
+- activity_id: academy2_python_basics_learn
+  title: Learn — Python Basics
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Python Basics
+    objective: Explain the purpose of python basics.
+    body: 'Python lets an analyst describe a calculation as a series of repeatable instructions. A **variable** gives a value
+      a name so you can use it again later.
+
+
+      ```python
+
+      revenue = 900
+
+      costs = 650
+
+      profit = revenue - costs
+
+      ```
+
+
+      Python uses `=` to assign a value and `==` to compare two values. Common value types include integers, decimal numbers
+      called floats, text strings, and Boolean values (`True` or `False`). Clear variable names make the business meaning
+      of the code easier to review.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - python.basics
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_python_basics_check
   title: 'Practice 1: Python Basics'
   type: recognition
   runtime: recognition
@@ -29,7 +74,11 @@ activities:
   - 10 = revenue
   - revenue == 10
   - assign revenue 10
-  hints: []
+  hints:
+  - Read the task again and identify where **Python Basics** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which statement assigns the value 10
+    to revenue?'
   validator:
     type: exact_answer
     expected_answer: revenue = 10
@@ -56,46 +105,155 @@ activities:
     action_label: Choose the best answer
     body: Python uses `=` for assignment and `==` for comparison.
   required_for_completion: true
-- activity_id: python_basics_step_2
-  title: 'Practice 2: Python Basics'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: revenue = 10
+- activity_id: academy2_python_basics_example
+  title: Example — See python basics in context
   type: recognition
-  runtime: recognition
-  prompt: What does type(3.5) report?
-  answer_options:
-  - float
-  - int
-  - str
-  - list
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See python basics in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A scheduling analyst stores `available_hours = 40` and `assigned_hours = 34`, then calculates `unused_hours = available_hours
+      - assigned_hours`. If either input changes, rerunning the code updates the result. The graded exercise uses revenue
+      and costs instead of staffing hours.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - python.basics
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: float
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: What does type(3.5) report?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Python Basics
-    after_correct: You identified the core idea behind python basics.
-    common_errors: []
-  instruction:
-    title: Python Basics
-    objective: Build a practical understanding of python basics.
-    action_label: Choose the best answer
-    body: A float represents a number with a decimal component.
+- activity_id: academy2_python_basics_guided
+  title: Try It — Calculate a simple profit
+  type: guided
+  runtime: python
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 7
+  prompt: Create variables named `revenue` and `costs` with values 1250 and 800. Create a third variable named `profit` by
+    subtracting costs from revenue.
+  starter: '# Create the three variables below.'
+  solution: 'revenue = 1250
+
+    costs = 800
+
+    profit = revenue - costs'
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: revenue == 1250
+      feedback: Set revenue to 1250.
+    - expression: costs == 800
+      feedback: Set costs to 800.
+    - expression: profit == 450
+      feedback: Calculate profit from the two variables instead of typing an unrelated value.
+    display_variable: profit
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
   required_for_completion: true
-- activity_id: python_basics_step_3
-  title: 'Practice 3: Python Basics'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: Create variables named `revenue` and `costs` with values 1250 and 800. Create a third variable named `profit` by
+      subtracting costs from revenue.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Try It — Calculate a simple profit
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_python_basics_independent
+  title: Practice — Calculate an average order value
+  type: independent
+  runtime: python
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: A team completed 18 orders worth 2,430 in total. Store those values in clear variables and calculate `average_order_value`.
+  starter: '# Store the order count and revenue, then calculate the average.'
+  solution: 'completed_orders = 18
+
+    total_revenue = 2430
+
+    average_order_value = total_revenue / completed_orders'
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: average_order_value == 135
+      feedback: Divide total revenue by the number of completed orders.
+    display_variable: average_order_value
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: A team completed 18 orders worth 2,430 in total. Store those values in clear variables and calculate `average_order_value`.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Practice — Calculate an average order value
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_python_basics_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: Why use clear variable names?
   answer_options:
@@ -103,30 +261,75 @@ activities:
   - They make code execute twice
   - They replace comments in every case
   - They hide errors
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: They make analysis logic easier to review and maintain
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: Why use clear variable names?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Python Basics
     after_correct: You identified the core idea behind python basics.
     common_errors: []
   instruction:
-    title: Python Basics
-    objective: Build a practical understanding of python basics.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: Names should communicate the business meaning of a value.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: They make analysis logic easier to review and maintain
+- activity_id: academy2_python_basics_recap
+  title: Recap — Python Basics
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Python Basics
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Python Basics
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Python Basics supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

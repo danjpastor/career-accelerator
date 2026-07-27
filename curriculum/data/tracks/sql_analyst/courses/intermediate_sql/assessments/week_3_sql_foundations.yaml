@@ -51,34 +51,7 @@ activities:
   title: WHERE versus HAVING
   type: mastery
   runtime: recognition
-  prompt: 'WHERE filters:
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Click any cell inside the complete data table.
-
-    4. Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
-
-    5. Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
-    and click **OK**.
-
-    6. Leave the filter active so Career Accelerator can verify the finished workbook.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: 'WHERE filters:'
   answer_options:
   - Rows before aggregation
   - Groups after aggregation only
@@ -130,34 +103,7 @@ activities:
   title: HAVING purpose
   type: mastery
   runtime: recognition
-  prompt: 'HAVING filters:
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Click any cell inside the complete data table.
-
-    4. Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
-
-    5. Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
-    and click **OK**.
-
-    6. Leave the filter active so Career Accelerator can verify the finished workbook.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: 'HAVING filters:'
   answer_options:
   - Aggregated groups
   - Raw workbook cells
@@ -273,33 +219,7 @@ activities:
   title: Spreadsheet retention
   type: mastery
   runtime: recognition
-  prompt: 'A pivot-table total should be:
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Select the complete source table, including its header row.
-
-    4. Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
-
-    5. Add the row, column, value, and filter fields named in the task in the Pivot table editor.
-
-    6. Set the required summarize-by calculation and reconcile the grand total to the source data.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: 'A pivot-table total should be:'
   answer_options:
   - Reconciled to the source population
   - Accepted without checking

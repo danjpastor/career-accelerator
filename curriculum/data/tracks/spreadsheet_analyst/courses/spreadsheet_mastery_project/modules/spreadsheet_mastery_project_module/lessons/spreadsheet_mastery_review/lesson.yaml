@@ -1,17 +1,18 @@
-lesson_id: spreadsheet_mastery_review
+lesson_id: academy2_spreadsheet_mastery_review
 title: Spreadsheet Mastery Review
 order: 2
 difficulty: beginner
-description: Finish the Northstar operations workbook, verify the major outputs, and demonstrate spreadsheet
-  readiness for SQL.
-estimated_minutes: 40
+description: Run a final quality review, confirm the central KPI, and decide whether the workbook is ready to share.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Verify that the workbook contains the complete analysis workflow.
-- Confirm the final total revenue from the finished workbook.
+- Review formulas, cleaning, lookups, validation, summaries, and documentation as one system.
+- Confirm the final Total Revenue from the formula-driven KPI.
+- Apply a final readiness standard before sharing analytical work.
 key_takeaways:
-- A finished analysis is not complete until formulas, relationships, summaries, and communication are validated.
-- The completed workbook can become demonstrated evidence.
+- A completed workbook is not necessarily a validated workbook.
+- Final QA should cover source integrity, formulas, relationships, summaries, and presentation outputs.
+- A key result should be traceable back to formula-driven source data.
 teaches:
 - spreadsheet.reconciliation
 requires:
@@ -29,40 +30,63 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_mastery_review_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_mastery_review_learn
+  title: Learn — Spreadsheet Mastery Review
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Spreadsheet Mastery Review
+    objective: Review formulas, cleaning, lookups, validation, summaries, and documentation as one system.
+    body: '# Review the workbook before sharing it
+
+
+      A final review asks whether the workbook is correct, complete, understandable, and safe to refresh.
+
+
+      Check the source row count, unique identifiers, formulas, lookup matches, summary totals, pivot source ranges, chart
+      labels, and visible error values. Then compare the main KPI with an independent calculation when possible.
+
+
+      A workbook is not ready simply because it opens without an error. The result must answer the business question and be
+      explainable to someone who did not build it.
+
+
+      In this lesson, you will run a structured quality review and decide whether the workbook is ready to share.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.reconciliation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_mastery_review_check
+  title: Learn & Predict — What final spreadsheet QA should cover
   type: recognition
   runtime: recognition
-  prompt: |-
-    What should happen before a spreadsheet analysis is considered complete?
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-    ### Complete this task in Google Sheets
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-    3. Select the completed summary range, including its labels.
-    4. Choose **Insert → Chart**.
-    5. Select the chart type named in the task and verify the data range, X-axis, and series.
-    6. Add the required title and confirm no requested category is hidden.
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-    8. Wait until Google Sheets shows that saving is complete.
-    9. Return to Career Accelerator and click **Check My Work**.
-    <!-- DCA GOOGLE SHEETS STEPS END -->
-  answer_options:
-  - Validate formulas, totals, relationships, and outputs
-  - Delete the raw sheets
-  - Replace formulas with typed values
-  - Hide all assumptions
+  prompt: What should happen before a spreadsheet analysis is considered complete?
   starter: ''
   solution: Validate formulas, totals, relationships, and outputs
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - A polished appearance does not prove the calculations are correct.
+  - Think across the full chain from source data to final output.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
     expected_answer: Validate formulas, totals, relationships, and outputs
@@ -72,64 +96,89 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
     task: What should happen before a spreadsheet analysis is considered complete?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.reconciliation
-    after_correct: You are ready to apply the idea in the Northstar workbook.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
+    after_correct: Completion requires evidence that the workbook is accurate, current, and reproducible.
   instruction:
-    title: Learn — Spreadsheet Mastery Review
-    objective: What should happen before a spreadsheet analysis is considered complete?
-    action_label: Choose the best answer
-    body: 'The mastery review checks the full workflow: preserved source data, calculated columns, conditional
-      logic, cleaning, validation, lookups, summaries, KPIs, visualization, and documentation.'
+    phase: LEARN & PREDICT
+    title: Learn & Predict — What final spreadsheet QA should cover
+    objective: Recognize the checks required before analytical work is considered complete.
+    why_it_matters: A workbook can look polished while containing incomplete formulas, stale pivots, broken lookups, or hidden
+      filters. Final QA tests the entire analytical chain.
+    concept: Final review should confirm source row counts, formula coverage, lookup completeness, validation controls, summary
+      accuracy, chart freshness, and documentation. Important KPIs should be traceable to the underlying data rather than
+      typed manually.
+    worked_example: Before distributing a workforce dashboard, an analyst verifies that all imported rows are present, employee
+      IDs match the roster, formulas extend to the final row, pivots were refreshed, and the headline total agrees with an
+      independent check.
+    action_label: Make a prediction
   required_for_completion: true
-  google_sheets:
-    source_of_truth: Google Sheets
-    steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **the worksheet named in the task** and work in the worksheet named in the task.
-    - Select the completed summary range, including its labels.
-    - Choose **Insert → Chart**.
-    - Select the chart type named in the task and verify the data range, X-axis, and series.
-    - Add the required title and confirm no requested category is hidden.
-    - 'Confirm the finished workbook matches this result: **One selected answer.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
-    primary_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-- activity_id: spreadsheet_mastery_review_workbook_guided
+  answer_options:
+  - Validate formulas, totals, relationships, and outputs
+  - Only change the workbook colors
+  - Hide all source sheets without checking them
+  - Replace formulas with typed values
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_mastery_review_example
+  title: Example — See spreadsheet mastery review in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See spreadsheet mastery review in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      Before sending a weekly inventory report, an analyst confirms that the raw import has 1,240 rows, every Item ID is present,
+      the low-stock total agrees with a separate `COUNTIF`, and the chart title names the correct week.
+
+
+      One pivot table still points to last week''s source range, so the analyst refreshes it before release.
+
+
+      **What to notice:** Final review is a deliberate checklist that catches problems the original builder may overlook.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.reconciliation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_mastery_review_guided
   title: Try It — Run the final workbook QA
   type: guided
   runtime: workbook
-  prompt: |-
-    Review the completed workbook. Confirm that the Orders calculations, customer cleaning, lookups, validation rules, analysis summaries, KPI block, chart, and workflow checklist are all saved.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet** and review the workbook from beginning to end.
-    2. On Orders, confirm Revenue, Adjusted Revenue, both flags, Product Name, Category, and Unit Cost are filled through row 37.
-    3. On Customers, confirm the three cleaned fields are filled through row 13 and the raw fields remain unchanged.
-    4. Confirm Orders Status has the approved dropdown rule.
-    5. On Analysis Workspace, confirm conditional summaries, reconciliation checks, customer summary, both pivots, KPI block, chart, workflow checklist, and handoff note are present.
-    6. Correct any blank formulas, `#N/A`, `#VALUE!`, or obviously inconsistent result before checking.
-    7. Wait until Google Sheets shows that all changes are saved.
-    8. Return to Career Accelerator and select **Check My Work**.
+  prompt: Review the completed Northstar workbook and correct any incomplete major formula, summary, chart, validation, or
+    documentation area.
   starter: ''
-  solution: The major calculation and analysis areas are populated and the Orders formulas remain filled through
-    row 37.
+  solution: Review each prior lesson output and repair any missing area. Orders formulas should extend through row 37; Analysis
+    Workspace should contain the KPI block, region and category summaries, chart, validation checks, workflow checklist, and
+    handoff note.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - Start with source and formula coverage before reviewing summaries.
+  - Check Orders K:Q, then Analysis Workspace KPIs, summaries, checklist, and handoff note.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -137,47 +186,34 @@ activities:
       sheet: Orders
       range: K2:N37
       min_count: 120
+      message: 'The workbook does not yet meet this requirement: The workbook passes the final structural QA checks across
+        calculations, summaries, and documentation.'
     - type: formula_present
       sheet: Orders
       range: O2:Q37
       min_count: 100
+      message: 'The workbook does not yet meet this requirement: The workbook passes the final structural QA checks across
+        calculations, summaries, and documentation.'
     - type: formula_present
       sheet: Analysis Workspace
       range: I3:I6
       min_count: 4
+      message: 'The workbook does not yet meet this requirement: The workbook passes the final structural QA checks across
+        calculations, summaries, and documentation.'
     - type: populated_range
       sheet: Analysis Workspace
       range: A28:J34
       min_count: 14
+      message: 'The workbook does not yet meet this requirement: The workbook passes the final structural QA checks across
+        calculations, summaries, and documentation.'
     - type: populated_range
       sheet: Analysis Workspace
       range: B46:B50
       min_count: 5
-    success_feedback: The final workbook contains the major formulas, summaries, and QA documentation required
-      for the mastery review.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - KPI Dashboard
-    - Region Pivot / Summary
-    - Reproducible Workflow Checklist
-    row_range: A1:J52
-    starting_state: Your continuing workbook contains the work completed throughout the Spreadsheet Academy.
-    expected_result: The major calculation and analysis areas are populated and the Orders formulas remain
-      filled through row 37.
-    column_descriptions:
-      KPI Dashboard: Compact area containing the workbook’s primary business metrics.
-      Region Pivot / Summary: Saved region-level revenue summary used for comparison.
-      Reproducible Workflow Checklist: Documented sequence for refreshing and quality-checking the workbook.
-    sample_values:
-    - 'KPI Dashboard: Total Revenue — $165,096.85'
-    - 'Region Pivot / Summary: West — $115,106.00'
-    - 'Reproducible Workflow Checklist: Confirm source row counts'
+      message: 'The workbook does not yet meet this requirement: The workbook passes the final structural QA checks across
+        calculations, summaries, and documentation.'
+    success_feedback: You tested the workbook as an integrated analytical product rather than as a collection of isolated
+      exercises.
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
@@ -185,21 +221,18 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: Review the completed workbook. Confirm that the Orders calculations, customer cleaning, lookups,
-      validation rules, analysis summaries, KPI block, chart, and workflow checklist are all saved.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Review the completed Northstar workbook and correct any incomplete major formula, summary, chart, validation, or
+      documentation area.
     requirements:
-    - Do not replace formulas with typed values.
-    - Fix any missing or broken output.
-    - Refresh pivots or charts if needed.
-    - Save the workbook.
-    expected_output: The major calculation and analysis areas are populated and the Orders formulas remain
-      filled through row 37.
+    - Verify Orders calculated and lookup columns extend through row 37.
+    - Verify the KPI block and both grouped summaries are populated.
+    - Verify the workflow checklist and handoff documentation are complete.
+    expected_output: The workbook passes the final structural QA checks across calculations, summaries, and documentation.
     skills_practiced:
     - spreadsheet.reconciliation
-    after_correct: The final workbook contains the major formulas, summaries, and QA documentation required
-      for the mastery review.
+    after_correct: You tested the workbook as an integrated analytical product rather than as a collection of isolated exercises.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -207,56 +240,67 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: The workbook passes the final structural QA checks across calculations, summaries, and documentation.
+    hide_exact_result: true
   instruction:
+    phase: TRY IT
     title: Try It — Run the final workbook QA
-    objective: Review the completed workbook. Confirm that the Orders calculations, customer cleaning, lookups,
-      validation rules, analysis summaries, KPI block, chart, and workflow checklist are all saved.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    objective: Confirm that the major analytical components are complete and saved.
+    approach: Review the workbook from source sheets through Analysis Workspace. Check that calculated columns are filled,
+      clean fields are complete, lookups return values, validation and reconciliation checks are present, summaries and KPIs
+      are populated, and the workflow documentation is finished.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - KPI Dashboard
+    - Region Pivot / Summary
+    - Reproducible Workflow Checklist
+    row_range: A1:J52
+    starting_state: Your continuing workbook contains the work completed throughout the Spreadsheet Academy.
+    expected_result: The workbook passes the final structural QA checks across calculations, summaries, and documentation.
+    column_descriptions:
+      KPI Dashboard: Compact area containing the workbook’s primary business metrics.
+      Region Pivot / Summary: Saved region-level revenue summary used for comparison.
+      Reproducible Workflow Checklist: Documented sequence for refreshing and quality-checking the workbook.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet** and review the workbook from beginning to end.
-    - On Orders, confirm Revenue, Adjusted Revenue, both flags, Product Name, Category, and Unit Cost are filled
-      through row 37.
-    - On Customers, confirm the three cleaned fields are filled through row 13 and the raw fields remain unchanged.
-    - Confirm Orders Status has the approved dropdown rule.
-    - On Analysis Workspace, confirm conditional summaries, reconciliation checks, customer summary, both pivots,
-      KPI block, chart, workflow checklist, and handoff note are present.
-    - Correct any blank formulas, `#N/A`, `#VALUE!`, or obviously inconsistent result before checking.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_mastery_review_workbook_practice
-  title: Practice — Confirm the final total revenue
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A1:J52**.
+    - Review the workbook from source sheets through Analysis Workspace. Check that calculated columns are filled, clean fields
+      are complete, lookups return values, validation and reconciliation checks are present, summaries and KPIs are populated,
+      and the workflow documentation is finished.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_mastery_review_independent
+  title: Challenge — Confirm the final Total Revenue
+  type: independent
   runtime: workbook
-  prompt: |-
-    Use the finished workbook to confirm Total Revenue. Enter the value shown by your KPI formula in I3, rounded to two decimal places.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. Locate the Total Revenue KPI in **I3**.
-    3. Confirm I3 contains a formula that sums the complete Orders Revenue range rather than a typed value.
-    4. Read the displayed Total Revenue and round it to two decimal places.
-    5. Enter that number in **Check Your Work** in Career Accelerator without a dollar sign or comma.
-    6. Do not change the workbook after the final value is confirmed unless you are correcting an error.
-    7. Wait until Google Sheets shows that all changes are saved.
-    8. Return to Career Accelerator and select **Check My Work**.
+  prompt: Verify the formula-driven Total Revenue in Analysis Workspace I3 and submit the displayed value rounded to two decimal
+    places.
   starter: ''
-  solution: The evidence answer matches the final total revenue of $165,096.85.
+  solution: I3 should sum the complete Orders Revenue range. The validated Total Revenue is 165096.85.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The answer is displayed by the Total Revenue KPI in I3.
+  - Verify that I3 sums every Revenue value in Orders K2:K37 before reading it.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -264,33 +308,13 @@ activities:
       sheet: Analysis Workspace
       cell: I3
       min_count: 1
+      message: 'The workbook does not yet meet this requirement: The submitted amount matches the validated formula-driven
+        Total Revenue.'
     - type: evidence_answer
       expected_number: 165096.85
       tolerance: 0.01
       message: Recheck the Total Revenue formula in I3 and enter the displayed value.
-    success_feedback: Spreadsheet mastery confirmed. The completed Northstar workbook produces the correct
-      final revenue total and a validated snapshot has been added to Demonstrated Evidence.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Total Revenue
-    - Value
-    row_range: H3:I3
-    starting_state: I3 should contain the final Total Revenue formula.
-    expected_result: The final Total Revenue is $165,096.85 and the validated workbook is preserved as demonstrated
-      evidence.
-    column_descriptions:
-      Total Revenue: Revenue across all orders in the workbook.
-      Value: Calculated KPI or summary value.
-    sample_values:
-    - 'Total Revenue: $165,096.85'
-    - 'Value: $165,096.85'
-    evidence_prompt: Enter the Total Revenue shown in Analysis Workspace cell I3.
+    success_feedback: You confirmed a headline KPI by tracing it back to its formula and complete source range.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: true
@@ -298,18 +322,18 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: Use the finished workbook to confirm Total Revenue. Enter the value shown by your KPI formula in
-      I3, rounded to two decimal places.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Verify the formula-driven Total Revenue in Analysis Workspace I3 and submit the displayed value rounded to two decimal
+      places.
     requirements:
-    - Use the workbook result, not a manual guess.
-    - Enter the number with or without a dollar sign and commas.
-    - Save the workbook before the final check.
-    expected_output: The evidence answer matches the final total revenue of $165,096.85.
+    - Confirm I3 contains a formula rather than a typed value.
+    - Confirm the formula uses the complete Orders Revenue range.
+    - Enter the displayed numeric result in Check Your Work.
+    expected_output: The submitted amount matches the validated formula-driven Total Revenue.
     skills_practiced:
     - spreadsheet.reconciliation
-    after_correct: Your completed workbook has been preserved as an Academy Capstone in Demonstrated Evidence.
+    after_correct: You confirmed a headline KPI by tracing it back to its formula and complete source range.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -317,29 +341,143 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: The submitted amount matches the validated formula-driven Total Revenue.
+    hide_exact_result: true
   instruction:
-    title: Practice — Confirm the final total revenue
-    objective: Use the finished workbook to confirm Total Revenue. Enter the value shown by your KPI formula
-      in I3, rounded to two decimal places.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Confirm the final Total Revenue
+    objective: Trace and submit the workbook’s central KPI without being given the answer.
+    approach: Locate Total Revenue in the KPI block and confirm it is calculated from the complete Orders Revenue range. Read
+      the displayed value only after verifying the formula, then enter it in Check Your Work without a currency symbol or
+      comma.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Total Revenue
+    - Value
+    row_range: H3:I3
+    starting_state: I3 should contain the final Total Revenue formula.
+    expected_result: The submitted amount matches the validated formula-driven Total Revenue.
+    column_descriptions:
+      Total Revenue: Revenue across all orders in the workbook.
+      Value: Calculated KPI or summary value.
+    evidence_prompt: Enter the Total Revenue shown in Analysis Workspace cell I3.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - Locate the Total Revenue KPI in **I3**.
-    - Confirm I3 contains a formula that sums the complete Orders Revenue range rather than a typed value.
-    - Read the displayed Total Revenue and round it to two decimal places.
-    - Enter that number in **Check Your Work** in Career Accelerator without a dollar sign or comma.
-    - Do not change the workbook after the final value is confirmed unless you are correcting an error.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **H3:I3**.
+    - Locate Total Revenue in the KPI block and confirm it is calculated from the complete Orders Revenue range. Read the
+      displayed value only after verifying the formula, then enter it in Check Your Work without a currency symbol or comma.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_mastery_review_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: A dashboard total looks correct, but several source rows are hidden by an active filter. Is the workbook ready to
+    share?
+  answer_options:
+  - No — clear or document the filter and rerun QA
+  - Yes — a correct-looking total is enough
+  - Yes — hidden rows never affect formulas
+  - No — all charts must be deleted first
+  starter: ''
+  solution: No — clear or document the filter and rerun QA
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: No — clear or document the filter and rerun QA
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A dashboard total looks correct, but several source rows are hidden by an active filter. Is the workbook ready to
+      share?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.reconciliation
+    after_correct: Before sharing, confirm the workbook’s filters, calculations, summaries, and documentation all reflect
+      the intended final state.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: Active filters can change what a reviewer sees and may affect some summaries or manual checks. Final QA
+      should establish the intended state.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_mastery_review_recap
+  title: Recap — Spreadsheet Mastery Review
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Spreadsheet Mastery Review
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Spreadsheet Mastery Review
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - A completed workbook is not necessarily a validated workbook.
+
+      - Final QA should cover source integrity, formulas, relationships, summaries, and presentation outputs.
+
+      - A key result should be traceable back to formula-driven source data.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -80,33 +80,7 @@ activities:
   title: Lookup safety
   type: mastery
   runtime: recognition
-  prompt: 'What makes a lookup key reliable?
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Click the first required output cell and begin the lookup formula with `=`.
-
-    4. Use the current row''s key as the search key and the named lookup table as the lookup range.
-
-    5. Use an exact match and lock the lookup range with `$` references before filling down.
-
-    6. Verify at least three results against the source table and correct unexpected `#N/A` values.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: What makes a lookup key reliable?
   answer_options:
   - It is stable and unique at the intended grain
   - It is numeric
@@ -157,33 +131,7 @@ activities:
   title: Missing match
   type: mastery
   runtime: recognition
-  prompt: 'An unmatched lookup should be:
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Click the first required output cell and begin the lookup formula with `=`.
-
-    4. Use the current row''s key as the search key and the named lookup table as the lookup range.
-
-    5. Use an exact match and lock the lookup range with `$` references before filling down.
-
-    6. Verify at least three results against the source table and correct unexpected `#N/A` values.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: 'An unmatched lookup should be:'
   answer_options:
   - Flagged and investigated
   - Changed to zero automatically
@@ -234,33 +182,7 @@ activities:
   title: Pivot measure
   type: mastery
   runtime: recognition
-  prompt: 'What belongs in the Values area?
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Select the complete source table, including its header row.
-
-    4. Choose **Insert → Pivot table**, select **New sheet**, and click **Create**.
-
-    5. Add the row, column, value, and filter fields named in the task in the Pivot table editor.
-
-    6. Set the required summarize-by calculation and reconcile the grand total to the source data.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: What belongs in the Values area?
   answer_options:
   - A measure to aggregate
   - A workbook name

@@ -1,16 +1,18 @@
-lesson_id: spreadsheet_kpis
+lesson_id: academy2_spreadsheet_kpis
 title: KPI Summaries & Business Interpretation
 order: 2
 difficulty: beginner
-description: Build a compact KPI block and a chart that communicates the most important operational result.
-estimated_minutes: 40
+description: Build a focused KPI block, use formatting to communicate meaning, and visualize regional performance.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Calculate four clear KPIs.
-- Create a chart with a descriptive title and readable labels.
+- Calculate total, average, count, and rate KPIs.
+- Apply appropriate currency and percentage formats.
+- Use conditional formatting and a comparison chart to communicate performance.
 key_takeaways:
-- A KPI should answer a business question, not merely display a number.
-- Charts should emphasize comparison and use a specific title.
+- A KPI should answer a specific business question and use a clearly defined calculation.
+- Number formats communicate units without changing the underlying value.
+- Charts and conditional formatting should highlight meaning rather than decorate the sheet.
 teaches:
 - spreadsheet.kpis
 requires:
@@ -19,40 +21,64 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_kpis_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_kpis_learn
+  title: Learn — KPI Summaries & Business Interpretation
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — KPI Summaries & Business Interpretation
+    objective: Calculate total, average, count, and rate KPIs.
+    body: '# Turn calculations into a focused business summary
+
+
+      A **key performance indicator**, or KPI, is a measure selected because it helps someone track an important goal. A useful
+      KPI block shows the value, its label, the time period, and often a comparison with a target or prior period.
+
+
+      Formatting should make meaning easier to see. Currency, percentages, and dates need appropriate formats. Conditional
+      formatting can draw attention to exceptions, but too many colors make a report harder to read.
+
+
+      Charts should answer a clear question. A bar chart works well for comparing categories; a line chart works well for
+      change over time.
+
+
+      In this lesson, you will build a compact summary and explain what the result means for the business.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.kpis
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_kpis_check
+  title: Learn & Predict — Choosing and presenting KPIs
   type: recognition
   runtime: recognition
-  prompt: |-
-    Which chart is usually best for comparing revenue across regions?
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-    ### Complete this task in Google Sheets
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-    3. Select the completed summary range, including its labels.
-    4. Choose **Insert → Chart**.
-    5. Select the chart type named in the task and verify the data range, X-axis, and series.
-    6. Add the required title and confirm no requested category is hidden.
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-    8. Wait until Google Sheets shows that saving is complete.
-    9. Return to Career Accelerator and click **Check My Work**.
-    <!-- DCA GOOGLE SHEETS STEPS END -->
-  answer_options:
-  - Column chart
-  - Scatter plot
-  - Gauge with no labels
-  - Pie chart with 30 categories
+  prompt: Which chart is usually best for comparing revenue across a small number of regions?
   starter: ''
   solution: Column chart
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - The goal is to compare several categories against the same numeric scale.
+  - A position or bar length comparison is easier than several separate shapes.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
     expected_answer: Column chart
@@ -62,66 +88,89 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
-    task: Which chart is usually best for comparing revenue across regions?
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    task: Which chart is usually best for comparing revenue across a small number of regions?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.kpis
-    after_correct: You are ready to apply the idea in the Northstar workbook.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
+    after_correct: Column and bar charts make differences among categories easy to compare against a shared scale.
   instruction:
-    title: Learn — KPI Summaries & Business Interpretation
-    objective: Which chart is usually best for comparing revenue across regions?
-    action_label: Choose the best answer
-    body: A KPI block summarizes the most important numbers. A simple column or bar chart is usually the clearest
-      way to compare a measure across a small number of categories.
+    phase: LEARN & PREDICT
+    title: Learn & Predict — Choosing and presenting KPIs
+    objective: Match KPI questions to calculations and visual forms.
+    why_it_matters: A dashboard should help a stakeholder understand performance quickly. Too many metrics or the wrong visual
+      can hide the important signal.
+    concept: Totals answer “how much,” averages answer “what is typical,” counts answer “how many,” and rates compare one
+      count with another. Currency and percentage formats communicate units. Column or bar charts are effective for comparing
+      categories.
+    worked_example: An ecommerce summary shows Total Sales, Average Basket Value, Orders, and On-Time Delivery Rate. A conditional
+      rule flags delivery rates below the service target, while a column chart compares Sales by Channel.
+    action_label: Make a prediction
   required_for_completion: true
-  google_sheets:
-    source_of_truth: Google Sheets
-    steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **the worksheet named in the task** and work in the worksheet named in the task.
-    - Select the completed summary range, including its labels.
-    - Choose **Insert → Chart**.
-    - Select the chart type named in the task and verify the data range, X-axis, and series.
-    - Add the required title and confirm no requested category is hidden.
-    - 'Confirm the finished workbook matches this result: **One selected answer.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
-    primary_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-- activity_id: spreadsheet_kpis_workbook_guided
+  answer_options:
+  - Column chart
+  - Scatter plot
+  - Gauge with no scale
+  - A separate pie chart for every region
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_kpis_example
+  title: Example — See kpi summaries & business interpretation in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See kpi summaries & business interpretation in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A support manager tracks Open Tickets, Average Resolution Hours, and Percent Resolved Within Target. The analyst places
+      these three KPIs at the top of a summary sheet and adds a bar chart comparing open tickets by team.
+
+
+      The analyst writes one sentence below the chart: “Billing has the most open tickets and is the only team above its weekly
+      target.”
+
+
+      **What to notice:** A dashboard is not a collection of decorations. Every number and chart should support a decision.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.kpis
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_kpis_guided
   title: Try It — Build the KPI block
   type: guided
   runtime: workbook
-  prompt: |-
-    In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so a delivered rate below 60% is clearly flagged for attention.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. In **I3**, enter `=SUM(Orders!K2:K37)` for Total Revenue.
-    3. In **I4**, enter `=AVERAGE(Orders!K2:K37)` for Average Order Value.
-    4. In **I5**, enter `=SUM(Orders!G2:G37)` for Total Units.
-    5. In **I6**, enter `=COUNTIF(Orders!J2:J37,"Delivered")/COUNTA(Orders!A2:A37)` for Delivered Rate.
-    6. Format I3:I4 as currency, I5 as a whole number, and I6 as a percentage.
-    7. Select I6 and choose **Format → Conditional formatting**.
-    8. Create a rule for **Less than 0.60**, choose a clear warning style, and select **Done**.
-    9. Wait until Google Sheets shows that all changes are saved.
-    10. Return to Career Accelerator and select **Check My Work**.
+  prompt: Calculate and format the four KPIs in Analysis Workspace I3:I6, then add the requested conditional formatting to
+    Delivered Rate.
   starter: ''
-  solution: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule that flags
-    performance below 60%.
+  solution: Use SUM of Orders Revenue for Total Revenue, AVERAGE of Revenue for Average Order Value, SUM of Units for Total
+    Units, and Delivered count divided by total order count for Delivered Rate. Apply currency, number, and percentage formats,
+    then add a conditional-format rule for I6 < 60%.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The first three KPIs use common summary functions; the rate is a part divided by a whole.
+  - Delivered Rate compares the number of Delivered orders with all orders.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -129,18 +178,58 @@ activities:
       sheet: Analysis Workspace
       range: I3:I6
       min_count: 4
+      message: 'The workbook does not yet meet this requirement: I3:I6 contains four readable formula-driven KPIs and the
+        rate has a saved warning rule.'
     - type: conditional_formatting
       sheet: Analysis Workspace
       range: I6
       message: Add a conditional-formatting rule to I6 that flags a Delivered Rate below 60%.
-    success_feedback: The KPI block is formula-driven, formatted for the business audience, and flags a low
-      delivered rate.
+    success_feedback: You combined calculations, units, and visual emphasis into a compact stakeholder-ready KPI block.
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 12
+  presentation:
+    scenario: Northstar Operations practice workbook
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Calculate and format the four KPIs in Analysis Workspace I3:I6, then add the requested conditional formatting to
+      Delivered Rate.
+    requirements:
+    - Use formulas tied to the complete Orders data.
+    - Format Total Revenue and Average Order Value as U.S. dollars.
+    - Format Delivered Rate as a percentage and flag values below 60%.
+    expected_output: I3:I6 contains four readable formula-driven KPIs and the rate has a saved warning rule.
+    skills_practiced:
+    - spreadsheet.kpis
+    after_correct: You combined calculations, units, and visual emphasis into a compact stakeholder-ready KPI block.
+    common_errors:
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    success_criteria: I3:I6 contains four readable formula-driven KPIs and the rate has a saved warning rule.
+    hide_exact_result: true
+  instruction:
+    phase: TRY IT
+    title: Try It — Build the KPI block
+    objective: Create formula-driven metrics and use formatting to make them readable.
+    approach: Use the completed Orders table to calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate
+      in the prepared KPI area. Format money as currency and the rate as a percentage. Add a conditional rule that calls attention
+      to a Delivered Rate below 60%.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
+  required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
     sheet: Analysis Workspace
     columns:
     - Total Revenue
@@ -149,102 +238,42 @@ activities:
     - Delivered Rate
     row_range: H3:I6
     starting_state: The KPI labels exist in H3:H6, while I3:I6 is blank and has no conditional formatting.
-    expected_result: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule
-      that flags performance below 60%.
+    expected_result: I3:I6 contains four readable formula-driven KPIs and the rate has a saved warning rule.
     column_descriptions:
       Total Revenue: Revenue across all orders in the workbook.
       Average Order Value: Average revenue produced by one order.
       Total Units: Total number of units across all orders.
       Delivered Rate: Share of orders whose status is Delivered.
-    sample_values:
-    - 'Total Revenue: $165,096.85'
-    - 'Average Order Value: $4,586.02'
-    - 'Total Units: 900'
-    - 'Delivered Rate: 52.8%'
-  required_for_practice: true
-  required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 12
-  presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate
-      in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so
-      a delivered rate below 60% is clearly flagged for attention.
-    requirements:
-    - Use formulas in all four KPI value cells.
-    - Format Total Revenue and Average Order Value as U.S. currency.
-    - Format Delivered Rate as a percentage.
-    - Add conditional formatting to I6 that flags a result below 60%.
-    - Save the workbook before checking it.
-    expected_output: I3:I6 contains four formula-driven KPIs, and I6 has a saved conditional-formatting rule
-      that flags performance below 60%.
-    skills_practiced:
-    - spreadsheet.kpis
-    after_correct: The KPI block is formula-driven, formatted for the business audience, and flags a low delivered
-      rate.
-    common_errors:
-    - Working in a different Google Sheet than the link saved in Career Accelerator.
-    - Selecting Check My Work before Google Sheets finishes saving.
-    - Using different cells, ranges, labels, or output text than the lesson requires.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-  instruction:
-    title: Try It — Build the KPI block
-    objective: In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered
-      Rate in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to
-      I6 so a delivered rate below 60% is clearly flagged for attention.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
-  required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - In **I3**, enter `=SUM(Orders!K2:K37)` for Total Revenue.
-    - In **I4**, enter `=AVERAGE(Orders!K2:K37)` for Average Order Value.
-    - In **I5**, enter `=SUM(Orders!G2:G37)` for Total Units.
-    - In **I6**, enter `=COUNTIF(Orders!J2:J37,"Delivered")/COUNTA(Orders!A2:A37)` for Delivered Rate.
-    - Format I3:I4 as currency, I5 as a whole number, and I6 as a percentage.
-    - Select I6 and choose **Format → Conditional formatting**.
-    - Create a rule for **Less than 0.60**, choose a clear warning style, and select **Done**.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_kpis_workbook_practice
-  title: Practice — Create a revenue-by-region chart
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **H3:I6**.
+    - Use the completed Orders table to calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate in the
+      prepared KPI area. Format money as currency and the rate as a percentage. Add a conditional rule that calls attention
+      to a Delivered Rate below 60%.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_kpis_independent
+  title: Challenge — Visualize revenue by region
+  type: independent
   runtime: workbook
-  prompt: |-
-    Create a column or bar chart from the region summary. Give it the title Revenue by Region and place it near the KPI block without covering the data.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. Select the Region and Revenue values in the region summary, excluding any grand-total row.
-    3. Choose **Insert → Chart**.
-    4. In Chart editor → Setup, choose a **Column chart** or **Bar chart**.
-    5. Confirm Region is used as the category axis and Revenue is the series.
-    6. In Customize → Chart & axis titles, set the chart title exactly to `Revenue by Region`.
-    7. Drag the chart near the KPI block without covering the KPI values or source summary.
-    8. If Career Accelerator asks for evidence, enter the exact chart title `Revenue by Region`.
-    9. Wait until Google Sheets shows that all changes are saved.
-    10. Return to Career Accelerator and select **Check My Work**.
+  prompt: Create a chart titled Revenue by Region from the region summary and place it near the KPI block.
   starter: ''
-  solution: A readable chart titled Revenue by Region is saved near the KPI block.
+  solution: Select the Region and Revenue summary, choose Insert → Chart, set the chart type to Column chart or Bar chart,
+    title it Revenue by Region, and move it near the KPI block without covering data.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The chart should use the compact region summary, not all 36 order rows.
+  - Choose a categorical comparison chart and confirm Region is the category axis.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -255,27 +284,7 @@ activities:
       - type: evidence_answer
         expected_answer: Revenue by Region
       message: Create the chart or enter its exact title after completing it.
-    success_feedback: The chart communicates regional revenue clearly.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Region
-    - Revenue
-    row_range: A28:J44
-    starting_state: The region summary and KPI block are available on Analysis Workspace.
-    expected_result: A readable chart titled Revenue by Region is saved near the KPI block.
-    column_descriptions:
-      Region: Sales territory assigned to the order or customer.
-      Revenue: Calculated order value after applying the row discount.
-    sample_values:
-    - 'Region: West'
-    - 'Revenue: $9,450.00'
-    evidence_prompt: Enter the exact chart title you used.
+    success_feedback: You turned a grouped summary into a visual comparison that supports faster stakeholder interpretation.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
@@ -283,19 +292,17 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: Create a column or bar chart from the region summary. Give it the title Revenue by Region and place
-      it near the KPI block without covering the data.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Create a chart titled Revenue by Region from the region summary and place it near the KPI block.
     requirements:
-    - Use Region as the category axis.
-    - Use Revenue as the value.
-    - Use the exact title Revenue by Region.
-    - Keep the source data visible and save.
-    expected_output: A readable chart titled Revenue by Region is saved near the KPI block.
+    - Use the region summary rather than individual order rows.
+    - Use a column or bar chart with the exact title Revenue by Region.
+    - Keep the chart from covering the KPI values or source summary.
+    expected_output: A readable chart compares regional revenue on a shared scale and is positioned beside the analysis.
     skills_practiced:
     - spreadsheet.kpis
-    after_correct: The chart communicates regional revenue clearly.
+    after_correct: You turned a grouped summary into a visual comparison that supports faster stakeholder interpretation.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -303,31 +310,138 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: A readable chart compares regional revenue on a shared scale and is positioned beside the analysis.
+    hide_exact_result: true
   instruction:
-    title: Practice — Create a revenue-by-region chart
-    objective: Create a column or bar chart from the region summary. Give it the title Revenue by Region and
-      place it near the KPI block without covering the data.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Visualize revenue by region
+    objective: Create a clear categorical comparison without covering the source summary.
+    approach: Use the completed region summary as the chart source. Choose a column or bar chart, add a descriptive title,
+      and position it near the KPI block so the summary remains readable.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Region
+    - Revenue
+    row_range: A28:J44
+    starting_state: The region summary and KPI block are available on Analysis Workspace.
+    expected_result: A readable chart compares regional revenue on a shared scale and is positioned beside the analysis.
+    column_descriptions:
+      Region: Sales territory assigned to the order or customer.
+      Revenue: Calculated order value after applying the row discount.
+    evidence_prompt: Enter the exact chart title you used.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - Select the Region and Revenue values in the region summary, excluding any grand-total row.
-    - Choose **Insert → Chart**.
-    - In Chart editor → Setup, choose a **Column chart** or **Bar chart**.
-    - Confirm Region is used as the category axis and Revenue is the series.
-    - In Customize → Chart & axis titles, set the chart title exactly to `Revenue by Region`.
-    - Drag the chart near the KPI block without covering the KPI values or source summary.
-    - If Career Accelerator asks for evidence, enter the exact chart title `Revenue by Region`.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A28:J44**.
+    - Use the completed region summary as the chart source. Choose a column or bar chart, add a descriptive title, and position
+      it near the KPI block so the summary remains readable.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_kpis_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: A rate is stored as 0.58. Which formatting choice communicates it most clearly to a stakeholder?
+  answer_options:
+  - Percentage format showing 58%
+  - Currency format showing $0.58
+  - Date format
+  - Plain text with no unit
+  starter: ''
+  solution: Percentage format showing 58%
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Percentage format showing 58%
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A rate is stored as 0.58. Which formatting choice communicates it most clearly to a stakeholder?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.kpis
+    after_correct: Choose number formats that communicate meaning without changing the stored value.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: Formatting communicates the unit while preserving the underlying decimal used in calculations.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_kpis_recap
+  title: Recap — KPI Summaries & Business Interpretation
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — KPI Summaries & Business Interpretation
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: KPI Summaries & Business Interpretation
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - A KPI should answer a specific business question and use a clearly defined calculation.
+
+      - Number formats communicate units without changing the underlying value.
+
+      - Charts and conditional formatting should highlight meaning rather than decorate the sheet.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

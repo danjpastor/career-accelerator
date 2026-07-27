@@ -1,3 +1,16 @@
+# Customize Query Results
+
+Explore categorical values and preview tables without confusing repeated values with duplicate records.
+
+## What you will learn
+
+- Return unique values with DISTINCT.
+- Explain uniqueness across multiple selected columns.
+- Use LIMIT for controlled previews.
+- Avoid treating a limited result as a ranked or representative sample.
+
+## Main idea
+
 # DISTINCT and LIMIT
 
 > **Learning goal:** Explore a dataset safely by returning unique values and controlling how many rows a query produces.
@@ -111,3 +124,9 @@ A query that asks for four rows must use `LIMIT 4`, not a memorized value from a
 - `LIMIT` caps result size and is useful for exploration.
 - `LIMIT` alone does not guarantee which rows appear.
 - Neither clause modifies the source table.
+
+## Key takeaways
+
+- DISTINCT applies to the complete selected row.
+- LIMIT controls quantity, not importance.
+- Both clauses affect only the result.

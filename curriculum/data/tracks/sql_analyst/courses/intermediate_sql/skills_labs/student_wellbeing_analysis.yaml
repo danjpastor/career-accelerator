@@ -45,7 +45,7 @@ activity:
     average_wellbeing, and average_anxiety, rounded to 2 decimals. Sort by program_level and stay_group.
   starter: 'SELECT
 
-    FROM '
+    FROM'
   solution: SELECT program_level, CASE WHEN stay_months < 6 THEN 'Under 6 months' WHEN stay_months < 12 THEN '6-11
     months' ELSE '12+ months' END AS stay_group, COUNT(*) AS student_count, ROUND(AVG(wellbeing_index), 2) AS average_wellbeing,
     ROUND(AVG(anxiety_score), 2) AS average_anxiety FROM student_wellbeing GROUP BY program_level, stay_group ORDER

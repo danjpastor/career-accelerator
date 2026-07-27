@@ -1,5 +1,5 @@
 module_id: combining_vertically
-title: Combining Data Vertically
+title: Stack Compatible Rows
 order: 1
 description: Stack compatible row sets into one result.
 lessons:

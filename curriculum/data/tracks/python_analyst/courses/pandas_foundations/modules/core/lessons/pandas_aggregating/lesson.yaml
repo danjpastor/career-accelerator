@@ -1,9 +1,10 @@
-lesson_id: pandas_aggregating
+lesson_id: academy2_pandas_aggregating
 title: Aggregating DataFrames
 order: 2
 difficulty: beginner
-description: Build practical fluency with aggregating dataframes.
-estimated_minutes: 15
+description: Aggregation turns many detailed rows into a smaller business summary. In pandas, `groupby()` defines the groups,
+  and an aggregation such as sum, mean, count, minimum, or maximum calculates one result per group.
+estimated_minutes: 35
 content: lesson.md
 objectives:
 - Explain the purpose of aggregating dataframes.
@@ -17,7 +18,38 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: pandas_aggregating_step_1
+- activity_id: academy2_pandas_aggregating_learn
+  title: Learn — Aggregating DataFrames
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Aggregating DataFrames
+    objective: Explain the purpose of aggregating dataframes.
+    body: "Aggregation turns many detailed rows into a smaller business summary. In pandas, `groupby()` defines the groups,\
+      \ and an aggregation such as sum, mean, count, minimum, or maximum calculates one result per group.\n\n```python\nteam_summary\
+      \ = tickets.groupby(\"team\", as_index=False).agg(\n    ticket_count=(\"ticket_id\", \"count\"),\n    average_hours=(\"\
+      resolution_hours\", \"mean\")\n)\n```\n\nThe result has one row per team. Choose the aggregation that matches the question:\
+      \ counting records is different from summing a numeric measure."
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - pandas.aggregation
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_pandas_aggregating_check
   title: 'Practice 1: Aggregating DataFrames'
   type: recognition
   runtime: recognition
@@ -27,7 +59,10 @@ activities:
   - merge
   - plot
   - rename
-  hints: []
+  hints:
+  - Read the task again and identify where **Aggregating DataFrames** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which method groups rows before aggregation?'
   validator:
     type: exact_answer
     expected_answer: groupby
@@ -54,46 +89,157 @@ activities:
     action_label: Choose the best answer
     body: '`groupby` defines the result grain before one or more measures are calculated.'
   required_for_completion: true
-- activity_id: pandas_aggregating_step_2
-  title: 'Practice 2: Aggregating DataFrames'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: groupby
+- activity_id: academy2_pandas_aggregating_example
+  title: Example — See aggregating dataframes in context
   type: recognition
-  runtime: recognition
-  prompt: Why use named aggregations?
-  answer_options:
-  - They make output column meanings explicit
-  - They remove all groups
-  - They change row order randomly
-  - They avoid importing pandas
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See aggregating dataframes in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A warehouse analyst groups shipment rows by carrier, counts shipments, and averages delivery days. They keep clear output
+      column names so another person can understand the summary. The graded exercise summarizes orders by region and status.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - pandas.aggregation
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: They make output column meanings explicit
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: Why use named aggregations?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Aggregating DataFrames
-    after_correct: You identified the core idea behind aggregating dataframes.
-    common_errors: []
-  instruction:
-    title: Aggregating DataFrames
-    objective: Build a practical understanding of aggregating dataframes.
-    action_label: Choose the best answer
-    body: Named aggregations create stakeholder-ready result headings in one operation.
+- activity_id: academy2_pandas_aggregating_guided
+  title: Try It — Summarize order value by region
+  type: guided
+  runtime: python
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 7
+  prompt: Use the loaded `orders` DataFrame to create `regional_totals`, with one row per region and the sum of `order_total`.
+    Keep the result as a DataFrame.
+  starter: '# orders is already loaded.
+
+    # Create regional_totals.'
+  solution: regional_totals = orders.groupby('region', as_index=False)['order_total'].sum()
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: isinstance(regional_totals, pd.DataFrame)
+      feedback: Keep the grouped result as a DataFrame.
+    - expression: set(regional_totals['region']) == {'East', 'West', 'South', 'North'}
+      feedback: Group by region so every region appears once.
+    - expression: float(regional_totals.loc[regional_totals['region']=='West', 'order_total'].iloc[0]) == 514
+      feedback: Sum order_total within each region.
+    display_variable: regional_totals
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+    dataset_id: sql_foundations
   required_for_completion: true
-- activity_id: pandas_aggregating_step_3
-  title: 'Practice 3: Aggregating DataFrames'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: Use the loaded `orders` DataFrame to create `regional_totals`, with one row per region and the sum of `order_total`.
+      Keep the result as a DataFrame.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Try It — Summarize order value by region
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_pandas_aggregating_independent
+  title: Practice — Count orders and total value by status
+  type: independent
+  runtime: python
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: Create `status_summary` with one row per status, an `order_count` column, and a `total_value` column.
+  starter: '# orders is already loaded.
+
+    # Create status_summary.'
+  solution: status_summary = (orders.groupby('status', as_index=False).agg(order_count=('order_id', 'count'), total_value=('order_total',
+    'sum')))
+  hints:
+  - Name each value or result exactly as the task requests so the checker can find it.
+  - Build the result from the provided variables or DataFrame instead of typing the finished answer.
+  - Run the code first. Read the error or output, then change only the part that does not match the task.
+  validator:
+    type: python_checks
+    checks:
+    - expression: set(status_summary.columns) >= {'status', 'order_count', 'total_value'}
+      feedback: Name the output columns status, order_count, and total_value.
+    - expression: int(status_summary.loc[status_summary['status']=='Completed', 'order_count'].iloc[0]) == 6
+      feedback: Count the number of rows in each status.
+    - expression: float(status_summary.loc[status_summary['status']=='Completed', 'total_value'].iloc[0]) == 878
+      feedback: Sum order_total within each status.
+    display_variable: status_summary
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
+      update when the inputs change.
+    dataset_id: sql_foundations
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Python analyst practice
+    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    task: Create `status_summary` with one row per status, an `order_count` column, and a `total_value` column.
+    requirements:
+    - Use the variable names requested by the task.
+    - Calculate the result with Python rather than typing the final answer.
+    - Run the code, read the feedback, and revise it when needed.
+    expected_output: Working Python code that creates the requested result.
+    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
+    skills_practiced:
+    - Python for analysis
+    after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
+  instruction:
+    title: Practice — Count orders and total value by status
+    objective: Use Python to produce a small, checkable analyst result.
+    approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
+    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+- activity_id: academy2_pandas_aggregating_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: What should you validate after aggregation?
   answer_options:
@@ -101,30 +247,75 @@ activities:
   - Only the font
   - Only the file size
   - Nothing
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: Group count, totals, and the intended grain
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: What should you validate after aggregation?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Aggregating DataFrames
     after_correct: You identified the core idea behind aggregating dataframes.
     common_errors: []
   instruction:
-    title: Aggregating DataFrames
-    objective: Build a practical understanding of aggregating dataframes.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: Compare summaries with source-level control totals and expected categories.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: Group count, totals, and the intended grain
+- activity_id: academy2_pandas_aggregating_recap
+  title: Recap — Aggregating DataFrames
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Aggregating DataFrames
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Aggregating DataFrames
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Aggregating DataFrames supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -126,7 +126,7 @@ activities:
 
     FROM inventory
 
-    WHERE '
+    WHERE'
   solution: 'SELECT sku, units_on_hand
 
     FROM inventory
@@ -174,7 +174,7 @@ activities:
 
     FROM support_tickets
 
-    WHERE '
+    WHERE'
   solution: 'SELECT ticket_id, resolution_hours
 
     FROM support_tickets
@@ -221,7 +221,7 @@ activities:
 
     FROM support_tickets
 
-    WHERE '
+    WHERE'
   solution: "SELECT ticket_id, priority, status\nFROM support_tickets\nWHERE status IN ('Open', 'Pending')\n  AND\
     \ priority = 'Urgent';"
   hints: []
@@ -264,9 +264,7 @@ activities:
     first.
   starter: 'SELECT department, full_name, hire_date
 
-    FROM employees
-
-    '
+    FROM employees'
   solution: 'SELECT department, full_name, hire_date
 
     FROM employees
@@ -312,9 +310,7 @@ activities:
   prompt: Return order_id and order_total for Completed orders, highest total first, limited to three rows.
   starter: 'SELECT order_id, order_total
 
-    FROM orders
-
-    '
+    FROM orders'
   solution: 'SELECT order_id, order_total
 
     FROM orders

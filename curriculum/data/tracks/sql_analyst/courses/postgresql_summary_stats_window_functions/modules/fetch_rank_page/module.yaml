@@ -1,5 +1,5 @@
 module_id: fetch_rank_page
-title: Fetching, Ranking, and Paging
+title: Rank and Page Results
 order: 2
 description: Use offset, ranking, and paging functions.
 lessons:

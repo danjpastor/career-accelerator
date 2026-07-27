@@ -1,3 +1,16 @@
+# Filter the Rows You Need
+
+Turn business language into precise row filters and handle missing values correctly.
+
+## What you will learn
+
+- Filter text and numeric values with WHERE.
+- Choose inclusive and exclusive comparison operators.
+- Combine conditions with AND, OR, IN, and parentheses.
+- Test missing values with IS NULL and IS NOT NULL.
+
+## Main idea
+
 # Filtering, Boolean Logic, and NULL
 
 > **Learning goal:** Translate business rules into precise row filters using comparison operators, `AND`, `OR`, parentheses, `IN`, and correct `NULL` tests.
@@ -147,3 +160,9 @@ WHERE status IN ('Open', 'Pending')
 - `AND` requires all conditions; `OR` accepts alternatives.
 - Parentheses are essential when combining `AND` and `OR`.
 - Use `IS NULL` and `IS NOT NULL` for missing values.
+
+## Key takeaways
+
+- Translate each business condition separately before combining them.
+- Parentheses make mixed Boolean logic explicit.
+- NULL requires IS NULL or IS NOT NULL.

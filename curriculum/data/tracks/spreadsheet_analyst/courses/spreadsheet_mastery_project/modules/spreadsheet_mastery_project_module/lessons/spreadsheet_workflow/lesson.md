@@ -1,19 +1,36 @@
 # Plan a Reproducible Spreadsheet Workflow
 
-Document a reproducible spreadsheet workflow so another analyst can understand, refresh, and verify the workbook.
+Document a repeatable refresh, validation, and handoff process for an analytical workbook.
 
-## Learn
+## What you will learn
 
-A professional workbook should preserve raw data, document the major transformations, validate totals, refresh outputs, and save a clear final file.
+- Identify the steps that make a spreadsheet workflow reproducible.
+- Record the current status of core refresh and QA steps.
+- Write a concise handoff note for another analyst.
 
-## Try It
+## Main idea
 
-On Analysis Workspace, complete B46:B50 with a short status or note for each workflow item: raw data preserved, changes documented, formulas validated, outputs refreshed, and workbook saved.
+# Plan a Reproducible Spreadsheet Workflow
 
-## Practice
+## What this lesson teaches
 
-In Analysis Workspace B52, write a short handoff note explaining where the source data lives, which sheet contains the final analysis, and what another analyst should refresh first.
+Document a repeatable refresh, validation, and handoff process for an analytical workbook.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- A reproducible workbook records source locations, transformations, checks, and refresh order.
+- Handoff notes should explain where to start and what to validate.
+- Documentation should be specific enough to support reuse without becoming a long narrative.
+
+## Key takeaways
+
+- A reproducible workbook records source locations, transformations, checks, and refresh order.
+- Handoff notes should explain where to start and what to validate.
+- Documentation should be specific enough to support reuse without becoming a long narrative.

@@ -1,5 +1,5 @@
 module_id: common_data_types
-title: Overview of Common Data Types
+title: Choose and Convert Data Types
 order: 1
 description: Work with text, numeric, date/time, interval, and collection concepts.
 lessons:

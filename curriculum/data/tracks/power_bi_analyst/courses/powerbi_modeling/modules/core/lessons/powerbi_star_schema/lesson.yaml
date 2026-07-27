@@ -1,9 +1,10 @@
-lesson_id: powerbi_star_schema
+lesson_id: academy2_powerbi_star_schema
 title: Star and Snowflake Schemas
 order: 4
 difficulty: beginner
-description: Build practical fluency with star and snowflake schemas.
-estimated_minutes: 15
+description: A **star schema** places a fact table at the center and connects it directly to descriptive dimensions. The shape
+  is simple, which helps Power BI filter efficiently and helps analysts understand where each field belongs.
+estimated_minutes: 36
 content: lesson.md
 objectives:
 - Explain the purpose of star and snowflake schemas.
@@ -17,7 +18,43 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: powerbi_star_schema_step_1
+- activity_id: academy2_powerbi_star_schema_learn
+  title: Learn — Star and Snowflake Schemas
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Star and Snowflake Schemas
+    objective: Explain the purpose of star and snowflake schemas.
+    body: 'A **star schema** places a fact table at the center and connects it directly to descriptive dimensions. The shape
+      is simple, which helps Power BI filter efficiently and helps analysts understand where each field belongs.
+
+
+      A **snowflake schema** splits a dimension into additional related tables. Snowflaking can reduce repeated descriptive
+      data, but it also adds relationships and makes the model harder for beginners to follow. For reporting, a clean star
+      schema is often the better starting point.
+
+
+      Measures should normally aggregate values from the fact table, while labels and slicers come from dimensions.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - powerbi.star_schema
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_powerbi_star_schema_check
   title: 'Practice 1: Star and Snowflake Schemas'
   type: recognition
   runtime: recognition
@@ -27,7 +64,10 @@ activities:
   - Every table connected to every other table
   - Only one table
   - No measures
-  hints: []
+  hints:
+  - Read the task again and identify where **Star and Snowflake Schemas** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: What defines a star schema?'
   validator:
     type: exact_answer
     expected_answer: A central fact connected directly to descriptive dimensions
@@ -54,46 +94,154 @@ activities:
     action_label: Choose the best answer
     body: A star schema creates clear filter paths from dimensions into facts.
   required_for_completion: true
-- activity_id: powerbi_star_schema_step_2
-  title: 'Practice 2: Star and Snowflake Schemas'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: A central fact connected directly to descriptive dimensions
+- activity_id: academy2_powerbi_star_schema_example
+  title: Example — See star and snowflake schemas in context
   type: recognition
-  runtime: recognition
-  prompt: Why is a simple star often preferred for reporting?
-  answer_options:
-  - It is easier to understand, filter, and maintain
-  - It always has more tables
-  - It removes the need for data quality
-  - It prevents all mistakes
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See star and snowflake schemas in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A retail model uses `Sales Lines` as the fact table and connects it to Product, Store, Customer, and Date dimensions.
+      Quantity and line revenue stay in the fact table. Product category and brand stay in Product. A report can then group
+      the fact values by any descriptive dimension without merging everything into one wide table.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - powerbi.star_schema
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: It is easier to understand, filter, and maintain
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: Why is a simple star often preferred for reporting?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Star and Snowflake Schemas
-    after_correct: You identified the core idea behind star and snowflake schemas.
-    common_errors: []
-  instruction:
-    title: Star and Snowflake Schemas
-    objective: Build a practical understanding of star and snowflake schemas.
-    action_label: Choose the best answer
-    body: A straightforward model reduces ambiguity for report authors and reviewers.
+- activity_id: academy2_powerbi_star_schema_guided
+  title: Try It — Identify the fact table
+  type: guided
+  runtime: response
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 8
+  prompt: Import `orders.csv`, `order_items.csv`, and `products.csv`. Which table records the repeated line-level business
+    events and should act as the central fact table?
+  starter: ''
+  solution: order_items
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: one_of
+    accepted:
+    - order_items
+    - order items
+    success_feedback: Correct. order_items contains one row per order line and is the central fact table.
+    failure_feedback: Look for the table with repeated order and product keys plus numeric quantities.
   required_for_completion: true
-- activity_id: powerbi_star_schema_step_3
-  title: 'Practice 3: Star and Snowflake Schemas'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: Import `orders.csv`, `order_items.csv`, and `products.csv`. Which table records the repeated line-level business
+      events and should act as the central fact table?
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    - datasets/order_items.csv
+    - datasets/products.csv
+    after_correct: Correct. order_items contains one row per order line and is the central fact table.
+  instruction:
+    title: Try It — Identify the fact table
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_star_schema_independent
+  title: Practice — Check a category result through the model
+  type: independent
+  runtime: response
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: Create relationships from orders and products to order_items. Calculate line revenue as quantity multiplied by unit
+    price, then summarize it by product category. Which category has the highest revenue?
+  starter: ''
+  solution: Office
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: one_of
+    accepted:
+    - Office
+    success_feedback: Correct. Office has the highest line revenue in this practice model.
+    failure_feedback: Check the product relationship and calculate revenue at the order-item level before grouping by category.
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: Create relationships from orders and products to order_items. Calculate line revenue as quantity multiplied by unit
+      price, then summarize it by product category. Which category has the highest revenue?
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    - datasets/order_items.csv
+    - datasets/products.csv
+    after_correct: Correct. Office has the highest line revenue in this practice model.
+  instruction:
+    title: Practice — Check a category result through the model
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_star_schema_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: When can snowflaking be reasonable?
   answer_options:
@@ -101,30 +249,75 @@ activities:
   - Whenever a report needs color
   - Only for CSV files
   - Never
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: When a dimension has reusable normalized subdimensions and the added complexity is justified
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: When can snowflaking be reasonable?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Star and Snowflake Schemas
     after_correct: You identified the core idea behind star and snowflake schemas.
     common_errors: []
   instruction:
-    title: Star and Snowflake Schemas
-    objective: Build a practical understanding of star and snowflake schemas.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: Normalize only when the maintenance or reuse benefit outweighs a more complex model.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: When a dimension has reusable normalized subdimensions and the added complexity is justified
+- activity_id: academy2_powerbi_star_schema_recap
+  title: Recap — Star and Snowflake Schemas
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Star and Snowflake Schemas
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Star and Snowflake Schemas
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Star and Snowflake Schemas supports a reliable, explainable analytics workflow.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

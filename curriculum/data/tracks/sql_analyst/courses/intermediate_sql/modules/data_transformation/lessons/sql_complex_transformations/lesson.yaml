@@ -1,9 +1,9 @@
-lesson_id: sql_complex_transformations
+lesson_id: academy2_sql_complex_transformations
 title: Complex Transformations
 order: 2
 difficulty: intermediate
 description: Create calculated fields, percentages, and rounded metrics.
-estimated_minutes: 24
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain complex transformations.
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: complex_transform_recognition
+- activity_id: academy2_sql_complex_transformations_learn
+  title: Learn — Complex Transformations
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Complex Transformations
+    objective: Explain complex transformations.
+    body: '# Combine several calculations into a clear result
+
+
+      More complex transformations may use arithmetic, rounding, null handling, and several source fields at once. Break the
+      request into small parts before writing one long expression.
+
+
+      Use parentheses to make the intended order of operations clear. When a denominator might be zero, protect the calculation
+      instead of allowing the query to fail.
+
+
+      In this lesson, you will create calculated business measures that remain readable and safe.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.complex_transformations
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_complex_transformations_check
   title: Protect a ratio
   type: recognition
   runtime: recognition
@@ -30,6 +68,8 @@ activities:
   - denominator / numerator
   hints:
   - Focus on how safe ratio calculations changes the result or database behavior.
+  - Read the task again and identify where **safe ratio calculations** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: numerator / NULLIF(denominator, 0)
@@ -54,11 +94,44 @@ activities:
     title: Protect a ratio
     objective: Use safe ratio calculations in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **safe ratio calculations** to make database work more accurate, readable, and useful. Read
-      the situation, identify what the result must preserve, and then choose the option that best matches that goal.
-      This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **safe ratio calculations** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
+      short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: complex_transform_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: numerator / NULLIF(denominator, 0)
+- activity_id: academy2_sql_complex_transformations_example
+  title: Example — See complex transformations in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See complex transformations in context
+    objective: Study a worked example before solving a different task.
+    body: "## A separate example\n\nAn analyst calculates a discount-adjusted line total.\n\n```sql\nSELECT\n    line_id,\n\
+      \    quantity * unit_price * (1 - discount_rate) AS net_amount\nFROM invoice_lines;\n```\n\n**What to notice:** Parentheses\
+      \ show that the discount is applied before the final multiplication. The alias describes the business meaning."
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.complex_transformations
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_complex_transformations_guided
   title: Calculate discounted order totals
   type: guided
   runtime: sql
@@ -68,6 +141,7 @@ activities:
   hints:
   - Identify where calculated numeric fields belongs in the query.
   - Build the query one clause at a time.
+  - Read the task again and identify where **calculated numeric fields** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -101,25 +175,28 @@ activities:
     title: Calculate discounted order totals
     objective: Apply calculated numeric fields to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **calculated numeric fields** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **calculated numeric fields** inside a complete analyst query. Start by identifying the
+      result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
-- activity_id: complex_transform_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_complex_transformations_independent
   title: Calculate annual subscription value
-  type: mastery
+  type: independent
   runtime: sql
-  prompt: Return subscriber_id and annual_value as monthly_fee multiplied by 12, rounded to 2 decimals. Sort by
-    subscriber_id.
+  prompt: Return subscriber_id and annual_value as monthly_fee multiplied by 12, rounded to 2 decimals. Sort by subscriber_id.
   starter: "SELECT subscriber_id,\n       \nFROM subscriptions\nORDER BY subscriber_id;"
   solution: SELECT subscriber_id, ROUND(monthly_fee * 12, 2) AS annual_value FROM subscriptions ORDER BY subscriber_id;
   hints:
   - Start from the requested result grain, then apply derived business metrics.
+  - Read the task again and identify where **derived business metrics** fits into the requested result.
+  - Focus on the named table or source (['subscriptions']) and check each requirement one at a time.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT subscriber_id, ROUND(monthly_fee * 12, 2) AS annual_value FROM subscriptions ORDER BY
-      subscriber_id;
+    expected_query: SELECT subscriber_id, ROUND(monthly_fee * 12, 2) AS annual_value FROM subscriptions ORDER BY subscriber_id;
     required_patterns:
     - monthly_fee\s*\*\s*12
     - AS\s+annual_value
@@ -134,8 +211,7 @@ activities:
   presentation:
     scenario: Original analyst practice request
     introduction: Translate the business request into a focused, reviewable SQL result.
-    task: Return subscriber_id and annual_value as monthly_fee multiplied by 12, rounded to 2 decimals. Sort by
-      subscriber_id.
+    task: Return subscriber_id and annual_value as monthly_fee multiplied by 12, rounded to 2 decimals. Sort by subscriber_id.
     tables:
     - subscriptions
     requirements:
@@ -150,7 +226,94 @@ activities:
     title: Calculate annual subscription value
     objective: Apply derived business metrics to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **derived business metrics** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **derived business metrics** inside a complete analyst query. Start by identifying the
+      result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_complex_transformations_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: A report needs a cleaned customer label made from trimmed first and last names, with a fallback when either value
+    is missing. What is the best approach?
+  answer_options:
+  - Build the label with text functions and CASE or COALESCE.
+  - Delete customers with missing names.
+  - Use LIMIT to skip blank values.
+  - Group by every name field.
+  solution: Build the label with text functions and CASE or COALESCE.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Build the label with text functions and CASE or COALESCE.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A report needs a cleaned customer label made from trimmed first and last names, with a fallback when either value
+      is missing. What is the best approach?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.complex_transformations
+    after_correct: Complex transformations combine small functions so the output is readable and handles known data problems.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_complex_transformations_recap
+  title: Recap — Complex Transformations
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Complex Transformations
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Complex Transformations
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Create calculated fields, percentages, and rounded metrics.
+
+      - Validate the result rather than relying only on valid syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

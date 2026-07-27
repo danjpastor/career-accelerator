@@ -1,19 +1,36 @@
 # Exact Lookups with XLOOKUP
 
-Bring product attributes into Orders with exact lookups and make missing matches visible.
+Use stable identifiers and exact lookups to bring related product details into the Orders table.
 
-## Learn
+## What you will learn
 
-A lookup should use a stable key shared by both tables. Orders and Products both contain Product ID, so it is the reliable match field.
+- Identify the key that connects Orders to Products.
+- Use an exact lookup to return one related field.
+- Reuse the lookup pattern to return multiple product attributes.
 
-## Try It
+## Main idea
 
-On Orders, add Product Name in O1. Use XLOOKUP or an exact-match VLOOKUP to return the product name from Products for each Product ID. Fill through O37.
+# Exact Lookups with XLOOKUP
 
-## Practice
+## What this lesson teaches
 
-Add Category in P1 and Unit Cost in Q1. Use exact lookups from Products and fill both columns through row 37.
+Use stable identifiers and exact lookups to bring related product details into the Orders table.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- A lookup key should represent the same entity in both tables.
+- Exact matching is safest for IDs and codes.
+- Unexpected missing matches should be investigated rather than hidden.
+
+## Key takeaways
+
+- A lookup key should represent the same entity in both tables.
+- Exact matching is safest for IDs and codes.
+- Unexpected missing matches should be investigated rather than hidden.

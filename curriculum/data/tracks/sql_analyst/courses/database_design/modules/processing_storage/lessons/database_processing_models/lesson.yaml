@@ -1,9 +1,9 @@
-lesson_id: database_processing_models
+lesson_id: academy2_database_processing_models
 title: Processing, Storage, and Data Models
 order: 1
 difficulty: intermediate
 description: Choose structures that fit operational transactions or analytical reporting.
-estimated_minutes: 18
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain processing, storage, and data models.
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: database_processing_models_1_recognition
+- activity_id: academy2_database_processing_models_learn
+  title: Learn — Processing, Storage, and Data Models
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Processing, Storage, and Data Models
+    objective: Explain processing, storage, and data models.
+    body: '# Understand why databases are organized differently
+
+
+      Transactional systems are designed to record frequent inserts and updates. Analytical systems are designed to scan and
+      summarize large amounts of history.
+
+
+      Row-oriented storage keeps the fields for one record together and often suits transactions. Column-oriented storage
+      keeps values from the same field together and often suits analytical scans.
+
+
+      In this lesson, you will connect a workload with an appropriate storage and processing approach.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - database.processing_models
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_database_processing_models_check
   title: 'Processing, Storage, and Data Models: decision 1'
   type: recognition
   runtime: recognition
@@ -30,6 +68,8 @@ activities:
   - A chart legend
   hints:
   - Focus on how processing, storage, and data models changes the result or database behavior.
+  - Read the task again and identify where **processing, storage, and data models** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: OLTP
@@ -54,13 +94,51 @@ activities:
     title: 'Processing, Storage, and Data Models: decision 1'
     objective: Use processing, storage, and data models in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and
-      useful. Read the situation, identify what the result must preserve, and then choose the option that best matches
-      that goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: database_processing_models_2_recognition
-  title: 'Processing, Storage, and Data Models: decision 2'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: OLTP
+- activity_id: academy2_database_processing_models_example
+  title: Example — See processing, storage, and data models in context
   type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See processing, storage, and data models in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A checkout system must record one purchase quickly and safely, while a reporting warehouse must total five years of
+      purchases by product and month.
+
+
+      **What to notice:** Both systems may contain sales data, but their workloads and design priorities are different.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - database.processing_models
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_database_processing_models_guided
+  title: 'Processing, Storage, and Data Models: decision 2'
+  type: guided
   runtime: recognition
   prompt: In a sales model, which table typically stores order-line events and numeric measures?
   answer_options:
@@ -70,6 +148,8 @@ activities:
   - View definition
   hints:
   - Focus on how processing, storage, and data models changes the result or database behavior.
+  - Read the task again and identify where **processing, storage, and data models** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: Fact table
@@ -94,13 +174,17 @@ activities:
     title: 'Processing, Storage, and Data Models: decision 2'
     objective: Use processing, storage, and data models in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and
-      useful. Read the situation, identify what the result must preserve, and then choose the option that best matches
-      that goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: database_processing_models_3_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  solution: Fact table
+- activity_id: academy2_database_processing_models_independent
   title: 'Processing, Storage, and Data Models: decision 3'
-  type: mastery
+  type: independent
   runtime: recognition
   prompt: Which model usually places measures in a central fact table connected to descriptive dimensions?
   answer_options:
@@ -108,12 +192,16 @@ activities:
   - Unstructured text file only
   - Single spreadsheet cell
   - User role hierarchy
-  hints: []
+  hints:
+  - Read the task again and identify where **processing, storage, and data models** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which model usually places measures
+    in a central fact table connected to descriptive dimensions?'
   validator:
     type: exact_answer
     expected_answer: Dimensional model
   required_for_practice: false
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: intermediate
   estimated_minutes: 5
@@ -133,7 +221,95 @@ activities:
     title: 'Processing, Storage, and Data Models: decision 3'
     objective: Use processing, storage, and data models in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and
-      useful. Read the situation, identify what the result must preserve, and then choose the option that best matches
-      that goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **processing, storage, and data models** to make database work more accurate, readable, and useful.
+      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
+      This check is intentionally short so you can test the idea immediately.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  solution: Dimensional model
+- activity_id: academy2_database_processing_models_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: Which model usually places measures in a central fact table connected to descriptive dimensions?
+  answer_options:
+  - Dimensional model
+  - Unstructured text file only
+  - Single spreadsheet cell
+  - User role hierarchy
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Dimensional model
+  required_for_practice: false
+  required_for_mastery: true
+  evidence_eligible: true
+  difficulty: intermediate
+  estimated_minutes: 5
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: Which model usually places measures in a central fact table connected to descriptive dimensions?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One correct selection.
+    skills_practiced:
+    - processing, storage, and data models
+    after_correct: You correctly applied processing, storage, and data models to the decision.
+    common_errors: []
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    action_label: Choose the best answer
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: Dimensional model
+- activity_id: academy2_database_processing_models_recap
+  title: Recap — Processing, Storage, and Data Models
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Processing, Storage, and Data Models
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Processing, Storage, and Data Models
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Choose structures that fit operational transactions or analytical reporting.
+
+      - Choose designs based on workload, grain, integrity, and maintainability.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -1,19 +1,36 @@
 # KPI Summaries & Business Interpretation
 
-Build a compact KPI block and a chart that communicates the most important operational result.
+Build a focused KPI block, use formatting to communicate meaning, and visualize regional performance.
 
-## Learn
+## What you will learn
 
-A KPI block summarizes the most important numbers. A simple column or bar chart is usually the clearest way to compare a measure across a small number of categories.
+- Calculate total, average, count, and rate KPIs.
+- Apply appropriate currency and percentage formats.
+- Use conditional formatting and a comparison chart to communicate performance.
 
-## Try It
+## Main idea
 
-In Analysis Workspace, calculate Total Revenue, Average Order Value, Total Units, and Delivered Rate in I3:I6. Format the currency and percentage values appropriately. Add conditional formatting to I6 so a delivered rate below 60% is clearly flagged for attention.
+# KPI Summaries & Business Interpretation
 
-## Practice
+## What this lesson teaches
 
-Create a column or bar chart from the region summary. Give it the title Revenue by Region and place it near the KPI block without covering the data.
+Build a focused KPI block, use formatting to communicate meaning, and visualize regional performance.
 
-## Check Your Work
+## Learning sequence
 
-Complete the task in the continuing linked Google Sheet. Wait until Google Sheets finishes saving, return to Accelerator Academy, and select **Check My Work**. Career Accelerator downloads the latest shared workbook and runs the lesson validator automatically.
+1. **Learn & Predict** — understand the theory and study a separate worked example.
+2. **Try It** — use the Google Sheets feature with guided strategy, without being given the finished formula.
+3. **Challenge** — solve an independent Northstar Operations business task.
+4. **Transfer** — apply the underlying principle to a new scenario.
+
+## Key takeaways
+
+- A KPI should answer a specific business question and use a clearly defined calculation.
+- Number formats communicate units without changing the underlying value.
+- Charts and conditional formatting should highlight meaning rather than decorate the sheet.
+
+## Key takeaways
+
+- A KPI should answer a specific business question and use a clearly defined calculation.
+- Number formats communicate units without changing the underlying value.
+- Charts and conditional formatting should highlight meaning rather than decorate the sheet.

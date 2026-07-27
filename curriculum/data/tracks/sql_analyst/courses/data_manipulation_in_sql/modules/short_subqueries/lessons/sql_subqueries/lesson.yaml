@@ -1,9 +1,9 @@
-lesson_id: sql_subqueries
+lesson_id: academy2_sql_subqueries
 title: Subqueries
 order: 1
 difficulty: intermediate
 description: Use nested queries to calculate benchmarks and eligible populations.
-estimated_minutes: 28
+estimated_minutes: 30
 content: lesson.md
 objectives:
 - Explain subqueries.
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: subquery_recognition
+- activity_id: academy2_sql_subqueries_learn
+  title: Learn — Subqueries
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Subqueries
+    objective: Explain subqueries.
+    body: '# Use one query''s result inside another query
+
+
+      A **subquery** is a query nested inside another query. It can calculate a benchmark, define an eligible group, or provide
+      a small result that the outer query uses.
+
+
+      Read from the inside out: first understand what the inner query returns, then how the outer query uses it. A scalar
+      subquery must return one value; a list subquery may return several.
+
+
+      In this lesson, you will use nested queries without losing track of the result grain.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.subqueries
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_subqueries_check
   title: Identify a scalar subquery
   type: recognition
   runtime: recognition
@@ -28,7 +66,11 @@ activities:
   - Any number of columns
   - A table name
   - Only text
-  hints: []
+  hints:
+  - Read the task again and identify where **Use a query result inside another query** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: What must a scalar subquery return when
+    used with a single comparison operator?'
   validator:
     type: exact_answer
     expected_answer: One value
@@ -55,23 +97,71 @@ activities:
     action_label: Choose the best answer
     body: A scalar subquery returns one value, such as an overall average, that the outer query can compare against.
   required_for_completion: true
-- activity_id: subquery_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: One value
+- activity_id: academy2_sql_subqueries_example
+  title: Example — See subqueries in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See subqueries in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A manager wants products priced above the overall average.
+
+
+      ```sql
+
+      SELECT product_id, product_name, price
+
+      FROM products
+
+      WHERE price > (SELECT AVG(price) FROM products);
+
+      ```
+
+
+      **What to notice:** The inner query returns one average. The outer query compares each product with that benchmark.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.subqueries
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_subqueries_guided
   title: Find above-average orders
   type: guided
   runtime: sql
   prompt: Return order_id and order_total for orders above the overall average order_total. Sort by order_id.
-  starter: "SELECT order_id, order_total\nFROM orders\nWHERE order_total > (\n    -- calculate the overall average\n\
-    )\nORDER BY order_id;"
-  solution: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders) ORDER
-    BY order_id;
+  starter: "SELECT order_id, order_total\nFROM orders\nWHERE order_total > (\n    -- calculate the overall average\n)\nORDER\
+    \ BY order_id;"
+  solution: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders) ORDER BY order_id;
   hints:
   - Focus on scalar subquery.
   - Build the result one clause at a time.
+  - Read the task again and identify where **scalar subquery** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders)
-      ORDER BY order_id;
+    expected_query: SELECT order_id, order_total FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders) ORDER
+      BY order_id;
     required_patterns:
     - WHERE.+\(\s*SELECT
     - AVG\s*\(
@@ -103,12 +193,14 @@ activities:
     action_label: Write and validate the query
     body: The inner query calculates one benchmark. The outer query uses it to filter individual rows.
   required_for_completion: true
-- activity_id: subquery_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_subqueries_independent
   title: Find customers with urgent tickets
-  type: mastery
+  type: independent
   runtime: sql
-  prompt: Return order_id and customer_id for orders placed by customers who have an Urgent support ticket. Sort
-    by order_id.
+  prompt: Return order_id and customer_id for orders placed by customers who have an Urgent support ticket. Sort by order_id.
   starter: 'SELECT order_id, customer_id
 
     FROM orders
@@ -116,11 +208,12 @@ activities:
     WHERE customer_id IN (
 
     );'
-  solution: SELECT order_id, customer_id FROM orders WHERE customer_id IN (SELECT customer_id FROM support_tickets
-    WHERE priority = 'Urgent') ORDER BY order_id;
+  solution: SELECT order_id, customer_id FROM orders WHERE customer_id IN (SELECT customer_id FROM support_tickets WHERE priority
+    = 'Urgent') ORDER BY order_id;
   hints:
   - Focus on list-returning subquery.
   - Build the result one clause at a time.
+  - Read the task again and identify where **list-returning subquery** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -139,8 +232,7 @@ activities:
   presentation:
     scenario: Analyst practice request
     introduction: Translate the request into a clear, reviewable SQL result.
-    task: Return order_id and customer_id for orders placed by customers who have an Urgent support ticket. Sort
-      by order_id.
+    task: Return order_id and customer_id for orders placed by customers who have an Urgent support ticket. Sort by order_id.
     tables:
     - orders
     - support_tickets
@@ -158,3 +250,88 @@ activities:
     action_label: Write and validate the query
     body: The inner query returns the eligible customer IDs; the outer query returns matching orders.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_subqueries_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: You need products priced above the overall average product price. Where can the average be calculated?
+  answer_options:
+  - In a subquery used by the outer filter.
+  - In LIMIT.
+  - By joining the table to every database table.
+  - By replacing each price with the average.
+  solution: In a subquery used by the outer filter.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: In a subquery used by the outer filter.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You need products priced above the overall average product price. Where can the average be calculated?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.subqueries
+    after_correct: A subquery can calculate the comparison value first, and the outer query can use it to filter rows.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_subqueries_recap
+  title: Recap — Subqueries
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Subqueries
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Subqueries
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Use nested queries to calculate benchmarks and eligible populations.
+
+      - Validate the result rather than relying only on query syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

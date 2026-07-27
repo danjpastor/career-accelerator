@@ -1,9 +1,9 @@
-lesson_id: sql_grouping_multiple
+lesson_id: academy2_sql_grouping_multiple
 title: Multiple Grouping Columns
 order: 3
 difficulty: intermediate
 description: Break summaries across more than one business dimension.
-estimated_minutes: 24
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain multiple grouping columns.
@@ -18,7 +18,45 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: group_multi_recognition
+- activity_id: academy2_sql_grouping_multiple_learn
+  title: Learn — Multiple Grouping Columns
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Multiple Grouping Columns
+    objective: Explain multiple grouping columns.
+    body: '# Build a more detailed grouped summary
+
+
+      Grouping by several columns creates one row for each unique combination of those values. Grouping by Region and Status,
+      for example, produces a separate row for each region-and-status pair.
+
+
+      Adding a grouping column makes the result more detailed. Removing one makes it more summarized. Decide the result grain
+      before choosing the fields.
+
+
+      In this lesson, you will create multi-level summaries and avoid selecting fields that do not belong at the grouped grain.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.grouping_multiple
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_grouping_multiple_check
   title: Identify the result grain
   type: recognition
   runtime: recognition
@@ -30,6 +68,8 @@ activities:
   - One status only
   hints:
   - Focus on how multi-dimensional grouping changes the result or database behavior.
+  - Read the task again and identify where **multi-dimensional grouping** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: One region-status combination
@@ -54,27 +94,59 @@ activities:
     title: Identify the result grain
     objective: Use multi-dimensional grouping in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **multi-dimensional grouping** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that
-      goal. This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **multi-dimensional grouping** to make database work more accurate, readable, and useful. Read the
+      situation, identify what the result must preserve, and then choose the option that best matches that goal. This check
+      is intentionally short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: group_multi_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: One region-status combination
+- activity_id: academy2_sql_grouping_multiple_example
+  title: Example — See multiple grouping columns in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See multiple grouping columns in context
+    objective: Study a worked example before solving a different task.
+    body: "## A separate example\n\nA ticket table is grouped by Department and Priority.\n\n```sql\nSELECT\n    department,\n\
+      \    priority,\n    COUNT(*) AS ticket_count\nFROM tickets\nGROUP BY department, priority;\n```\n\n**What to notice:**\
+      \ One row now represents one Department–Priority combination, not one ticket or one department alone."
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.grouping_multiple
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_grouping_multiple_guided
   title: Count orders by region and status
   type: guided
   runtime: sql
   prompt: Return region, status, and order_count, sorted by region and status.
-  starter: "SELECT region, status,\n       COUNT(*) AS order_count\nFROM orders\nGROUP BY region, status\nORDER\
-    \ BY region, status;"
-  solution: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY region, status ORDER BY region,
-    status;
+  starter: "SELECT region, status,\n       COUNT(*) AS order_count\nFROM orders\nGROUP BY region, status\nORDER BY region,\
+    \ status;"
+  solution: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY region, status ORDER BY region, status;
   hints:
   - Identify where multiple grouping columns belongs in the query.
   - Build the query one clause at a time.
+  - Read the task again and identify where **multiple grouping columns** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY region, status ORDER BY
-      region, status;
+    expected_query: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY region, status ORDER BY region, status;
     required_patterns:
     - GROUP\s+BY\s+region\s*,\s*status
     forbidden_patterns: []
@@ -103,25 +175,30 @@ activities:
     title: Count orders by region and status
     objective: Apply multiple grouping columns to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **multiple grouping columns** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **multiple grouping columns** inside a complete analyst query. Start by identifying the
+      result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
-- activity_id: group_multi_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_grouping_multiple_independent
   title: Summarize revenue by region and status
-  type: mastery
+  type: independent
   runtime: sql
   prompt: Return region, status, and total_order_value, sorted by region and status.
   starter: "SELECT region, status,\n       \nFROM orders\nGROUP BY region, status\nORDER BY region, status;"
-  solution: SELECT region, status, SUM(order_total) AS total_order_value FROM orders GROUP BY region, status ORDER
-    BY region, status;
+  solution: SELECT region, status, SUM(order_total) AS total_order_value FROM orders GROUP BY region, status ORDER BY region,
+    status;
   hints:
   - Start from the requested result grain, then apply multi-dimensional metrics.
+  - Read the task again and identify where **multi-dimensional metrics** fits into the requested result.
+  - Focus on the named table or source (['orders']) and check each requirement one at a time.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT region, status, SUM(order_total) AS total_order_value FROM orders GROUP BY region, status
-      ORDER BY region, status;
+    expected_query: SELECT region, status, SUM(order_total) AS total_order_value FROM orders GROUP BY region, status ORDER
+      BY region, status;
     required_patterns:
     - SUM\s*\(
     - GROUP\s+BY\s+region\s*,\s*status
@@ -151,7 +228,92 @@ activities:
     title: Summarize revenue by region and status
     objective: Apply multi-dimensional metrics to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **multi-dimensional metrics** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **multi-dimensional metrics** inside a complete analyst query. Start by identifying the
+      result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_grouping_multiple_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: You need revenue by both region and product category. What must appear in GROUP BY?
+  answer_options:
+  - Both region and product category.
+  - Only the revenue column.
+  - Only the first selected column.
+  - Every numeric measure.
+  solution: Both region and product category.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Both region and product category.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You need revenue by both region and product category. What must appear in GROUP BY?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.grouping_multiple
+    after_correct: Every non-aggregated category in the selected summary must be included in GROUP BY.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_grouping_multiple_recap
+  title: Recap — Multiple Grouping Columns
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Multiple Grouping Columns
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Multiple Grouping Columns
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Break summaries across more than one business dimension.
+
+      - Validate the result rather than relying only on valid syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

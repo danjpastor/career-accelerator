@@ -22,6 +22,36 @@ class ProgressState(str, Enum):
         }[self]
 
 
+class LessonStepKind(str, Enum):
+    """Learner-facing stage in the shared Academy lesson rhythm."""
+
+    CONCEPT = "concept"
+    KNOWLEDGE_CHECK = "knowledge_check"
+    WORKED_EXAMPLE = "worked_example"
+    GUIDED_PRACTICE = "guided_practice"
+    INDEPENDENT_PRACTICE = "independent_practice"
+    COMBINED_CHALLENGE = "combined_challenge"
+    TRANSFER = "transfer"
+    RECAP = "recap"
+    CHECKPOINT = "checkpoint"
+    PROJECT = "project"
+
+    @property
+    def label(self) -> str:
+        return {
+            LessonStepKind.CONCEPT: "Learn",
+            LessonStepKind.KNOWLEDGE_CHECK: "Check",
+            LessonStepKind.WORKED_EXAMPLE: "Example",
+            LessonStepKind.GUIDED_PRACTICE: "Try It",
+            LessonStepKind.INDEPENDENT_PRACTICE: "Practice",
+            LessonStepKind.COMBINED_CHALLENGE: "Challenge",
+            LessonStepKind.TRANSFER: "Apply It",
+            LessonStepKind.RECAP: "Recap",
+            LessonStepKind.CHECKPOINT: "Checkpoint",
+            LessonStepKind.PROJECT: "Project",
+        }[self]
+
+
 class ActivityType(str, Enum):
     RECOGNITION = "recognition"
     GUIDED = "guided"
@@ -52,6 +82,9 @@ class ActivityDefinition:
     workbook: Mapping[str, Any] = field(default_factory=dict)
     required_for_completion: bool = True
     estimated_minutes: int = 5
+    step_kind: LessonStepKind = LessonStepKind.GUIDED_PRACTICE
+    xp: int = 100
+    completion_mode: str = "validated"
 
 
 @dataclass(frozen=True)

@@ -1,5 +1,5 @@
 module_id: schemas_normalization
-title: Database Schemas and Normalization
+title: Design Clean, Related Tables
 order: 2
 description: Use star and snowflake schemas, keys, and normalization deliberately.
 lessons:

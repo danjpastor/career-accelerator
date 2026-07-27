@@ -209,33 +209,7 @@ activities:
   title: Spreadsheet retention
   type: mastery
   runtime: recognition
-  prompt: 'Duplicate lookup keys create:
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-    3. Click the first required output cell and begin the lookup formula with `=`.
-
-    4. Use the current row''s key as the search key and the named lookup table as the lookup range.
-
-    5. Use an exact match and lock the lookup range with `$` references before filling down.
-
-    6. Verify at least three results against the source table and correct unexpected `#N/A` values.
-
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  prompt: 'Duplicate lookup keys create:'
   answer_options:
   - Ambiguous matches
   - Guaranteed accuracy

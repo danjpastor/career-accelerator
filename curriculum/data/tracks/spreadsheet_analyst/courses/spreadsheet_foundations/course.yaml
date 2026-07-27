@@ -1,8 +1,8 @@
 course_id: spreadsheet_foundations
-title: Spreadsheet Foundations
+title: Google Sheets Foundations
 order: 1
-description: Learn workbook structure, create filterable tables, and build reliable relative and absolute-reference
-  formulas.
+description: Learn table structure, filtering, formulas, and references through explanation, worked examples, and
+  real workbook practice.
 estimated_minutes: 240
 outcomes:
 - Complete real spreadsheet work in Excel or Google Sheets.

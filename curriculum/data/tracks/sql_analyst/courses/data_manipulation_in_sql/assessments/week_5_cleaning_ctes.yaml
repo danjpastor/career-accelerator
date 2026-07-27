@@ -1,8 +1,7 @@
 assessment_id: week_5_cleaning_ctes
 title: Week 5 Cumulative Knowledge Check
 order: 99
-description: Verify cleaning, null handling, type conversion, CASE, subqueries, CTEs, and prior relationship
-  knowledge.
+description: Verify cleaning, null handling, type conversion, CASE, subqueries, CTEs, and prior relationship knowledge.
 estimated_minutes: 40
 instructions:
 - Complete every question independently.

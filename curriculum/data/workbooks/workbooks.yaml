@@ -3,44 +3,8 @@ workbooks:
   title: Northstar Operations Practice Workbook
   template: Northstar Operations Practice Workbook.xlsx
   working_copy: academy_workspace/spreadsheets/Northstar Operations Practice Workbook.xlsx
-  description: 'A continuing operations-analysis workbook used throughout the Spreadsheet Academy. The template
-    remains read-only; each learner works in a personal copy.
-
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-
-    ### Complete this task in Google Sheets
-
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task, range A1:J37.
-
-    3. Use these columns for this task: **{''name'': ''Order ID'', ''description'': ''Unique text identifier for
-    one customer order.'', ''sample'': ''NS-1001''}, {''name'': ''Order Date'', ''description'': ''Date the customer
-    order was created.'', ''sample'': ''01/05/2026''}, {''name'': ''Customer ID'', ''description'': ''Identifier
-    that connects an order to the Customers sheet.'', ''sample'': ''C001''}, {''name'': ''Region'', ''description'':
-    ''Sales territory assigned to the order or customer.'', ''sample'': ''West''}, {''name'': ''Sales Rep'', ''description'':
-    ''Employee responsible for the order.'', ''sample'': ''Maya Chen''}, {''name'': ''Product ID'', ''description'':
-    ''Identifier that connects an order to the Products sheet.'', ''sample'': ''P002''}, {''name'': ''Units'', ''description'':
-    ''Number of product units ordered.'', ''sample'': ''18''}, {''name'': ''Unit Price'', ''description'': ''Selling
-    price for one unit, stored in U.S. dollars.'', ''sample'': ''$525.00''}, {''name'': ''Discount'', ''description'':
-    ''Order discount stored as a decimal percentage.'', ''sample'': ''0%''}, {''name'': ''Status'', ''description'':
-    ''Current order status from the approved lookup list.'', ''sample'': ''Delivered''}**.
-
-    4. Click the first required output cell and begin the lookup formula with `=`.
-
-    5. Use the current row''s key as the search key and the named lookup table as the lookup range.
-
-    6. Use an exact match and lock the lookup range with `$` references before filling down.
-
-    7. Verify at least three results against the source table and correct unexpected `#N/A` values.
-
-    8. Wait until Google Sheets shows that saving is complete.
-
-    9. Return to Career Accelerator and click **Check My Work**.
-
-    <!-- DCA GOOGLE SHEETS STEPS END -->'
+  description: A continuing operations-analysis workbook used throughout the Spreadsheet Academy. The template remains
+    read-only; each learner works in a personal copy.
   sheets:
     Orders:
       range: A1:J37
@@ -74,31 +38,7 @@ workbooks:
         description: Order discount stored as a decimal percentage.
         sample: 0%
       - name: Status
-        description: 'Current order status from the approved lookup list.
-
-
-          <!-- DCA GOOGLE SHEETS STEPS START -->
-
-          ### Complete this task in Google Sheets
-
-
-          1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-
-          2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-
-          3. Click the first required output cell and begin the lookup formula with `=`.
-
-          4. Use the current row''s key as the search key and the named lookup table as the lookup range.
-
-          5. Use an exact match and lock the lookup range with `$` references before filling down.
-
-          6. Verify at least three results against the source table and correct unexpected `#N/A` values.
-
-          7. Wait until Google Sheets shows that saving is complete.
-
-          8. Return to Career Accelerator and click **Check My Work**.
-
-          <!-- DCA GOOGLE SHEETS STEPS END -->'
+        description: Current order status from the approved lookup list.
         sample: Delivered
         google_sheets:
           source_of_truth: Google Sheets
@@ -124,7 +64,7 @@ workbooks:
         sample: C001
       - name: Customer Name Raw
         description: Customer name exactly as received from the source system.
-        sample: '  summit health group'
+        sample: summit health group
       - name: Segment
         description: Customer segment used for grouped analysis.
         sample: Enterprise

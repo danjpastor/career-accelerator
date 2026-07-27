@@ -1,5 +1,5 @@
 module_id: conditional_operations
-title: Conditional Operations
+title: Apply Business Rules
 order: 4
 description: Use CASE for transformation and conditional metrics.
 lessons:

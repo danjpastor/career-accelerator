@@ -1,7 +1,7 @@
 course_id: data_cleaning_and_validation
 title: Data Cleaning & Validation
 order: 3
-description: Clean real customer fields, add controlled inputs, and reconcile the Orders table.
+description: Preserve raw data, create analysis-ready fields, prevent invalid entries, and reconcile identifiers.
 estimated_minutes: 240
 outcomes:
 - Complete real spreadsheet work in Excel or Google Sheets.

@@ -16,6 +16,7 @@ from .models import (
     DatasetDefinition,
     DatasetTable,
     LessonDefinition,
+    LessonStepKind,
     ModuleDefinition,
     PathDefinition,
     ProgramDefinition,
@@ -94,6 +95,21 @@ def _activity(raw: dict[str, Any], source: Path) -> ActivityDefinition:
         kind = ActivityType(str(raw["type"]).strip().lower())
     except (KeyError, ValueError) as exc:
         raise CurriculumError(f"Unknown activity type in {source}: {raw.get('type')!r}") from exc
+    runtime = str(raw.get("runtime") or "sql").strip().lower()
+    allowed_runtimes = {"content", "recognition", "response", "sql", "python", "workbook"}
+    if runtime not in allowed_runtimes:
+        raise CurriculumError(f"Unknown activity runtime in {source}: {runtime!r}")
+    completion_mode = str(raw.get("completion_mode") or "validated").strip().lower()
+    if completion_mode not in {"continue", "validated"}:
+        raise CurriculumError(f"Unknown completion_mode in {source}: {completion_mode!r}")
+    if runtime == "content" and completion_mode != "continue":
+        raise CurriculumError(f"Content steps must use completion_mode: continue in {source}")
+    if runtime != "content" and completion_mode == "continue":
+        raise CurriculumError(f"Interactive steps must use completion_mode: validated in {source}")
+    try:
+        step_kind = LessonStepKind(str(raw.get("step_kind") or "guided_practice").strip().lower())
+    except ValueError as exc:
+        raise CurriculumError(f"Unknown step_kind in {source}: {raw.get('step_kind')!r}") from exc
     validator = raw.get("validator") or {}
     if not isinstance(validator, dict):
         raise CurriculumError(f"validator must be a mapping in {source}")
@@ -102,7 +118,7 @@ def _activity(raw: dict[str, Any], source: Path) -> ActivityDefinition:
         title=str(raw.get("title") or "Untitled activity").strip(),
         activity_type=kind,
         prompt=str(raw.get("prompt") or "").strip(),
-        runtime=str(raw.get("runtime") or "sql").strip().lower(),
+        runtime=runtime,
         starter=str(raw.get("starter") or ""),
         solution=str(raw.get("solution") or ""),
         hints=_tuple_strings(raw.get("hints", []), "hints", source),
@@ -117,6 +133,9 @@ def _activity(raw: dict[str, Any], source: Path) -> ActivityDefinition:
         workbook=_mapping(raw.get("workbook"), "workbook", source),
         required_for_completion=bool(raw.get("required_for_completion", True)),
         estimated_minutes=max(1, int(raw.get("estimated_minutes", 5))),
+        step_kind=step_kind,
+        xp=max(0, int(raw.get("xp", 100))),
+        completion_mode=completion_mode,
     )
 
 

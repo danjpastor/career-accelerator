@@ -1,5 +1,5 @@
 module_id: data_filtering
-title: Data Filtering
+title: Choose the Rows You Need
 order: 3
 description: Build precise row populations with basic and complex conditions.
 lessons:

@@ -1,4 +1,4 @@
-lesson_id: sql_advanced_filtering
+lesson_id: academy2_sql_advanced_filtering
 title: Basic Filtering
 order: 1
 difficulty: intermediate
@@ -18,7 +18,46 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: filter_adv_recognition
+- activity_id: academy2_sql_advanced_filtering_learn
+  title: Learn — Basic Filtering
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Basic Filtering
+    objective: Explain advanced filtering patterns.
+    body: '# Write readable filters for common business questions
+
+
+      A `WHERE` clause keeps only rows that meet a condition. Useful patterns include `IN` for several allowed values, `BETWEEN`
+      for a range, and `LIKE` for text patterns.
+
+
+      A clear filter describes the business rule directly. Check boundary values and remember that text comparisons and date
+      rules may behave differently across SQL systems.
+
+
+      In this lesson, you will choose concise filtering patterns and inspect the returned rows before trusting a count or
+      total.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.advanced_filtering
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_advanced_filtering_check
   title: Choose a membership filter
   type: recognition
   runtime: recognition
@@ -28,7 +67,11 @@ activities:
   - AS
   - GROUP BY
   - UNION
-  hints: []
+  hints:
+  - Read the task again and identify where **Express business rules clearly** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which operator is clearest for matching
+    several known category values?'
   validator:
     type: exact_answer
     expected_answer: IN
@@ -53,10 +96,43 @@ activities:
     title: Express business rules clearly
     objective: Build a practical understanding of express business rules clearly.
     action_label: Choose the best answer
-    body: '`IN` is useful when a field may match one of several explicit values. Combine conditions with parentheses
-      when `AND` and `OR` appear together.'
+    body: '`IN` is useful when a field may match one of several explicit values. Combine conditions with parentheses when
+      `AND` and `OR` appear together.'
   required_for_completion: true
-- activity_id: filter_adv_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: IN
+- activity_id: academy2_sql_advanced_filtering_example
+  title: Example — See basic filtering in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See basic filtering in context
+    objective: Study a worked example before solving a different task.
+    body: "## A separate example\n\nA manager wants orders from three approved regions with values from 100 through 500.\n\
+      \n```sql\nWHERE region IN ('North', 'South', 'West')\n  AND order_value BETWEEN 100 AND 500\n```\n\n**What to notice:**\
+      \ `IN` is clearer than repeating several `OR` conditions, and `BETWEEN` includes both endpoints."
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.advanced_filtering
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_advanced_filtering_guided
   title: Find high-value East and West orders
   type: guided
   runtime: sql
@@ -68,16 +144,17 @@ activities:
     WHERE
 
     ORDER BY order_id;'
-  solution: SELECT order_id, region, order_total FROM orders WHERE region IN ('East', 'West') AND order_total >=
-    100 ORDER BY order_id;
+  solution: SELECT order_id, region, order_total FROM orders WHERE region IN ('East', 'West') AND order_total >= 100 ORDER
+    BY order_id;
   hints:
   - Focus on IN and compound filters.
   - Build the result one clause at a time.
+  - Read the task again and identify where **IN and compound filters** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT order_id, region, order_total FROM orders WHERE region IN ('East', 'West') AND order_total
-      >= 100 ORDER BY order_id;
+    expected_query: SELECT order_id, region, order_total FROM orders WHERE region IN ('East', 'West') AND order_total >= 100
+      ORDER BY order_id;
     required_patterns:
     - \bIN\s*\(
     - \bAND\b
@@ -109,12 +186,14 @@ activities:
     action_label: Write and validate the query
     body: Separate the category condition from the numeric threshold, then connect them with `AND`.
   required_for_completion: true
-- activity_id: filter_adv_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_advanced_filtering_independent
   title: Filter urgent non-email tickets
-  type: mastery
+  type: independent
   runtime: sql
-  prompt: Return ticket_id, priority, and channel for High or Urgent tickets whose channel is not Email. Sort by
-    ticket_id.
+  prompt: Return ticket_id, priority, and channel for High or Urgent tickets whose channel is not Email. Sort by ticket_id.
   starter: 'SELECT ticket_id, priority, channel
 
     FROM support_tickets
@@ -122,16 +201,17 @@ activities:
     WHERE
 
     ORDER BY ticket_id;'
-  solution: SELECT ticket_id, priority, channel FROM support_tickets WHERE channel <> 'Email' AND priority IN ('High',
-    'Urgent') ORDER BY ticket_id;
+  solution: SELECT ticket_id, priority, channel FROM support_tickets WHERE channel <> 'Email' AND priority IN ('High', 'Urgent')
+    ORDER BY ticket_id;
   hints:
   - Focus on compound filters.
   - Build the result one clause at a time.
+  - Read the task again and identify where **compound filters** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT ticket_id, priority, channel FROM support_tickets WHERE channel <> 'Email' AND priority
-      IN ('High', 'Urgent') ORDER BY ticket_id;
+    expected_query: SELECT ticket_id, priority, channel FROM support_tickets WHERE channel <> 'Email' AND priority IN ('High',
+      'Urgent') ORDER BY ticket_id;
     required_patterns:
     - <>
     - \bIN\s*\(
@@ -146,8 +226,7 @@ activities:
   presentation:
     scenario: Analyst practice request
     introduction: Translate the request into a clear, reviewable SQL result.
-    task: Return ticket_id, priority, and channel for High or Urgent tickets whose channel is not Email. Sort by
-      ticket_id.
+    task: Return ticket_id, priority, and channel for High or Urgent tickets whose channel is not Email. Sort by ticket_id.
     tables:
     - support_tickets
     requirements:
@@ -164,3 +243,88 @@ activities:
     action_label: Write and validate the query
     body: Use one condition to exclude Email and another to keep the requested priorities.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_advanced_filtering_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: You want only orders placed after July 1. Which clause should contain that rule?
+  answer_options:
+  - WHERE
+  - SELECT
+  - ORDER BY
+  - LIMIT
+  solution: WHERE
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: WHERE
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You want only orders placed after July 1. Which clause should contain that rule?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.advanced_filtering
+    after_correct: WHERE decides which source rows are included before the result is returned.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_advanced_filtering_recap
+  title: Recap — Basic Filtering
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Basic Filtering
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Basic Filtering
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Build readable filters for multi-part business rules.
+
+      - Validate the result rather than relying only on query syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -2,7 +2,8 @@ track_id: spreadsheet_analyst
 title: Spreadsheets for Data Analysts
 navigation_title: Spreadsheets
 order: 1
-description: Build complete spreadsheet foundations before advancing to SQL, Power BI, and Python.
+description: Learn Google Sheets through short explanations, prediction checks, original examples, guided workbook
+  practice, independent challenges, and immediate feedback.
 courses:
 - courses/spreadsheet_foundations/course.yaml
 - courses/formulas_and_logic/course.yaml

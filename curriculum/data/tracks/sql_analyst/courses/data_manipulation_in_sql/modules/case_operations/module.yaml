@@ -1,5 +1,5 @@
 module_id: case_operations
-title: We'll Take the CASE
+title: Turn Business Rules into Labels
 order: 1
 description: Use ordered CASE logic to transform and summarize business rules.
 lessons:

@@ -1,9 +1,9 @@
-lesson_id: sql_foundations_distinct_limit
+lesson_id: academy2_sql_foundations_distinct_limit
 title: Customize Query Results
 order: 3
 difficulty: beginner
 description: Explore categorical values and preview tables without confusing repeated values with duplicate records.
-estimated_minutes: 30
+estimated_minutes: 31
 content: lesson.md
 objectives:
 - Return unique values with DISTINCT.
@@ -22,7 +22,76 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: distinct_combination_recognition
+- activity_id: academy2_sql_foundations_distinct_limit_learn
+  title: Learn — Customize Query Results
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Customize Query Results
+    objective: Understand the idea in plain language before writing a query.
+    body: '# Explore unique values and small previews
+
+
+      A category often repeats because many records share the same value. Several orders may all belong to the West region.
+      Those are not necessarily duplicate orders.
+
+
+      `DISTINCT` removes repeated values from the **query result**:
+
+
+      ```sql
+
+      SELECT DISTINCT region
+
+      FROM orders;
+
+      ```
+
+
+      With more than one selected column, `DISTINCT` keeps each unique combination. A region can still appear more than once
+      when it is paired with different statuses.
+
+
+      `LIMIT` controls how many rows the query returns:
+
+
+      ```sql
+
+      SELECT order_id, order_date
+
+      FROM orders
+
+      LIMIT 10;
+
+      ```
+
+
+      This is useful when you want a quick preview. It does not mean “the newest ten” or “the largest ten.” A later lesson
+      will show how sorting defines which rows come first.
+
+
+      Neither `DISTINCT` nor `LIMIT` changes the source table.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.distinct
+    - sql.limit
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_foundations_distinct_limit_check
   title: Interpret DISTINCT combinations
   type: recognition
   runtime: recognition
@@ -32,7 +101,11 @@ activities:
   - One row for each region only
   - Only rows whose source records are duplicated
   - The first region and first status
-  hints: []
+  hints:
+  - Read the task again and identify where **DISTINCT** fits into the requested result.
+  - Focus on the named table or source (orders) and check each requirement one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: What does SELECT DISTINCT region, status
+    FROM orders return?'
   validator:
     type: exact_answer
     expected_answer: One row for each unique region-and-status combination
@@ -52,15 +125,14 @@ activities:
     skills_practiced:
     - DISTINCT
     - unique combinations
-    after_correct: DISTINCT evaluates the complete selected combination, so a region may appear with more than one
-      status.
+    after_correct: DISTINCT evaluates the complete selected combination, so a region may appear with more than one status.
     common_errors: []
   instruction:
     title: Apply DISTINCT to the complete selected row
     objective: Predict how DISTINCT behaves with more than one selected column.
     action_label: Interpret the result
-    body: '`DISTINCT` removes repeated combinations from a query result. With one selected column, it returns one
-      row per unique value:
+    body: '`DISTINCT` removes repeated combinations from a query result. With one selected column, it returns one row per
+      unique value:
 
 
       ```sql
@@ -84,18 +156,79 @@ activities:
       ```
 
 
-      If `West` occurs with both `Completed` and `Pending`, both combinations remain. `DISTINCT` does not force
-      the first column to appear only once, and it does not remove records from the source table.
+      If `West` occurs with both `Completed` and `Pending`, both combinations remain. `DISTINCT` does not force the first
+      column to appear only once, and it does not remove records from the source table.
 
 
-      This distinction matters during profiling. A single-column query helps inspect the domain of one field. A
-      multi-column query helps inspect which combinations actually occur.
+      This distinction matters during profiling. A single-column query helps inspect the domain of one field. A multi-column
+      query helps inspect which combinations actually occur.
 
 
-      Predict the result of the two-column query by focusing on the complete selected row rather than either column
-      in isolation.'
+      Predict the result of the two-column query by focusing on the complete selected row rather than either column in isolation.'
   required_for_completion: true
-- activity_id: distinct_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: One row for each unique region-and-status combination
+- activity_id: academy2_sql_foundations_distinct_limit_example
+  title: Example — See customize query results in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See customize query results in context
+    objective: Study a separate example, then use the method on different data.
+    body: '## A separate example
+
+
+      A volunteer coordinator wants to inspect the types of shifts in a scheduling table:
+
+
+      ```sql
+
+      SELECT DISTINCT shift_type
+
+      FROM volunteer_shifts;
+
+      ```
+
+
+      They then preview three volunteer assignments:
+
+
+      ```sql
+
+      SELECT volunteer_id, shift_date
+
+      FROM volunteer_shifts
+
+      LIMIT 3;
+
+      ```
+
+
+      **What to notice:** The first query answers “which different values exist?” The second returns a small preview, not
+      a ranked result.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.distinct
+    - sql.limit
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_foundations_distinct_limit_guided
   title: List unique order regions
   type: guided
   runtime: sql
@@ -109,6 +242,7 @@ activities:
   hints:
   - Place DISTINCT immediately after SELECT.
   - Return only the region column.
+  - Read the task again and identify where **DISTINCT** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -143,8 +277,8 @@ activities:
     title: Profile a categorical field
     objective: Return one row for each different category value.
     action_label: List the unique regions
-    body: 'Analysts often begin exploring a categorical column by listing its unique values. This reveals the field’s
-      domain and can expose inconsistent labels such as `West`, `WEST`, and `west`.
+    body: 'Analysts often begin exploring a categorical column by listing its unique values. This reveals the field’s domain
+      and can expose inconsistent labels such as `West`, `WEST`, and `west`.
 
 
       ```sql
@@ -156,18 +290,21 @@ activities:
       ```
 
 
-      `DISTINCT` appears immediately after `SELECT`. The query changes only the result; repeated values remain in
-      the source data because they may represent valid, separate records.
+      `DISTINCT` appears immediately after `SELECT`. The query changes only the result; repeated values remain in the source
+      data because they may represent valid, separate records.
 
 
-      A unique-value check answers “Which categories are present?” It does not answer “How many records are in each
-      category?” Counting categories comes later with aggregation.
+      A unique-value check answers “Which categories are present?” It does not answer “How many records are in each category?”
+      Counting categories comes later with aggregation.
 
 
-      Use the `orders` table to return only the distinct `region` values. Keep the result to one column and do not
-      add a limit, because the stakeholder wants the complete domain.'
+      Use the `orders` table to return only the distinct `region` values. Keep the result to one column and do not add a limit,
+      because the stakeholder wants the complete domain.'
   required_for_completion: true
-- activity_id: distinct_limit_independent
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_foundations_distinct_limit_independent
   title: Preview unique support channels
   type: independent
   runtime: sql
@@ -183,6 +320,7 @@ activities:
   hints:
   - Use DISTINCT on channel.
   - Add LIMIT 4 after FROM support_tickets.
+  - Read the task again and identify where **DISTINCT** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -215,15 +353,15 @@ activities:
     skills_practiced:
     - DISTINCT
     - LIMIT
-    after_correct: The result is a controlled domain preview. It does not rank channels or count how often they
-      occur. Because no ORDER BY clause is present, SQL does not promise which four valid channels appear.
+    after_correct: The result is a controlled domain preview. It does not rank channels or count how often they occur. Because
+      no ORDER BY clause is present, SQL does not promise which four valid channels appear.
     common_errors: []
   instruction:
     title: Create a controlled domain preview
     objective: Combine DISTINCT and LIMIT without implying a ranking.
     action_label: Preview the channels
-    body: '`LIMIT` caps how many rows a query returns. It is useful for checking syntax, previewing a table, or
-      keeping an exploratory result manageable.
+    body: '`LIMIT` caps how many rows a query returns. It is useful for checking syntax, previewing a table, or keeping an
+      exploratory result manageable.
 
 
       ```sql
@@ -237,19 +375,21 @@ activities:
       ```
 
 
-      This query returns no more than four unique carriers. Because it has no `ORDER BY`, the database does not
-      promise which four valid values will appear. The result is a preview—not the most common, newest, or most
-      important values.
+      This query returns no more than four unique carriers. Because it has no `ORDER BY`, the database does not promise which
+      four valid values will appear. The result is a preview—not the most common, newest, or most important values.
 
 
-      Clause placement matters: `LIMIT` appears after the source and any other result-shaping clauses. `DISTINCT`
-      belongs directly after `SELECT`.
+      Clause placement matters: `LIMIT` appears after the source and any other result-shaping clauses. `DISTINCT` belongs
+      directly after `SELECT`.
 
 
-      Build a one-column preview of unique support channels and cap it at four rows. Do not describe the result
-      as ranked or representative.'
+      Build a one-column preview of unique support channels and cap it at four rows. Do not describe the result as ranked
+      or representative.'
   required_for_completion: true
-- activity_id: distinct_limit_mastery
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_foundations_distinct_limit_challenge
   title: Create a location preview
   type: mastery
   runtime: sql
@@ -265,6 +405,7 @@ activities:
   hints:
   - Select only location with DISTINCT.
   - Use LIMIT 3 at the end.
+  - Read the task again and identify where **independent DISTINCT** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
@@ -297,8 +438,8 @@ activities:
     skills_practiced:
     - independent DISTINCT
     - LIMIT
-    after_correct: The query produces a concise location-domain preview while preserving the source data. The three
-      valid locations are an unordered preview, not a ranked list.
+    after_correct: The query produces a concise location-domain preview while preserving the source data. The three valid
+      locations are an unordered preview, not a ranked list.
     common_errors: []
   instruction:
     title: Independently combine uniqueness and a row cap
@@ -330,6 +471,96 @@ activities:
       - No ranking claim because no sort is requested
 
 
-      The source field is `location` and the table is `employees`. Write the complete query from the minimal starter.
-      This is the mastery step, so a successful unassisted attempt is required before the next lesson can unlock.'
+      The source field is `location` and the table is `employees`. Write the complete query from the minimal starter. This
+      is the mastery step, so a successful unassisted attempt is required before the next lesson can unlock.'
   required_for_completion: true
+  step_kind: combined_challenge
+  completion_mode: validated
+  xp: 150
+- activity_id: academy2_sql_foundations_distinct_limit_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: A customer list contains many repeated city names. You need a short sample of five different cities. Which approach
+    fits the task?
+  answer_options:
+  - Select DISTINCT city and limit the result to five rows.
+  - Delete repeated cities from the table.
+  - Group every column and return all rows.
+  - Sort the table without limiting it.
+  solution: Select DISTINCT city and limit the result to five rows.
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: Select DISTINCT city and limit the result to five rows.
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A customer list contains many repeated city names. You need a short sample of five different cities. Which approach
+      fits the task?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.distinct
+    - sql.limit
+    after_correct: DISTINCT removes repeated result values, and LIMIT controls how many rows are returned.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_foundations_distinct_limit_recap
+  title: Recap — Customize Query Results
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Customize Query Results
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Customize Query Results
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - DISTINCT applies to the complete selected row.
+
+      - LIMIT controls quantity, not importance.
+
+      - Both clauses affect only the result.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

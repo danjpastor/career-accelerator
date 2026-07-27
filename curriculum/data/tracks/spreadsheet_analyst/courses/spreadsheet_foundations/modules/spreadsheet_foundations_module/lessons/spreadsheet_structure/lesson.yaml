@@ -1,17 +1,18 @@
-lesson_id: spreadsheet_structure
+lesson_id: academy2_spreadsheet_structure
 title: Rows, Columns, Tables & Data Types
 order: 1
 difficulty: beginner
-description: Learn how a real operations workbook is organized, identify the grain of a table, and prepare
-  the Orders data for analysis.
-estimated_minutes: 40
+description: Understand spreadsheet structure, table grain, and filters before changing or analyzing data.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Identify what one row represents and which fields are identifiers, categories, dates, or measures.
-- Prepare the Orders sheet as a filterable analysis table without changing the raw values.
+- Identify what one row and one column represent in a well-structured table.
+- Make a Google Sheets table filterable without changing its source records.
+- Document table grain in clear analyst language.
 key_takeaways:
-- A reliable spreadsheet starts with a clear table grain and one header row.
-- Identifiers such as Order ID and Customer ID should remain text.
+- A reliable table has one consistent type of record per row.
+- Filters change what is visible; they do not delete the hidden rows.
+- Summary values should not be mixed into the middle of transaction data.
 teaches:
 - spreadsheet.structure
 - spreadsheet.data_types
@@ -20,78 +21,169 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_structure_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_structure_learn
+  title: Learn — Rows, Columns, Tables & Data Types
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Rows, Columns, Tables & Data Types
+    objective: Identify what one row and one column represent in a well-structured table.
+    body: '# Understand what a spreadsheet table represents
+
+
+      A spreadsheet is made of **cells** arranged in rows and columns. A group of related cells is called a **range**. When
+      the first row contains field names and every row below it follows the same structure, that range works like a table.
+
+
+      Before you analyze a table, ask one important question: **What does one row represent?** Analysts call this the table''s
+      **grain**. One row might represent one order, one customer, or one day. Knowing the grain helps you avoid counting the
+      same thing twice.
+
+
+      Cells also have data types. A date should behave like a date, a number like a number, and text like text. A value that
+      only looks correct can still cause sorting, filtering, or formulas to fail.
+
+
+      In this lesson, you will identify the grain of a table, check its headers and data types, and use a filter without deleting
+      any rows.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.structure
+    - spreadsheet.data_types
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_structure_check
+  title: Learn & Predict — How spreadsheet tables are organized
   type: recognition
   runtime: recognition
-  prompt: What does one row in the Orders sheet represent?
-  answer_options:
-  - One customer order
-  - One customer
-  - One product
-  - One month
+  prompt: A sales table has one row per order. Where should a grand-total revenue calculation be placed?
   starter: ''
-  solution: One customer order
+  solution: In a separate summary area
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - Think about what every existing row represents.
+  - A summary is not another order, so it should not be inserted among the order records.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
-    expected_answer: One customer order
+    expected_answer: In a separate summary area
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
-    task: What does one row in the Orders sheet represent?
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    task: A sales table has one row per order. Where should a grand-total revenue calculation be placed?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.structure
-    after_correct: You are ready to apply the idea in the Northstar workbook.
+    after_correct: 'Keeping summaries separate preserves the table grain: each transaction row remains one order.'
   instruction:
-    title: Learn — Rows, Columns, Tables & Data Types
-    objective: What does one row in the Orders sheet represent?
-    action_label: Choose the best answer
-    body: A table is easiest to analyze when every row represents the same kind of business event. In the Orders
-      sheet, the grain is one customer order. Order ID and Customer ID are identifiers, while Units and Unit
-      Price are measures.
+    phase: LEARN & PREDICT
+    title: Learn & Predict — How spreadsheet tables are organized
+    objective: Recognize table grain, fields, records, and the effect of a filter.
+    why_it_matters: Before an analyst writes a formula or builds a chart, they need to know what the table represents. Misreading
+      the grain can cause double-counting, missing records, and misleading summaries.
+    concept: A **record** is one row. A **field** is one column. The **grain** states exactly what one row represents. A filter
+      temporarily hides rows that do not match a condition, while the underlying records remain in the sheet.
+    worked_example: A support-ticket table has one row per ticket and columns for Ticket ID, Team, Priority, and Status. Filtering
+      Status to Open lets the analyst focus on unresolved tickets without deleting closed tickets. A total such as “428 open
+      tickets” belongs in a separate summary area, not inside the ticket rows.
+    action_label: Make a prediction
   required_for_completion: true
-- activity_id: spreadsheet_structure_workbook_guided
-  title: Try It — Prepare the Orders table
+  answer_options:
+  - In a separate summary area
+  - In the middle of the order rows
+  - In the Order ID column
+  - As another order record
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_structure_example
+  title: Example — See rows, columns, tables & data types in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See rows, columns, tables & data types in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      Imagine a table of library loans. Each row represents one borrowed book. The columns include Loan ID, Member ID, Checkout
+      Date, and Return Status.
+
+
+      If someone asks, “How many members borrowed a book?”, counting rows would be wrong because one member may appear several
+      times. The analyst first recognizes that the table''s grain is **one loan**, then counts unique Member IDs instead.
+
+
+      The analyst also checks that Checkout Date contains real dates. If some dates are stored as text, a date filter may
+      leave them out.
+
+
+      **What to notice:** Understanding the row meaning and data types comes before calculating anything.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.structure
+    - spreadsheet.data_types
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_structure_guided
+  title: Try It — Make the Orders table filterable
   type: guided
   runtime: workbook
-  prompt: |-
-    Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter to the header row. Keep every existing row and column unchanged.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open the **Orders** sheet.
-    2. Click cell **A1**, hold **Shift**, and click **J37** so the complete Orders range is selected.
-    3. Choose **Data → Create a filter** from the Google Sheets menu.
-    4. Confirm that a filter icon appears in every header cell from **A1 through J1**.
-    5. Confirm that row 1 is still the header row and that rows 2 through 37 are still present.
-    6. Do not rename, move, sort, or delete any source columns for this task.
-    7. Wait until Google Sheets shows that all changes are saved.
-    8. Return to Career Accelerator and select **Check My Work**.
+  prompt: Make the full Orders dataset filterable while keeping every existing row and column unchanged.
   starter: ''
-  solution: The full Orders range is filterable and still contains all 36 order records.
+  solution: Select A1:J37, then choose Data → Create a filter. Confirm the funnel icons appear in row 1 and that rows 2 through
+    37 remain intact.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - A filter is created from the Data menu, not by deleting rows you do not need.
+  - Click inside the Orders data, then look for Create a filter under Data.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
     - type: sheet_exists
       sheet: Orders
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
+        contains all 36 order records.'
     - type: headers
       sheet: Orders
       row: 1
@@ -106,20 +198,64 @@ activities:
       - Unit Price
       - Discount
       - Status
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
+        contains all 36 order records.'
     - type: table_or_filter
       sheet: Orders
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
+        contains all 36 order records.'
     - type: populated_range
       sheet: Orders
       range: A2:J37
       min_count: 360
-    success_feedback: 'The Orders sheet is ready for real analysis: the headers are intact, every record remains,
-      and the range is filterable.'
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
+        contains all 36 order records.'
+    success_feedback: You prepared a transaction table for investigation without changing its grain or deleting data.
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 12
+  presentation:
+    scenario: Northstar Operations practice workbook
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Make the full Orders dataset filterable while keeping every existing row and column unchanged.
+    requirements:
+    - Work on the Orders sheet and include the full header and data range.
+    - Use a Google Sheets filter or equivalent filterable table structure.
+    - Do not delete, move, or overwrite any source records.
+    expected_output: The Orders headers have filter controls and the dataset still contains all 36 order records.
+    skills_practiced:
+    - spreadsheet.structure
+    - spreadsheet.data_types
+    after_correct: You prepared a transaction table for investigation without changing its grain or deleting data.
+    common_errors:
+    - Working in a different Google Sheet than the link saved in Career Accelerator.
+    - Selecting Check My Work before Google Sheets finishes saving.
+    - Using different cells, ranges, labels, or output text than the lesson requires.
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    success_criteria: The Orders headers have filter controls and the dataset still contains all 36 order records.
+    hide_exact_result: true
+  instruction:
+    phase: TRY IT
+    title: Try It — Make the Orders table filterable
+    objective: Use Google Sheets filtering controls without changing the source records.
+    approach: Open **Orders**, click any cell inside the data, and use **Data → Create a filter**. Confirm that filter icons
+      appear in the header row and that all 36 order records are still present. Do not apply a value filter yet; this step
+      is about preparing the table safely.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
+  required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
     sheet: Orders
     columns:
     - Order ID
@@ -134,7 +270,7 @@ activities:
     - Status
     row_range: A1:J37
     starting_state: The Orders data has one header row and 36 order records, but no saved table or filter.
-    expected_result: The full Orders range is filterable and still contains all 36 order records.
+    expected_result: The Orders headers have filter controls and the dataset still contains all 36 order records.
     column_descriptions:
       Order ID: Unique text identifier for one customer order.
       Order Date: Date the customer order was created.
@@ -146,88 +282,35 @@ activities:
       Unit Price: Selling price for one unit, stored in U.S. dollars.
       Discount: Order discount stored as a decimal percentage.
       Status: Current order status from the approved lookup list.
-    sample_values:
-    - 'Order ID: NS-1001'
-    - 'Order Date: 01/05/2026'
-    - 'Customer ID: C001'
-    - 'Region: West'
-    - 'Sales Rep: Maya Chen'
-  required_for_practice: true
-  required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 12
-  presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter
-      to the header row. Keep every existing row and column unchanged.
-    requirements:
-    - Use row 1 as the header row.
-    - Include all records through row 37.
-    - Do not delete, rename, or reorder the source columns.
-    - Save the workbook before checking it.
-    expected_output: The full Orders range is filterable and still contains all 36 order records.
-    skills_practiced:
-    - spreadsheet.structure
-    - spreadsheet.data_types
-    after_correct: 'The Orders sheet is ready for real analysis: the headers are intact, every record remains,
-      and the range is filterable.'
-    common_errors:
-    - Working in a different Google Sheet than the link saved in Career Accelerator.
-    - Selecting Check My Work before Google Sheets finishes saving.
-    - Using different cells, ranges, labels, or output text than the lesson requires.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-  instruction:
-    title: Try It — Prepare the Orders table
-    objective: Open the Orders sheet. Select A1:J37 and turn the range into a filterable table, or add a filter
-      to the header row. Keep every existing row and column unchanged.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
-  required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open the **Orders** sheet.
-    - Click cell **A1**, hold **Shift**, and click **J37** so the complete Orders range is selected.
-    - Choose **Data → Create a filter** from the Google Sheets menu.
-    - Confirm that a filter icon appears in every header cell from **A1 through J1**.
-    - Confirm that row 1 is still the header row and that rows 2 through 37 are still present.
-    - Do not rename, move, sort, or delete any source columns for this task.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_structure_workbook_practice
-  title: Practice — Document the table grain
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Orders** and locate **A1:J37**.
+    - Open **Orders**, click any cell inside the data, and use **Data → Create a filter**. Confirm that filter icons appear
+      in the header row and that all 36 order records are still present. Do not apply a value filter yet; this step is about
+      preparing the table safely.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_structure_independent
+  title: Challenge — Explain the table grain
+  type: independent
   runtime: workbook
-  prompt: |-
-    Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row in Orders represents.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Analysis Workspace**.
-    2. Click cell **B4** beside the label **Orders table grain**.
-    3. Type one complete sentence explaining what a single row in Orders represents.
-    4. Include both words **customer** and **order**. A suitable structure is: `One row represents one customer order.`
-    5. Press **Enter** and confirm the sentence is visible in B4.
-    6. Wait until Google Sheets shows that all changes are saved.
-    7. Return to Career Accelerator and select **Check My Work**.
+  prompt: In Analysis Workspace cell B4, write a concise grain statement explaining what one row in Orders represents.
   starter: ''
-  solution: B4 clearly states that one row represents one customer order.
+  solution: One row in Orders represents one customer order.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - Look at the values that repeat across columns and the field that uniquely identifies each row.
+  - The Order ID changes from row to row, while each row contains one date, customer, product, and status.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -237,26 +320,9 @@ activities:
       contains:
       - customer
       - order
-    success_feedback: Your workbook now documents the Orders table grain.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Analysis Workspace
-    columns:
-    - Orders table grain
-    - Your Result
-    row_range: A4:B4
-    starting_state: Cell A4 contains the label Orders table grain and B4 is blank.
-    expected_result: B4 clearly states that one row represents one customer order.
-    column_descriptions:
-      Orders table grain: A plain-language statement describing what one Orders row represents.
-      Your Result: Learner-entered answer or calculated result.
-    sample_values:
-    - 'Orders table grain: One row represents one customer order.'
-    - 'Your Result: One row represents one customer order.'
+      message: 'The workbook does not yet meet this requirement: B4 contains a clear statement that one row represents one
+        customer order.'
+    success_feedback: A clear grain statement gives later formulas, pivots, and joins a reliable unit of analysis.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
@@ -264,19 +330,18 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row in Orders
-      represents.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: In Analysis Workspace cell B4, write a concise grain statement explaining what one row in Orders represents.
     requirements:
-    - Use a complete, plain-language sentence.
-    - Include the words customer and order.
-    - Save the workbook before checking it.
-    expected_output: B4 clearly states that one row represents one customer order.
+    - Write the statement in B4 on Analysis Workspace.
+    - Identify the business record represented by one row.
+    - Keep the statement short enough to use as documentation.
+    expected_output: B4 contains a clear statement that one row represents one customer order.
     skills_practiced:
     - spreadsheet.structure
     - spreadsheet.data_types
-    after_correct: Your workbook now documents the Orders table grain.
+    after_correct: A clear grain statement gives later formulas, pivots, and joins a reliable unit of analysis.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -284,29 +349,138 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: B4 contains a clear statement that one row represents one customer order.
+    hide_exact_result: true
   instruction:
-    title: Practice — Document the table grain
-    objective: Go to Analysis Workspace. In cell B4, write a short grain statement explaining what one row
-      in Orders represents.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Explain the table grain
+    objective: Describe the Orders table in language another analyst can understand.
+    approach: Use the repeated pattern in the Orders rows to decide what one row represents. Write a short statement in your
+      own words; do not copy the lesson definition verbatim.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Analysis Workspace
+    columns:
+    - Orders table grain
+    - Your Result
+    row_range: A4:B4
+    starting_state: Cell A4 contains the label Orders table grain and B4 is blank.
+    expected_result: B4 contains a clear statement that one row represents one customer order.
+    column_descriptions:
+      Orders table grain: A plain-language statement describing what one Orders row represents.
+      Your Result: Learner-entered answer or calculated result.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Analysis Workspace**.
-    - Click cell **B4** beside the label **Orders table grain**.
-    - Type one complete sentence explaining what a single row in Orders represents.
-    - 'Include both words **customer** and **order**. A suitable structure is: `One row represents one customer
-      order.`'
-    - Press **Enter** and confirm the sentence is visible in B4.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Analysis Workspace** and locate **A4:B4**.
+    - Use the repeated pattern in the Orders rows to decide what one row represents. Write a short statement in your own words;
+      do not copy the lesson definition verbatim.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_structure_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: After applying a filter, several rows are no longer visible. What is the safest conclusion?
+  answer_options:
+  - The rows are hidden by the filter, not deleted
+  - The rows were permanently erased
+  - The formulas converted them to blanks
+  - The workbook removed duplicate records automatically
+  starter: ''
+  solution: The rows are hidden by the filter, not deleted
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: The rows are hidden by the filter, not deleted
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: After applying a filter, several rows are no longer visible. What is the safest conclusion?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.structure
+    after_correct: When results look unexpectedly small, check active filters before assuming records are missing.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: Filters are a viewing tool. Understanding that distinction prevents analysts from mistaking hidden records
+      for missing data.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_structure_recap
+  title: Recap — Rows, Columns, Tables & Data Types
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Rows, Columns, Tables & Data Types
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Rows, Columns, Tables & Data Types
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - A reliable table has one consistent type of record per row.
+
+      - Filters change what is visible; they do not delete the hidden rows.
+
+      - Summary values should not be mixed into the middle of transaction data.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

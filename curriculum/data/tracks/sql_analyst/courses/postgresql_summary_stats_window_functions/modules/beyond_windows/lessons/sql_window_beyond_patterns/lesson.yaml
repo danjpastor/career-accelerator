@@ -1,9 +1,9 @@
-lesson_id: sql_window_beyond_patterns
+lesson_id: academy2_sql_window_beyond_patterns
 title: Beyond Window Functions
 order: 1
 difficulty: intermediate
 description: Create pivot-like summaries and subtotal levels for reporting.
-estimated_minutes: 24
+estimated_minutes: 26
 content: lesson.md
 objectives:
 - Explain beyond window functions.
@@ -18,7 +18,44 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: win_beyond_recognition
+- activity_id: academy2_sql_window_beyond_patterns_learn
+  title: Learn — Beyond Window Functions
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Beyond Window Functions
+    objective: Explain beyond window functions.
+    body: '# Produce advanced summaries without separate manual queries
+
+
+      SQL offers patterns such as grouping sets, rollups, and cubes for returning detail and subtotal rows together. These
+      tools are useful for reports that need several summary levels.
+
+
+      The result includes rows with different grains, so labels and null handling must make each level clear.
+
+
+      In this lesson, you will recognize when an advanced summary pattern is useful and keep subtotal rows understandable.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - sql.window_extensions
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_window_beyond_patterns_check
   title: Choose a portable pivot pattern
   type: recognition
   runtime: recognition
@@ -30,6 +67,8 @@ activities:
   - A scalar subquery only
   hints:
   - Focus on how portable pivoting changes the result or database behavior.
+  - Read the task again and identify where **portable pivoting** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
   validator:
     type: exact_answer
     expected_answer: Conditional aggregation with CASE
@@ -54,28 +93,67 @@ activities:
     title: Choose a portable pivot pattern
     objective: Use portable pivoting in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **portable pivoting** to make database work more accurate, readable, and useful. Read the
-      situation, identify what the result must preserve, and then choose the option that best matches that goal.
-      This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **portable pivoting** to make database work more accurate, readable, and useful. Read the situation,
+      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
+      short so you can test the idea immediately.
   required_for_completion: true
-- activity_id: win_beyond_guided
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: Conditional aggregation with CASE
+- activity_id: academy2_sql_window_beyond_patterns_example
+  title: Example — See beyond window functions in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See beyond window functions in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A report needs sales by Region and Product Category, subtotals by Region, and a grand total. A grouping-set query can
+      return all three levels in one result.
+
+
+      **What to notice:** A null category in a subtotal row may mean “all categories,” not missing source data. The report
+      should label that row clearly.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - sql.window_extensions
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_sql_window_beyond_patterns_guided
   title: Pivot order statuses by region
   type: guided
   runtime: sql
   prompt: Return region, completed_orders, and processing_orders using conditional counts. Sort by region.
-  starter: "SELECT region,\n       SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders,\n\
-    \       SUM(CASE WHEN status = 'Processing' THEN 1 ELSE 0 END) AS processing_orders\nFROM orders\nGROUP BY region\n\
-    ORDER BY region;"
-  solution: SELECT region, SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, SUM(CASE WHEN
-    status = 'Processing' THEN 1 ELSE 0 END) AS processing_orders FROM orders GROUP BY region ORDER BY region;
+  starter: "SELECT region,\n       SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders,\n       SUM(CASE\
+    \ WHEN status = 'Processing' THEN 1 ELSE 0 END) AS processing_orders\nFROM orders\nGROUP BY region\nORDER BY region;"
+  solution: SELECT region, SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, SUM(CASE WHEN status
+    = 'Processing' THEN 1 ELSE 0 END) AS processing_orders FROM orders GROUP BY region ORDER BY region;
   hints:
   - Identify where conditional pivoting belongs in the query.
   - Build the query one clause at a time.
+  - Read the task again and identify where **conditional pivoting** fits into the requested result.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT region, SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, SUM(CASE
-      WHEN status = 'Processing' THEN 1 ELSE 0 END) AS processing_orders FROM orders GROUP BY region ORDER BY region;
+    expected_query: SELECT region, SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) AS completed_orders, SUM(CASE WHEN
+      status = 'Processing' THEN 1 ELSE 0 END) AS processing_orders FROM orders GROUP BY region ORDER BY region;
     required_patterns:
     - SUM\s*\(\s*CASE
     - GROUP\s+BY\s+region
@@ -105,27 +183,32 @@ activities:
     title: Pivot order statuses by region
     objective: Apply conditional pivoting to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **conditional pivoting** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **conditional pivoting** inside a complete analyst query. Start by identifying the result
+      grain—what one row should represent—then select only the fields and calculations needed to answer the request. Run the
+      query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
-- activity_id: win_beyond_mastery
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_sql_window_beyond_patterns_independent
   title: Create regional and status subtotals
-  type: mastery
+  type: independent
   runtime: sql
-  prompt: Return region, status, and order_count using GROUPING SETS for (region,status), (region), and grand total.
-    Order by region NULLS LAST, status NULLS LAST.
-  starter: "SELECT region, status,\n       \nFROM orders\nGROUP BY GROUPING SETS ((region, status), (region), ())\n\
-    ORDER BY region NULLS LAST, status NULLS LAST;"
-  solution: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY GROUPING SETS ((region, status),
-    (region), ()) ORDER BY region NULLS LAST, status NULLS LAST;
+  prompt: Return region, status, and order_count using GROUPING SETS for (region,status), (region), and grand total. Order
+    by region NULLS LAST, status NULLS LAST.
+  starter: "SELECT region, status,\n       \nFROM orders\nGROUP BY GROUPING SETS ((region, status), (region), ())\nORDER BY\
+    \ region NULLS LAST, status NULLS LAST;"
+  solution: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY GROUPING SETS ((region, status), (region),
+    ()) ORDER BY region NULLS LAST, status NULLS LAST;
   hints:
   - Start from the requested result grain, then apply subtotal grouping sets.
+  - Read the task again and identify where **subtotal grouping sets** fits into the requested result.
+  - Focus on the named table or source (['orders']) and check each requirement one at a time.
   validator:
     type: sql_result
     dataset_id: sql_foundations
-    expected_query: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY GROUPING SETS ((region,
-      status), (region), ()) ORDER BY region NULLS LAST, status NULLS LAST;
+    expected_query: SELECT region, status, COUNT(*) AS order_count FROM orders GROUP BY GROUPING SETS ((region, status), (region),
+      ()) ORDER BY region NULLS LAST, status NULLS LAST;
     required_patterns:
     - GROUPING\s+SETS
     - COUNT\s*\(
@@ -140,8 +223,8 @@ activities:
   presentation:
     scenario: Original analyst practice request
     introduction: Translate the business request into a focused, reviewable SQL result.
-    task: Return region, status, and order_count using GROUPING SETS for (region,status), (region), and grand total.
-      Order by region NULLS LAST, status NULLS LAST.
+    task: Return region, status, and order_count using GROUPING SETS for (region,status), (region), and grand total. Order
+      by region NULLS LAST, status NULLS LAST.
     tables:
     - orders
     requirements:
@@ -156,7 +239,94 @@ activities:
     title: Create regional and status subtotals
     objective: Apply subtotal grouping sets to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **subtotal grouping sets** inside a complete analyst query. Start by identifying
-      the result grain—what one row should represent—then select only the fields and calculations needed to answer
-      the request. Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **subtotal grouping sets** inside a complete analyst query. Start by identifying the
+      result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
+      Run the query, inspect the output, and check the answer when the result looks right.
   required_for_completion: true
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_sql_window_beyond_patterns_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  estimated_minutes: 4
+  prompt: You need the previous month’s revenue beside the current month so you can calculate change. Which function is designed
+    for that comparison?
+  answer_options:
+  - LAG
+  - COUNT
+  - UPPER
+  - UNION
+  solution: LAG
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: LAG
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: You need the previous month’s revenue beside the current month so you can calculate change. Which function is designed
+      for that comparison?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected approach supported by the lesson concept.
+    skills_practiced:
+    - sql.window_extensions
+    after_correct: LAG brings a value from an earlier row in the window order into the current row.
+  instruction:
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+- activity_id: academy2_sql_window_beyond_patterns_recap
+  title: Recap — Beyond Window Functions
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Beyond Window Functions
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Beyond Window Functions
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Create pivot-like summaries and subtotal levels for reporting.
+
+      - Validate the result rather than relying only on valid syntax.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

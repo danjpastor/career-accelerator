@@ -1,15 +1,18 @@
-lesson_id: powerbi_getting_started
+lesson_id: academy2_powerbi_getting_started
 title: Getting Started with Power BI
 order: 1
 difficulty: beginner
-description: Build practical fluency with getting started with power bi.
-estimated_minutes: 15
+description: Power BI Desktop has several work areas because an analyst does different kinds of work at different times.
+estimated_minutes: 36
 content: lesson.md
 objectives:
 - Explain the purpose of getting started with power bi.
 - Choose an appropriate action in a realistic analyst workflow.
 key_takeaways:
-- Getting Started with Power BI supports a reliable, explainable analytics workflow.
+- '**Report view** is where you arrange charts, cards, slicers, and text on report pages.'
+- '**Data view** lets you inspect the rows and columns already loaded into the model.'
+- '**Model view** shows tables and the relationships between them.'
+- '**Power Query Editor** is where you clean and reshape data before it reaches the model.'
 teaches:
 - powerbi.interface
 requires:
@@ -18,7 +21,48 @@ requires:
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: powerbi_getting_started_step_1
+- activity_id: academy2_powerbi_getting_started_learn
+  title: Learn — Getting Started with Power BI
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Getting Started with Power BI
+    objective: Explain the purpose of getting started with power bi.
+    body: 'Power BI Desktop has several work areas because an analyst does different kinds of work at different times.
+
+
+      - **Report view** is where you arrange charts, cards, slicers, and text on report pages.
+
+      - **Data view** lets you inspect the rows and columns already loaded into the model.
+
+      - **Model view** shows tables and the relationships between them.
+
+      - **Power Query Editor** is where you clean and reshape data before it reaches the model.
+
+
+      A safe beginner workflow is: connect to a source, inspect it, transform what needs cleaning, build relationships, create
+      calculations, design visuals, and validate the result. You do not need to memorize every button. You do need to know
+      which work area matches the job you are trying to do.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - powerbi.interface
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_powerbi_getting_started_check
   title: 'Practice 1: Getting Started with Power BI'
   type: recognition
   runtime: recognition
@@ -28,7 +72,11 @@ activities:
   - Model view
   - Data source settings
   - Power Query only
-  hints: []
+  hints:
+  - Read the task again and identify where **Getting Started with Power BI** fits into the requested result.
+  - Check the source, required output, and any conditions one at a time.
+  - 'Compare your work with the success criteria. Your result should directly answer: Which view is used to arrange report
+    visuals?'
   validator:
     type: exact_answer
     expected_answer: Report view
@@ -53,50 +101,157 @@ activities:
     title: Getting Started with Power BI
     objective: Build a practical understanding of getting started with power bi.
     action_label: Choose the best answer
-    body: Power BI separates report design, data inspection, model relationships, and query transformations
-      into distinct work areas. Choose the view that matches the action you need to perform.
+    body: Power BI separates report design, data inspection, model relationships, and query transformations into distinct
+      work areas. Choose the view that matches the action you need to perform.
   required_for_completion: true
-- activity_id: powerbi_getting_started_step_2
-  title: 'Practice 2: Getting Started with Power BI'
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+  solution: Report view
+- activity_id: academy2_powerbi_getting_started_example
+  title: Example — See getting started with power bi in context
   type: recognition
-  runtime: recognition
-  prompt: What should you confirm immediately after importing a table?
-  answer_options:
-  - Column names, row count, and data types
-  - Only the report theme
-  - Only the file name
-  - Nothing until publishing
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See getting started with power bi in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A support manager receives a CSV containing ticket date, team, status, and resolution time. The analyst first imports
+      the file and checks the row count in Data view. They use Power Query to set the date and duration types, Model view
+      to inspect relationships, and Report view to build a workload chart. Each view supports a different part of the same
+      workflow.
+
+
+      The graded task uses an orders file instead, so focus on choosing the right view and checking the source before building
+      a report.
+
+
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
+      decisions yourself.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - powerbi.interface
+  validator: {}
   hints: []
-  validator:
-    type: exact_answer
-    expected_answer: Column names, row count, and data types
+  solution: ''
+  required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 5
-  presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
-    task: What should you confirm immediately after importing a table?
-    requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
-    expected_output: One correct selection.
-    skills_practiced:
-    - Getting Started with Power BI
-    after_correct: You identified the core idea behind getting started with power bi.
-    common_errors: []
-  instruction:
-    title: Getting Started with Power BI
-    objective: Build a practical understanding of getting started with power bi.
-    action_label: Choose the best answer
-    body: A quick source check catches missing columns, unexpected row counts, and incorrect types before they
-      spread into measures and visuals.
+- activity_id: academy2_powerbi_getting_started_guided
+  title: Try It — Import and inspect an orders table
+  type: guided
+  runtime: response
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+  estimated_minutes: 8
+  prompt: Open Power BI Desktop and import `orders.csv`. In Data view, confirm that the table has the expected columns and
+    that `order_total` is treated as a decimal number. How many data rows were imported?
+  starter: ''
+  solution: '8'
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: numeric
+    expected: 8
+    success_feedback: Correct. Power BI imported 8 order records.
+    failure_feedback: The source file contains 8 order records. Check that the header was not counted as a row and that no
+      filter is active.
   required_for_completion: true
-- activity_id: powerbi_getting_started_step_3
-  title: 'Practice 3: Getting Started with Power BI'
-  type: mastery
+  required_for_practice: true
+  required_for_mastery: false
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: Open Power BI Desktop and import `orders.csv`. In Data view, confirm that the table has the expected columns and
+      that `order_total` is treated as a decimal number. How many data rows were imported?
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    after_correct: Correct. Power BI imported 8 order records.
+  instruction:
+    title: Try It — Import and inspect an orders table
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_getting_started_independent
+  title: Practice — Build your first business total
+  type: independent
+  runtime: response
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+  estimated_minutes: 10
+  prompt: In Report view, add a Card visual. Use `order_total` and keep its summarization set to Sum. Enter the total shown
+    on the card.
+  starter: ''
+  solution: '1123'
+  hints:
+  - Follow the interface steps in the lesson and check that the correct source file is loaded.
+  - Confirm the field, summarization, filter, or relationship named in the task before reading the result.
+  - Use the result shown by Power BI rather than calculating or guessing it outside the report.
+  validator:
+    mode: numeric
+    expected: 1123
+    tolerance: 0.01
+    success_feedback: Correct. The eight orders total 1,123.
+    failure_feedback: Check that the Card is using Sum of order_total and that no report filter is active.
+  required_for_completion: true
+  required_for_practice: false
+  required_for_mastery: true
+  difficulty: beginner
+  answer_options: []
+  presentation:
+    scenario: Power BI Desktop practice
+    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
+      tells you which skill to use without giving you the final answer.
+    task: In Report view, add a Card visual. Use `order_total` and keep its summarization set to Sum. Enter the total shown
+      on the card.
+    requirements:
+    - Use Power BI Desktop for the task.
+    - Use the source file or files provided with the lesson.
+    - Enter only the result or short response the task asks for.
+    expected_output: A checked result from the Power BI report or model.
+    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
+    skills_practiced:
+    - Power BI
+    source_files:
+    - datasets/orders.csv
+    after_correct: Correct. The eight orders total 1,123.
+  instruction:
+    title: Practice — Build your first business total
+    objective: Complete a focused Power BI task and verify the business result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
+      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+- activity_id: academy2_powerbi_getting_started_transfer
+  title: Apply It — Use the skill in a new situation
+  type: transfer
   runtime: recognition
   prompt: Which sequence is the safest starting workflow?
   answer_options:
@@ -104,31 +259,81 @@ activities:
   - Visualize first, then inspect
   - Publish before modeling
   - Create measures before loading data
-  hints: []
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
   validator:
     type: exact_answer
     expected_answer: Connect, inspect, transform, model, measure, visualize, validate
   required_for_practice: true
-  required_for_mastery: true
+  required_for_mastery: false
   evidence_eligible: true
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
     task: Which sequence is the safest starting workflow?
     requirements:
-    - Choose one answer.
-    - Check your answer before continuing.
+    - Choose the answer that best follows the lesson idea.
     expected_output: One correct selection.
     skills_practiced:
     - Getting Started with Power BI
     after_correct: You identified the core idea behind getting started with power bi.
     common_errors: []
   instruction:
-    title: Getting Started with Power BI
-    objective: Build a practical understanding of getting started with power bi.
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
-    body: A reliable workflow moves from source understanding toward presentation, with validation at every
-      stage.
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
   required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+  solution: Connect, inspect, transform, model, measure, visualize, validate
+- activity_id: academy2_powerbi_getting_started_recap
+  title: Recap — Getting Started with Power BI
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Getting Started with Power BI
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Getting Started with Power BI
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - **Report view** is where you arrange charts, cards, slicers, and text on report pages.
+
+      - **Data view** lets you inspect the rows and columns already loaded into the model.
+
+      - **Model view** shows tables and the relationships between them.
+
+      - **Power Query Editor** is where you clean and reshape data before it reaches the model.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

@@ -1,17 +1,19 @@
-lesson_id: spreadsheet_references
+lesson_id: academy2_spreadsheet_references
 title: Cell References, Sorting & Filtering
 order: 2
 difficulty: beginner
-description: Create calculated columns with relative references, then use an absolute reference for a shared
-  business assumption.
-estimated_minutes: 40
+description: Build row-level formulas, understand relative references, lock shared assumptions, and investigate results with
+  sorting and filtering.
+estimated_minutes: 45
 content: lesson.md
 objectives:
-- Write a row-level revenue formula and fill it down.
-- Lock a shared rate with an absolute reference.
+- Build a row-level arithmetic formula from fields in the same record.
+- Use an absolute reference for a shared rate or assumption.
+- Sort and filter calculated results to answer a business question.
 key_takeaways:
-- Relative references move as a formula is filled down.
-- Absolute references keep a shared assumption fixed.
+- Relative references move when formulas are filled to another row.
+- Absolute references keep a shared cell fixed with dollar signs.
+- A strong formula is written once, filled down, and spot-checked.
 teaches:
 - spreadsheet.references
 - spreadsheet.formulas
@@ -21,108 +23,163 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Save the continuing working copy as an .xlsx file in the Academy workspace before selecting
-    Check Workbook.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+    latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
-- activity_id: spreadsheet_references_1
-  title: Learn — Quick concept check
+- activity_id: academy2_spreadsheet_references_learn
+  title: Learn — Cell References, Sorting & Filtering
+  type: recognition
+  runtime: content
+  step_kind: concept
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Learn — Cell References, Sorting & Filtering
+    objective: Build a row-level arithmetic formula from fields in the same record.
+    body: '# Build formulas that keep working
+
+
+      A formula can use values from other cells. Those cell addresses are called **references**.
+
+
+      A **relative reference**, such as `D2`, moves when a formula is copied. This is useful for row-by-row calculations.
+      An **absolute reference**, such as `$B$1`, stays fixed. This is useful when every row must use the same rate, target,
+      or assumption.
+
+
+      Sorting changes the order of rows. Filtering temporarily hides rows that do not match your conditions. Neither action
+      should change the underlying values.
+
+
+      In this lesson, you will calculate a row-level result, decide which references should move or stay fixed, and narrow
+      a table to answer a business question.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Learn the idea in plain language before you use it.
+    task: Read the explanation, then continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced:
+    - spreadsheet.references
+    - spreadsheet.formulas
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_references_check
+  title: Learn & Predict — Relative and absolute references
   type: recognition
   runtime: recognition
-  prompt: |-
-    Which reference stays fixed when a formula is copied down?
-
-    <!-- DCA GOOGLE SHEETS STEPS START -->
-    ### Complete this task in Google Sheets
-
-    1. Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    2. Open **the worksheet named in the task** and work in the worksheet named in the task.
-    3. Click the first required output cell and begin the lookup formula with `=`.
-    4. Use the current row's key as the search key and the named lookup table as the lookup range.
-    5. Use an exact match and lock the lookup range with `$` references before filling down.
-    6. Verify at least three results against the source table and correct unexpected `#N/A` values.
-    7. Confirm the finished workbook matches this result: **One selected answer.**
-    8. Wait until Google Sheets shows that saving is complete.
-    9. Return to Career Accelerator and click **Check My Work**.
-    <!-- DCA GOOGLE SHEETS STEPS END -->
-  answer_options:
-  - $B$2
-  - B2
-  - B$2:B10
-  - B:B
+  prompt: A formula uses a row-level sales reference and a fixed rate reference. When the formula is filled down, which part
+    should change?
   starter: ''
-  solution: $B$2
+  solution: The row-level sales reference
   hints:
-  - Review the short explanation and focus on the role each field or formula plays.
+  - Dollar signs lock a row and column.
+  - The employee-specific value should move to the next employee row.
+  - Choose the option that follows the rule explained in the worked example.
   validator:
     type: exact_answer
-    expected_answer: $B$2
+    expected_answer: The row-level sales reference
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Start with one short concept check before working in the real workbook.
-    task: Which reference stays fixed when a formula is copied down?
+    scenario: Northstar Operations learning scenario
+    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    task: A formula uses a row-level sales reference and a fixed rate reference. When the formula is filled down, which part
+      should change?
     requirements:
-    - Choose the answer that best supports a reliable spreadsheet workflow.
-    expected_output: One selected answer.
+    - Choose the answer that best follows the concept explained in the lesson.
+    expected_output: One selected answer supported by the lesson concept.
     skills_practiced:
     - spreadsheet.references
-    after_correct: You are ready to apply the idea in the Northstar workbook.
-    primary_workbook_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
+    after_correct: The row-level input moves with the record, while the shared assumption remains fixed.
   instruction:
-    title: Learn — Cell References, Sorting & Filtering
-    objective: Which reference stays fixed when a formula is copied down?
-    action_label: Choose the best answer
-    body: Relative references change with the row. Absolute references use dollar signs to keep a cell fixed.
-      For example, `=K2*(1+'Lookup Tables'!$B$2)` changes K2 as it fills down but always uses the tax rate
-      in B2.
+    phase: LEARN & PREDICT
+    title: Learn & Predict — Relative and absolute references
+    objective: Decide which references should move and which should stay fixed.
+    why_it_matters: Analysts often calculate one result for every row while also using a shared assumption such as a tax rate,
+      target, or commission percentage. The formula must treat those two kinds of references differently.
+    concept: A relative reference such as `C2` changes when copied down. An absolute reference such as `$B$1` stays fixed.
+      In a formula like `=C2*$B$1`, the row-level amount moves from C2 to C3, while the shared rate remains in B1.
+    worked_example: A bonus worksheet stores each employee’s sales in column C and one company bonus rate in B1. The first
+      formula uses the current employee’s sales and the fixed rate. Filling the formula down should move the sales reference
+      but keep the rate locked.
+    action_label: Make a prediction
   required_for_completion: true
-  google_sheets:
-    source_of_truth: Google Sheets
-    steps:
-    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
-    - Open **the worksheet named in the task** and work in the worksheet named in the task.
-    - Click the first required output cell and begin the lookup formula with `=`.
-    - Use the current row's key as the search key and the named lookup table as the lookup range.
-    - Use an exact match and lock the lookup range with `$` references before filling down.
-    - Verify at least three results against the source table and correct unexpected `#N/A` values.
-    - 'Confirm the finished workbook matches this result: **One selected answer.**'
-    - Wait until Google Sheets shows that saving is complete.
-    - Return to Career Accelerator and click **Check My Work**.
-    workbook_flow: one_continuing_linked_google_sheet
-    primary_action: Open Google Sheet
-    check_action: Check My Work
-    hide_download_upload: true
-- activity_id: spreadsheet_references_workbook_guided
+  answer_options:
+  - The row-level sales reference
+  - The fixed rate reference
+  - Both references stay unchanged
+  - Both references become text
+  step_kind: knowledge_check
+  completion_mode: validated
+  xp: 50
+- activity_id: academy2_spreadsheet_references_example
+  title: Example — See cell references, sorting & filtering in context
+  type: recognition
+  runtime: content
+  step_kind: worked_example
+  completion_mode: continue
+  xp: 50
+  estimated_minutes: 3
+  prompt: ''
+  instruction:
+    title: Example — See cell references, sorting & filtering in context
+    objective: Study a worked example before solving a different task.
+    body: '## A separate example
+
+
+      A training sheet contains Hours Attended in column C and an hourly reimbursement rate in cell H2. The first formula
+      multiplies `C2` by `$H$2`.
+
+
+      When the formula is copied down, `C2` becomes `C3`, `C4`, and so on, while `$H$2` stays fixed. Each employee uses their
+      own hours and the same rate.
+
+
+      The analyst then filters Department to “Operations” and sorts Reimbursement from highest to lowest to review the largest
+      claims first.
+
+
+      **What to notice:** References control how formulas behave when copied; filters and sorts help investigate the result
+      without changing the source records.'
+  presentation:
+    scenario: A separate worked example
+    introduction: Study how the idea works before solving a different task.
+    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    requirements: []
+    expected_output: An understanding of how the method is applied.
+    skills_practiced:
+    - spreadsheet.references
+    - spreadsheet.formulas
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false
+- activity_id: academy2_spreadsheet_references_guided
   title: Try It — Calculate order revenue
   type: guided
   runtime: workbook
-  prompt: |-
-    On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 − Discount), then fill the formula through K37.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Orders**.
-    2. In **K1**, type the header `Revenue`.
-    3. In **K2**, enter `=G2*H2*(1-I2)` and press **Enter**.
-    4. Read the formula as Units × Unit Price × the portion left after Discount.
-    5. Select K2, then double-click the small blue fill handle to copy the formula through **K37**.
-    6. Select **K2:K37** and choose **Format → Number → Currency**.
-    7. Spot-check K2, K18, and K37 to confirm each row uses its own G, H, and I values.
-    8. Wait until Google Sheets shows that all changes are saved.
-    9. Return to Career Accelerator and select **Check My Work**.
+  prompt: Use the Units, Unit Price, and Discount fields to calculate Revenue for every order in K2:K37.
   starter: ''
-  solution: K1 is Revenue and every order row from K2 through K37 contains a saved formula.
+  solution: In K2 use `=G2*H2*(1-I2)`, then fill the formula through K37 and format K2:K37 as currency.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - First calculate the pre-discount amount from Units and Unit Price.
+  - A discount of 10% means the order keeps 90% of its pre-discount value.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -131,6 +188,8 @@ activities:
       row: 1
       expected:
       - Revenue
+      message: 'The workbook does not yet meet this requirement: Every order row has a saved Revenue formula and the results
+        are formatted as currency.'
     - type: formula_present
       sheet: Orders
       range: K2:K37
@@ -139,33 +198,7 @@ activities:
       - g2
       - units
       message: Enter the revenue formula in K2 and fill it through K37.
-    success_feedback: Revenue is calculated for every order row.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Orders
-    columns:
-    - Units
-    - Unit Price
-    - Discount
-    - Revenue
-    row_range: G1:K37
-    starting_state: Columns G, H, and I contain Units, Unit Price, and Discount. Column K is available for
-      Revenue.
-    expected_result: K1 is Revenue and every order row from K2 through K37 contains a saved formula.
-    column_descriptions:
-      Units: Number of product units ordered.
-      Unit Price: Selling price for one unit, stored in U.S. dollars.
-      Discount: Order discount stored as a decimal percentage.
-      Revenue: Calculated order value after applying the row discount.
-    sample_values:
-    - 'Units: 18'
-    - 'Unit Price: $525.00'
-    - 'Discount: 0%'
-    - 'Revenue: $9,450.00'
+    success_feedback: You built one row-level formula and reused it consistently across the complete transaction table.
   required_for_practice: true
   required_for_mastery: false
   evidence_eligible: false
@@ -173,20 +206,18 @@ activities:
   estimated_minutes: 12
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 − Discount),
-      then fill the formula through K37.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Use the Units, Unit Price, and Discount fields to calculate Revenue for every order in K2:K37.
     requirements:
-    - Use the values from the same order row.
-    - Account for the Discount column.
-    - Format Revenue as US dollars.
-    - Fill the formula through row 37 and save.
-    expected_output: K1 is Revenue and every order row from K2 through K37 contains a saved formula.
+    - Add the header Revenue in K1.
+    - Use values from the same order row and account for the discount.
+    - Fill the formula through row 37 and format the results as U.S. dollars.
+    expected_output: Every order row has a saved Revenue formula and the results are formatted as currency.
     skills_practiced:
     - spreadsheet.references
     - spreadsheet.formulas
-    after_correct: Revenue is calculated for every order row.
+    after_correct: You built one row-level formula and reused it consistently across the complete transaction table.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -194,58 +225,70 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: Every order row has a saved Revenue formula and the results are formatted as currency.
+    hide_exact_result: true
   instruction:
+    phase: TRY IT
     title: Try It — Calculate order revenue
-    objective: On Orders, add a new column named Revenue in K1. In K2, calculate Units × Unit Price × (1 −
-      Discount), then fill the formula through K37.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    objective: Create and fill a row-level formula using fields from the same order.
+    approach: Add a Revenue column in **Orders**. In the first order row, combine Units, Unit Price, and Discount so the result
+      represents the amount earned after the discount. Enter the formula once, fill it through the remaining rows, and spot-check
+      a no-discount row and a discounted row.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Orders
+    columns:
+    - Units
+    - Unit Price
+    - Discount
+    - Revenue
+    row_range: G1:K37
+    starting_state: Columns G, H, and I contain Units, Unit Price, and Discount. Column K is available for Revenue.
+    expected_result: Every order row has a saved Revenue formula and the results are formatted as currency.
+    column_descriptions:
+      Units: Number of product units ordered.
+      Unit Price: Selling price for one unit, stored in U.S. dollars.
+      Discount: Order discount stored as a decimal percentage.
+      Revenue: Calculated order value after applying the row discount.
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Orders**.
-    - In **K1**, type the header `Revenue`.
-    - In **K2**, enter `=G2*H2*(1-I2)` and press **Enter**.
-    - Read the formula as Units × Unit Price × the portion left after Discount.
-    - Select K2, then double-click the small blue fill handle to copy the formula through **K37**.
-    - Select **K2:K37** and choose **Format → Number → Currency**.
-    - Spot-check K2, K18, and K37 to confirm each row uses its own G, H, and I values.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
-- activity_id: spreadsheet_references_workbook_practice
-  title: Practice — Use an absolute tax-rate reference
-  type: mastery
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Orders** and locate **G1:K37**.
+    - Add a Revenue column in **Orders**. In the first order row, combine Units, Unit Price, and Discount so the result represents
+      the amount earned after the discount. Enter the formula once, fill it through the remaining rows, and spot-check a no-discount
+      row and a discounted row.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: guided_practice
+  completion_mode: validated
+  xp: 100
+- activity_id: academy2_spreadsheet_references_independent
+  title: Challenge — Lock a shared tax rate and investigate West orders
+  type: independent
   runtime: workbook
-  prompt: |-
-    Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in 'Lookup Tables'!$B$2. Fill the formula through row 37. Then filter Region to West and sort Revenue from largest to smallest. Enter the Order ID at the top of the filtered list in Check Your Work.
-
-    ### Complete this task in Google Sheets
-
-    1. Select **Open Google Sheet**, then open **Orders**.
-    2. In **L1**, type the header `Adjusted Revenue`.
-    3. In **L2**, enter `=K2*(1+'Lookup Tables'!$B$2)` and press **Enter**.
-    4. The dollar signs in `$B$2` lock the shared tax-rate cell while the Revenue row reference changes.
-    5. Fill L2 through **L37**, then format L2:L37 as currency.
-    6. Open the filter in **Region (D1)**, clear Select all, choose **West**, and select **OK**.
-    7. Open the filter in **Revenue (K1)** and choose **Sort Z → A** so the largest revenue is first.
-    8. Read the first visible Order ID in column A and enter it in **Check Your Work** in Career Accelerator.
-    9. Wait until Google Sheets shows that all changes are saved.
-    10. Return to Career Accelerator and select **Check My Work**.
+  prompt: Calculate Adjusted Revenue in L2:L37 using the shared tax rate, then identify the highest-Revenue West order and
+    enter its Order ID in Check Your Work.
   starter: ''
-  solution: Adjusted Revenue uses a locked $B$2 tax-rate reference. With Region filtered to West and Revenue
-    sorted largest to smallest, NS-1017 appears first.
+  solution: In L2 use `=K2*(1+'Lookup Tables'!$B$2)`, fill through L37, filter Region to West, sort Revenue Z→A, and enter
+    `NS-1017`.
   hints:
-  - Use the exact sheet, cells, and Google Sheets menu path shown in the numbered steps.
-  - Wait until Google Sheets finishes saving, then select Check My Work.
+  - The shared tax rate should not move when the formula is filled down.
+  - Use dollar signs around both the row and column of the tax-rate cell, then filter Region before sorting Revenue.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
+    last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -254,6 +297,8 @@ activities:
       row: 1
       expected:
       - Adjusted Revenue
+      message: 'The workbook does not yet meet this requirement: Adjusted Revenue is complete, the tax-rate reference is fixed,
+        and the submitted Order ID matches the top West order.'
     - type: formula_present
       sheet: Orders
       range: L2:L37
@@ -263,34 +308,13 @@ activities:
       message: Use a locked $B$2 reference and fill Adjusted Revenue through row 37.
     - type: table_or_filter
       sheet: Orders
+      message: 'The workbook does not yet meet this requirement: Adjusted Revenue is complete, the tax-rate reference is fixed,
+        and the submitted Order ID matches the top West order.'
     - type: evidence_answer
       expected_answer: NS-1017
       message: Filter Region to West, sort Revenue largest to smallest, and enter the first Order ID.
-    success_feedback: The absolute reference is correct, and the saved filter/sort workflow identifies NS-1017
-      as the largest West order.
-  workbook:
-    workbook_name: Northstar Operations Practice Workbook.xlsx
-    file_name: Northstar Operations Practice Workbook.xlsx
-    template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving. Career Accelerator downloads the linked workbook
-      automatically when Check My Work is selected.
-    sheet: Orders
-    columns:
-    - Revenue
-    - Adjusted Revenue
-    row_range: K1:L37
-    starting_state: Revenue is available in column K, Adjusted Revenue is blank, and the Orders filter is ready
-      to use.
-    expected_result: Adjusted Revenue uses a locked $B$2 tax-rate reference. With Region filtered to West and
-      Revenue sorted largest to smallest, NS-1017 appears first.
-    column_descriptions:
-      Revenue: Calculated order value after applying the row discount.
-      Adjusted Revenue: Revenue adjusted by the shared tax rate in Lookup Tables!B2.
-    sample_values:
-    - 'Revenue: $9,450.00'
-    - 'Adjusted Revenue: $10,111.50'
-    evidence_prompt: Which Order ID appears first after filtering Region to West and sorting Revenue largest
-      to smallest?
+    success_feedback: You combined a moving row reference with a fixed business assumption and used sorting and filtering
+      to answer a focused question.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
@@ -298,24 +322,21 @@ activities:
   estimated_minutes: 18
   presentation:
     scenario: Northstar Operations practice workbook
-    introduction: Complete this task in the linked Northstar Operations Google Sheet. The numbered steps below
-      use Google Sheets as the source of truth.
-    task: Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in 'Lookup Tables'!$B$2.
-      Fill the formula through row 37. Then filter Region to West and sort Revenue from largest to smallest.
-      Enter the Order ID at the top of the filtered list in Check Your Work.
+    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
+      ranges, and final formula.
+    task: Calculate Adjusted Revenue in L2:L37 using the shared tax rate, then identify the highest-Revenue West order and
+      enter its Order ID in Check Your Work.
     requirements:
-    - Enter Adjusted Revenue in L2 and fill it through L37.
-    - Use the shared tax rate in 'Lookup Tables'!$B$2 with an absolute reference.
-    - Filter Region so only West orders are visible.
-    - Sort Revenue from largest to smallest.
-    - Save the workbook and enter the first visible Order ID in Check Your Work.
-    expected_output: Adjusted Revenue uses a locked $B$2 tax-rate reference. With Region filtered to West and
-      Revenue sorted largest to smallest, NS-1017 appears first.
+    - Use Revenue from the current order row.
+    - Lock the tax-rate cell so it does not move when filled down.
+    - Filter Region to West and sort Revenue from largest to smallest.
+    expected_output: Adjusted Revenue is complete, the tax-rate reference is fixed, and the submitted Order ID matches the
+      top West order.
     skills_practiced:
     - spreadsheet.references
     - spreadsheet.formulas
-    after_correct: The absolute reference is correct, and the saved filter/sort workflow identifies NS-1017
-      as the largest West order.
+    after_correct: You combined a moving row reference with a fixed business assumption and used sorting and filtering to
+      answer a focused question.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -323,32 +344,144 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    success_criteria: Adjusted Revenue is complete, the tax-rate reference is fixed, and the submitted Order ID matches the
+      top West order.
+    hide_exact_result: true
   instruction:
-    title: Practice — Use an absolute tax-rate reference
-    objective: Create Adjusted Revenue in column L using each row’s Revenue and the shared tax rate in 'Lookup
-      Tables'!$B$2. Fill the formula through row 37. Then filter Region to West and sort Revenue from largest
-      to smallest. Enter the Order ID at the top of the filtered list in Check Your Work.
-    action_label: Open the linked Google Sheet and complete the numbered task
-    body: Use the same continuing Northstar Operations Google Sheet throughout the course. Follow the numbered
-      Google Sheets steps in order, wait for saving to finish, then return to Career Accelerator and select
-      Check My Work.
+    phase: CHALLENGE
+    title: Challenge — Lock a shared tax rate and investigate West orders
+    objective: Use an absolute reference, then filter and sort to answer a business question.
+    approach: Create Adjusted Revenue from each row’s Revenue and the single tax-rate assumption on Lookup Tables. The Revenue
+      reference should move as the formula is filled, but the tax-rate reference must remain fixed. Then use filters and a
+      descending sort to identify the largest West-region order.
+    action_label: Open the workbook and solve the task
+    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
+      the task.
   required_for_completion: true
+  workbook:
+    workbook_name: Northstar Operations Practice Workbook.xlsx
+    file_name: Northstar Operations Practice Workbook.xlsx
+    template: workbooks/Northstar Operations Practice Workbook.xlsx
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
+      latest shared workbook automatically.
+    sheet: Orders
+    columns:
+    - Revenue
+    - Adjusted Revenue
+    row_range: K1:L37
+    starting_state: Revenue is available in column K, Adjusted Revenue is blank, and the Orders filter is ready to use.
+    expected_result: Adjusted Revenue is complete, the tax-rate reference is fixed, and the submitted Order ID matches the
+      top West order.
+    column_descriptions:
+      Revenue: Calculated order value after applying the row discount.
+      Adjusted Revenue: Revenue adjusted by the shared tax rate in Lookup Tables!B2.
+    evidence_prompt: Which Order ID appears first after filtering Region to West and sorting Revenue largest to smallest?
   google_sheets:
     source_of_truth: Google Sheets
-    steps:
-    - Select **Open Google Sheet**, then open **Orders**.
-    - In **L1**, type the header `Adjusted Revenue`.
-    - In **L2**, enter `=K2*(1+'Lookup Tables'!$B$2)` and press **Enter**.
-    - The dollar signs in `$B$2` lock the shared tax-rate cell while the Revenue row reference changes.
-    - Fill L2 through **L37**, then format L2:L37 as currency.
-    - Open the filter in **Region (D1)**, clear Select all, choose **West**, and select **OK**.
-    - Open the filter in **Revenue (K1)** and choose **Sort Z → A** so the largest revenue is first.
-    - Read the first visible Order ID in column A and enter it in **Check Your Work** in Career Accelerator.
-    - Wait until Google Sheets shows that all changes are saved.
-    - Return to Career Accelerator and select **Check My Work**.
     workbook_flow: one_continuing_shared_google_sheet
     primary_action: Open Google Sheet
-    link_action: Paste Google Sheet Link
     check_action: Check My Work
-    access_requirement: Anyone with the link — Viewer
     hide_download_upload: true
+    steps:
+    - Open the continuing Google Sheet from Career Accelerator.
+    - Go to **Orders** and locate **K1:L37**.
+    - Create Adjusted Revenue from each row’s Revenue and the single tax-rate assumption on Lookup Tables. The Revenue reference
+      should move as the formula is filled, but the tax-rate reference must remain fixed. Then use filters and a descending
+      sort to identify the largest West-region order.
+    - Spot-check the result and confirm the source data was not unintentionally changed.
+    - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
+  step_kind: independent_practice
+  completion_mode: validated
+  xp: 125
+- activity_id: academy2_spreadsheet_references_transfer_check
+  title: Apply It — Use the skill in a new situation
+  type: transfer
+  runtime: recognition
+  prompt: A monthly target is stored in one cell and used in formulas for 40 rows. Which reference style should the target
+    use?
+  answer_options:
+  - An absolute reference
+  - A relative reference
+  - A whole-column reference only
+  - A text value copied into every formula
+  starter: ''
+  solution: An absolute reference
+  hints:
+  - Start with the business result the new situation needs.
+  - Think about what the lesson skill changes, checks, calculates, or protects.
+  - Remove choices that answer a different question or would damage the source data.
+  validator:
+    type: exact_answer
+    expected_answer: An absolute reference
+  required_for_practice: true
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: A new workplace situation
+    introduction: Use the lesson idea in a different context.
+    task: A monthly target is stored in one cell and used in formulas for 40 rows. Which reference style should the target
+      use?
+    requirements:
+    - Choose the answer that best follows the lesson idea.
+    expected_output: One selected answer with the correct reasoning.
+    skills_practiced:
+    - spreadsheet.references
+    after_correct: Use absolute references for shared assumptions; use relative references for row-specific inputs.
+  instruction:
+    phase: TRANSFER
+    title: Apply It — Use the skill in a new situation
+    objective: Recognize when and how to use the skill outside the practice example.
+    why_it_matters: A shared assumption must remain fixed as formulas move through different records.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
+      the method.
+    action_label: Choose the best approach
+    body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+  required_for_completion: true
+  step_kind: transfer
+  completion_mode: validated
+  xp: 75
+- activity_id: academy2_spreadsheet_references_recap
+  title: Recap — Cell References, Sorting & Filtering
+  type: recognition
+  runtime: content
+  step_kind: recap
+  completion_mode: continue
+  xp: 25
+  estimated_minutes: 2
+  prompt: ''
+  instruction:
+    title: Recap — Cell References, Sorting & Filtering
+    objective: Review the main idea and prepare to use it again.
+    body: '# Recap: Cell References, Sorting & Filtering
+
+
+      You have practiced the idea with support and then used it more independently.
+
+
+      ## Key points
+
+
+      - Relative references move when formulas are filled to another row.
+
+      - Absolute references keep a shared cell fixed with dollar signs.
+
+      - A strong formula is written once, filled down, and spot-checked.
+
+
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
+      situation.'
+  presentation:
+    scenario: A short Academy lesson
+    introduction: Read this section at your own pace.
+    task: Read the explanation and continue when the idea makes sense.
+    requirements: []
+    expected_output: A clear understanding of the lesson idea.
+    skills_practiced: []
+  validator: {}
+  hints: []
+  solution: ''
+  required_for_completion: true
+  required_for_practice: true
+  required_for_mastery: false

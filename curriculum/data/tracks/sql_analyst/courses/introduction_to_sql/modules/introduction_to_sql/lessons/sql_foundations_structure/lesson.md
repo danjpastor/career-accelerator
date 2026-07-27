@@ -1,3 +1,16 @@
+# Meet Databases & SQL
+
+Learn how relational tables are structured and how to identify the correct unit of analysis before querying.
+
+## What you will learn
+
+- Define the grain of a table in plain language.
+- Distinguish rows, columns, cells, and tables.
+- Recognize common analyst-facing data types.
+- Write a basic SELECT query with multiple columns.
+
+## Main idea
+
 # Tables, Rows, Columns, and Data Types
 
 > **Learning goal:** Build a reliable mental model of a table before you write SQL. You will learn to identify a table's grain, distinguish rows from columns, recognize common data types, and select fields without changing the source data.
@@ -118,3 +131,9 @@ A missing satisfaction score does not necessarily mean a score of zero. It may m
 - Data types determine how values can be compared and calculated.
 - `SELECT` chooses result columns; `FROM` chooses the source table.
 - A query returns a result set and does not modify the source table.
+
+## Key takeaways
+
+- Always identify what one row represents before analysis.
+- IDs may contain digits but still behave as text labels.
+- Selecting columns changes the result shape, not the source data.
