@@ -2,9 +2,7 @@ lesson_id: academy2_powerbi_filtering
 title: Filtering and Interaction
 order: 4
 difficulty: beginner
-description: 'Filters narrow the data used by a visual or report. Power BI supports filters at several levels: one visual,
-  one page, or the entire report. A **slicer** is a filter control placed directly on the report so the reader can change
-  the view.'
+description: 'Filters narrow the data used by a visual or report. Power BI supports filters at several levels: one visual, one page, or the entire report. A **slicer** is a filter control placed directly on the report so the reader can change the view.'
 estimated_minutes: 36
 content: lesson.md
 objectives:
@@ -31,21 +29,18 @@ activities:
   instruction:
     title: Learn — Filtering and Interaction
     objective: Explain the purpose of filtering and interaction.
-    body: 'Filters narrow the data used by a visual or report. Power BI supports filters at several levels: one visual, one
-      page, or the entire report. A **slicer** is a filter control placed directly on the report so the reader can change
-      the view.
+    body: 'Filters narrow the data used by a visual or report. Power BI supports filters at several levels: one visual, one page, or the entire report. A **slicer** is a filter control placed directly on the report so the reader can change the view.
 
 
-      Visual interactions determine whether selecting one chart filters, highlights, or leaves another visual unchanged. When
-      a number looks unexpectedly small, check every active filter and slicer before assuming records are missing.
+      Visual interactions determine whether selecting one chart filters, highlights, or leaves another visual unchanged. When a number looks unexpectedly small, check every active filter and slicer before assuming records are missing.
 
 
-      A useful report makes its filter state easy to understand. Clear labels and sensible default selections help the reader
-      know what the numbers represent.'
+      A useful report makes its filter state easy to understand. Clear labels and sensible default selections help the reader know what the numbers represent.'
+    concept_heading: Focus on the Rows That Matter
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning filtering and interaction before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how filtering and interaction works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -79,8 +74,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What does a slicer provide?
     requirements:
     - Choose one answer.
@@ -95,6 +90,7 @@ activities:
     objective: Build a practical understanding of filtering and interaction.
     action_label: Choose the best answer
     body: Slicers expose selected filter fields directly to the report user.
+    concept_heading: Focus on the Rows That Matter
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -115,17 +111,15 @@ activities:
     body: '## A separate example
 
 
-      A recruitment report has a card for total applications and a slicer for Department. Selecting Engineering updates the
-      card and interview chart together. The analyst tests the selection, clears it, and confirms the report returns to the
-      company-wide total before publishing.
+      A recruitment report has a card for total applications and a slicer for Department. Selecting Engineering updates the card and interview chart together. The analyst tests the selection, clears it, and confirms the report returns to the company-wide total before publishing.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Focus on the Rows That Matter
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning filtering and interaction before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how filtering and interaction works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -144,8 +138,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 8
-  prompt: Create a Card showing Sum of `order_total`, then add a slicer using `status`. Select **Completed**. What value does
-    the Card show?
+  prompt: Create a Card showing Sum of `order_total`, then add a slicer using `status`. Select **Completed**. What value does the Card show?
   starter: ''
   solution: '878'
   hints:
@@ -164,17 +157,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
-    task: Create a Card showing Sum of `order_total`, then add a slicer using `status`. Select **Completed**. What value does
-      the Card show?
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
+    task: Create a Card showing Sum of `order_total`, then add a slicer using `status`. Select **Completed**. What value does the Card show?
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -183,9 +173,8 @@ activities:
   instruction:
     title: Try It — Control a report with a slicer
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Focus on the Rows That Matter
 - activity_id: academy2_powerbi_filtering_independent
   title: Practice — Test a different filter state
   type: independent
@@ -213,16 +202,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
     task: Change the slicer selection to **Processing**. Enter the updated Card value.
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -231,9 +218,8 @@ activities:
   instruction:
     title: Practice — Test a different filter state
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Focus on the Rows That Matter
 - activity_id: academy2_powerbi_filtering_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -257,8 +243,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What is the safest filter design?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -272,6 +258,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Focus on the Rows That Matter
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -301,12 +288,12 @@ activities:
       - Filtering and Interaction supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Focus on the Rows That Matter
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning filtering and interaction before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how filtering and interaction works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

@@ -35,18 +35,18 @@ Preparation only: review the brief, confirm the business problem, create the pro
 - **Review:** Week 1 cumulative knowledge check and retrospective
 
 ## Checklist
-- [ ] Complete the planned Google Certificate work for the week
-- [ ] Complete Spreadsheet Structure and Data Types
-- [ ] Complete Cell References and Core Formulas
-- [ ] Complete Conditional Formulas and Logic
-- [ ] Complete Conditional Summaries
-- [ ] Practice sorting, filtering, and identifying missing values
-- [ ] Build and validate a small formula-based summary
-- [ ] Review the flagship project brief and stakeholder problem
-- [ ] Create or verify the project folder structure
-- [ ] Preserve the untouched raw source files
-- [ ] Pass the Week 1 Cumulative Knowledge Check
-- [ ] Complete the Week 1 retrospective
+- [ ] Complete the Planned Google Certificate Work for the Week
+- [ ] Complete Understand Spreadsheet Structure
+- [ ] Complete Cell References, Sorting & Filtering
+- [ ] Complete IF, AND, OR & Error Handling
+- [ ] Complete COUNTIFS, SUMIFS & Variance
+- [ ] Practice Sorting, Filtering, and Identifying Missing Values
+- [ ] Build and Validate a Small Formula-Based Summary
+- [ ] Review the Flagship Project Brief and Stakeholder Problem
+- [ ] Create or Verify the Project Folder Structure
+- [ ] Preserve the Untouched Raw Source Files
+- [ ] Pass the Week 1 Knowledge Check
+- [ ] Complete the Week 1 Retrospective
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Spreadsheet foundations guided practice
-- [ ] Formula and reference error diagnosis
+- [ ] Spreadsheet Foundations Guided Practice
+- [ ] Formula and Reference Error Diagnosis

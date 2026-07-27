@@ -35,18 +35,19 @@ Complete the Project 1 model, Power BI report, findings, recommendations, docume
 - **Review:** Project 1 completion gate
 
 ## Checklist
-- [ ] Import the validated Project 1 model into Power BI
-- [ ] Build reproducible Power Query steps
-- [ ] Configure and validate the data model relationships
-- [ ] Create and test required DAX measures
-- [ ] Build executive and operational report views
-- [ ] Validate every key dashboard value against SQL
-- [ ] Write findings, recommendations, assumptions, and limitations
-- [ ] Finalize the README and reproducibility instructions
-- [ ] Add clear screenshots and project artifacts
-- [ ] Prepare a concise Project 1 interview walkthrough
-- [ ] Publish Project 1 and verify all repository links
-- [ ] Pass the Project 1 completion gate
+- [ ] Import the Validated Project 1 Model into Power BI
+- [ ] Build Reproducible Power Query Steps
+- [ ] Configure and Validate the Data Model Relationships
+- [ ] Create and Test Required DAX Measures
+- [ ] Build Executive and Operational Report Views
+- [ ] Validate Every Key Dashboard Value Against SQL
+- [ ] Write Findings, Recommendations, Assumptions, and Limitations
+- [ ] Finalize the README and Reproducibility Instructions
+- [ ] Add Clear Screenshots and Project Artifacts
+- [ ] Prepare a Concise Project 1 Interview Walkthrough
+- [ ] Publish Project 1 and Verify All Repository Links
+- [ ] Pass the Week 10 Knowledge Check
+- [ ] Complete the Week 10 Retrospective
 
 ## Daily Log
 
@@ -64,5 +65,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Project 1 Power BI model and calculation audit
-- [ ] Project 1 stakeholder walkthrough and publication review
+- [ ] Project 1 Power BI Model and Calculation Audit
+- [ ] Project 1 Stakeholder Walkthrough and Publication Review

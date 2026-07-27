@@ -1341,9 +1341,11 @@ class TaskRow(QWidget):
         action_text=None,
         on_action=None,
         completed=False,
+        preserve_source_in_compact=False,
     ):
         super().__init__()
         self._forced_density = "comfortable"
+        self._preserve_source_in_compact = bool(preserve_source_in_compact)
         self._interface_scale = 1.0
         self.setStyleSheet("background:transparent;border:none;")
         self.setMinimumWidth(0)
@@ -1510,9 +1512,13 @@ class TaskRow(QWidget):
         self._forced_density = str(density or "comfortable")
         compact = self._forced_density != "comfortable"
         ultra = self._forced_density == "ultra"
-        self.source_label.setVisible(not compact)
+        show_source = (not compact) or self._preserve_source_in_compact
+        self.source_label.setVisible(show_source)
         self.title_label.setWordWrap(not compact)
         self.source_label.setWordWrap(not compact)
+        self.source_label.setStyleSheet(
+            f"font-size:{7.6 if ultra else 8.1 if compact else 8.7}pt;"
+        )
         self.row_layout.setContentsMargins(0, 1 if compact else 3, 0, 1 if compact else 3)
         self.row_layout.setSpacing(4 if ultra else 6 if compact else 9)
         if self.metadata_label is not None:

@@ -1,6 +1,7 @@
 course_id: powerbi_modeling
 title: Data Modeling in Power BI
 order: 2
+roadmap_week: 7
 description: Build dependable Power BI models by defining table roles, grain, relationships, and star-schema structure.
 estimated_minutes: 72
 outcomes:

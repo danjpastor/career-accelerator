@@ -1,0 +1,253 @@
+assessment_id: week_10_reporting_publication_check
+title: Week 10 Knowledge Check
+order: 10
+description: An eight-question check covering Week 10 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- Score at least 80% (seven of eight) to pass.
+- Review recommendations under missed questions before retaking the check.
+requires:
+- roadmap.portfolio_readiness
+passing_score: 0.8
+activities:
+- activity_id: w10_q1
+  title: Model dimensions and facts
+  type: mastery
+  runtime: recognition
+  prompt: In a star schema, what usually belongs in a fact table?
+  answer_options:
+  - Events or measurements at a defined grain
+  - Only descriptive category names
+  - A list of report colors
+  - Unrelated notes from every source
+  starter: ''
+  solution: Events or measurements at a defined grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Events or measurements at a defined grain
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: In a star schema, what usually belongs in a fact table?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review fact tables, dimensions, and star-schema grain.
+- activity_id: w10_q2
+  title: Use measures
+  type: mastery
+  runtime: recognition
+  prompt: Why is a measure usually preferred for a filter-responsive KPI?
+  answer_options:
+  - It recalculates in the current filter context
+  - It permanently changes every source row
+  - It removes relationships
+  - It prevents report interaction
+  starter: ''
+  solution: It recalculates in the current filter context
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It recalculates in the current filter context
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Why is a measure usually preferred for a filter-responsive KPI?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review DAX measures and filter context.
+- activity_id: w10_q3
+  title: Choose visuals
+  type: mastery
+  runtime: recognition
+  prompt: Which visual best supports comparing values across a small set of categories?
+  answer_options:
+  - A bar or column chart
+  - A decorative background image
+  - A single unlabeled shape
+  - A random color palette
+  starter: ''
+  solution: A bar or column chart
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A bar or column chart
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Which visual best supports comparing values across a small set of categories?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review visual selection and comparison design.
+- activity_id: w10_q4
+  title: Reconcile reports
+  type: mastery
+  runtime: recognition
+  prompt: Before publishing a dashboard, KPI cards should be compared with what?
+  answer_options:
+  - Validated source or analytical totals
+  - Only the chart titles
+  - A different company’s dashboard
+  - The number of report pages
+  starter: ''
+  solution: Validated source or analytical totals
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Validated source or analytical totals
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Before publishing a dashboard, KPI cards should be compared with what?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review dashboard reconciliation and QA.
+- activity_id: w10_q5
+  title: Design interactions
+  type: mastery
+  runtime: recognition
+  prompt: What should a report filter do?
+  answer_options:
+  - Change relevant visuals in a predictable way
+  - Delete records from the source
+  - Rename measures automatically
+  - Hide all context from the user
+  starter: ''
+  solution: Change relevant visuals in a predictable way
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Change relevant visuals in a predictable way
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What should a report filter do?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review slicers, filters, and interaction testing.
+- activity_id: w10_q6
+  title: Write recommendations
+  type: mastery
+  runtime: recognition
+  prompt: A useful recommendation should be connected to what?
+  answer_options:
+  - A validated finding and a stakeholder decision
+  - The analyst’s favorite chart
+  - An unsupported prediction
+  - A random industry trend
+  starter: ''
+  solution: A validated finding and a stakeholder decision
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A validated finding and a stakeholder decision
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: A useful recommendation should be connected to what?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review executive summaries and recommendation writing.
+- activity_id: w10_q7
+  title: Publish reproducibly
+  type: mastery
+  runtime: recognition
+  prompt: What makes a portfolio analysis reproducible?
+  answer_options:
+  - Clear data sources, documented steps, and runnable artifacts
+  - Screenshots without source files
+  - A dashboard with no README
+  - Manual edits that are not recorded
+  starter: ''
+  solution: Clear data sources, documented steps, and runnable artifacts
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Clear data sources, documented steps, and runnable artifacts
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What makes a portfolio analysis reproducible?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review publication, README, and reproducibility requirements.
+- activity_id: w10_q8
+  title: Protect privacy
+  type: mastery
+  runtime: recognition
+  prompt: What should be checked before publishing project data?
+  answer_options:
+  - Whether sensitive or restricted information must be removed
+  - Whether every column can be made public
+  - Whether filenames are short
+  - Whether charts use gradients
+  starter: ''
+  solution: Whether sensitive or restricted information must be removed
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Whether sensitive or restricted information must be removed
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 10 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What should be checked before publishing project data?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review responsible publication and privacy checks.

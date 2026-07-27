@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -491,7 +492,7 @@ class AcceleratorAcademyWidget(QWidget):
         self.lesson_splitter.setChildrenCollapsible(False)
         self.lesson_splitter.setHandleWidth(5)
 
-        learn = Card("Lesson & Practice")
+        learn = Card()
         learn.layout.setContentsMargins(8, 8, 8, 8)
         self.step_learn_view = CoursePageWidget()
         self.step_learn_view.set_navigation(next_title=None, show_back=False)
@@ -565,46 +566,127 @@ class AcceleratorAcademyWidget(QWidget):
         choice_layout.addWidget(self.step_choice_explanation)
         choice_layout.addStretch(1)
 
-        self.step_workbook_host = QWidget()
-        workbook_layout = QVBoxLayout(self.step_workbook_host)
-        workbook_layout.setContentsMargins(0, 4, 0, 4)
-        workbook_layout.setSpacing(9)
+        self.step_workbook_host = QScrollArea()
+        self.step_workbook_host.setWidgetResizable(True)
+        self.step_workbook_host.setFrameShape(QFrame.Shape.NoFrame)
+        self.step_workbook_host.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.step_workbook_host.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        self.step_workbook_host.setStyleSheet(
+            "QScrollArea {background:transparent;border:none;}"
+            "QScrollArea > QWidget > QWidget {background:transparent;}"
+        )
+        workbook_content = QWidget()
+        workbook_content.setMinimumWidth(0)
+        workbook_content.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        workbook_layout = QVBoxLayout(workbook_content)
+        workbook_layout.setContentsMargins(0, 4, 4, 4)
+        workbook_layout.setSpacing(10)
+        self.step_workbook_host.setWidget(workbook_content)
 
+        self.step_workbook_summary_card = QFrame()
+        self.step_workbook_summary_card.setObjectName("AcademyWorkbookSummary")
+        self.step_workbook_summary_card.setStyleSheet(
+            "QFrame#AcademyWorkbookSummary {background:#0F1C30;border:1px solid #2B3D59;"
+            "border-radius:10px;}"
+        )
+        summary_card_layout = QVBoxLayout(self.step_workbook_summary_card)
+        summary_card_layout.setContentsMargins(12, 12, 12, 12)
+        summary_card_layout.setSpacing(10)
+        summary_row = QHBoxLayout()
+        summary_row.setSpacing(10)
+        workbook_icon = QLabel("▦")
+        workbook_icon.setFixedSize(42, 42)
+        workbook_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        workbook_icon.setStyleSheet(
+            "background:#0BA65A;color:#FFFFFF;border-radius:8px;font-size:20pt;font-weight:700;"
+        )
+        summary_row.addWidget(workbook_icon, 0, Qt.AlignmentFlag.AlignTop)
         self.step_workbook_summary = QLabel()
         self.step_workbook_summary.setWordWrap(True)
+        self.step_workbook_summary.setMinimumWidth(0)
         self.step_workbook_summary.setStyleSheet(
-            "background:#111D31;border:1px solid #31415F;border-radius:9px;"
-            "padding:11px;color:#E4EAF5;"
+            "background:transparent;border:none;color:#E4EAF5;font-size:9.5pt;"
         )
-        workbook_layout.addWidget(self.step_workbook_summary)
-
-        workbook_actions = QVBoxLayout()
-        workbook_actions.setSpacing(7)
-        workbook_row_one = QHBoxLayout()
-        workbook_row_one.setSpacing(7)
-        self.workbook_open_button = QPushButton("Open Google Sheet")
+        summary_row.addWidget(self.step_workbook_summary, 1)
+        summary_card_layout.addLayout(summary_row)
+        self.workbook_open_button = QPushButton("Open Google Sheet  ↗")
         self.workbook_open_button.setObjectName("Primary")
+        self.workbook_open_button.setMinimumHeight(40)
         self.workbook_open_button.clicked.connect(self._open_practice_workbook)
+        summary_card_layout.addWidget(self.workbook_open_button)
+        workbook_layout.addWidget(self.step_workbook_summary_card)
+
         self.workbook_google_button = QPushButton("Paste Google Sheet Link")
         self.workbook_google_button.setObjectName("Secondary")
+        self.workbook_google_button.setMinimumHeight(38)
         self.workbook_google_button.clicked.connect(self._use_in_google_sheets)
-        workbook_row_one.addWidget(self.workbook_open_button, 1)
-        workbook_row_one.addWidget(self.workbook_google_button, 1)
-        workbook_actions.addLayout(workbook_row_one)
+        workbook_layout.addWidget(self.workbook_google_button)
 
-        workbook_row_two = QHBoxLayout()
-        workbook_row_two.setSpacing(7)
         self.workbook_reset_button = QPushButton("Get Starter Workbook")
         self.workbook_reset_button.setObjectName("Secondary")
+        self.workbook_reset_button.setMinimumHeight(38)
         self.workbook_reset_button.clicked.connect(self._reset_lesson_workbook)
+        workbook_layout.addWidget(self.workbook_reset_button)
+
         self.workbook_instructions_button = QPushButton("Google Sheets Setup")
         self.workbook_instructions_button.setObjectName("Secondary")
+        self.workbook_instructions_button.setMinimumHeight(38)
         self.workbook_instructions_button.clicked.connect(self._open_lesson_instructions)
-        workbook_row_two.addWidget(self.workbook_reset_button, 1)
-        workbook_row_two.addWidget(self.workbook_instructions_button, 1)
-        workbook_actions.addLayout(workbook_row_two)
-        workbook_layout.addLayout(workbook_actions)
+        workbook_layout.addWidget(self.workbook_instructions_button)
 
+        self.step_workbook_evidence_label = QLabel("Your answer")
+        self.step_workbook_evidence_label.setStyleSheet(
+            "font-size:10pt;font-weight:700;color:#FFFFFF;margin-top:4px;"
+        )
+        workbook_layout.addWidget(self.step_workbook_evidence_label)
+        self.step_workbook_answer = QTextEdit()
+        self.step_workbook_answer.setMinimumHeight(74)
+        self.step_workbook_answer.setMaximumHeight(104)
+        self.step_workbook_answer.setPlaceholderText(
+            "Enter the short result requested by the task, when one is required."
+        )
+        workbook_layout.addWidget(self.step_workbook_answer)
+
+        feedback_title = QLabel("Feedback")
+        feedback_title.setStyleSheet(
+            "font-size:12pt;font-weight:750;color:#FFFFFF;margin-top:4px;"
+        )
+        workbook_layout.addWidget(feedback_title)
+        feedback_frame = QFrame()
+        feedback_frame.setObjectName("AcademyFeedbackCard")
+        feedback_frame.setStyleSheet(
+            "QFrame#AcademyFeedbackCard {background:#0F1C30;border:1px solid #2B3D59;"
+            "border-radius:10px;}"
+        )
+        feedback_layout = QVBoxLayout(feedback_frame)
+        feedback_layout.setContentsMargins(8, 8, 8, 8)
+        feedback_layout.setSpacing(6)
+        self.step_workbook_feedback = FeedbackLabel()
+        self.step_workbook_feedback.setSizePolicy(
+            QSizePolicy.Policy.Ignored,
+            QSizePolicy.Policy.Preferred,
+        )
+        feedback_layout.addWidget(self.step_workbook_feedback)
+        self.step_workbook_explanation = QLabel()
+        self.step_workbook_explanation.setWordWrap(True)
+        self.step_workbook_explanation.setStyleSheet(
+            "background:transparent;border:none;padding:4px;color:#E7ECF8;"
+        )
+        self.step_workbook_explanation.hide()
+        feedback_layout.addWidget(self.step_workbook_explanation)
+        workbook_layout.addWidget(feedback_frame)
+
+        self.step_workbook_location_heading = QLabel("Linked Google Sheet")
+        self.step_workbook_location_heading.setStyleSheet(
+            "font-size:10pt;font-weight:700;color:#FFFFFF;margin-top:3px;"
+        )
+        workbook_layout.addWidget(self.step_workbook_location_heading)
         self.step_workbook_location = QLabel()
         self.step_workbook_location.setWordWrap(True)
         self.step_workbook_location.setTextInteractionFlags(
@@ -612,30 +694,6 @@ class AcceleratorAcademyWidget(QWidget):
         )
         self.step_workbook_location.setObjectName("Muted")
         workbook_layout.addWidget(self.step_workbook_location)
-
-        self.step_workbook_evidence_label = QLabel("Evidence answer")
-        self.step_workbook_evidence_label.setStyleSheet(
-            "font-size:10pt;font-weight:700;color:#FFFFFF;"
-        )
-        workbook_layout.addWidget(self.step_workbook_evidence_label)
-        self.step_workbook_answer = QTextEdit()
-        self.step_workbook_answer.setMinimumHeight(74)
-        self.step_workbook_answer.setMaximumHeight(104)
-        self.step_workbook_answer.setPlaceholderText(
-            "Enter the result requested in Check Your Work, when one is required."
-        )
-        workbook_layout.addWidget(self.step_workbook_answer)
-
-        self.step_workbook_feedback = FeedbackLabel()
-        workbook_layout.addWidget(self.step_workbook_feedback)
-        self.step_workbook_explanation = QLabel()
-        self.step_workbook_explanation.setWordWrap(True)
-        self.step_workbook_explanation.setStyleSheet(
-            "background:#14233B;border:1px solid #52627F;border-radius:8px;"
-            "padding:9px;color:#E7ECF8;"
-        )
-        self.step_workbook_explanation.hide()
-        workbook_layout.addWidget(self.step_workbook_explanation)
         workbook_layout.addStretch(1)
 
         self.step_response_host = QWidget()
@@ -698,8 +756,8 @@ class AcceleratorAcademyWidget(QWidget):
         workspace_layout.addWidget(self.step_workspace_stack, 1)
         self.step_workspace_card.layout.addWidget(workspace_body, 1)
         self.lesson_splitter.addWidget(self.step_workspace_card)
-        self.lesson_splitter.setStretchFactor(0, 55)
-        self.lesson_splitter.setStretchFactor(1, 45)
+        self.lesson_splitter.setStretchFactor(0, 68)
+        self.lesson_splitter.setStretchFactor(1, 32)
         root.addWidget(self.lesson_splitter, 1)
 
         footer = Card()
@@ -772,8 +830,8 @@ class AcceleratorAcademyWidget(QWidget):
 
         self.lesson_footer_splitter.addWidget(self.lesson_footer_left)
         self.lesson_footer_splitter.addWidget(self.lesson_footer_right)
-        self.lesson_footer_splitter.setStretchFactor(0, 55)
-        self.lesson_footer_splitter.setStretchFactor(1, 45)
+        self.lesson_footer_splitter.setStretchFactor(0, 68)
+        self.lesson_footer_splitter.setStretchFactor(1, 32)
         footer.layout.addWidget(self.lesson_footer_splitter)
         self.lesson_splitter.splitterMoved.connect(self._sync_lesson_footer_splitter)
         root.addWidget(footer)
@@ -816,10 +874,20 @@ class AcceleratorAcademyWidget(QWidget):
         work_layout = QVBoxLayout(work_body)
         work_layout.setContentsMargins(4, 4, 4, 4)
         work_layout.setSpacing(8)
+        self.assessment_answer_stack = QStackedWidget()
         self.assessment_sql = SqlCodeEditor()
         self.assessment_sql.setMinimumHeight(260)
-        self.assessment_sql.setPlaceholderText("Write the checkpoint query…")
-        work_layout.addWidget(self.assessment_sql, 1)
+        self.assessment_sql.setPlaceholderText("Write the checkpoint answer…")
+        self.assessment_answer_stack.addWidget(self.assessment_sql)
+
+        self.assessment_choices_page = QWidget()
+        self.assessment_choices_layout = QVBoxLayout(self.assessment_choices_page)
+        self.assessment_choices_layout.setContentsMargins(4, 8, 4, 8)
+        self.assessment_choices_layout.setSpacing(10)
+        self.assessment_choice_group = QButtonGroup(self.assessment_choices_page)
+        self.assessment_choice_group.setExclusive(True)
+        self.assessment_answer_stack.addWidget(self.assessment_choices_page)
+        work_layout.addWidget(self.assessment_answer_stack, 1)
         self.assessment_action_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.assessment_run = QPushButton("▶ Run Query")
         self.assessment_run.setObjectName("Secondary")
@@ -827,11 +895,15 @@ class AcceleratorAcademyWidget(QWidget):
         self.assessment_save = QPushButton("Save Answer")
         self.assessment_save.setObjectName("Secondary")
         self.assessment_save.clicked.connect(self._save_assessment_answer)
-        self.assessment_submit = QPushButton("Submit Checkpoint")
+        self.assessment_review = QPushButton("Review Last Attempt")
+        self.assessment_review.setObjectName("Secondary")
+        self.assessment_review.clicked.connect(self._review_assessment_attempt)
+        self.assessment_submit = QPushButton("Submit Knowledge Check")
         self.assessment_submit.setObjectName("Primary")
         self.assessment_submit.clicked.connect(self._submit_assessment)
         self.assessment_action_row.addWidget(self.assessment_run)
         self.assessment_action_row.addWidget(self.assessment_save)
+        self.assessment_action_row.addWidget(self.assessment_review)
         self.assessment_action_row.addStretch(1)
         self.assessment_action_row.addWidget(self.assessment_submit)
         work_layout.addLayout(self.assessment_action_row)
@@ -1639,47 +1711,207 @@ class AcceleratorAcademyWidget(QWidget):
 
     # -------------------------------------------------------------- lesson flow
     @staticmethod
-    def _lesson_instruction_content(
+    def _clean_step_title(value: str) -> str:
+        text = str(value or "").strip()
+        return re.sub(
+            r"^(?:learn(?:\s*&\s*predict)?|example|try it|challenge|apply it|recap)\s*[—–:-]\s*",
+            "",
+            text,
+            flags=re.IGNORECASE,
+        ).strip() or text
+
+    @staticmethod
+    def _is_generic_lesson_copy(value: str) -> bool:
+        text = re.sub(r"\s+", " ", str(value or "").strip().casefold())
+        if not text:
+            return True
+        generic = (
+            "a short academy lesson",
+            "northstar operations learning scenario",
+            "northstar operations practice workbook",
+            "a separate worked example",
+            "a new workplace situation",
+            "read the explanation",
+            "read the example",
+            "read this section",
+            "apply the named skill",
+            "use the skill in a new situation",
+        )
+        return any(item in text for item in generic)
+
+    @staticmethod
+    def _concept_heading(lesson: LessonDefinition, activity: ActivityDefinition) -> str:
+        instruction = dict(activity.instruction)
+        explicit = str(instruction.get("concept_heading") or "").strip()
+        if explicit:
+            return explicit
+        source = f"{lesson.title} {activity.title}".casefold()
+        phrases = (
+            (("grain", "row", "record"), "Go with the Grain"),
+            (("absolute reference", "cell reference", "references"), "Keep the Right Cell Fixed"),
+            (("sort", "filter"), "Focus on the Rows That Matter"),
+            (("sumif", "sumifs", "countif", "countifs", "conditional summar"), "Add and Count with Conditions"),
+            (("if", "and", "or", "logic"), "Let the Formula Decide"),
+            (("clean", "trim", "text", "date"), "Make the Data Consistent"),
+            (("lookup", "vlookup", "xlookup", "index", "match"), "Bring the Right Value Across"),
+            (("relationship", "key"), "Connect Related Records"),
+            (("pivot",), "Summarize Without New Formulas"),
+            (("kpi", "chart", "dashboard", "visual"), "Show the Story Clearly"),
+            (("select", "alias", "column"), "Ask for the Columns You Need"),
+            (("where", "filtering", "condition"), "Keep Only the Rows You Need"),
+            (("group", "aggregate", "summary"), "Turn Rows into Answers"),
+            (("join",), "Connect the Tables"),
+            (("subquery",), "Build the Answer in Layers"),
+            (("cte", "common table"), "Name Each Step"),
+            (("window", "rank", "lag", "lead"), "Compare Rows Without Collapsing Them"),
+            (("power query", "transform"), "Shape the Data Before Reporting"),
+            (("model", "schema", "cardinality"), "Build a Model You Can Trust"),
+            (("dax", "measure", "filter context"), "Build Measures That Respond"),
+            (("python basics", "variable"), "Give Values Useful Names"),
+            (("list", "dictionary"), "Keep Related Values Together"),
+            (("numpy", "array"), "Calculate Across Many Values"),
+            (("pandas", "dataframe", "indexing"), "Work with DataFrames"),
+            (("merge", "concat"), "Bring DataFrames Together"),
+            (("plot", "matplotlib", "visualization"), "Make the Pattern Visible"),
+        )
+        for keywords, heading in phrases:
+            if any(keyword in source for keyword in keywords):
+                return heading
+        return str(lesson.title or "Learn the idea")
+
+    @staticmethod
+    def _practical_scenario(task: str, track_title: str) -> str:
+        task_text = str(task or "").strip()
+        lowered = task_text.casefold()
+        if any(word in lowered for word in ("order", "shipment", "inventory", "product")):
+            role = "The operations manager"
+            purpose = "is preparing the weekly operations review"
+        elif any(word in lowered for word in ("revenue", "sales", "customer", "campaign")):
+            role = "The commercial analytics team"
+            purpose = "needs a reliable answer for an upcoming business review"
+        elif any(word in lowered for word in ("ticket", "support", "case")):
+            role = "The support manager"
+            purpose = "is reviewing the team’s open workload"
+        elif any(word in lowered for word in ("employee", "staff", "capacity", "hours")):
+            role = "The workforce planning manager"
+            purpose = "is checking staffing capacity"
+        elif any(word in lowered for word in ("funding", "project", "outcome", "ngo")):
+            role = "The program director"
+            purpose = "is preparing an outcomes update"
+        elif "power bi" in str(track_title or "").casefold():
+            role = "The report owner"
+            purpose = "is preparing a dashboard for stakeholders"
+        elif "python" in str(track_title or "").casefold():
+            role = "A data analyst"
+            purpose = "is building a repeatable analysis"
+        elif "sql" in str(track_title or "").casefold():
+            role = "A business stakeholder"
+            purpose = "needs an answer from the company database"
+        else:
+            role = "A data analyst"
+            purpose = "is preparing a trustworthy report"
+        return f"{role} {purpose}."
+
+    def _lesson_display_sections(
+        self,
         lesson: LessonDefinition,
         activity: ActivityDefinition,
-    ) -> tuple[str, str, str, str]:
-        """Build a consistent teaching sequence without leaking task answers.
-
-        Spreadsheet lessons can declare structured teaching fields while older SQL
-        and assessment content continues to use the legacy ``body`` field.
-        """
+        node: JourneyNode,
+    ) -> dict[str, str]:
         instruction = dict(activity.instruction)
-        title = str(instruction.get("title") or activity.title)
-        objective = str(
-            instruction.get("objective")
-            or "Understand the idea, then apply it in the active task."
+        presentation = dict(activity.presentation)
+        title = self._clean_step_title(
+            str(instruction.get("title") or activity.title)
         )
-        phase = str(
-            instruction.get("phase")
-            or activity.activity_type.value.replace("_", " ").upper()
-        )
-        sections: list[str] = []
-        structured_fields = (
-            ("why_it_matters", "## Why this matters"),
-            ("concept", "## Learn the idea"),
-            ("worked_example", "## Worked example"),
-            ("approach", "## How to approach the task"),
-            ("watch_for", "## Before you check your work"),
-        )
-        for key, heading in structured_fields:
-            value = str(instruction.get(key) or "").strip()
-            if value:
-                sections.append(f"{heading}\n\n{value}")
 
+        # Collect durable lesson context once. It is used only on the stage where
+        # that material belongs; later practice steps no longer repeat the same
+        # blue purpose bubble, green concept block, and yellow example on every
+        # screen.
+        lesson_why = ""
+        lesson_concept = ""
+        lesson_example = ""
+        for candidate in lesson.activities:
+            candidate_instruction = dict(candidate.instruction)
+            if not lesson_why:
+                lesson_why = str(candidate_instruction.get("why_it_matters") or "").strip()
+            if not lesson_concept:
+                lesson_concept = str(candidate_instruction.get("concept") or "").strip()
+            if candidate.step_kind == LessonStepKind.WORKED_EXAMPLE and not lesson_example:
+                lesson_example = str(
+                    candidate_instruction.get("worked_example")
+                    or candidate_instruction.get("body")
+                    or ""
+                ).strip()
+            if not lesson_example:
+                lesson_example = str(candidate_instruction.get("worked_example") or "").strip()
+
+        own_why = str(instruction.get("why_it_matters") or "").strip()
+        own_concept = str(instruction.get("concept") or "").strip()
+        own_example = str(instruction.get("worked_example") or "").strip()
         body = str(instruction.get("body") or "").strip()
-        if body:
-            if sections:
-                sections.append(f"## Additional context\n\n{body}")
-            else:
-                sections.append(body)
-        if not sections:
-            sections.append(lesson.content_markdown)
-        return title, objective, "\n\n".join(sections), phase
+
+        why = ""
+        concept = ""
+        example = ""
+
+        if activity.step_kind == LessonStepKind.CONCEPT:
+            why = own_why or lesson_why or str(lesson.description or "").strip()
+            if not why and lesson.objectives:
+                why = str(lesson.objectives[0])
+            concept = own_concept or body or lesson_concept or lesson.content_markdown
+        elif activity.step_kind == LessonStepKind.WORKED_EXAMPLE:
+            example = own_example or body or lesson_example
+        elif activity.step_kind == LessonStepKind.RECAP:
+            concept = own_concept or body or lesson.content_markdown
+        elif bool(instruction.get("show_context")):
+            # Curriculum authors may explicitly opt a unique step back into the
+            # full teaching treatment, but inherited lesson copy is otherwise
+            # suppressed on checks, practice, challenges, and transfer steps.
+            why = own_why
+            concept = own_concept
+            example = own_example
+
+        task = str(presentation.get("task") or activity.prompt or "").strip()
+        if self._is_generic_lesson_copy(task) or activity.runtime == "content":
+            task = ""
+        scenario = str(presentation.get("scenario") or "").strip()
+        if self._is_generic_lesson_copy(scenario):
+            scenario = self._practical_scenario(task, node.track_title) if task else ""
+
+        task_body = ""
+        if task:
+            parts: list[str] = []
+            if scenario:
+                parts.append(scenario)
+            parts.append(task)
+
+            helpful: list[str] = []
+            approach = str(instruction.get("approach") or "").strip()
+            if approach and not self._is_generic_lesson_copy(approach):
+                helpful.append(approach)
+            requirements = presentation.get("requirements") or ()
+            if isinstance(requirements, str):
+                requirements = (requirements,)
+            requirement_lines = [
+                str(item).strip()
+                for item in requirements
+                if str(item).strip()
+            ]
+            if requirement_lines:
+                helpful.append("\n".join(f"- {item}" for item in requirement_lines))
+            if helpful:
+                parts.append("**Helpful requirements**\n\n" + "\n\n".join(helpful))
+            task_body = "\n\n".join(parts)
+
+        return {
+            "title": title,
+            "why": why,
+            "concept_title": self._concept_heading(lesson, activity),
+            "concept": concept,
+            "example": example,
+            "task": task_body,
+        }
 
     def _open_lesson_node(self, node: JourneyNode) -> None:
         lesson = self.catalog.lesson(str(node.lesson_id))
@@ -1695,30 +1927,27 @@ class AcceleratorAcademyWidget(QWidget):
             f"Lesson {lesson.order}: {lesson.title}"
         )
         self.lesson_step_pill.setText(f"Step {step_index} of {len(lesson.activities)}")
-        title, objective, body, phase = self._lesson_instruction_content(
-            lesson,
-            activity,
+        sections = self._lesson_display_sections(lesson, activity, node)
+        self._current_instruction_text = "\n\n".join(
+            part
+            for part in (
+                f"# {sections['title']}",
+                f"## Why does this matter?\n\n{sections['why']}" if sections["why"] else "",
+                f"## {sections['concept_title']}\n\n{sections['concept']}" if sections["concept"] else "",
+                f"## Example\n\n{sections['example']}" if sections["example"] else "",
+                f"## Task\n\n{sections['task']}" if sections["task"] else "",
+            )
+            if part
         )
-        activity_section = (
-            ""
-            if activity.runtime == "content" or activity.completion_mode == "continue"
-            else "\n\n---\n\n" + self._activity_markdown(activity, embedded=True)
-        )
-        learn_markdown = (
-            f"# {title}\n\n"
-            f"> **Step goal:** {objective}\n\n"
-            f"{body}"
-            f"{activity_section}"
-        )
-        self._current_instruction_text = learn_markdown
-        self.step_learn_view.set_markdown(
-            learn_markdown,
+        self.step_learn_view.set_academy_lesson(
+            title=sections["title"],
             eyebrow=f"LESSON {lesson.order} • {activity.step_kind.label.upper()}",
-            subtitle=(
-                f"About {activity.estimated_minutes} minutes • "
-                f"{activity.xp} XP • {activity.difficulty.title()}"
-            ),
-            bookmarked=False,
+            subtitle=f"About {activity.estimated_minutes} minutes",
+            why_it_matters=sections["why"],
+            concept_title=sections["concept_title"],
+            concept_body=sections["concept"],
+            example_body=sections["example"],
+            task_body=sections["task"],
         )
         self.step_learn_view.set_navigation(next_title=None, show_back=False)
         row = self.service.activity_progress(lesson.lesson_id, activity.activity_id)
@@ -1800,7 +2029,11 @@ class AcceleratorAcademyWidget(QWidget):
         self.step_solution.setVisible(not content_runtime and bool(activity.solution))
         self.step_feedback.setText("")
         self.step_choice_feedback.setText("")
-        self.step_workbook_feedback.setText("")
+        self.step_workbook_feedback.setText(
+            "Check your work to see feedback here.\nWe’ll let you know what’s right and where to improve."
+            if workbook_runtime
+            else ""
+        )
         self.step_response_feedback.setText("")
         self.step_explanation.hide()
         self.step_choice_explanation.hide()
@@ -1821,47 +2054,49 @@ class AcceleratorAcademyWidget(QWidget):
             or metadata.get("file_name")
             or "Northstar Operations Practice Workbook.xlsx"
         )
-        sheet = str(metadata.get("sheet") or "See the lesson instructions")
-        columns = metadata.get("columns") or []
-        if isinstance(columns, str):
-            columns = [item.strip() for item in columns.split(",") if item.strip()]
-        column_text = ", ".join(str(item) for item in columns) or "See the lesson instructions"
-        row_range = str(metadata.get("row_range") or "Configured lesson range")
-        presentation = dict(activity.presentation)
-        expected = str(
-            presentation.get("success_criteria")
-            or presentation.get("expected_output")
-            or metadata.get("expected_result")
-            or "Complete the requested workbook change."
+        validator = dict(activity.validator)
+        checks = validator.get("checks") or []
+        first_check = next(
+            (dict(item) for item in checks if isinstance(item, dict)),
+            {},
         )
-        self.step_workbook_summary.setText(
+        sheet = str(
+            metadata.get("sheet")
+            or first_check.get("sheet")
+            or "See the task"
+        )
+        table_or_range = str(
+            metadata.get("table")
+            or metadata.get("range")
+            or first_check.get("table")
+            or first_check.get("range")
+            or ""
+        ).strip()
+        context_label = "Table" if table_or_range and ":" not in table_or_range else "Range"
+        summary = (
             f"<b>Workbook:</b> {workbook_name}<br>"
-            f"<b>Sheet:</b> {sheet}<br>"
-            f"<b>Columns:</b> {column_text}<br>"
-            f"<b>Rows:</b> {row_range}<br>"
-            f"<b>Success criteria:</b> {expected}"
+            f"<b>Sheet:</b> {sheet}"
         )
+        if table_or_range:
+            summary += f"<br><b>{context_label}:</b> {table_or_range}"
+        self.step_workbook_summary.setText(summary)
         self._refresh_workbook_link_status()
         evidence_prompt = str(metadata.get("evidence_prompt") or "").strip()
         self.step_workbook_evidence_label.setVisible(bool(evidence_prompt))
         self.step_workbook_answer.setVisible(bool(evidence_prompt))
         if evidence_prompt:
-            self.step_workbook_evidence_label.setText("Check Your Work")
+            self.step_workbook_evidence_label.setText("Your answer")
             self.step_workbook_answer.setPlaceholderText(evidence_prompt)
 
     def _refresh_workbook_link_status(self) -> None:
         link = self.service.spreadsheet_share_link
         if link.linked:
             self.workbook_google_button.setText("Replace Google Sheet Link")
-            self.step_workbook_location.setText(
-                "Linked Google Sheet\n" + str(link.share_url)
-            )
+            self.step_workbook_location.setText(str(link.share_url))
         else:
             self.workbook_google_button.setText("Paste Google Sheet Link")
             self.step_workbook_location.setText(
-                "No Google Sheet is linked yet. Get the starter workbook, "
-                "import it into Google Sheets, share it as Anyone with the "
-                "link → Viewer, then paste the share link here."
+                "No Google Sheet is linked yet. Paste a viewer-access share link to begin."
             )
 
     def _open_practice_workbook(self) -> None:
@@ -2295,6 +2530,75 @@ class AcceleratorAcademyWidget(QWidget):
         QTimer.singleShot(0, self._sync_lesson_footer_splitter)
 
     # ----------------------------------------------------------- assessment flow
+    def _clear_assessment_choices(self) -> None:
+        while self.assessment_choices_layout.count():
+            item = self.assessment_choices_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                self.assessment_choice_group.removeButton(widget)
+                widget.deleteLater()
+
+    def _assessment_answer_text(self) -> str:
+        if self._assessment_activity is not None and self._assessment_activity.runtime == "recognition":
+            button = self.assessment_choice_group.checkedButton()
+            return str(button.text() if button is not None else "").strip()
+        return self.assessment_sql.toPlainText()
+
+    def _set_assessment_answer(self, answer: str) -> None:
+        answer = str(answer or "")
+        if self._assessment_activity is not None and self._assessment_activity.runtime == "recognition":
+            for button in self.assessment_choice_group.buttons():
+                button.setChecked(button.text().strip() == answer.strip())
+        else:
+            self.assessment_sql.setPlainText(answer)
+
+    def _review_assessment_attempt(self) -> None:
+        if self._assessment is None:
+            return
+        attempt = self.service.latest_assessment_attempt(self._assessment.assessment_id)
+        if attempt is None:
+            QMessageBox.information(self, "No Attempt Yet", "Submit the knowledge check before reviewing an attempt.")
+            return
+        lines = [
+            f"Attempt {attempt['attempt_number']} • {round(attempt['score'] * 100)}% • "
+            + ("Passed" if attempt["passed"] else "Not Passed"),
+            "",
+        ]
+        answers = dict(attempt.get("answers") or {})
+        results = dict(attempt.get("results") or {})
+        for index, activity in enumerate(self._assessment.activities, start=1):
+            selected = str(answers.get(activity.activity_id, "") or "Not answered")
+            correct = str(activity.solution or activity.validator.get("expected_answer") or "")
+            item_result = dict(results.get(activity.activity_id) or {})
+            passed = bool(item_result.get("passed"))
+            lines.extend([
+                f"{index}. {activity.title}",
+                f"Question: {activity.prompt}",
+                f"Your answer: {selected}",
+                f"Correct answer: {correct}",
+                "Result: Correct" if passed else "Result: Review Needed",
+            ])
+            feedback = str(item_result.get("feedback") or "").strip()
+            if feedback:
+                lines.append(f"Explanation: {feedback}")
+            if not passed:
+                recommendation = str(
+                    activity.presentation.get("review_recommendation")
+                    or f"Review the lesson and practice connected to {activity.title}."
+                ).strip()
+                lines.append(f"Recommended review: {recommendation}")
+            lines.append("")
+        dialog = QMessageBox(self)
+        dialog.setIcon(QMessageBox.Icon.Information if attempt["passed"] else QMessageBox.Icon.Warning)
+        dialog.setWindowTitle(f"{self._assessment.title} — Attempt Review")
+        dialog.setText(
+            f"Score: {round(attempt['score'] * 100)}% "
+            + ("— Passed" if attempt["passed"] else "— Review and Retake")
+        )
+        dialog.setInformativeText("Expand the details to review every selected answer, correct answer, explanation, and learning recommendation.")
+        dialog.setDetailedText("\n".join(lines))
+        dialog.exec()
+
     def _open_assessment_node(self, node: JourneyNode) -> None:
         assessment = self.catalog.assessment(str(node.assessment_id))
         activity = next(item for item in assessment.activities if item.activity_id == node.activity_id)
@@ -2327,7 +2631,23 @@ class AcceleratorAcademyWidget(QWidget):
         )
         self.assessment_brief.set_navigation(next_title=None, show_back=False)
         answer = self._assessment_answers.get(activity.activity_id, activity.starter)
-        self.assessment_sql.setPlainText(answer)
+        self._clear_assessment_choices()
+        recognition = activity.runtime == "recognition"
+        if recognition:
+            for option in activity.answer_options:
+                radio = QRadioButton(str(option))
+                self.assessment_choice_group.addButton(radio)
+                self.assessment_choices_layout.addWidget(radio)
+            self.assessment_choices_layout.addStretch(1)
+            self.assessment_answer_stack.setCurrentWidget(self.assessment_choices_page)
+        else:
+            self.assessment_answer_stack.setCurrentWidget(self.assessment_sql)
+        self._set_assessment_answer(answer)
+        self.assessment_run.setVisible(activity.runtime in {"sql", "python"})
+        self.assessment_results.setVisible(activity.runtime in {"sql", "python"})
+        self.assessment_review.setEnabled(
+            self.service.latest_assessment_attempt(assessment.assessment_id) is not None
+        )
         self.assessment_feedback.setText("")
         self._show_result(self.assessment_results, (), ())
         self._refresh_assessment_navigation()
@@ -2335,7 +2655,7 @@ class AcceleratorAcademyWidget(QWidget):
     def _save_assessment_answer(self, silent: bool = False) -> bool:
         if self._assessment is None or self._assessment_activity is None:
             return False
-        answer = self.assessment_sql.toPlainText()
+        answer = self._assessment_answer_text()
         self._assessment_answers[self._assessment_activity.activity_id] = answer
         self.service.save_assessment_draft(
             self._assessment.assessment_id,
@@ -2350,10 +2670,10 @@ class AcceleratorAcademyWidget(QWidget):
     def _run_assessment_query(self) -> None:
         if self._assessment_activity is None:
             return
-        result = self.service.run_activity(self._assessment_activity, self.assessment_sql.toPlainText())
-        self.assessment_feedback.setText(("✅ Query ran. " if result.passed else "❌ ") + result.feedback)
+        result = self.service.run_activity(self._assessment_activity, self._assessment_answer_text())
+        self.assessment_feedback.setText(("✅ Answer checked. " if result.passed else "❌ ") + result.feedback)
         self._show_result(self.assessment_results, result.columns, result.rows)
-        if not result.passed:
+        if not result.passed and self._assessment_activity.runtime in {"sql", "python"}:
             self.assessment_sql.navigate_to_error(result.feedback)
 
     def _assessment_continue_clicked(self) -> None:
@@ -2478,6 +2798,7 @@ class AcceleratorAcademyWidget(QWidget):
                     ]
                 )
             self.assessment_feedback.setText("\n".join(feedback_lines))
+            self.assessment_review.setEnabled(True)
 
             dialog = QMessageBox(self)
             dialog.setIcon(QMessageBox.Icon.Information)
@@ -2540,7 +2861,12 @@ class AcceleratorAcademyWidget(QWidget):
             "Review these questions:",
         ]
         message.extend(f"• {title}" for title in failed_titles)
+        message.extend([
+            "",
+            "Use Review Last Attempt to see your selected answers, the correct answers, and targeted recommendations before retaking the check.",
+        ])
         self.assessment_feedback.setText("\n".join(message))
+        self.assessment_review.setEnabled(True)
 
         dialog = QMessageBox(self)
         dialog.setIcon(QMessageBox.Icon.Warning)
@@ -2554,6 +2880,7 @@ class AcceleratorAcademyWidget(QWidget):
         dialog.addButton("Continue Reviewing", QMessageBox.ButtonRole.AcceptRole)
         dialog.exec()
         self.refresh_all()
+        self._review_assessment_attempt()
 
     def _refresh_assessment_navigation(self) -> None:
         if self._assessment is None or self._assessment_activity is None:
@@ -2565,10 +2892,10 @@ class AcceleratorAcademyWidget(QWidget):
         )
         self.assessment_nav_status.setText(
             f"{answered} of {len(self._assessment.activities)} answers saved. "
-            "We’ll score everything when you submit the checkpoint."
+            "We’ll score all eight answers when you submit the knowledge check."
         )
         last = index == len(self._assessment.activities) - 1
-        self.assessment_continue.setText("Submit Checkpoint" if last else "Save & Continue  →")
+        self.assessment_continue.setText("Submit Knowledge Check" if last else "Save & Continue  →")
         self.assessment_submit.setVisible(not last)
 
     # ---------------------------------------------------------------- lab flow

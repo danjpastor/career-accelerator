@@ -75,6 +75,14 @@ def _resolve(root: Path, value: str | None) -> Path | None:
     return path.resolve()
 
 
+def _table_exists(conn, name: str) -> bool:
+    """Return whether a SQLite table exists for optional retrospective sources."""
+    return conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (str(name),),
+    ).fetchone() is not None
+
+
 def validate_iso_date(value: str | None, *, field: str) -> str | None:
     text = str(value or "").strip()
     if not text:
@@ -90,83 +98,28 @@ def validate_iso_date(value: str | None, *, field: str) -> str | None:
 
 _WEEKLY_RETROSPECTIVE_FIELDS = (
     {
-        "key": "major_learning",
-        "label": "Major learning completed",
-        "prompt": "What course, lesson, assessment, or technical concept moved forward this week?",
-        "required": True,
-        "rows": 3,
-    },
-    {
-        "key": "technical_practice",
-        "label": "SQL or technical practice completed",
-        "prompt": "What did you practice, validate, or solve? Include the topics that still need review.",
-        "required": True,
-        "rows": 3,
-    },
-    {
-        "key": "project_progress",
-        "label": "Portfolio or project work completed",
-        "prompt": "What project milestone, artifact, analysis, or documentation changed this week?",
-        "required": True,
-        "rows": 3,
-    },
-    {
         "key": "biggest_win",
-        "label": "Biggest win",
+        "label": "Biggest Win",
         "prompt": "What moved forward, and why did it matter?",
         "required": True,
         "rows": 4,
     },
     {
         "key": "blocker",
-        "label": "Friction or blocker",
+        "label": "Friction or Blocker",
         "prompt": "What slowed progress? Describe the cause, not only the symptom. Enter “None” when appropriate.",
         "required": True,
         "rows": 4,
     },
     {
         "key": "learning",
-        "label": "What I learned",
+        "label": "What I Learned",
         "prompt": "Capture the most important lesson, insight, or correction from the week.",
         "required": True,
         "rows": 4,
     },
-    {
-        "key": "evidence",
-        "label": "Evidence created",
-        "prompt": "List substantial work you could show or discuss with an employer. Enter “None this week” when appropriate.",
-        "required": True,
-        "rows": 4,
-    },
-    {
-        "key": "adjustment_1",
-        "label": "Next-sprint adjustment 1",
-        "prompt": "What specific change will you make next week?",
-        "required": True,
-        "rows": 3,
-    },
-    {
-        "key": "adjustment_2",
-        "label": "Next-sprint adjustment 2",
-        "prompt": "What second specific change will you make next week?",
-        "required": True,
-        "rows": 3,
-    },
-    {
-        "key": "confidence",
-        "label": "Confidence",
-        "prompt": "Rate your confidence from 1 to 10.",
-        "required": True,
-        "control": "score",
-    },
-    {
-        "key": "confidence_reason",
-        "label": "Confidence reason",
-        "prompt": "Why did you choose that confidence score?",
-        "required": True,
-        "rows": 3,
-    },
 )
+
 
 _PROGRAM_RETROSPECTIVE_FIELDS = (
     {
@@ -298,8 +251,9 @@ def retrospective_form_spec(label: str) -> dict:
         "kind": kind,
         "title": "Weekly Retrospective",
         "intro": (
-            "Review the week honestly, capture evidence and blockers, and choose "
-            "two specific adjustments for the next sprint."
+            "Review the week honestly. Learning progress and evidence are filled "
+            "in automatically, so you only need to record your biggest win, any "
+            "friction or blocker, and what you learned."
         ),
         "fields": _WEEKLY_RETROSPECTIVE_FIELDS,
     }
@@ -662,20 +616,102 @@ def current_sprint_items(conn, week: int) -> list[dict]:
 
 
 def retrospective_weekly_milestones(conn, task_id: int) -> list[dict]:
+    """Return the automatically populated learning record for the sprint week."""
     row = task_record(conn, int(task_id))
     if row is None:
         raise ValueError("The selected retrospective task no longer exists.")
-    sections = [
-        {"title": "Google Course", "items": []},
-        {"title": "SQL", "items": []},
-        {"title": "Portfolio", "items": []},
-    ]
-    by_title = {section["title"]: section for section in sections}
+    section_order = (
+        "Google Course",
+        "Accelerator Academy",
+        "Applied Labs",
+        "SQL",
+        "Portfolio",
+        "Review",
+        "Learning",
+        "General",
+    )
+    grouped = {title: [] for title in section_order}
     for item in current_sprint_items(conn, int(row["week"])):
-        title = item["section"]
-        if title in by_title:
-            by_title[title]["items"].append(item)
-    return sections
+        grouped.setdefault(str(item.get("section") or "General"), []).append(item)
+    return [
+        {"title": title, "items": grouped.get(title, [])}
+        for title in section_order
+        if grouped.get(title)
+    ]
+
+
+def retrospective_weekly_evidence(conn, task_id: int) -> list[dict]:
+    """Return evidence created during the retrospective week from durable records."""
+    row = task_record(conn, int(task_id))
+    if row is None:
+        raise ValueError("The selected retrospective task no longer exists.")
+    week_start, week_end = _retrospective_week_bounds(conn, int(row["week"]))
+    start_text = week_start.isoformat()
+    end_text = (week_end + timedelta(days=1)).isoformat()
+    evidence: list[dict] = []
+
+    def add(title, source, created_at="", path=""):
+        title = str(title or "").strip()
+        if not title:
+            return
+        key = (title.casefold(), str(path or "").casefold())
+        if any(item["_key"] == key for item in evidence):
+            return
+        evidence.append({
+            "title": title,
+            "source": str(source or "Evidence"),
+            "created_at": str(created_at or ""),
+            "path": str(path or ""),
+            "_key": key,
+        })
+
+    if _table_exists(conn, "task_workspace_artifacts"):
+        for item in conn.execute(
+            """SELECT COALESCE(a.label,a.artifact_path) AS title,
+                      a.artifact_path,a.created_at,COALESCE(w.task_label,'Workspace') AS source
+                 FROM task_workspace_artifacts a
+                 LEFT JOIN task_workspaces w ON w.workspace_key=a.workspace_key
+                WHERE date(a.created_at)>=date(?) AND date(a.created_at)<date(?)
+                ORDER BY a.created_at""",
+            (start_text, end_text),
+        ).fetchall():
+            add(item["title"], item["source"], item["created_at"], item["artifact_path"])
+
+    if _table_exists(conn, "academy_submissions"):
+        for item in conn.execute(
+            """SELECT title,artifact_path,updated_at,
+                      CASE item_type WHEN 'skills_lab' THEN 'Applied Lab' ELSE 'Academy' END AS source
+                 FROM academy_submissions
+                WHERE date(updated_at)>=date(?) AND date(updated_at)<date(?)
+                  AND (COALESCE(answer_text,'')<>'' OR COALESCE(artifact_path,'')<>'')
+                ORDER BY updated_at""",
+            (start_text, end_text),
+        ).fetchall():
+            add(item["title"], item["source"], item["updated_at"], item["artifact_path"])
+
+    if _table_exists(conn, "academy_assessment_attempts"):
+        for item in conn.execute(
+            """SELECT assessment_id,score,completed_at
+                 FROM academy_assessment_attempts
+                WHERE passed=1 AND date(completed_at)>=date(?) AND date(completed_at)<date(?)
+                ORDER BY completed_at""",
+            (start_text, end_text),
+        ).fetchall():
+            title = str(item["assessment_id"]).replace("_", " ").title()
+            add(f"{title} — {round(float(item['score'] or 0)*100)}%", "Assessment", item["completed_at"])
+
+    if _table_exists(conn, "academy_skill_evidence"):
+        for item in conn.execute(
+            """SELECT skill_key,source_type,source_id,submission_path,demonstrated_at
+                 FROM academy_skill_evidence
+                WHERE date(demonstrated_at)>=date(?) AND date(demonstrated_at)<date(?)
+                ORDER BY demonstrated_at""",
+            (start_text, end_text),
+        ).fetchall():
+            title = str(item["skill_key"]).replace(".", " ").replace("_", " ").title()
+            add(title, item["source_type"], item["demonstrated_at"], item["submission_path"])
+
+    return [{key: value for key, value in item.items() if key != "_key"} for item in evidence]
 
 
 def retrospective_metrics(conn, week: int, kind: str) -> dict:
@@ -811,6 +847,19 @@ def _retrospective_markdown(record: dict) -> str:
         snapshot,
         "",
     ]
+    if spec["kind"] == "weekly":
+        lines.extend(["## Learning Progress This Week", ""])
+        progress = [
+            item
+            for section in retrospective_weekly_milestones(record["conn"], int(task["id"]))
+            for item in section.get("items", [])
+            if item.get("status") == "Completed"
+        ] if record.get("conn") is not None else []
+        lines.extend([f"- {item['label']}" for item in progress] or ["_No completed learning was recorded._"])
+        lines.extend(["", "## Evidence Created This Week", ""])
+        evidence = retrospective_weekly_evidence(record["conn"], int(task["id"])) if record.get("conn") is not None else []
+        lines.extend([f"- {item['title']} ({item['source']})" for item in evidence] or ["_No new evidence was recorded._"])
+        lines.append("")
     for field in spec["fields"]:
         value = str(values.get(field["key"], "")).strip()
         lines.extend([
@@ -894,6 +943,7 @@ def save_retrospective(
     spec = draft["spec"]
     normalized = draft["values"]
     record = {
+        "conn": conn,
         "task": row,
         "spec": spec,
         "values": normalized,
@@ -929,9 +979,7 @@ def save_retrospective(
             f"{metrics['sql_completed']} SQL problems completed. "
             f"Win: {normalized.get('biggest_win') or 'Not recorded.'} "
             f"Blocker: {normalized.get('blocker') or 'Not recorded.'} "
-            f"Next adjustments: {normalized.get('adjustment_1') or 'Not recorded.'}; "
-            f"{normalized.get('adjustment_2') or 'Not recorded.'} "
-            f"Confidence: {normalized.get('confidence') or '7'}/10."
+            f"Learning: {normalized.get('learning') or 'Not recorded.'}"
         )
         conn.execute(
             """INSERT INTO weekly_summaries

@@ -2,9 +2,7 @@ lesson_id: academy2_powerbi_dimensional_modeling
 title: Dimensional Modeling
 order: 3
 difficulty: beginner
-description: A dimensional model separates measurable business events from descriptive context. A **fact table** contains
-  events and numbers, such as orders and revenue. A **dimension table** contains descriptive fields, such as customer segment,
-  product category, or calendar month.
+description: A dimensional model separates measurable business events from descriptive context. A **fact table** contains events and numbers, such as orders and revenue. A **dimension table** contains descriptive fields, such as customer segment, product category, or calendar month.
 estimated_minutes: 36
 content: lesson.md
 objectives:
@@ -31,21 +29,18 @@ activities:
   instruction:
     title: Learn — Dimensional Modeling
     objective: Explain the purpose of dimensional modeling.
-    body: 'A dimensional model separates measurable business events from descriptive context. A **fact table** contains events
-      and numbers, such as orders and revenue. A **dimension table** contains descriptive fields, such as customer segment,
-      product category, or calendar month.
+    body: 'A dimensional model separates measurable business events from descriptive context. A **fact table** contains events and numbers, such as orders and revenue. A **dimension table** contains descriptive fields, such as customer segment, product category, or calendar month.
 
 
-      Relationships allow dimension selections to filter the fact table. For a simple star model, single-direction filtering
-      from dimension to fact is usually the easiest behavior to understand. Bidirectional filtering can be useful in special
-      cases, but it can also create confusing or ambiguous paths.
+      Relationships allow dimension selections to filter the fact table. For a simple star model, single-direction filtering from dimension to fact is usually the easiest behavior to understand. Bidirectional filtering can be useful in special cases, but it can also create confusing or ambiguous paths.
 
 
       Good models make measures easier to write and totals easier to trust.'
+    concept_heading: Build a Model You Can Trust
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning dimensional modeling before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how dimensional modeling works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -69,8 +64,7 @@ activities:
   hints:
   - Read the task again and identify where **Dimensional Modeling** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: What relationship is most common from
-    a dimension to a fact?'
+  - 'Compare your work with the success criteria. Your result should directly answer: What relationship is most common from a dimension to a fact?'
   validator:
     type: exact_answer
     expected_answer: One-to-many
@@ -80,8 +74,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What relationship is most common from a dimension to a fact?
     requirements:
     - Choose one answer.
@@ -96,6 +90,7 @@ activities:
     objective: Build a practical understanding of dimensional modeling.
     action_label: Choose the best answer
     body: A unique dimension key relates to many fact rows.
+    concept_heading: Build a Model You Can Trust
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -116,17 +111,15 @@ activities:
     body: '## A separate example
 
 
-      A training model uses `Attendance` as a fact table and `Employees`, `Courses`, and `Calendar` as dimensions. Choosing
-      a department in Employees filters attendance records, while attendance does not automatically rewrite the list of employees.
-      This one-way flow keeps the model predictable.
+      A training model uses `Attendance` as a fact table and `Employees`, `Courses`, and `Calendar` as dimensions. Choosing a department in Employees filters attendance records, while attendance does not automatically rewrite the list of employees. This one-way flow keeps the model predictable.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning dimensional modeling before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how dimensional modeling works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -145,8 +138,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 8
-  prompt: 'Create a one-to-many relationship from customers to orders. For this simple star-style model, which cross-filter
-    direction should you choose: **Single** or **Both**?'
+  prompt: 'Create a one-to-many relationship from customers to orders. For this simple star-style model, which cross-filter direction should you choose: **Single** or **Both**?'
   starter: ''
   solution: Single
   hints:
@@ -167,17 +159,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
-    task: 'Create a one-to-many relationship from customers to orders. For this simple star-style model, which cross-filter
-      direction should you choose: **Single** or **Both**?'
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
+    task: 'Create a one-to-many relationship from customers to orders. For this simple star-style model, which cross-filter direction should you choose: **Single** or **Both**?'
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -187,9 +176,8 @@ activities:
   instruction:
     title: Try It — Set a safe relationship direction
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Connect Related Records
 - activity_id: academy2_powerbi_dimensional_modeling_independent
   title: Practice — Use the model to summarize a segment
   type: independent
@@ -217,16 +205,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
     task: Build a visual showing Sum of `order_total` by customer `segment`. What total is shown for the **Enterprise** segment?
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -236,9 +222,8 @@ activities:
   instruction:
     title: Practice — Use the model to summarize a segment
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Build a Model You Can Trust
 - activity_id: academy2_powerbi_dimensional_modeling_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -262,8 +247,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What should you check before creating a one-side relationship?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -277,6 +262,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Build a Model You Can Trust
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -306,12 +292,12 @@ activities:
       - Dimensional Modeling supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Build a Model You Can Trust
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning dimensional modeling before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how dimensional modeling works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

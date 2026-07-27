@@ -2,8 +2,7 @@ lesson_id: academy2_powerbi_transforming_data
 title: Transforming Data
 order: 2
 difficulty: beginner
-description: Power Query is Power BI's preparation area. It records each cleaning action as an **Applied Step** so the same
-  work can run again when the source refreshes.
+description: Power Query is Power BI's preparation area. It records each cleaning action as an **Applied Step** so the same work can run again when the source refreshes.
 estimated_minutes: 36
 content: lesson.md
 objectives:
@@ -30,21 +29,18 @@ activities:
   instruction:
     title: Learn — Transforming Data
     objective: Explain the purpose of transforming data.
-    body: 'Power Query is Power BI''s preparation area. It records each cleaning action as an **Applied Step** so the same
-      work can run again when the source refreshes.
+    body: 'Power Query is Power BI''s preparation area. It records each cleaning action as an **Applied Step** so the same work can run again when the source refreshes.
 
 
-      Common steps include changing data types, removing unused columns, replacing inconsistent values, splitting text, filtering
-      invalid rows, and combining tables. The order of the steps matters. For example, a date calculation cannot work reliably
-      until the source column has a date type.
+      Common steps include changing data types, removing unused columns, replacing inconsistent values, splitting text, filtering invalid rows, and combining tables. The order of the steps matters. For example, a date calculation cannot work reliably until the source column has a date type.
 
 
-      Power Query does not rewrite the original CSV or Excel file. It creates a repeatable set of instructions that shapes
-      the data before it is loaded into the model.'
+      Power Query does not rewrite the original CSV or Excel file. It creates a repeatable set of instructions that shapes the data before it is loaded into the model.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning transforming data before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how transforming data works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -68,8 +64,7 @@ activities:
   hints:
   - Read the task again and identify where **Transforming Data** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Where should repeatable source-cleaning
-    steps usually live?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Where should repeatable source-cleaning steps usually live?'
   validator:
     type: exact_answer
     expected_answer: Power Query
@@ -79,8 +74,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Where should repeatable source-cleaning steps usually live?
     requirements:
     - Choose one answer.
@@ -95,6 +90,7 @@ activities:
     objective: Build a practical understanding of transforming data.
     action_label: Choose the best answer
     body: Power Query records repeatable transformation steps before data reaches the model.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -115,18 +111,15 @@ activities:
     body: '## A separate example
 
 
-      A staffing file stores `hire_date` as text. An analyst opens Power Query, changes the column to Date, and checks the
-      preview for errors. A later refresh applies the same type change automatically. If the analyst accidentally filters
-      out blank departments before reviewing them, those records will disappear from every report, so they inspect the Applied
-      Steps before loading the data.
+      A staffing file stores `hire_date` as text. An analyst opens Power Query, changes the column to Date, and checks the preview for errors. A later refresh applies the same type change automatically. If the analyst accidentally filters out blank departments before reviewing them, those records will disappear from every report, so they inspect the Applied Steps before loading the data.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning transforming data before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how transforming data works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -145,8 +138,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 8
-  prompt: Import `support_tickets.csv`, select **Transform Data**, and set `opened_date` to the Date type. Confirm the table
-    preview still contains every ticket. How many rows remain?
+  prompt: Import `support_tickets.csv`, select **Transform Data**, and set `opened_date` to the Date type. Confirm the table preview still contains every ticket. How many rows remain?
   starter: ''
   solution: '10'
   hints:
@@ -164,17 +156,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
-    task: Import `support_tickets.csv`, select **Transform Data**, and set `opened_date` to the Date type. Confirm the table
-      preview still contains every ticket. How many rows remain?
+    scenario: The support manager is reviewing the team’s open workload.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
+    task: Import `support_tickets.csv`, select **Transform Data**, and set `opened_date` to the Date type. Confirm the table preview still contains every ticket. How many rows remain?
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -183,9 +172,8 @@ activities:
   instruction:
     title: Try It — Check data types in Power Query
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_powerbi_transforming_data_independent
   title: Practice — Summarize only completed cases
   type: independent
@@ -194,8 +182,7 @@ activities:
   completion_mode: validated
   xp: 125
   estimated_minutes: 10
-  prompt: Load the transformed ticket table. Filter a visual to `status = Closed` and calculate the average of `resolution_hours`.
-    Enter the value shown.
+  prompt: Load the transformed ticket table. Filter a visual to `status = Closed` and calculate the average of `resolution_hours`. Enter the value shown.
   starter: ''
   solution: '10.5'
   hints:
@@ -214,17 +201,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
-    task: Load the transformed ticket table. Filter a visual to `status = Closed` and calculate the average of `resolution_hours`.
-      Enter the value shown.
+    scenario: The support manager is reviewing the team’s open workload.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
+    task: Load the transformed ticket table. Filter a visual to `status = Closed` and calculate the average of `resolution_hours`. Enter the value shown.
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -233,9 +217,8 @@ activities:
   instruction:
     title: Practice — Summarize only completed cases
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_powerbi_transforming_data_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -259,8 +242,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Why keep transformation steps focused and named?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -274,6 +257,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -303,12 +287,12 @@ activities:
       - Transforming Data supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning transforming data before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how transforming data works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

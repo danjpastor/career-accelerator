@@ -1,24 +1,84 @@
-# Applied Lab 02 Submission
+# Applied Lab 02 submission
 
-## Lab
-**Clean, merge, append, pivot, and unpivot with Power Query**
+## Clean, merge, append, pivot, and unpivot with Power Query
 
-## Artifact path
-Record any `.pbix`, `.xlsx`, image, recording, or other external artifact path.
+### Artifact paths
 
-`TODO`
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-## Work completed
-- TODO
+### Business question and audience
 
-## Findings or decisions
-TODO
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Validation performed
-- TODO
+### Work completed
 
-## What this demonstrates
-Power Query transformation workflow
+#### Step 1
 
-## Reflection
-What changed after validation, and what would you explain in an interview?
+**Planned work:** Trim and standardize text and replace invalid blanks with nulls.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 2
+
+**Planned work:** Merge shots to projects and verify join cardinality.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 3
+
+**Planned work:** Append the monthly time-entry files.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Unpivot the wide stage-target table.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Name and document every transformation step.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] The merge does not duplicate shot grain.
+  - Evidence:
+- [ ] The appended total equals both inputs combined.
+  - Evidence:
+- [ ] The unpivoted data reconciles to the wide source.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

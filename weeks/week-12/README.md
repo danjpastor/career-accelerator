@@ -35,18 +35,18 @@ Finish Project 3, audit all projects, publish final versions, update career mate
 - **Review:** Final 90-day assessment and reflection
 
 ## Checklist
-- [ ] Complete Project 3 analysis and visual deliverable
-- [ ] Write and publish the Project 3 case study
-- [ ] Re-run critical calculations across all three projects
-- [ ] Audit documentation, screenshots, links, and reproducibility
-- [ ] Finalize the résumé with all three project bullets
-- [ ] Finalize LinkedIn and GitHub profile evidence
-- [ ] Prepare project walkthroughs and five STAR stories
-- [ ] Complete a timed SQL and spreadsheet review
-- [ ] Complete a mock interview and record remediation needs
-- [ ] Submit the first targeted applications and record follow-up dates
-- [ ] Pass the final program completion audit
-- [ ] Complete the 90-day retrospective and post-program plan
+- [ ] Complete Project 3 Analysis and Visual Deliverable
+- [ ] Write and Publish the Project 3 CASE Study
+- [ ] Re-Run Critical Calculations Across All Three Projects
+- [ ] Audit Documentation, Screenshots, Links, and Reproducibility
+- [ ] Finalize the Résumé with All Three Project Bullets
+- [ ] Finalize LinkedIn and GitHub Profile Evidence
+- [ ] Prepare Project Walkthroughs and Five Star Stories
+- [ ] Complete a Timed SQL and Spreadsheet Review
+- [ ] Complete a Mock Interview and Record Remediation Needs
+- [ ] Submit the First Targeted Applications and Record Follow-up Dates
+- [ ] Pass the Week 12 Knowledge Check
+- [ ] Complete the 90-Day Retrospective and Post-Program Plan
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Cross-project calculation and publication audit
-- [ ] Final interview and portfolio presentation simulation
+- [ ] Cross-Project Calculation and Publication Audit
+- [ ] Final Interview and Portfolio Presentation Simulation

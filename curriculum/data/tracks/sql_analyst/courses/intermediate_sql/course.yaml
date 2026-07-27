@@ -1,6 +1,7 @@
 course_id: intermediate_sql
 title: Intermediate SQL
 order: 2
+roadmap_week: 3
 description: Summarize, transform, filter, and categorize data for analyst work.
 estimated_minutes: 410
 outcomes:

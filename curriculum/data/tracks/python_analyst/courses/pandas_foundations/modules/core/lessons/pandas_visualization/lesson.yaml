@@ -2,8 +2,7 @@ lesson_id: academy2_pandas_visualization
 title: Creating and Visualizing DataFrames
 order: 4
 difficulty: beginner
-description: A useful chart begins with a clear question and chart-ready data. Usually you summarize or filter the DataFrame
-  first, then plot the smaller result.
+description: A useful chart begins with a clear question and chart-ready data. Usually you summarize or filter the DataFrame first, then plot the smaller result.
 estimated_minutes: 35
 content: lesson.md
 objectives:
@@ -30,20 +29,18 @@ activities:
   instruction:
     title: Learn — Creating and Visualizing DataFrames
     objective: Explain the purpose of creating and visualizing dataframes.
-    body: 'A useful chart begins with a clear question and chart-ready data. Usually you summarize or filter the DataFrame
-      first, then plot the smaller result.
+    body: 'A useful chart begins with a clear question and chart-ready data. Usually you summarize or filter the DataFrame first, then plot the smaller result.
 
 
-      Bar charts compare categories, line charts show change over time, histograms show a numeric distribution, and scatter
-      plots compare two numeric measures. Labels and sorting should help the reader understand the result without guessing.
+      Bar charts compare categories, line charts show change over time, histograms show a numeric distribution, and scatter plots compare two numeric measures. Labels and sorting should help the reader understand the result without guessing.
 
 
-      pandas plotting returns a Matplotlib axes object. Saving that object in a variable lets you adjust labels or inspect
-      the chart later.'
+      pandas plotting returns a Matplotlib axes object. Saving that object in a variable lets you adjust labels or inspect the chart later.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning creating and visualizing dataframes before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how creating and visualizing dataframes works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -67,8 +64,7 @@ activities:
   hints:
   - Read the task again and identify where **Creating and Visualizing DataFrames** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: What is the safest way to build a DataFrame
-    from records?'
+  - 'Compare your work with the success criteria. Your result should directly answer: What is the safest way to build a DataFrame from records?'
   validator:
     type: exact_answer
     expected_answer: Use consistently named fields for each record
@@ -78,8 +74,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A data analyst is building a repeatable analysis for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What is the safest way to build a DataFrame from records?
     requirements:
     - Choose one answer.
@@ -94,6 +90,7 @@ activities:
     objective: Build a practical understanding of creating and visualizing dataframes.
     action_label: Choose the best answer
     body: Consistent record keys become predictable DataFrame columns.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -114,16 +111,15 @@ activities:
     body: '## A separate example
 
 
-      A service analyst groups ticket count by channel, sorts the summary, and creates a horizontal bar chart. They use channel
-      names as labels and ticket count as the numeric axis. The graded exercise prepares and charts regional order totals.
+      A service analyst groups ticket count by channel, sorts the summary, and creates a horizontal bar chart. They use channel names as labels and ticket count as the numeric axis. The graded exercise prepares and charts regional order totals.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning creating and visualizing dataframes before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how creating and visualizing dataframes works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -142,8 +138,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 7
-  prompt: Use `orders` to create `regional_totals` with one row per region and the sum of `order_total`. Sort the result from
-    highest to lowest total.
+  prompt: Use `orders` to create `regional_totals` with one row per region and the sum of `order_total`. Sort the result from highest to lowest total.
   starter: '# orders is already loaded.
 
     # Create and sort regional_totals.'
@@ -160,8 +155,7 @@ activities:
     - expression: list(regional_totals['order_total']) == [514.0, 309.0, 265.0, 35.0]
       feedback: Use the sum of order_total for each region.
     display_variable: regional_totals
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
     dataset_id: sql_foundations
   required_for_completion: true
   required_for_practice: true
@@ -169,16 +163,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
-    task: Use `orders` to create `regional_totals` with one row per region and the sum of `order_total`. Sort the result from
-      highest to lowest total.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
+    task: Use `orders` to create `regional_totals` with one row per region and the sum of `order_total`. Sort the result from highest to lowest total.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -186,7 +178,7 @@ activities:
     title: Try It — Prepare chart-ready data
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_pandas_visualization_independent
   title: Practice — Create a clear bar chart
   type: independent
@@ -195,14 +187,11 @@ activities:
   completion_mode: validated
   xp: 125
   estimated_minutes: 10
-  prompt: Create a horizontal bar chart from `regional_totals` with region labels and order total values. Store the returned
-    chart object in a variable named `ax`.
-  starter: 'regional_totals = (orders.groupby(''region'', as_index=False)[''order_total''].sum().sort_values(''order_total'',
-    ascending=False))
+  prompt: Create a horizontal bar chart from `regional_totals` with region labels and order total values. Store the returned chart object in a variable named `ax`.
+  starter: 'regional_totals = (orders.groupby(''region'', as_index=False)[''order_total''].sum().sort_values(''order_total'', ascending=False))
 
     # Create the chart and store it as ax.'
-  solution: 'regional_totals = (orders.groupby(''region'', as_index=False)[''order_total''].sum().sort_values(''order_total'',
-    ascending=False))
+  solution: 'regional_totals = (orders.groupby(''region'', as_index=False)[''order_total''].sum().sort_values(''order_total'', ascending=False))
 
     ax = regional_totals.plot.barh(x=''region'', y=''order_total'')'
   hints:
@@ -217,8 +206,7 @@ activities:
     - expression: len(ax.patches) == 4
       feedback: The chart should contain one bar for each of the four regions.
     display_variable: ''
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
     dataset_id: sql_foundations
   required_for_completion: true
   required_for_practice: false
@@ -226,16 +214,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
-    task: Create a horizontal bar chart from `regional_totals` with region labels and order total values. Store the returned
-      chart object in a variable named `ax`.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
+    task: Create a horizontal bar chart from `regional_totals` with region labels and order total values. Store the returned chart object in a variable named `ax`.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -243,7 +229,7 @@ activities:
     title: Practice — Create a clear bar chart
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_pandas_visualization_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -267,8 +253,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A data analyst is building a repeatable analysis for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What should happen before sharing a chart?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -282,6 +268,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -311,12 +298,12 @@ activities:
       - Creating and Visualizing DataFrames supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning creating and visualizing dataframes before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how creating and visualizing dataframes works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

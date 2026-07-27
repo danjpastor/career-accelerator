@@ -158,6 +158,7 @@ class CourseDefinition:
     skills_labs: tuple[SkillsLabDefinition, ...] = ()
     outcomes: tuple[str, ...] = ()
     estimated_minutes: int = 180
+    roadmap_week: int | None = None
 
 
 @dataclass(frozen=True)

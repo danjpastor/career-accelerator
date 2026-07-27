@@ -21,8 +21,7 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-    latest shared workbook automatically.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
@@ -41,24 +40,21 @@ activities:
     body: '# Clean data without damaging the source
 
 
-      Real spreadsheets often contain extra spaces, inconsistent capitalization, numbers stored as text, dates in mixed formats,
-      and duplicate records.
+      Real spreadsheets often contain extra spaces, inconsistent capitalization, numbers stored as text, dates in mixed formats, and duplicate records.
 
 
-      Analysts usually preserve the original columns and create cleaned fields beside them. This keeps the source traceable
-      and makes it easier to compare the original and cleaned values.
+      Analysts usually preserve the original columns and create cleaned fields beside them. This keeps the source traceable and makes it easier to compare the original and cleaned values.
 
 
-      Text functions such as `TRIM`, `CLEAN`, `UPPER`, `LOWER`, and `PROPER` can standardize text. Date and number conversions
-      help values behave correctly in calculations. Duplicate checks should use the fields that define a unique record, not
-      simply delete every repeated-looking row.
+      Text functions such as `TRIM`, `CLEAN`, `UPPER`, `LOWER`, and `PROPER` can standardize text. Date and number conversions help values behave correctly in calculations. Duplicate checks should use the fields that define a unique record, not simply delete every repeated-looking row.
 
 
       In this lesson, you will create analysis-ready fields and document what changed.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning text, dates, numbers & duplicates before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how text, dates, numbers & duplicates works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -89,8 +85,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations learning scenario
-    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What is the safest way to clean a raw customer-name field?
     requirements:
     - Choose the answer that best follows the concept explained in the lesson.
@@ -102,13 +98,11 @@ activities:
     phase: LEARN & PREDICT
     title: Learn & Predict — Cleaning without losing the source
     objective: Separate raw source fields from clean analytical fields.
-    why_it_matters: Cleaning improves consistency, but overwriting the source removes the evidence needed to audit a transformation
-      or correct a mistake.
-    concept: A safe cleaning workflow preserves the original column and creates a new clean column. Text functions can remove
-      extra spaces, normalize case, replace punctuation, and convert date-like text into true date values.
-    worked_example: A customer list contains `  north ridge clinic `, `NORTH RIDGE CLINIC`, and `North Ridge Clinic`. A clean-name
-      column can standardize all three while the raw-name column remains unchanged for traceability.
+    why_it_matters: Cleaning improves consistency, but overwriting the source removes the evidence needed to audit a transformation or correct a mistake.
+    concept: A safe cleaning workflow preserves the original column and creates a new clean column. Text functions can remove extra spaces, normalize case, replace punctuation, and convert date-like text into true date values.
+    worked_example: A customer list contains `  north ridge clinic `, `NORTH RIDGE CLINIC`, and `North Ridge Clinic`. A clean-name column can standardize all three while the raw-name column remains unchanged for traceability.
     action_label: Make a prediction
+    concept_heading: Make the Data Consistent
   required_for_completion: true
   answer_options:
   - Keep the raw field and add a clean field
@@ -133,20 +127,18 @@ activities:
     body: '## A separate example
 
 
-      A volunteer list contains names such as `  maria LOPEZ ` and phone numbers with several formats. The analyst creates
-      Clean Name and Clean Phone columns rather than overwriting the originals.
+      A volunteer list contains names such as `  maria LOPEZ ` and phone numbers with several formats. The analyst creates Clean Name and Clean Phone columns rather than overwriting the originals.
 
 
-      Two rows share the same name, but their volunteer IDs are different. The analyst does not remove either row until checking
-      which field is supposed to be unique.
+      Two rows share the same name, but their volunteer IDs are different. The analyst does not remove either row until checking which field is supposed to be unique.
 
 
-      **What to notice:** Cleaning improves consistency while preserving evidence. A duplicate decision depends on the table''s
-      grain and unique identifier.'
+      **What to notice:** Cleaning improves consistency while preserving evidence. A duplicate decision depends on the table''s grain and unique identifier.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning text, dates, numbers & duplicates before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how text, dates, numbers & duplicates works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -167,8 +159,7 @@ activities:
   hints:
   - One function removes leading, trailing, and repeated spaces; another standardizes capitalization.
   - Nest TRIM inside PROPER so spacing is corrected before capitalization.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -177,8 +168,7 @@ activities:
       row: 1
       expected:
       - Clean Customer Name
-      message: 'The workbook does not yet meet this requirement: Every customer has a standardized clean name while the original
-        source remains intact.'
+      message: 'The workbook does not yet meet this requirement: Every customer has a standardized clean name while the original source remains intact.'
     - type: formula_present
       sheet: Customers
       range: I2:I13
@@ -186,8 +176,7 @@ activities:
       contains_all:
       - trim
       - proper
-      message: 'The workbook does not yet meet this requirement: Every customer has a standardized clean name while the original
-        source remains intact.'
+      message: 'The workbook does not yet meet this requirement: Every customer has a standardized clean name while the original source remains intact.'
     success_feedback: You created a repeatable transformation while preserving the original names for audit.
   required_for_practice: true
   required_for_mastery: false
@@ -195,9 +184,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 12
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Create Clean Customer Name in I2:I13 using TRIM and PROPER on Customer Name Raw.
     requirements:
     - Add Clean Customer Name in I1.
@@ -214,25 +202,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: Every customer has a standardized clean name while the original source remains intact.
     hide_exact_result: true
   instruction:
     phase: TRY IT
     title: Try It — Standardize customer names
     objective: Combine text-cleaning functions without overwriting the raw name.
-    approach: Add a clean-name column beside the customer data. Use the function that removes extra spaces together with the
-      function that applies consistent title capitalization. Fill the formula through all customer rows and compare several
-      raw/clean pairs.
+    approach: Add a clean-name column beside the customer data. Use the function that removes extra spaces together with the function that applies consistent title capitalization. Fill the formula through all customer rows and compare several raw/clean pairs.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Customers
     columns:
     - Customer Name Raw
@@ -252,9 +235,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Customers** and locate **B1:I13**.
-    - Add a clean-name column beside the customer data. Use the function that removes extra spaces together with the function
-      that applies consistent title capitalization. Fill the formula through all customer rows and compare several raw/clean
-      pairs.
+    - Add a clean-name column beside the customer data. Use the function that removes extra spaces together with the function that applies consistent title capitalization. Fill the formula through all customer rows and compare several raw/clean pairs.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: guided_practice
@@ -266,13 +247,11 @@ activities:
   runtime: workbook
   prompt: Create Clean Phone in J2:J13 and Clean Join Date in K2:K13 from the raw customer fields.
   starter: ''
-  solution: Use nested SUBSTITUTE functions in J2 to remove `(`, `)`, `-`, `.`, and spaces from G2. Use `=DATEVALUE(H2)` in
-    K2. Fill both through row 13 and format K as Date.
+  solution: Use nested SUBSTITUTE functions in J2 to remove `(`, `)`, `-`, `.`, and spaces from G2. Use `=DATEVALUE(H2)` in K2. Fill both through row 13 and format K as Date.
   hints:
   - The phone task removes several unwanted characters without changing the digits.
   - Use repeated SUBSTITUTE operations for the phone and DATEVALUE for the date text.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -282,8 +261,7 @@ activities:
       expected:
       - Clean Phone
       - Clean Join Date
-      message: 'The workbook does not yet meet this requirement: Every customer has a consistent phone value and a true spreadsheet
-        date.'
+      message: 'The workbook does not yet meet this requirement: Every customer has a consistent phone value and a true spreadsheet date.'
     - type: formula_present
       sheet: Customers
       range: J2:J13
@@ -291,8 +269,7 @@ activities:
       contains_any:
       - substitute
       - trim
-      message: 'The workbook does not yet meet this requirement: Every customer has a consistent phone value and a true spreadsheet
-        date.'
+      message: 'The workbook does not yet meet this requirement: Every customer has a consistent phone value and a true spreadsheet date.'
     - type: formula_present
       sheet: Customers
       range: K2:K13
@@ -300,19 +277,16 @@ activities:
       contains_any:
       - datevalue
       - value
-      message: 'The workbook does not yet meet this requirement: Every customer has a consistent phone value and a true spreadsheet
-        date.'
-    success_feedback: You converted inconsistent source text into fields that can be searched, sorted, grouped, and compared
-      reliably.
+      message: 'The workbook does not yet meet this requirement: Every customer has a consistent phone value and a true spreadsheet date.'
+    success_feedback: You converted inconsistent source text into fields that can be searched, sorted, grouped, and compared reliably.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
   difficulty: intermediate
   estimated_minutes: 18
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Create Clean Phone in J2:J13 and Clean Join Date in K2:K13 from the raw customer fields.
     requirements:
     - Add both requested headers.
@@ -321,8 +295,7 @@ activities:
     expected_output: Every customer has a consistent phone value and a true spreadsheet date.
     skills_practiced:
     - spreadsheet.cleaning
-    after_correct: You converted inconsistent source text into fields that can be searched, sorted, grouped, and compared
-      reliably.
+    after_correct: You converted inconsistent source text into fields that can be searched, sorted, grouped, and compared reliably.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -330,24 +303,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: Every customer has a consistent phone value and a true spreadsheet date.
     hide_exact_result: true
   instruction:
     phase: CHALLENGE
     title: Challenge — Standardize phone and join-date fields
     objective: Turn inconsistent text formats into usable analytical fields.
-    approach: Create one field that removes punctuation and spaces from the raw phone values and another that converts the
-      raw join-date text into true dates. Use formulas so the clean values can be regenerated if the source changes.
+    approach: Create one field that removes punctuation and spaces from the raw phone values and another that converts the raw join-date text into true dates. Use formulas so the clean values can be regenerated if the source changes.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Customers
     columns:
     - Phone Raw
@@ -371,8 +340,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Customers** and locate **G1:K13**.
-    - Create one field that removes punctuation and spaces from the raw phone values and another that converts the raw join-date
-      text into true dates. Use formulas so the clean values can be regenerated if the source changes.
+    - Create one field that removes punctuation and spaces from the raw phone values and another that converts the raw join-date text into true dates. Use formulas so the clean values can be regenerated if the source changes.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: independent_practice
@@ -403,8 +371,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A data analyst is preparing a trustworthy report for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Why should the raw Join Date field remain in the workbook after a clean date is created?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -417,10 +385,10 @@ activities:
     title: Apply It — Use the skill in a new situation
     objective: Recognize when and how to use the skill outside the practice example.
     why_it_matters: The source value provides evidence for checking unexpected results or changing the cleaning rule later.
-    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
-      the method.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind the method.
     action_label: Choose the best approach
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Make the Data Consistent
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -453,12 +421,12 @@ activities:
       - SUBSTITUTE and DATEVALUE can transform inconsistent text into usable fields.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning text, dates, numbers & duplicates before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how text, dates, numbers & duplicates works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

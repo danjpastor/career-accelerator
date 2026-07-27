@@ -33,19 +33,18 @@ activities:
     body: '# Combine several calculations into a clear result
 
 
-      More complex transformations may use arithmetic, rounding, null handling, and several source fields at once. Break the
-      request into small parts before writing one long expression.
+      More complex transformations may use arithmetic, rounding, null handling, and several source fields at once. Break the request into small parts before writing one long expression.
 
 
-      Use parentheses to make the intended order of operations clear. When a denominator might be zero, protect the calculation
-      instead of allowing the query to fail.
+      Use parentheses to make the intended order of operations clear. When a denominator might be zero, protect the calculation instead of allowing the query to fail.
 
 
       In this lesson, you will create calculated business measures that remain readable and safe.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning complex transformations before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how complex transformations works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -79,8 +78,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which expression prevents division-by-zero errors when the denominator may be zero?
     requirements:
     - Choose one answer.
@@ -94,9 +93,8 @@ activities:
     title: Protect a ratio
     objective: Use safe ratio calculations in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **safe ratio calculations** to make database work more accurate, readable, and useful. Read the situation,
-      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
-      short so you can test the idea immediately.
+    body: Analysts use **safe ratio calculations** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -114,13 +112,12 @@ activities:
   instruction:
     title: Example — See complex transformations in context
     objective: Study a worked example before solving a different task.
-    body: "## A separate example\n\nAn analyst calculates a discount-adjusted line total.\n\n```sql\nSELECT\n    line_id,\n\
-      \    quantity * unit_price * (1 - discount_rate) AS net_amount\nFROM invoice_lines;\n```\n\n**What to notice:** Parentheses\
-      \ show that the discount is applied before the final multiplication. The alias describes the business meaning."
+    body: "## A separate example\n\nAn analyst calculates a discount-adjusted line total.\n\n```sql\nSELECT\n    line_id,\n    quantity * unit_price * (1 - discount_rate) AS net_amount\nFROM invoice_lines;\n```\n\n**What to notice:** Parentheses show that the discount is applied before the final multiplication. The alias describes the business meaning."
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning complex transformations before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how complex transformations works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -158,8 +155,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 7
   presentation:
-    scenario: Original analyst practice request
-    introduction: Translate the business request into a focused, reviewable SQL result.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Return order_id and discounted_total equal to 90% of order_total, rounded to 2 decimals. Sort by order_id.
     tables:
     - orders
@@ -175,9 +172,8 @@ activities:
     title: Calculate discounted order totals
     objective: Apply calculated numeric fields to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **calculated numeric fields** inside a complete analyst query. Start by identifying the
-      result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
-      Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **calculated numeric fields** inside a complete analyst query. Start by identifying the result grain—what one row should represent—then select only the fields and calculations needed to answer the request. Run the query, inspect the output, and check the answer when the result looks right.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: guided_practice
   completion_mode: validated
@@ -209,8 +205,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 7
   presentation:
-    scenario: Original analyst practice request
-    introduction: Translate the business request into a focused, reviewable SQL result.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Return subscriber_id and annual_value as monthly_fee multiplied by 12, rounded to 2 decimals. Sort by subscriber_id.
     tables:
     - subscriptions
@@ -226,9 +222,8 @@ activities:
     title: Calculate annual subscription value
     objective: Apply derived business metrics to a realistic analyst request.
     action_label: Write and validate the query
-    body: In this step, you will use **derived business metrics** inside a complete analyst query. Start by identifying the
-      result grain—what one row should represent—then select only the fields and calculations needed to answer the request.
-      Run the query, inspect the output, and check the answer when the result looks right.
+    body: In this step, you will use **derived business metrics** inside a complete analyst query. Start by identifying the result grain—what one row should represent—then select only the fields and calculations needed to answer the request. Run the query, inspect the output, and check the answer when the result looks right.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: independent_practice
   completion_mode: validated
@@ -241,8 +236,7 @@ activities:
   completion_mode: validated
   xp: 75
   estimated_minutes: 4
-  prompt: A report needs a cleaned customer label made from trimmed first and last names, with a fallback when either value
-    is missing. What is the best approach?
+  prompt: A report needs a cleaned customer label made from trimmed first and last names, with a fallback when either value is missing. What is the best approach?
   answer_options:
   - Build the label with text functions and CASE or COALESCE.
   - Delete customers with missing names.
@@ -262,10 +256,9 @@ activities:
   evidence_eligible: false
   difficulty: beginner
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
-    task: A report needs a cleaned customer label made from trimmed first and last names, with a fallback when either value
-      is missing. What is the best approach?
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
+    task: A report needs a cleaned customer label made from trimmed first and last names, with a fallback when either value is missing. What is the best approach?
     requirements:
     - Choose the answer that best follows the lesson idea.
     expected_output: One selected approach supported by the lesson concept.
@@ -276,6 +269,7 @@ activities:
     title: Apply It — Use the skill in a new situation
     objective: Recognize when and how to use the skill outside the practice example.
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_sql_complex_transformations_recap
   title: Recap — Complex Transformations
   type: recognition
@@ -302,12 +296,12 @@ activities:
       - Validate the result rather than relying only on valid syntax.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning complex transformations before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how complex transformations works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

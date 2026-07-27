@@ -1,0 +1,253 @@
+assessment_id: week_12_career_launch_check
+title: Week 12 Knowledge Check
+order: 12
+description: An eight-question check covering Week 12 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- Score at least 80% (seven of eight) to pass.
+- Review recommendations under missed questions before retaking the check.
+requires:
+- roadmap.portfolio_readiness
+passing_score: 0.8
+activities:
+- activity_id: w12_q1
+  title: Audit a portfolio
+  type: mastery
+  runtime: recognition
+  prompt: What should a final portfolio QA pass verify?
+  answer_options:
+  - Links, reproducibility, data privacy, calculations, and presentation
+  - Only the cover image
+  - Only the repository name
+  - Only the number of charts
+  starter: ''
+  solution: Links, reproducibility, data privacy, calculations, and presentation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Links, reproducibility, data privacy, calculations, and presentation
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What should a final portfolio QA pass verify?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review the final portfolio QA checklist.
+- activity_id: w12_q2
+  title: Write resume bullets
+  type: mastery
+  runtime: recognition
+  prompt: A strong project resume bullet should include what?
+  answer_options:
+  - The action, analytical method, and meaningful result
+  - Only a software list
+  - A vague statement about helping
+  - Every project file name
+  starter: ''
+  solution: The action, analytical method, and meaningful result
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The action, analytical method, and meaningful result
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: A strong project resume bullet should include what?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review evidence-based resume bullet writing.
+- activity_id: w12_q3
+  title: Prepare walkthroughs
+  type: mastery
+  runtime: recognition
+  prompt: What is the best structure for a project interview walkthrough?
+  answer_options:
+  - Problem, approach, validation, finding, recommendation, and limitation
+  - Tool names in random order
+  - Only the final dashboard
+  - A memorized definition with no project context
+  starter: ''
+  solution: Problem, approach, validation, finding, recommendation, and limitation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Problem, approach, validation, finding, recommendation, and limitation
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What is the best structure for a project interview walkthrough?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review project presentation and interview reflection guidance.
+- activity_id: w12_q4
+  title: Handle SQL interviews
+  type: mastery
+  runtime: recognition
+  prompt: When a SQL result looks wrong during an interview, what should you do?
+  answer_options:
+  - State the expected grain and test intermediate results
+  - Keep adding joins
+  - Hide the output
+  - Guess the final number
+  starter: ''
+  solution: State the expected grain and test intermediate results
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: State the expected grain and test intermediate results
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: When a SQL result looks wrong during an interview, what should you do?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review SQL debugging and grain checks.
+- activity_id: w12_q5
+  title: Target applications
+  type: mastery
+  runtime: recognition
+  prompt: Why tailor an application to a role?
+  answer_options:
+  - To connect relevant evidence to the employer’s stated needs
+  - To change your job history
+  - To remove measurable results
+  - To avoid reading the job description
+  starter: ''
+  solution: To connect relevant evidence to the employer’s stated needs
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To connect relevant evidence to the employer’s stated needs
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Why tailor an application to a role?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review job-description matching and application strategy.
+- activity_id: w12_q6
+  title: Discuss limitations
+  type: mastery
+  runtime: recognition
+  prompt: How should you answer when a project has a limitation?
+  answer_options:
+  - Explain it directly and describe how you would address it
+  - Claim there are no limitations
+  - Blame the dataset without analysis
+  - Change the subject
+  starter: ''
+  solution: Explain it directly and describe how you would address it
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Explain it directly and describe how you would address it
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: How should you answer when a project has a limitation?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review interview-ready limitation statements.
+- activity_id: w12_q7
+  title: Use evidence
+  type: mastery
+  runtime: recognition
+  prompt: What should support a claim that you know a skill?
+  answer_options:
+  - A specific artifact, decision, or validated result you created
+  - A generic interest statement
+  - A copied definition
+  - A tool logo
+  starter: ''
+  solution: A specific artifact, decision, or validated result you created
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A specific artifact, decision, or validated result you created
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What should support a claim that you know a skill?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review Demonstrated Evidence and portfolio artifact mapping.
+- activity_id: w12_q8
+  title: Plan continued growth
+  type: mastery
+  runtime: recognition
+  prompt: After the 90-day program, what is the strongest next step?
+  answer_options:
+  - Continue targeted practice based on job feedback and remaining gaps
+  - Stop reviewing completed work
+  - Start every topic over without a plan
+  - Avoid tracking applications
+  starter: ''
+  solution: Continue targeted practice based on job feedback and remaining gaps
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Continue targeted practice based on job feedback and remaining gaps
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 12 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: After the 90-day program, what is the strongest next step?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review the continuation plan and weekly learning feedback loop.

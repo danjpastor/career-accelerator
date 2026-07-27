@@ -37,8 +37,7 @@ activities:
     body: '# Choose the columns your result needs
 
 
-      `SELECT` controls which columns appear in a query result. A table may contain many fields, but a clear analysis usually
-      returns only the ones needed for the question.
+      `SELECT` controls which columns appear in a query result. A table may contain many fields, but a clear analysis usually returns only the ones needed for the question.
 
 
       ```sql
@@ -68,16 +67,15 @@ activities:
       The source column is still named `annual_value`. The alias only changes the heading in this result.
 
 
-      Clear aliases help another person understand technical field names and calculated values. Prefer names such as `monthly_revenue`
-      instead of vague names such as `value`.
+      Clear aliases help another person understand technical field names and calculated values. Prefer names such as `monthly_revenue` instead of vague names such as `value`.
 
 
-      `SELECT *` returns every column. It is useful for a quick first look, but a saved analysis should usually name the columns
-      it depends on.'
+      `SELECT *` returns every column. It is useful for a quick first look, but a saved analysis should usually name the columns it depends on.'
+    concept_heading: Write Your First SQL
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning write your first sql before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how write your first sql works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -102,8 +100,7 @@ activities:
   hints:
   - Read the task again and identify where **projection** fits into the requested result.
   - Focus on the named table or source (products) and check each requirement one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which query operation changes which
-    columns appear while keeping all source rows?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which query operation changes which columns appear while keeping all source rows?'
   validator:
     type: exact_answer
     expected_answer: Selecting an explicit column list
@@ -113,8 +110,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Reporting design review
-    introduction: A teammate is describing how a query changes the shape of a result.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Identify the operation that controls result columns.
     table: products
     requirements:
@@ -129,8 +126,7 @@ activities:
     title: Understand projection
     objective: Recognize the operation that changes result columns without filtering rows.
     action_label: Choose the operation
-    body: 'In relational terminology, choosing columns is called **projection**. Projection changes the shape of the result
-      horizontally: it controls which attributes appear. It does not determine which records qualify.
+    body: 'In relational terminology, choosing columns is called **projection**. Projection changes the shape of the result horizontally: it controls which attributes appear. It does not determine which records qualify.
 
 
       ```sql
@@ -142,12 +138,10 @@ activities:
       ```
 
 
-      If the source contains seven rows and no filter is present, the result still contains seven rows. It simply contains
-      fewer columns.
+      If the source contains seven rows and no filter is present, the result still contains seven rows. It simply contains fewer columns.
 
 
-      This differs from **filtering**, which changes the result vertically by keeping only rows that satisfy a condition.
-      Later, both operations can be combined:
+      This differs from **filtering**, which changes the result vertically by keeping only rows that satisfy a condition. Later, both operations can be combined:
 
 
       ```sql
@@ -164,8 +158,8 @@ activities:
       Here, `SELECT` projects columns and `WHERE` filters rows.
 
 
-      The question asks specifically about changing which columns appear while retaining all source rows. Choose the operation
-      that describes that behavior.'
+      The question asks specifically about changing which columns appear while retaining all source rows. Choose the operation that describes that behavior.'
+    concept_heading: Write Your First SQL
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -183,14 +177,12 @@ activities:
   instruction:
     title: Example — See write your first sql in context
     objective: Study a separate example, then use the method on different data.
-    body: "## A separate example\n\nA clinic table stores `appt_id`, `patient_display_name`, and `scheduled_at`. A daily schedule\
-      \ should use clearer headings:\n\n```sql\nSELECT appt_id AS appointment_id,\n       patient_display_name AS patient_name,\n\
-      \       scheduled_at AS appointment_time\nFROM clinic_appointments;\n```\n\n**What to notice:** The query chooses only\
-      \ the useful columns and changes their result headings without renaming anything in the database."
+    body: "## A separate example\n\nA clinic table stores `appt_id`, `patient_display_name`, and `scheduled_at`. A daily schedule should use clearer headings:\n\n```sql\nSELECT appt_id AS appointment_id,\n       patient_display_name AS patient_name,\n       scheduled_at AS appointment_time\nFROM clinic_appointments;\n```\n\n**What to notice:** The query chooses only the useful columns and changes their result headings without renaming anything in the database."
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning write your first sql before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how write your first sql works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -234,8 +226,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Merchandising catalog extract
-    introduction: The merchandising team needs a concise product reference without category or active-status fields.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Create a three-column catalog view.
     table: products
     requirements:
@@ -251,8 +243,7 @@ activities:
     title: Design the result for its reader
     objective: Select a compact, stakeholder-ready set of fields.
     action_label: Build the catalog view
-    body: 'Most business questions do not need every field in a table. A focused result is easier to inspect, export, explain,
-      and validate.
+    body: 'Most business questions do not need every field in a table. A focused result is easier to inspect, export, explain, and validate.
 
 
       When choosing a column order, consider how a reader will scan the result:
@@ -280,8 +271,8 @@ activities:
       The identifier supports traceability, the name supports interpretation, and the measure supports comparison.
 
 
-      The product table contains more fields than the catalog view needs. Return exactly `product_id`, `product_name`, and
-      `unit_price` in that order. Do not add a filter, because the request covers every product.'
+      The product table contains more fields than the catalog view needs. Return exactly `product_id`, `product_name`, and `unit_price` in that order. Do not add a filter, because the request covers every product.'
+    concept_heading: Write Your First SQL
   required_for_completion: true
   step_kind: guided_practice
   completion_mode: validated
@@ -318,8 +309,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Finance handoff
-    introduction: A finance dashboard uses the business term order value instead of the source name order_total.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Return the identifier and rename the measure in the result.
     table: orders
     requirements:
@@ -336,14 +327,8 @@ activities:
     title: Rename result columns with AS
     objective: Use an alias to make a source field clearer to a report reader.
     action_label: Add the reporting alias
-    body: "An alias changes a column heading in the query result without renaming the source column.\n\n```sql\nSELECT annual_value\
-      \ AS contract_value\nFROM contracts;\n```\n\nThe table still contains `annual_value`; only the displayed heading becomes\
-      \ `contract_value`. Aliases are useful when a source name is technical, abbreviated, or too vague for the audience.\n\
-      \nUse the explicit `AS` keyword while learning. Some SQL dialects allow a space alone, but `AS` makes the intention\
-      \ unmistakable and reduces confusion during review.\n\nAliases apply to individual expressions, so the comma belongs\
-      \ after the complete expression:\n\n```sql\nSELECT order_id,\n       order_total AS order_value\nFROM orders;\n```\n\
-      \nComplete the query so the monetary field appears under the report-friendly heading `order_value`. Keep `order_id`\
-      \ unchanged."
+    body: "An alias changes a column heading in the query result without renaming the source column.\n\n```sql\nSELECT annual_value AS contract_value\nFROM contracts;\n```\n\nThe table still contains `annual_value`; only the displayed heading becomes `contract_value`. Aliases are useful when a source name is technical, abbreviated, or too vague for the audience.\n\nUse the explicit `AS` keyword while learning. Some SQL dialects allow a space alone, but `AS` makes the intention unmistakable and reduces confusion during review.\n\nAliases apply to individual expressions, so the comma belongs after the complete expression:\n\n```sql\nSELECT order_id,\n       order_total AS order_value\nFROM orders;\n```\n\nComplete the query so the monetary field appears under the report-friendly heading `order_value`. Keep `order_id` unchanged."
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: independent_practice
   completion_mode: validated
@@ -380,8 +365,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Subscription report QA
-    introduction: A saved query fails because its alias expression is unfinished.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Complete the alias without changing the requested fields.
     table: subscriptions
     requirements:
@@ -397,8 +382,7 @@ activities:
     title: Treat an alias as a complete expression
     objective: Repair an alias that is missing its result name.
     action_label: Fix the alias
-    body: 'Each item in a `SELECT` list must be a complete expression. When you use `AS`, the database expects a result name
-      immediately after it.
+    body: 'Each item in a `SELECT` list must be a complete expression. When you use `AS`, the database expects a result name immediately after it.
 
 
       ```sql
@@ -410,8 +394,7 @@ activities:
       ```
 
 
-      A dangling `AS` is incomplete, just as a comma with no following column is incomplete. When an alias query fails, inspect
-      the expression from left to right:
+      A dangling `AS` is incomplete, just as a comma with no following column is incomplete. When an alias query fails, inspect the expression from left to right:
 
 
       - Source expression: `monthly_fee`
@@ -421,12 +404,11 @@ activities:
       - Result heading: `recurring_revenue`
 
 
-      The alias should be a valid, readable identifier. Avoid punctuation and unnecessary spaces unless the dialect and reporting
-      need explicitly require quoted aliases.
+      The alias should be a valid, readable identifier. Avoid punctuation and unnecessary spaces unless the dialect and reporting need explicitly require quoted aliases.
 
 
-      Repair the starter query by supplying the requested alias. Do not rename the source field elsewhere or remove the other
-      selected columns.'
+      Repair the starter query by supplying the requested alias. Do not rename the source field elsewhere or remove the other selected columns.'
+    concept_heading: Ask for the Columns You Need
   required_for_completion: true
   step_kind: combined_challenge
   completion_mode: validated
@@ -464,8 +446,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 8
   presentation:
-    scenario: Customer-success export
-    introduction: Customer Success needs a clean two-column account-and-plan export for a workflow tool.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Create the requested result with stakeholder-friendly headings.
     table: subscriptions
     requirements:
@@ -476,21 +458,14 @@ activities:
     skills_practiced:
     - independent SELECT
     - multiple aliases
-    after_correct: The result is concise, readable, and stable because both source fields are explicitly selected and clearly
-      renamed.
+    after_correct: The result is concise, readable, and stable because both source fields are explicitly selected and clearly renamed.
     common_errors: []
   instruction:
     title: Create a reader-friendly two-column view
     objective: Independently select and alias multiple fields.
     action_label: Build the account-plan view
-    body: "A strong result set balances source traceability with reader-friendly headings. You can alias more than one selected\
-      \ field:\n\n```sql\nSELECT member_id AS account_id,\n       membership_tier AS plan_name\nFROM memberships;\n```\n\n\
-      Each alias applies only to the expression directly before it. Commas still separate the complete expressions.\n\nBefore\
-      \ writing, translate the request into a small output contract:\n\n- First result column: source `subscriber_id`, displayed\
-      \ as `account_id`\n- Second result column: source `plan_name`, displayed as `subscription_plan`\n- Source table: `subscriptions`\n\
-      - Rows: all subscriptions\n\nThis is the lesson’s independent mastery step. Build the query without copying a previous\
-      \ solution. If you view the full solution, you can still practice, but you must pass a later unassisted attempt to demonstrate\
-      \ mastery."
+    body: "A strong result set balances source traceability with reader-friendly headings. You can alias more than one selected field:\n\n```sql\nSELECT member_id AS account_id,\n       membership_tier AS plan_name\nFROM memberships;\n```\n\nEach alias applies only to the expression directly before it. Commas still separate the complete expressions.\n\nBefore writing, translate the request into a small output contract:\n\n- First result column: source `subscriber_id`, displayed as `account_id`\n- Second result column: source `plan_name`, displayed as `subscription_plan`\n- Source table: `subscriptions`\n- Rows: all subscriptions\n\nThis is the lesson’s independent mastery step. Build the query without copying a previous solution. If you view the full solution, you can still practice, but you must pass a later unassisted attempt to demonstrate mastery."
+    concept_heading: Write Your First SQL
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -523,12 +498,12 @@ activities:
       - Readable names should preserve business meaning.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Write Your First SQL
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning write your first sql before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how write your first sql works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

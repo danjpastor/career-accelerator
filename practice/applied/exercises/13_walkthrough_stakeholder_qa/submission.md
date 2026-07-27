@@ -1,24 +1,84 @@
-# Applied Lab 13 Submission
+# Applied Lab 13 submission
 
-## Lab
-**Prepare a dashboard walkthrough and stakeholder Q&A**
+## Prepare a dashboard walkthrough and stakeholder Q&A
 
-## Artifact path
-Record any `.pbix`, `.xlsx`, image, recording, or other external artifact path.
+### Artifact paths
 
-`TODO`
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-## Work completed
-- TODO
+### Business question and audience
 
-## Findings or decisions
-TODO
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Validation performed
-- TODO
+### Work completed
 
-## What this demonstrates
-Dashboard presentation and stakeholder communication
+#### Step 1
 
-## Reflection
-What changed after validation, and what would you explain in an interview?
+**Planned work:** Write a five-minute audience-problem-evidence-action-limitations outline.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 2
+
+**Planned work:** Choose the three visuals to show first.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 3
+
+**Planned work:** Draft three likely stakeholder questions.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Prepare concise evidence-based answers.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Rehearse and revise.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Walkthrough stays within five minutes.
+  - Evidence:
+- [ ] It explains decisions, not features.
+  - Evidence:
+- [ ] Answers distinguish fact, inference, and recommendation.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

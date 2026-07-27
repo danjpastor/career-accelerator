@@ -2,8 +2,7 @@ lesson_id: academy2_python_numpy
 title: NumPy Arrays
 order: 4
 difficulty: beginner
-description: NumPy stores numeric values in an **array**. Arrays look similar to lists, but they are designed for fast, consistent
-  calculations across many values.
+description: NumPy stores numeric values in an **array**. Arrays look similar to lists, but they are designed for fast, consistent calculations across many values.
 estimated_minutes: 35
 content: lesson.md
 objectives:
@@ -30,8 +29,7 @@ activities:
   instruction:
     title: Learn — NumPy Arrays
     objective: Explain the purpose of numpy arrays.
-    body: 'NumPy stores numeric values in an **array**. Arrays look similar to lists, but they are designed for fast, consistent
-      calculations across many values.
+    body: 'NumPy stores numeric values in an **array**. Arrays look similar to lists, but they are designed for fast, consistent calculations across many values.
 
 
       ```python
@@ -45,12 +43,12 @@ activities:
       ```
 
 
-      A comparison such as `scores >= 80` creates a Boolean mask. Using that mask inside brackets keeps only the matching
-      values. This is called vectorized work because one expression operates across the whole array.'
+      A comparison such as `scores >= 80` creates a Boolean mask. Using that mask inside brackets keeps only the matching values. This is called vectorized work because one expression operates across the whole array.'
+    concept_heading: Calculate Across Many Values
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning numpy arrays before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how numpy arrays works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -74,8 +72,7 @@ activities:
   hints:
   - Read the task again and identify where **NumPy Arrays** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: What is a major advantage of a NumPy
-    array?'
+  - 'Compare your work with the success criteria. Your result should directly answer: What is a major advantage of a NumPy array?'
   validator:
     type: exact_answer
     expected_answer: Vectorized numeric operations
@@ -85,8 +82,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: A data analyst is building a repeatable analysis for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What is a major advantage of a NumPy array?
     requirements:
     - Choose one answer.
@@ -101,6 +98,7 @@ activities:
     objective: Build a practical understanding of numpy arrays.
     action_label: Choose the best answer
     body: NumPy performs array operations efficiently without writing a Python loop for every element.
+    concept_heading: Calculate Across Many Values
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -121,16 +119,15 @@ activities:
     body: '## A separate example
 
 
-      A quality analyst stores inspection measurements in an array, calculates the mean, and filters values outside the accepted
-      range. They do not need to write a loop for each measurement. The graded exercise uses order values.
+      A quality analyst stores inspection measurements in an array, calculates the mean, and filters values outside the accepted range. They do not need to write a loop for each measurement. The graded exercise uses order values.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning numpy arrays before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how numpy arrays works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -149,8 +146,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 7
-  prompt: Create a NumPy array named `order_values` containing 145, 89, 210, 175, and 35. Calculate its mean and store it
-    as `average_order_value`.
+  prompt: Create a NumPy array named `order_values` containing 145, 89, 210, 175, and 35. Calculate its mean and store it as `average_order_value`.
   starter: 'import numpy as np
 
 
@@ -175,24 +171,21 @@ activities:
     - expression: abs(float(average_order_value) - 130.8) < 1e-9
       feedback: Use the array mean rather than dividing by a typed count.
     display_variable: average_order_value
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
   required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
-    task: Create a NumPy array named `order_values` containing 145, 89, 210, 175, and 35. Calculate its mean and store it
-      as `average_order_value`.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
+    task: Create a NumPy array named `order_values` containing 145, 89, 210, 175, and 35. Calculate its mean and store it as `average_order_value`.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -200,7 +193,7 @@ activities:
     title: Try It — Calculate with a NumPy array
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Calculate Across Many Values
 - activity_id: academy2_python_numpy_independent
   title: Practice — Filter an array with a condition
   type: independent
@@ -209,8 +202,7 @@ activities:
   completion_mode: validated
   xp: 125
   estimated_minutes: 10
-  prompt: From the provided `order_values` array, create `large_orders` containing only values greater than 150. Use a Boolean
-    condition on the array.
+  prompt: From the provided `order_values` array, create `large_orders` containing only values greater than 150. Use a Boolean condition on the array.
   starter: 'import numpy as np
 
 
@@ -233,24 +225,21 @@ activities:
     - expression: np.array_equal(large_orders, np.array([210, 175]))
       feedback: Use order_values > 150 as a Boolean mask.
     display_variable: large_orders
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
   required_for_completion: true
   required_for_practice: false
   required_for_mastery: true
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
-    task: From the provided `order_values` array, create `large_orders` containing only values greater than 150. Use a Boolean
-      condition on the array.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
+    task: From the provided `order_values` array, create `large_orders` containing only values greater than 150. Use a Boolean condition on the array.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -258,7 +247,7 @@ activities:
     title: Practice — Filter an array with a condition
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Focus on the Rows That Matter
 - activity_id: academy2_python_numpy_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -282,8 +271,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A data analyst is building a repeatable analysis for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Why inspect dtype?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -297,6 +286,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Calculate Across Many Values
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -326,12 +316,12 @@ activities:
       - NumPy Arrays supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Calculate Across Many Values
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning numpy arrays before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how numpy arrays works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

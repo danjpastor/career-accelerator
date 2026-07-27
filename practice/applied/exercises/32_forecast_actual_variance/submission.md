@@ -1,38 +1,84 @@
-# Applied Lab 32 Submission
+# Applied Lab 32 submission
 
-## Lab
+## Explain forecast-versus-actual variance
 
-**Explain forecast-versus-actual variance**
+### Artifact paths
 
-## Artifact or output path
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-Record any notebook, workbook, `.pbix`, SQL file, chart, memo, or
-other artifact created for this lab.
+### Business question and audience
 
-`TODO`
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Method
+### Work completed
 
-- TODO
-- TODO
+#### Step 1
 
-## Result
+**Planned work:** Define sign conventions for revenue and cost variances.
 
-TODO
+**What I completed:**
 
-## Validation
+**Evidence or result:**
 
-- TODO
-- TODO
+#### Step 2
 
-## Decision or interpretation
+**Planned work:** Calculate absolute and percentage variance.
 
-TODO
+**What I completed:**
 
-## Limitations
+**Evidence or result:**
 
-TODO
+#### Step 3
 
-## What this demonstrates
+**Planned work:** Rank departments or products by contribution to total variance.
 
-Forecast and variance analysis
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Separate volume, rate, and timing explanations where possible.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Write an executive variance commentary with an action owner.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Sign conventions are explicit.
+  - Evidence:
+- [ ] Driver contributions reconcile to total variance.
+  - Evidence:
+- [ ] Percentage variance handles zero or very small forecasts safely.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

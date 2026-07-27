@@ -1,24 +1,84 @@
-# Applied Lab 18 Submission
+# Applied Lab 18 submission
 
-## Lab
-**Repair a misleading analytical story**
+## Repair a misleading analytical story
 
-## Artifact path
-Record any `.pbix`, `.xlsx`, image, recording, or other external artifact path.
+### Artifact paths
 
-`TODO`
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-## Work completed
-- TODO
+### Business question and audience
 
-## Findings or decisions
-TODO
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Validation performed
-- TODO
+### Work completed
 
-## What this demonstrates
-Detecting misleading visual and narrative choices
+#### Step 1
 
-## Reflection
-What changed after validation, and what would you explain in an interview?
+**Planned work:** List misleading visual and statistical choices.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 2
+
+**Planned work:** Recalculate selectively summarized metrics.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 3
+
+**Planned work:** Choose an appropriate scale and period.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Rewrite the headline.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Add a meaningful limitation or annotation.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Material context is preserved.
+  - Evidence:
+- [ ] Headline is supported.
+  - Evidence:
+- [ ] Limitations are visible.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

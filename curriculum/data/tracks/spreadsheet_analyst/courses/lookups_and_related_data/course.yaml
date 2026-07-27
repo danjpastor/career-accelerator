@@ -1,6 +1,7 @@
 course_id: lookups_and_related_data
 title: Lookups & Data Relationships
 order: 4
+roadmap_week: 2
 description: Connect related tables with exact keys, validate matches, and summarize data at the correct grain.
 estimated_minutes: 240
 outcomes:

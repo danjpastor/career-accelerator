@@ -42,7 +42,7 @@ WEEKLY_GUIDANCE = {
     2: (
         "Spreadsheet Analysis & Mastery",
         "Continue the current Google Certificate module without allowing it to replace required Academy catch-up work.",
-        "Complete spreadsheet cleaning, validation, lookups, pivots, KPI analysis, and the Week 2 Spreadsheet Mastery Assessment.",
+        "Complete spreadsheet cleaning, validation, lookups, pivots, KPI analysis, and the Week 2 Knowledge Check.",
         [],
         "Portfolio preparation only: finish source documentation, the data dictionary, and preliminary relationship mapping. Do not clean or analyze portfolio data yet.",
     ),
@@ -70,23 +70,23 @@ WEEKLY_GUIDANCE = {
     6: (
         "Advanced SQL Mastery",
         "Complete or substantially finish the Google Certificate learning scheduled for the first half.",
-        "Complete window functions, date analysis, advanced SQL workflows, and the Week 6 Spreadsheet & SQL Mastery Assessment.",
+        "Complete window functions, date analysis, advanced SQL workflows, and the Week 6 Knowledge Check.",
         ["User's Third Transaction", "Top Three Salaries", "Odd and Even Measurements"],
         "Portfolio execution remains locked until the learning-phase mastery gates are passed.",
     ),
     7: (
         "Power BI & Power Query",
         "Use Google Certificate work as supporting learning while Power BI is the primary Academy focus.",
-        "Complete Power Query, data modeling, DAX foundations, report design, and the Week 7 Power BI Mastery Assessment.",
+        "Complete Power Query, data modeling, DAX foundations, report design, and the Week 7 Knowledge Check.",
         ["Tweets' Rolling Averages", "User Shopping Sprees"],
         "Portfolio preparation may continue, but dashboard construction waits for Power BI mastery and final portfolio readiness.",
     ),
     8: (
         "Python, pandas & Portfolio Readiness",
         "Close remaining Google Certificate gaps while completing the final learning-phase requirements.",
-        "Complete Python and pandas foundations, cleaning, grouping, merging, notebooks, and the Week 8 Portfolio Readiness Assessment.",
+        "Complete Python and pandas foundations, cleaning, grouping, merging, notebooks, and the Week 8 Knowledge Check.",
         ["Mixed SQL retention review"],
-        "Pass the Portfolio Readiness Assessment to unlock cleaning, analysis, modeling, and dashboard execution.",
+        "Pass the Week 8 Knowledge Check to unlock cleaning, analysis, modeling, and dashboard execution.",
     ),
     9: (
         "Flagship Project — Clean & Analyze",

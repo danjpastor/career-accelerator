@@ -313,7 +313,7 @@ class AppliedLabsWidget(QWidget):
 
         file_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.file_actions = file_actions
-        self.instructions_button = QPushButton("Open Instructions")
+        self.instructions_button = QPushButton("Open Full Guide")
         self.instructions_button.clicked.connect(lambda: self.open_reference("instructions"))
         self.starter_button = QPushButton("Open Starter")
         self.starter_button.clicked.connect(lambda: self.open_reference("starter"))
@@ -520,51 +520,61 @@ class AppliedLabsWidget(QWidget):
         )
 
     def _lab_markdown(self, number: int, item: dict[str, Any]) -> str:
-        steps = "\n".join(
-            f"{index}. {step}" for index, step in enumerate(item.get("steps", []), start=1)
-        )
-        deliverables = "\n".join(f"- {value}" for value in item.get("deliverables", []))
-        validation = "\n".join(f"- {value}" for value in item.get("validation", []))
+        """Render the full guided lab workspace in the main Learn panel.
+
+        Earlier builds showed a short catalog summary first and appended the
+        actual README at the very bottom. Most labs therefore appeared to have
+        only a few vague bullets. The README is now the primary workspace
+        guide, with a concise lab brief and tool-specific setup placed above it.
+        """
+        instructions_path = applied_lab_runner.lab_paths(self.root, number, item)["instructions"]
+        guide = ""
+        if instructions_path.exists():
+            guide = instructions_path.read_text(encoding="utf-8").replace("\r\n", "\n").strip()
+            if guide.startswith("# ") and "\n" in guide:
+                guide = guide.split("\n", 1)[1].lstrip()
+
         sql_note = ""
         if applied_lab_runner.is_sql_lab(item):
             inventory = applied_lab_runner.dataset_inventory(self.root, number, item)
-            if inventory:
-                rows = ["| Table | File | Rows |", "|---|---|---:|"]
-                for dataset in inventory:
-                    row_count = dataset["rows"] if dataset["rows"] is not None else "—"
-                    rows.append(
-                        f"| `{dataset['table']}` | `{dataset['relative_path']}` | {row_count} |"
-                    )
-                sql_note = (
-                    "\n## In-app SQL workspace\n"
-                    "> The dataset files below are loaded automatically into an isolated DuckDB "
-                    "database. Run each step as you build it, then use **Check Lab** for execution "
-                    "and rubric validation.\n\n"
-                    + "\n".join(rows)
-                    + "\n"
+            rows = ["| In-app table | Source file | Rows |", "|---|---|---:|"]
+            for dataset in inventory:
+                row_count = dataset["rows"] if dataset["rows"] is not None else "—"
+                rows.append(
+                    f"| `{dataset['table']}` | `{dataset['relative_path']}` | {row_count} |"
                 )
-        extra = ""
-        instructions_path = applied_lab_runner.lab_paths(self.root, number, item)["instructions"]
-        if instructions_path.exists():
-            source = instructions_path.read_text(encoding="utf-8").strip()
-            # Avoid showing a second top-level title while preserving any richer
-            # course notes supplied by the lab package.
-            source = source.replace("\r\n", "\n")
-            source = source.split("\n", 1)[1].lstrip() if source.startswith("# ") and "\n" in source else source
-            if source:
-                extra = f"\n---\n\n## Detailed lab guide\n\n{source}\n"
+            sql_note = (
+                "\n## Your SQL workspace\n\n"
+                "The files below are loaded automatically into an isolated DuckDB database. "
+                "Write and run the analysis in the SQL Workspace beneath this guide. Save your "
+                "submission as you work, then use **Check Lab** for execution and rubric feedback.\n\n"
+                + ("\n".join(rows) if inventory else "No dataset tables were found.")
+                + "\n"
+            )
+
+        if not guide:
+            steps = "\n".join(
+                f"{index}. {step}"
+                for index, step in enumerate(item.get("steps", []), start=1)
+            )
+            deliverables = "\n".join(
+                f"- {value}" for value in item.get("deliverables", [])
+            )
+            validation = "\n".join(
+                f"- {value}" for value in item.get("validation", [])
+            )
+            guide = (
+                "## Guided workflow\n\n" + steps + "\n\n"
+                "## Deliverables\n\n" + deliverables + "\n\n"
+                "## Definition of done\n\n" + validation
+            )
+
         return (
             f"# {item['title']}\n\n"
-            f"> **Learning objective:** {item['objective']}\n\n"
-            "## What you will practice\n"
-            f"{item['concepts']}\n\n"
-            "## Lab workflow\n"
-            f"{steps}\n\n"
-            "## Deliverables\n"
-            f"{deliverables}\n\n"
-            "## Validation checklist\n"
-            f"{validation}\n"
-            f"{sql_note}{extra}"
+            "> Work through the guide in order. Use **Create / Open Submission** to create the "
+            "artifact you will turn in, record evidence in **Progress & Evidence**, and use the "
+            "validation checklist before marking the lab complete.\n"
+            f"{sql_note}\n---\n\n{guide}\n"
         )
 
     # ---------- Refresh and selection ----------

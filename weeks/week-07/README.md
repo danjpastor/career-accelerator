@@ -32,21 +32,21 @@ Preparation may continue, but dashboard construction remains locked until Power 
 - **Applied Practice:** Two report-building sessions
 - **SQL Retention:** One DuckDB and one interview session
 - **Google:** One or two supporting sessions
-- **Review:** Power BI Mastery Assessment
+- **Review:** Week 7 Knowledge Check
 
 ## Checklist
-- [ ] Complete the planned Google Certificate work for the week
-- [ ] Complete Power BI orientation and Power Query foundations
-- [ ] Complete reproducible Power Query transformations
-- [ ] Complete fact, dimension, relationship, and star-schema lessons
-- [ ] Complete measures, calculated columns, and DAX foundations
-- [ ] Complete report layout, interaction, and accessibility lessons
-- [ ] Validate Power BI results against SQL outputs
-- [ ] Complete DuckDB Exercise 09: Timed product challenge
+- [ ] Complete the Planned Google Certificate Work for the Week
+- [ ] Complete Power BI Orientation and Power Query Foundations
+- [ ] Complete Reproducible Power Query Transformations
+- [ ] Complete Fact, Dimension, Relationship, and Star-Schema Lessons
+- [ ] Complete Measures, Calculated Columns, and DAX Foundations
+- [ ] Complete Report Layout, Interaction, and Accessibility Lessons
+- [ ] Validate Power BI Results Against SQL Outputs
+- [ ] Complete DuckDB Exercise 09: Timed Product Challenge
 - [ ] Solve Tweets' Rolling Averages or User Shopping Sprees
-- [ ] Finalize the portfolio dashboard requirements and KPI-to-visual map
-- [ ] Pass the Week 7 Power BI Mastery Assessment
-- [ ] Complete the Week 7 retrospective
+- [ ] Finalize the Portfolio Dashboard Requirements and KPI-to-Visual Map
+- [ ] Pass the Week 7 Knowledge Check
+- [ ] Complete the Week 7 Retrospective
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Transform and model a practice dataset in Power BI
-- [ ] Build and validate a small executive report
+- [ ] Transform and Model a Practice Dataset in Power BI
+- [ ] Build and Validate a Small Executive Report

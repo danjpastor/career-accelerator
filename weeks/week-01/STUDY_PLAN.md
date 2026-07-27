@@ -36,9 +36,9 @@ Build the spreadsheet and data-foundation skills required before SQL begins, whi
 - Do not clean, transform, join, or analyze portfolio data.
 
 ### Session 7 — Mastery and review
-- Complete the Week 1 Cumulative Knowledge Check.
+- Complete the Week 1 Knowledge Check.
 - Complete targeted remediation for any weak topic.
 - Write the Week 1 retrospective.
 
 ## Completion rule
-Week 2 unlocks after the required Week 1 spreadsheet lessons and cumulative knowledge check are complete. SQL, DuckDB exercises, and SQL Companion interview problems are intentionally not scheduled during Week 1.
+Week 2 unlocks after the required Week 1 spreadsheet lessons and cumulative knowledge check are complete. SQL, DuckDB exercises, and SQL Interview Practice interview problems are intentionally not scheduled during Week 1.

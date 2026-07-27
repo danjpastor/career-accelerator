@@ -44,13 +44,12 @@ activities:
       - Use a **table or matrix** when the exact row-level values matter.
 
 
-      The fields placed on the axis, legend, and values areas control what the visual means. Power BI may automatically sum
-      a numeric field, but you should always confirm the summarization. A chart can look polished and still answer the wrong
-      question if it counts rows when the manager asked for revenue.'
+      The fields placed on the axis, legend, and values areas control what the visual means. Power BI may automatically sum a numeric field, but you should always confirm the summarization. A chart can look polished and still answer the wrong question if it counts rows when the manager asked for revenue.'
+    concept_heading: Show the Story Clearly
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning visualizing data before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how visualizing data works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -74,8 +73,7 @@ activities:
   hints:
   - Read the task again and identify where **Visualizing Data** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which visual is generally strongest
-    for a trend over time?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which visual is generally strongest for a trend over time?'
   validator:
     type: exact_answer
     expected_answer: Line chart
@@ -85,8 +83,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which visual is generally strongest for a trend over time?
     requirements:
     - Choose one answer.
@@ -101,6 +99,7 @@ activities:
     objective: Build a practical understanding of visualizing data.
     action_label: Choose the best answer
     body: Choose a visual based on the analytical question. Lines emphasize change over an ordered time axis.
+    concept_heading: Show the Story Clearly
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -121,17 +120,15 @@ activities:
     body: '## A separate example
 
 
-      A facilities analyst wants to compare maintenance cost across buildings. A column chart uses Building on the axis and
-      Sum of Cost as the value. A line chart would imply a time sequence that is not part of the question. Before sharing
-      the chart, the analyst checks the field aggregation and sorts the buildings by cost.
+      A facilities analyst wants to compare maintenance cost across buildings. A column chart uses Building on the axis and Sum of Cost as the value. A line chart would imply a time sequence that is not part of the question. Before sharing the chart, the analyst checks the field aggregation and sorts the buildings by cost.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning visualizing data before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how visualizing data works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -150,8 +147,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 8
-  prompt: Import `orders.csv`. Create a clustered column chart with `region` on the axis and Sum of `order_total` as the value.
-    Which region has the tallest column?
+  prompt: Import `orders.csv`. Create a clustered column chart with `region` on the axis and Sum of `order_total` as the value. Which region has the tallest column?
   starter: ''
   solution: West
   hints:
@@ -170,17 +166,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
-    task: Import `orders.csv`. Create a clustered column chart with `region` on the axis and Sum of `order_total` as the value.
-      Which region has the tallest column?
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
+    task: Import `orders.csv`. Create a clustered column chart with `region` on the axis and Sum of `order_total` as the value. Which region has the tallest column?
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -189,9 +182,8 @@ activities:
   instruction:
     title: Try It — Compare regions with a column chart
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Show the Story Clearly
 - activity_id: academy2_powerbi_visualizing_data_independent
   title: Practice — Read a chart value accurately
   type: independent
@@ -219,16 +211,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
     task: Using the same chart, enter the total order value for the West region.
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -237,9 +227,8 @@ activities:
   instruction:
     title: Practice — Read a chart value accurately
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Show the Story Clearly
 - activity_id: academy2_powerbi_visualizing_data_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -263,8 +252,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What should determine visual formatting decisions?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -278,6 +267,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Show the Story Clearly
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -313,12 +303,12 @@ activities:
       - Use a **table or matrix** when the exact row-level values matter.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Show the Story Clearly
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning visualizing data before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how visualizing data works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

@@ -2,9 +2,7 @@ lesson_id: academy2_powerbi_defining_tables
 title: Defining Tables
 order: 1
 difficulty: beginner
-description: A reliable model begins with a clear definition of what each table represents. The **grain** tells you what one
-  row means. A customer table may have one row per customer, while an orders table has one row per order and can repeat the
-  same customer ID.
+description: A reliable model begins with a clear definition of what each table represents. The **grain** tells you what one row means. A customer table may have one row per customer, while an orders table has one row per order and can repeat the same customer ID.
 estimated_minutes: 36
 content: lesson.md
 objectives:
@@ -31,18 +29,15 @@ activities:
   instruction:
     title: Learn — Defining Tables
     objective: Explain the purpose of defining tables.
-    body: 'A reliable model begins with a clear definition of what each table represents. The **grain** tells you what one
-      row means. A customer table may have one row per customer, while an orders table has one row per order and can repeat
-      the same customer ID.
+    body: 'A reliable model begins with a clear definition of what each table represents. The **grain** tells you what one row means. A customer table may have one row per customer, while an orders table has one row per order and can repeat the same customer ID.
 
 
-      A key identifies or connects records. The unique key belongs on the **one** side of a relationship. The repeating key
-      belongs on the **many** side. Before creating a relationship, check for duplicates, blanks, and unmatched values. Power
-      BI may allow a relationship that looks reasonable but produces misleading totals when the grain is misunderstood.'
+      A key identifies or connects records. The unique key belongs on the **one** side of a relationship. The repeating key belongs on the **many** side. Before creating a relationship, check for duplicates, blanks, and unmatched values. Power BI may allow a relationship that looks reasonable but produces misleading totals when the grain is misunderstood.'
+    concept_heading: Defining Tables
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning defining tables before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how defining tables works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -66,8 +61,7 @@ activities:
   hints:
   - Read the task again and identify where **Defining Tables** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which table usually stores measurable
-    business events?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which table usually stores measurable business events?'
   validator:
     type: exact_answer
     expected_answer: Fact table
@@ -77,8 +71,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: The report owner is preparing a dashboard for stakeholders.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which table usually stores measurable business events?
     requirements:
     - Choose one answer.
@@ -93,6 +87,7 @@ activities:
     objective: Build a practical understanding of defining tables.
     action_label: Choose the best answer
     body: Fact tables record events at a declared grain, while dimensions provide descriptive context.
+    concept_heading: Defining Tables
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -113,17 +108,15 @@ activities:
     body: '## A separate example
 
 
-      A clinic model contains one row per patient in `Patients` and one row per appointment in `Appointments`. Patient ID
-      is unique in Patients and repeats in Appointments. Patients therefore belongs on the one side of a one-to-many relationship.
-      An appointment with a missing patient ID should be investigated rather than silently ignored.
+      A clinic model contains one row per patient in `Patients` and one row per appointment in `Appointments`. Patient ID is unique in Patients and repeats in Appointments. Patients therefore belongs on the one side of a one-to-many relationship. An appointment with a missing patient ID should be investigated rather than silently ignored.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning defining tables before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how defining tables works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -142,8 +135,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 8
-  prompt: Import `customers.csv` and `orders.csv`. Compare the `customer_id` columns. Which table should be on the **one**
-    side of a one-to-many relationship?
+  prompt: Import `customers.csv` and `orders.csv`. Compare the `customer_id` columns. Which table should be on the **one** side of a one-to-many relationship?
   starter: ''
   solution: customers
   hints:
@@ -163,17 +155,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
-    task: Import `customers.csv` and `orders.csv`. Compare the `customer_id` columns. Which table should be on the **one**
-      side of a one-to-many relationship?
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
+    task: Import `customers.csv` and `orders.csv`. Compare the `customer_id` columns. Which table should be on the **one** side of a one-to-many relationship?
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -183,9 +172,8 @@ activities:
   instruction:
     title: Try It — Identify the one side of a relationship
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_powerbi_defining_tables_independent
   title: Practice — Find a key that does not match
   type: independent
@@ -194,8 +182,7 @@ activities:
   completion_mode: validated
   xp: 125
   estimated_minutes: 10
-  prompt: Create the relationship from `customers[customer_id]` to `orders[customer_id]`. Build a table that shows each order
-    and customer name. How many orders have a blank customer name?
+  prompt: Create the relationship from `customers[customer_id]` to `orders[customer_id]`. Build a table that shows each order and customer name. How many orders have a blank customer name?
   starter: ''
   solution: '1'
   hints:
@@ -213,17 +200,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Power BI Desktop practice
-    introduction: Open the practice file, complete the task in Power BI, then enter the result requested below. The lesson
-      tells you which skill to use without giving you the final answer.
-    task: Create the relationship from `customers[customer_id]` to `orders[customer_id]`. Build a table that shows each order
-      and customer name. How many orders have a blank customer name?
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the work in the named tool, then record the requested result in the Academy.
+    task: Create the relationship from `customers[customer_id]` to `orders[customer_id]`. Build a table that shows each order and customer name. How many orders have a blank customer name?
     requirements:
     - Use Power BI Desktop for the task.
     - Use the source file or files provided with the lesson.
     - Enter only the result or short response the task asks for.
     expected_output: A checked result from the Power BI report or model.
-    success_criteria: The entered result matches the output produced by a correctly configured Power BI task.
     skills_practiced:
     - Power BI
     source_files:
@@ -233,9 +217,8 @@ activities:
   instruction:
     title: Practice — Find a key that does not match
     objective: Complete a focused Power BI task and verify the business result.
-    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load
-      the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
-    watch_for: Check data types, summarization, active filters, and relationships before trusting the result.
+    approach: Use **Open Practice Files** to find the CSV source. In Power BI Desktop, choose **Get data → Text/CSV**, load the named source, and follow the task. Read the result from the report rather than typing a value from the lesson.
+    concept_heading: Bring the Right Value Across
 - activity_id: academy2_powerbi_defining_tables_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -259,8 +242,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which field belongs naturally in a customer dimension?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -274,6 +257,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Defining Tables
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -303,12 +287,12 @@ activities:
       - Defining Tables supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Defining Tables
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning defining tables before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how defining tables works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

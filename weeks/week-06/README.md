@@ -32,21 +32,21 @@ Execution remains locked. Use the week to prove spreadsheet and SQL mastery befo
 - **DuckDB:** Two capstone-style sessions
 - **Interview Practice:** Two or three mixed sessions
 - **Google:** Certificate completion or catch-up
-- **Review:** Spreadsheet and SQL Mastery Assessment
+- **Review:** Week 6 Knowledge Check
 
 ## Checklist
-- [ ] Complete the planned Google Certificate work for the week
-- [ ] Complete ROW_NUMBER, RANK, and DENSE_RANK lessons
-- [ ] Complete partitioning, ordering, and window-frame lessons
-- [ ] Complete running totals, period comparisons, and date-analysis lessons
-- [ ] Complete advanced SQL workflow and interpretation review
-- [ ] Complete DuckDB Exercise 08: Analyze a VFX production snapshot
-- [ ] Complete DuckDB Exercise 11: Explain joins and window functions
-- [ ] Solve User's Third Transaction in SQL Companion
+- [ ] Complete the Planned Google Certificate Work for the Week
+- [ ] Complete ROW_NUMBER, RANK, and DENSE_RANK Lessons
+- [ ] Complete Partitioning, Ordering, and Window-Frame Lessons
+- [ ] Complete Running Totals, Period Comparisons, and Date-Analysis Lessons
+- [ ] Complete Advanced SQL Workflow and Interpretation Review
+- [ ] Complete DuckDB Exercise 08: Analyze a Vfx Production Snapshot
+- [ ] Complete DuckDB Exercise 11: Explain Joins and Window Functions
+- [ ] Solve User's Third Transaction in SQL Interview Practice
 - [ ] Solve Top Three Salaries or Odd and Even Measurements
-- [ ] Complete targeted remediation for any missing SQL prerequisite
-- [ ] Pass the Week 6 Spreadsheet and SQL Mastery Assessment
-- [ ] Complete the Week 6 retrospective
+- [ ] Complete Targeted Remediation for Any Missing SQL Prerequisite
+- [ ] Pass the Week 6 Knowledge Check
+- [ ] Complete the Week 6 Retrospective
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Complete an end-to-end SQL analysis on practice data
-- [ ] Explain and validate joins, CTEs, and window calculations
+- [ ] Complete an End-to-End SQL Analysis on Practice Data
+- [ ] Explain and Validate Joins, CTEs, and Window Calculations

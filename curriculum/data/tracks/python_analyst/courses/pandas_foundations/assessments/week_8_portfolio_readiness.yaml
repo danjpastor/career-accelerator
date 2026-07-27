@@ -1,13 +1,12 @@
 assessment_id: week_8_portfolio_readiness
-title: Week 8 Portfolio Readiness Assessment
+title: Week 8 Knowledge Check
 order: 99
-description: Verify Python/pandas plus retained spreadsheet, SQL, Power BI, data-quality, and communication mastery.
-estimated_minutes: 55
+description: An eight-question mastery check covering the required Week 8 topics.
+estimated_minutes: 25
 instructions:
-- Complete every question independently.
-- Hints and full solutions are disabled.
-- A score of 80% or higher passes.
-- The check includes current-week material and retained prior knowledge.
+- Answer all eight multiple-choice questions independently.
+- A score of 80% or higher is required. With eight questions, you must answer at least seven correctly.
+- After grading, review every answer and use the recommendations beneath missed questions before retaking the check.
 requires:
 - roadmap.sql_mastery
 - roadmap.power_bi_mastery
@@ -39,16 +38,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A pandas DataFrame is:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to DataFrame.
+  required_for_completion: true
 - activity_id: w8_filter
   title: Boolean filtering
   type: mastery
@@ -71,11 +72,11 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Multiple pandas Series conditions should use:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
@@ -84,6 +85,7 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+    review_recommendation: Review the Week 8 lesson or practice work related to Boolean filtering.
   google_sheets:
     source_of_truth: Google Sheets
     steps:
@@ -101,6 +103,7 @@ activities:
     primary_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
+  required_for_completion: true
 - activity_id: w8_missing
   title: Missing values
   type: mastery
@@ -123,16 +126,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Before filling missing values, first:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Missing values.
+  required_for_completion: true
 - activity_id: w8_merge
   title: Merge validation
   type: mastery
@@ -155,16 +160,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A pandas merge should validate:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Merge validation.
+  required_for_completion: true
 - activity_id: w8_group
   title: groupby
   type: mastery
@@ -187,16 +194,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'groupby is used to:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to groupby.
+  required_for_completion: true
 - activity_id: w8_notebook
   title: Notebook quality
   type: mastery
@@ -219,16 +228,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A portfolio notebook should separate:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Notebook quality.
+  required_for_completion: true
 - activity_id: w8_model
   title: Power BI retention
   type: mastery
@@ -251,16 +262,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A reliable data model begins with:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Power BI retention.
+  required_for_completion: true
 - activity_id: w8_sql
   title: SQL retention
   type: mastery
@@ -283,77 +296,15 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Before trusting a multi-table KPI, validate:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
-- activity_id: w8_comm
-  title: Communication
-  type: mastery
-  runtime: recognition
-  prompt: 'A recommendation should include:'
-  answer_options:
-  - Evidence, expected impact, assumptions, and limitations
-  - Only confidence
-  - Only code
-  - Only a chart title
-  starter: ''
-  solution: Evidence, expected impact, assumptions, and limitations
-  hints: []
-  validator:
-    type: exact_answer
-    expected_answer: Evidence, expected impact, assumptions, and limitations
-  required_for_practice: false
-  required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 3
-  presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
-    task: 'A recommendation should include:'
-    requirements:
-    - Choose the best analyst answer.
-    expected_output: One selected answer.
-    skills_practiced:
-    - cumulative mastery
-    after_correct: This demonstrates the expected weekly knowledge.
-    common_errors: []
-- activity_id: w8_ready
-  title: Readiness
-  type: mastery
-  runtime: recognition
-  prompt: 'Portfolio execution should begin when:'
-  answer_options:
-  - The required skills are demonstrated and the readiness assessment is passed
-  - A dataset is downloaded
-  - A folder exists
-  - A chart is selected
-  starter: ''
-  solution: The required skills are demonstrated and the readiness assessment is passed
-  hints: []
-  validator:
-    type: exact_answer
-    expected_answer: The required skills are demonstrated and the readiness assessment is passed
-  required_for_practice: false
-  required_for_mastery: false
-  evidence_eligible: false
-  difficulty: beginner
-  estimated_minutes: 3
-  presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
-    task: 'Portfolio execution should begin when:'
-    requirements:
-    - Choose the best analyst answer.
-    expected_output: One selected answer.
-    skills_practiced:
-    - cumulative mastery
-    after_correct: This demonstrates the expected weekly knowledge.
-    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to SQL retention.
+  required_for_completion: true

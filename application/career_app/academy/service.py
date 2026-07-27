@@ -14,6 +14,9 @@ from career_app.services.spreadsheet_share_link import (
     SpreadsheetShareLinkError,
 )
 
+from career_app.services.task_titles import title_case_task
+from career_app.services import weekly_mastery
+
 from .catalog import CatalogIndex
 from .loader import load_catalog
 from .models import ActivityDefinition, ActivityType, AssessmentDefinition, LessonDefinition, SkillsLabDefinition
@@ -36,6 +39,7 @@ class AcademyService:
 
     TRACK_KEY = "academy"
     DESTINATION_INDEX = PAGE_LEARNING
+    PLANNER_SORT_ORDER = -300000
 
     def __init__(self, conn: sqlite3.Connection, repository_root: str | Path):
         self.conn = conn
@@ -746,6 +750,34 @@ class AcademyService:
         ).fetchall()
         return {str(row["activity_id"]): str(row["answer_text"] or "") for row in rows}
 
+    def latest_assessment_attempt(self, assessment_id: str) -> dict[str, Any] | None:
+        row = self.conn.execute(
+            """SELECT attempt_number,score,passed,answers_json,result_json,completed_at
+                 FROM academy_assessment_attempts
+                WHERE assessment_id=?
+                ORDER BY attempt_number DESC
+                LIMIT 1""",
+            (str(assessment_id),),
+        ).fetchone()
+        if row is None:
+            return None
+        try:
+            answers = json.loads(str(row["answers_json"] or "{}"))
+        except (TypeError, ValueError, json.JSONDecodeError):
+            answers = {}
+        try:
+            results = json.loads(str(row["result_json"] or "{}"))
+        except (TypeError, ValueError, json.JSONDecodeError):
+            results = {}
+        return {
+            "attempt_number": int(row["attempt_number"] or 0),
+            "score": float(row["score"] or 0),
+            "passed": bool(row["passed"]),
+            "answers": answers if isinstance(answers, dict) else {},
+            "results": results if isinstance(results, dict) else {},
+            "completed_at": str(row["completed_at"] or ""),
+        }
+
     def _validate_answer(
         self,
         activity: ActivityDefinition,
@@ -803,13 +835,13 @@ class AcademyService:
     ) -> dict[str, Any]:
         if not answers:
             answers = self.assessment_drafts(assessment.assessment_id)
-        missing = self._missing_skills(assessment.requires)
-        if missing:
+        unlocked, missing = self.assessment_unlocked(assessment)
+        if not unlocked:
             return {
                 "passed": False,
                 "score": 0.0,
                 "results": {},
-                "feedback": "Prerequisites not yet mastered: " + ", ".join(missing),
+                "feedback": "Prerequisites not yet completed: " + ", ".join(missing),
             }
         results: dict[str, dict[str, Any]] = {}
         earned = 0
@@ -1338,6 +1370,100 @@ class AcademyService:
         self.conn.commit()
         return True
 
+    def _course_for_assessment(self, assessment_id: str):
+        for course in self.catalog.courses():
+            if any(item.assessment_id == str(assessment_id) for item in course.assessments):
+                return course
+        return None
+
+    def _course_for_skills_lab(self, lab_id: str):
+        for course in self.catalog.courses():
+            if any(item.lab_id == str(lab_id) for item in course.skills_labs):
+                return course
+        return None
+
+    def _recommendation_week(
+        self,
+        recommendation: AcademyRecommendation,
+        current_week: int,
+    ) -> int:
+        """Return the curriculum week represented by an adaptive Academy task.
+
+        The old planner always moved the reusable Academy row into the active
+        sprint. That turned unfinished Week 1 lessons into Week 2 work and then
+        blocked those lessons behind the Week 1 Knowledge Check they were
+        supposed to unlock. Course-level roadmap metadata keeps the adaptive
+        task attached to its real week so overdue lessons remain actionable
+        Catch-Up work.
+        """
+        target = str(recommendation.target_key or "")
+        parts = target.split(":")
+        course = None
+        if len(parts) >= 4 and parts[:2] == ["academy", "activity"]:
+            try:
+                course = self.index.lesson(parts[2]).course
+            except KeyError:
+                course = None
+        elif len(parts) >= 3 and parts[:2] == ["academy", "lesson"]:
+            try:
+                course = self.index.lesson(parts[2]).course
+            except KeyError:
+                course = None
+        elif len(parts) >= 3 and parts[:2] == ["academy", "assessment"]:
+            exact_week = weekly_mastery.knowledge_check_week(parts[2])
+            if exact_week is not None:
+                return int(exact_week)
+            course = self._course_for_assessment(parts[2])
+        elif len(parts) >= 3 and parts[:2] == ["academy", "skills_lab"]:
+            course = self._course_for_skills_lab(parts[2])
+
+        roadmap_week = getattr(course, "roadmap_week", None) if course is not None else None
+        return max(1, int(roadmap_week if roadmap_week is not None else current_week))
+
+    def _academy_sort_order(self, week: int, task_id: int | None = None) -> int:
+        """Reserve one stable high-priority position for the adaptive task."""
+        candidate = int(self.PLANNER_SORT_ORDER)
+        while self.conn.execute(
+            """SELECT 1 FROM sprint_tasks
+               WHERE week=? AND sort_order=? AND (? IS NULL OR id<>?)""",
+            (int(week), candidate, task_id, task_id),
+        ).fetchone() is not None:
+            candidate += 1
+        return candidate
+
+    def _yield_to_weekly_knowledge_check(
+        self,
+        recommendation: AcademyRecommendation,
+    ) -> bool:
+        """Use the durable mastery task instead of creating a duplicate row."""
+        if recommendation.kind != "assessment":
+            return False
+        target = str(recommendation.target_key or "")
+        prefix = "academy:assessment:"
+        if not target.startswith(prefix):
+            return False
+        assessment_id = target[len(prefix) :]
+        if weekly_mastery.knowledge_check_week(assessment_id) is None:
+            return False
+
+        existing = self.conn.execute(
+            "SELECT task_id FROM track_tasks WHERE track_key=?",
+            (self.TRACK_KEY,),
+        ).fetchone()
+        if existing is not None:
+            task_id = int(existing["task_id"])
+            self.conn.execute("DELETE FROM daily_focus WHERE task_id=?", (task_id,))
+            self.conn.execute("DELETE FROM track_tasks WHERE track_key=?", (self.TRACK_KEY,))
+            self.conn.execute("DELETE FROM task_metadata WHERE task_id=?", (task_id,))
+            self.conn.execute("DELETE FROM sprint_tasks WHERE id=?", (task_id,))
+
+        # Reconciliation owns the canonical Week N Knowledge Check row and
+        # changes it from locked to ready as soon as the coursework is complete.
+        from career_app.services import roadmap_mastery
+
+        roadmap_mastery.reconcile(self.conn, self.repository_root)
+        return True
+
     def sync_planner_task(self) -> None:
         """Expose the next prerequisite-ready Academy action to the existing planner."""
         recommendation = self.next_recommendation()
@@ -1398,6 +1524,18 @@ class AcademyService:
                 self.conn.commit()
                 return
             if recommendation is None:
+                existing = self.conn.execute(
+                    "SELECT task_id,target_key FROM track_tasks WHERE track_key=?",
+                    (self.TRACK_KEY,),
+                ).fetchone()
+                if existing is not None and self._target_is_complete(str(existing["target_key"] or "")):
+                    task_id = int(existing["task_id"])
+                    self.conn.execute("UPDATE sprint_tasks SET completed=1 WHERE id=?", (task_id,))
+                    self.conn.execute(
+                        "UPDATE task_metadata SET status='Completed' WHERE task_id=?",
+                        (task_id,),
+                    )
+                    self.conn.execute("DELETE FROM track_tasks WHERE track_key=?", (self.TRACK_KEY,))
                 self.conn.execute(
                     "UPDATE track_state SET status='Active',updated_at=CURRENT_TIMESTAMP WHERE track_key=?",
                     (self.TRACK_KEY,),
@@ -1429,7 +1567,8 @@ class AcademyService:
                     (self.TRACK_KEY,),
                 )
                 existing = None
-            label = recommendation.title
+            label = title_case_task(recommendation.title)
+            scheduled_week = self._recommendation_week(recommendation, current_week)
             planner_metadata = {
                 "provider": "internal",
                 "program_id": self.catalog.program.program_id,
@@ -1444,13 +1583,20 @@ class AcademyService:
                    WHERE track_key=?""",
                 (json.dumps(planner_metadata), self.TRACK_KEY),
             )
-            if self._use_existing_roadmap_catchup(recommendation, planner_metadata):
+            if self._yield_to_weekly_knowledge_check(recommendation):
+                self.conn.commit()
                 return
+            # Static v10.26 Academy catch-up rows are retired by
+            # roadmap_mastery.reconcile(). Keep this adaptive task as the only
+            # dashboard link to the current Academy activity.
             if existing:
                 task_id = int(existing[0])
+                sort_order = self._academy_sort_order(scheduled_week, task_id)
                 self.conn.execute(
-                    "UPDATE sprint_tasks SET week=?,label=?,completed=0 WHERE id=?",
-                    (current_week, label, task_id),
+                    """UPDATE sprint_tasks
+                       SET week=?,sort_order=?,label=?,completed=0
+                       WHERE id=?""",
+                    (scheduled_week, sort_order, label, task_id),
                 )
                 self.conn.execute(
                     """UPDATE task_metadata SET status='Not Started',priority=2,
@@ -1464,15 +1610,10 @@ class AcademyService:
                     (recommendation.target_key, system_name, self.TRACK_KEY),
                 )
             else:
-                next_order = int(
-                    self.conn.execute(
-                        "SELECT COALESCE(MAX(sort_order),0)+1 FROM sprint_tasks WHERE week=?",
-                        (current_week,),
-                    ).fetchone()[0]
-                )
+                next_order = self._academy_sort_order(scheduled_week)
                 cursor = self.conn.execute(
                     "INSERT INTO sprint_tasks(week,sort_order,label,completed) VALUES(?,?,?,0)",
-                    (current_week, next_order, label),
+                    (scheduled_week, next_order, label),
                 )
                 task_id = int(cursor.lastrowid)
                 self.conn.execute(

@@ -1,9 +1,13 @@
 from __future__ import annotations
 import json
 import re
+import sqlite3
+
+import yaml
 from pathlib import Path
 
 from career_app.services import roadmap_mastery
+from career_app.services.task_titles import normalize_database_task_titles
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 from career_app.navigation import PAGE_LEARNING
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
@@ -113,6 +117,7 @@ def _clean_legacy_roadmap_tasks(conn) -> dict:
         """SELECT s.id,s.week,s.sort_order,s.label,s.completed,
                   m.status,m.priority,m.estimated_minutes,m.energy,m.destination,
                   m.category,m.prerequisite_state,m.prerequisite_reason,
+                  m.managed_key,m.starter_path,
                   tt.track_key,tt.target_key,tt.source_label,tt.linked_entity_id
            FROM sprint_tasks s
            LEFT JOIN task_metadata m ON m.task_id=s.id
@@ -124,6 +129,26 @@ def _clean_legacy_roadmap_tasks(conn) -> dict:
     updated = 0
     for row in rows:
         track_key = str(row["track_key"] or "").strip().lower()
+        managed_key = str(row["managed_key"] or "").strip()
+        starter_path = str(row["starter_path"] or "").strip()
+
+        # Static Academy lesson/check rows were superseded by the one adaptive
+        # Academy task. Archive both completed and incomplete copies so they
+        # cannot return to Today’s Focus after a curriculum change.
+        if (
+            managed_key.startswith("roadmap_v1026:lesson:")
+            or managed_key.startswith("roadmap_v1026:assessment:")
+            or starter_path.startswith("academy:lesson:")
+            or starter_path.startswith("academy:assessment:")
+        ) and track_key != "academy":
+            _archive_roadmap_task(
+                conn,
+                row,
+                "Retired static Academy assignment; current curriculum is owned by the adaptive Academy task",
+            )
+            archived += 1
+            continue
+
         if track_key in ACTIVE_DYNAMIC_TRACKS:
             if track_key == "academy":
                 cleaned = re.sub(
@@ -297,11 +322,12 @@ def _update_duckdb_exercise_tasks(conn):
                        priority=?,
                        estimated_minutes=?,
                        energy='Normal',
-                       destination=PAGE_LEARNING
+                       destination=?
                    WHERE task_id=?""",
                 (
                     exercise["priority"],
                     exercise["minutes"],
+                    PAGE_LEARNING,
                     row["id"],
                 ),
             )
@@ -440,6 +466,175 @@ def _sync_portfolio_task_guidance(conn) -> dict:
     }
 
 
+
+def _table_exists(conn, name: str) -> bool:
+    return conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (str(name),),
+    ).fetchone() is not None
+
+
+def _curriculum_targets(root: Path) -> set[str]:
+    """Return every exact target that the installed Academy can open."""
+    curriculum = Path(root) / "curriculum" / "data"
+    targets: set[str] = set()
+    if not curriculum.is_dir():
+        return targets
+    for path in curriculum.rglob("*.yaml"):
+        try:
+            raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except (OSError, UnicodeError, yaml.YAMLError):
+            continue
+        if not isinstance(raw, dict):
+            continue
+        lesson_id = str(raw.get("lesson_id") or "").strip()
+        if lesson_id:
+            for activity in raw.get("activities") or []:
+                if not isinstance(activity, dict):
+                    continue
+                activity_id = str(activity.get("activity_id") or "").strip()
+                if activity_id:
+                    targets.add(f"academy:activity:{lesson_id}:{activity_id}")
+        assessment_id = str(raw.get("assessment_id") or "").strip()
+        if assessment_id:
+            targets.add(f"academy:assessment:{assessment_id}")
+        lab_id = str(raw.get("lab_id") or "").strip()
+        if lab_id:
+            targets.add(f"academy:skills_lab:{lab_id}")
+    return targets
+
+
+def _program_integrity_cleanup(conn, root: Path) -> dict:
+    """Remove runtime leftovers that can no longer resolve in the program.
+
+    User-authored workspaces and historical completion records are preserved.
+    Only active planner rows, orphan links, and obsolete derived focus state are
+    removed or archived.
+    """
+    result = {
+        "invalid_academy_targets_archived": 0,
+        "orphan_track_links_removed": 0,
+        "orphan_metadata_removed": 0,
+        "orphan_focus_rows_removed": 0,
+        "manual_focus_rows_removed": 0,
+        "stale_requirement_rows_removed": 0,
+        "legacy_wording_updated": 0,
+        "obsolete_retrospective_fields_removed": 0,
+    }
+
+    valid_targets = _curriculum_targets(root)
+    if valid_targets and _table_exists(conn, "track_tasks"):
+        rows = conn.execute(
+            """SELECT s.id,s.week,s.sort_order,s.label,s.completed,
+                      m.status,m.priority,m.estimated_minutes,m.energy,m.destination,
+                      m.category,m.prerequisite_state,m.prerequisite_reason,
+                      tt.track_key,tt.target_key,tt.source_label,tt.linked_entity_id
+               FROM track_tasks tt
+               JOIN sprint_tasks s ON s.id=tt.task_id
+               LEFT JOIN task_metadata m ON m.task_id=s.id
+               WHERE LOWER(tt.track_key)='academy'"""
+        ).fetchall()
+        for row in rows:
+            if str(row["target_key"] or "") in valid_targets:
+                continue
+            _archive_roadmap_task(
+                conn,
+                row,
+                "Academy target no longer exists in the installed curriculum",
+            )
+            result["invalid_academy_targets_archived"] += 1
+
+    if _table_exists(conn, "track_tasks"):
+        result["orphan_track_links_removed"] = max(
+            0,
+            conn.execute(
+                "DELETE FROM track_tasks WHERE task_id NOT IN (SELECT id FROM sprint_tasks)"
+            ).rowcount,
+        )
+    if _table_exists(conn, "task_metadata"):
+        result["orphan_metadata_removed"] = max(
+            0,
+            conn.execute(
+                "DELETE FROM task_metadata WHERE task_id NOT IN (SELECT id FROM sprint_tasks)"
+            ).rowcount,
+        )
+    if _table_exists(conn, "task_concept_tags"):
+        conn.execute(
+            "DELETE FROM task_concept_tags WHERE task_id NOT IN (SELECT id FROM sprint_tasks)"
+        )
+    if _table_exists(conn, "task_workspaces"):
+        conn.execute(
+            """UPDATE task_workspaces SET task_id=NULL
+               WHERE task_id IS NOT NULL
+                 AND task_id NOT IN (SELECT id FROM sprint_tasks)"""
+        )
+    if _table_exists(conn, "daily_focus"):
+        result["orphan_focus_rows_removed"] = max(
+            0,
+            conn.execute(
+                """DELETE FROM daily_focus
+                   WHERE completed_at IS NULL AND task_id IS NOT NULL
+                     AND task_id NOT IN (SELECT id FROM sprint_tasks)"""
+            ).rowcount,
+        )
+    if _table_exists(conn, "manual_daily_focus"):
+        result["manual_focus_rows_removed"] = max(
+            0,
+            conn.execute("DELETE FROM manual_daily_focus").rowcount,
+        )
+    if _table_exists(conn, "roadmap_requirement_state"):
+        result["stale_requirement_rows_removed"] = max(
+            0,
+            conn.execute(
+                "DELETE FROM roadmap_requirement_state WHERE kind='academy_lesson'"
+            ).rowcount,
+        )
+
+    # Weekly retrospectives now keep only the three reflective answers. Older
+    # manually entered progress, evidence, confidence, and adjustment prompts
+    # are derived automatically or have been retired.
+    if _table_exists(conn, "retrospective_notes"):
+        retired_sections = (
+            "major_learning", "technical_practice", "project_progress",
+            "evidence", "adjustment_1", "adjustment_2", "confidence",
+            "confidence_reason",
+        )
+        placeholders = ",".join("?" for _ in retired_sections)
+        result["obsolete_retrospective_fields_removed"] = max(
+            0,
+            conn.execute(
+                f"""DELETE FROM retrospective_notes
+                    WHERE (section LIKE 'weekly:%' OR section LIKE 'program:%')
+                      AND SUBSTR(section, INSTR(section, ':') + 1) IN ({placeholders})""",
+                retired_sections,
+            ).rowcount,
+        )
+
+    # Remove retired names from active task surfaces while leaving historical
+    # study-session text and changelog history untouched.
+    for table, column in (
+        ("sprint_tasks", "label"),
+        ("task_metadata", "description"),
+        ("task_metadata", "definition_of_done"),
+        ("track_tasks", "source_label"),
+    ):
+        if not _table_exists(conn, table):
+            continue
+        changed = conn.execute(
+            f"""UPDATE {table}
+                SET {column}=REPLACE({column},'SQL Companion','SQL Interview Practice')
+                WHERE {column} LIKE '%SQL Companion%'"""
+        ).rowcount
+        result["legacy_wording_updated"] += max(0, changed)
+
+    if _table_exists(conn, "settings"):
+        conn.execute(
+            """INSERT INTO settings(key,value) VALUES('program_integrity_version','10.35.3')
+               ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
+        )
+    return result
+
+
 def migrate(conn, root: Path):
     roadmap_mastery_result = roadmap_mastery.reconcile(conn, root)
     sprint_count = 0
@@ -483,6 +678,8 @@ def migrate(conn, root: Path):
     roadmap_cleanup = _clean_legacy_roadmap_tasks(conn)
     portfolio_guidance = _sync_portfolio_task_guidance(conn)
     evidence_cleanup = _clean_academy_evidence(conn)
+    integrity_cleanup = _program_integrity_cleanup(conn, root)
+    normalized_task_titles = normalize_database_task_titles(conn)
 
     from career_app.services import task_workspace
     workspace_cleanup = (
@@ -511,4 +708,6 @@ def migrate(conn, root: Path):
             + evidence_cleanup["main_rows_removed"]
         ),
         "academy_projects_consolidated": evidence_cleanup["projects_consolidated"],
+        "program_integrity_cleanup": integrity_cleanup,
+        "task_titles_normalized": normalized_task_titles,
     }

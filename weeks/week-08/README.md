@@ -24,7 +24,7 @@ Close remaining certificate gaps while completing the final learning-phase requi
 Complete Python and pandas foundations, inspection, cleaning, grouping, merging, notebooks, and analytical communication.
 
 ### Portfolio
-Pass the Portfolio Readiness Assessment to unlock portfolio cleaning, analysis, modeling, and dashboard execution.
+Pass the Week 8 Knowledge Check to unlock portfolio cleaning, analysis, modeling, and dashboard execution.
 
 ## Recommended Rhythm
 
@@ -32,21 +32,21 @@ Pass the Portfolio Readiness Assessment to unlock portfolio cleaning, analysis, 
 - **Applied Practice:** Two notebook sessions
 - **SQL Retention:** One mixed DuckDB session
 - **Google:** Certificate catch-up or completion
-- **Review:** Portfolio Readiness Assessment
+- **Review:** Week 8 Knowledge Check
 
 ## Checklist
-- [ ] Complete the planned Google Certificate work for the week
-- [ ] Complete Python variables, data types, functions, and packages
-- [ ] Complete pandas loading, inspection, filtering, and missing-value lessons
-- [ ] Complete pandas cleaning, type conversion, and date-parsing lessons
-- [ ] Complete pandas groupby, aggregation, and calculated-column lessons
-- [ ] Complete pandas merge, duplicate handling, and export lessons
-- [ ] Complete notebook organization and analytical interpretation lessons
-- [ ] Complete DuckDB Exercise 10: Mixed workforce assessment
-- [ ] Complete a mixed SQL retention review
-- [ ] Finalize the portfolio execution plan and readiness checklist
-- [ ] Pass the Week 8 Portfolio Readiness Assessment
-- [ ] Complete the Week 8 retrospective
+- [ ] Complete the Planned Google Certificate Work for the Week
+- [ ] Complete Python Variables, Data Types, Functions, and Packages
+- [ ] Complete pandas Loading, Inspection, Filtering, and Missing-Value Lessons
+- [ ] Complete pandas Cleaning, Type Conversion, and Date-Parsing Lessons
+- [ ] Complete pandas Groupby, Aggregation, and Calculated-Column Lessons
+- [ ] Complete pandas Merge, Duplicate Handling, and Export Lessons
+- [ ] Complete Notebook Organization and Analytical Interpretation Lessons
+- [ ] Complete DuckDB Exercise 10: Mixed Workforce Assessment
+- [ ] Complete a Mixed SQL Retention Review
+- [ ] Finalize the Portfolio Execution Plan and Readiness Checklist
+- [ ] Pass the Week 8 Knowledge Check
+- [ ] Complete the Week 8 Retrospective
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Clean and analyze a practice dataset with pandas
-- [ ] Complete a cross-tool portfolio-readiness simulation
+- [ ] Clean and Analyze a Practice Dataset with pandas
+- [ ] Complete a Cross-Tool Portfolio-Readiness Simulation

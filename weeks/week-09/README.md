@@ -35,18 +35,19 @@ Clean and validate Project 1, build the analytical database, complete SQL analys
 - **Review:** Weekly project checkpoint
 
 ## Checklist
-- [ ] Confirm raw-data preservation and project reproducibility
-- [ ] Profile every Project 1 source table
-- [ ] Validate row counts, grain, keys, and relationships
-- [ ] Document nulls, duplicates, invalid types, and ambiguous business values
-- [ ] Create staged and cleaned Project 1 tables
-- [ ] Re-run validation checks against the cleaned outputs
-- [ ] Build analysis-ready tables or views
-- [ ] Calculate and validate core KPIs in SQL
-- [ ] Complete exploratory and exception analysis
-- [ ] Reconcile project findings to source totals
-- [ ] Update the cleaning log, data dictionary, and limitations
-- [ ] Complete the Week 9 project checkpoint
+- [ ] Confirm Raw-Data Preservation and Project Reproducibility
+- [ ] Profile Every Project 1 Source Table
+- [ ] Validate Row Counts, Grain, Keys, and Relationships
+- [ ] Document Nulls, Duplicates, Invalid Types, and Ambiguous Business Values
+- [ ] Create Staged and Cleaned Project 1 Tables
+- [ ] Re-Run Validation Checks Against the Cleaned Outputs
+- [ ] Build Analysis-Ready Tables or Views
+- [ ] Calculate and Validate Core KPIs in SQL
+- [ ] Complete Exploratory and Exception Analysis
+- [ ] Reconcile Project Findings to Source Totals
+- [ ] Update the Cleaning Log, Data Dictionary, and Limitations
+- [ ] Pass the Week 9 Knowledge Check
+- [ ] Complete the Week 9 Retrospective
 
 ## Daily Log
 
@@ -64,5 +65,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Project 1 relationship and cleaning validation
-- [ ] Project 1 SQL and exploratory-analysis review
+- [ ] Project 1 Relationship and Cleaning Validation
+- [ ] Project 1 SQL and Exploratory-Analysis Review

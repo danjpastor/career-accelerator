@@ -1,13 +1,12 @@
 assessment_id: week_6_sql_mastery
-title: Week 6 Spreadsheet & SQL Mastery Assessment
+title: Week 6 Knowledge Check
 order: 99
-description: Prove complete spreadsheet and SQL mastery before Power BI and Python unlock.
-estimated_minutes: 50
+description: An eight-question mastery check covering the required Week 6 topics.
+estimated_minutes: 25
 instructions:
-- Complete every question independently.
-- Hints and full solutions are disabled.
-- A score of 80% or higher passes.
-- The check includes current-week material and retained prior knowledge.
+- Answer all eight multiple-choice questions independently.
+- A score of 80% or higher is required. With eight questions, you must answer at least seven correctly.
+- After grading, review every answer and use the recommendations beneath missed questions before retaking the check.
 requires:
 - roadmap.spreadsheet_mastery
 - sql.window_functions
@@ -37,16 +36,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'ROW_NUMBER assigns:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to ROW_NUMBER.
+  required_for_completion: true
 - activity_id: w6_rank
   title: RANK ties
   type: mastery
@@ -69,16 +70,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'RANK gives tied rows:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to RANK ties.
+  required_for_completion: true
 - activity_id: w6_partition
   title: PARTITION BY
   type: mastery
@@ -101,16 +104,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'PARTITION BY:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to PARTITION BY.
+  required_for_completion: true
 - activity_id: w6_frame
   title: Window frame
   type: mastery
@@ -133,16 +138,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A rolling average requires attention to:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Window frame.
+  required_for_completion: true
 - activity_id: w6_date
   title: Date logic
   type: mastery
@@ -165,16 +172,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Period comparisons require:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Date logic.
+  required_for_completion: true
 - activity_id: w6_design
   title: Normalization
   type: mastery
@@ -197,16 +206,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Normalization primarily reduces:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Normalization.
+  required_for_completion: true
 - activity_id: w6_reconcile
   title: Spreadsheet retention
   type: mastery
@@ -229,20 +240,22 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Final SQL metrics should be:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Spreadsheet retention.
+  required_for_completion: true
 - activity_id: w6_sql_rank
   title: Rank inventory within category
   type: mastery
-  runtime: sql
+  runtime: recognition
   prompt: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to lowest
     within category. Sort category, stock_rank, item_name.
   starter: 'SELECT
@@ -252,33 +265,35 @@ activities:
     \ units_on_hand DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
   hints: []
   validator:
-    type: sql_result
-    dataset_id: sql_foundations
-    expected_query: "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category\
+    type: exact_answer
+    expected_answer: "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category\
       \ ORDER BY units_on_hand DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
-    required_patterns:
-    - DENSE_RANK\s*\(
-    - PARTITION\s+BY\s+category
-    - ORDER\s+BY\s+units_on_hand\s+DESC
-    forbidden_patterns: []
-    order_sensitive: true
-    column_sensitive: true
   required_for_practice: false
   required_for_mastery: false
   evidence_eligible: false
   difficulty: intermediate
-  estimated_minutes: 8
+  estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Write the complete query independently.
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to lowest
       within category. Sort category, stock_rank, item_name.
     requirements:
-    - Return only the requested columns.
-    - Use the required SQL concepts.
-    expected_output: Inventory rows ranked within category.
+    - Choose one answer.
+    expected_output: One selected answer.
     skills_practiced:
     - independent SQL
     after_correct: The query meets the requested grain and output.
     common_errors: []
     table: inventory
+    review_recommendation: Review the Week 6 lesson or practice work related to Rank inventory within category.
+  answer_options:
+  - "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category ORDER BY units_on_hand\
+    \ DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
+  - SELECT category, item_name, units_on_hand, DENSE_RANK() OVER (ORDER BY units_on_hand DESC) AS stock_rank FROM
+    inventory;
+  - SELECT category, item_name, units_on_hand, ROW_NUMBER() OVER (PARTITION BY category ORDER BY units_on_hand)
+    AS stock_rank FROM inventory;
+  - SELECT category, item_name, units_on_hand, DENSE_RANK() OVER (PARTITION BY category ORDER BY units_on_hand ASC)
+    AS stock_rank FROM inventory;
+  required_for_completion: true

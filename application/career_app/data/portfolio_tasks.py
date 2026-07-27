@@ -9,6 +9,7 @@ override is declared.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 
 
 @dataclass(frozen=True)
@@ -336,18 +337,53 @@ EXACT_TASK_SPECS: dict[str, PortfolioTaskSpec] = {
     "Finalize README": README,
     "Publish project": PUBLISH,
     "Publish release": PUBLISH,
+    # Canonical v10.35 portfolio-workspace milestone labels.
+    "Approve data source and specification": DATASET_SOURCE,
+    "Build and test Power BI report": DASHBOARDS,
+    "Build and validate Power BI semantic model": POWER_BI_MODEL,
+    "Build reproducible analytical database": SCHEMA,
+    "Clean and validate analytical data": CLEAN_VALIDATE_DATA,
+    "Complete SQL analysis": ANALYSIS_QUERIES,
+    "Complete exploratory analysis": EDA,
+    "Create or acquire raw dataset": DATASET_SOURCE,
+    "Publish reproducible portfolio case study": PUBLISH,
+    "Review and approve project brief": BUSINESS_PROBLEM,
+    "Review and finalize data dictionary": DATA_DICTIONARY,
+    "Validate findings across tools": VALIDATE_FINDINGS,
+    "Write executive summary and recommendations": EXECUTIVE_SUMMARY,
 }
 
 
 PROJECT_OVERRIDES: dict[tuple[int, str], PortfolioTaskSpec] = {}
 
 
+def _label_key(value: object) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(value or "").casefold()).strip()
+
+
+_NORMALIZED_TASK_SPECS = {
+    _label_key(label): spec for label, spec in EXACT_TASK_SPECS.items()
+}
+
+
 def task_spec(label: str, project_id: int | None = None) -> PortfolioTaskSpec | None:
+    text = str(label or "")
     if project_id is not None:
-        override = PROJECT_OVERRIDES.get((int(project_id), str(label)))
+        override = PROJECT_OVERRIDES.get((int(project_id), text))
+        if override is None:
+            normalized = _label_key(text)
+            override = next(
+                (
+                    spec
+                    for (candidate_project, candidate_label), spec in PROJECT_OVERRIDES.items()
+                    if candidate_project == int(project_id)
+                    and _label_key(candidate_label) == normalized
+                ),
+                None,
+            )
         if override is not None:
             return override
-    return EXACT_TASK_SPECS.get(str(label))
+    return EXACT_TASK_SPECS.get(text) or _NORMALIZED_TASK_SPECS.get(_label_key(text))
 
 
 def all_labels() -> tuple[str, ...]:

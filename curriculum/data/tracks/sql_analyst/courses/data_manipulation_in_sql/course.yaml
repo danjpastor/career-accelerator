@@ -1,6 +1,7 @@
 course_id: data_manipulation_in_sql
 title: Data Manipulation in SQL
 order: 4
+roadmap_week: 5
 description: Build complex analyst queries with CASE, subqueries, CTEs, and introductory windows.
 estimated_minutes: 300
 outcomes:

@@ -6,6 +6,8 @@ from pathlib import Path
 
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 from career_app.navigation import PAGE_LEARNING
+from career_app.services.task_titles import title_case_task
+from career_app.services import weekly_mastery
 
 # Each passing cumulative check creates validated Academy evidence. The final
 # readiness assessment also proves the Python/pandas requirement used by the
@@ -28,35 +30,31 @@ MASTERED_ASSESSMENTS = {
     ),
 }
 
-WEEKLY_CHECKS = (
-    (1, "week_1_spreadsheet_foundations_check", "Week 1 Cumulative Knowledge Check"),
-    (2, "week_2_spreadsheet_mastery", "Week 2 Spreadsheet Mastery Assessment"),
-    (3, "week_3_sql_foundations", "Week 3 Cumulative Knowledge Check"),
-    (4, "week_4_relationships_joins", "Week 4 Cumulative Knowledge Check"),
-    (5, "week_5_cleaning_ctes", "Week 5 Cumulative Knowledge Check"),
-    (6, "week_6_sql_mastery", "Week 6 Spreadsheet & SQL Mastery Assessment"),
-    (7, "week_7_power_bi_mastery", "Week 7 Power BI Mastery Assessment"),
-    (8, "week_8_portfolio_readiness", "Week 8 Portfolio Readiness Assessment"),
-)
+WEEKLY_CHECKS = weekly_mastery.WEEKLY_KNOWLEDGE_CHECKS
+
 
 # The spreadsheet track did not exist before v10.26.0. These lesson-level
 # requirements let an existing learner catch up in sequence instead of seeing
 # only the final assessments.
 SPREADSHEET_LESSONS = (
-    (1, "spreadsheet_structure", "Rows, Columns, Tables & Data Types", 35),
-    (1, "spreadsheet_references", "Cell References, Sorting & Filtering", 35),
-    (1, "conditional_formulas", "IF, AND, OR & Error Handling", 40),
-    (1, "conditional_summaries", "COUNTIFS, SUMIFS & Variance", 40),
-    (2, "spreadsheet_cleaning", "Text, Dates, Numbers & Duplicates", 45),
-    (2, "spreadsheet_validation", "Validation Rules & Reconciliation", 45),
-    (2, "spreadsheet_lookups", "Exact Lookups with XLOOKUP", 45),
-    (2, "spreadsheet_relationships", "Matching Tables & Understanding Grain", 45),
-    (2, "spreadsheet_pivots", "Pivot Tables, Dimensions & Measures", 45),
-    (2, "spreadsheet_kpis", "KPI Summaries & Business Interpretation", 45),
-    (2, "spreadsheet_workflow", "Plan a Reproducible Spreadsheet Workflow", 40),
-    (2, "spreadsheet_mastery_review", "Spreadsheet Mastery Review", 45),
+    (1, "academy2_spreadsheet_structure", "Understand Spreadsheet Structure", 35),
+    (1, "academy2_spreadsheet_references", "Cell References, Sorting & Filtering", 35),
+    (1, "academy2_conditional_formulas", "IF, AND, OR & Error Handling", 40),
+    (1, "academy2_conditional_summaries", "COUNTIFS, SUMIFS & Variance", 40),
+    (2, "academy2_spreadsheet_cleaning", "Text, Dates, Numbers & Duplicates", 45),
+    (2, "academy2_spreadsheet_validation", "Validation Rules & Reconciliation", 45),
+    (2, "academy2_spreadsheet_lookups", "Exact Lookups with XLOOKUP", 45),
+    (2, "academy2_spreadsheet_relationships", "Matching Tables & Understanding Grain", 45),
+    (2, "academy2_spreadsheet_pivots", "Pivot Tables, Dimensions & Measures", 45),
+    (2, "academy2_spreadsheet_kpis", "KPI Summaries & Business Interpretation", 45),
+    (2, "academy2_spreadsheet_workflow", "Plan a Reproducible Spreadsheet Workflow", 40),
+    (2, "academy2_spreadsheet_mastery_review", "Spreadsheet Mastery Review", 45),
 )
 
+LEGACY_LESSON_ID_BY_CANONICAL = {
+    lesson_id: lesson_id.removeprefix("academy2_")
+    for _, lesson_id, _, _ in SPREADSHEET_LESSONS
+}
 LESSON_ORDER = [lesson_id for _, lesson_id, _, _ in SPREADSHEET_LESSONS]
 LESSON_TITLES = {lesson_id: title for _, lesson_id, title, _ in SPREADSHEET_LESSONS}
 
@@ -141,6 +139,26 @@ ASSESSMENT_PREREQUISITES = {
         "all_of": {"roadmap.sql_mastery", "roadmap.power_bi_mastery"},
         "any_of": set(),
     },
+    "week_9_project_analysis_check": {
+        "prior_assessments": {"week_8_portfolio_readiness"},
+        "all_of": {"roadmap.portfolio_readiness"},
+        "any_of": set(),
+    },
+    "week_10_reporting_publication_check": {
+        "prior_assessments": {"week_9_project_analysis_check"},
+        "all_of": {"roadmap.portfolio_readiness"},
+        "any_of": set(),
+    },
+    "week_11_portfolio_execution_check": {
+        "prior_assessments": {"week_10_reporting_publication_check"},
+        "all_of": {"roadmap.portfolio_readiness"},
+        "any_of": set(),
+    },
+    "week_12_career_launch_check": {
+        "prior_assessments": {"week_11_portfolio_execution_check"},
+        "all_of": {"roadmap.portfolio_readiness"},
+        "any_of": set(),
+    },
 }
 
 SCHEMA = """
@@ -182,12 +200,23 @@ def assessment_passed(conn, assessment_id: str) -> bool:
     ).fetchone() is not None
 
 
+def _lesson_progress_ids(lesson_id: str) -> tuple[str, ...]:
+    lesson_id = str(lesson_id)
+    legacy = LEGACY_LESSON_ID_BY_CANONICAL.get(lesson_id)
+    values = [lesson_id]
+    if legacy:
+        values.append(legacy)
+    return tuple(dict.fromkeys(values))
+
+
 def lesson_mastered(conn, lesson_id: str) -> bool:
     if not _table_exists(conn, "academy_lesson_progress"):
         return False
+    lesson_ids = _lesson_progress_ids(lesson_id)
+    placeholders = ",".join("?" for _ in lesson_ids)
     return conn.execute(
-        "SELECT 1 FROM academy_lesson_progress WHERE lesson_id=? AND state='Mastered' LIMIT 1",
-        (lesson_id,),
+        f"SELECT 1 FROM academy_lesson_progress WHERE lesson_id IN ({placeholders}) AND state='Mastered' LIMIT 1",
+        lesson_ids,
     ).fetchone() is not None
 
 
@@ -321,21 +350,33 @@ def assessment_readiness(conn, assessment_id: str) -> dict:
     if assessment_id == "week_1_spreadsheet_foundations_check":
         required = LESSON_ORDER[:4]
         missing = [LESSON_TITLES[item] for item in required if not lesson_mastered(conn, item)]
-        return {
+        result = {
             "ready": not missing,
             "missing": missing,
             "reason": "" if not missing else "Complete " + ", ".join(missing) + " first.",
         }
-    if assessment_id == "week_2_spreadsheet_mastery":
+    elif assessment_id == "week_2_spreadsheet_mastery":
         missing = [LESSON_TITLES[item] for item in LESSON_ORDER if not lesson_mastered(conn, item)]
         if not assessment_passed(conn, "week_1_spreadsheet_foundations_check"):
             missing.append(_assessment_title("week_1_spreadsheet_foundations_check"))
-        return {
+        result = {
             "ready": not missing,
             "missing": missing,
             "reason": "" if not missing else "Complete " + ", ".join(missing) + " first.",
         }
-    return _readiness_for_spec(conn, ASSESSMENT_PREREQUISITES.get(assessment_id, {}))
+    else:
+        result = _readiness_for_spec(conn, ASSESSMENT_PREREQUISITES.get(assessment_id, {}))
+
+    weekly = weekly_mastery.knowledge_check_readiness(conn, assessment_id)
+    if not weekly.ready:
+        missing = list(result.get("missing") or []) + list(weekly.missing)
+        missing = list(dict.fromkeys(missing))
+        return {
+            "ready": False,
+            "missing": missing,
+            "reason": weekly.reason or result.get("reason") or "Complete the prerequisites first.",
+        }
+    return result
 
 
 def duckdb_readiness(conn, number: int) -> dict:
@@ -443,6 +484,81 @@ def _task_for_managed_key(conn, managed_key):
     ).fetchone()
 
 
+def _retire_legacy_academy_planner_tasks(conn) -> int:
+    """Remove obsolete static lesson rows while preserving weekly checks.
+
+    Academy lessons are represented by one adaptive planner task, so old static
+    lesson rows must be removed. Weekly knowledge checks are different: they are
+    durable mastery gates and must remain visible as locked or ready tasks until
+    passed. Earlier v10.35.0 cleanup removed those check rows, leaving every next
+    task blocked by a quiz the learner could not open.
+    """
+    canonical_checks = {
+        f"roadmap_v1026:assessment:{assessment_id}"
+        for _week, assessment_id, _title in WEEKLY_CHECKS
+    }
+    rows = conn.execute(
+        """SELECT s.id,m.managed_key
+           FROM sprint_tasks s
+           JOIN task_metadata m ON m.task_id=s.id
+           WHERE s.completed=0
+             AND (m.managed_key LIKE 'roadmap_v1026:lesson:%'
+                  OR m.managed_key LIKE 'roadmap_v1026:assessment:%')"""
+    ).fetchall()
+    rows = [
+        row for row in rows
+        if str(row["managed_key"] or "").startswith("roadmap_v1026:lesson:")
+        or str(row["managed_key"] or "") not in canonical_checks
+    ]
+    task_ids = [int(row["id"] if hasattr(row, "keys") else row[0]) for row in rows]
+    if task_ids:
+        placeholders = ",".join("?" for _ in task_ids)
+        values = tuple(task_ids)
+        conn.execute(
+            f"DELETE FROM daily_focus WHERE completed_at IS NULL AND task_id IN ({placeholders})",
+            values,
+        )
+        if _table_exists(conn, "task_workspaces"):
+            workspace_rows = conn.execute(
+                f"SELECT workspace_key FROM task_workspaces WHERE task_id IN ({placeholders})",
+                values,
+            ).fetchall()
+            workspace_keys = [str(row[0]) for row in workspace_rows]
+            if workspace_keys and _table_exists(conn, "task_workspace_artifacts"):
+                workspace_placeholders = ",".join("?" for _ in workspace_keys)
+                conn.execute(
+                    f"DELETE FROM task_workspace_artifacts WHERE workspace_key IN ({workspace_placeholders})",
+                    tuple(workspace_keys),
+                )
+            conn.execute(
+                f"DELETE FROM task_workspaces WHERE task_id IN ({placeholders})",
+                values,
+            )
+        conn.execute(
+            f"DELETE FROM track_tasks WHERE task_id IN ({placeholders})",
+            values,
+        )
+        conn.execute(
+            f"DELETE FROM task_metadata WHERE task_id IN ({placeholders})",
+            values,
+        )
+        conn.execute(
+            f"DELETE FROM sprint_tasks WHERE id IN ({placeholders})",
+            values,
+        )
+
+    canonical_keys = tuple(f"lesson:{lesson_id}" for lesson_id in LESSON_ORDER)
+    if canonical_keys:
+        placeholders = ",".join("?" for _ in canonical_keys)
+        conn.execute(
+            f"""DELETE FROM roadmap_requirement_state
+                WHERE kind='academy_lesson'
+                  AND requirement_key NOT IN ({placeholders})""",
+            canonical_keys,
+        )
+    return len(task_ids)
+
+
 def _stage_existing_catchup_orders(conn) -> None:
     """Move existing managed rows out of the final ordering range before re-ranking.
 
@@ -470,7 +586,7 @@ def _create_or_update_catchup(
     *,
     key,
     title,
-    current_week,
+    task_week,
     destination,
     category,
     reason,
@@ -485,7 +601,7 @@ def _create_or_update_catchup(
     if existing is None:
         cur = conn.execute(
             "INSERT INTO sprint_tasks(week,sort_order,label,completed) VALUES(?,?,?,0)",
-            (current_week, sort_order, title),
+            (task_week, sort_order, title_case_task(title)),
         )
         task_id = int(cur.lastrowid)
         conn.execute(
@@ -514,7 +630,7 @@ def _create_or_update_catchup(
     task_id = int(existing["id"])
     conn.execute(
         "UPDATE sprint_tasks SET week=?,sort_order=?,label=?,completed=0 WHERE id=?",
-        (current_week, sort_order, title, task_id),
+        (task_week, sort_order, title_case_task(title), task_id),
     )
     conn.execute(
         """UPDATE task_metadata SET status='Not Started',priority=0,estimated_minutes=?,
@@ -613,43 +729,22 @@ def reconcile(conn, root=None) -> dict:
     ensure_schema(conn)
     sync_mastery_evidence(conn)
     _retire_legacy_datacamp_tasks(conn)
+    retired_academy_tasks = _retire_legacy_academy_planner_tasks(conn)
     _stage_existing_catchup_orders(conn)
     state = _program_state(conn)
     current_week = max(1, int(state["current_week"] if state else 1))
     overdue = []
     completed = []
 
-    # New spreadsheet lessons are reconciled before their weekly assessments.
-    for due_week, lesson_id, title, minutes in SPREADSHEET_LESSONS:
-        done = lesson_mastered(conn, lesson_id)
-        readiness = lesson_readiness(conn, lesson_id)
-        status = "Completed" if done else (("Overdue" if readiness["ready"] else "Locked") if due_week <= current_week else "Future")
-        reason = None if done else (readiness["reason"] or f"Expected by Week {due_week}. Complete this Academy lesson before advancing.")
-        key = f"lesson:{lesson_id}"
-        _upsert_requirement(conn, key, "academy_lesson", title, due_week, lesson_id, status, reason)
-        if done:
-            _complete_catchup(conn, key)
-            completed.append(key)
-        elif due_week <= current_week:
-            _create_or_update_catchup(
-                conn,
-                key=key,
-                title=title,
-                current_week=current_week,
-                destination=PAGE_LEARNING,
-                category="Learning",
-                reason=f"Expected by Week {due_week}. Complete and master this spreadsheet lesson.",
-                minutes=minutes,
-                starter_path=f"academy:lesson:{lesson_id}",
-                prerequisite_state="Ready" if readiness["ready"] else "Blocked",
-                prerequisite_reason=None if readiness["ready"] else readiness["reason"],
-            )
-            overdue.append(key)
+    # Individual Academy lessons are owned only by AcademyService. Historical
+    # roadmap requirement rows created for those lessons are removed so renamed
+    # or retired curriculum items cannot leak back into dashboard queues.
+    conn.execute("DELETE FROM roadmap_requirement_state WHERE kind='academy_lesson'")
 
     for due_week, assessment_id, title in WEEKLY_CHECKS:
         passed = assessment_passed(conn, assessment_id)
         readiness = assessment_readiness(conn, assessment_id)
-        status = "Completed" if passed else (("Overdue" if readiness["ready"] else "Locked") if due_week <= current_week else "Future")
+        status = "Completed" if passed else ((("Overdue" if readiness["ready"] else "Locked")) if due_week <= current_week else "Future")
         reason = None if passed else (readiness["reason"] or f"Expected by Week {due_week}. This mastery check gates later learning.")
         key = f"assessment:{assessment_id}"
         _upsert_requirement(conn, key, "assessment", title, due_week, assessment_id, status, reason)
@@ -657,18 +752,19 @@ def reconcile(conn, root=None) -> dict:
             _complete_catchup(conn, key)
             completed.append(key)
         elif due_week <= current_week:
+            locked_message = f"Complete All Week {due_week} Coursework to Unlock"
             _create_or_update_catchup(
                 conn,
                 key=key,
                 title=title,
-                current_week=current_week,
+                task_week=due_week,
                 destination=PAGE_LEARNING,
                 category="Learning",
-                reason=f"Expected by Week {due_week}. This mastery check gates later learning.",
-                minutes=45,
+                reason=f"Complete and pass {title} before beginning later skill-dependent coursework.",
+                minutes=20,
                 starter_path=f"academy:assessment:{assessment_id}",
                 prerequisite_state="Ready" if readiness["ready"] else "Blocked",
-                prerequisite_reason=None if readiness["ready"] else readiness["reason"],
+                prerequisite_reason=None if readiness["ready"] else locked_message,
             )
             overdue.append(key)
 
@@ -692,7 +788,7 @@ def reconcile(conn, root=None) -> dict:
                 conn,
                 key=key,
                 title=item["label"],
-                current_week=current_week,
+                task_week=due_week,
                 destination=PAGE_LEARNING,
                 category="SQL",
                 reason=f"Expected by Week {due_week}. Complete this skill-gated DuckDB exercise.",
@@ -722,7 +818,7 @@ def reconcile(conn, root=None) -> dict:
                 conn,
                 key=key,
                 title=f"Solve {title}",
-                current_week=current_week,
+                task_week=due_week,
                 destination=PAGE_LEARNING,
                 category="SQL",
                 reason=f"Expected by Week {due_week}. Complete this skill-gated SQL interview problem in Learning Practice.",
@@ -737,4 +833,9 @@ def reconcile(conn, root=None) -> dict:
     # Do not clear the snapshot here; doing so caused empty dashboards when a
     # later startup step failed before the planner regenerated it.
     conn.commit()
-    return {"current_week": current_week, "overdue": overdue, "completed": completed}
+    return {
+        "current_week": current_week,
+        "overdue": overdue,
+        "completed": completed,
+        "retired_academy_planner_tasks": retired_academy_tasks,
+    }

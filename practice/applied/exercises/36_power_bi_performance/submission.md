@@ -1,38 +1,92 @@
-# Applied Lab 36 Submission
+# Applied Lab 36 submission
 
-## Lab
+## Optimize Power BI model and refresh performance
 
-**Optimize Power BI model and refresh performance**
+### Artifact paths
 
-## Artifact or output path
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-Record any notebook, workbook, `.pbix`, SQL file, chart, memo, or
-other artifact created for this lab.
+### Business question and audience
 
-`TODO`
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Method
+### Work completed
 
-- TODO
-- TODO
+#### Step 1
 
-## Result
+**Planned work:** Identify transformations that can preserve query folding.
 
-TODO
+**What I completed:**
 
-## Validation
+**Evidence or result:**
 
-- TODO
-- TODO
+#### Step 2
 
-## Decision or interpretation
+**Planned work:** Remove unused columns and reduce high-cardinality text where appropriate.
 
-TODO
+**What I completed:**
 
-## Limitations
+**Evidence or result:**
 
-TODO
+#### Step 3
 
-## What this demonstrates
+**Planned work:** Review calculated columns versus measures.
 
-Power BI performance optimization
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Document Import, DirectQuery, or composite-model tradeoffs.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Draft an incremental-refresh policy.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 6
+
+**Planned work:** Use or simulate Performance Analyzer findings and prioritize fixes.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Optimizations preserve analytical meaning.
+  - Evidence:
+- [ ] Performance claims are supported by a measurement or documented expectation.
+  - Evidence:
+- [ ] The incremental-refresh policy includes date boundaries and retention.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

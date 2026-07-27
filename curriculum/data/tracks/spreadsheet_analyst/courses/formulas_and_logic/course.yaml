@@ -1,6 +1,7 @@
 course_id: formulas_and_logic
 title: Formulas, Logic & Conditional Analysis
 order: 2
+roadmap_week: 1
 description: Build reliable row-level logic and conditional summaries without copying completed answers.
 estimated_minutes: 240
 outcomes:

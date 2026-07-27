@@ -30,23 +30,23 @@ Preparation only: finish the cleaning plan, validation plan, and decision-log te
 
 - **Academy:** Three cleaning and query-structure sessions
 - **DuckDB:** Two applied exercise sessions
-- **Interview Practice:** Two SQL Companion sessions
+- **Interview Practice:** Two SQL Interview Practice sessions
 - **Google:** Two certificate sessions
 - **Review:** Week 5 cumulative knowledge check
 
 ## Checklist
-- [ ] Complete the planned Google Certificate work for the week
-- [ ] Complete string, date, casting, and null-handling lessons
-- [ ] Complete advanced CASE and conditional transformation lessons
-- [ ] Complete subquery lessons
-- [ ] Complete CTE and multi-step workflow lessons
-- [ ] Complete DuckDB Exercise 03: Clean customer feedback
-- [ ] Complete DuckDB Exercise 07: Analyze order profitability
-- [ ] Complete DuckDB Exercise 12: Refactor an unreadable analytics query
+- [ ] Complete the Planned Google Certificate Work for the Week
+- [ ] Complete String, Date, Casting, and NULL-Handling Lessons
+- [ ] Complete Advanced CASE and Conditional Transformation Lessons
+- [ ] Complete Subquery Lessons
+- [ ] Complete CTE and Multi-Step Workflow Lessons
+- [ ] Complete DuckDB Exercise 03: Clean Customer Feedback
+- [ ] Complete DuckDB Exercise 07: Analyze Order Profitability
+- [ ] Complete DuckDB Exercise 12: Refactor an Unreadable Analytics Query
 - [ ] Solve Histogram of Tweets or Duplicate Job Listings
-- [ ] Finish the portfolio cleaning and validation plan
-- [ ] Pass the Week 5 Cumulative Knowledge Check
-- [ ] Complete the Week 5 retrospective
+- [ ] Finish the Portfolio Cleaning and Validation Plan
+- [ ] Pass the Week 5 Knowledge Check
+- [ ] Complete the Week 5 Retrospective
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Clean a deliberately flawed practice dataset
-- [ ] Build and explain a reproducible multi-step SQL workflow
+- [ ] Clean a Deliberately Flawed Practice Dataset
+- [ ] Build and Explain a Reproducible Multi-Step SQL Workflow

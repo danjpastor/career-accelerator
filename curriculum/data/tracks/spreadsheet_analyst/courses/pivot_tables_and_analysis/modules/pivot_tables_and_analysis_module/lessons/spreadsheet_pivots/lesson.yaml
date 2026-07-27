@@ -21,8 +21,7 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-    latest shared workbook automatically.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
@@ -41,21 +40,18 @@ activities:
     body: '# Summarize a large table without writing many formulas
 
 
-      A pivot table groups detailed rows into a smaller summary. A **dimension** is a category used to group the data, such
-      as Region or Product Category. A **measure** is a number you summarize, such as Revenue, Quantity, or Average Resolution
-      Time.
+      A pivot table groups detailed rows into a smaller summary. A **dimension** is a category used to group the data, such as Region or Product Category. A **measure** is a number you summarize, such as Revenue, Quantity, or Average Resolution Time.
 
 
-      The same source table can answer different questions depending on where fields are placed in Rows, Columns, Values,
-      and Filters. The aggregation method matters: sum, count, and average answer different questions.
+      The same source table can answer different questions depending on where fields are placed in Rows, Columns, Values, and Filters. The aggregation method matters: sum, count, and average answer different questions.
 
 
-      In this lesson, you will build and interpret a pivot table, then check whether the source range and aggregation match
-      the business question.'
+      In this lesson, you will build and interpret a pivot table, then check whether the source range and aggregation match the business question.'
+    concept_heading: Summarize Without New Formulas
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning pivot tables, dimensions & measures before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how pivot tables, dimensions & measures works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -86,8 +82,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations learning scenario
-    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: In a pivot table that compares sales by Region, which field is the measure?
     requirements:
     - Choose the answer that best follows the concept explained in the lesson.
@@ -99,14 +95,11 @@ activities:
     phase: LEARN & PREDICT
     title: Learn & Predict — Dimensions, measures, and pivot layout
     objective: Choose which fields belong in Rows and Values.
-    why_it_matters: Pivot tables let analysts summarize large tables quickly, but the result is meaningful only when grouping
-      fields and numeric measures are assigned correctly.
-    concept: A **dimension** describes how records should be grouped, such as Region or Category. A **measure** is the numeric
-      value being summarized, such as Revenue or Units. Rows usually contain dimensions; Values usually contain measures with
-      an aggregation such as SUM.
-    worked_example: A support-ticket pivot uses Team in Rows and Ticket ID in Values summarized by COUNT. Team is the dimension;
-      ticket count is the measure. Adding Priority as Columns would split each team’s count into priority groups.
+    why_it_matters: Pivot tables let analysts summarize large tables quickly, but the result is meaningful only when grouping fields and numeric measures are assigned correctly.
+    concept: A **dimension** describes how records should be grouped, such as Region or Category. A **measure** is the numeric value being summarized, such as Revenue or Units. Rows usually contain dimensions; Values usually contain measures with an aggregation such as SUM.
+    worked_example: A support-ticket pivot uses Team in Rows and Ticket ID in Values summarized by COUNT. Team is the dimension; ticket count is the measure. Adding Priority as Columns would split each team’s count into priority groups.
     action_label: Make a prediction
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   answer_options:
   - Revenue
@@ -131,19 +124,18 @@ activities:
     body: '## A separate example
 
 
-      A donation table contains one row per donation. A nonprofit creates a pivot with Campaign in Rows and Donation Amount
-      in Values using SUM. It then adds Payment Method as Columns.
+      A donation table contains one row per donation. A nonprofit creates a pivot with Campaign in Rows and Donation Amount in Values using SUM. It then adds Payment Method as Columns.
 
 
-      When the analyst accidentally changes the value to COUNT, the table shows the number of donations rather than the dollars
-      raised. Both results are valid, but they answer different questions.
+      When the analyst accidentally changes the value to COUNT, the table shows the number of donations rather than the dollars raised. Both results are valid, but they answer different questions.
 
 
       **What to notice:** Dimensions organize the summary; measures and aggregation define what is being calculated.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning pivot tables, dimensions & measures before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how pivot tables, dimensions & measures works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -160,13 +152,11 @@ activities:
   runtime: workbook
   prompt: Create a region-level Revenue pivot or equivalent grouped summary beginning at Analysis Workspace A28.
   starter: ''
-  solution: Insert a pivot from Orders, place it on Analysis Workspace at A28, add Region to Rows, add Revenue to Values as
-    SUM, and sort descending. West should be the highest-revenue region.
+  solution: Insert a pivot from Orders, place it on Analysis Workspace at A28, add Region to Rows, add Revenue to Values as SUM, and sort descending. West should be the highest-revenue region.
   hints:
   - The group names belong in Rows; the numeric amount belongs in Values.
   - Confirm the Values field is summarized by SUM rather than COUNT.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -178,8 +168,7 @@ activities:
         sheet: Analysis Workspace
         range: A28:D34
         min_count: 8
-      message: 'The workbook does not yet meet this requirement: A saved region summary shows total Revenue for each region
-        in descending order.'
+      message: 'The workbook does not yet meet this requirement: A saved region summary shows total Revenue for each region in descending order.'
     - type: evidence_answer
       expected_answer: West
       message: Review the region summary and enter the highest-revenue region.
@@ -190,9 +179,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 12
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Create a region-level Revenue pivot or equivalent grouped summary beginning at Analysis Workspace A28.
     requirements:
     - Use Region as the grouping dimension.
@@ -209,24 +197,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: A saved region summary shows total Revenue for each region in descending order.
     hide_exact_result: true
   instruction:
     phase: TRY IT
     title: Try It — Summarize revenue by region
     objective: Build a pivot with one grouping field and one summed measure.
-    approach: Create a pivot from the full Orders dataset. Place Region in Rows and Revenue in Values summarized by SUM. Put
-      the result in Analysis Workspace and sort the revenue values from largest to smallest.
+    approach: Create a pivot from the full Orders dataset. Place Region in Rows and Revenue in Values summarized by SUM. Put the result in Analysis Workspace and sort the revenue values from largest to smallest.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Summarize Without New Formulas
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Analysis Workspace
     columns:
     - Region
@@ -247,8 +231,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Analysis Workspace** and locate **A28:D34**.
-    - Create a pivot from the full Orders dataset. Place Region in Rows and Revenue in Values summarized by SUM. Put the result
-      in Analysis Workspace and sort the revenue values from largest to smallest.
+    - Create a pivot from the full Orders dataset. Place Region in Rows and Revenue in Values summarized by SUM. Put the result in Analysis Workspace and sort the revenue values from largest to smallest.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: guided_practice
@@ -260,13 +243,11 @@ activities:
   runtime: workbook
   prompt: Create a Category-by-Units summary beginning at Analysis Workspace G28.
   starter: ''
-  solution: Create a second pivot at G28 with Category in Rows and Units in Values summarized by SUM. Sort descending; Technology
-    should be the highest-unit category.
+  solution: Create a second pivot at G28 with Category in Rows and Units in Values summarized by SUM. Sort descending; Technology should be the highest-unit category.
   hints:
   - Reuse the region-pivot structure but change both the dimension and the measure.
   - Category belongs in Rows; Units belongs in Values.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -278,8 +259,7 @@ activities:
         sheet: Analysis Workspace
         range: G28:J34
         min_count: 6
-      message: 'The workbook does not yet meet this requirement: A saved category summary shows total Units for each product
-        category in descending order.'
+      message: 'The workbook does not yet meet this requirement: A saved category summary shows total Units for each product category in descending order.'
     - type: evidence_answer
       expected_answer: Technology
       message: Review the category summary and enter the highest-unit category.
@@ -290,9 +270,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 18
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: A data analyst is preparing a trustworthy report for the team.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Create a Category-by-Units summary beginning at Analysis Workspace G28.
     requirements:
     - Use Category as the grouping dimension.
@@ -309,24 +288,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: A saved category summary shows total Units for each product category in descending order.
     hide_exact_result: true
   instruction:
     phase: CHALLENGE
     title: Challenge — Summarize units by category
     objective: Apply the pivot pattern to a different dimension and measure.
-    approach: Create a second pivot or grouped summary using the Category field already added to Orders and the Units measure.
-      Place it separately from the region summary and sort it for comparison.
+    approach: Create a second pivot or grouped summary using the Category field already added to Orders and the Units measure. Place it separately from the region summary and sort it for comparison.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Analysis Workspace
     columns:
     - Category
@@ -347,8 +322,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Analysis Workspace** and locate **G28:J34**.
-    - Create a second pivot or grouped summary using the Category field already added to Orders and the Units measure. Place
-      it separately from the region summary and sort it for comparison.
+    - Create a second pivot or grouped summary using the Category field already added to Orders and the Units measure. Place it separately from the region summary and sort it for comparison.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: independent_practice
@@ -379,8 +353,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: A manager wants average order value by Sales Rep. Which pivot layout is appropriate?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -393,10 +367,10 @@ activities:
     title: Apply It — Use the skill in a new situation
     objective: Recognize when and how to use the skill outside the practice example.
     why_it_matters: Sales Rep defines the groups, while Revenue is the numeric measure whose average is needed.
-    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
-      the method.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind the method.
     action_label: Choose the best approach
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Summarize Without New Formulas
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -429,12 +403,12 @@ activities:
       - A pivot can answer a new grouping question without changing the source data.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Summarize Without New Formulas
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning pivot tables, dimensions & measures before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how pivot tables, dimensions & measures works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

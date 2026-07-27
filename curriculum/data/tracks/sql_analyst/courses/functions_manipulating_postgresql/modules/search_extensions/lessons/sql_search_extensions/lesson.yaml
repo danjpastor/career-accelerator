@@ -33,19 +33,18 @@ activities:
     body: '# Understand specialized database features
 
 
-      Simple `LIKE` searches scan text for a pattern. Full-text search breaks documents into searchable terms and can rank
-      results by relevance. Database extensions add optional features that are not part of the basic SQL language.
+      Simple `LIKE` searches scan text for a pattern. Full-text search breaks documents into searchable terms and can rank results by relevance. Database extensions add optional features that are not part of the basic SQL language.
 
 
-      These tools can be powerful, but they are dialect-specific. An analyst should understand what the feature does, whether
-      it is available, and how portable the query needs to be.
+      These tools can be powerful, but they are dialect-specific. An analyst should understand what the feature does, whether it is available, and how portable the query needs to be.
 
 
       In this lesson, you will choose between basic text matching and specialized search features.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning full-text search and postgresql extensions before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how full-text search and postgresql extensions works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -60,8 +59,7 @@ activities:
   title: 'Full-Text Search and PostgreSQL Extensions: decision 1'
   type: recognition
   runtime: recognition
-  prompt: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed for
-    that workload?
+  prompt: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed for that workload?
   answer_options:
   - Full-text search with an indexed document representation
   - A simple ORDER BY only
@@ -80,10 +78,9 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
-    task: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed for
-      that workload?
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
+    task: A team needs relevance-ranked document search across thousands of long text fields. Which feature is designed for that workload?
     requirements:
     - Choose one answer.
     - Check your answer before continuing.
@@ -96,9 +93,8 @@ activities:
     title: 'Full-Text Search and PostgreSQL Extensions: decision 1'
     objective: Use full-text search and postgresql extensions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
-      This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -119,16 +115,15 @@ activities:
     body: '## A separate example
 
 
-      Searching support notes for `%ship%` may match “shipping,” “shipment,” and unrelated character sequences. A full-text
-      index can search normalized words and rank the most relevant notes.
+      Searching support notes for `%ship%` may match “shipping,” “shipment,” and unrelated character sequences. A full-text index can search normalized words and rank the most relevant notes.
 
 
-      **What to notice:** Specialized search improves behavior for large text collections, but it requires database-specific
-      setup and syntax.'
+      **What to notice:** Specialized search improves behavior for large text collections, but it requires database-specific setup and syntax.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning full-text search and postgresql extensions before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how full-text search and postgresql extensions works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -162,8 +157,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What is the main reason to review a database extension before enabling it?
     requirements:
     - Choose one answer.
@@ -177,9 +172,8 @@ activities:
     title: 'Full-Text Search and PostgreSQL Extensions: decision 2'
     objective: Use full-text search and postgresql extensions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
-      This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: guided_practice
   completion_mode: validated
@@ -198,8 +192,7 @@ activities:
   hints:
   - Read the task again and identify where **full-text search and postgresql extensions** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which measure describes the number of
-    single-character edits needed to transform one string into another?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which measure describes the number of single-character edits needed to transform one string into another?'
   validator:
     type: exact_answer
     expected_answer: Levenshtein distance
@@ -209,8 +202,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 5
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which measure describes the number of single-character edits needed to transform one string into another?
     requirements:
     - Choose one answer.
@@ -224,9 +217,8 @@ activities:
     title: 'Full-Text Search and PostgreSQL Extensions: decision 3'
     objective: Use full-text search and postgresql extensions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful.
-      Read the situation, identify what the result must preserve, and then choose the option that best matches that goal.
-      This check is intentionally short so you can test the idea immediately.
+    body: Analysts use **full-text search and postgresql extensions** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: independent_practice
   completion_mode: validated
@@ -255,8 +247,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which measure describes the number of single-character edits needed to transform one string into another?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -270,6 +262,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -301,12 +294,12 @@ activities:
       - Choose designs based on workload, grain, integrity, and maintainability.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning full-text search and postgresql extensions before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how full-text search and postgresql extensions works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

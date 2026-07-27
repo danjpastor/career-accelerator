@@ -1,6 +1,7 @@
 course_id: spreadsheet_foundations
 title: Google Sheets Foundations
 order: 1
+roadmap_week: 1
 description: Learn table structure, filtering, formulas, and references through explanation, worked examples, and
   real workbook practice.
 estimated_minutes: 240

@@ -1,6 +1,7 @@
 course_id: data_cleaning_and_validation
 title: Data Cleaning & Validation
 order: 3
+roadmap_week: 2
 description: Preserve raw data, create analysis-ready fields, prevent invalid entries, and reconcile identifiers.
 estimated_minutes: 240
 outcomes:

@@ -36,16 +36,15 @@ activities:
       Database management includes access control, indexing, partitioning, backups, and transaction safety.
 
 
-      **Least privilege** gives a user only the permissions needed for their work. An index can speed up common searches but
-      uses storage and adds work to updates. Partitioning divides a very large table into manageable sections, often by date.
+      **Least privilege** gives a user only the permissions needed for their work. An index can speed up common searches but uses storage and adds work to updates. Partitioning divides a very large table into manageable sections, often by date.
 
 
-      In this lesson, you will choose a management practice based on the actual risk or performance problem instead of applying
-      every feature automatically.'
+      In this lesson, you will choose a management practice based on the actual risk or performance problem instead of applying every feature automatically.'
+    concept_heading: Database Management Decisions
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning database management decisions before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how database management decisions works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -79,8 +78,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which principle grants users only the permissions needed for their work?
     requirements:
     - Choose one answer.
@@ -94,9 +93,8 @@ activities:
     title: 'Database Management Decisions: decision 1'
     objective: Use database management decisions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful. Read the
-      situation, identify what the result must preserve, and then choose the option that best matches that goal. This check
-      is intentionally short so you can test the idea immediately.
+    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Database Management Decisions
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -117,19 +115,18 @@ activities:
     body: '## A separate example
 
 
-      A reporting analyst needs to read approved analytics views but should not delete production tables. The database administrator
-      grants read access only to the reporting schema.
+      A reporting analyst needs to read approved analytics views but should not delete production tables. The database administrator grants read access only to the reporting schema.
 
 
-      A separate event table contains several years of data and is usually queried by month, so date partitioning may reduce
-      how much data each query scans.
+      A separate event table contains several years of data and is usually queried by month, so date partitioning may reduce how much data each query scans.
 
 
       **What to notice:** Each decision solves a specific problem and has a tradeoff.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning database management decisions before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how database management decisions works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -163,8 +160,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Why partition a very large event table by date?
     requirements:
     - Choose one answer.
@@ -178,9 +175,8 @@ activities:
     title: 'Database Management Decisions: decision 2'
     objective: Use database management decisions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful. Read the
-      situation, identify what the result must preserve, and then choose the option that best matches that goal. This check
-      is intentionally short so you can test the idea immediately.
+    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Database Management Decisions
   required_for_completion: true
   step_kind: guided_practice
   completion_mode: validated
@@ -199,8 +195,7 @@ activities:
   hints:
   - Read the task again and identify where **database management decisions** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which factor matters most when choosing
-    a database platform?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which factor matters most when choosing a database platform?'
   validator:
     type: exact_answer
     expected_answer: The workload, scale, consistency, skills, and operational requirements
@@ -210,8 +205,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 5
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which factor matters most when choosing a database platform?
     requirements:
     - Choose one answer.
@@ -225,9 +220,8 @@ activities:
     title: 'Database Management Decisions: decision 3'
     objective: Use database management decisions in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful. Read the
-      situation, identify what the result must preserve, and then choose the option that best matches that goal. This check
-      is intentionally short so you can test the idea immediately.
+    body: Analysts use **database management decisions** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Database Management Decisions
   required_for_completion: true
   step_kind: independent_practice
   completion_mode: validated
@@ -256,8 +250,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which factor matters most when choosing a database platform?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -271,6 +265,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Database Management Decisions
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -302,12 +297,12 @@ activities:
       - Choose designs based on workload, grain, integrity, and maintainability.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Database Management Decisions
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning database management decisions before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how database management decisions works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

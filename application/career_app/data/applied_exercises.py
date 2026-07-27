@@ -184,7 +184,7 @@ APPLIED_EXERCISES = {1: {'week': 7,
      'slug': '07_excel_analyst_workbook',
      'title': 'Build an end-to-end Excel analyst workbook',
      'concepts': 'tables, validation, XLOOKUP, SUMIFS, PivotTables, Power Query, controls',
-     'minutes': 90,
+     'minutes': 105,
      'task_category': 'Portfolio',
      'destination': PAGE_LEARNING,
      'energy': 'High',
@@ -194,20 +194,35 @@ APPLIED_EXERCISES = {1: {'week': 7,
      'dataset_slug': 'operations',
      'label': 'Complete Applied Lab 07: Build an Excel analyst workbook',
      'aliases': [],
-     'objective': 'Build a controlled workbook that cleans data, calculates reliable metrics, and '
-                  'presents a management summary.',
-     'steps': ['Load CSV files into named tables.',
-               'Add data validation and controlled inputs.',
-               'Use Power Query to clean and combine sources.',
-               'Use XLOOKUP, SUMIFS, and explicit error handling.',
-               'Build PivotTables, PivotCharts, slicers, and a one-page summary.',
-               'Create a controls and assumptions sheet.'],
-     'deliverables': ['Finished .xlsx workbook.',
-                      'Management-summary screenshot.',
-                      'Controls and assumptions sheet.'],
-     'validation': ['Totals reconcile to raw files.',
-                    'No unexplained hard-coded business values.',
-                    'A new month can be added through documented refresh steps.'],
+     'objective': 'Build a refreshable Excel workbook that combines the operations CSV files, '
+                  'calculates reliable order and service metrics, reconciles revenue, and presents '
+                  'a one-page management summary.',
+     'steps': ['Create a new workbook in the submissions folder and define what one row represents '
+               'in each source file.',
+               'Import all operations CSV files with Power Query, clean data types and region values, '
+               'and load each source as a named table.',
+               'Build one Order Analysis table with customer and product lookups, revenue calculations, '
+               'returned quantities, and clear error handling.',
+               'Create a Controls sheet with month and region dropdowns, metric definitions, assumptions, '
+               'and refresh instructions.',
+               'Build a Management Summary with five KPIs, a regional comparison, and two useful '
+               'PivotCharts or charts.',
+               'Reconcile calculated monthly revenue to the Finance report, test the controls and '
+               'Refresh All, and document every unresolved difference.',
+               'Save the workbook and summary screenshot, then complete the guided submission record.'],
+     'deliverables': ['Refreshable 07_operations_analyst_workbook.xlsx saved in the Applied Labs '
+                      'submissions folder.',
+                      'Controls, Order Analysis, and one-page Management Summary sheets.',
+                      'Five management KPIs, a regional summary, and two useful charts.',
+                      'Revenue reconciliation to finance_report.csv with differences shown and explained.',
+                      'Management Summary screenshot and completed submission.md.'],
+     'validation': ['Order Analysis remains one row per order and matches the Orders row count.',
+                    'Lookups, return calculations, and KPI totals are formula- or query-driven rather '
+                    'than typed manually.',
+                    'Month and region controls update the summary, and Refresh All does not duplicate data.',
+                    'Calculated revenue is compared with the Finance report and any mismatch is documented.',
+                    'The workbook includes clear metric definitions, assumptions, refresh instructions, '
+                    'and limitations.'],
      'priority': 3,
      'optional': False},
  8: {'week': 8,

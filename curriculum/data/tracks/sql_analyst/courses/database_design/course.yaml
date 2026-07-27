@@ -1,6 +1,7 @@
 course_id: database_design
 title: Database Design
 order: 7
+roadmap_week: 6
 description: Understand how databases process, organize, expose, and govern data.
 estimated_minutes: 300
 outcomes:

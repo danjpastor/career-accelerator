@@ -84,7 +84,7 @@ from career_app.ui.responsive import (
 from career_app.ui.widgets import (
     AreaChart, BadgeCard, BrandedBannerCard, Card, ClickableCard, CircularTimer, Divider, FocusRow,
     FooterMetricBox, MetricRow, MiniSparkline, Ring, SectionHeader,
-    ContentSizedScrollArea, SidebarMetricCard, SoftPanel, StatRow, TaskRow,
+    SidebarMetricCard, SoftPanel, StatRow, TaskRow,
     make_card_scrollable
 )
 
@@ -96,6 +96,7 @@ from career_app.services import completion_contract
 from career_app.ui.startup_splash import StartupSplash
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
+DASHBOARD_NEXT_TASK_LIMIT = 4
 
 
 
@@ -401,6 +402,11 @@ class CareerAccelerator(QMainWindow):
         self.first_run.finalize_initialization()
         self.state = completion_contract.prepare_state(self.conn, state(self.conn))
         tracks.sync_all(self.conn, self.state)
+        # Track synchronization must never undo the Monday rollover performed
+        # above. Reconcile once more after all pacing services have written their
+        # state, then use the persisted row as the sole dashboard source.
+        sync_calendar_sprint_week(self.conn)
+        self.state = state(self.conn)
         AcademyService(self.conn, ROOT)
         roadmap_mastery.reconcile(self.conn, ROOT)
         self.state = state(self.conn)
@@ -526,6 +532,59 @@ class CareerAccelerator(QMainWindow):
         self.autosave_timer = QTimer(self)
         self.autosave_timer.timeout.connect(self.autosave)
         self.autosave_timer.start(max(60000, autosave_ms))
+
+        # Keep weekly planning aligned with the user's local calendar even when
+        # the application remains open across midnight.  Startup already
+        # performs the same reconciliation; this lightweight check covers the
+        # Sunday-to-Monday boundary and resume-from-sleep cases.
+        self._last_calendar_date = date.today()
+        self.calendar_rollover_timer = QTimer(self)
+        self.calendar_rollover_timer.timeout.connect(
+            self._check_calendar_rollover
+        )
+        self.calendar_rollover_timer.start(60_000)
+
+    def _check_calendar_rollover(self):
+        today = date.today()
+        date_changed = today != getattr(
+            self, "_last_calendar_date", today
+        )
+        old_week, new_week, week_changed = sync_calendar_sprint_week(
+            self.conn, today
+        )
+        if not date_changed and not week_changed:
+            return
+
+        self._last_calendar_date = today
+        self.state = state(self.conn)
+
+        if week_changed:
+            tracks.sync_all(self.conn, self.state)
+            # Defensive invariant: a pacing service may update other program
+            # fields, but the completed Monday rollover is monotonic and cannot
+            # be written back to the previous sprint.
+            persisted = state(self.conn)
+            if int(persisted["current_week"]) < int(new_week):
+                update_state(self.conn, current_week=int(new_week))
+            self.state = state(self.conn)
+            planner.repair_persisted_planner_data(
+                self.conn, int(new_week)
+            )
+            unified_tasks.migrate_runtime(
+                self.conn, int(new_week)
+            )
+            roadmap_mastery.reconcile(self.conn, ROOT)
+            self.state = state(self.conn)
+
+        # A new local date also needs a fresh daily snapshot, even when the
+        # program is already on a manually advanced later sprint.
+        self.refresh_all(sync_tracks=not week_changed)
+
+        if week_changed and self.isVisible():
+            self._notify(
+                f"Week {old_week} is complete. Week {new_week} is ready.",
+                6500,
+            )
 
     # ---------- Shell ----------
     def build_sidebar(self):
@@ -1267,7 +1326,6 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_focus_card.layout.addWidget(
             self.dashboard_focus_header
         )
-        self.dashboard_extra_focus_candidate = None
         self.dashboard_tomorrow_preview = []
 
         # DASHBOARD ROW GEOMETRY + GRADIENT REPAIR 1
@@ -1388,28 +1446,9 @@ class CareerAccelerator(QMainWindow):
         )
         self.dashboard_tasks_card.layout.addWidget(task_header)
 
-        self.dashboard_tasks_scroll = ContentSizedScrollArea(
-            self.dashboard_tasks_card
-        )
-        self.dashboard_tasks_scroll.setMinimumSize(0, 0)
-        self.dashboard_tasks_scroll.setFrameShape(
-            QFrame.Shape.NoFrame
-        )
-        self.dashboard_tasks_scroll.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self.dashboard_tasks_scroll.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded
-        )
-        self.dashboard_tasks_scroll.setSizePolicy(
-            QSizePolicy.Policy.Ignored,
-            QSizePolicy.Policy.Expanding,
-        )
-        self.dashboard_tasks_scroll.setStyleSheet(
-            "QScrollArea {background:transparent;border:none;}"
-            "QScrollArea > QWidget > QWidget {background:transparent;}"
-        )
-
+        # Next Tasks is a fixed dashboard summary, not a scrolling task browser.
+        # Render exactly four priority slots directly in the card and use the
+        # View All Tasks dialog for the full ready queue and Coming Soon items.
         self.dashboard_tasks_rows_host = QWidget()
         self.dashboard_tasks_rows_host.setMinimumWidth(0)
         self.dashboard_tasks_rows_host.setAttribute(
@@ -1418,7 +1457,7 @@ class CareerAccelerator(QMainWindow):
         )
         self.dashboard_tasks_rows_host.setSizePolicy(
             QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Fixed,
+            QSizePolicy.Policy.Expanding,
         )
         self.dashboard_tasks_layout = QVBoxLayout(
             self.dashboard_tasks_rows_host
@@ -1430,61 +1469,47 @@ class CareerAccelerator(QMainWindow):
             0,
         )
         self.dashboard_tasks_layout.setSpacing(0)
-        self.dashboard_tasks_layout.setAlignment(
-            Qt.AlignmentFlag.AlignTop
-        )
-        self.dashboard_tasks_scroll.setWidget(
-            self.dashboard_tasks_rows_host
-        )
-        self.dashboard_tasks_scroll.verticalScrollBar().valueChanged.connect(
-            lambda _value:
-            self._repaint_dashboard_scroll_actions(
-                self.dashboard_tasks_scroll,
-                self.dashboard_tasks_rows_host,
-            )
-        )
         self.dashboard_tasks_card.layout.addWidget(
-            self.dashboard_tasks_scroll,
+            self.dashboard_tasks_rows_host,
             1,
         )
 
-        self.dashboard_get_ahead_button = QPushButton(
-            "Optional Practice"
+        self.dashboard_view_all_tasks_button = QPushButton(
+            "View All Tasks"
         )
-        self.dashboard_get_ahead_button.setObjectName(
+        self.dashboard_view_all_tasks_button.setObjectName(
             "Primary"
         )
-        self.dashboard_get_ahead_button.setToolTip(
+        self.dashboard_view_all_tasks_button.setToolTip(
             (
-                "Browse additional prerequisite-ready practice. "
-                "Optional work never changes Today’s Focus or weekly requirements."
+                "Show every prerequisite-ready task and the next Coming Soon items."
             )
         )
         button_height = max(
             40,
             int(
-                self.dashboard_get_ahead_button
+                self.dashboard_view_all_tasks_button
                 .sizeHint()
                 .height()
             ),
             int(
-                self.dashboard_get_ahead_button
+                self.dashboard_view_all_tasks_button
                 .fontMetrics()
                 .height()
             ) + 18,
         )
-        self.dashboard_get_ahead_button.setMinimumHeight(
+        self.dashboard_view_all_tasks_button.setMinimumHeight(
             button_height
         )
-        self.dashboard_get_ahead_button.setSizePolicy(
+        self.dashboard_view_all_tasks_button.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Fixed,
         )
-        self.dashboard_get_ahead_button.clicked.connect(
-            self.open_get_ahead_dialog
+        self.dashboard_view_all_tasks_button.clicked.connect(
+            self.open_all_tasks_dialog
         )
         self.dashboard_tasks_card.layout.addWidget(
-            self.dashboard_get_ahead_button
+            self.dashboard_view_all_tasks_button
         )
 
         self.dashboard_timer_card = Card()
@@ -2178,12 +2203,17 @@ class CareerAccelerator(QMainWindow):
             [],
         ):
             row.set_density(row_density)
+        task_row_density = (
+            "compact"
+            if density == "comfortable"
+            else "ultra"
+        )
         for row in getattr(
             self,
             "dashboard_task_density_widgets",
             [],
         ):
-            row.set_density(row_density)
+            row.set_density(task_row_density)
         for row in self.dashboard_summary_card.findChildren(StatRow):
             row.set_density(density)
         for badge in self.dashboard_achievement_card.findChildren(BadgeCard):
@@ -2242,6 +2272,12 @@ class CareerAccelerator(QMainWindow):
             if button is not None:
                 control_height = 32 if density == "comfortable" else 29 if density == "compact" else 26
                 fit_dashboard_button(button, control_height)
+
+        task_button_height = 34 if density == "comfortable" else 30 if density == "compact" else 27
+        fit_dashboard_button(
+            self.dashboard_view_all_tasks_button,
+            task_button_height,
+        )
 
         self.dashboard_quote.setVisible(density != "ultra")
         self.dashboard_date.setVisible(density != "ultra")
@@ -4792,6 +4828,7 @@ class CareerAccelerator(QMainWindow):
                 self.conn,
                 self.state,
             )
+            sync_calendar_sprint_week(self.conn)
             self.state = state(self.conn)
 
         portfolio_evidence.reconcile(
@@ -5011,15 +5048,7 @@ class CareerAccelerator(QMainWindow):
 
     # END CURRENT SPRINT PROGRESS FIX
 
-    # ---------- Optional prerequisite-ready practice ----------
-    def _get_ahead_candidates(self, limit=12):
-        return planner.get_ahead_candidates(
-            self.conn,
-            int(self.state["current_week"]),
-            self.state,
-            limit=int(limit),
-        )
-
+    # ---------- Shared task target routing ----------
     @staticmethod
     def _get_ahead_task_id(item):
         value = item.get("task_id") if isinstance(item, dict) else None
@@ -5030,19 +5059,8 @@ class CareerAccelerator(QMainWindow):
         except (TypeError, ValueError):
             return None
 
-    def _open_get_ahead_target(self, item, *, add_to_today=False):
-        # ADD TO TODAY COMPLETION REPAIR 1
+    def _open_get_ahead_target(self, item):
         item = dict(item or {})
-
-        if add_to_today:
-            planner.start_get_ahead(
-                self.conn,
-                int(self.state["current_week"]),
-                self.state,
-                item,
-            )
-            self.state = state(self.conn)
-            return
 
         task_id = self._get_ahead_task_id(item)
         if task_id is not None:
@@ -5082,129 +5100,199 @@ class CareerAccelerator(QMainWindow):
         self.navigate(int(destination))
 
 
-    def open_get_ahead_dialog(self):
-        candidates = self._get_ahead_candidates(limit=12)
-        if not candidates:
-            QMessageBox.information(
-                self,
-                "No Optional Practice",
-                "There is no additional prerequisite-ready practice available right now.",
-            )
+    def _sync_dashboard_tasks_scroll_extent(self):
+        """Refresh fixed Next Tasks row geometry; this card has no scroll area."""
+        if not hasattr(self, "dashboard_tasks_layout"):
             return
+        self.dashboard_tasks_layout.invalidate()
+        self.dashboard_tasks_layout.activate()
+        self.dashboard_tasks_rows_host.updateGeometry()
+
+    def open_all_tasks_dialog(self):
+        """Show the complete ready queue followed by the next locked tasks."""
+        week = int(self.state["current_week"])
+        ready = [
+            dict(item)
+            for item in unified_tasks.ready_tasks(self.conn, week)
+        ]
+        coming_soon = [
+            dict(item)
+            for item in planner.coming_up_tasks(
+                self.conn,
+                week,
+                limit=12,
+            )
+        ]
 
         dialog = QDialog(self)
-        dialog.setWindowTitle("Optional Practice")
-        dialog.resize(760, 520)
+        dialog.setWindowTitle("All Tasks")
+        dialog.resize(820, 620)
         dialog.setStyleSheet(stylesheet(self._ui_scale, self._content_scale))
         layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(18, 18, 18, 18)
+        layout.setSpacing(12)
 
         heading = QLabel(
-            "Optional Practice contains extra ready exercises after required work. "
-            "Opening an item does not add it to Today’s Focus, change weekly targets, "
-            "or unlock future curriculum early."
+            "Ready tasks are listed in priority order. Current-week work appears "
+            "before catch-up work. Coming Soon shows the next locked tasks and "
+            "what must be completed first."
         )
-        heading.setWordWrap(True)
         heading.setObjectName("Muted")
+        heading.setWordWrap(True)
         layout.addWidget(heading)
 
         task_list = QListWidget()
         task_list.setWordWrap(True)
-        task_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        for candidate in candidates:
-            minutes = int(candidate.get("estimated_minutes") or 30)
-            task_list.addItem(
-                f"{candidate.get('display_source') or candidate.get('category', 'Practice')} • {minutes}m\n"
-                f"{candidate.get('label', 'Optional practice')}"
-            )
-            row = task_list.item(task_list.count() - 1)
-            row.setIcon(
-                QIcon(
-                    str(
-                        task_icons.path_for_task(
-                            ASSET_ROOT, candidate, int(self.state["current_week"])
+        task_list.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+
+        def add_section(label):
+            section = QListWidgetItem(label)
+            section.setFlags(Qt.ItemFlag.NoItemFlags)
+            section.setForeground(QColor(COLORS["muted"]))
+            task_list.addItem(section)
+
+        add_section("READY NOW")
+        if ready:
+            for item in ready:
+                minutes = int(item.get("estimated_minutes") or 30)
+                scheduled_week = int(item.get("week") or week)
+                prefix = "Catch-Up • " if scheduled_week < week else ""
+                metadata = str(
+                    item.get("metadata_label")
+                    or unified_tasks.task_type_label(item, week)
+                    or item.get("category")
+                    or "Task"
+                )
+                row = QListWidgetItem(
+                    f"{prefix}{metadata} • {minutes}m\n"
+                    f"{item.get('label') or 'Task'}"
+                )
+                row.setIcon(
+                    QIcon(
+                        str(
+                            task_icons.path_for_task(
+                                ASSET_ROOT,
+                                item,
+                                week,
+                            )
                         )
                     )
                 )
-            )
-            row.setData(Qt.ItemDataRole.UserRole, dict(candidate))
-        task_list.setCurrentRow(0)
+                row.setData(
+                    Qt.ItemDataRole.UserRole,
+                    {"status": "ready", "item": dict(item)},
+                )
+                task_list.addItem(row)
+        else:
+            row = QListWidgetItem("No task is ready right now.")
+            row.setFlags(Qt.ItemFlag.NoItemFlags)
+            task_list.addItem(row)
+
+        add_section("COMING SOON")
+        if coming_soon:
+            for item in coming_soon:
+                reason = str(
+                    item.get("prerequisite_reason")
+                    or "Complete the prerequisite first."
+                )
+                metadata = str(
+                    item.get("metadata_label")
+                    or unified_tasks.task_type_label(item, week)
+                    or "Coming Soon"
+                )
+                row = QListWidgetItem(
+                    f"{metadata}\n{item.get('label') or 'Upcoming task'}\n{reason}"
+                )
+                row.setIcon(
+                    QIcon(
+                        str(
+                            task_icons.path_for_task(
+                                ASSET_ROOT,
+                                item,
+                                week,
+                            )
+                        )
+                    )
+                )
+                row.setData(
+                    Qt.ItemDataRole.UserRole,
+                    {"status": "coming_soon", "item": dict(item)},
+                )
+                task_list.addItem(row)
+        else:
+            row = QListWidgetItem("No additional Coming Soon tasks are available.")
+            row.setFlags(Qt.ItemFlag.NoItemFlags)
+            task_list.addItem(row)
+
         layout.addWidget(task_list, 1)
 
         actions = QHBoxLayout()
-        open_button = QPushButton("Open Selected Practice")
+        open_button = QPushButton("Open Selected Task")
         open_button.setObjectName("Primary")
         close_button = QPushButton("Close")
 
+        def selected_payload():
+            current = task_list.currentItem()
+            value = (
+                current.data(Qt.ItemDataRole.UserRole)
+                if current is not None
+                else None
+            )
+            return value if isinstance(value, dict) else None
+
+        def update_open_state(*_args):
+            value = selected_payload()
+            open_button.setEnabled(
+                bool(value and value.get("status") == "ready")
+            )
+
         def open_selected():
-            row = task_list.currentItem()
-            item = row.data(Qt.ItemDataRole.UserRole) if row is not None else None
+            value = selected_payload()
+            if not value or value.get("status") != "ready":
+                return
+            item = value.get("item")
             if not isinstance(item, dict):
                 return
             dialog.accept()
-            self._open_get_ahead_target(item, add_to_today=False)
+            self._open_get_ahead_target(item)
 
+        task_list.currentItemChanged.connect(update_open_state)
+        task_list.itemDoubleClicked.connect(lambda _item: open_selected())
         open_button.clicked.connect(open_selected)
         close_button.clicked.connect(dialog.reject)
-        task_list.itemDoubleClicked.connect(lambda _item: open_selected())
         actions.addStretch()
         actions.addWidget(open_button)
         actions.addWidget(close_button)
         layout.addLayout(actions)
+
+        for index in range(task_list.count()):
+            task_list.setCurrentRow(index)
+            if open_button.isEnabled():
+                break
+        update_open_state()
         dialog.exec()
 
-
-
-
-    def _repaint_dashboard_scroll_actions(
-        self,
-        scroll_area,
-        rows_host,
-    ):
-        """Repaint row action buttons after a QScrollArea viewport move."""
-        viewport = scroll_area.viewport()
-        viewport.update()
-
-        def repaint_visible_actions():
-            viewport.update()
-            for button in rows_host.findChildren(QPushButton):
-                if not button.property("workspace_open_button"):
-                    continue
-                button.raise_()
-                button.update()
-
-        QTimer.singleShot(0, repaint_visible_actions)
-
-    def _sync_dashboard_tasks_scroll_extent(self):
-        """End the Next Tasks scroll range at the final rendered row."""
-        if not hasattr(self, "dashboard_tasks_rows_host"):
-            return
-        self.dashboard_tasks_layout.invalidate()
-        self.dashboard_tasks_layout.activate()
-        if hasattr(self.dashboard_tasks_scroll, "sync_content_extent"):
-            self.dashboard_tasks_scroll.sync_content_extent()
-        else:
-            content_height = max(
-                0,
-                int(self.dashboard_tasks_layout.sizeHint().height()),
-            )
-            self.dashboard_tasks_rows_host.setFixedHeight(content_height)
-            self.dashboard_tasks_rows_host.updateGeometry()
-        self._repaint_dashboard_scroll_actions(
-            self.dashboard_tasks_scroll,
-            self.dashboard_tasks_rows_host,
-        )
 
     def _refresh_dashboard_next_tasks(self, week):
         self.clear_layout(self.dashboard_tasks_layout)
         self.dashboard_task_density_widgets = []
 
-        ready = [dict(row) for row in planner.next_tasks(self.conn, int(week))]
-        coming_up = [
+        ready = [
+            dict(row)
+            for row in unified_tasks.next_tasks(
+                self.conn,
+                int(week),
+                limit=DASHBOARD_NEXT_TASK_LIMIT,
+            )
+        ]
+        coming_soon = [
             dict(row)
             for row in planner.coming_up_tasks(
                 self.conn,
                 int(week),
-                limit=3,
+                limit=DASHBOARD_NEXT_TASK_LIMIT,
             )
         ]
         task_category_colors = {
@@ -5215,15 +5303,39 @@ class CareerAccelerator(QMainWindow):
             "General": COLORS["muted"],
         }
 
-        if ready:
-            for index, item in enumerate(ready):
-                task_id = self._get_ahead_task_id(item)
-                category = str(item.get("category") or "General")
-                metadata_label = str(
-                    item.get("metadata_label")
-                    or unified_tasks.task_type_label(item, int(week))
-                    or category
-                )
+        visible_items = [
+            ("ready", item)
+            for item in ready[:DASHBOARD_NEXT_TASK_LIMIT]
+        ]
+        remaining_slots = DASHBOARD_NEXT_TASK_LIMIT - len(visible_items)
+        if remaining_slots > 0:
+            visible_items.extend(
+                ("coming_soon", item)
+                for item in coming_soon[:remaining_slots]
+            )
+
+        while len(visible_items) < DASHBOARD_NEXT_TASK_LIMIT:
+            visible_items.append((
+                "coming_soon",
+                {
+                    "label": "More Tasks Coming Soon",
+                    "category": "General",
+                    "prerequisite_reason": (
+                        "The planner will add another task when its prerequisites are complete."
+                    ),
+                },
+            ))
+
+        for index, (status, item) in enumerate(visible_items):
+            task_id = self._get_ahead_task_id(item)
+            category = str(item.get("category") or "General")
+            metadata_label = str(
+                item.get("metadata_label")
+                or unified_tasks.task_type_label(item, int(week))
+                or category
+            )
+
+            if status == "ready":
                 scheduled_week = int(item.get("week") or week)
                 is_catch_up = scheduled_week < int(week)
                 category_text = (
@@ -5264,6 +5376,7 @@ class CareerAccelerator(QMainWindow):
                         else None
                     ),
                     completed=False,
+                    preserve_source_in_compact=True,
                 )
                 if task_id is None:
                     task_row.checkbox.setEnabled(False)
@@ -5276,37 +5389,16 @@ class CareerAccelerator(QMainWindow):
                             state_value,
                         )
                     )
-                self.dashboard_tasks_layout.addWidget(task_row)
-                self.dashboard_task_density_widgets.append(task_row)
-                if index < len(ready) - 1:
-                    self.dashboard_tasks_layout.addWidget(Divider())
-        else:
-            empty = QLabel(
-                "No prerequisite-ready task is available right now."
-            )
-            empty.setObjectName("Muted")
-            empty.setWordWrap(True)
-            self.dashboard_tasks_layout.addWidget(empty)
-
-        if coming_up:
-            self.dashboard_tasks_layout.addWidget(Divider())
-            heading = QLabel("Coming Up")
-            heading.setStyleSheet("font-weight:700;")
-            self.dashboard_tasks_layout.addWidget(heading)
-            for item in coming_up:
+            else:
                 reason = str(
                     item.get("prerequisite_reason")
                     or "Complete the prerequisite first."
                 )
-                locked = TaskRow(
-                    title=str(item.get("label") or "Locked task"),
+                task_row = TaskRow(
+                    title=str(item.get("label") or "Upcoming task"),
                     source=reason,
                     checked=False,
-                    category_text=str(
-                        item.get("metadata_label")
-                        or unified_tasks.task_type_label(item, int(week))
-                        or "Locked"
-                    ),
+                    category_text="Coming Soon",
                     category_color=COLORS["muted"],
                     icon=task_icons.path_for_task(
                         ASSET_ROOT,
@@ -5315,16 +5407,23 @@ class CareerAccelerator(QMainWindow):
                     ),
                     icon_fallback="🔒",
                     completed=False,
+                    preserve_source_in_compact=True,
                 )
-                locked.checkbox.hide()
-                locked.setToolTip(reason)
-                self.dashboard_tasks_layout.addWidget(locked)
-                self.dashboard_task_density_widgets.append(locked)
+                task_row.checkbox.hide()
+                task_row.setToolTip(reason)
 
-        # Do not add a stretch inside the scroll host. A stretch preserved the
-        # previous larger height and allowed scrolling far below the final row.
+            task_row.setSizePolicy(
+                QSizePolicy.Policy.Expanding,
+                QSizePolicy.Policy.Expanding,
+            )
+            self.dashboard_tasks_layout.addWidget(task_row, 1)
+            self.dashboard_task_density_widgets.append(task_row)
+            if index < len(visible_items) - 1:
+                self.dashboard_tasks_layout.addWidget(Divider())
+
         self._sync_dashboard_tasks_scroll_extent()
         QTimer.singleShot(0, self._sync_dashboard_tasks_scroll_extent)
+
 
     def refresh_dashboard(
         self,
@@ -5342,6 +5441,9 @@ class CareerAccelerator(QMainWindow):
                 self.conn,
                 self.state,
             )
+            # Re-assert the calendar sprint after any service refresh so every
+            # dashboard component reads the same persisted week.
+            sync_calendar_sprint_week(self.conn)
             self.state = state(
                 self.conn
             )
@@ -5503,11 +5605,7 @@ class CareerAccelerator(QMainWindow):
 
         track_snapshot = tracks.snapshot(self.conn, self.state)
 
-        def add_focus_item(
-            item,
-            *,
-            optional=False,
-        ):
+        def add_focus_item(item):
             completed = bool(
                 item.get(
                     "completed"
@@ -5591,7 +5689,7 @@ class CareerAccelerator(QMainWindow):
                 icon_path = task_icons.path_for_task(
                     ASSET_ROOT, item, int(week)
                 )
-                icon_fallback = "✨" if optional else default_emoji
+                icon_fallback = default_emoji
                 if str(item.get("kind") or "") == "google":
                     google_progress = track_snapshot.get("google", {})
                     detail = (
@@ -5602,60 +5700,6 @@ class CareerAccelerator(QMainWindow):
                 duration = (
                     f"{int(item['estimated_minutes'])}m"
                 )
-                if optional:
-                    original_title = title
-                    task_label = str(
-                        item.get(
-                            "label",
-                            original_title,
-                        )
-                    )
-                    reason = str(
-                        item.get(
-                            "extra_reason",
-                            "Optional progress",
-                        )
-                    )
-                    short_reason = {
-                        "Unfinished weekly target": (
-                            "Weekly target remaining"
-                        ),
-                        (
-                            "Advance the current "
-                            "portfolio milestone"
-                        ): "Portfolio milestone",
-                        (
-                            "Practice current SQL skills"
-                        ): "SQL practice",
-                        (
-                            "Complete the next "
-                            "eligible Applied Lab"
-                        ): "Eligible Applied Lab",
-                        (
-                            "Optional practice for tomorrow's "
-                            "external learning"
-                        ): "External learning",
-                    }.get(
-                        reason,
-                        reason,
-                    )
-
-                    detail = (
-                        f"{original_title} • "
-                        f"{short_reason}"
-                    )
-                    if item is (
-                        self.dashboard_extra_focus_candidate
-                    ):
-                        title = (
-                            f"Optional • "
-                            f"{task_label}"
-                        )
-                    else:
-                        title = (
-                            f"Extra • "
-                            f"{task_label}"
-                        )
 
             task_id = self._get_ahead_task_id(item)
             workspace_available = (
@@ -5667,15 +5711,7 @@ class CareerAccelerator(QMainWindow):
             action_text = None
             action_callback = None
 
-            if optional and item is (
-                self.dashboard_extra_focus_candidate
-            ):
-                action_text = "Start"
-                action_callback = (
-                    lambda _checked=False:
-                    self.start_dashboard_extra_focus()
-                )
-            elif (
+            if (
                 task_id is not None
                 and workspace_available
             ):
@@ -5688,7 +5724,7 @@ class CareerAccelerator(QMainWindow):
                     )
                 )
 
-            if not completed and not optional:
+            if not completed:
 
                 detail = completion_contract.focus_detail(
 
@@ -5717,240 +5753,63 @@ class CareerAccelerator(QMainWindow):
         if focus_summary[
             "all_base_complete"
         ]:
+            self.dashboard_tomorrow_preview = []
+
             complete_panel = SoftPanel()
-            complete_panel.setMinimumHeight(
-                44
-            )
+            complete_panel.setMinimumHeight(54)
             complete_panel.setSizePolicy(
                 QSizePolicy.Policy.Expanding,
                 QSizePolicy.Policy.Preferred,
             )
-            complete_layout = QHBoxLayout(
-                complete_panel
-            )
-            complete_layout.setContentsMargins(
-                10,
-                3,
-                10,
-                3,
-            )
-            complete_layout.setSpacing(
-                10
-            )
+            complete_layout = QHBoxLayout(complete_panel)
+            complete_layout.setContentsMargins(10, 5, 10, 5)
+            complete_layout.setSpacing(10)
 
-            complete_icon = QLabel(
-                "🎉"
-            )
-            complete_icon.setStyleSheet(
-                "font-size:15pt;"
-            )
-            complete_layout.addWidget(
-                complete_icon
-            )
+            complete_icon = QLabel("🎉")
+            complete_icon.setStyleSheet("font-size:15pt;")
+            complete_layout.addWidget(complete_icon)
 
-            complete_text = (
-                QVBoxLayout()
-            )
+            complete_text = QVBoxLayout()
             complete_text.setSpacing(0)
-            complete_title = QLabel(
-                "Today's plan complete"
-            )
+            complete_title = QLabel("Today's plan complete")
             complete_title.setStyleSheet(
                 "font-weight:700;"
                 f"color:{COLORS['green']};"
             )
-            if focus_summary[
-                "inferred_empty_complete"
-            ]:
-                if focus_summary[
-                    "completed_count"
-                ]:
-                    completion_detail_text = (
-                        f"{focus_summary['completed_count']} "
-                        "completion(s) recorded today"
-                    )
-                elif focus_summary[
-                    "session_count"
-                ]:
-                    completion_detail_text = (
-                        f"{focus_summary['session_count']} "
-                        "study session(s) recorded today"
-                    )
-                else:
-                    completion_detail_text = (
-                        "All currently available focus work is complete"
-                    )
+            new_total = int(focus_summary.get("new_total_count") or 0)
+            catchup_done = int(
+                focus_summary.get("catchup_completed_count") or 0
+            )
+            if new_total:
+                completion_detail_text = (
+                    f"{new_total} new task"
+                    + ("s" if new_total != 1 else "")
+                    + " completed. You are done for today."
+                )
             else:
                 completion_detail_text = (
-                    f"{focus_summary['completed_count']} "
-                    f"tasks • "
-                    f"{focus_summary['planned_minutes'] // 60}h "
-                    f"{focus_summary['planned_minutes'] % 60:02d}m "
-                    "of planned work"
+                    "No new prerequisite-ready task was assigned today. "
+                    "Your available catch-up work is complete."
+                )
+            if catchup_done:
+                completion_detail_text += (
+                    f" {catchup_done} catch-up task"
+                    + ("s were" if catchup_done != 1 else " was")
+                    + " also completed."
                 )
 
-            complete_detail = QLabel(
-                completion_detail_text
-            )
-            complete_detail.setObjectName(
-                "Muted"
-            )
+            complete_detail = QLabel(completion_detail_text)
+            complete_detail.setObjectName("Muted")
             complete_detail.setWordWrap(True)
-            complete_detail.setStyleSheet(
-                "font-size:8.2pt;"
-            )
+            complete_detail.setStyleSheet("font-size:8.2pt;")
             complete_detail.setToolTip(
-                "\n".join(
-                    focus_summary[
-                        "completed_titles"
-                    ]
-                )
+                "\n".join(focus_summary["completed_titles"])
             )
-            complete_text.addWidget(
-                complete_title
-            )
-            complete_text.addWidget(
-                complete_detail
-            )
-            complete_layout.addLayout(
-                complete_text,
-                1,
-            )
-            self.focus_layout.addWidget(
-                complete_panel
-            )
-
-            active_extra = focus_summary[
-                "active_extra"
-            ]
-            if active_extra is not None:
-                add_focus_item(
-                    active_extra,
-                    optional=True,
-                )
-                self.dashboard_extra_focus_candidate = None
-            else:
-                self.dashboard_extra_focus_candidate = (
-                    planner.optional_focus_candidate(
-                        self.conn,
-                        week,
-                        self.state,
-                    )
-                )
-                if (
-                    self.dashboard_extra_focus_candidate
-                    is not None
-                ):
-                    add_focus_item(
-                        self.dashboard_extra_focus_candidate,
-                        optional=True,
-                    )
-                else:
-                    no_extra = QLabel(
-                        "No additional eligible task is available right now."
-                    )
-                    no_extra.setObjectName(
-                        "Muted"
-                    )
-                    no_extra.setMinimumHeight(
-                        38
-                    )
-                    no_extra.setWordWrap(True)
-                    no_extra.setAlignment(
-                        Qt.AlignVCenter
-                    )
-                    self.focus_layout.addWidget(
-                        no_extra
-                    )
-
-            self.dashboard_tomorrow_preview = (
-                planner.tomorrow_preview(
-                    self.conn,
-                    week,
-                    self.state,
-                    limit=3,
-                )
-            )
-            preview_row = QHBoxLayout()
-            preview_row.setContentsMargins(
-                0,
-                0,
-                0,
-                0,
-            )
-            preview_row.setSpacing(6)
-
-            preview_count = len(
-                self.dashboard_tomorrow_preview
-            )
-            if preview_count:
-                first_preview = (
-                    self.dashboard_tomorrow_preview[
-                        0
-                    ]["title"]
-                )
-                remaining_preview = (
-                    preview_count - 1
-                )
-                preview_summary = (
-                    f"Tomorrow • {first_preview}"
-                    + (
-                        f" + {remaining_preview} more"
-                        if remaining_preview
-                        else ""
-                    )
-                )
-            else:
-                preview_summary = (
-                    "Tomorrow • Adaptive plan refreshes automatically"
-                )
-
-            preview_text = QLabel(
-                preview_summary
-            )
-            preview_text.setObjectName(
-                "Muted"
-            )
-            preview_text.setStyleSheet(
-                "font-size:8.2pt;"
-            )
-            preview_text.setWordWrap(True)
-            preview_text.setMinimumHeight(24)
-            preview_text.setToolTip(
-                "\n".join(
-                    (
-                        f"{item['title']} — "
-                        f"{item['detail']} "
-                        f"({item['minutes']}m)"
-                    )
-                    for item in self.dashboard_tomorrow_preview
-                )
-            )
-            preview_row.addWidget(
-                preview_text,
-                1,
-            )
-
-            preview_button = QPushButton(
-                "Preview"
-            )
-            preview_button.setObjectName(
-                "Link"
-            )
-            preview_button.setFixedHeight(
-                24
-            )
-            preview_button.clicked.connect(
-                self.show_dashboard_tomorrow_preview
-            )
-            preview_row.addWidget(
-                preview_button
-            )
-            self.focus_layout.addLayout(
-                preview_row
-            )
+            complete_text.addWidget(complete_title)
+            complete_text.addWidget(complete_detail)
+            complete_layout.addLayout(complete_text, 1)
+            self.focus_layout.addWidget(complete_panel)
         else:
-            self.dashboard_extra_focus_candidate = None
             self.dashboard_tomorrow_preview = []
 
             for index, item in enumerate(
@@ -7015,66 +6874,6 @@ class CareerAccelerator(QMainWindow):
                 5200,
             )
 
-    def start_dashboard_extra_focus(
-        self,
-    ):
-        candidate = getattr(
-            self,
-            "dashboard_extra_focus_candidate",
-            None,
-        )
-        if candidate is None:
-            self._notify(
-                "No optional extra task is currently available.",
-                3600,
-            )
-            return
-
-        try:
-            started = planner.start_extra_focus(
-                self.conn,
-                int(
-                    self.state[
-                        "current_week"
-                    ]
-                ),
-                self.state,
-                candidate,
-            )
-        except ValueError as exc:
-            QMessageBox.warning(
-                self,
-                "Could Not Start Extra Task",
-                str(exc),
-            )
-            return
-
-        self.refresh_all(
-            sync_tracks=False
-        )
-        self._notify(
-            (
-                "Optional extra task started. "
-                "It does not change today's completed target "
-                "and will not be treated as missed work."
-            ),
-            6000,
-        )
-
-        task_id = started.get(
-            "task_id"
-        )
-        if (
-            task_id is not None
-            and task_workspace.workspace_supported_task_id(
-                self.conn,
-                task_id,
-            )
-        ):
-            self.open_task_workspace(
-                task_id=task_id
-            )
-
     def show_dashboard_tomorrow_preview(
         self,
     ):
@@ -7616,11 +7415,41 @@ class CareerAccelerator(QMainWindow):
             session_guard.restore(self, session_snapshot)
 
     def _route_roadmap_academy_task(self, task_id):
+        """Open the exact Academy target linked to a dashboard task.
+
+        Legacy roadmap rows stored an ``academy:lesson:*`` starter path. The
+        current adaptive Academy row stores the precise activity, assessment,
+        or Skills Lab target in ``track_tasks.target_key`` instead. Routing
+        only by starter path opened a generic task workspace and lost the
+        learner's exact place in the Path tab.
+        """
         row = self.conn.execute(
-            "SELECT starter_path FROM task_metadata WHERE task_id=?",
+            """SELECT m.starter_path,tt.track_key,tt.target_key
+               FROM task_metadata AS m
+               LEFT JOIN track_tasks AS tt ON tt.task_id=m.task_id
+               WHERE m.task_id=?""",
             (int(task_id),),
         ).fetchone()
-        starter = str(row["starter_path"] or "") if row else ""
+        if row is None:
+            return False
+
+        starter = str(row["starter_path"] or "")
+        track_key = str(row["track_key"] or "").casefold()
+        target_key = str(row["target_key"] or "").strip()
+
+        if track_key == "academy" and target_key:
+            self.open_learning_section("Path")
+            try:
+                # Refresh first so a target created by the latest completion
+                # event exists in the widget's journey-node cache.
+                self.academy_widget.refresh_all()
+                self.academy_widget.open_target(target_key)
+            except (KeyError, ValueError):
+                # A curriculum migration can retire a saved target. The next
+                # canonical recommendation is the safest recovery.
+                self.academy_widget.open_recommendation()
+            return True
+
         if starter.startswith("academy:lesson:"):
             lesson_id = starter.split(":", 2)[2]
             self.open_learning_section("Path")

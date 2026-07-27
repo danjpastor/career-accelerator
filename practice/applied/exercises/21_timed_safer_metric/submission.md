@@ -1,24 +1,84 @@
-# Applied Lab 21 Submission
+# Applied Lab 21 submission
 
-## Lab
-**Respond to a request for a misleading metric**
+## Respond to a request for a misleading metric
 
-## Artifact path
-Record any `.pbix`, `.xlsx`, image, recording, or other external artifact path.
+### Artifact paths
 
-`TODO`
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-## Work completed
-- TODO
+### Business question and audience
 
-## Findings or decisions
-TODO
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Validation performed
-- TODO
+### Work completed
 
-## What this demonstrates
-Stakeholder challenge and responsible metric design
+#### Step 1
 
-## Reflection
-What changed after validation, and what would you explain in an interview?
+**Planned work:** Restate the requested metric and decision.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 2
+
+**Planned work:** Identify gaming or interpretation risk.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 3
+
+**Planned work:** Ask one clarifying question.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Propose a safer metric or balanced set.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Draft a respectful response.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Alternative is measurable.
+  - Evidence:
+- [ ] Response preserves the business goal.
+  - Evidence:
+- [ ] New metric reduces the identified risk.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

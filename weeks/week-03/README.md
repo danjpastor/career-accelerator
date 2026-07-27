@@ -30,23 +30,23 @@ Preparation only: refine business questions, preliminary KPIs, and the analysis 
 
 - **Academy:** Three SQL learning sessions
 - **DuckDB:** Two guided exercise sessions
-- **Interview Practice:** One or two SQL Companion sessions
+- **Interview Practice:** One or two SQL Interview Practice sessions
 - **Google:** Two certificate sessions
 - **Review:** Week 3 cumulative knowledge check
 
 ## Checklist
-- [ ] Complete the planned Google Certificate work for the week
-- [ ] Complete SQL selection, filtering, sorting, and limiting lessons
-- [ ] Complete SQL aggregation, GROUP BY, and HAVING lessons
-- [ ] Complete SQL arithmetic and introductory CASE lessons
-- [ ] Complete DuckDB Exercise 01: Filter and sort support tickets
-- [ ] Complete DuckDB Exercise 02: Summarize retail orders
-- [ ] Complete DuckDB Exercise 05: Segment service performance
-- [ ] Solve Data Science Skills in SQL Companion
-- [ ] Solve Pharmacy Analytics Part 1 or Laptop vs. Mobile Viewership
-- [ ] Refine portfolio business questions and KPI definitions
-- [ ] Pass the Week 3 Cumulative Knowledge Check
-- [ ] Complete the Week 3 retrospective
+- [ ] Complete the Planned Google Certificate Work for the Week
+- [ ] Complete SQL Selection, Filtering, Sorting, and Limiting Lessons
+- [ ] Complete SQL Aggregation, GROUP BY, and HAVING Lessons
+- [ ] Complete SQL Arithmetic and Introductory CASE Lessons
+- [ ] Complete DuckDB Exercise 01: Filter and Sort Support Tickets
+- [ ] Complete DuckDB Exercise 02: Summarize Retail Orders
+- [ ] Complete DuckDB Exercise 05: Segment Service Performance
+- [ ] Solve Data Science Skills in SQL Interview Practice
+- [ ] Solve Pharmacy Analytics Part 1 or Laptop Vs. Mobile Viewership
+- [ ] Refine Portfolio Business Questions and KPI Definitions
+- [ ] Pass the Week 3 Knowledge Check
+- [ ] Complete the Week 3 Retrospective
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Build and reconcile grouped SQL summaries
-- [ ] Diagnose filtering, aggregation, and CASE errors
+- [ ] Build and Reconcile Grouped SQL Summaries
+- [ ] Diagnose Filtering, Aggregation, and CASE Errors

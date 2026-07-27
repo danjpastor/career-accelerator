@@ -2,8 +2,7 @@ lesson_id: academy2_pandas_transforming
 title: Transforming DataFrames
 order: 1
 difficulty: beginner
-description: A pandas **DataFrame** is a table with named rows and columns. Transforming a DataFrame often means creating
-  a new column from existing fields, renaming columns, changing types, or replacing inconsistent values.
+description: A pandas **DataFrame** is a table with named rows and columns. Transforming a DataFrame often means creating a new column from existing fields, renaming columns, changing types, or replacing inconsistent values.
 estimated_minutes: 35
 content: lesson.md
 objectives:
@@ -30,8 +29,7 @@ activities:
   instruction:
     title: Learn — Transforming DataFrames
     objective: Explain the purpose of transforming dataframes.
-    body: 'A pandas **DataFrame** is a table with named rows and columns. Transforming a DataFrame often means creating a
-      new column from existing fields, renaming columns, changing types, or replacing inconsistent values.
+    body: 'A pandas **DataFrame** is a table with named rows and columns. Transforming a DataFrame often means creating a new column from existing fields, renaming columns, changing types, or replacing inconsistent values.
 
 
       When you want to keep the source unchanged, make a copy before editing:
@@ -46,12 +44,12 @@ activities:
       ```
 
 
-      A calculated column should come from the source fields rather than a manually typed final answer. That keeps the analysis
-      repeatable when new rows arrive.'
+      A calculated column should come from the source fields rather than a manually typed final answer. That keeps the analysis repeatable when new rows arrive.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning transforming dataframes before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how transforming dataframes works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -85,8 +83,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: How do you select one column named revenue?
     requirements:
     - Choose one answer.
@@ -101,6 +99,7 @@ activities:
     objective: Build a practical understanding of transforming dataframes.
     action_label: Choose the best answer
     body: Bracket selection returns a Series for one named column.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -121,16 +120,15 @@ activities:
     body: '## A separate example
 
 
-      A shipping analyst copies a packages DataFrame and adds `weight_kg` from a pounds field. They verify a few rows and
-      confirm the original table did not change. The graded exercise creates order calculations and review flags.
+      A shipping analyst copies a packages DataFrame and adds `weight_kg` from a pounds field. They verify a few rows and confirm the original table did not change. The graded exercise creates order calculations and review flags.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning transforming dataframes before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how transforming dataframes works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -149,8 +147,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 7
-  prompt: The `orders` DataFrame is already loaded. Create `orders_with_tax` as a copy. Add `total_with_tax`, equal to `order_total`
-    multiplied by 1.08.
+  prompt: The `orders` DataFrame is already loaded. Create `orders_with_tax` as a copy. Add `total_with_tax`, equal to `order_total` multiplied by 1.08.
   starter: '# orders is already loaded.
 
     orders_with_tax = orders.copy()
@@ -173,8 +170,7 @@ activities:
     - expression: '''total_with_tax'' not in orders.columns'
       feedback: Keep the original orders DataFrame unchanged by working on the copy.
     display_variable: orders_with_tax
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
     dataset_id: sql_foundations
   required_for_completion: true
   required_for_practice: true
@@ -182,16 +178,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
-    task: The `orders` DataFrame is already loaded. Create `orders_with_tax` as a copy. Add `total_with_tax`, equal to `order_total`
-      multiplied by 1.08.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
+    task: The `orders` DataFrame is already loaded. Create `orders_with_tax` as a copy. Add `total_with_tax`, equal to `order_total` multiplied by 1.08.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -199,7 +193,7 @@ activities:
     title: Try It — Add a calculated DataFrame column
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_pandas_transforming_independent
   title: Practice — Create a useful business flag
   type: independent
@@ -208,8 +202,7 @@ activities:
   completion_mode: validated
   xp: 125
   estimated_minutes: 10
-  prompt: Create `review_orders` as a copy of `orders`. Add a Boolean column named `needs_review` that is True when `order_total`
-    is at least 200 or `status` is Processing.
+  prompt: Create `review_orders` as a copy of `orders`. Add a Boolean column named `needs_review` that is True when `order_total` is at least 200 or `status` is Processing.
   starter: '# orders is already loaded.
 
     review_orders = orders.copy()
@@ -230,8 +223,7 @@ activities:
     - expression: int(review_orders['needs_review'].sum()) == 2
       feedback: Combine the amount and status conditions with OR.
     display_variable: review_orders
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
     dataset_id: sql_foundations
   required_for_completion: true
   required_for_practice: false
@@ -239,16 +231,14 @@ activities:
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
-    task: Create `review_orders` as a copy of `orders`. Add a Boolean column named `needs_review` that is True when `order_total`
-      is at least 200 or `status` is Processing.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
+    task: Create `review_orders` as a copy of `orders`. Add a Boolean column named `needs_review` that is True when `order_total` is at least 200 or `status` is Processing.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -256,7 +246,7 @@ activities:
     title: Practice — Create a useful business flag
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_pandas_transforming_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -280,8 +270,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A data analyst is building a repeatable analysis for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Why create a new derived column explicitly?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -295,6 +285,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -324,12 +315,12 @@ activities:
       - Transforming DataFrames supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning transforming dataframes before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how transforming dataframes works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS daily_focus (
     track_key TEXT,
     target_key TEXT,
     is_extra INTEGER NOT NULL DEFAULT 0,
+    focus_kind TEXT NOT NULL DEFAULT 'new',
     completed_at TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(focus_date, position),
@@ -352,6 +353,7 @@ def _ensure_columns(conn):
             ("track_key", "TEXT"),
             ("target_key", "TEXT"),
             ("is_extra", "INTEGER NOT NULL DEFAULT 0"),
+            ("focus_kind", "TEXT NOT NULL DEFAULT 'new'"),
             ("completed_at", "TEXT"),
         ],
         "task_workspaces": [

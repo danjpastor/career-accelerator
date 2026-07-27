@@ -227,6 +227,10 @@ def _course(path: Path) -> CourseDefinition:
     modules = tuple(sorted((_module(_safe_ref(path.parent, ref)) for ref in raw.get("modules", [])), key=lambda x: x.order))
     assessments = tuple(sorted((_assessment(_safe_ref(path.parent, ref)) for ref in raw.get("assessments", [])), key=lambda x: x.order))
     labs = tuple(sorted((_lab(_safe_ref(path.parent, ref)) for ref in raw.get("skills_labs", [])), key=lambda x: x.order))
+    roadmap_week_raw = raw.get("roadmap_week")
+    roadmap_week = None if roadmap_week_raw in (None, "") else int(roadmap_week_raw)
+    if roadmap_week is not None and not 1 <= roadmap_week <= 12:
+        raise CurriculumError(f"roadmap_week must be between 1 and 12 in {path}")
     return CourseDefinition(
         course_id=_id(raw.get("course_id"), "course_id", path),
         title=str(raw.get("title") or "Untitled course").strip(),
@@ -237,6 +241,7 @@ def _course(path: Path) -> CourseDefinition:
         skills_labs=labs,
         outcomes=_tuple_strings(raw.get("outcomes", []), "outcomes", path),
         estimated_minutes=max(1, int(raw.get("estimated_minutes", 180))),
+        roadmap_week=roadmap_week,
     )
 
 

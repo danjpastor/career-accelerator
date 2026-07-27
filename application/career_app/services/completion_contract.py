@@ -146,6 +146,33 @@ def _derive_existing_start(today: date, state: Any) -> date:
     return today - timedelta(days=(current_week - 1) * 7)
 
 
+def _monday_sprint_week(started: date, current: date) -> int:
+    """Return the Monday-based sprint number used by the dashboard.
+
+    The first sprint begins on the saved program start date. The first rollover
+    is the first Monday after that date, then every later Monday begins the next
+    sprint. Keeping the completion contract on this same calendar prevents a
+    successful dashboard rollover from being immediately written back to the
+    previous week by track synchronization.
+    """
+    if current <= started:
+        return 1
+    days_until_monday = (7 - started.weekday()) % 7
+    if days_until_monday == 0:
+        days_until_monday = 7
+    first_rollover = started + timedelta(days=days_until_monday)
+    if current < first_rollover:
+        return 1
+    return 2 + (current - first_rollover).days // 7
+
+
+def _program_start_date(conn: sqlite3.Connection) -> date | None:
+    if not _table_exists(conn, "program_state"):
+        return None
+    row = conn.execute("SELECT start_date FROM program_state WHERE id=1").fetchone()
+    return _parse_date(_row_value(row, "start_date", 0, None))
+
+
 def _program_state_columns(conn: sqlite3.Connection) -> set[str]:
     return _columns(conn, "program_state")
 
@@ -538,7 +565,12 @@ def ensure_contract(
     if not _profile_is_ready(conn):
         return {"active": False, "program_days": PROGRAM_DAYS}
 
-    start = _parse_date(_get_setting(conn, KEY_START_DATE))
+    # program_state.start_date is the canonical learner start date used by the
+    # dashboard rollover. Older builds could leave a different derived date in
+    # the completion-contract settings, which made Monday briefly advance the
+    # sprint before track synchronization moved it backward again.
+    program_start = _program_start_date(conn)
+    start = program_start or _parse_date(_get_setting(conn, KEY_START_DATE))
     created = start is None
     if start is None:
         origin = _get_setting(conn, "onboarding.profile_origin", "new")
@@ -554,7 +586,11 @@ def ensure_contract(
     )
 
     contract_clock = clock(conn, today=current)
-    expected_week = min(SPRINT_WEEKS, max(1, ((contract_clock["program_day"] - 1) // 7) + 1))
+    calendar_week = min(SPRINT_WEEKS, _monday_sprint_week(start, current))
+    expected_week = max(
+        max(1, _state_int(state, "current_week", 1)),
+        calendar_week,
+    )
     origin = _get_setting(conn, "onboarding.profile_origin", "new")
     selected_weekly_hours = max(
         DEFAULT_WEEKLY_HOURS,
@@ -615,8 +651,12 @@ def prepare_state(conn: sqlite3.Connection, state: Any) -> dict[str, Any]:
 
     snapshot = ensure_contract(conn, normalized)
     if snapshot.get("active"):
-        expected_week = min(SPRINT_WEEKS, max(1, ((snapshot["program_day"] - 1) // 7) + 1))
-        normalized["current_week"] = expected_week
+        started = _parse_date(snapshot.get("start_date")) or date.today()
+        calendar_week = min(SPRINT_WEEKS, _monday_sprint_week(started, date.today()))
+        normalized["current_week"] = max(
+            max(1, _state_int(normalized, "current_week", 1)),
+            calendar_week,
+        )
         normalized["weekly_target_hours"] = max(
             DEFAULT_WEEKLY_HOURS,
             _state_float(normalized, "weekly_target_hours", DEFAULT_WEEKLY_HOURS),

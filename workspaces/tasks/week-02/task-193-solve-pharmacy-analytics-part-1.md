@@ -6,7 +6,7 @@
 
 ## Task Brief
 
-Open Pharmacy Analytics Part 1 in SQL Companion, write and save your own SQL solution, then mark the problem complete. Use the notes area to record your approach, checks, or anything you want to review.
+Open Pharmacy Analytics Part 1 in SQL Interview Practice, write and save your own SQL solution, then mark the problem complete. Use the notes area to record your approach, checks, or anything you want to review.
 
 ## Definition of Done
 

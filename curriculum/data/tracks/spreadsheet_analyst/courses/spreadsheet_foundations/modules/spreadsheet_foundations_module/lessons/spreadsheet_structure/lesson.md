@@ -1,4 +1,4 @@
-# Rows, Columns, Tables & Data Types
+# Understand Spreadsheet Structure
 
 Understand spreadsheet structure, table grain, and filters before changing or analyzing data.
 
@@ -10,7 +10,7 @@ Understand spreadsheet structure, table grain, and filters before changing or an
 
 ## Main idea
 
-# Rows, Columns, Tables & Data Types
+# Understand Spreadsheet Structure
 
 ## What this lesson teaches
 

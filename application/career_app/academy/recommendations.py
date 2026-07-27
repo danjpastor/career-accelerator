@@ -5,20 +5,25 @@ from dataclasses import dataclass
 from .catalog import CatalogIndex, LessonLocation
 from .models import ActivityDefinition, ProgressState
 from .progress import ProgressRepository
+from career_app.services import weekly_mastery
 
 
 TRACK_GATE_ASSESSMENTS = {
     "sql_analyst": (
         "week_2_spreadsheet_mastery",
-        "Week 2 Spreadsheet Mastery Assessment",
+        "Week 2 Knowledge Check",
     ),
     "power_bi_analyst": (
         "week_6_sql_mastery",
-        "Week 6 Spreadsheet & SQL Mastery Assessment",
+        "Week 6 Knowledge Check",
     ),
     "python_analyst": (
         "week_7_power_bi_mastery",
-        "Week 7 Power BI Mastery Assessment",
+        "Week 7 Knowledge Check",
+    ),
+    "program_mastery": (
+        "week_8_portfolio_readiness",
+        "Week 8 Knowledge Check",
     ),
 }
 
@@ -153,7 +158,14 @@ class RecommendationEngine:
         track = self._track_for_assessment(str(assessment_id))
         if track is None:
             return False, ("Academy assessment",)
-        return self.track_unlocked(track.track_id)
+        track_ready, track_missing = self.track_unlocked(track.track_id)
+        weekly = weekly_mastery.knowledge_check_readiness(
+            self.progress.conn, str(assessment_id)
+        )
+        missing = list(track_missing if not track_ready else ())
+        if not weekly.ready:
+            missing.extend(weekly.missing)
+        return not missing, tuple(dict.fromkeys(missing))
 
     def skills_lab_unlocked(self, lab_id: str) -> tuple[bool, tuple[str, ...]]:
         track = self._track_for_lab(str(lab_id))
@@ -340,50 +352,59 @@ class RecommendationEngine:
                                     )
 
                     for assessment in course.assessments:
+                        if assessment.assessment_id in passed_assessments:
+                            continue
                         missing = tuple(
                             skill for skill in assessment.requires
                             if skill not in mastered
                         )
-                        if (
-                            not missing
-                            and assessment.assessment_id not in passed_assessments
-                        ):
-                            return AcademyRecommendation(
-                                kind="assessment",
-                                title=assessment.title,
-                                target_key=(
-                                    f"academy:assessment:{assessment.assessment_id}"
-                                ),
-                                estimated_minutes=assessment.estimated_minutes,
-                                reason=(
-                                    "Complete the next checkpoint in the learning path."
-                                ),
+                        gate_ready, _gate_missing = self.assessment_unlocked(
+                            assessment.assessment_id
+                        )
+                        if missing:
+                            prerequisite = self._prerequisite_recommendation(
+                                missing, activity_rows
                             )
+                            if prerequisite is not None:
+                                return prerequisite
+                            return None
+                        if not gate_ready:
+                            # A weekly check stays out of the task queue until
+                            # the week's required and catch-up work is complete.
+                            # Do not skip into a later course while it is locked.
+                            return None
+                        return AcademyRecommendation(
+                            kind="assessment",
+                            title=assessment.title,
+                            target_key=(
+                                f"academy:assessment:{assessment.assessment_id}"
+                            ),
+                            estimated_minutes=assessment.estimated_minutes,
+                            reason=(
+                                "Complete the next knowledge check in the learning path."
+                            ),
+                        )
 
-                    all_assessments_passed = all(
-                        item.assessment_id in passed_assessments
-                        for item in course.assessments
-                    )
                     for lab in course.skills_labs:
+                        if lab.lab_id in passed_labs:
+                            continue
                         missing = tuple(
                             skill for skill in lab.requires
                             if skill not in mastered
                         )
-                        if (
-                            all_assessments_passed
-                            and not missing
-                            and lab.lab_id not in passed_labs
-                        ):
-                            return AcademyRecommendation(
-                                kind="skills_lab",
-                                title=lab.title,
-                                target_key=f"academy:skills_lab:{lab.lab_id}",
-                                estimated_minutes=lab.estimated_minutes,
-                                reason=(
-                                    "Apply the completed course in an "
-                                    "evidence-producing project."
-                                ),
-                            )
+                        gate_ready, _gate_missing = self.skills_lab_unlocked(lab.lab_id)
+                        if missing or not gate_ready:
+                            return None
+                        return AcademyRecommendation(
+                            kind="skills_lab",
+                            title=lab.title,
+                            target_key=f"academy:skills_lab:{lab.lab_id}",
+                            estimated_minutes=lab.estimated_minutes,
+                            reason=(
+                                "Apply the completed course in an "
+                                "evidence-producing project."
+                            ),
+                        )
         # ``None`` is reserved for a genuinely finished pathway. If the
         # curriculum is incomplete but no prerequisite-ready node was found, keep
         # the path active and direct the learner to the first unfinished step.

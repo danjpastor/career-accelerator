@@ -1,6 +1,7 @@
 course_id: functions_manipulating_postgresql
 title: Functions for Manipulating Data in PostgreSQL
 order: 6
+roadmap_week: 6
 description: Use common PostgreSQL-oriented types and functions while understanding dialect portability.
 estimated_minutes: 250
 outcomes:

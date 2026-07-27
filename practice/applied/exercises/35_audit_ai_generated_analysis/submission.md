@@ -1,38 +1,92 @@
-# Applied Lab 35 Submission
+# Applied Lab 35 submission
 
-## Lab
+## Audit an AI-generated analysis
 
-**Audit an AI-generated analysis**
+### Artifact paths
 
-## Artifact or output path
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-Record any notebook, workbook, `.pbix`, SQL file, chart, memo, or
-other artifact created for this lab.
+### Business question and audience
 
-`TODO`
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Method
+### Work completed
 
-- TODO
-- TODO
+#### Step 1
 
-## Result
+**Planned work:** Identify nonexistent or misused fields.
 
-TODO
+**What I completed:**
 
-## Validation
+**Evidence or result:**
 
-- TODO
-- TODO
+#### Step 2
 
-## Decision or interpretation
+**Planned work:** Diagnose join duplication and denominator errors.
 
-TODO
+**What I completed:**
 
-## Limitations
+**Evidence or result:**
 
-TODO
+#### Step 3
 
-## What this demonstrates
+**Planned work:** Check every numerical claim against source data.
 
-Responsible validation of AI-assisted analytics
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Separate observation, inference, and recommendation.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Replace the misleading chart recommendation.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 6
+
+**Planned work:** Document a reusable AI-output verification checklist.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Every correction links to a validation check.
+  - Evidence:
+- [ ] Unsupported causal or universal claims are removed.
+  - Evidence:
+- [ ] The final analysis can be reproduced without trusting the AI output.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

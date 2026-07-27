@@ -32,21 +32,21 @@ Preparation only: document sources, draft the data dictionary, inspect schemas, 
 - **Google:** Two certificate sessions
 - **Practice:** Two cleaning, lookup, or pivot activities
 - **Portfolio:** One documentation block
-- **Review:** Spreadsheet Mastery Assessment and retrospective
+- **Review:** Week 2 Knowledge Check and retrospective
 
 ## Checklist
-- [ ] Complete the planned Google Certificate work for the week
-- [ ] Complete Spreadsheet Cleaning and Standardization
-- [ ] Complete Spreadsheet Validation and Quality Checks
-- [ ] Complete Lookups and Missing-Match Diagnosis
-- [ ] Complete Related Data and Table Grain Foundations
-- [ ] Complete Pivot Tables and Summary Analysis
-- [ ] Complete Spreadsheet KPI Analysis
-- [ ] Complete the Spreadsheet Workflow and Documentation lesson
-- [ ] Draft or update the portfolio data dictionary
-- [ ] Document likely keys, relationships, and source-quality risks
-- [ ] Pass the Week 2 Spreadsheet Mastery Assessment
-- [ ] Complete the Week 2 retrospective
+- [ ] Complete the Planned Google Certificate Work for the Week
+- [ ] Complete Text, Dates, Numbers & Duplicates
+- [ ] Complete Validation Rules & Reconciliation
+- [ ] Complete Exact Lookups with XLOOKUP
+- [ ] Complete Matching Tables & Understanding Grain
+- [ ] Complete Pivot Tables, Dimensions & Measures
+- [ ] Complete KPI Summaries & Business Interpretation
+- [ ] Complete Plan a Reproducible Spreadsheet Workflow
+- [ ] Draft or Update the Portfolio Data Dictionary
+- [ ] Document Likely Keys, Relationships, and Source-Quality Risks
+- [ ] Pass the Week 2 Knowledge Check
+- [ ] Complete the Week 2 Retrospective
 
 ## Daily Log
 
@@ -64,5 +64,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Clean and validate a flawed spreadsheet
-- [ ] Build and reconcile a pivot-based business summary
+- [ ] Clean and Validate a Flawed Spreadsheet
+- [ ] Build and Reconcile a Pivot-Based Business Summary

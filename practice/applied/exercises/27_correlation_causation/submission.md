@@ -1,38 +1,84 @@
-# Applied Lab 27 Submission
+# Applied Lab 27 submission
 
-## Lab
+## Separate correlation from causal evidence
 
-**Separate correlation from causal evidence**
+### Artifact paths
 
-## Artifact or output path
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-Record any notebook, workbook, `.pbix`, SQL file, chart, memo, or
-other artifact created for this lab.
+### Business question and audience
 
-`TODO`
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Method
+### Work completed
 
-- TODO
-- TODO
+#### Step 1
 
-## Result
+**Planned work:** Measure and describe the observed association.
 
-TODO
+**What I completed:**
 
-## Validation
+**Evidence or result:**
 
-- TODO
-- TODO
+#### Step 2
 
-## Decision or interpretation
+**Planned work:** List plausible confounders and reverse-causality explanations.
 
-TODO
+**What I completed:**
 
-## Limitations
+**Evidence or result:**
 
-TODO
+#### Step 3
 
-## What this demonstrates
+**Planned work:** Identify what the current data can and cannot establish.
 
-Correlation, confounding, and causal reasoning
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Propose an experiment or quasi-experimental design.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Rewrite the conclusion using appropriately cautious language.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Correlation is not treated as proof of causation.
+  - Evidence:
+- [ ] At least one plausible alternative mechanism is considered.
+  - Evidence:
+- [ ] The proposed design addresses the main confounder.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

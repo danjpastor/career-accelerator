@@ -21,8 +21,7 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-    latest shared workbook automatically.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
@@ -41,25 +40,21 @@ activities:
     body: '# Summarize rows that meet several conditions
 
 
-      `COUNTIFS` counts rows that meet all of the conditions you provide. `SUMIFS` adds values from rows that meet all of
-      those conditions.
+      `COUNTIFS` counts rows that meet all of the conditions you provide. `SUMIFS` adds values from rows that meet all of those conditions.
 
 
-      Each condition uses a **criteria range** and a **criterion**. The ranges should cover the same rows. A mismatch can
-      produce a wrong result or an error.
+      Each condition uses a **criteria range** and a **criterion**. The ranges should cover the same rows. A mismatch can produce a wrong result or an error.
 
 
-      **Variance** compares an actual value with a target or budget. A common calculation is actual minus target, but the
-      business meaning depends on the measure: a positive sales variance may be good, while a positive cost variance may be
-      bad.
+      **Variance** compares an actual value with a target or budget. A common calculation is actual minus target, but the business meaning depends on the measure: a positive sales variance may be good, while a positive cost variance may be bad.
 
 
-      In this lesson, you will create conditional counts and totals, then explain what a variance means instead of reporting
-      a number without context.'
+      In this lesson, you will create conditional counts and totals, then explain what a variance means instead of reporting a number without context.'
+    concept_heading: Add and Count with Conditions
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning countifs, sumifs & variance before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how countifs, sumifs & variance works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -90,8 +85,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations learning scenario
-    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    scenario: A data analyst is preparing a trustworthy report for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which function is designed to count rows that meet two conditions?
     requirements:
     - Choose the answer that best follows the concept explained in the lesson.
@@ -103,14 +98,11 @@ activities:
     phase: LEARN & PREDICT
     title: Learn & Predict — Conditional totals and counts
     objective: Match a business question to SUMIFS, COUNTIFS, or a variance calculation.
-    why_it_matters: Analysts rarely need only a grand total. They need answers such as revenue for one region, open cases
-      for one team, or the gap between actual performance and a target.
-    concept: '`SUMIF` and `SUMIFS` add values for rows that meet conditions. `COUNTIF` and `COUNTIFS` count matching rows.
-      A variance compares actual performance with a benchmark, usually as Actual − Target.'
-    worked_example: A support manager wants the total handling time for Priority tickets assigned to Billing. The handling-time
-      column is the sum range; the Priority and Team columns are criteria ranges. Because two conditions are required, SUMIFS
-      is the appropriate structure.
+    why_it_matters: Analysts rarely need only a grand total. They need answers such as revenue for one region, open cases for one team, or the gap between actual performance and a target.
+    concept: '`SUMIF` and `SUMIFS` add values for rows that meet conditions. `COUNTIF` and `COUNTIFS` count matching rows. A variance compares actual performance with a benchmark, usually as Actual − Target.'
+    worked_example: A support manager wants the total handling time for Priority tickets assigned to Billing. The handling-time column is the sum range; the Priority and Team columns are criteria ranges. Because two conditions are required, SUMIFS is the appropriate structure.
     action_label: Make a prediction
+    concept_heading: Add and Count with Conditions
   required_for_completion: true
   answer_options:
   - COUNTIFS
@@ -135,20 +127,18 @@ activities:
     body: '## A separate example
 
 
-      A recruiting team wants the number of open roles in the East region and the total planned salary for those roles. The
-      analyst uses Region and Status as criteria ranges.
+      A recruiting team wants the number of open roles in the East region and the total planned salary for those roles. The analyst uses Region and Status as criteria ranges.
 
 
-      The result is compared with the quarterly hiring budget. The analyst does not stop at “$12,000 variance”; they explain
-      whether the team is above or below its plan.
+      The result is compared with the quarterly hiring budget. The analyst does not stop at “$12,000 variance”; they explain whether the team is above or below its plan.
 
 
-      **What to notice:** The criteria describe which rows belong in the calculation, and the interpretation explains why
-      the result matters.'
+      **What to notice:** The criteria describe which rows belong in the calculation, and the interpretation explains why the result matters.'
+    concept_heading: Add and Count with Conditions
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning countifs, sumifs & variance before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how countifs, sumifs & variance works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -169,8 +159,7 @@ activities:
   hints:
   - Identify the range containing Region and the range containing Revenue.
   - The condition is West; the values to add are in the Revenue column.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -189,9 +178,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 12
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Calculate total Revenue for West-region orders in Analysis Workspace cell B8.
     requirements:
     - Use a conditional-sum function rather than manually selecting rows.
@@ -208,24 +196,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: B8 contains a formula-driven total for West-region Revenue.
     hide_exact_result: true
   instruction:
     phase: TRY IT
     title: Try It — Calculate West-region revenue
     objective: Use a conditional sum to answer a focused regional question.
-    approach: In Analysis Workspace, use the Orders Region field as the condition and the Revenue field as the values to add.
-      The formula should update automatically if order values change.
+    approach: In Analysis Workspace, use the Orders Region field as the condition and the Revenue field as the values to add. The formula should update automatically if order values change.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Add and Count with Conditions
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Analysis Workspace
     columns:
     - West revenue target
@@ -245,8 +229,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Analysis Workspace** and locate **A7:B8**.
-    - In Analysis Workspace, use the Orders Region field as the condition and the Revenue field as the values to add. The
-      formula should update automatically if order values change.
+    - In Analysis Workspace, use the Orders Region field as the condition and the Revenue field as the values to add. The formula should update automatically if order values change.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: guided_practice
@@ -262,8 +245,7 @@ activities:
   hints:
   - The first result asks how many rows meet a text condition.
   - The second result compares the actual value already calculated in B8 with the target in B7.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -274,8 +256,7 @@ activities:
       contains_any:
       - countif
       - countifs
-      message: 'The workbook does not yet meet this requirement: B9 contains a conditional count and B10 contains the actual-minus-target
-        variance.'
+      message: 'The workbook does not yet meet this requirement: B9 contains a conditional count and B10 contains the actual-minus-target variance.'
     - type: formula_present
       sheet: Analysis Workspace
       cell: B10
@@ -283,19 +264,16 @@ activities:
       contains_all:
       - b8
       - b7
-      message: 'The workbook does not yet meet this requirement: B9 contains a conditional count and B10 contains the actual-minus-target
-        variance.'
-    success_feedback: You paired a conditional operational count with a target variance that can be interpreted as favorable
-      or unfavorable.
+      message: 'The workbook does not yet meet this requirement: B9 contains a conditional count and B10 contains the actual-minus-target variance.'
+    success_feedback: You paired a conditional operational count with a target variance that can be interpreted as favorable or unfavorable.
   required_for_practice: false
   required_for_mastery: true
   evidence_eligible: false
   difficulty: intermediate
   estimated_minutes: 18
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Calculate the delivered-order count in B9 and the West revenue variance to target in B10.
     requirements:
     - Count orders whose Status equals Delivered.
@@ -304,8 +282,7 @@ activities:
     expected_output: B9 contains a conditional count and B10 contains the actual-minus-target variance.
     skills_practiced:
     - spreadsheet.conditional_aggregation
-    after_correct: You paired a conditional operational count with a target variance that can be interpreted as favorable
-      or unfavorable.
+    after_correct: You paired a conditional operational count with a target variance that can be interpreted as favorable or unfavorable.
     common_errors:
     - Working in a different Google Sheet than the link saved in Career Accelerator.
     - Selecting Check My Work before Google Sheets finishes saving.
@@ -313,24 +290,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: B9 contains a conditional count and B10 contains the actual-minus-target variance.
     hide_exact_result: true
   instruction:
     phase: CHALLENGE
     title: Challenge — Count delivered orders and calculate variance
     objective: Combine a conditional count with a target comparison.
-    approach: Use a counting function to determine how many Orders records have Delivered status. Then compare actual West
-      revenue with the target by subtracting the target from the actual amount.
+    approach: Use a counting function to determine how many Orders records have Delivered status. Then compare actual West revenue with the target by subtracting the target from the actual amount.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Add and Count with Conditions
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Analysis Workspace
     columns:
     - Delivered orders
@@ -350,8 +323,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Analysis Workspace** and locate **A9:B10**.
-    - Use a counting function to determine how many Orders records have Delivered status. Then compare actual West revenue
-      with the target by subtracting the target from the actual amount.
+    - Use a counting function to determine how many Orders records have Delivered status. Then compare actual West revenue with the target by subtracting the target from the actual amount.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: independent_practice
@@ -382,8 +354,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: You need total revenue for East-region orders that are also Delivered. Which function is the best fit?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -396,10 +368,10 @@ activities:
     title: Apply It — Use the skill in a new situation
     objective: Recognize when and how to use the skill outside the practice example.
     why_it_matters: 'The task adds Revenue while enforcing two conditions: Region and Status.'
-    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
-      the method.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind the method.
     action_label: Choose the best approach
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Add and Count with Conditions
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -432,12 +404,12 @@ activities:
       - Variance is commonly calculated as actual minus target.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Add and Count with Conditions
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning countifs, sumifs & variance before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how countifs, sumifs & variance works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

@@ -61,9 +61,10 @@ def focus_day_summary(items, *, conn=None, week=None):
 def rebuild_today_snapshot(conn, week, guide, state, max_items=5):
     del guide, state
     today = date.today().isoformat()
+    conn.execute("DELETE FROM daily_focus WHERE focus_date=?", (today,))
     conn.execute(
-        "DELETE FROM daily_focus WHERE focus_date=? AND completed_at IS NULL",
-        (today,),
+        "DELETE FROM settings WHERE key=?",
+        (f"daily_focus_snapshot_v2:{today}",),
     )
     conn.commit()
     items = unified_tasks.daily_plan(conn, int(week), max_items=max_items)
@@ -111,40 +112,6 @@ def task_schedule_eligibility(conn, task_id, week):
         "ready": False,
         "reason": str(task.get("prerequisite_reason") or "Complete the prerequisite first."),
     }
-
-
-def get_ahead_candidates(conn, week, state, limit=12):
-    """Compatibility name for the Optional Practice browser."""
-    del state
-    candidates = unified_tasks.optional_practice(conn, int(week), limit=int(limit))
-    for candidate in candidates:
-        candidate["extra_reason"] = "Optional prerequisite-ready practice"
-    return candidates
-
-
-def started_get_ahead_tasks(conn, week):
-    del conn, week
-    return []
-
-
-def start_get_ahead(conn, week, state, item):
-    del conn, week, state
-    # Optional work is never persisted into Today’s Focus.
-    return dict(item or {})
-
-
-def remove_get_ahead_task(conn, week, item):
-    del conn, week
-    return {"removed": False, "label": str((item or {}).get("label") or "")}
-
-
-def optional_focus_candidate(conn, week, state):
-    del conn, week, state
-    return None
-
-
-def start_extra_focus(conn, week, state, item):
-    return start_get_ahead(conn, week, state, item)
 
 
 def tomorrow_preview(conn, week, state, limit=3):

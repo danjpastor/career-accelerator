@@ -1,38 +1,84 @@
-# Applied Lab 23 Submission
+# Applied Lab 23 submission
 
-## Lab
+## Evaluate sampling bias and representativeness
 
-**Evaluate sampling bias and representativeness**
+### Artifact paths
 
-## Artifact or output path
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-Record any notebook, workbook, `.pbix`, SQL file, chart, memo, or
-other artifact created for this lab.
+### Business question and audience
 
-`TODO`
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Method
+### Work completed
 
-- TODO
-- TODO
+#### Step 1
 
-## Result
+**Planned work:** Define the target population and available sampling frame.
 
-TODO
+**What I completed:**
 
-## Validation
+**Evidence or result:**
 
-- TODO
-- TODO
+#### Step 2
 
-## Decision or interpretation
+**Planned work:** Compare demographic and behavioral proportions between population and sample.
 
-TODO
+**What I completed:**
 
-## Limitations
+**Evidence or result:**
 
-TODO
+#### Step 3
 
-## What this demonstrates
+**Planned work:** Identify groups that are overrepresented or missing.
 
-Sampling design and bias evaluation
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Explain how the bias could affect the reported outcome.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 5
+
+**Planned work:** Recommend a safer collection or weighting strategy.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] Representativeness is evaluated across multiple relevant fields.
+  - Evidence:
+- [ ] The analysis distinguishes sampling bias from random sampling error.
+  - Evidence:
+- [ ] The recommendation is practical for the stated collection process.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

@@ -58,7 +58,35 @@ Promote only supported patterns into findings validation.
 
 ## Working notes
 
-- [ ] Record your work, decisions, and validation results here.
+**Milestone:** Complete exploratory analysis  
+**Started:** 2026-07-27
+
+## EDA questions
+
+- What does one row represent in each table?
+- Which fields are complete and reliable?
+- What are the important category distributions?
+- How are key numeric values distributed?
+- What changes over time?
+- Which segments differ meaningfully?
+- Which records or patterns need investigation?
+
+## Analysis log
+
+| Question | Method | Output table/chart | Result | Business relevance | Follow-up |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
+
+## Minimum coverage
+
+- [ ] Dataset shape and types
+- [ ] Missing values and duplicates
+- [ ] Numeric distributions
+- [ ] Categorical distributions
+- [ ] Time trends where applicable
+- [ ] Segment comparisons
+- [ ] Outlier review
+- [ ] Findings linked to business questions
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 

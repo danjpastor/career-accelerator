@@ -1,6 +1,7 @@
 course_id: introduction_to_sql
 title: Introduction to SQL
 order: 1
+roadmap_week: 3
 description: Build a reliable mental model of relational tables and write clear foundation queries.
 estimated_minutes: 240
 outcomes:

@@ -10,7 +10,7 @@ systems.  This module is the single runtime source for:
 * Today\'s Focus selection;
 * Next Tasks ordering;
 * Coming Up lock explanations; and
-* optional practice discovery.
+* daily five-task snapshot and rolling catch-up planning.
 
 The existing sprint/progress tables remain the durable storage layer so learner
 history is preserved.  Legacy planners may still exist for migration support,
@@ -29,6 +29,8 @@ from career_app.data.duckdb_exercises import exercise_for_label as duckdb_for_la
 from career_app.data.duckdb_exercises import exercise_number_for_label
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.services import roadmap_mastery
+from career_app.services import weekly_mastery
+from career_app.services.task_titles import title_case_task
 from career_app.navigation import PAGE_LEARNING, PAGE_PORTFOLIO, PAGE_WORKSPACES
 
 
@@ -115,7 +117,7 @@ def _normalize_label(value: object) -> str:
     # Early v10.26 reconciliation stored presentation prefixes in the title.
     text = re.sub(r"^Catch-Up:\s*Academy:\s*", "", text, flags=re.I)
     text = re.sub(r"^Catch-Up:\s*", "", text, flags=re.I)
-    return text.strip()
+    return title_case_task(text.strip())
 
 
 def _task_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
@@ -126,10 +128,13 @@ def _task_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
                  m.destination,m.category,m.prerequisite_state,
                  m.prerequisite_reason,m.description,m.definition_of_done,
                  m.starter_path,m.managed_key,
-                 tt.track_key,tt.target_key,tt.source_label,tt.linked_entity_id
+                 tt.track_key,tt.target_key,tt.source_label,tt.linked_entity_id,
+                 r.due_week AS requirement_due_week
              FROM sprint_tasks AS s
              JOIN task_metadata AS m ON m.task_id=s.id
              LEFT JOIN track_tasks AS tt ON tt.task_id=s.id
+             LEFT JOIN roadmap_requirement_state AS r
+               ON m.managed_key=('roadmap_v1026:' || r.requirement_key)
              ORDER BY s.week,s.sort_order,s.id"""
     ).fetchall()
 
@@ -222,21 +227,32 @@ def _learning_area(task: dict) -> str:
         )
     ).casefold()
 
+    # Resolve the curriculum ID before title heuristics. The shared Academy
+    # prefix is not a subject: SQL, Power BI, Python, pandas, and spreadsheet
+    # lessons all use ``academy2_*`` identifiers.
     if any(token in haystack for token in (
-        "spreadsheet", "google sheets", "cell reference", "pivot table",
-        "vlookup", "countif", "sumif",
+        "academy2_spreadsheet_",
+        "academy2_conditional_",
+        "week_1_spreadsheet",
+        "week_2_spreadsheet",
+        "spreadsheet_analyst",
     )):
         return "spreadsheets"
     if any(token in haystack for token in (
-        "power_bi", "power bi", "power query", "dax",
+        "spreadsheet", "google sheets", "cell reference", "pivot table",
+        "vlookup", "xlookup", "countif", "sumif", "iferror",
+    )):
+        return "spreadsheets"
+    if any(token in haystack for token in (
+        "academy2_powerbi_", "power_bi", "power bi", "power query", "dax",
     )):
         return "power_bi"
     if any(token in haystack for token in (
-        "python", "pandas", "dataframe",
+        "academy2_python_", "academy2_pandas_", "python", "pandas", "dataframe",
     )):
         return "python"
     if any(token in haystack for token in (
-        "sql", "duckdb", "select ", "join", "group by", "cte",
+        "academy2_sql_", "academy2_database_", "sql", "duckdb", "select ", "join", "group by", "cte",
         "window function",
     )):
         return "sql"
@@ -280,34 +296,42 @@ def task_type_label(task: dict, current_week: int | None = None) -> str:
 
 
 def focus_context(task: dict, current_week: int) -> str:
-    """Return the concise task-type line shown under a focus title."""
+    """Return the concise second line shown under a focus title.
+
+    Catch-Up is a factual scheduling state, not a presentation prefix stored in
+    the task title. It appears only when the task's scheduled week is earlier
+    than the active sprint week.
+    """
     kind = str(task.get("kind") or "general")
     week = max(1, _safe_int(task.get("week"), current_week))
     short_area, full_area = _area_labels(task)
 
     if kind == "google":
-        return "Google Certification"
-    if kind in {"academy_lesson", "academy_practice"}:
-        return f"{full_area} • Week {week}"
-    if kind == "knowledge_check":
+        detail = "Google Certification"
+    elif kind in {"academy_lesson", "academy_practice"}:
+        detail = f"{full_area} • Week {week}"
+    elif kind == "knowledge_check":
         area = full_area if full_area != "Learning" else "Weekly"
-        return f"{area} Assessment • Week {week}"
-    if kind == "duckdb":
-        return f"DuckDB SQL • Week {week}"
-    if kind == "interview_problem":
-        return f"SQL Interview Practice • Week {week}"
-    if kind == "sql_practice":
-        return f"SQL Practice • Week {week}"
-    if kind == "applied_lab":
-        return f"Skills Lab • Week {week}"
-    if kind in {"portfolio_preparation", "portfolio_execution"}:
-        return f"Portfolio • Week {week}"
-    if kind == "review":
-        return f"Weekly Review • Week {week}"
-    if kind == "career_readiness":
-        return f"Career Readiness • Week {week}"
-    label = task_type_label(task, current_week)
-    return f"{label} • Week {week}"
+        detail = f"{area} Assessment • Week {week}"
+    elif kind == "duckdb":
+        detail = f"DuckDB SQL • Week {week}"
+    elif kind == "interview_problem":
+        detail = f"SQL Interview Practice • Week {week}"
+    elif kind == "sql_practice":
+        detail = f"SQL Practice • Week {week}"
+    elif kind == "applied_lab":
+        detail = f"Skills Lab • Week {week}"
+    elif kind in {"portfolio_preparation", "portfolio_execution"}:
+        detail = f"Portfolio • Week {week}"
+    elif kind == "review":
+        detail = f"Weekly Review • Week {week}"
+    elif kind == "career_readiness":
+        detail = f"Career Readiness • Week {week}"
+    else:
+        label = task_type_label(task, current_week)
+        detail = f"{label} • Week {week}"
+
+    return f"Catch-Up • {detail}" if week < int(current_week) else detail
 
 
 def _assessment_id_from_managed_key(managed_key: str) -> str | None:
@@ -328,6 +352,27 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
     if week > current_week and kind not in {"google"}:
         return Readiness(False, f"Scheduled for Week {week}.")
 
+    # The knowledge check itself must remain visible while locked. Evaluate its
+    # complete weekly gate directly and use one stable learner-facing message.
+    # Other tasks may say to pass the check; this row is the actionable check the
+    # learner needs in order to clear that gate.
+    if kind == "knowledge_check":
+        assessment_id = _assessment_id_from_managed_key(str(task.get("managed_key") or ""))
+        if assessment_id:
+            result = roadmap_mastery.assessment_readiness(conn, assessment_id)
+            if not bool(result.get("ready")):
+                return Readiness(False, f"Complete All Week {week} Coursework to Unlock")
+            return Readiness(True, "")
+
+    progression_gate = weekly_mastery.task_progression_gate(
+        conn,
+        task_week=week,
+        current_week=current_week,
+        kind=kind,
+    )
+    if not progression_gate.ready:
+        return Readiness(False, progression_gate.reason)
+
     if metadata_state.casefold() not in {"ready", "unlocked", ""}:
         return Readiness(False, metadata_reason or "Complete the prerequisite first.")
 
@@ -346,17 +391,11 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
             result = roadmap_mastery.sql_problem_readiness(conn, title)
             return Readiness(bool(result.get("ready")), str(result.get("reason") or ""))
 
-    if kind == "knowledge_check":
-        assessment_id = _assessment_id_from_managed_key(str(task.get("managed_key") or ""))
-        if assessment_id:
-            result = roadmap_mastery.assessment_readiness(conn, assessment_id)
-            return Readiness(bool(result.get("ready")), str(result.get("reason") or ""))
-
     if kind == "portfolio_execution":
         if current_week < 9:
             return Readiness(False, "Portfolio execution begins in Week 9 after the learning phase.")
         if not roadmap_mastery.assessment_passed(conn, "week_8_portfolio_readiness"):
-            return Readiness(False, "Pass the Week 8 Portfolio Readiness Assessment first.")
+            return Readiness(False, "Pass the Week 8 Knowledge Check first.")
 
     if kind == "review":
         # Weekly retrospectives become actionable Friday through Sunday even
@@ -426,7 +465,10 @@ def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> d
     task = {key: row[key] for key in row.keys()}
     task["id"] = _safe_int(task.get("id"), 0)
     task["task_id"] = task["id"]
-    task["week"] = _safe_int(task.get("week"), current_week)
+    task["planner_week"] = _safe_int(task.get("week"), current_week)
+    task["week"] = _safe_int(
+        task.get("requirement_due_week"), task["planner_week"]
+    )
     task["sort_order"] = _safe_int(task.get("sort_order"), 0)
     task["estimated_minutes"] = max(5, _safe_int(task.get("estimated_minutes"), 30))
     task["label"] = _normalize_label(task.get("label"))
@@ -452,23 +494,10 @@ def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> d
 def all_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     tasks = [_as_task(conn, row, current_week) for row in _task_rows(conn)]
 
-    # A catch-up Academy lesson owns the visible progression slot.  Suppress a
-    # stale reusable Academy pointer until the catch-up queue advances.
-    catchup_active = any(
-        task["is_catch_up"]
-        and task["kind"] in {"academy_lesson", "knowledge_check"}
-        and not task["completed"]
-        for task in tasks
-    )
-    if catchup_active:
-        tasks = [
-            task
-            for task in tasks
-            if not (
-                str(task.get("track_key") or "").casefold() == ACADEMY_TRACK
-                and not task["is_catch_up"]
-            )
-        ]
+    # Current-week work must remain visible even when earlier Academy work is
+    # unfinished. Readiness rules decide whether the current lesson is available;
+    # the queue no longer hides an otherwise-ready current-week task merely
+    # because a catch-up task exists.
 
     # Only the current Google module may exist in the active task pool.
     google_seen = False
@@ -511,12 +540,18 @@ def _roadmap_sort(task: dict, current_week: int) -> tuple:
         "career_readiness": 60,
         "general": 70,
     }.get(kind, 70)
-    overdue_rank = 0 if task.get("is_catch_up") or task.get("week", current_week) < current_week else 1
+    scheduled_week = _safe_int(task.get("week"), current_week)
+    if scheduled_week == int(current_week):
+        week_rank = 0
+    elif scheduled_week < int(current_week):
+        week_rank = 1
+    else:
+        week_rank = 2
     return (
+        week_rank,
         0 if kind == "google" else 1,
-        overdue_rank,
-        _safe_int(task.get("week"), current_week),
         kind_rank,
+        scheduled_week,
         _safe_int(task.get("sort_order"), 0),
         _safe_int(task.get("id"), 0),
     )
@@ -576,182 +611,432 @@ def _pick_first(pool: list[dict], selected: list[dict], kinds: set[str]) -> dict
     return None
 
 
-def daily_plan(conn: sqlite3.Connection, current_week: int, max_items: int = MAX_FOCUS_TASKS) -> list[dict]:
-    """Return up to five ready tasks using fixed, explainable slot rules."""
-    max_items = max(1, min(MAX_FOCUS_TASKS, int(max_items or MAX_FOCUS_TASKS)))
-    pool = ready_tasks(conn, current_week)
-    selected: list[dict] = []
+def _snapshot_setting_key(focus_date: str) -> str:
+    return f"daily_focus_snapshot_v2:{focus_date}"
 
-    # 1. Google is always the highest-priority unfinished requirement.
-    google = _pick_first(pool, selected, {"google"})
-    if google:
-        selected.append(google)
 
-    # 2. Main progression: mastery gate, Academy, then portfolio execution.
-    main = _pick_first(
-        pool,
-        selected,
-        {"knowledge_check", "academy_lesson", "academy_practice", "portfolio_execution"},
+def _task_identity(task: dict) -> str:
+    return str(
+        task.get("target_key")
+        or task.get("managed_key")
+        or f"task:{_safe_int(task.get('id'), 0)}"
     )
-    if main:
-        selected.append(main)
 
-    # 3. Related practice.
-    practice = _pick_first(
-        pool,
-        selected,
-        {"duckdb", "interview_problem", "sql_practice", "applied_lab"},
+
+def _load_daily_snapshot(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    current_week: int,
+) -> dict | None:
+    if not _table_exists(conn, "settings"):
+        return None
+    row = conn.execute(
+        "SELECT value FROM settings WHERE key=?",
+        (_snapshot_setting_key(focus_date),),
+    ).fetchone()
+    if row is None:
+        return None
+    try:
+        payload = json.loads(str(row["value"] or "{}"))
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None
+    if _safe_int(payload.get("week"), 0) != int(current_week):
+        return None
+    assignments = payload.get("new_assignments")
+    if not isinstance(assignments, list):
+        return None
+    return payload
+
+
+def _save_daily_snapshot(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    current_week: int,
+    assignments: list[dict],
+) -> dict:
+    payload = {
+        "version": 2,
+        "focus_date": focus_date,
+        "week": int(current_week),
+        "new_task_limit": MAX_FOCUS_TASKS,
+        "new_assignments": assignments[:MAX_FOCUS_TASKS],
+    }
+    conn.execute(
+        """INSERT INTO settings(key,value) VALUES(?,?)
+           ON CONFLICT(key) DO UPDATE SET value=excluded.value""",
+        (_snapshot_setting_key(focus_date), json.dumps(payload, sort_keys=True)),
     )
-    if practice:
-        selected.append(practice)
+    return payload
 
-    # 4. Secondary progression.
-    secondary = _pick_first(
-        pool,
-        selected,
-        {"academy_lesson", "academy_practice", "knowledge_check", "portfolio_preparation", "portfolio_execution"},
+
+def _new_assignment_payload(task: dict) -> dict:
+    return {
+        "task_id": _safe_int(task.get("id"), 0),
+        "identity": _task_identity(task),
+        "target_key": str(task.get("target_key") or ""),
+        "track_key": str(task.get("track_key") or ""),
+        "category": str(task.get("category") or "General"),
+        "title": str(task.get("label") or "Task"),
+        "estimated_minutes": max(5, _safe_int(task.get("estimated_minutes"), 30)),
+    }
+
+
+def _daily_focus_rows(conn: sqlite3.Connection, focus_date: str) -> list[sqlite3.Row]:
+    if not _table_exists(conn, "daily_focus"):
+        return []
+    return conn.execute(
+        """SELECT id,focus_date,week,position,task_id,source_key,category,title,
+                  estimated_minutes,track_key,target_key,is_extra,focus_kind,
+                  completed_at,created_at
+           FROM daily_focus
+           WHERE focus_date=?
+           ORDER BY position,id""",
+        (focus_date,),
+    ).fetchall()
+
+
+def _daily_row_for_identity(
+    rows: list[sqlite3.Row],
+    identity: str,
+    *,
+    focus_kind: str,
+) -> sqlite3.Row | None:
+    for row in rows:
+        if str(row["focus_kind"] or "new") != focus_kind:
+            continue
+        if str(row["source_key"] or "") == identity:
+            return row
+    return None
+
+
+def _next_free_position(rows: list[sqlite3.Row], start: int) -> int:
+    used = {_safe_int(row["position"], 0) for row in rows}
+    position = int(start)
+    while position in used:
+        position += 1
+    return position
+
+
+def _insert_daily_focus_assignment(
+    conn: sqlite3.Connection,
+    *,
+    focus_date: str,
+    current_week: int,
+    position: int,
+    task: dict,
+    focus_kind: str,
+) -> None:
+    conn.execute(
+        """INSERT INTO daily_focus
+           (focus_date,week,position,task_id,source_key,category,title,
+            estimated_minutes,track_key,target_key,is_extra,focus_kind,completed_at)
+           VALUES(?,?,?,?,?,?,?,?,?,?,0,?,NULL)""",
+        (
+            focus_date,
+            int(current_week),
+            int(position),
+            _safe_int(task.get("id"), 0) or None,
+            _task_identity(task),
+            str(task.get("category") or "General"),
+            str(task.get("label") or "Task"),
+            max(5, _safe_int(task.get("estimated_minutes"), 30)),
+            task.get("track_key"),
+            task.get("target_key"),
+            focus_kind,
+        ),
     )
-    if secondary:
-        selected.append(secondary)
 
-    # 5. Supporting work.
-    supporting = _pick_first(
-        pool,
-        selected,
-        {"knowledge_check", "portfolio_preparation", "review", "career_readiness", "general"},
-    )
-    if supporting:
-        selected.append(supporting)
 
-    # Fill any still-empty slots with the next ready item in roadmap order.
-    selected_ids = {int(item["id"]) for item in selected}
-    for task in pool:
-        if len(selected) >= max_items:
-            break
-        if int(task["id"]) not in selected_ids:
-            selected.append(task)
-            selected_ids.add(int(task["id"]))
+def _migrate_today_focus_rows(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    current_week: int,
+    task_map: dict[int, dict],
+) -> None:
+    """Classify same-day rows created before the v2 snapshot migration."""
+    for row in _daily_focus_rows(conn, focus_date):
+        task = task_map.get(_safe_int(row["task_id"], 0))
+        kind = str(row["focus_kind"] or "new")
+        if task is not None and _safe_int(task.get("week"), current_week) < int(current_week):
+            kind = "catch_up"
+        elif row["completed_at"] and task is None:
+            kind = "history"
+        if kind != str(row["focus_kind"] or "new"):
+            conn.execute(
+                "UPDATE daily_focus SET focus_kind=? WHERE id=?",
+                (kind, int(row["id"])),
+            )
 
-    selected = selected[:max_items]
-    _persist_focus(conn, current_week, selected)
+
+def _ensure_daily_snapshot(
+    conn: sqlite3.Connection,
+    current_week: int,
+    max_items: int,
+    tasks: list[dict],
+) -> dict:
+    focus_date = date.today().isoformat()
+    snapshot = _load_daily_snapshot(conn, focus_date, current_week)
+    task_map = {int(task["id"]): task for task in tasks}
+    _migrate_today_focus_rows(conn, focus_date, current_week, task_map)
+
+    if snapshot is None:
+        current_ready = sorted(
+            (
+                task
+                for task in tasks
+                if task.get("ready")
+                and not bool(task.get("completed"))
+                and _safe_int(task.get("week"), current_week) == int(current_week)
+            ),
+            key=lambda task: _roadmap_sort(task, current_week),
+        )
+        assignments = [
+            _new_assignment_payload(task)
+            for task in current_ready[: max(1, min(MAX_FOCUS_TASKS, int(max_items)))]
+        ]
+        snapshot = _save_daily_snapshot(
+            conn,
+            focus_date,
+            current_week,
+            assignments,
+        )
+    else:
+        assignments = list(snapshot.get("new_assignments") or [])[:MAX_FOCUS_TASKS]
+
+    rows = _daily_focus_rows(conn, focus_date)
+    for index, assignment in enumerate(assignments, start=1):
+        identity = str(assignment.get("identity") or "")
+        if not identity:
+            continue
+        existing = _daily_row_for_identity(rows, identity, focus_kind="new")
+        if existing is not None:
+            continue
+        task = task_map.get(_safe_int(assignment.get("task_id"), 0))
+        if task is None:
+            task = {
+                "id": assignment.get("task_id"),
+                "target_key": assignment.get("target_key"),
+                "track_key": assignment.get("track_key"),
+                "category": assignment.get("category"),
+                "label": assignment.get("title"),
+                "estimated_minutes": assignment.get("estimated_minutes"),
+            }
+        _insert_daily_focus_assignment(
+            conn,
+            focus_date=focus_date,
+            current_week=current_week,
+            position=index,
+            task=task,
+            focus_kind="new",
+        )
+        rows = _daily_focus_rows(conn, focus_date)
+
+    return snapshot
+
+
+def _mark_completed_snapshot_rows(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    task_map: dict[int, dict],
+) -> None:
+    for row in _daily_focus_rows(conn, focus_date):
+        if row["completed_at"]:
+            continue
+        task = task_map.get(_safe_int(row["task_id"], 0))
+        if task is not None and bool(task.get("completed")):
+            conn.execute(
+                "UPDATE daily_focus SET completed_at=CURRENT_TIMESTAMP WHERE id=?",
+                (int(row["id"]),),
+            )
+
+
+def _active_new_tasks(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    snapshot: dict,
+    task_map: dict[int, dict],
+    current_week: int,
+) -> list[dict]:
+    rows = _daily_focus_rows(conn, focus_date)
+    completed_by_identity = {
+        str(row["source_key"] or "")
+        for row in rows
+        if str(row["focus_kind"] or "new") == "new" and row["completed_at"]
+    }
+    active: list[dict] = []
+    for assignment in snapshot.get("new_assignments") or []:
+        identity = str(assignment.get("identity") or "")
+        if not identity or identity in completed_by_identity:
+            continue
+        task = task_map.get(_safe_int(assignment.get("task_id"), 0))
+        if task is None or bool(task.get("completed")):
+            continue
+        # A migration may correct a task's scheduled week after the daily
+        # snapshot was created. Do not keep an overdue task in the frozen
+        # current-week quota; the rolling Catch-Up queue owns it instead.
+        if _safe_int(task.get("week"), current_week) < int(current_week):
+            continue
+        item = dict(task)
+        item["focus_kind"] = "new"
+        active.append(item)
+    return active
+
+
+def _sync_active_catchup(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    current_week: int,
+    slots: int,
+    ready: list[dict],
+) -> list[dict]:
+    catchup = [
+        dict(task)
+        for task in ready
+        if _safe_int(task.get("week"), current_week) < int(current_week)
+    ]
+    selected = catchup[: max(0, int(slots))]
+    selected_identities = {_task_identity(task) for task in selected}
+
+    rows = _daily_focus_rows(conn, focus_date)
+    for row in rows:
+        if str(row["focus_kind"] or "new") != "catch_up" or row["completed_at"]:
+            continue
+        if str(row["source_key"] or "") not in selected_identities:
+            conn.execute("DELETE FROM daily_focus WHERE id=?", (int(row["id"]),))
+
+    rows = _daily_focus_rows(conn, focus_date)
+    for index, task in enumerate(selected, start=1):
+        identity = _task_identity(task)
+        existing = _daily_row_for_identity(rows, identity, focus_kind="catch_up")
+        if existing is None:
+            _insert_daily_focus_assignment(
+                conn,
+                focus_date=focus_date,
+                current_week=current_week,
+                position=_next_free_position(rows, 20 + index),
+                task=task,
+                focus_kind="catch_up",
+            )
+            rows = _daily_focus_rows(conn, focus_date)
+        task["focus_kind"] = "catch_up"
+        task["is_catch_up"] = True
     return selected
 
 
+def daily_plan(conn: sqlite3.Connection, current_week: int, max_items: int = MAX_FOCUS_TASKS) -> list[dict]:
+    """Return the frozen daily new-task quota plus rolling catch-up work.
+
+    Exactly five prerequisite-ready current-week tasks (or fewer when fewer are
+    ready) are assigned once per local date. Completing those tasks never pulls
+    another current-week task into the same day. Earlier-week catch-up work fills
+    vacant visible slots and advances one task at a time until the learner is
+    caught up.
+    """
+    max_items = max(1, min(MAX_FOCUS_TASKS, int(max_items or MAX_FOCUS_TASKS)))
+    tasks = all_tasks(conn, current_week)
+    task_map = {int(task["id"]): task for task in tasks}
+    snapshot = _ensure_daily_snapshot(conn, current_week, max_items, tasks)
+    focus_date = date.today().isoformat()
+    _mark_completed_snapshot_rows(conn, focus_date, task_map)
+
+    active_new = _active_new_tasks(conn, focus_date, snapshot, task_map, current_week)
+    ready = ready_tasks(conn, current_week)
+    active_catchup = _sync_active_catchup(
+        conn,
+        focus_date,
+        current_week,
+        max_items - len(active_new),
+        ready,
+    )
+    conn.commit()
+    return (active_new + active_catchup)[:max_items]
+
+
 def next_tasks(conn: sqlite3.Connection, current_week: int, limit: int = MAX_NEXT_TASKS) -> list[dict]:
-    return ready_tasks(conn, current_week)[: max(1, int(limit or MAX_NEXT_TASKS))]
+    """Return the queue after the tasks currently visible in Today’s Focus."""
+    focus = daily_plan(conn, current_week, max_items=MAX_FOCUS_TASKS)
+    focus_ids = {_safe_int(item.get("id"), 0) for item in focus}
+    queue = [
+        task
+        for task in ready_tasks(conn, current_week)
+        if _safe_int(task.get("id"), 0) not in focus_ids
+    ]
+    return queue[: max(1, int(limit or MAX_NEXT_TASKS))]
 
 
 def coming_up(conn: sqlite3.Connection, current_week: int, limit: int = MAX_COMING_UP) -> list[dict]:
     return locked_tasks(conn, current_week)[: max(1, int(limit or MAX_COMING_UP))]
 
 
-def optional_practice(conn: sqlite3.Connection, current_week: int, limit: int = 3) -> list[dict]:
-    focus_ids = {int(item["id"]) for item in daily_plan(conn, current_week)}
-    candidates = [
-        task
-        for task in ready_tasks(conn, current_week)
-        if int(task["id"]) not in focus_ids
-        and task["kind"] in {"duckdb", "interview_problem", "sql_practice", "applied_lab", "academy_practice"}
-    ]
-    return candidates[: max(0, int(limit or 0))]
-
-
 def _persist_focus(conn: sqlite3.Connection, current_week: int, items: list[dict]) -> None:
-    today = date.today().isoformat()
-    if not _table_exists(conn, "daily_focus"):
-        return
+    """Compatibility wrapper for callers that still request a planner write.
 
-    completed_rows = conn.execute(
-        """SELECT task_id,source_key,category,title,estimated_minutes,track_key,target_key,completed_at
-             FROM daily_focus
-             WHERE focus_date=? AND completed_at IS NOT NULL
-             ORDER BY completed_at,id""",
-        (today,),
-    ).fetchall()
-    conn.execute("DELETE FROM daily_focus WHERE focus_date=?", (today,))
-
-    for position, item in enumerate(items, start=1):
-        source_key = str(item.get("managed_key") or item.get("target_key") or f"task:{item['id']}")
-        conn.execute(
-            """INSERT INTO daily_focus
-               (focus_date,week,position,task_id,source_key,category,title,
-                estimated_minutes,track_key,target_key,is_extra,completed_at)
-               VALUES(?,?,?,?,?,?,?,?,?,?,0,NULL)""",
-            (
-                today,
-                int(current_week),
-                position,
-                int(item["id"]),
-                source_key,
-                str(item.get("category") or "General"),
-                str(item.get("label") or "Task"),
-                int(item.get("estimated_minutes") or 30),
-                item.get("track_key"),
-                item.get("target_key"),
-            ),
-        )
-
-    # Retain completion history outside active positions for the footer.
-    seen: set[tuple] = set()
-    history_position = 101
-    for row in completed_rows:
-        identity = (row["task_id"], row["source_key"], row["title"])
-        if identity in seen:
-            continue
-        seen.add(identity)
-        conn.execute(
-            """INSERT INTO daily_focus
-               (focus_date,week,position,task_id,source_key,category,title,
-                estimated_minutes,track_key,target_key,is_extra,completed_at)
-               VALUES(?,?,?,?,?,?,?,?,?,?,0,?)""",
-            (
-                today,
-                int(current_week),
-                history_position,
-                row["task_id"],
-                row["source_key"] or f"history:{history_position}",
-                row["category"] or "General",
-                row["title"] or "Completed task",
-                _safe_int(row["estimated_minutes"], 30),
-                row["track_key"],
-                row["target_key"],
-                row["completed_at"],
-            ),
-        )
-        history_position += 1
-    conn.commit()
+    The v2 planner owns its snapshot directly in :func:`daily_plan`; rewriting
+    the day here would break the five-new-task cap. Calling this helper now only
+    ensures the canonical snapshot exists.
+    """
+    del items
+    daily_plan(conn, current_week, max_items=MAX_FOCUS_TASKS)
 
 
 def completion_summary(conn: sqlite3.Connection, active_items: list[dict]) -> dict:
-    today = date.today().isoformat()
-    completed_rows = []
-    if _table_exists(conn, "daily_focus"):
-        completed_rows = conn.execute(
-            """SELECT title,estimated_minutes FROM daily_focus
-               WHERE focus_date=? AND completed_at IS NOT NULL""",
-            (today,),
-        ).fetchall()
+    focus_date = date.today().isoformat()
+    state_row = conn.execute(
+        "SELECT current_week FROM program_state WHERE id=1"
+    ).fetchone()
+    current_week = _safe_int(state_row["current_week"] if state_row else 1, 1)
+    snapshot = _load_daily_snapshot(conn, focus_date, current_week) or {
+        "new_assignments": []
+    }
+    rows = _daily_focus_rows(conn, focus_date)
+
+    new_rows = [row for row in rows if str(row["focus_kind"] or "new") == "new"]
+    catchup_rows = [row for row in rows if str(row["focus_kind"] or "") == "catch_up"]
+    new_total = len(snapshot.get("new_assignments") or [])
+    completed_new = sum(bool(row["completed_at"]) for row in new_rows)
+    completed_catchup = sum(bool(row["completed_at"]) for row in catchup_rows)
+    completed_rows = [row for row in rows if row["completed_at"]]
     completed_titles = [str(row["title"] or "Completed task") for row in completed_rows]
-    completed_minutes = sum(_safe_int(row["estimated_minutes"], 0) for row in completed_rows)
-    planned_minutes = sum(_safe_int(item.get("estimated_minutes"), 0) for item in active_items)
+
+    assigned_minutes = sum(
+        max(5, _safe_int(item.get("estimated_minutes"), 30))
+        for item in snapshot.get("new_assignments") or []
+    )
+    active_catchup_minutes = sum(
+        _safe_int(item.get("estimated_minutes"), 0)
+        for item in active_items
+        if item.get("is_catch_up") or item.get("focus_kind") == "catch_up"
+    )
+
+    remaining_catchup = [
+        task
+        for task in ready_tasks(conn, current_week)
+        if _safe_int(task.get("week"), current_week) < current_week
+    ]
+    new_complete = completed_new >= new_total
+    all_complete = bool(new_complete and not remaining_catchup and not active_items)
+
     session_count = 0
     if _table_exists(conn, "study_sessions"):
         row = conn.execute(
             "SELECT COUNT(*) AS n FROM study_sessions WHERE session_date=?",
-            (today,),
+            (focus_date,),
         ).fetchone()
         session_count = _safe_int(row["n"] if row else 0, 0)
 
-    no_ready = not active_items
     return {
-        "total_count": len(active_items) + len(completed_rows),
-        "completed_count": len(completed_rows),
-        "planned_minutes": planned_minutes + completed_minutes,
+        "total_count": new_total,
+        "completed_count": min(completed_new, new_total),
+        "new_total_count": new_total,
+        "new_completed_count": min(completed_new, new_total),
+        "catchup_completed_count": completed_catchup,
+        "catchup_remaining_count": len(remaining_catchup),
+        "planned_minutes": assigned_minutes + active_catchup_minutes,
         "completed_titles": completed_titles,
         "session_count": session_count,
         "active_extra": None,
-        "all_base_complete": bool(no_ready and completed_rows),
-        "inferred_empty_complete": bool(no_ready and (completed_rows or session_count)),
+        "all_base_complete": all_complete,
+        "inferred_empty_complete": all_complete,
     }
 
 

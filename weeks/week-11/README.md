@@ -35,18 +35,19 @@ Complete a focused Project 2 and begin or substantially complete Project 3 with 
 - **Review:** Weekly portfolio checkpoint
 
 ## Checklist
-- [ ] Finalize the Project 2 problem, stakeholders, KPIs, and scope
-- [ ] Clean and validate Project 2 data
-- [ ] Complete Project 2 analysis and reconcile calculations
-- [ ] Build the Project 2 visual deliverable
-- [ ] Write and publish the Project 2 case study
-- [ ] Create a Project 2 résumé bullet and interview explanation
-- [ ] Finalize the Project 3 problem, stakeholders, KPIs, and scope
-- [ ] Acquire, preserve, and document Project 3 source data
-- [ ] Clean and validate Project 3 data
-- [ ] Begin Project 3 analysis and visual design
-- [ ] Audit Projects 1 and 2 for missing evidence
-- [ ] Complete the Week 11 portfolio checkpoint
+- [ ] Finalize the Project 2 Problem, Stakeholders, KPIs, and Scope
+- [ ] Clean and Validate Project 2 Data
+- [ ] Complete Project 2 Analysis and Reconcile Calculations
+- [ ] Build the Project 2 Visual Deliverable
+- [ ] Write and Publish the Project 2 CASE Study
+- [ ] Create a Project 2 Résumé Bullet and Interview Explanation
+- [ ] Finalize the Project 3 Problem, Stakeholders, KPIs, and Scope
+- [ ] Acquire, Preserve, and Document Project 3 Source Data
+- [ ] Clean and Validate Project 3 Data
+- [ ] Begin Project 3 Analysis and Visual Design
+- [ ] Audit Projects 1 and 2 for Missing Evidence
+- [ ] Pass the Week 11 Knowledge Check
+- [ ] Complete the Week 11 Retrospective
 
 ## Daily Log
 
@@ -64,5 +65,5 @@ Add one row after each study session.
 
 ## Applied Labs
 
-- [ ] Project 2 completion and publication review
-- [ ] Project 3 scope, data-quality, and analysis review
+- [ ] Project 2 Completion and Publication Review
+- [ ] Project 3 Scope, Data-Quality, and Analysis Review

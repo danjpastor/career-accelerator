@@ -1,0 +1,253 @@
+assessment_id: week_9_project_analysis_check
+title: Week 9 Knowledge Check
+order: 9
+description: An eight-question check covering Week 9 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- Score at least 80% (seven of eight) to pass.
+- Review recommendations under missed questions before retaking the check.
+requires:
+- roadmap.portfolio_readiness
+passing_score: 0.8
+activities:
+- activity_id: w9_q1
+  title: Define analytical grain
+  type: mastery
+  runtime: recognition
+  prompt: Before validating a project table, what should an analyst define first?
+  answer_options:
+  - What one row represents
+  - The dashboard theme
+  - The repository name
+  - The chart font
+  starter: ''
+  solution: What one row represents
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: What one row represents
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Before validating a project table, what should an analyst define first?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review table grain and relationship-validation guidance.
+- activity_id: w9_q2
+  title: Preserve raw data
+  type: mastery
+  runtime: recognition
+  prompt: Which practice best protects reproducibility during project cleaning?
+  answer_options:
+  - Keep raw files unchanged and create cleaned outputs separately
+  - Edit the only copy of each raw file
+  - Delete records that look unusual without documenting them
+  - Rename columns differently in every tool
+  starter: ''
+  solution: Keep raw files unchanged and create cleaned outputs separately
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Keep raw files unchanged and create cleaned outputs separately
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Which practice best protects reproducibility during project cleaning?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review the raw-to-cleaned data workflow and decision-log guidance.
+- activity_id: w9_q3
+  title: Validate joins
+  type: mastery
+  runtime: recognition
+  prompt: A join unexpectedly increases row count. What should you check first?
+  answer_options:
+  - Whether the join keys are unique at the intended grain
+  - Whether the query uses lowercase keywords
+  - Whether the dashboard has enough charts
+  - Whether the CSV files are alphabetized
+  starter: ''
+  solution: Whether the join keys are unique at the intended grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Whether the join keys are unique at the intended grain
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: A join unexpectedly increases row count. What should you check first?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review relationship validation, key uniqueness, and join diagnostics.
+- activity_id: w9_q4
+  title: Reconcile metrics
+  type: mastery
+  runtime: recognition
+  prompt: SQL and Python produce different revenue totals. What is the best next step?
+  answer_options:
+  - Compare filters, grain, null handling, and aggregation logic
+  - Choose the larger total
+  - Average the two totals
+  - Publish both without explanation
+  starter: ''
+  solution: Compare filters, grain, null handling, and aggregation logic
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Compare filters, grain, null handling, and aggregation logic
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: SQL and Python produce different revenue totals. What is the best next step?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review cross-tool reconciliation and validation checklists.
+- activity_id: w9_q5
+  title: Document assumptions
+  type: mastery
+  runtime: recognition
+  prompt: Why should analytical assumptions be recorded?
+  answer_options:
+  - So another person can understand and reproduce the decisions
+  - So formulas can be hidden
+  - So source data can be deleted
+  - So every result looks certain
+  starter: ''
+  solution: So another person can understand and reproduce the decisions
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: So another person can understand and reproduce the decisions
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Why should analytical assumptions be recorded?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review decision logs, assumptions, and limitations.
+- activity_id: w9_q6
+  title: Investigate anomalies
+  type: mastery
+  runtime: recognition
+  prompt: What is the safest response to an unusual value?
+  answer_options:
+  - Validate it against source context before changing or removing it
+  - Delete it immediately
+  - Replace it with zero automatically
+  - Ignore it because it is only one row
+  starter: ''
+  solution: Validate it against source context before changing or removing it
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Validate it against source context before changing or removing it
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What is the safest response to an unusual value?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review anomaly investigation and data-quality validation.
+- activity_id: w9_q7
+  title: Answer business questions
+  type: mastery
+  runtime: recognition
+  prompt: A strong analysis query should primarily do what?
+  answer_options:
+  - Answer a defined business question with reproducible logic
+  - Use the greatest number of SQL clauses
+  - Return every column in every table
+  - Avoid documenting filters
+  starter: ''
+  solution: Answer a defined business question with reproducible logic
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Answer a defined business question with reproducible logic
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: A strong analysis query should primarily do what?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review the project analysis plan and business-question mapping.
+- activity_id: w9_q8
+  title: Communicate limitations
+  type: mastery
+  runtime: recognition
+  prompt: What belongs beside a project finding?
+  answer_options:
+  - The assumptions and limitations that affect interpretation
+  - Only a decorative icon
+  - A promise that the result is always correct
+  - Every unused field from the source
+  starter: ''
+  solution: The assumptions and limitations that affect interpretation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The assumptions and limitations that affect interpretation
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 9 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What belongs beside a project finding?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review finding validation and limitation statements.

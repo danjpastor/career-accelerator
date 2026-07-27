@@ -21,8 +21,7 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-    latest shared workbook automatically.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
@@ -41,23 +40,21 @@ activities:
     body: '# Bring related information into a table
 
 
-      A lookup finds a value in one table and returns related information from another. `XLOOKUP` is especially useful when
-      the two tables share a stable identifier such as Product ID or Customer ID.
+      A lookup finds a value in one table and returns related information from another. `XLOOKUP` is especially useful when the two tables share a stable identifier such as Product ID or Customer ID.
 
 
-      An **exact match** means the identifier must be the same in both tables. Names are usually poor lookup keys because
-      spelling and formatting can change. IDs are safer when they are unique and complete.
+      An **exact match** means the identifier must be the same in both tables. Names are usually poor lookup keys because spelling and formatting can change. IDs are safer when they are unique and complete.
 
 
-      A lookup formula needs a value to find, a range to search, and a range to return from. Before filling it down, check
-      a few known records and decide how unmatched IDs should appear.
+      A lookup formula needs a value to find, a range to search, and a range to return from. Before filling it down, check a few known records and decide how unmatched IDs should appear.
 
 
       In this lesson, you will connect related tables without manually copying values.'
+    concept_heading: Bring the Right Value Across
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning exact lookups with xlookup before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how exact lookups with xlookup works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -88,8 +85,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations learning scenario
-    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which field should connect Orders to Products?
     requirements:
     - Choose the answer that best follows the concept explained in the lesson.
@@ -101,14 +98,11 @@ activities:
     phase: LEARN & PREDICT
     title: Learn & Predict — Connecting tables with exact lookups
     objective: Identify lookup keys, return ranges, and exact-match behavior.
-    why_it_matters: Analysts often keep transaction data separate from reference data. A lookup can enrich each transaction
-      with attributes from the related reference table without copying values manually.
-    concept: A lookup uses a **search key**, a **lookup range**, and a **return range**. IDs are usually matched exactly.
-      XLOOKUP directly specifies the search and return ranges; VLOOKUP uses a table range and column position.
-    worked_example: A ticket table stores Agent ID, while an agent directory stores Agent ID, Agent Name, and Team. The ticket
-      table can use Agent ID to return the Agent Name. Matching on the name itself would be less reliable because names can
-      be duplicated or changed.
+    why_it_matters: Analysts often keep transaction data separate from reference data. A lookup can enrich each transaction with attributes from the related reference table without copying values manually.
+    concept: A lookup uses a **search key**, a **lookup range**, and a **return range**. IDs are usually matched exactly. XLOOKUP directly specifies the search and return ranges; VLOOKUP uses a table range and column position.
+    worked_example: A ticket table stores Agent ID, while an agent directory stores Agent ID, Agent Name, and Team. The ticket table can use Agent ID to return the Agent Name. Matching on the name itself would be less reliable because names can be duplicated or changed.
     action_label: Make a prediction
+    concept_heading: Bring the Right Value Across
   required_for_completion: true
   answer_options:
   - Product ID
@@ -133,20 +127,18 @@ activities:
     body: '## A separate example
 
 
-      A repair table contains Equipment ID, while an equipment directory contains Equipment ID, Model, and Site. The analyst
-      uses Equipment ID to return the Site for each repair.
+      A repair table contains Equipment ID, while an equipment directory contains Equipment ID, Model, and Site. The analyst uses Equipment ID to return the Site for each repair.
 
 
-      One Equipment ID has no match. Instead of silently returning a blank, the analyst displays “ID not found” and investigates
-      the reference table.
+      One Equipment ID has no match. Instead of silently returning a blank, the analyst displays “ID not found” and investigates the reference table.
 
 
-      **What to notice:** The ID defines the relationship. A missing match is useful quality information, not something to
-      hide.'
+      **What to notice:** The ID defines the relationship. A missing match is useful quality information, not something to hide.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning exact lookups with xlookup before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how exact lookups with xlookup works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -163,13 +155,11 @@ activities:
   runtime: workbook
   prompt: Use XLOOKUP or an exact-match VLOOKUP to return Product Name in O2:O37.
   starter: ''
-  solution: In O2 use `=XLOOKUP(F2,Products!$A$2:$A$9,Products!$B$2:$B$9,"Not found",0)` or an exact-match VLOOKUP, then fill
-    through O37.
+  solution: In O2 use `=XLOOKUP(F2,Products!$A$2:$A$9,Products!$B$2:$B$9,"Not found",0)` or an exact-match VLOOKUP, then fill through O37.
   hints:
   - The search key is the current row’s Product ID.
   - The lookup range is Products Product ID; the return range is Products Product.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -178,8 +168,7 @@ activities:
       row: 1
       expected:
       - Product Name
-      message: 'The workbook does not yet meet this requirement: Every order has a formula-driven product name that matches
-        the Products table.'
+      message: 'The workbook does not yet meet this requirement: Every order has a formula-driven product name that matches the Products table.'
     - type: formula_present
       sheet: Orders
       range: O2:O37
@@ -188,8 +177,7 @@ activities:
       - xlookup
       - vlookup
       - index
-      message: 'The workbook does not yet meet this requirement: Every order has a formula-driven product name that matches
-        the Products table.'
+      message: 'The workbook does not yet meet this requirement: Every order has a formula-driven product name that matches the Products table.'
     success_feedback: You enriched transaction rows from a separate reference table using a stable identifier.
   required_for_practice: true
   required_for_mastery: false
@@ -197,9 +185,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 12
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Use XLOOKUP or an exact-match VLOOKUP to return Product Name in O2:O37.
     requirements:
     - Add Product Name in O1.
@@ -216,24 +203,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: Every order has a formula-driven product name that matches the Products table.
     hide_exact_result: true
   instruction:
     phase: TRY IT
     title: Try It — Return the product name
     objective: Use an exact lookup to enrich each order with its related product name.
-    approach: Add Product Name to Orders. Use the current row’s Product ID as the search key and the Products table as the
-      reference. Return the Product field, use exact matching, fill the formula down, and verify several results against Products.
+    approach: Add Product Name to Orders. Use the current row’s Product ID as the search key and the Products table as the reference. Return the Product field, use exact matching, fill the formula down, and verify several results against Products.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Bring the Right Value Across
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Orders
     columns:
     - Product ID
@@ -253,8 +236,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Orders** and locate **F1:O37**.
-    - Add Product Name to Orders. Use the current row’s Product ID as the search key and the Products table as the reference.
-      Return the Product field, use exact matching, fill the formula down, and verify several results against Products.
+    - Add Product Name to Orders. Use the current row’s Product ID as the search key and the Products table as the reference. Return the Product field, use exact matching, fill the formula down, and verify several results against Products.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: guided_practice
@@ -266,13 +248,11 @@ activities:
   runtime: workbook
   prompt: Create Category in P2:P37 and Unit Cost in Q2:Q37 using exact lookups from Products.
   starter: ''
-  solution: In P2 return Products Category (column C) with an exact lookup. In Q2 return Products Unit Cost (column D). Lock
-    the lookup ranges and fill both formulas through row 37.
+  solution: In P2 return Products Category (column C) with an exact lookup. In Q2 return Products Unit Cost (column D). Lock the lookup ranges and fill both formulas through row 37.
   hints:
   - Both formulas use the same search key and lookup ID range.
   - 'Only the return range changes: Category for one formula and Unit Cost for the other.'
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -282,8 +262,7 @@ activities:
       expected:
       - Category
       - Unit Cost
-      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit
-        cost from Products.'
+      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit cost from Products.'
     - type: formula_present
       sheet: Orders
       range: P2:P37
@@ -292,8 +271,7 @@ activities:
       - xlookup
       - vlookup
       - index
-      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit
-        cost from Products.'
+      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit cost from Products.'
     - type: formula_present
       sheet: Orders
       range: Q2:Q37
@@ -302,8 +280,7 @@ activities:
       - xlookup
       - vlookup
       - index
-      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit
-        cost from Products.'
+      message: 'The workbook does not yet meet this requirement: Every order contains the correct product category and unit cost from Products.'
     success_feedback: You reused one relationship to add multiple trusted reference attributes to the transaction table.
   required_for_practice: false
   required_for_mastery: true
@@ -311,9 +288,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 18
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Create Category in P2:P37 and Unit Cost in Q2:Q37 using exact lookups from Products.
     requirements:
     - Add both requested headers.
@@ -330,24 +306,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: Every order contains the correct product category and unit cost from Products.
     hide_exact_result: true
   instruction:
     phase: CHALLENGE
     title: Challenge — Return category and unit cost
     objective: Extend the exact-lookup pattern to multiple related fields.
-    approach: Use the same Product ID relationship to return Category and Unit Cost into separate columns. Keep the lookup
-      ranges fixed and verify that one Product ID returns the same attributes shown in Products.
+    approach: Use the same Product ID relationship to return Category and Unit Cost into separate columns. Keep the lookup ranges fixed and verify that one Product ID returns the same attributes shown in Products.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Orders
     columns:
     - Product ID
@@ -369,8 +341,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Orders** and locate **F1:Q37**.
-    - Use the same Product ID relationship to return Category and Unit Cost into separate columns. Keep the lookup ranges
-      fixed and verify that one Product ID returns the same attributes shown in Products.
+    - Use the same Product ID relationship to return Category and Unit Cost into separate columns. Keep the lookup ranges fixed and verify that one Product ID returns the same attributes shown in Products.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: independent_practice
@@ -401,8 +372,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A data analyst is preparing a trustworthy report for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Why is exact matching usually preferred when looking up an ID such as P004?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -414,12 +385,11 @@ activities:
     phase: TRANSFER
     title: Apply It — Use the skill in a new situation
     objective: Recognize when and how to use the skill outside the practice example.
-    why_it_matters: Identifiers are discrete keys. An approximate match could return the wrong entity without making the error
-      obvious.
-    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
-      the method.
+    why_it_matters: Identifiers are discrete keys. An approximate match could return the wrong entity without making the error obvious.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind the method.
     action_label: Choose the best approach
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Bring the Right Value Across
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -452,12 +422,12 @@ activities:
       - Unexpected missing matches should be investigated rather than hidden.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Bring the Right Value Across
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning exact lookups with xlookup before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how exact lookups with xlookup works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

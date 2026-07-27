@@ -1,24 +1,76 @@
-# Applied Lab 03 Submission
+# Applied Lab 03 submission
 
-## Lab
-**Build a star schema and date table**
+## Build a star schema and date table
 
-## Artifact path
-Record any `.pbix`, `.xlsx`, image, recording, or other external artifact path.
+### Artifact paths
 
-`TODO`
+- Main artifact:
+- Supporting screenshot or export:
+- Other evidence:
 
-## Work completed
-- TODO
+### Business question and audience
 
-## Findings or decisions
-TODO
+- Audience:
+- Decision or question:
+- Unit of analysis / grain:
 
-## Validation performed
-- TODO
+### Work completed
 
-## What this demonstrates
-Dimensional modeling in Power BI
+#### Step 1
 
-## Reflection
-What changed after validation, and what would you explain in an interview?
+**Planned work:** Define the grain of shot and time-entry facts.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 2
+
+**Planned work:** Create project, artist, department, status, and date dimensions.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 3
+
+**Planned work:** Build one-to-many single-direction relationships.
+
+**What I completed:**
+
+**Evidence or result:**
+
+#### Step 4
+
+**Planned work:** Mark the date table and hide technical fields.
+
+**What I completed:**
+
+**Evidence or result:**
+
+### Validation evidence
+
+- [ ] No accidental many-to-many relationships.
+  - Evidence:
+- [ ] Dimension keys are unique.
+  - Evidence:
+- [ ] A project filter affects both facts correctly.
+  - Evidence:
+
+### Decisions and assumptions
+
+- 
+
+### Limitations or unresolved issues
+
+- 
+
+### Stakeholder takeaway
+
+Write two or three sentences explaining the result, why it matters, and the next action.
+
+### Interview-ready reflection
+
+- Most important technical or analytical choice:
+- Strongest validation check:
+- What I would improve with more time:

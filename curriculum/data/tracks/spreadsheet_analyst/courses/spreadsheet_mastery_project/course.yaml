@@ -1,6 +1,7 @@
 course_id: spreadsheet_mastery_project
 title: Analyst Workflow & Spreadsheet Capstone
 order: 6
+roadmap_week: 2
 description: Document a reproducible workflow, run final QA, and validate a complete analytical workbook.
 estimated_minutes: 240
 outcomes:

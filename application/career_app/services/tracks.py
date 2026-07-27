@@ -5,6 +5,7 @@ import math
 import re
 from datetime import date, timedelta
 
+from career_app.services import weekly_mastery
 from career_app.data.applied_exercises import (
     APPLIED_EXERCISES,
     APPLIED_SKILL_EVIDENCE,
@@ -609,19 +610,19 @@ SKILL_DEFINITIONS = {
     ),
     "roadmap.spreadsheet_mastery": (
         "Spreadsheet Mastery",
-        "Pass the Week 2 Spreadsheet Mastery Assessment",
+        "Pass the Week 2 Knowledge Check",
     ),
     "roadmap.sql_mastery": (
         "Spreadsheet & SQL Mastery",
-        "Pass the Week 6 Spreadsheet & SQL Mastery Assessment",
+        "Pass the Week 6 Knowledge Check",
     ),
     "roadmap.power_bi_mastery": (
         "Power BI Mastery",
-        "Pass the Week 7 Power BI Mastery Assessment",
+        "Pass the Week 7 Knowledge Check",
     ),
     "roadmap.portfolio_readiness": (
         "Portfolio Readiness",
-        "Pass the Week 8 Portfolio Readiness Assessment",
+        "Pass the Week 8 Knowledge Check",
     ),
     "portfolio_delivery": (
         "Portfolio Case Study Delivery",
@@ -777,10 +778,10 @@ SQL_SKILL_ACCEPTED_EVIDENCE = {
     "sql_intermediate": (
         "Complete validated subquery, CTE, or window-function learning and practice"
     ),
-    "roadmap.spreadsheet_mastery": "Pass the Week 2 Spreadsheet Mastery Assessment",
-    "roadmap.sql_mastery": "Pass the Week 6 Spreadsheet & SQL Mastery Assessment",
-    "roadmap.power_bi_mastery": "Pass the Week 7 Power BI Mastery Assessment",
-    "roadmap.portfolio_readiness": "Pass the Week 8 Portfolio Readiness Assessment",
+    "roadmap.spreadsheet_mastery": "Pass the Week 2 Knowledge Check",
+    "roadmap.sql_mastery": "Pass the Week 6 Knowledge Check",
+    "roadmap.power_bi_mastery": "Pass the Week 7 Knowledge Check",
+    "roadmap.portfolio_readiness": "Pass the Week 8 Knowledge Check",
 }
 
 DUCKDB_SKILL_EVIDENCE = {
@@ -2465,7 +2466,7 @@ def _portfolio_target(
         reasons = []
         if execution_too_early:
             reasons.append(
-                "Scheduled for Week 9 after the learning phase and Portfolio Readiness Assessment"
+                "Scheduled for Week 9 after the learning phase and Week 8 Knowledge Check"
             )
         if missing_names:
             reasons.append("Learn first: " + ", ".join(missing_names))
@@ -2736,6 +2737,13 @@ def applied_lab_readiness(
                     "or equivalent validation evidence"
                 )
             )
+
+
+    week_gate = weekly_mastery.previous_week_gate(
+        conn, int(item["week"])
+    )
+    if not week_gate.ready:
+        missing.append(week_gate.reason)
 
     # Preserve order while removing duplicate reasons.
     missing = list(
@@ -3249,7 +3257,7 @@ def _sync_sprint_prerequisites(
             ):
                 reason = (
                     "Scheduled for Week 9 after the learning phase and "
-                    "Portfolio Readiness Assessment."
+                    "Week 8 Knowledge Check."
                 )
                 if int(row["week"]) < 9:
                     conn.execute(
@@ -4739,45 +4747,6 @@ def task_detail(conn, task_id):
             "Continue your next Academy lesson",
         )
         context = "Built-in guided learning"
-    elif track_key == "academy":
-        target_key = str(link["target_key"] or "")
-        parts = target_key.split(":", 3)
-        if len(parts) != 4 or parts[:2] != ["academy", "activity"]:
-            raise ValueError(
-                "The Academy task target could not be identified. Open Accelerator Academy and resume the recommended lesson."
-            )
-        lesson_id, activity_id = parts[2], parts[3]
-        progress_row = conn.execute(
-            """SELECT state,last_attempt_solution_assisted
-               FROM academy_activity_progress
-               WHERE lesson_id=? AND activity_id=?""",
-            (lesson_id, activity_id),
-        ).fetchone()
-        if progress_row is None or str(progress_row["state"] or "") != "Passed":
-            raise ValueError(
-                "Complete and pass this interactive Academy step before marking the task complete."
-            )
-        _record_event(
-            conn,
-            "academy",
-            target_key,
-            label,
-            metadata={
-                "lesson_id": lesson_id,
-                "activity_id": activity_id,
-                "target_key": target_key,
-                "task_id": int(task_id),
-            },
-        )
-        conn.execute(
-            """UPDATE daily_focus SET completed_at=COALESCE(completed_at,CURRENT_TIMESTAMP)
-               WHERE focus_date=? AND target_key=?
-                 AND (LOWER(COALESCE(track_key,''))='academy'
-                      OR LOWER(COALESCE(source_key,''))='roadmap:academy')""",
-            (date.today().isoformat(), target_key),
-        )
-        message = f"Accelerator Academy completed: {label}"
-
     elif track_key == "sql":
         specific_work = metadata.get(
             "title",
@@ -5118,6 +5087,40 @@ def complete_track_task(
                 + ", ".join(readiness["missing_names"])
                 + " first."
             )
+    elif track_key == "academy":
+        target_key = str(link["target_key"] or "")
+        parts = target_key.split(":")
+        target_complete = False
+        if len(parts) == 4 and parts[:2] == ["academy", "activity"]:
+            progress_row = conn.execute(
+                """SELECT state,last_attempt_solution_assisted
+                   FROM academy_activity_progress
+                   WHERE lesson_id=? AND activity_id=?""",
+                (parts[2], parts[3]),
+            ).fetchone()
+            target_complete = bool(
+                progress_row
+                and str(progress_row["state"] or "") == "Passed"
+                and not int(progress_row["last_attempt_solution_assisted"] or 0)
+            )
+        elif len(parts) == 3 and parts[:2] == ["academy", "assessment"]:
+            target_complete = conn.execute(
+                """SELECT 1 FROM academy_assessment_attempts
+                   WHERE assessment_id=? AND passed=1
+                     AND COALESCE(solution_assisted,0)=0 LIMIT 1""",
+                (parts[2],),
+            ).fetchone() is not None
+        elif len(parts) == 3 and parts[:2] == ["academy", "skills_lab"]:
+            target_complete = conn.execute(
+                """SELECT 1 FROM academy_submissions
+                   WHERE item_type='skills_lab' AND item_id=?
+                     AND validation_status='Passed' LIMIT 1""",
+                (parts[2],),
+            ).fetchone() is not None
+        if not target_complete:
+            raise ValueError(
+                "Complete and pass the linked Accelerator Academy activity before marking this task complete."
+            )
     elif track_key == "portfolio":
         project_task = None
         if link["linked_entity_id"] is not None:
@@ -5226,6 +5229,35 @@ def complete_track_task(
             "DataCamp advanced to "
             "the next aligned lesson."
         )
+
+    elif track_key == "academy":
+        target_key = str(link["target_key"] or "")
+        parts = target_key.split(":")
+        metadata = {
+            "target_key": target_key,
+            "task_id": int(task_id),
+            "target_type": parts[1] if len(parts) > 1 else "academy",
+        }
+        if len(parts) == 4 and parts[:2] == ["academy", "activity"]:
+            metadata.update({"lesson_id": parts[2], "activity_id": parts[3]})
+        elif len(parts) == 3:
+            metadata["item_id"] = parts[2]
+        _record_event(
+            conn,
+            "academy",
+            target_key,
+            label,
+            metadata=metadata,
+        )
+        conn.execute(
+            """UPDATE daily_focus
+               SET completed_at=COALESCE(completed_at,CURRENT_TIMESTAMP)
+               WHERE focus_date=? AND target_key=?
+                 AND (LOWER(COALESCE(track_key,''))='academy'
+                      OR LOWER(COALESCE(source_key,''))='roadmap:academy')""",
+            (date.today().isoformat(), target_key),
+        )
+        message = f"Accelerator Academy completed: {label}"
 
     elif track_key == "sql":
         target_key = link[

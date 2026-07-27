@@ -58,7 +58,29 @@ Use confirmed findings and governed metrics in Power BI.
 
 ## Working notes
 
-- [ ] Record your work, decisions, and validation results here.
+**Milestone:** Validate findings across tools  
+**Started:** 2026-07-27
+
+## Findings validation matrix
+
+| Finding | Original result | Independent check | Alternative explanation tested | SQL/Python/BI agree? | Final status |
+|---|---|---|---|---|---|
+|  |  |  |  |  | Confirmed / Revised / Unsupported |
+
+## Required checks
+
+- Recalculate headline metrics using a second query or method.
+- Reconcile totals with source or processed files.
+- Test the effect of nulls, filters, date boundaries, and duplicates.
+- Compare SQL, Python, and dashboard results where more than one tool is used.
+- Inspect the records behind surprising results.
+- Separate correlation from causation.
+
+## Discrepancy log
+
+| Discrepancy | Cause | Correction | Files updated |
+|---|---|---|---|
+|  |  |  |  |
 
 <!-- DCA MANAGED PORTFOLIO GUIDE END -->
 

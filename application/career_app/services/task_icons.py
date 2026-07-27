@@ -56,13 +56,34 @@ def key_for_task(task: dict, current_week: int | None = None) -> str:
     if kind == "career_readiness":
         return "career"
 
-    if any(token in text for token in ("power bi", "dax", "power_bi")):
+    # Curriculum IDs identify the Academy subject more reliably than the
+    # sprint week. The shared ``academy2_*`` prefix is not itself a Spreadsheet
+    # signal because SQL, Power BI, Python, and pandas use it too.
+    if any(token in text for token in (
+        "academy2_spreadsheet_",
+        "academy2_conditional_",
+        "week_1_spreadsheet",
+        "week_2_spreadsheet",
+        "spreadsheet_analyst",
+    )):
+        return "spreadsheet"
+    if any(token in text for token in (
+        "academy2_powerbi_", "power bi", "dax", "power_bi", "power query",
+    )):
         return "power_bi"
-    if any(token in text for token in ("python", "pandas", "dataframe")):
+    if any(token in text for token in (
+        "academy2_python_", "academy2_pandas_", "python", "pandas", "dataframe",
+    )):
         return "python"
-    if any(token in text for token in ("sql", "duckdb", "query", "join", "cte", "window function")):
+    if any(token in text for token in (
+        "academy2_sql_", "academy2_database_", "sql", "duckdb", "query", "join", "cte",
+        "window function",
+    )):
         return "sql"
-    if any(token in text for token in ("spreadsheet", "excel", "sheet", "cell reference", "vlookup", "pivot")):
+    if any(token in text for token in (
+        "spreadsheet", "excel", "sheet", "cell reference", "vlookup",
+        "xlookup", "iferror", "countif", "sumif", "pivot",
+    )):
         return "spreadsheet"
 
     if kind in {"academy_lesson", "academy_practice"}:

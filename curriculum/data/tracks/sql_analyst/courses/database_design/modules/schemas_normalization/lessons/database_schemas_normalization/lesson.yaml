@@ -36,15 +36,15 @@ activities:
       A **schema** is a named area that groups database objects, such as `raw`, `staging`, or `analytics` tables.
 
 
-      **Normalization** separates repeated facts into related tables. For example, customer details belong in one customer
-      table instead of being copied into every order row. This reduces inconsistent updates, but analysis often requires joins.
+      **Normalization** separates repeated facts into related tables. For example, customer details belong in one customer table instead of being copied into every order row. This reduces inconsistent updates, but analysis often requires joins.
 
 
       In this lesson, you will identify table responsibilities, keys, and repeated information.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning schemas and normalization before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how schemas and normalization works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -78,8 +78,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which schema connects denormalized dimensions directly to a central fact table?
     requirements:
     - Choose one answer.
@@ -93,9 +93,8 @@ activities:
     title: 'Schemas and Normalization: decision 1'
     objective: Use schemas and normalization in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation,
-      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
-      short so you can test the idea immediately.
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -116,15 +115,15 @@ activities:
     body: '## A separate example
 
 
-      If a customer''s email appears in 40 order rows, changing it requires 40 updates and may leave conflicting values. A
-      normalized design stores the email once in Customers and connects Orders through Customer ID.
+      If a customer''s email appears in 40 order rows, changing it requires 40 updates and may leave conflicting values. A normalized design stores the email once in Customers and connects Orders through Customer ID.
 
 
       **What to notice:** The design protects consistency, while the relationship preserves access to the customer details.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning schemas and normalization before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how schemas and normalization works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -158,8 +157,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: What is a primary goal of normalization?
     requirements:
     - Choose one answer.
@@ -173,9 +172,8 @@ activities:
     title: 'Schemas and Normalization: decision 2'
     objective: Use schemas and normalization in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation,
-      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
-      short so you can test the idea immediately.
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: guided_practice
   completion_mode: validated
@@ -194,8 +192,7 @@ activities:
   hints:
   - Read the task again and identify where **schemas and normalization** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which relationship should a foreign
-    key enforce?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which relationship should a foreign key enforce?'
   validator:
     type: exact_answer
     expected_answer: A child value references an existing parent key
@@ -205,8 +202,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 5
   presentation:
-    scenario: Quick analyst decision
-    introduction: Use the concept from this step to choose the strongest answer.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which relationship should a foreign key enforce?
     requirements:
     - Choose one answer.
@@ -220,9 +217,8 @@ activities:
     title: 'Schemas and Normalization: decision 3'
     objective: Use schemas and normalization in a practical analyst decision.
     action_label: Choose the best answer
-    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation,
-      identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally
-      short so you can test the idea immediately.
+    body: Analysts use **schemas and normalization** to make database work more accurate, readable, and useful. Read the situation, identify what the result must preserve, and then choose the option that best matches that goal. This check is intentionally short so you can test the idea immediately.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: independent_practice
   completion_mode: validated
@@ -251,8 +247,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which relationship should a foreign key enforce?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -266,6 +262,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -297,12 +294,12 @@ activities:
       - Choose designs based on workload, grain, integrity, and maintainability.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Let the Formula Decide
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning schemas and normalization before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how schemas and normalization works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

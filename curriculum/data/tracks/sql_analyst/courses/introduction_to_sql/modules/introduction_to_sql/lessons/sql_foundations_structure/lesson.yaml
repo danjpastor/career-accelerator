@@ -48,17 +48,13 @@ activities:
       - A **cell** is one value where a row and column meet.
 
 
-      Before you analyze a table, identify its **grain**. Grain means what one row represents. In an `orders` table, one row
-      may be one order. In an `order_items` table, one row may be one product inside an order. That difference changes what
-      a row count means.
+      Before you analyze a table, identify its **grain**. Grain means what one row represents. In an `orders` table, one row may be one order. In an `order_items` table, one row may be one product inside an order. That difference changes what a row count means.
 
 
-      Columns also have data types. Text stores labels and IDs. Numbers store amounts or quantities. Dates store calendar
-      values. A missing value is usually shown as `NULL`.
+      Columns also have data types. Text stores labels and IDs. Numbers store amounts or quantities. Dates store calendar values. A missing value is usually shown as `NULL`.
 
 
-      SQL is a language for asking a database a question. A basic query uses `SELECT` to choose columns and `FROM` to choose
-      the table:
+      SQL is a language for asking a database a question. A basic query uses `SELECT` to choose columns and `FROM` to choose the table:
 
 
       ```sql
@@ -71,10 +67,11 @@ activities:
 
 
       The query returns a result. It does not change the source table.'
+    concept_heading: Meet Databases & SQL
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning meet databases & sql before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how meet databases & sql works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -100,8 +97,7 @@ activities:
   hints:
   - Read the task again and identify where **table grain** fits into the requested result.
   - Focus on the named table or source (support_tickets) and check each requirement one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: In the support_tickets table, what does
-    one row represent?'
+  - 'Compare your work with the success criteria. Your result should directly answer: In the support_tickets table, what does one row represent?'
   validator:
     type: exact_answer
     expected_answer: One support ticket
@@ -111,9 +107,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Support operations orientation
-    introduction: Before answering questions about workload, the operations team needs a shared definition of what one record
-      means.
+    scenario: The support manager is reviewing the team’s open workload.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Identify the grain of the support_tickets table.
     table: support_tickets
     requirements:
@@ -132,24 +127,20 @@ activities:
     title: Begin with the unit of analysis
     objective: Identify what one row represents before counting, filtering, or summarizing a table.
     action_label: Identify the grain
-    body: 'A table is useful only when you understand its **grain**: the exact thing or event represented by one row. Grain
-      is also called the *unit of analysis*. Before writing SQL, finish the sentence: “One row represents one ____.”
+    body: 'A table is useful only when you understand its **grain**: the exact thing or event represented by one row. Grain is also called the *unit of analysis*. Before writing SQL, finish the sentence: “One row represents one ____.”
 
 
-      A support-ticket table may contain one row per ticket, while a ticket-message table may contain many rows for the same
-      ticket. Counting rows in the first table counts tickets; counting rows in the second counts messages. Both tables may
-      contain a `ticket_id`, but they answer different questions.
+      A support-ticket table may contain one row per ticket, while a ticket-message table may contain many rows for the same ticket. Counting rows in the first table counts tickets; counting rows in the second counts messages. Both tables may contain a `ticket_id`, but they answer different questions.
 
 
-      Use identifiers and repeated values as clues. If `ticket_id` is unique on every row, one row probably represents one
-      ticket. A `customer_id` may repeat because a customer can open several tickets.
+      Use identifiers and repeated values as clues. If `ticket_id` is unique on every row, one row probably represents one ticket. A `customer_id` may repeat because a customer can open several tickets.
 
 
-      **Worked example:** In a table containing `order_id`, `customer_id`, `order_date`, and `order_total`, a unique `order_id`
-      suggests one row per order. The repeated `customer_id` does not change the grain.
+      **Worked example:** In a table containing `order_id`, `customer_id`, `order_date`, and `order_total`, a unique `order_id` suggests one row per order. The repeated `customer_id` does not change the grain.
 
 
       Now inspect the support-ticket context and choose the statement that precisely describes one row.'
+    concept_heading: Go with the Grain
   required_for_completion: true
   google_sheets:
     source_of_truth: Google Sheets
@@ -186,8 +177,7 @@ activities:
     body: '## A separate example
 
 
-      A library has a `loans` table with one row per borrowed book. It contains `loan_id`, `member_id`, `book_title`, and
-      `due_date`.
+      A library has a `loans` table with one row per borrowed book. It contains `loan_id`, `member_id`, `book_title`, and `due_date`.
 
 
       A librarian only needs the loan number and due date:
@@ -205,12 +195,12 @@ activities:
       The result keeps one row per loan because no rows were filtered. It simply shows fewer columns.
 
 
-      **What to notice:** The analyst first identifies the grain—one row per loan—then selects only the fields needed for
-      the question.'
+      **What to notice:** The analyst first identifies the grain—one row per loan—then selects only the fields needed for the question.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning meet databases & sql before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how meet databases & sql works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -255,8 +245,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Inventory catalog review
-    introduction: A new operations analyst is creating a compact catalog view before checking stock levels.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Return the product identifier, readable item name, and category for every inventory record.
     table: inventory
     requirements:
@@ -288,8 +278,7 @@ activities:
       ```
 
 
-      `SELECT` controls the columns in the result. `FROM` identifies the source table. To return several columns, list them
-      in the order the reader should see them and separate them with commas.
+      `SELECT` controls the columns in the result. `FROM` identifies the source table. To return several columns, list them in the order the reader should see them and separate them with commas.
 
 
       ```sql
@@ -301,17 +290,14 @@ activities:
       ```
 
 
-      This operation does not delete other columns or change the source table. It creates a new result set containing only
-      the requested fields. Explicit column lists are usually clearer than `SELECT *` because they document the intended output
-      and remain stable when a table gains new fields.
+      This operation does not delete other columns or change the source table. It creates a new result set containing only the requested fields. Explicit column lists are usually clearer than `SELECT *` because they document the intended output and remain stable when a table gains new fields.
 
 
-      For identifiers and labels, a practical order is often: identifier first, readable name second, category or status after
-      that.
+      For identifiers and labels, a practical order is often: identifier first, readable name second, category or status after that.
 
 
-      The starter query already names the `inventory` table. Replace the comment with exactly the three requested columns,
-      separated by commas.'
+      The starter query already names the `inventory` table. Replace the comment with exactly the three requested columns, separated by commas.'
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: guided_practice
   completion_mode: validated
@@ -348,8 +334,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 7
   presentation:
-    scenario: Employee directory extract
-    introduction: Human Resources needs a three-column directory, but the draft query does not parse.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Correct the selected column list without changing the requested output.
     table: employees
     requirements:
@@ -395,8 +381,7 @@ activities:
       ```
 
 
-      Without commas, the database may interpret adjacent words as aliases or report a syntax error. When debugging a selected-column
-      list, check three things:
+      Without commas, the database may interpret adjacent words as aliases or report a syntax error. When debugging a selected-column list, check three things:
 
 
       1. Every requested column is present.
@@ -406,8 +391,8 @@ activities:
       3. Each column name exists in the source table.
 
 
-      Do not “fix” the query by removing requested columns or replacing the list with `*`. Preserve the requested output and
-      repair only the punctuation.'
+      Do not “fix” the query by removing requested columns or replacing the list with `*`. Preserve the requested output and repair only the punctuation.'
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: independent_practice
   completion_mode: validated
@@ -435,8 +420,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which description best fits the order_total column in orders?
     table: orders
     requirements:
@@ -452,6 +437,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Classify the field
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Meet Databases & SQL
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -485,12 +471,12 @@ activities:
       - Selecting columns changes the result shape, not the source data.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Meet Databases & SQL
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning meet databases & sql before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how meet databases & sql works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

@@ -1,6 +1,7 @@
 course_id: postgresql_summary_stats_window_functions
 title: PostgreSQL Summary Stats and Window Functions
 order: 5
+roadmap_week: 6
 description: Develop advanced analytical windows and report-ready summary patterns.
 estimated_minutes: 300
 outcomes:

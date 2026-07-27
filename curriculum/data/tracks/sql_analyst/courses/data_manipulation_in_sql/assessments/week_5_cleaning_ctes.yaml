@@ -1,13 +1,12 @@
 assessment_id: week_5_cleaning_ctes
-title: Week 5 Cumulative Knowledge Check
+title: Week 5 Knowledge Check
 order: 99
-description: Verify cleaning, null handling, type conversion, CASE, subqueries, CTEs, and prior relationship knowledge.
-estimated_minutes: 40
+description: An eight-question mastery check covering the required Week 5 topics.
+estimated_minutes: 25
 instructions:
-- Complete every question independently.
-- Hints and full solutions are disabled.
-- A score of 80% or higher passes.
-- The check includes current-week material and retained prior knowledge.
+- Answer all eight multiple-choice questions independently.
+- A score of 80% or higher is required. With eight questions, you must answer at least seven correctly.
+- After grading, review every answer and use the recommendations beneath missed questions before retaking the check.
 requires:
 - roadmap.spreadsheet_mastery
 - sql.transformations
@@ -37,16 +36,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'COALESCE should be used when:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to NULL handling.
+  required_for_completion: true
 - activity_id: w5_cast
   title: Safe conversion
   type: mastery
@@ -69,16 +70,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'TRY_CAST is useful because it:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to Safe conversion.
+  required_for_completion: true
 - activity_id: w5_case
   title: CASE logic
   type: mastery
@@ -101,16 +104,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'CASE is used to:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to CASE logic.
+  required_for_completion: true
 - activity_id: w5_cte
   title: CTE purpose
   type: mastery
@@ -133,16 +138,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A CTE can improve:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to CTE purpose.
+  required_for_completion: true
 - activity_id: w5_subquery
   title: Subquery
   type: mastery
@@ -165,16 +172,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A subquery is:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to Subquery.
+  required_for_completion: true
 - activity_id: w5_raw
   title: Raw preservation
   type: mastery
@@ -197,16 +206,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Cleaning should write to:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to Raw preservation.
+  required_for_completion: true
 - activity_id: w5_join
   title: Week 4 retention
   type: mastery
@@ -229,16 +240,18 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'Before joining cleaned tables, re-check:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to Week 4 retention.
+  required_for_completion: true
 - activity_id: w5_log
   title: Decision log
   type: mastery
@@ -261,13 +274,15 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Weekly cumulative knowledge check
-    introduction: Demonstrate retained understanding without hints.
+    scenario: Week 5 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
     task: 'A cleaning log should record:'
     requirements:
-    - Choose the best analyst answer.
+    - Choose one answer.
     expected_output: One selected answer.
     skills_practiced:
     - cumulative mastery
     after_correct: This demonstrates the expected weekly knowledge.
     common_errors: []
+    review_recommendation: Review the Week 5 lesson or practice work related to Decision log.
+  required_for_completion: true

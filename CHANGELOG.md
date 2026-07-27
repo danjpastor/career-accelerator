@@ -1,18 +1,96 @@
+# 10.35.3
+
+- Fixed installer rollback when preserved weekly retrospective files contained retired Academy lesson references.
+- Added canonical retrospective templates for Weeks 1–12 to the cumulative payload.
+- Retained all v10.35.2 coursework, Catch-Up, Knowledge Check, retrospective, and planner fixes.
+
+# 10.35.2
+
+- Fixed the circular gate that hid unfinished Week 1 Academy coursework behind the Week 1 Knowledge Check.
+- Added explicit roadmap-week metadata to every Academy course.
+- Kept overdue Academy activities and weekly checks in their original week so Catch-Up labeling and rolling replacement work correctly.
+- Prevented duplicate adaptive and durable weekly Knowledge Check tasks.
+- Excluded retired static Academy rows and retrospectives from pre-check blockers.
+- Added weekly retrospective tasks to Weeks 9, 10, and 11.
+- Corrected Spreadsheet, SQL, Power BI, Python, and pandas Academy task classification.
+
+# 10.35.1
+
+- Restored persistent weekly Knowledge Check tasks so a mastery gate can never block later work without showing the quiz that clears it.
+- Shows locked checks as `Week N Knowledge Check` with the second line `Complete All Week N Coursework to Unlock`.
+- Routes ready Knowledge Check tasks directly to the matching eight-question Academy assessment.
+- Preserves canonical weekly assessment rows during stale Academy task cleanup while continuing to remove retired static lesson rows.
+- Fixed the weekly retrospective save and completion crash caused by the missing `_table_exists` helper.
+- Added database-level regressions for locked Knowledge Check visibility, check routing metadata, retrospective saving, and retrospective completion validation.
+
+# 10.35.0
+
+- Added a full program-integrity audit covering active task references, retired files, curriculum IDs, and prerequisite graphs.
+- Enforced a frozen daily limit of five new current-week tasks with rolling prerequisite-ready catch-up work.
+- Added factual Catch-Up labels to the second line of previous-week tasks.
+- Audited Academy lesson, practice, assessment, Skills Lab, and all 36 Applied Lab prerequisite locks.
+- Added twelve weekly eight-question multiple-choice Knowledge Checks with a seven-of-eight passing requirement, graded review, and missed-question recommendations.
+- Gated new skill-dependent weekly work behind the previous week’s passed Knowledge Check while leaving review, Google Certificate, and career tools available.
+- Simplified the weekly retrospective to Biggest Win, Friction or Blocker, and What I Learned; progress and evidence are filled automatically.
+- Restored canonical Title Case task labels while preserving SQL keywords, spreadsheet functions, and product names.
+- Made the four fixed Next Tasks rows expand evenly to fill the card above View All Tasks.
+- Removed the retired Optional Practice workflow and obsolete Academy files and task references.
+
+# 10.34.6
+
+- Removed scrolling from the Dashboard Next Tasks card.
+- Limited the card to four priority rows.
+- Replaced Optional Practice with View All Tasks.
+- Added Ready Now and Coming Soon sections to the full task dialog.
+
+# 10.34.5
+
+- Replaced the regressed resizable Next Tasks QScrollArea with the exact pre-overhaul ContentSizedScrollArea implementation.
+- Prevented mouse-wheel scrolling through blank space after the final task row.
+
+# 10.34.4
+
+- Restored the pre-Academy-overhaul exact-height Next Tasks scroll document.
+- Prevented scrolling through empty space beneath the final task row.
+
+# 10.34.3
+
+- Fixed startup migration failure: `sqlite3.OperationalError: no such column: PAGE_LEARNING`.
+- Added an isolated SQLite execution test for `_update_duckdb_exercise_tasks()`.
+
 # Changelog
+
+## 10.34.2 — Next Tasks and Spreadsheet Guidance Repair
+
+- Replaces the custom Next Tasks scroll document with the same widget-resizable QScrollArea pattern that already works correctly for Today’s Focus.
+- Removes stale blank scroll range below the final Next Tasks row while preserving normal scrolling when the visible rows overflow.
+- Revises Spreadsheet Lesson 2 Step 5 so absolute references are practiced with a 5% assumption entered on the Orders sheet instead of requiring an untaught cross-sheet reference.
+- Rewrites Applied Lab 07 as a complete beginner-friendly build guide with a business scenario, source-file map, required workbook sheets, staged workflow, KPI definitions, reconciliation checks, deliverables, and submission prompts.
+
+## 10.34.1 — Academy Step Focus and Dashboard Rollover Hotfix
+
+- Keeps the Monday sprint rollover persisted after track and deadline synchronization, so Current Sprint, Today’s Focus, and Next Tasks all move to the new week immediately.
+- Uses the saved program start date as the single calendar source and preserves manual future-week advancement.
+- Rebuilds the Next Tasks scroll document from the real row height with a non-resizable content widget, eliminating scrollable space below the final row.
+- Draws the Academy purpose bubble and right-side tail as one continuous shape.
+- Removes redundant Markdown subheadings beneath the green lesson concept header.
+- Stops repeating unchanged purpose, concept, and example content on practice, challenge, and transfer steps. Those steps now focus on the task and concise helpful requirements.
+
+## 10.34.0 — Academy Experience Overhaul
+
+- Rebuilt the Academy lesson presentation around the approved existing three-panel layout.
+- Added a right-tailed “Why does this matter?” speech bubble with no left tail.
+- Added lesson-specific concept headings and full-width colored header rules for concept, Example, and Task sections.
+- Removed XP/difficulty clutter, Step Goal, duplicate starting-state/success-criteria content, bookmark, and overflow controls.
+- Reworked lesson scenarios and tasks into practical, beginner-friendly workplace requests without exposing completed answers.
+- Rebuilt the Google Sheet & Feedback panel with a compact workbook card, primary Open Google Sheet action, secondary workbook controls, separate feedback card, and linked-sheet URL.
+- Added a live local-date check so an app left open across Sunday night advances the sprint after Monday begins.
+- Rebuilds weekly planning, Today’s Focus, Next Tasks, and sprint progress after rollover.
+- Orders ready current-week tasks before earlier-week catch-up work.
+- Replaced the Next Tasks scroll extent logic with exact visible-row geometry and disables scrolling when all rows fit.
+- Preserves the v10.33 curriculum content version, so Academy progress is not reset again for learners who already migrated to the new curriculum.
 
 ## 10.33.0 — Universal beginner-first Academy
 
-- Replaced the prior Academy curriculum with curriculum schema 2 and content version 2.0.0.
-- Added one shared lesson-stage engine for Spreadsheet, SQL, Power BI, and Python learning.
-- Standardized every lesson around Learn, Check, Example, Try It, Practice, Apply It, and Recap.
-- Rebuilt 63 lessons into 448 short, original learning activities.
-- Added plain-language explanations that define unfamiliar terms and explain why each skill matters.
-- Separated worked examples from graded activities so examples teach the method without revealing the answer.
-- Added progressive three-level hints, solution tracking, XP, estimated time, and specific validation feedback.
-- Added executable Python exercises with hidden result checks and timeout protection.
-- Added checked Power BI Desktop tasks using included practice files and business-result validation.
-- Preserved SQL and Google Sheets validators while placing them inside the new shared learning flow.
-- Kept exact formulas, queries, and code out of graded prompts; complete answers are shown only in View Solution.
-- Reset Academy-only lesson, assessment, submission, evidence, and planner progress once when the new curriculum is first opened.
-- Preserved portfolio work, applications, settings, projects, career files, and all other non-Academy data.
-- Carried forward the shared Google Sheet workflow, repository cleanup, and exact Next Tasks scroll-height repair.
+- Introduced one shared DataCamp-style lesson engine and 63 original lessons across Spreadsheet, SQL, Power BI, and Python tracks.
+- Added 448 short activities, progressive hints, solution tracking, executable practice, and plain-language teaching.

@@ -76,15 +76,15 @@ activities:
       ```
 
 
-      For a top-five question, use `ORDER BY` to define which rows are highest or newest, then use `LIMIT 5`. A limit without
-      sorting is only a preview.
+      For a top-five question, use `ORDER BY` to define which rows are highest or newest, then use `LIMIT 5`. A limit without sorting is only a preview.
 
 
       Build a query one clause at a time and run it after each meaningful change. This makes mistakes easier to find.'
+    concept_heading: Complete Your SQL Foundation
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning complete your sql foundation before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how complete your sql foundation works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -109,8 +109,7 @@ activities:
   hints:
   - Read the task again and identify where **ORDER BY** fits into the requested result.
   - Focus on the named table or source (support_tickets) and check each requirement one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which clause places the oldest opened_date
-    values first?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which clause places the oldest opened_date values first?'
   validator:
     type: exact_answer
     expected_answer: ORDER BY opened_date ASC
@@ -120,8 +119,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: Queue-order definition
-    introduction: A support manager wants the records that have waited the longest to appear first.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Choose the sort direction that places older dates before newer dates.
     table: support_tickets
     requirements:
@@ -147,16 +146,14 @@ activities:
       - `DESC` usually means newest to oldest.
 
 
-      For numbers, ascending means lowest to highest and descending means highest to lowest. For text, ascending generally
-      means A–Z.
+      For numbers, ascending means lowest to highest and descending means highest to lowest. For text, ascending generally means A–Z.
 
 
-      Translate the stakeholder’s words directly. “Oldest opened first” means the earliest date should appear at the top,
-      so the date must be sorted ascending.
+      Translate the stakeholder’s words directly. “Oldest opened first” means the earliest date should appear at the top, so the date must be sorted ascending.
 
 
-      Choose the clause that places the oldest `opened_date` values first. Do not confuse “oldest” with “largest” or assume
-      descending is always more important.'
+      Choose the clause that places the oldest `opened_date` values first. Do not confuse “oldest” with “largest” or assume descending is always more important.'
+    concept_heading: Focus on the Rows That Matter
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -195,12 +192,12 @@ activities:
       ```
 
 
-      **What to notice:** `WHERE` defines the eligible applications, `ORDER BY` places the oldest first, and `LIMIT` keeps
-      only five rows.'
+      **What to notice:** `WHERE` defines the eligible applications, `ORDER BY` places the oldest first, and `LIMIT` keeps only five rows.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning complete your sql foundation before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how complete your sql foundation works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -248,8 +245,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Merchandising price review
-    introduction: The merchandising team wants to inspect the most expensive catalog items first.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Sort the product list from highest to lowest price.
     table: products
     requirements:
@@ -279,15 +276,14 @@ activities:
       ```
 
 
-      `DESC` puts the largest values first. `ASC` is the default, but writing the direction explicitly makes the query easier
-      to review.
+      `DESC` puts the largest values first. `ASC` is the default, but writing the direction explicitly makes the query easier to review.
 
 
-      Sorting changes presentation order; it does not modify the table. If two rows share the same price, their relative order
-      may remain unspecified unless you add a second sort key.
+      Sorting changes presentation order; it does not modify the table. If two rows share the same price, their relative order may remain unspecified unless you add a second sort key.
 
 
       Complete the product query so the highest `unit_price` appears first. Keep the result to the requested two columns.'
+    concept_heading: Compare Rows Without Collapsing Them
   required_for_completion: true
   step_kind: guided_practice
   completion_mode: validated
@@ -296,8 +292,7 @@ activities:
   title: Sort subscriptions by region and fee
   type: independent
   runtime: sql
-  prompt: Return region, plan_name, and monthly_fee from subscriptions. Sort region A–Z, then monthly_fee highest to lowest
-    within each region.
+  prompt: Return region, plan_name, and monthly_fee from subscriptions. Sort region A–Z, then monthly_fee highest to lowest within each region.
   starter: 'SELECT region, plan_name, monthly_fee
 
     FROM subscriptions'
@@ -329,8 +324,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Regional plan review
-    introduction: The growth team wants subscriptions grouped by region and then ranked by value inside each region.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Apply two sort keys in the requested priority.
     table: subscriptions
     requirements:
@@ -356,12 +351,10 @@ activities:
       ```
 
 
-      SQL first arranges rows by region. Only among rows with the same region does it apply the second key, ranking annual
-      value from highest to lowest.
+      SQL first arranges rows by region. Only among rows with the same region does it apply the second key, ranking annual value from highest to lowest.
 
 
-      This pattern is common in stakeholder reports: group by a familiar category, then prioritize the most important records
-      inside each category.
+      This pattern is common in stakeholder reports: group by a familiar category, then prioritize the most important records inside each category.
 
 
       The requested order is:
@@ -373,6 +366,7 @@ activities:
 
 
       Write both expressions in one `ORDER BY` clause, separated by a comma. Reversing the keys would answer a different question.'
+    concept_heading: Focus on the Rows That Matter
   required_for_completion: true
   step_kind: independent_practice
   completion_mode: validated
@@ -381,8 +375,7 @@ activities:
   title: Build a top-order report
   type: mastery
   runtime: sql
-  prompt: Return order_id, region, and order_total for Completed orders. Sort highest order_total first and return only three
-    rows.
+  prompt: Return order_id, region, and order_total for Completed orders. Sort highest order_total first and return only three rows.
   starter: 'SELECT order_id, region, order_total
 
     FROM orders'
@@ -424,8 +417,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Executive sales snapshot
-    introduction: Leadership wants the three largest completed orders, excluding work that is processing or cancelled.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Combine a status filter, descending value sort, and row limit.
     table: orders
     requirements:
@@ -439,8 +432,7 @@ activities:
     - ORDER BY
     - LIMIT
     - top-N
-    after_correct: Filtering defines the eligible population, sorting identifies the largest values, and LIMIT returns the
-      requested top three.
+    after_correct: Filtering defines the eligible population, sorting identifies the largest values, and LIMIT returns the requested top three.
     common_errors: []
   instruction:
     title: Build a true top-N query
@@ -474,11 +466,11 @@ activities:
       ```
 
 
-      For this report, only `Completed` orders are eligible. Rank those orders by `order_total` descending, then keep the
-      first three. If you apply `LIMIT` without sorting, you get an arbitrary preview rather than the largest orders.
+      For this report, only `Completed` orders are eligible. Rank those orders by `order_total` descending, then keep the first three. If you apply `LIMIT` without sorting, you get an arbitrary preview rather than the largest orders.
 
 
       Build the complete report one clause at a time and run it to confirm the highest value appears first.'
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: combined_challenge
   completion_mode: validated
@@ -527,8 +519,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 6
   presentation:
-    scenario: Subscription query review
-    introduction: A query contains the correct ideas but places them in an invalid structural order.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Move the clauses into valid SQL order without changing the business rule.
     table: subscriptions
     requirements:
@@ -561,12 +553,10 @@ activities:
       ```
 
 
-      The starter places `ORDER BY` before `WHERE`, so the database encounters a filter where the grammar no longer permits
-      one.
+      The starter places `ORDER BY` before `WHERE`, so the database encounters a filter where the grammar no longer permits one.
 
 
-      When debugging clause order, avoid rewriting the whole query. Identify each clause’s job, then place it in the standard
-      sequence:
+      When debugging clause order, avoid rewriting the whole query. Identify each clause’s job, then place it in the standard sequence:
 
 
       - `FROM` identifies the source.
@@ -576,8 +566,8 @@ activities:
       - `ORDER BY` arranges the resulting rows.
 
 
-      Move the existing status condition above the existing sort clause. Preserve the selected columns and descending fee
-      order.'
+      Move the existing status condition above the existing sort clause. Preserve the selected columns and descending fee order.'
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -586,8 +576,7 @@ activities:
   title: Prioritize the oldest unresolved tickets
   type: transfer
   runtime: sql
-  prompt: Return ticket_id, priority, status, assigned_team, and opened_date for Open or Pending tickets. Sort oldest first
-    and return only five rows.
+  prompt: Return ticket_id, priority, status, assigned_team, and opened_date for Open or Pending tickets. Sort oldest first and return only five rows.
   starter: 'SELECT
 
     FROM support_tickets'
@@ -629,8 +618,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 10
   presentation:
-    scenario: Backlog triage
-    introduction: The support lead needs a five-row action list that surfaces the longest-waiting unresolved work.
+    scenario: A business stakeholder needs an answer from the company database.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: Build the full query independently.
     table: support_tickets
     requirements:
@@ -643,8 +632,7 @@ activities:
     - query composition
     - top-N workflow
     - date sorting
-    after_correct: The query defines the unresolved population, places the oldest work first, and limits the result to a manageable
-      action list.
+    after_correct: The query defines the unresolved population, places the oldest work first, and limits the result to a manageable action list.
     common_errors: []
   instruction:
     title: Create an operational priority list
@@ -680,11 +668,11 @@ activities:
       ```
 
 
-      Use parentheses or `IN` to express the two accepted statuses. Ascending date order places the oldest unresolved work
-      first. Add the limit only after the order is defined.
+      Use parentheses or `IN` to express the two accepted statuses. Ascending date order places the oldest unresolved work first. Add the limit only after the order is defined.
 
 
       This is the final lesson mastery step. Pass it without using the full solution to unlock the course checkpoint.'
+    concept_heading: Let the Formula Decide
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -717,12 +705,12 @@ activities:
       - Build and test complex queries incrementally.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Complete Your SQL Foundation
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning complete your sql foundation before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how complete your sql foundation works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

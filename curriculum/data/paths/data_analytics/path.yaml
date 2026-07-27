@@ -8,3 +8,4 @@ tracks:
 - ../../tracks/sql_analyst/track.yaml
 - ../../tracks/power_bi_analyst/track.yaml
 - ../../tracks/python_analyst/track.yaml
+- ../../tracks/program_mastery/track.yaml

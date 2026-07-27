@@ -1,6 +1,7 @@
 course_id: python_foundations
 title: Python Foundations
 order: 1
+roadmap_week: 8
 description: Learn the Python building blocks analysts use to store values, work with collections, reuse logic,
   and calculate efficiently.
 estimated_minutes: 72

@@ -2,8 +2,7 @@ lesson_id: academy2_python_basics
 title: Python Basics
 order: 1
 difficulty: beginner
-description: Python lets an analyst describe a calculation as a series of repeatable instructions. A **variable** gives a
-  value a name so you can use it again later.
+description: Python lets an analyst describe a calculation as a series of repeatable instructions. A **variable** gives a value a name so you can use it again later.
 estimated_minutes: 35
 content: lesson.md
 objectives:
@@ -32,8 +31,7 @@ activities:
   instruction:
     title: Learn — Python Basics
     objective: Explain the purpose of python basics.
-    body: 'Python lets an analyst describe a calculation as a series of repeatable instructions. A **variable** gives a value
-      a name so you can use it again later.
+    body: 'Python lets an analyst describe a calculation as a series of repeatable instructions. A **variable** gives a value a name so you can use it again later.
 
 
       ```python
@@ -47,13 +45,12 @@ activities:
       ```
 
 
-      Python uses `=` to assign a value and `==` to compare two values. Common value types include integers, decimal numbers
-      called floats, text strings, and Boolean values (`True` or `False`). Clear variable names make the business meaning
-      of the code easier to review.'
+      Python uses `=` to assign a value and `==` to compare two values. Common value types include integers, decimal numbers called floats, text strings, and Boolean values (`True` or `False`). Clear variable names make the business meaning of the code easier to review.'
+    concept_heading: Give Values Useful Names
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning python basics before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how python basics works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -77,8 +74,7 @@ activities:
   hints:
   - Read the task again and identify where **Python Basics** fits into the requested result.
   - Check the source, required output, and any conditions one at a time.
-  - 'Compare your work with the success criteria. Your result should directly answer: Which statement assigns the value 10
-    to revenue?'
+  - 'Compare your work with the success criteria. Your result should directly answer: Which statement assigns the value 10 to revenue?'
   validator:
     type: exact_answer
     expected_answer: revenue = 10
@@ -88,8 +84,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: Quick knowledge check
-    introduction: Use the idea you just reviewed to choose the strongest answer.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Which statement assigns the value 10 to revenue?
     requirements:
     - Choose one answer.
@@ -104,6 +100,7 @@ activities:
     objective: Build a practical understanding of python basics.
     action_label: Choose the best answer
     body: Python uses `=` for assignment and `==` for comparison.
+    concept_heading: Give Values Useful Names
   required_for_completion: true
   step_kind: knowledge_check
   completion_mode: validated
@@ -124,17 +121,15 @@ activities:
     body: '## A separate example
 
 
-      A scheduling analyst stores `available_hours = 40` and `assigned_hours = 34`, then calculates `unused_hours = available_hours
-      - assigned_hours`. If either input changes, rerunning the code updates the result. The graded exercise uses revenue
-      and costs instead of staffing hours.
+      A scheduling analyst stores `available_hours = 40` and `assigned_hours = 34`, then calculates `unused_hours = available_hours - assigned_hours`. If either input changes, rerunning the code updates the result. The graded exercise uses revenue and costs instead of staffing hours.
 
 
-      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the
-      decisions yourself.'
+      **What to notice:** The example teaches the method, while the graded task uses different data and asks you to make the decisions yourself.'
+    concept_heading: Make the Data Consistent
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning python basics before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how python basics works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -153,8 +148,7 @@ activities:
   completion_mode: validated
   xp: 100
   estimated_minutes: 7
-  prompt: Create variables named `revenue` and `costs` with values 1250 and 800. Create a third variable named `profit` by
-    subtracting costs from revenue.
+  prompt: Create variables named `revenue` and `costs` with values 1250 and 800. Create a third variable named `profit` by subtracting costs from revenue.
   starter: '# Create the three variables below.'
   solution: 'revenue = 1250
 
@@ -175,24 +169,21 @@ activities:
     - expression: profit == 450
       feedback: Calculate profit from the two variables instead of typing an unrelated value.
     display_variable: profit
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
   required_for_completion: true
   required_for_practice: true
   required_for_mastery: false
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
-    task: Create variables named `revenue` and `costs` with values 1250 and 800. Create a third variable named `profit` by
-      subtracting costs from revenue.
+    scenario: The commercial analytics team needs a reliable answer for an upcoming business review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
+    task: Create variables named `revenue` and `costs` with values 1250 and 800. Create a third variable named `profit` by subtracting costs from revenue.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -200,7 +191,7 @@ activities:
     title: Try It — Calculate a simple profit
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Give Values Useful Names
 - activity_id: academy2_python_basics_independent
   title: Practice — Calculate an average order value
   type: independent
@@ -226,23 +217,21 @@ activities:
     - expression: average_order_value == 135
       feedback: Divide total revenue by the number of completed orders.
     display_variable: average_order_value
-    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can
-      update when the inputs change.
+    success_feedback: Your code runs and produces the requested result. Notice how the result comes from the code, so it can update when the inputs change.
   required_for_completion: true
   required_for_practice: false
   required_for_mastery: true
   difficulty: beginner
   answer_options: []
   presentation:
-    scenario: Python analyst practice
-    introduction: Write and run a small piece of Python. The example uses different values from this exercise.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Write and run your own solution. Use the lesson example as a guide, not as an answer to copy.
     task: A team completed 18 orders worth 2,430 in total. Store those values in clear variables and calculate `average_order_value`.
     requirements:
     - Use the variable names requested by the task.
     - Calculate the result with Python rather than typing the final answer.
     - Run the code, read the feedback, and revise it when needed.
     expected_output: Working Python code that creates the requested result.
-    success_criteria: The code runs and the named variables or DataFrame contain the expected values.
     skills_practiced:
     - Python for analysis
     after_correct: Your code produced the result from reusable instructions rather than a manually typed answer.
@@ -250,7 +239,7 @@ activities:
     title: Practice — Calculate an average order value
     objective: Use Python to produce a small, checkable analyst result.
     approach: Read the requested variable names, build the result one line at a time, and use **Run** before **Check Answer**.
-    watch_for: Python is case-sensitive. Check spelling, indentation, parentheses, and column names carefully.
+    concept_heading: Let the Formula Decide
 - activity_id: academy2_python_basics_transfer
   title: Apply It — Use the skill in a new situation
   type: transfer
@@ -274,8 +263,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 5
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A data analyst is building a repeatable analysis for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: Why use clear variable names?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -289,6 +278,7 @@ activities:
     objective: Recognize when and how to use the skill outside the practice example.
     action_label: Choose the best answer
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Give Values Useful Names
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
@@ -318,12 +308,12 @@ activities:
       - Python Basics supports a reliable, explainable analytics workflow.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Give Values Useful Names
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning python basics before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how python basics works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

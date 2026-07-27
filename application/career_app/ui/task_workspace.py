@@ -229,12 +229,11 @@ class TaskWorkspaceDialog(QDialog):
         self.retrospective_snapshot.setWordWrap(True)
         layout.addWidget(self.retrospective_snapshot)
 
-        milestones_title = QLabel("This Week's Milestones")
+        milestones_title = QLabel("Learning Progress This Week")
         milestones_title.setStyleSheet("font-weight:700;")
         layout.addWidget(milestones_title)
         milestones_help = QLabel(
-            "Google Course, SQL, and Portfolio milestones assigned or "
-            "completed during this retrospective week."
+            "This is filled automatically from the tasks and learning activities recorded for this week."
         )
         milestones_help.setObjectName("Muted")
         milestones_help.setWordWrap(True)
@@ -248,11 +247,27 @@ class TaskWorkspaceDialog(QDialog):
         self.retrospective_milestones.setMaximumHeight(280)
         layout.addWidget(self.retrospective_milestones)
 
+        evidence_title = QLabel("Evidence Created This Week")
+        evidence_title.setStyleSheet("font-weight:700;")
+        layout.addWidget(evidence_title)
+        evidence_help = QLabel(
+            "Artifacts, passed assessments, Applied Lab submissions, and demonstrated evidence created this week are added automatically."
+        )
+        evidence_help.setObjectName("Muted")
+        evidence_help.setWordWrap(True)
+        layout.addWidget(evidence_help)
+        self.retrospective_evidence = QListWidget()
+        self.retrospective_evidence.setWordWrap(True)
+        self.retrospective_evidence.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.retrospective_evidence.setMinimumHeight(110)
+        self.retrospective_evidence.setMaximumHeight(220)
+        layout.addWidget(self.retrospective_evidence)
+
         note = QLabel(
-            "Complete every required prompt here. Answers autosave as you work; "
-            "Save Retrospective Progress refreshes the generated record, and "
-            "the saved weekly summary is generated once every required prompt is filled. "
-            "No external document is required."
+            "Learning progress and evidence are filled in automatically. Complete the three required prompts. "
+            "Answers autosave as you work, and no external document is required."
         )
         note.setWordWrap(True)
         layout.addWidget(note)
@@ -878,6 +893,30 @@ class TaskWorkspaceDialog(QDialog):
                 row.setFlags(Qt.ItemFlag.NoItemFlags)
                 self.retrospective_milestones.addItem(row)
 
+    def _load_retrospective_evidence(self):
+        if not self.is_retrospective or self.task_id is None:
+            return
+        self.retrospective_evidence.clear()
+        try:
+            items = workspace_service.retrospective_weekly_evidence(
+                self.conn, int(self.task_id)
+            )
+        except Exception as exc:
+            self.retrospective_evidence.addItem(f"Evidence list unavailable: {exc}")
+            return
+        if not items:
+            row = QListWidgetItem("No evidence was created during this week yet.")
+            row.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.retrospective_evidence.addItem(row)
+            return
+        for item in items:
+            detail = str(item.get("source") or "Evidence")
+            if item.get("created_at"):
+                detail += f" • {str(item['created_at'])[:10]}"
+            row = QListWidgetItem(f"✓ {item['title']}\n   {detail}")
+            row.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.retrospective_evidence.addItem(row)
+
     def _retrospective_changed(self, *_args):
         if self._retrospective_loading or not self.is_retrospective:
             return
@@ -910,6 +949,7 @@ class TaskWorkspaceDialog(QDialog):
                 )
             )
             self._load_retrospective_milestones()
+            self._load_retrospective_evidence()
             for key, control in self.retrospective_fields.items():
                 value = str(record["values"].get(key, "") or "")
                 control.blockSignals(True)
@@ -977,6 +1017,7 @@ class TaskWorkspaceDialog(QDialog):
             )
         )
         self._load_retrospective_milestones()
+        self._load_retrospective_evidence()
         self._retrospective_dirty = False
         self.retrospective_status.setText("Saved inside Career Accelerator")
         self.save_state.setText("Saved")

@@ -1,6 +1,7 @@
 course_id: joining_data_in_sql
 title: Joining Data in SQL
 order: 3
+roadmap_week: 4
 description: Combine row sets vertically and related tables horizontally.
 estimated_minutes: 260
 outcomes:

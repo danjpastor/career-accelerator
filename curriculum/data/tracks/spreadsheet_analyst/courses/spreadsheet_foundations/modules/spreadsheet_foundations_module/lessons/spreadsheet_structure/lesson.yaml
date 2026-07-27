@@ -1,5 +1,5 @@
 lesson_id: academy2_spreadsheet_structure
-title: Rows, Columns, Tables & Data Types
+title: Understand Spreadsheet Structure
 order: 1
 difficulty: beginner
 description: Understand spreadsheet structure, table grain, and filters before changing or analyzing data.
@@ -21,13 +21,12 @@ workbook:
   workbook_name: Northstar Operations Practice Workbook.xlsx
   file_name: Northstar Operations Practice Workbook.xlsx
   template: workbooks/Northstar Operations Practice Workbook.xlsx
-  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-    latest shared workbook automatically.
+  save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
 mastery:
   passing_score: 1.0
 activities:
 - activity_id: academy2_spreadsheet_structure_learn
-  title: Learn — Rows, Columns, Tables & Data Types
+  title: Learn — Understand Spreadsheet Structure
   type: recognition
   runtime: content
   step_kind: concept
@@ -36,30 +35,26 @@ activities:
   estimated_minutes: 3
   prompt: ''
   instruction:
-    title: Learn — Rows, Columns, Tables & Data Types
+    title: Learn — Understand Spreadsheet Structure
     objective: Identify what one row and one column represent in a well-structured table.
     body: '# Understand what a spreadsheet table represents
 
 
-      A spreadsheet is made of **cells** arranged in rows and columns. A group of related cells is called a **range**. When
-      the first row contains field names and every row below it follows the same structure, that range works like a table.
+      A spreadsheet is made of **cells** arranged in rows and columns. A group of related cells is called a **range**. When the first row contains field names and every row below it follows the same structure, that range works like a table.
 
 
-      Before you analyze a table, ask one important question: **What does one row represent?** Analysts call this the table''s
-      **grain**. One row might represent one order, one customer, or one day. Knowing the grain helps you avoid counting the
-      same thing twice.
+      Before you analyze a table, ask one important question: **What does one row represent?** Analysts call this the table''s **grain**. One row might represent one order, one customer, or one day. Knowing the grain helps you avoid counting the same thing twice.
 
 
-      Cells also have data types. A date should behave like a date, a number like a number, and text like text. A value that
-      only looks correct can still cause sorting, filtering, or formulas to fail.
+      Cells also have data types. A date should behave like a date, a number like a number, and text like text. A value that only looks correct can still cause sorting, filtering, or formulas to fail.
 
 
-      In this lesson, you will identify the grain of a table, check its headers and data types, and use a filter without deleting
-      any rows.'
+      In this lesson, you will identify the grain of a table, check its headers and data types, and use a filter without deleting any rows.'
+    concept_heading: Go with the Grain
   presentation:
-    scenario: A short Academy lesson
-    introduction: Learn the idea in plain language before you use it.
-    task: Read the explanation, then continue when the idea makes sense.
+    scenario: A beginner is learning spreadsheet structure before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how spreadsheet structure works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced:
@@ -91,8 +86,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 4
   presentation:
-    scenario: Northstar Operations learning scenario
-    introduction: Study the concept and worked example, then make a prediction before opening the workbook.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: A sales table has one row per order. Where should a grand-total revenue calculation be placed?
     requirements:
     - Choose the answer that best follows the concept explained in the lesson.
@@ -104,14 +99,11 @@ activities:
     phase: LEARN & PREDICT
     title: Learn & Predict — How spreadsheet tables are organized
     objective: Recognize table grain, fields, records, and the effect of a filter.
-    why_it_matters: Before an analyst writes a formula or builds a chart, they need to know what the table represents. Misreading
-      the grain can cause double-counting, missing records, and misleading summaries.
-    concept: A **record** is one row. A **field** is one column. The **grain** states exactly what one row represents. A filter
-      temporarily hides rows that do not match a condition, while the underlying records remain in the sheet.
-    worked_example: A support-ticket table has one row per ticket and columns for Ticket ID, Team, Priority, and Status. Filtering
-      Status to Open lets the analyst focus on unresolved tickets without deleting closed tickets. A total such as “428 open
-      tickets” belongs in a separate summary area, not inside the ticket rows.
+    why_it_matters: Before an analyst writes a formula or builds a chart, they need to know what the table represents. Misreading the grain can cause double-counting, missing records, and misleading summaries.
+    concept: A **record** is one row. A **field** is one column. The **grain** states exactly what one row represents. A filter temporarily hides rows that do not match a condition, while the underlying records remain in the sheet.
+    worked_example: A support-ticket table has one row per ticket and columns for Ticket ID, Team, Priority, and Status. Filtering Status to Open lets the analyst focus on unresolved tickets without deleting closed tickets. A total such as “428 open tickets” belongs in a separate summary area, not inside the ticket rows.
     action_label: Make a prediction
+    concept_heading: Go with the Grain
   required_for_completion: true
   answer_options:
   - In a separate summary area
@@ -122,7 +114,7 @@ activities:
   completion_mode: validated
   xp: 50
 - activity_id: academy2_spreadsheet_structure_example
-  title: Example — See rows, columns, tables & data types in context
+  title: Example — See Spreadsheet Structure in Context
   type: recognition
   runtime: content
   step_kind: worked_example
@@ -131,28 +123,26 @@ activities:
   estimated_minutes: 3
   prompt: ''
   instruction:
-    title: Example — See rows, columns, tables & data types in context
+    title: Example — See Spreadsheet Structure in Context
     objective: Study a worked example before solving a different task.
     body: '## A separate example
 
 
-      Imagine a table of library loans. Each row represents one borrowed book. The columns include Loan ID, Member ID, Checkout
-      Date, and Return Status.
+      Imagine a table of library loans. Each row represents one borrowed book. The columns include Loan ID, Member ID, Checkout Date, and Return Status.
 
 
-      If someone asks, “How many members borrowed a book?”, counting rows would be wrong because one member may appear several
-      times. The analyst first recognizes that the table''s grain is **one loan**, then counts unique Member IDs instead.
+      If someone asks, “How many members borrowed a book?”, counting rows would be wrong because one member may appear several times. The analyst first recognizes that the table''s grain is **one loan**, then counts unique Member IDs instead.
 
 
-      The analyst also checks that Checkout Date contains real dates. If some dates are stored as text, a date filter may
-      leave them out.
+      The analyst also checks that Checkout Date contains real dates. If some dates are stored as text, a date filter may leave them out.
 
 
       **What to notice:** Understanding the row meaning and data types comes before calculating anything.'
+    concept_heading: Go with the Grain
   presentation:
-    scenario: A separate worked example
-    introduction: Study how the idea works before solving a different task.
-    task: Read the example and focus on the reasoning rather than memorizing the answer.
+    scenario: A beginner is learning spreadsheet structure before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how spreadsheet structure works and why an analyst would use it.
     requirements: []
     expected_output: An understanding of how the method is applied.
     skills_practiced:
@@ -170,20 +160,17 @@ activities:
   runtime: workbook
   prompt: Make the full Orders dataset filterable while keeping every existing row and column unchanged.
   starter: ''
-  solution: Select A1:J37, then choose Data → Create a filter. Confirm the funnel icons appear in row 1 and that rows 2 through
-    37 remain intact.
+  solution: Select A1:J37, then choose Data → Create a filter. Confirm the funnel icons appear in row 1 and that rows 2 through 37 remain intact.
   hints:
   - A filter is created from the Data menu, not by deleting rows you do not need.
   - Click inside the Orders data, then look for Create a filter under Data.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
     - type: sheet_exists
       sheet: Orders
-      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
-        contains all 36 order records.'
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still contains all 36 order records.'
     - type: headers
       sheet: Orders
       row: 1
@@ -198,18 +185,15 @@ activities:
       - Unit Price
       - Discount
       - Status
-      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
-        contains all 36 order records.'
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still contains all 36 order records.'
     - type: table_or_filter
       sheet: Orders
-      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
-        contains all 36 order records.'
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still contains all 36 order records.'
     - type: populated_range
       sheet: Orders
       range: A2:J37
       min_count: 360
-      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still
-        contains all 36 order records.'
+      message: 'The workbook does not yet meet this requirement: The Orders headers have filter controls and the dataset still contains all 36 order records.'
     success_feedback: You prepared a transaction table for investigation without changing its grain or deleting data.
   required_for_practice: true
   required_for_mastery: false
@@ -217,9 +201,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 12
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: Make the full Orders dataset filterable while keeping every existing row and column unchanged.
     requirements:
     - Work on the Orders sheet and include the full header and data range.
@@ -237,25 +220,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: The Orders headers have filter controls and the dataset still contains all 36 order records.
     hide_exact_result: true
   instruction:
     phase: TRY IT
     title: Try It — Make the Orders table filterable
     objective: Use Google Sheets filtering controls without changing the source records.
-    approach: Open **Orders**, click any cell inside the data, and use **Data → Create a filter**. Confirm that filter icons
-      appear in the header row and that all 36 order records are still present. Do not apply a value filter yet; this step
-      is about preparing the table safely.
+    approach: Open **Orders**, click any cell inside the data, and use **Data → Create a filter**. Confirm that filter icons appear in the header row and that all 36 order records are still present. Do not apply a value filter yet; this step is about preparing the table safely.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Go with the Grain
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Orders
     columns:
     - Order ID
@@ -291,9 +269,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Orders** and locate **A1:J37**.
-    - Open **Orders**, click any cell inside the data, and use **Data → Create a filter**. Confirm that filter icons appear
-      in the header row and that all 36 order records are still present. Do not apply a value filter yet; this step is about
-      preparing the table safely.
+    - Open **Orders**, click any cell inside the data, and use **Data → Create a filter**. Confirm that filter icons appear in the header row and that all 36 order records are still present. Do not apply a value filter yet; this step is about preparing the table safely.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: guided_practice
@@ -309,8 +285,7 @@ activities:
   hints:
   - Look at the values that repeat across columns and the field that uniquely identifies each row.
   - The Order ID changes from row to row, while each row contains one date, customer, product, and status.
-  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and
-    last result before checking your work.
+  - Use the named function or feature with the sheet, fields, and range listed in the task. Then spot-check the first and last result before checking your work.
   validator:
     type: workbook
     checks:
@@ -320,8 +295,7 @@ activities:
       contains:
       - customer
       - order
-      message: 'The workbook does not yet meet this requirement: B4 contains a clear statement that one row represents one
-        customer order.'
+      message: 'The workbook does not yet meet this requirement: B4 contains a clear statement that one row represents one customer order.'
     success_feedback: A clear grain statement gives later formulas, pivots, and joins a reliable unit of analysis.
   required_for_practice: false
   required_for_mastery: true
@@ -329,9 +303,8 @@ activities:
   difficulty: intermediate
   estimated_minutes: 18
   presentation:
-    scenario: Northstar Operations practice workbook
-    introduction: Apply the named skill to a real business task. The lesson explains the method, but you choose the cell references,
-      ranges, and final formula.
+    scenario: The operations manager is preparing the weekly operations review.
+    introduction: Complete the request in the shared Google Sheet using the skill taught in this lesson.
     task: In Analysis Workspace cell B4, write a concise grain statement explaining what one row in Orders represents.
     requirements:
     - Write the statement in B4 on Analysis Workspace.
@@ -349,24 +322,20 @@ activities:
     primary_workbook_action: Open Google Sheet
     check_action: Check My Work
     hide_download_upload: true
-    success_criteria: B4 contains a clear statement that one row represents one customer order.
     hide_exact_result: true
   instruction:
     phase: CHALLENGE
     title: Challenge — Explain the table grain
     objective: Describe the Orders table in language another analyst can understand.
-    approach: Use the repeated pattern in the Orders rows to decide what one row represents. Write a short statement in your
-      own words; do not copy the lesson definition verbatim.
+    approach: Use the repeated pattern in the Orders rows to decide what one row represents. Write a short statement in your own words; do not copy the lesson definition verbatim.
     action_label: Open the workbook and solve the task
-    watch_for: Use the named spreadsheet skill, verify a few results, and avoid changing source values that are not part of
-      the task.
+    concept_heading: Go with the Grain
   required_for_completion: true
   workbook:
     workbook_name: Northstar Operations Practice Workbook.xlsx
     file_name: Northstar Operations Practice Workbook.xlsx
     template: workbooks/Northstar Operations Practice Workbook.xlsx
-    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the
-      latest shared workbook automatically.
+    save_instructions: Wait until Google Sheets finishes saving, then select Check My Work. Career Accelerator downloads the latest shared workbook automatically.
     sheet: Analysis Workspace
     columns:
     - Orders table grain
@@ -386,8 +355,7 @@ activities:
     steps:
     - Open the continuing Google Sheet from Career Accelerator.
     - Go to **Analysis Workspace** and locate **A4:B4**.
-    - Use the repeated pattern in the Orders rows to decide what one row represents. Write a short statement in your own words;
-      do not copy the lesson definition verbatim.
+    - Use the repeated pattern in the Orders rows to decide what one row represents. Write a short statement in your own words; do not copy the lesson definition verbatim.
     - Spot-check the result and confirm the source data was not unintentionally changed.
     - Wait until Google Sheets shows that saving is complete, then return and select **Check My Work**.
   step_kind: independent_practice
@@ -418,8 +386,8 @@ activities:
   difficulty: beginner
   estimated_minutes: 3
   presentation:
-    scenario: A new workplace situation
-    introduction: Use the lesson idea in a different context.
+    scenario: A data analyst is preparing a trustworthy report for the team.
+    introduction: Use the lesson idea to decide the best answer for this workplace situation.
     task: After applying a filter, several rows are no longer visible. What is the safest conclusion?
     requirements:
     - Choose the answer that best follows the lesson idea.
@@ -431,18 +399,17 @@ activities:
     phase: TRANSFER
     title: Apply It — Use the skill in a new situation
     objective: Recognize when and how to use the skill outside the practice example.
-    why_it_matters: Filters are a viewing tool. Understanding that distinction prevents analysts from mistaking hidden records
-      for missing data.
-    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind
-      the method.
+    why_it_matters: Filters are a viewing tool. Understanding that distinction prevents analysts from mistaking hidden records for missing data.
+    concept: Strong spreadsheet skills transfer to new datasets, teams, and business questions. Focus on the reasoning behind the method.
     action_label: Choose the best approach
     body: Read the new situation, decide what result is needed, and choose the approach that best fits.
+    concept_heading: Go with the Grain
   required_for_completion: true
   step_kind: transfer
   completion_mode: validated
   xp: 75
 - activity_id: academy2_spreadsheet_structure_recap
-  title: Recap — Rows, Columns, Tables & Data Types
+  title: Recap — Understand Spreadsheet Structure
   type: recognition
   runtime: content
   step_kind: recap
@@ -451,9 +418,9 @@ activities:
   estimated_minutes: 2
   prompt: ''
   instruction:
-    title: Recap — Rows, Columns, Tables & Data Types
+    title: Recap — Understand Spreadsheet Structure
     objective: Review the main idea and prepare to use it again.
-    body: '# Recap: Rows, Columns, Tables & Data Types
+    body: '# Recap: Understand Spreadsheet Structure
 
 
       You have practiced the idea with support and then used it more independently.
@@ -469,12 +436,12 @@ activities:
       - Summary values should not be mixed into the middle of transaction data.
 
 
-      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business
-      situation.'
+      Before moving on, make sure you can explain **why** the method works and when you would use it in a different business situation.'
+    concept_heading: Go with the Grain
   presentation:
-    scenario: A short Academy lesson
-    introduction: Read this section at your own pace.
-    task: Read the explanation and continue when the idea makes sense.
+    scenario: A beginner is learning spreadsheet structure before using it in real analysis.
+    introduction: Start with the idea in plain language, then continue when it makes sense.
+    task: Learn how spreadsheet structure works and why an analyst would use it.
     requirements: []
     expected_output: A clear understanding of the lesson idea.
     skills_practiced: []

@@ -1,11 +1,28 @@
-# Validation — Applied Lab 35
+# Applied Lab 35 validation rubric
 
-Before marking this lab complete, confirm:
+Use this rubric after completing the guided workflow. A checked item should have visible evidence in the artifact, result output, screenshot, or Progress & Evidence notes.
+
+## Required result
 
 - [ ] Every correction links to a validation check.
 - [ ] Unsupported causal or universal claims are removed.
 - [ ] The final analysis can be reproduced without trusting the AI output.
-- [ ] The submission identifies the artifact or result produced.
-- [ ] The work can be reproduced from the included data and instructions.
-- [ ] The conclusion distinguishes evidence, inference, and recommendation.
-- [ ] Unresolved limitations or assumptions are documented.
+
+## Reproducibility and control
+
+- [ ] The original packaged source files were not edited.
+- [ ] The main result can be recreated from the supplied inputs.
+- [ ] Row-count, grain, join, total, or boundary checks are recorded where relevant.
+- [ ] Hardcoded final answers are not used in place of analysis logic.
+
+## Communication and handoff
+
+- [ ] The artifact path and supporting evidence are recorded.
+- [ ] Assumptions and metric definitions are visible.
+- [ ] Limitations and unresolved issues are stated honestly.
+- [ ] The stakeholder takeaway identifies the result, implication, and next action.
+
+## Completion decision
+
+- **Ready to complete:** all required results are supported by evidence and the artifact can be reopened.
+- **Keep in progress:** a required deliverable is missing, a validation check fails, or the result cannot be reproduced.

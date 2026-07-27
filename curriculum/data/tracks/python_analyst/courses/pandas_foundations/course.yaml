@@ -1,6 +1,7 @@
 course_id: pandas_foundations
 title: pandas Foundations
 order: 2
+roadmap_week: 8
 description: Use pandas to reshape, summarize, select, and visualize tabular data in a repeatable analysis workflow.
 estimated_minutes: 72
 outcomes:
