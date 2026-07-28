@@ -1,4 +1,4 @@
-# Applied Lab 29: Build and interpret a conversion funnel
+# Applied Lab 06: Build and interpret a conversion funnel
 
 **Category:** Business Analysis  
 **Roadmap week:** 5  

@@ -1,0 +1,25 @@
+order_id,order_date,region,product,status,quantity,unit_price
+O001,2026-01-03,East,Desk Lamp,Completed,2,35
+O002,2026-01-05,West,Monitor Stand,Completed,1,55
+O003,2026-01-07,South,Keyboard,Completed,3,40
+O004,2026-01-09,North,Mouse,Cancelled,2,25
+O005,2026-01-12, west ,Desk Lamp,Completed,1,35
+O006,2026-01-14,East,Keyboard,Completed,2,40
+O007,2026-01-16,South,Mouse,Completed,4,25
+O008,2026-01-18,North,Monitor Stand,Completed,2,55
+O009,2026-01-21,East,Mouse,Completed,3,25
+O010,2026-01-24,West,Keyboard,Cancelled,1,40
+O011,2026-01-27,South,Desk Lamp,Completed,2,35
+O012,2026-01-30,North,Keyboard,Completed,1,40
+O013,2026-02-02,East,Monitor Stand,Completed,2,55
+O014,2026-02-04,West,Mouse,Completed,5,25
+O015,2026-02-06,South,Keyboard,Completed,1,40
+O016,2026-02-08,North,Desk Lamp,Completed,3,35
+O017,2026-02-11,east,Mouse,Completed,2,25
+O018,2026-02-13,West,Monitor Stand,Cancelled,1,55
+O019,2026-02-16,South,Desk Lamp,Completed,4,35
+O020,2026-02-18,North,Keyboard,Completed,2,40
+O021,2026-02-20,East,Desk Lamp,Completed,2,35
+O022,2026-02-23,West,Keyboard,Completed,3,40
+O023,2026-02-25,South,Mouse,Cancelled,2,25
+O024,2026-02-27,North,Monitor Stand,Completed,1,55

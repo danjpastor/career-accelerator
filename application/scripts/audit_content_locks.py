@@ -86,18 +86,18 @@ def run(root: Path) -> list[str]:
         )
         conn.commit()
 
-        lab07 = tracks.applied_lab_readiness(conn, app_state, 7)
+        lab01 = tracks.applied_lab_readiness(conn, app_state, 1)
         spreadsheet_keys = [
             chapter.key for chapter in DATACAMP_CHAPTERS if chapter.week in {1, 2}
         ]
         _assert(
-            set(lab07["required_datacamp_keys"]) == set(spreadsheet_keys),
-            "Applied Lab 07 does not expose all Week 1–2 DataCamp prerequisites.",
+            set(lab01["required_datacamp_keys"]) == set(spreadsheet_keys),
+            "Applied Lab 01 does not expose all Week 1–2 DataCamp prerequisites.",
             errors,
         )
         _assert(
-            set(lab07["missing_datacamp_keys"]) == set(spreadsheet_keys),
-            "Applied Lab 07 was not locked when spreadsheet chapters were unfinished.",
+            set(lab01["missing_datacamp_keys"]) == set(spreadsheet_keys),
+            "Applied Lab 01 was not locked when spreadsheet chapters were unfinished.",
             errors,
         )
 
@@ -148,10 +148,10 @@ def run(root: Path) -> list[str]:
                 (key,),
             )
         conn.commit()
-        lab07_after = tracks.applied_lab_readiness(conn, app_state, 7)
+        lab01_after = tracks.applied_lab_readiness(conn, app_state, 1)
         _assert(
-            not lab07_after.get("missing_datacamp_keys"),
-            "Applied Lab 07 remained DataCamp-locked after all Week 1–2 chapters completed.",
+            not lab01_after.get("missing_datacamp_keys"),
+            "Applied Lab 01 remained DataCamp-locked after all Week 1–2 chapters completed.",
             errors,
         )
 
@@ -189,7 +189,7 @@ def main() -> int:
     print("- 18 DuckDB exercises have explicit DataCamp chapter gates")
     print("- Every SQL interview problem has an explicit DataCamp chapter gate")
     print("- Portfolio milestones include DataCamp chapter prerequisites")
-    print("- Applied Lab 07 requires all 13 Week 1–2 spreadsheet chapters")
+    print("- Applied Lab 01 requires all 13 Week 1–2 spreadsheet chapters")
     return 0
 
 

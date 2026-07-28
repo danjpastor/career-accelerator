@@ -1,4 +1,4 @@
-# Applied Lab 25: Perform and interpret a hypothesis test
+# Applied Lab 12: Perform and interpret a hypothesis test
 
 **Category:** Statistics  
 **Roadmap week:** 7  

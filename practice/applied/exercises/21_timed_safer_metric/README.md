@@ -1,4 +1,4 @@
-# Applied Lab 21: Respond to a request for a misleading metric
+# Applied Lab 35: Respond to a request for a misleading metric
 
 **Category:** Timed Analysis  
 **Roadmap week:** 11  

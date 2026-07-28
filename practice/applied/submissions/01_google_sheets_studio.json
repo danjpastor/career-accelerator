@@ -1,0 +1,33 @@
+{
+  "steps": {
+    "1": {
+      "complete": true,
+      "evidence": "Created and linked Northstar Operations Analysis worksheet. Created tabs and imported data for Orders and Targets. Orders has 24 rows and targets has 4."
+    },
+    "2": {
+      "complete": true,
+      "evidence": "Created analysis sheet built from data in Raw Orders. Calculated gross sales and net sales with existing data records."
+    },
+    "3": {
+      "complete": true,
+      "evidence": "I created a region dropdown and five formula-driven KPIs on the Summary tab. I tested All, East, and West and confirmed that completed orders, gross sales, net sales, average order value, and the regional target updated correctly. The pivot-table grand total matched the All-region gross-sales result. I also confirmed that changing the processing fee affected net sales but not gross sales."
+    },
+    "4": {
+      "complete": true,
+      "evidence": "The region that produced the most gross sales was the South. I would review Net Sales Next to see if that same finding alligned."
+    }
+  },
+  "spreadsheet_id": "",
+  "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1laZfalg2JqdhSwmKtHm8jhoiHZPk7EqyT_DP8z3u0Gc/edit?usp=sharing",
+  "artifact_path": "https://docs.google.com/spreadsheets/d/1laZfalg2JqdhSwmKtHm8jhoiHZPk7EqyT_DP8z3u0Gc/edit?usp=sharing",
+  "screenshot_path": "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\practice\\applied\\submissions\\07_management_summary.png",
+  "final_notes": "The summary shows how completed orders and sales performance vary by region. Net sales are slightly lower than gross sales because of the 2% processing fee, while the pivot table and chart make regional and monthly differences easier to compare. This workbook can help a manager quickly identify stronger-performing areas and decide where further review may be needed.",
+  "final_checks": [
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "updated_at": "2026-07-28T19:06:06"
+}

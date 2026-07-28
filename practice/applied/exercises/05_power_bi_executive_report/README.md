@@ -1,4 +1,4 @@
-# Applied Lab 05: Build an executive report with guided interactions
+# Applied Lab 25: Build an executive report with guided interactions
 
 **Category:** Power BI  
 **Roadmap week:** 9  

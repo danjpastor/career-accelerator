@@ -1,4 +1,4 @@
--- Applied Lab 29: Build and interpret a conversion funnel
+-- Applied Lab 06: Build and interpret a conversion funnel
 -- Concepts: event grain, funnel stages, stage conversion, overall conversion, drop-off, segmentation
 -- Run with DuckDB. Keep validation queries separate from the main result.
 

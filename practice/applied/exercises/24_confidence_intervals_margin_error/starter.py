@@ -1,4 +1,4 @@
-"""Applied Lab 24: Calculate confidence intervals and margin of error."""
+"""Applied Lab 09: Calculate confidence intervals and margin of error."""
 
 from pathlib import Path
 import json

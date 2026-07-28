@@ -1,4 +1,4 @@
-# Applied Lab 27: Separate correlation from causal evidence
+# Applied Lab 22: Separate correlation from causal evidence
 
 **Category:** Statistics  
 **Roadmap week:** 9  

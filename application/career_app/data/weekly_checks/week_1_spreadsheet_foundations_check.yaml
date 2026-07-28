@@ -1,0 +1,347 @@
+assessment_id: week_1_spreadsheet_foundations_check
+title: Week 1 Knowledge Check
+order: 99
+description: An eight-question mastery check covering the required Week 1 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- A score of 80% or higher is required. With eight questions, you must answer at least seven correctly.
+- After grading, review every answer and use the recommendations beneath missed questions before retaking the check.
+requires:
+- spreadsheet.structure
+- spreadsheet.data_types
+- spreadsheet.references
+- spreadsheet.formulas
+- spreadsheet.conditional_logic
+passing_score: 0.8
+activities:
+- activity_id: w1_grain
+  title: Table grain
+  type: mastery
+  runtime: recognition
+  prompt: What should be defined before counting spreadsheet rows?
+  answer_options:
+  - What one row represents
+  - The chart color
+  - The workbook filename
+  - The zoom level
+  starter: ''
+  solution: What one row represents
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: What one row represents
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: What should be defined before counting spreadsheet rows?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 1 lesson or practice work related to Table grain.
+  required_for_completion: true
+- activity_id: w1_type
+  title: Identifier type
+  type: mastery
+  runtime: recognition
+  prompt: Which value should remain text?
+  answer_options:
+  - Employee ID 0007
+  - Hours worked 38.5
+  - Revenue 2500.00
+  - Completion rate 0.92
+  starter: ''
+  solution: Employee ID 0007
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Employee ID 0007
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: Which value should remain text?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 1 lesson or practice work related to Identifier type.
+  required_for_completion: true
+- activity_id: w1_reference
+  title: Absolute reference
+  type: mastery
+  runtime: recognition
+  prompt: Which reference locks both row and column?
+  answer_options:
+  - $B$2
+  - B2
+  - B$2
+  - $B2
+  starter: ''
+  solution: $B$2
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: $B$2
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: Which reference locks both row and column?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 1 lesson or practice work related to Absolute reference.
+  required_for_completion: true
+- activity_id: w1_filter
+  title: Filter behavior
+  type: mastery
+  runtime: recognition
+  prompt: 'A filter should be understood as:'
+  answer_options:
+  - A temporary view of matching rows
+  - Permanent deletion
+  - A formula replacement
+  - A lookup
+  starter: ''
+  solution: A temporary view of matching rows
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A temporary view of matching rows
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A filter should be understood as:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 1 lesson or practice work related to Filter behavior.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click any cell inside the complete data table.
+    - Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
+    - Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
+      and click **OK**.
+    - Leave the filter active so Career Accelerator can verify the finished workbook.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true
+- activity_id: w1_formula
+  title: Core formula
+  type: mastery
+  runtime: recognition
+  prompt: Which function calculates the mean?
+  answer_options:
+  - AVERAGE
+  - COUNT
+  - MAX
+  - SUM
+  starter: ''
+  solution: AVERAGE
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: AVERAGE
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: Which function calculates the mean?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 1 lesson or practice work related to Core formula.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click the first required output cell and type `=` to begin the formula.
+    - Build the formula with the source cells from the current row, then press **Enter**.
+    - Drag the blue fill handle through the full required range.
+    - Spot-check the first, middle, and last result before checking your work.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true
+- activity_id: w1_logic
+  title: Boolean logic
+  type: mastery
+  runtime: recognition
+  prompt: 'AND returns true when:'
+  answer_options:
+  - Every condition is true
+  - Any condition is true
+  - No cells are blank
+  - A lookup succeeds
+  starter: ''
+  solution: Every condition is true
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Every condition is true
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'AND returns true when:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 1 lesson or practice work related to Boolean logic.
+  required_for_completion: true
+- activity_id: w1_error
+  title: Formula diagnosis
+  type: mastery
+  runtime: recognition
+  prompt: A copied formula points to the wrong fixed target. What should you inspect?
+  answer_options:
+  - Relative versus absolute references
+  - Worksheet color
+  - Pivot layout
+  - File size
+  starter: ''
+  solution: Relative versus absolute references
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Relative versus absolute references
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: A copied formula points to the wrong fixed target. What should you inspect?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 1 lesson or practice work related to Formula diagnosis.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Enter the formula in the first required output cell.
+    - Add `$` before the column letter and row number for every reference that must stay fixed, such as `$B$2`.
+    - Press **Enter**, then fill the formula through the required rows.
+    - Open a later formula and confirm the fixed reference did not move.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true
+- activity_id: w1_raw
+  title: Raw preservation
+  type: mastery
+  runtime: recognition
+  prompt: 'Before correcting values, create:'
+  answer_options:
+  - An untouched raw copy
+  - A final chart
+  - A password
+  - A macro
+  starter: ''
+  solution: An untouched raw copy
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: An untouched raw copy
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 1 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Before correcting values, create:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 1 lesson or practice work related to Raw preservation.
+  required_for_completion: true

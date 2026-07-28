@@ -1,4 +1,4 @@
-# Applied Lab 20: Reconcile a finance total discrepancy
+# Applied Lab 32: Reconcile a finance total discrepancy
 
 **Category:** Timed Analysis  
 **Roadmap week:** 10  

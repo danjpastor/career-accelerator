@@ -127,6 +127,11 @@ def duckdb_readiness(conn: sqlite3.Connection, number: int) -> dict:
     if not datacamp_gate["ready"]:
         missing.append(datacamp_gate["summary"])
 
+    from career_app.services import weekly_checks
+    exercise_week = int(item.get("week") or 1)
+    if exercise_week > 1 and not weekly_checks.passed(conn, exercise_week - 1):
+        missing.append(f"Pass {weekly_checks.title(exercise_week - 1)}")
+
     missing = list(dict.fromkeys(missing))
     return {
         "ready": not missing,

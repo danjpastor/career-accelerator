@@ -1,0 +1,9 @@
+Applied: 2026-07-28T13:55:30
+Version: 10.36.9 r3
+Backup: C:\Users\Dan\Documents\MEGA\Dev\GitHub\career-accelerator\backups\patch_10.36.9_r3_20260728_135529
+Applied Lab: active ready task no longer re-blocked.
+Planner: newly unlocked work promoted ahead of locked previews.
+Counter: stale daily completion markers repaired at refresh.
+Snapshot: occupied Focus positions normalized transactionally.
+Notification: one-time Applied Lab unlock notice enabled.
+Database changed by installer: no

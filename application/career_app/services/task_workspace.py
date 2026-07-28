@@ -734,7 +734,7 @@ def retrospective_metrics(conn, week: int, kind: str) -> dict:
         "week": week,
         "week_start": week_start.isoformat(),
         "week_end": week_end.isoformat(),
-        "hours": float(hours or 0),
+        "hours": round(float(hours or 0), 2),
         "tasks_completed": int(task_row[0] or 0),
         "tasks_total": int(task_row[1] or 0),
         "sql_completed": int(sql_completed or 0),
@@ -783,7 +783,7 @@ def retrospective_responses(conn, task_id: int) -> dict:
 def retrospective_snapshot_text(metrics: dict, kind: str) -> str:
     if kind == "program":
         return (
-            f"Program totals • {metrics['hours']:g} study hours • "
+            f"Program totals • {metrics['hours']:.2f} study hours • "
             f"{metrics['tasks_completed']}/{metrics['tasks_total']} roadmap tasks • "
             f"{metrics['sql_completed']} SQL problems • "
             f"{metrics['project_milestones_completed']}/"
@@ -792,7 +792,7 @@ def retrospective_snapshot_text(metrics: dict, kind: str) -> str:
         )
     return (
         f"{metrics['week_start']} through {metrics['week_end']} • "
-        f"{metrics['hours']:g} study hours • "
+        f"{metrics['hours']:.2f} study hours • "
         f"{metrics['tasks_completed']}/{metrics['tasks_total']} sprint tasks • "
         f"{metrics['sql_completed']} SQL problems • "
         f"{metrics['project_milestones_completed']}/"
@@ -949,7 +949,7 @@ def save_retrospective(
         summary = (
             f"Week {row['week']}: {metrics['tasks_completed']}/"
             f"{metrics['tasks_total']} sprint tasks completed, "
-            f"{metrics['hours']:g} study hours, and "
+            f"{metrics['hours']:.2f} study hours, and "
             f"{metrics['sql_completed']} SQL problems completed. "
             f"Win: {normalized.get('biggest_win') or 'Not recorded.'} "
             f"Blocker: {normalized.get('blocker') or 'Not recorded.'} "

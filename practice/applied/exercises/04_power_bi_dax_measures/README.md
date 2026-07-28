@@ -1,4 +1,4 @@
-# Applied Lab 04: Create reusable DAX measures
+# Applied Lab 19: Create reusable DAX measures
 
 **Category:** Power BI  
 **Roadmap week:** 8  

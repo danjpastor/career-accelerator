@@ -1,4 +1,4 @@
-"""Applied Lab 09: Clean and merge operational tables with pandas."""
+"""Applied Lab 21: Clean and merge operational tables with pandas."""
 from pathlib import Path
 import pandas as pd
 

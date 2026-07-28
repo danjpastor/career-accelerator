@@ -1,3 +1,56 @@
+# Changelog
+
+## 10.38.0 - Beginner Lab 01 and weekly knowledge checks
+
+- Simplified Applied Lab 01 into a four-stage beginner Google Sheets sales-summary project using only skills taught in Weeks 1–2.
+- Replaced the seven-source portfolio-style workbook with two small CSV files, four tabs, one dropdown, four KPIs, one pivot table, one chart, and a short takeaway.
+- Removed the screenshot and independent finance-reconciliation requirements from the first lab.
+- Replaced Applied Lab status-bar confirmations with the application-wide floating notification panel so messages no longer compress the workspace.
+- Restored one `Week N Knowledge Check` task for every week from Week 1 through Week 12.
+- Each check contains exactly eight multiple-choice questions, requires 7 of 8 to pass, provides answer-by-answer review and targeted recommendations, and permits unlimited retakes.
+- A weekly check appears only after all required work for that week and earlier catch-up work are complete.
+- Later skill-dependent work remains locked until the prior week's check is passed; Google Certificate, review, and career-readiness work remain available.
+- Newly ready checks are promoted into Today’s Focus and Next Tasks and generate a one-time unlock notification.
+
+## 10.37.2 - Share-link-only Google Sheets labs
+
+- Removed the Google account/OAuth connection requirement from Applied Lab 01.
+- Replaced API-created spreadsheets with a shareable Google Sheets URL field.
+- Added Save Sheet Link, Open Linked Sheet, and Open Blank Google Sheet actions.
+- Career Accelerator now stores only the URL and does not read or modify the linked spreadsheet.
+- Updated the lab guide, catalog, validation rubric, and submission instructions for manual CSV import and protected Raw tabs.
+- Preserved existing linked Google Sheets URLs and all learner progress.
+
+# 10.37.0
+
+- Converted the spreadsheet Applied Lab to a Google Sheets-first workflow using the existing connected-account integration.
+- Added a guided Google Sheets Studio that creates protected raw-data tabs, analysis and reconciliation structures, controls, a management summary, and a data dictionary without completing the learner’s work.
+- Renumbered all 36 Applied Labs by their actual unlock order so the Week 3 Google Sheets lab is Applied Lab 01 and Power BI begins later in the sequence.
+- Added a one-time, idempotent migration that preserves Applied Lab progress, notes, submissions, evidence, achievements, task links, and daily-focus references under the new lab numbers.
+- Preserved legacy Excel labels and files only as migration aliases; an old Excel artifact does not satisfy the new Google Sheets artifact requirement.
+
+# 10.36.9
+
+- Fixed the active Applied Lab prerequisite pass immediately re-blocking the same lab after DataCamp requirements were completed.
+- Applied Lab 07 now enters Today’s Focus when a locked preview slot is available and always enters the actionable Next Tasks queue before Coming Soon items.
+- Added a one-time in-app notification when the active Applied Lab unlocks.
+- Fixed stale daily completion markers causing Today’s Tasks to show 1/1 while the same Google task remained active.
+- Preserved greyed-out DataCamp chapters in Today’s Focus and the dedicated COMING SOON divider in Next Tasks.
+
+# 10.36.8
+
+- Preserved greyed-out prerequisite-locked DataCamp chapters in Today’s Focus.
+- Restored the dedicated COMING SOON divider in Next Tasks.
+- Moved locked Focus previews beneath the Next Tasks divider instead of displaying them as active rows.
+- Kept actionable Focus assignments above the divider and removed duplicate locked previews from the fixed four-row card.
+
+# 10.36.7
+
+- Study Session logging now saves immediately and refreshes only linked session, dashboard, readiness, achievement, and workspace surfaces instead of running a full application/Git refresh.
+- Today’s Focus fills available positions with due DataCamp chapters even when an earlier chapter still locks them. Locked chapters are grey, non-actionable, and name the exact chapter that must be completed first.
+- Today’s Focus keeps locked DataCamp chapters visible as grey prerequisite guidance; Next Tasks presents those chapters beneath its Coming Soon divider.
+- Weekly and total study-hour displays are rounded and rendered to exactly two decimal places.
+
 # 10.36.6
 
 - Added explicit DataCamp chapter prerequisites to every Applied Lab, DuckDB exercise, SQL interview problem, and portfolio milestone lock.

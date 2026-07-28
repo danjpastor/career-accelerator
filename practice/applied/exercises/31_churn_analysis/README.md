@@ -1,4 +1,4 @@
-# Applied Lab 31: Distinguish customer, logo, and revenue churn
+# Applied Lab 17: Distinguish customer, logo, and revenue churn
 
 **Category:** Business Analysis  
 **Roadmap week:** 8  

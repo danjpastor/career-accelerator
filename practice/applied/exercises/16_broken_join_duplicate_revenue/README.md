@@ -1,4 +1,4 @@
-# Applied Lab 16: Diagnose duplicated revenue from a broken join
+# Applied Lab 04: Diagnose duplicated revenue from a broken join
 
 **Category:** Broken Analysis  
 **Roadmap week:** 4  

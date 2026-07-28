@@ -6,7 +6,7 @@ import sqlite3
 import yaml
 from pathlib import Path
 
-from career_app.services import roadmap_mastery
+from career_app.services import roadmap_mastery, applied_lab_migration
 from career_app.services.task_titles import normalize_database_task_titles
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 from career_app.navigation import PAGE_LEARNING
@@ -620,6 +620,7 @@ def _program_integrity_cleanup(conn, root: Path) -> dict:
 
 
 def migrate(conn, root: Path):
+    applied_lab_numbering = applied_lab_migration.reconcile(conn, root)
     roadmap_mastery_result = roadmap_mastery.reconcile(conn, root)
     sprint_count = 0
     project_count = 0
@@ -698,6 +699,7 @@ def migrate(conn, root: Path):
         "academy_projects_consolidated": evidence_cleanup["projects_consolidated"],
         "program_integrity_cleanup": integrity_cleanup,
         "task_titles_normalized": normalized_task_titles,
+        "applied_lab_numbering": applied_lab_numbering,
         "academy_purge": academy_purge,
         "datacamp_tasks": datacamp_tasks,
     }

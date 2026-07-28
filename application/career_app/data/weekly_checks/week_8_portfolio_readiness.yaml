@@ -1,0 +1,310 @@
+assessment_id: week_8_portfolio_readiness
+title: Week 8 Knowledge Check
+order: 99
+description: An eight-question mastery check covering the required Week 8 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- A score of 80% or higher is required. With eight questions, you must answer at least seven correctly.
+- After grading, review every answer and use the recommendations beneath missed questions before retaking the check.
+requires:
+- roadmap.sql_mastery
+- roadmap.power_bi_mastery
+- python.basics
+- python_pandas
+- pandas.aggregation
+- pandas.indexing
+passing_score: 0.8
+activities:
+- activity_id: w8_df
+  title: DataFrame
+  type: mastery
+  runtime: recognition
+  prompt: 'A pandas DataFrame is:'
+  answer_options:
+  - A two-dimensional labeled data structure
+  - A Power BI visual
+  - A SQL database server
+  - A spreadsheet formula
+  starter: ''
+  solution: A two-dimensional labeled data structure
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A two-dimensional labeled data structure
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A pandas DataFrame is:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to DataFrame.
+  required_for_completion: true
+- activity_id: w8_filter
+  title: Boolean filtering
+  type: mastery
+  runtime: recognition
+  prompt: 'Multiple pandas Series conditions should use:'
+  answer_options:
+  - '& or | with each condition in parentheses'
+  - Python and directly between Series
+  - SQL HAVING
+  - A pivot filter only
+  starter: ''
+  solution: '& or | with each condition in parentheses'
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: '& or | with each condition in parentheses'
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Multiple pandas Series conditions should use:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 8 lesson or practice work related to Boolean filtering.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click any cell inside the complete data table.
+    - Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
+    - Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
+      and click **OK**.
+    - Leave the filter active so Career Accelerator can verify the finished workbook.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true
+- activity_id: w8_missing
+  title: Missing values
+  type: mastery
+  runtime: recognition
+  prompt: 'Before filling missing values, first:'
+  answer_options:
+  - Understand why they are missing and how the field is used
+  - Replace all with zero
+  - Delete every row
+  - Convert all columns to text
+  starter: ''
+  solution: Understand why they are missing and how the field is used
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Understand why they are missing and how the field is used
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Before filling missing values, first:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Missing values.
+  required_for_completion: true
+- activity_id: w8_merge
+  title: Merge validation
+  type: mastery
+  runtime: recognition
+  prompt: 'A pandas merge should validate:'
+  answer_options:
+  - Keys, expected cardinality, unmatched rows, and row counts
+  - Only column colors
+  - Only notebook title
+  - Only file size
+  starter: ''
+  solution: Keys, expected cardinality, unmatched rows, and row counts
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Keys, expected cardinality, unmatched rows, and row counts
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A pandas merge should validate:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Merge validation.
+  required_for_completion: true
+- activity_id: w8_group
+  title: groupby
+  type: mastery
+  runtime: recognition
+  prompt: 'groupby is used to:'
+  answer_options:
+  - Split data into groups and calculate summaries
+  - Create Power BI relationships
+  - Write SQL DDL
+  - Format cells
+  starter: ''
+  solution: Split data into groups and calculate summaries
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Split data into groups and calculate summaries
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'groupby is used to:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to groupby.
+  required_for_completion: true
+- activity_id: w8_notebook
+  title: Notebook quality
+  type: mastery
+  runtime: recognition
+  prompt: 'A portfolio notebook should separate:'
+  answer_options:
+  - Setup, analysis, outputs, and concise interpretation
+  - All code into one line
+  - Only screenshots
+  - Only markdown
+  starter: ''
+  solution: Setup, analysis, outputs, and concise interpretation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Setup, analysis, outputs, and concise interpretation
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A portfolio notebook should separate:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Notebook quality.
+  required_for_completion: true
+- activity_id: w8_model
+  title: Power BI retention
+  type: mastery
+  runtime: recognition
+  prompt: 'A reliable data model begins with:'
+  answer_options:
+  - Defined fact grain and dimension keys
+  - Visual colors
+  - Tooltips
+  - Bookmarks
+  starter: ''
+  solution: Defined fact grain and dimension keys
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Defined fact grain and dimension keys
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A reliable data model begins with:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to Power BI retention.
+  required_for_completion: true
+- activity_id: w8_sql
+  title: SQL retention
+  type: mastery
+  runtime: recognition
+  prompt: 'Before trusting a multi-table KPI, validate:'
+  answer_options:
+  - Join cardinality, grain, null rules, and denominator
+  - Only the alias
+  - Only the chart
+  - Only the maximum value
+  starter: ''
+  solution: Join cardinality, grain, null rules, and denominator
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Join cardinality, grain, null rules, and denominator
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 8 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Before trusting a multi-table KPI, validate:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 8 lesson or practice work related to SQL retention.
+  required_for_completion: true

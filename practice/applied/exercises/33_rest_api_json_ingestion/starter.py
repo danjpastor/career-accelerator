@@ -1,4 +1,4 @@
-"""Applied Lab 33: Ingest paginated REST API and JSON data."""
+"""Applied Lab 24: Ingest paginated REST API and JSON data."""
 
 from pathlib import Path
 import json

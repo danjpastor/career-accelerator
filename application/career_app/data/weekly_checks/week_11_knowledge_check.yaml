@@ -1,0 +1,253 @@
+assessment_id: week_11_portfolio_execution_check
+title: Week 11 Knowledge Check
+order: 11
+description: An eight-question check covering Week 11 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- Score at least 80% (seven of eight) to pass.
+- Review recommendations under missed questions before retaking the check.
+requires:
+- roadmap.portfolio_readiness
+passing_score: 0.8
+activities:
+- activity_id: w11_q1
+  title: Differentiate projects
+  type: mastery
+  runtime: recognition
+  prompt: Why should portfolio projects demonstrate different capabilities?
+  answer_options:
+  - To show breadth across business problems and analytical methods
+  - To repeat the same dashboard three times
+  - To avoid explaining decisions
+  - To reduce validation work
+  starter: ''
+  solution: To show breadth across business problems and analytical methods
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: To show breadth across business problems and analytical methods
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Why should portfolio projects demonstrate different capabilities?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review the distinct purpose and skill evidence planned for each project.
+- activity_id: w11_q2
+  title: Scope work
+  type: mastery
+  runtime: recognition
+  prompt: What is the best way to keep a portfolio project achievable?
+  answer_options:
+  - Define a clear question, deliverables, and definition of done
+  - Add every possible analysis
+  - Change the stakeholder daily
+  - Avoid deadlines
+  starter: ''
+  solution: Define a clear question, deliverables, and definition of done
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Define a clear question, deliverables, and definition of done
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What is the best way to keep a portfolio project achievable?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review project scoping and milestone definitions.
+- activity_id: w11_q3
+  title: Reuse validation
+  type: mastery
+  runtime: recognition
+  prompt: When starting a new project, what should carry over from earlier work?
+  answer_options:
+  - A repeatable validation process, not copied conclusions
+  - The same final numbers
+  - Unverified assumptions
+  - Identical business recommendations
+  starter: ''
+  solution: A repeatable validation process, not copied conclusions
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A repeatable validation process, not copied conclusions
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: When starting a new project, what should carry over from earlier work?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review reusable QA checklists and project-specific analysis.
+- activity_id: w11_q4
+  title: Create evidence
+  type: mastery
+  runtime: recognition
+  prompt: Which artifact is strongest evidence of analytical ability?
+  answer_options:
+  - A reproducible deliverable with documented reasoning and validation
+  - A list of tools without examples
+  - An unfinished screenshot
+  - A copied tutorial result
+  starter: ''
+  solution: A reproducible deliverable with documented reasoning and validation
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A reproducible deliverable with documented reasoning and validation
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Which artifact is strongest evidence of analytical ability?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review demonstrated-evidence requirements.
+- activity_id: w11_q5
+  title: Explain tradeoffs
+  type: mastery
+  runtime: recognition
+  prompt: Why document a decision not to include an analysis?
+  answer_options:
+  - It shows scope control and the reasoning behind the choice
+  - It hides missing work
+  - It proves the data is perfect
+  - It removes the need for validation
+  starter: ''
+  solution: It shows scope control and the reasoning behind the choice
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It shows scope control and the reasoning behind the choice
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: Why document a decision not to include an analysis?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review decision logs and scope tradeoffs.
+- activity_id: w11_q6
+  title: Check consistency
+  type: mastery
+  runtime: recognition
+  prompt: What should be consistent across SQL, Python, and Power BI outputs?
+  answer_options:
+  - Metric definitions, filters, and the intended grain
+  - Only font size
+  - Only file names
+  - The exact number of code lines
+  starter: ''
+  solution: Metric definitions, filters, and the intended grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Metric definitions, filters, and the intended grain
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What should be consistent across SQL, Python, and Power BI outputs?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review cross-tool parity checks.
+- activity_id: w11_q7
+  title: Tailor communication
+  type: mastery
+  runtime: recognition
+  prompt: How should an executive summary differ from technical documentation?
+  answer_options:
+  - It should emphasize decisions, findings, and implications
+  - It should include every line of code
+  - It should omit all limitations
+  - It should use unexplained jargon
+  starter: ''
+  solution: It should emphasize decisions, findings, and implications
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: It should emphasize decisions, findings, and implications
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: How should an executive summary differ from technical documentation?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review stakeholder communication and technical handoff.
+- activity_id: w11_q8
+  title: Review responsibly
+  type: mastery
+  runtime: recognition
+  prompt: What should an analyst do when a metric may create unfair incentives?
+  answer_options:
+  - Document the risk and recommend safeguards or a better metric
+  - Publish it without context
+  - Hide the calculation
+  - Assume all metrics are neutral
+  starter: ''
+  solution: Document the risk and recommend safeguards or a better metric
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Document the risk and recommend safeguards or a better metric
+  required_for_practice: false
+  required_for_mastery: false
+  required_for_completion: true
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 11 Knowledge Check
+    introduction: Choose the best answer based on the work completed this week.
+    task: What should an analyst do when a metric may create unfair incentives?
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    review_recommendation: Review responsible metrics and bias checks.

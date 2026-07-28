@@ -1,4 +1,4 @@
-# Applied Lab 09 validation rubric
+# Applied Lab 21 validation rubric
 
 Use this rubric after completing the guided workflow. A checked item should have visible evidence in the artifact, result output, screenshot, or Progress & Evidence notes.
 

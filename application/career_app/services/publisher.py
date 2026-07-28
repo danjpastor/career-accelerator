@@ -11,7 +11,7 @@ def publish(conn, root: Path, state, project_names, readiness):
 - Week: {state['current_week']} / {state['total_weeks']}
 - Google Certificate: Course {state['google_course']} / {state['google_total_courses']}
 - SQL Problems: {sql_count} / {state['sql_target']}
-- Study Hours: {hours:g}
+- Study Hours: {float(hours):.2f}
 - Active Project: {project_names[state['current_project']]}
 - Applications: {applications}
 - Overall Job Readiness: {readiness['Overall']}%

@@ -36,6 +36,7 @@ from career_app.database import (
     sync_calendar_sprint_week, update_state,
 )
 from career_app.data.applied_exercises import (
+    APPLIED_EXERCISES,
     exercise_number_for_label as applied_exercise_number_for_label,
     exercise_source as applied_exercise_source,
 )
@@ -65,6 +66,7 @@ from career_app.services import (
     task_workspace,
     tracks,
     unified_tasks,
+    weekly_checks,
     task_icons,
 )
 from career_app.services.backup import create_backup, prune_backups_with_report
@@ -91,6 +93,7 @@ from career_app.ui.widgets import (
 
 from career_app.ui.first_run import FirstRunCoordinator
 from career_app.ui.notifications import OverlayNotifier
+from career_app.ui.weekly_quiz import WeeklyKnowledgeCheckDialog
 from career_app.services import completion_contract
 from career_app.ui.startup_splash import StartupSplash
 ROOT = Path(__file__).resolve().parents[2]
@@ -409,6 +412,13 @@ class CareerAccelerator(QMainWindow):
         roadmap_mastery.reconcile(self.conn, ROOT)
         datacamp.purge_academy(self.conn)
         datacamp.reconcile(self.conn)
+        weekly_checks.reconcile(self.conn)
+        self.state = state(self.conn)
+        # Weekly-check repair can change progression gates after the first track
+        # synchronization.  Run the adaptive tracks once more so a previously
+        # passed Week 2 check immediately promotes Applied Lab 01 and updates its
+        # lock reason during this same launch.
+        tracks.sync_all(self.conn, self.state)
         self.state = state(self.conn)
         planner.repair_persisted_planner_data(
             self.conn, self.state["current_week"]
@@ -3123,6 +3133,7 @@ class CareerAccelerator(QMainWindow):
         save.setObjectName("Primary")
         save.setMinimumHeight(38)
         save.clicked.connect(self.save_session)
+        self.study_save_button = save
         log_card.layout.addWidget(save)
         self.study_log_scroll = make_card_scrollable(log_card)
         log_card._content_host.layout().setAlignment(
@@ -4405,7 +4416,7 @@ class CareerAccelerator(QMainWindow):
             unlock(
                 f"study-session:{row['id']}",
                 "Study Session Logged",
-                f"{row['session_date']} • {float(row['hours']):g}h",
+                f"{row['session_date']} • {float(row['hours']):.2f}h",
             )
 
         application_rows = self.conn.execute(
@@ -4596,35 +4607,9 @@ class CareerAccelerator(QMainWindow):
         )
         self.last_removed_achievements = removed
 
-        duplicate_groups = (
-            achievements.duplicate_activity_groups(
-                self.conn
-            )
+        achievements.repair_duplicate_activity_groups(
+            self.conn
         )
-        if duplicate_groups:
-            # Defensive cleanup for any legacy generic task record that still
-            # overlaps a canonical SQL or portfolio record.
-            for keys in duplicate_groups.values():
-                has_specialized = any(
-                    key.startswith(
-                        (
-                            "sql-problem:",
-                            "project-task:",
-                        )
-                    )
-                    for key in keys
-                )
-                if not has_specialized:
-                    continue
-                for key in keys:
-                    if key.startswith(
-                        "task:"
-                    ):
-                        self.conn.execute(
-                            """DELETE FROM achievements
-                               WHERE achievement_key=?""",
-                            (key,),
-                        )
 
         self.conn.commit()
         return unlocked
@@ -5318,16 +5303,40 @@ class CareerAccelerator(QMainWindow):
             "General": COLORS["muted"],
         }
 
+        # Today’s Focus may intentionally include locked DataCamp chapters so
+        # the learner can see the full due sequence. Next Tasks uses a cleaner
+        # presentation: actionable assignments stay above the divider and every
+        # locked preview is grouped beneath COMING SOON.
+        ready_items = [item for item in ready if bool(item.get("ready"))]
+        locked_focus_items = [item for item in ready if not bool(item.get("ready"))]
         visible_items = [
             ("ready", item)
-            for item in ready[:DASHBOARD_NEXT_TASK_LIMIT]
+            for item in ready_items[:DASHBOARD_NEXT_TASK_LIMIT]
         ]
+
+        def next_task_identity(item):
+            task_id = self._get_ahead_task_id(item)
+            if task_id is not None:
+                return f"task:{int(task_id)}"
+            return "|".join(
+                (
+                    str(item.get("kind") or ""),
+                    str(item.get("source_key") or item.get("identity") or ""),
+                    str(item.get("label") or ""),
+                )
+            )
+
+        seen = {next_task_identity(item) for _, item in visible_items}
         remaining_slots = DASHBOARD_NEXT_TASK_LIMIT - len(visible_items)
         if remaining_slots > 0:
-            visible_items.extend(
-                ("coming_soon", item)
-                for item in coming_soon[:remaining_slots]
-            )
+            for item in [*locked_focus_items, *coming_soon]:
+                identity = next_task_identity(item)
+                if identity in seen:
+                    continue
+                visible_items.append(("coming_soon", item))
+                seen.add(identity)
+                if len(visible_items) >= DASHBOARD_NEXT_TASK_LIMIT:
+                    break
 
         while len(visible_items) < DASHBOARD_NEXT_TASK_LIMIT:
             visible_items.append((
@@ -5398,9 +5407,10 @@ class CareerAccelerator(QMainWindow):
                     if task_id is not None
                     else None
                 )
+                is_weekly_check = str(item.get("kind") or "") == "weekly_check"
                 open_available = bool(
                     task_id is not None
-                    and (workspace_available or datacamp_url)
+                    and (workspace_available or datacamp_url or is_weekly_check)
                 )
                 task_row = TaskRow(
                     title=str(item.get("label") or "Task"),
@@ -5429,9 +5439,12 @@ class CareerAccelerator(QMainWindow):
                     ),
                     completed=False,
                     preserve_source_in_compact=True,
+                    locked=False,
                 )
                 if task_id is None:
                     task_row.checkbox.setEnabled(False)
+                elif is_weekly_check:
+                    task_row.checkbox.hide()
                 else:
                     task_row.checkbox.stateChanged.connect(
                         lambda state_value, task_row=task_row, task_id=task_id:
@@ -5563,7 +5576,7 @@ class CareerAccelerator(QMainWindow):
             ),
             (
                 weekly_goal,
-                f"{week_hours:g}h / {target_hours:g}h",
+                f"{week_hours:.2f}h / {target_hours:g}h",
                 f"●  {target_hours:g}h Goal",
             ),
         ]
@@ -5671,6 +5684,7 @@ class CareerAccelerator(QMainWindow):
                     "completed"
                 )
             )
+            locked = bool(not completed and not item.get("ready", True))
             if completed:
                 style_category = (
                     item.get(
@@ -5760,6 +5774,12 @@ class CareerAccelerator(QMainWindow):
                 duration = (
                     f"{int(item['estimated_minutes'])}m"
                 )
+                if locked:
+                    detail = str(
+                        item.get("prerequisite_reason")
+                        or "Complete the prerequisite chapter first."
+                    )
+                    accent = COLORS["muted"]
 
             task_id = self._get_ahead_task_id(item)
             workspace_available = (
@@ -5773,12 +5793,14 @@ class CareerAccelerator(QMainWindow):
                 if task_id is not None
                 else None
             )
+            is_weekly_check = str(item.get("kind") or "") == "weekly_check"
             action_text = None
             action_callback = None
 
             if (
-                task_id is not None
-                and (workspace_available or bool(datacamp_url))
+                not locked
+                and task_id is not None
+                and (workspace_available or bool(datacamp_url) or is_weekly_check)
             ):
                 action_text = "Open"
                 action_callback = (
@@ -5789,7 +5811,7 @@ class CareerAccelerator(QMainWindow):
                     )
                 )
 
-            if not completed:
+            if not completed and not locked:
 
                 detail = completion_contract.focus_detail(
 
@@ -5799,7 +5821,7 @@ class CareerAccelerator(QMainWindow):
 
             focus_row_holder = {}
             on_toggle = None
-            if task_id is not None and not completed:
+            if task_id is not None and not completed and not locked and not is_weekly_check:
                 on_toggle = (
                     lambda state_value,
                     task_id=task_id,
@@ -5827,9 +5849,10 @@ class CareerAccelerator(QMainWindow):
                 icon_fallback=icon_fallback,
                 checked=completed,
                 on_toggle=on_toggle,
+                locked=locked,
             )
             focus_row_holder["row"] = focus_row
-            if task_id is not None and not completed:
+            if task_id is not None and not completed and not locked and not is_weekly_check:
                 self.dashboard_task_rows_by_id.setdefault(
                     int(task_id), []
                 ).append(focus_row)
@@ -6017,7 +6040,7 @@ class CareerAccelerator(QMainWindow):
         focus_score = analytics.weekly_focus_score(self.conn)
 
         summary_items = [
-            ("⏱️", "Study Time", f"{week_hours:g}h"),
+            ("⏱️", "Study Time", f"{week_hours:.2f}h"),
             ("📅", "Sessions", str(session_count)),
             ("✅", "Tasks Completed", f"{done} / {total}"),
             (
@@ -6066,7 +6089,7 @@ class CareerAccelerator(QMainWindow):
             "Monday through Sunday study activity"
         )
 
-        self.side_hours_value.setText(f"{week_hours:g}h")
+        self.side_hours_value.setText(f"{week_hours:.2f}h")
         self.sidebar_goal.setValue(int(weekly_goal))
         self.sidebar_goal_label.setText(
             f"Goal: {target_hours:g}h"
@@ -6091,6 +6114,8 @@ class CareerAccelerator(QMainWindow):
                 0,
                 animator._advance,
             )
+
+        QTimer.singleShot(250, self._notify_new_content_unlocks)
 
 
 
@@ -6506,7 +6531,7 @@ class CareerAccelerator(QMainWindow):
                 else ""
             )
             self.session_list.addItem(
-                f"{row['session_date']} • {row['hours']:g}h • "
+                f"{row['session_date']} • {float(row['hours']):.2f}h • "
                 f"Productivity {row['productivity_score'] or '-'}{linked}\n"
                 f"Google: {row['google_progress'] or '-'} • "
                 f"SQL: {row['sql_problems']}"
@@ -6809,6 +6834,57 @@ class CareerAccelerator(QMainWindow):
                 column.layout.addWidget(empty)
             column.layout.addStretch()
             self.kanban_layout.addWidget(column)
+
+    def _notify_new_content_unlocks(self):
+        """Show one-time notices for newly ready weekly checks and Applied Labs."""
+        if not self.isVisible():
+            return
+
+        ready_checks = weekly_checks.ready_unpassed_weeks(
+            self.conn, int(self.state.get("current_week", 1))
+        )
+        for check_week in ready_checks:
+            notice_key = f"content_unlock_notified:weekly_check:{check_week:02d}"
+            if str(setting(self.conn, notice_key, "")) == "1":
+                continue
+            save_setting(self.conn, notice_key, "1")
+            self._notify(
+                f"📝 Week {check_week} Knowledge Check unlocked: answer all 8 questions and score at least 7 of 8.",
+                8500,
+            )
+            break
+
+        row = self.conn.execute(
+            """SELECT tt.target_key,s.id,s.completed
+               FROM track_tasks tt
+               JOIN sprint_tasks s ON s.id=tt.task_id
+               WHERE tt.track_key='applied'
+               LIMIT 1"""
+        ).fetchone()
+        if row is None or bool(row["completed"]):
+            return
+        target_key = str(row["target_key"] or "")
+        if not target_key.startswith("lab:"):
+            return
+        try:
+            number = int(target_key.split(":", 1)[1])
+        except (TypeError, ValueError):
+            return
+        item = APPLIED_EXERCISES.get(number)
+        if item is None:
+            return
+        readiness = tracks.applied_lab_readiness(self.conn, self.state, number)
+        if not readiness.get("ready"):
+            return
+        notice_key = f"content_unlock_notified:applied_lab:{number:02d}"
+        if str(setting(self.conn, notice_key, "")) == "1":
+            return
+        save_setting(self.conn, notice_key, "1")
+        self._notify(
+            f"🔓 Applied Lab {number:02d} unlocked: {item['title']}",
+            8500,
+        )
+
 
     def queue_dashboard_task_completion(
         self,
@@ -7603,7 +7679,51 @@ class CareerAccelerator(QMainWindow):
         QDesktopServices.openUrl(QUrl(url))
         return True
 
+    def open_weekly_knowledge_check(self, week, task_id=None):
+        week = int(week)
+        readiness = weekly_checks.readiness(self.conn, week)
+        if not readiness.ready:
+            self._notify(readiness.reason or f"Complete all Week {week} coursework first.", 6500)
+            return
+        dialog = WeeklyKnowledgeCheckDialog(
+            self,
+            conn=self.conn,
+            week=week,
+            passed_callback=self._weekly_check_passed,
+        )
+        dialog.exec()
+
+    def _weekly_check_passed(self, week, task_id):
+        # Persist the durable quiz result, then resynchronize adaptive tracks
+        # before refreshing the dashboard.  Without this step, the passed check
+        # could disappear while the newly eligible Applied Lab remained linked
+        # to its old locked state until a later full restart.
+        weekly_checks.reconcile(self.conn)
+        self.state = state(self.conn)
+        tracks.sync_all(self.conn, self.state)
+        weekly_checks.reconcile(self.conn)
+        self.state = state(self.conn)
+        try:
+            self.refresh_dashboard(sync_tracks=False)
+            self.refresh_learning()
+            self.refresh_readiness()
+            self.refresh_task_workspaces()
+        except Exception as exc:
+            self._notify(f"Knowledge Check passed, but a panel could not refresh: {exc}", 6500)
+        self._notify(
+            f"✅ Week {int(week)} Knowledge Check passed. Week {int(week) + 1} skill work is now eligible to unlock."
+            if int(week) < 12
+            else "✅ Week 12 Knowledge Check passed. All weekly mastery gates are complete.",
+            8500,
+        )
+        QTimer.singleShot(300, self._notify_new_content_unlocks)
+
     def open_task_workspace(self, *, task_id=None, workspace_key=None):
+        if task_id is not None:
+            task = unified_tasks.task_by_id(self.conn, int(self.state["current_week"]), int(task_id))
+            if task is not None and str(task.get("kind") or "") == "weekly_check":
+                self.open_weekly_knowledge_check(int(task.get("week") or 1), int(task_id))
+                return
         if task_id is not None and self._route_datacamp_task(int(task_id)):
             return
         if task_id is not None:
@@ -8715,7 +8835,56 @@ class CareerAccelerator(QMainWindow):
         )
         self.conn.commit()
         self.reset_timer()
-        self.refresh_all()
+
+        # Complete the visible form interaction immediately. The old path ran
+        # every application reconciler, page refresh, and Git status command
+        # before returning control to the Study Session page.
+        self.session_hours.setValue(0)
+        self.session_minutes.setValue(0)
+        self.session_google.clear()
+        self.session_datacamp.clear()
+        self.session_sql.setValue(0)
+        self.session_portfolio.clear()
+        self.session_notes.clear()
+        self.session_task.setCurrentIndex(0)
+        self._last_logged_session_task_id = linked_task_id
+        if hasattr(self, "study_save_button"):
+            self.study_save_button.setEnabled(False)
+        self._notify(
+            f"Study session logged: {hours:.2f} hours.",
+            3600,
+        )
+
+        # Yield to Qt before refreshing only the surfaces affected by a study
+        # session. Splitting these updates prevents one long blocking redraw.
+        QTimer.singleShot(0, self._refresh_after_session_log)
+
+    def _refresh_after_session_log(self):
+        try:
+            newly_unlocked = self.sync_achievement_records()
+            self.refresh_sessions()
+            self.refresh_dashboard(sync_tracks=False)
+            self.refresh_readiness()
+            if getattr(self, "_last_logged_session_task_id", None) is not None:
+                self.refresh_task_workspaces()
+            if newly_unlocked:
+                extra = (
+                    f"  +{len(newly_unlocked) - 1} more"
+                    if len(newly_unlocked) > 1
+                    else ""
+                )
+                self._notify(
+                    f"🏆 Achievement unlocked: {newly_unlocked[0]}{extra}",
+                    7000,
+                )
+        except Exception as error:
+            self._notify(
+                f"Session was saved, but a summary panel could not refresh: {error}",
+                6500,
+            )
+        finally:
+            if hasattr(self, "study_save_button"):
+                self.study_save_button.setEnabled(True)
 
     def add_evidence(self):
         dialog = QDialog(self)

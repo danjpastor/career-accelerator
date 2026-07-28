@@ -1,4 +1,4 @@
-# Applied Lab 14: Create a decision log and limitations register
+# Applied Lab 34: Create a decision log and limitations register
 
 **Category:** Communication  
 **Roadmap week:** 11  

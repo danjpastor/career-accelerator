@@ -1,4 +1,4 @@
-# Applied Lab 17: Fix denominator, date-filter, and grain errors
+# Applied Lab 07: Fix denominator, date-filter, and grain errors
 
 **Category:** Broken Analysis  
 **Roadmap week:** 5  

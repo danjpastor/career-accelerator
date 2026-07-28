@@ -431,8 +431,8 @@ def readiness(conn: sqlite3.Connection, task: dict, *, today: date | None = None
     if incomplete:
         first = incomplete[0]
         return False, (
-            f"Complete the earlier DataCamp assignment first: {first.course_name}, "
-            f"Chapter {first.chapter_number}."
+            f"Complete {first.course_name} — Chapter {first.chapter_number}: "
+            f"{first.chapter_name} first."
         )
     return True, ""
 

@@ -31,6 +31,7 @@ from career_app.data.duckdb_exercises import exercise_number_for_label
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.services import roadmap_mastery
 from career_app.services import datacamp
+from career_app.services import weekly_checks
 from career_app.services.task_titles import title_case_task
 from career_app.navigation import PAGE_LEARNING, PAGE_PORTFOLIO, PAGE_WORKSPACES
 
@@ -177,6 +178,10 @@ def _kind(conn: sqlite3.Connection, task: dict) -> str:
 
     if track_key == GOOGLE_TRACK:
         return "google"
+    if managed_key.startswith("weekly_check:") or re.fullmatch(
+        r"week\s+\d+\s+knowledge\s+check", label.casefold()
+    ):
+        return "weekly_check"
     if managed_key.startswith("datacamp:") or track_key == DATACAMP_TRACK:
         return "datacamp_chapter"
     if duckdb_for_label(label) is not None or managed_key.startswith("roadmap_v1026:duckdb:"):
@@ -257,6 +262,8 @@ def task_type_label(task: dict, current_week: int | None = None) -> str:
     short_area, _full_area = _area_labels(task)
     if kind == "google":
         return "Google"
+    if kind == "weekly_check":
+        return "Checkpoint"
     if kind == "datacamp_chapter":
         return "DataCamp"
     if kind in {"duckdb", "interview_problem", "sql_practice"}:
@@ -286,6 +293,8 @@ def focus_context(task: dict, current_week: int) -> str:
 
     if kind == "google":
         detail = "Google Certification"
+    elif kind == "weekly_check":
+        detail = f"Weekly Assessment • Week {week}"
     elif kind == "datacamp_chapter":
         detail = f"DataCamp • {full_area} • Week {week}"
     elif kind == "duckdb":
@@ -318,12 +327,23 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
     metadata_state = str(task.get("prerequisite_state") or "Ready")
     metadata_reason = str(task.get("prerequisite_reason") or "").strip()
 
-    if kind == "datacamp_chapter":
-        ready, reason = datacamp.readiness(conn, task)
-        return Readiness(ready, reason)
+    if kind == "weekly_check":
+        check_week = weekly_checks.week_from_task(task) or week
+        result = weekly_checks.readiness(conn, int(check_week))
+        return Readiness(result.ready, result.reason)
 
     if week > current_week and kind not in {"google"}:
         return Readiness(False, f"Scheduled for Week {week}.")
+
+    progression = weekly_checks.progression_gate(
+        conn, task_week=week, current_week=current_week, kind=kind
+    )
+    if not progression.ready:
+        return Readiness(False, progression.reason)
+
+    if kind == "datacamp_chapter":
+        ready, reason = datacamp.readiness(conn, task)
+        return Readiness(ready, reason)
 
     if metadata_state.casefold() not in {"ready", "unlocked", ""}:
         return Readiness(False, metadata_reason or "Complete the prerequisite first.")
@@ -392,6 +412,8 @@ def _source(task: dict) -> str:
     kind = str(task.get("kind") or "general")
     if kind == "google":
         return str(task.get("source_label") or "Google Certificate")
+    if kind == "weekly_check":
+        return f"Week {_safe_int(task.get('week'), 1)} Mastery Check"
     if kind == "datacamp_chapter":
         chapter = datacamp.chapter_for_task(task)
         return f"DataCamp • {chapter.course_name}" if chapter else "DataCamp"
@@ -417,6 +439,7 @@ def _display_title(task: dict) -> str:
     kind = str(task.get("kind") or "general")
     return {
         "google": "Google Certificate",
+        "weekly_check": "Weekly Knowledge Check",
         "datacamp_chapter": "DataCamp Chapter",
         "duckdb": "DuckDB Practice",
         "interview_problem": "SQL Interview Practice",
@@ -473,6 +496,13 @@ def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> d
     return task
 
 
+def task_by_id(conn: sqlite3.Connection, current_week: int, task_id: int) -> dict | None:
+    for task in all_tasks(conn, current_week):
+        if _safe_int(task.get("id"), 0) == int(task_id):
+            return task
+    return None
+
+
 def all_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     tasks = [_as_task(conn, row, current_week) for row in _task_rows(conn)]
 
@@ -509,6 +539,7 @@ def _roadmap_sort(task: dict, current_week: int) -> tuple:
     kind = str(task.get("kind") or "general")
     kind_rank = {
         "google": 0,
+        "weekly_check": 5,
         "datacamp_chapter": 20,
         "duckdb": 30,
         "interview_problem": 31,
@@ -537,6 +568,19 @@ def _roadmap_sort(task: dict, current_week: int) -> tuple:
     )
 
 
+def _focus_display_sort(task: dict, current_week: int) -> tuple:
+    """Keep actionable prerequisites above the grey chapters they unlock."""
+    if not bool(task.get("ready")):
+        return (
+            1,
+            0 if str(task.get("kind") or "") == "datacamp_chapter" else 1,
+            _safe_int(task.get("sort_order"), 0),
+            _safe_int(task.get("week"), current_week),
+            _safe_int(task.get("id"), 0),
+        )
+    return (0, *_roadmap_sort(task, current_week))
+
+
 def ready_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     tasks = [
         task
@@ -549,6 +593,7 @@ def ready_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
 def _locked_sort(task: dict, current_week: int) -> tuple:
     """Put the nearest missing prerequisite before distant mastery gates."""
     kind_rank = {
+        "weekly_check": 5,
         "datacamp_chapter": 10,
         "duckdb": 20,
         "interview_problem": 21,
@@ -574,7 +619,9 @@ def locked_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     tasks = [
         task
         for task in all_tasks(conn, current_week)
-        if not task["ready"] and not bool(task.get("completed"))
+        if not task["ready"]
+        and not bool(task.get("completed"))
+        and str(task.get("kind") or "") != "weekly_check"
     ]
     return sorted(_dedupe(tasks), key=lambda task: _locked_sort(task, current_week))
 
@@ -591,6 +638,31 @@ def _pick_first(pool: list[dict], selected: list[dict], kinds: set[str]) -> dict
 
 def _snapshot_setting_key(focus_date: str) -> str:
     return f"daily_focus_snapshot_v2:{focus_date}"
+
+
+def _locked_datacamp_focus_candidate(task: dict, current_week: int) -> bool:
+    """Allow due DataCamp chapters to remain visible while their chain is locked.
+
+    Future chapters stay out of Today's Focus. A chapter is eligible only when
+    its scheduled date has arrived and its lock is specifically another
+    unfinished DataCamp chapter.
+    """
+    if str(task.get("kind") or "") != "datacamp_chapter":
+        return False
+    if bool(task.get("completed")) or bool(task.get("ready")):
+        return False
+    if _safe_int(task.get("week"), current_week) > int(current_week):
+        return False
+    reason = str(task.get("prerequisite_reason") or "").strip()
+    if not reason.casefold().startswith("complete "):
+        return False
+    due_text = str(task.get("deferred_until") or "").strip()
+    if not due_text:
+        return False
+    try:
+        return date.fromisoformat(due_text) <= date.today()
+    except ValueError:
+        return False
 
 
 def _task_identity(task: dict) -> str:
@@ -633,7 +705,7 @@ def _save_daily_snapshot(
     assignments: list[dict],
 ) -> dict:
     payload = {
-        "version": 2,
+        "version": 3,
         "focus_date": focus_date,
         "week": int(current_week),
         "new_task_limit": MAX_FOCUS_TASKS,
@@ -725,6 +797,109 @@ def _insert_daily_focus_assignment(
     )
 
 
+def _normalize_daily_focus_positions(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    assignments: list[dict],
+) -> None:
+    """Reconcile persisted Focus rows with the current snapshot safely.
+
+    Older builds could leave a completed, replaced, or stale row occupying one
+    of positions 1-5.  Because ``daily_focus`` enforces a unique
+    ``(focus_date, position)`` pair, inserting a newly promoted task into that
+    slot could fail before the dashboard opened.  Move every row to a temporary
+    unique position first, reclassify rows no longer owned by the snapshot, and
+    then assign stable position bands for current Focus, Catch-Up, and history.
+    """
+    rows = _daily_focus_rows(conn, focus_date)
+    if not rows:
+        return
+
+    assignment_positions = {
+        str(item.get("identity") or ""): index
+        for index, item in enumerate(assignments, start=1)
+        if str(item.get("identity") or "")
+    }
+
+    # Move all rows outside the live position bands before any resequencing.
+    # The temporary range starts above the largest current position, so each
+    # update remains valid even under SQLite's immediate UNIQUE enforcement.
+    max_position = max((_safe_int(row["position"], 0) for row in rows), default=0)
+    temp_base = max(1000, max_position + len(rows) + 100)
+    for offset, row in enumerate(rows, start=1):
+        conn.execute(
+            "UPDATE daily_focus SET position=? WHERE id=?",
+            (temp_base + offset, int(row["id"])),
+        )
+
+    # Rows that are no longer part of the frozen snapshot must not occupy or be
+    # counted as active Focus work. Keep completed rows as history; remove only
+    # stale, incomplete planner rows. Also collapse duplicate planner rows that
+    # may have been created by older builds before source identity was stable.
+    new_groups: dict[str, list[sqlite3.Row]] = {}
+    for row in rows:
+        if str(row["focus_kind"] or "new") == "new":
+            new_groups.setdefault(str(row["source_key"] or ""), []).append(row)
+
+    for identity, group in new_groups.items():
+        ordered = sorted(group, key=lambda row: int(row["id"]))
+        keeper = ordered[0]
+        completed_values = [
+            str(row["completed_at"]) for row in ordered if row["completed_at"]
+        ]
+        if completed_values and not keeper["completed_at"]:
+            conn.execute(
+                "UPDATE daily_focus SET completed_at=? WHERE id=?",
+                (min(completed_values), int(keeper["id"])),
+            )
+        for duplicate in ordered[1:]:
+            conn.execute("DELETE FROM daily_focus WHERE id=?", (int(duplicate["id"]),))
+
+        if identity not in assignment_positions:
+            if completed_values or keeper["completed_at"]:
+                conn.execute(
+                    "UPDATE daily_focus SET focus_kind='history' WHERE id=?",
+                    (int(keeper["id"]),),
+                )
+            else:
+                conn.execute("DELETE FROM daily_focus WHERE id=?", (int(keeper["id"]),))
+
+    rows = _daily_focus_rows(conn, focus_date)
+    by_identity = {
+        str(row["source_key"] or ""): row
+        for row in rows
+        if str(row["focus_kind"] or "new") == "new"
+    }
+    for identity, position in assignment_positions.items():
+        row = by_identity.get(identity)
+        if row is not None:
+            conn.execute(
+                "UPDATE daily_focus SET position=? WHERE id=?",
+                (int(position), int(row["id"])),
+            )
+
+    catchup_rows = [
+        row for row in _daily_focus_rows(conn, focus_date)
+        if str(row["focus_kind"] or "") == "catch_up"
+    ]
+    for index, row in enumerate(catchup_rows, start=21):
+        conn.execute(
+            "UPDATE daily_focus SET position=? WHERE id=?",
+            (index, int(row["id"])),
+        )
+
+    history_rows = [
+        row for row in _daily_focus_rows(conn, focus_date)
+        if str(row["focus_kind"] or "") not in {"new", "catch_up"}
+    ]
+    for index, row in enumerate(history_rows, start=101):
+        conn.execute(
+            "UPDATE daily_focus SET position=? WHERE id=?",
+            (index, int(row["id"])),
+        )
+
+
+
 def _migrate_today_focus_rows(
     conn: sqlite3.Connection,
     focus_date: str,
@@ -746,6 +921,92 @@ def _migrate_today_focus_rows(
             )
 
 
+def _promote_newly_ready_focus_task(
+    conn: sqlite3.Connection,
+    focus_date: str,
+    current_week: int,
+    focus_limit: int,
+    snapshot: dict,
+    tasks: list[dict],
+) -> dict:
+    """Replace one locked preview with newly unlocked current-week work.
+
+    The daily plan remains stable for actionable assignments. The only dynamic
+    promotion is a task whose prerequisites became satisfied during the day,
+    such as Applied Lab 01 after the final spreadsheet chapter is completed.
+    """
+    assignments = list(snapshot.get("new_assignments") or [])[:MAX_FOCUS_TASKS]
+    task_map = {int(task["id"]): task for task in tasks}
+    assigned = {str(item.get("identity") or "") for item in assignments}
+    candidates = [
+        task
+        for task in tasks
+        if bool(task.get("ready"))
+        and not bool(task.get("completed"))
+        and (
+            (not bool(task.get("is_catch_up"))
+             and _safe_int(task.get("week"), current_week) == int(current_week))
+            or str(task.get("kind") or "") == "weekly_check"
+        )
+        and _task_identity(task) not in assigned
+    ]
+    priority_kinds = {
+        "weekly_check": -1,
+        "applied_lab": 0,
+        "duckdb": 1,
+        "interview_problem": 2,
+        "sql_practice": 3,
+        "portfolio_preparation": 4,
+        "portfolio_execution": 5,
+        "datacamp_chapter": 20,
+    }
+    candidates.sort(
+        key=lambda task: (
+            priority_kinds.get(str(task.get("kind") or ""), 10),
+            _roadmap_sort(task, current_week),
+        )
+    )
+    if not candidates:
+        return snapshot
+
+    replaceable = []
+    for index, assignment in enumerate(assignments):
+        task = task_map.get(_safe_int(assignment.get("task_id"), 0))
+        if (
+            task is not None
+            and not bool(task.get("ready"))
+            and str(task.get("kind") or "") == "datacamp_chapter"
+        ):
+            replaceable.append(index)
+
+    changed = False
+    for task in candidates:
+        if len(assignments) < focus_limit:
+            assignments.append(_new_assignment_payload(task))
+            changed = True
+            break
+        if replaceable:
+            assignments[replaceable[-1]] = _new_assignment_payload(task)
+            changed = True
+            break
+
+    if not changed:
+        return snapshot
+
+    snapshot = _save_daily_snapshot(
+        conn, focus_date, current_week, assignments
+    )
+    valid_identities = {str(item.get("identity") or "") for item in assignments}
+    for row in _daily_focus_rows(conn, focus_date):
+        if (
+            str(row["focus_kind"] or "new") == "new"
+            and not row["completed_at"]
+            and str(row["source_key"] or "") not in valid_identities
+        ):
+            conn.execute("DELETE FROM daily_focus WHERE id=?", (int(row["id"]),))
+    return snapshot
+
+
 def _ensure_daily_snapshot(
     conn: sqlite3.Connection,
     current_week: int,
@@ -757,21 +1018,26 @@ def _ensure_daily_snapshot(
     task_map = {int(task["id"]): task for task in tasks}
     _migrate_today_focus_rows(conn, focus_date, current_week, task_map)
 
+    focus_limit = max(1, min(MAX_FOCUS_TASKS, int(max_items)))
+    current_candidates = sorted(
+        (
+            task
+            for task in tasks
+            if not bool(task.get("completed"))
+            and _safe_int(task.get("week"), current_week) == int(current_week)
+            and not bool(task.get("is_catch_up"))
+            and (
+                bool(task.get("ready"))
+                or _locked_datacamp_focus_candidate(task, current_week)
+            )
+        ),
+        key=lambda task: _roadmap_sort(task, current_week),
+    )
+
     if snapshot is None:
-        current_ready = sorted(
-            (
-                task
-                for task in tasks
-                if task.get("ready")
-                and not bool(task.get("completed"))
-                and _safe_int(task.get("week"), current_week) == int(current_week)
-                and not bool(task.get("is_catch_up"))
-            ),
-            key=lambda task: _roadmap_sort(task, current_week),
-        )
         assignments = [
             _new_assignment_payload(task)
-            for task in current_ready[: max(1, min(MAX_FOCUS_TASKS, int(max_items)))]
+            for task in current_candidates[:focus_limit]
         ]
         snapshot = _save_daily_snapshot(
             conn,
@@ -781,6 +1047,33 @@ def _ensure_daily_snapshot(
         )
     else:
         assignments = list(snapshot.get("new_assignments") or [])[:MAX_FOCUS_TASKS]
+        # v10.36.7 upgrades an existing same-day snapshot once. Preserve every
+        # assignment already chosen, then fill unused positions with due locked
+        # DataCamp chapters so the learner can see the full five-task sequence.
+        if _safe_int(snapshot.get("version"), 2) < 3 and len(assignments) < focus_limit:
+            existing = {str(item.get("identity") or "") for item in assignments}
+            for task in current_candidates:
+                identity = _task_identity(task)
+                if identity in existing:
+                    continue
+                assignments.append(_new_assignment_payload(task))
+                existing.add(identity)
+                if len(assignments) >= focus_limit:
+                    break
+            snapshot = _save_daily_snapshot(
+                conn, focus_date, current_week, assignments
+            )
+
+    snapshot = _promote_newly_ready_focus_task(
+        conn,
+        focus_date,
+        current_week,
+        focus_limit,
+        snapshot,
+        tasks,
+    )
+    assignments = list(snapshot.get("new_assignments") or [])[:MAX_FOCUS_TASKS]
+    _normalize_daily_focus_positions(conn, focus_date, assignments)
 
     rows = _daily_focus_rows(conn, focus_date)
     for index, assignment in enumerate(assignments, start=1):
@@ -819,12 +1112,21 @@ def _mark_completed_snapshot_rows(
     task_map: dict[int, dict],
 ) -> None:
     for row in _daily_focus_rows(conn, focus_date):
-        if row["completed_at"]:
-            continue
         task = task_map.get(_safe_int(row["task_id"], 0))
-        if task is not None and bool(task.get("completed")):
+        if task is None:
+            continue
+        completed = bool(task.get("completed"))
+        if completed and not row["completed_at"]:
             conn.execute(
                 "UPDATE daily_focus SET completed_at=CURRENT_TIMESTAMP WHERE id=?",
+                (int(row["id"]),),
+            )
+        elif not completed and row["completed_at"]:
+            # A task can be restored by an undo or track repair. Clear the
+            # stale daily marker so the footer cannot report 1/1 while the
+            # same task is still visibly active.
+            conn.execute(
+                "UPDATE daily_focus SET completed_at=NULL WHERE id=?",
                 (int(row["id"]),),
             )
 
@@ -872,6 +1174,10 @@ def _sync_active_catchup(
         dict(task)
         for task in ready
         if bool(task.get("is_catch_up"))
+        and (
+            bool(task.get("ready"))
+            or _locked_datacamp_focus_candidate(task, current_week)
+        )
     ]
     selected = catchup[: max(0, int(slots))]
     selected_identities = {_task_identity(task) for task in selected}
@@ -919,35 +1225,43 @@ def daily_plan(conn: sqlite3.Connection, current_week: int, max_items: int = MAX
     _mark_completed_snapshot_rows(conn, focus_date, task_map)
 
     active_new = _active_new_tasks(conn, focus_date, snapshot, task_map, current_week)
-    ready = ready_tasks(conn, current_week)
+    catchup_candidates = sorted(
+        all_tasks(conn, current_week),
+        key=lambda task: _roadmap_sort(task, current_week),
+    )
     active_catchup = _sync_active_catchup(
         conn,
         focus_date,
         current_week,
         max_items - len(active_new),
-        ready,
+        catchup_candidates,
     )
     conn.commit()
-    return (active_new + active_catchup)[:max_items]
+    combined = _dedupe([*active_new, *active_catchup])
+    return sorted(
+        combined,
+        key=lambda task: _focus_display_sort(task, current_week),
+    )[:max_items]
 
 
 def next_tasks(conn: sqlite3.Connection, current_week: int, limit: int = MAX_NEXT_TASKS) -> list[dict]:
-    """Return the actionable queue, beginning with Today’s Focus.
+    """Return actionable work before locked Focus previews.
 
-    Today’s Focus and Next Tasks are two views of the same assigned work.  The
-    dashboard summary therefore begins with the still-active focus tasks, then
-    fills any remaining slots with the next prerequisite-ready items.  This
-    keeps the compact card useful as a completion surface without allowing it
-    to mutate the frozen daily focus snapshot.
+    Today’s Focus may include greyed-out DataCamp chapters. Those rows still
+    belong beneath the Coming Soon divider in Next Tasks and must never consume
+    the compact card before a newly unlocked actionable item such as an
+    Applied Lab.
     """
     focus = daily_plan(conn, current_week, max_items=MAX_FOCUS_TASKS)
     focus_ids = {_safe_int(item.get("id"), 0) for item in focus}
+    ready_focus = [item for item in focus if bool(item.get("ready"))]
+    locked_focus = [item for item in focus if not bool(item.get("ready"))]
     following = [
         task
         for task in ready_tasks(conn, current_week)
         if _safe_int(task.get("id"), 0) not in focus_ids
     ]
-    queue = _dedupe([*focus, *following])
+    queue = _dedupe([*ready_focus, *following, *locked_focus])
     return queue[: max(1, int(limit or MAX_NEXT_TASKS))]
 
 
@@ -1079,6 +1393,7 @@ def migrate_runtime(conn: sqlite3.Connection, current_week: int) -> dict:
     purge = datacamp.purge_academy(conn)
     removed["academy_tasks"] = int(purge.get("tasks", 0))
     datacamp.reconcile(conn)
+    weekly_checks.reconcile(conn)
 
     # Remove temporary presentation prefixes from canonical titles.
     rows = conn.execute(

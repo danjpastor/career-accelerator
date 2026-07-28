@@ -1342,6 +1342,7 @@ class TaskRow(QWidget):
         on_action=None,
         completed=False,
         preserve_source_in_compact=False,
+        locked=False,
     ):
         super().__init__()
         self._forced_density = "comfortable"
@@ -1361,6 +1362,7 @@ class TaskRow(QWidget):
         self.checkbox = VisibleCheckBox(checked=checked)
         if on_toggle is not None:
             self.checkbox.stateChanged.connect(on_toggle)
+        self.checkbox.setEnabled(not completed and not locked)
         layout.addWidget(
             self.checkbox,
             0,
@@ -1386,7 +1388,9 @@ class TaskRow(QWidget):
         title_label.setMinimumWidth(0)
         title_label.setWordWrap(True)
         title_label.setStyleSheet(
-            "font-weight:600;background:transparent;border:none;"
+            f"font-weight:600;color:{COLORS['muted'] if completed or locked else COLORS['text']};"
+            "background:transparent;border:none;"
+            + ("text-decoration:line-through;" if completed else "")
         )
         title_label.setSizePolicy(
             QSizePolicy.Ignored,
@@ -1398,7 +1402,9 @@ class TaskRow(QWidget):
         self.source_label = QLabel(source)
         source_label = self.source_label
         source_label.setObjectName("TaskSource")
-        source_label.setStyleSheet("font-size:8.7pt;")
+        source_label.setStyleSheet(
+            f"font-size:8.7pt;color:{COLORS['muted'] if locked else COLORS['muted']};"
+        )
         source_label.setMinimumWidth(0)
         source_label.setWordWrap(True)
         source_label.setSizePolicy(
@@ -1474,7 +1480,7 @@ class TaskRow(QWidget):
                 True,
             )
             action.clicked.connect(on_action)
-            action.setEnabled(not completed)
+            action.setEnabled(not completed and not locked)
             layout.addWidget(
                 action,
                 0,
@@ -1554,6 +1560,7 @@ class FocusRow(QWidget):
         icon_fallback="•",
         checked=False,
         on_toggle=None,
+        locked=False,
     ):
         super().__init__()
         self._forced_density = "comfortable"
@@ -1570,10 +1577,11 @@ class FocusRow(QWidget):
         layout.setSpacing(9)
 
         self.checkbox = None
-        if on_toggle is not None:
+        if on_toggle is not None or locked:
             self.checkbox = VisibleCheckBox(checked=checked)
-            self.checkbox.stateChanged.connect(on_toggle)
-            self.checkbox.setEnabled(not completed)
+            if on_toggle is not None:
+                self.checkbox.stateChanged.connect(on_toggle)
+            self.checkbox.setEnabled(not completed and not locked)
             layout.addWidget(
                 self.checkbox,
                 0,
@@ -1597,7 +1605,7 @@ class FocusRow(QWidget):
         title_label.setMinimumWidth(0)
         title_label.setWordWrap(False)
         title_label.setStyleSheet(
-            f"font-weight:700;color:{COLORS['muted'] if completed else accent};"
+            f"font-weight:700;color:{COLORS['muted'] if completed or locked else accent};"
             + ("text-decoration:line-through;" if completed else "")
         )
         title_label.setSizePolicy(
@@ -1626,7 +1634,7 @@ class FocusRow(QWidget):
         duration_label.setObjectName("Muted")
         duration_label.setStyleSheet(
             "color:#8A96AA;font-weight:700;"
-            if completed
+            if completed or locked
             else "font-weight:700;"
         )
         duration_label.setMinimumWidth(34)
@@ -1653,7 +1661,7 @@ class FocusRow(QWidget):
                 True,
             )
             action.clicked.connect(on_action)
-            action.setEnabled(not completed)
+            action.setEnabled(not completed and not locked)
             layout.addWidget(
                 action,
                 0,

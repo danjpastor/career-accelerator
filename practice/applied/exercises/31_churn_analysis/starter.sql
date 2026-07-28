@@ -1,4 +1,4 @@
--- Applied Lab 31: Distinguish customer, logo, and revenue churn
+-- Applied Lab 17: Distinguish customer, logo, and revenue churn
 -- Concepts: churn count, churn rate, beginning population, MRR churn, contraction, expansion, net revenue retention
 -- Run with DuckDB. Keep validation queries separate from the main result.
 

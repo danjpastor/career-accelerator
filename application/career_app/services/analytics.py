@@ -75,7 +75,7 @@ def weekly_hours(conn, reference=None):
            WHERE session_date BETWEEN ? AND ?""",
         (start.isoformat(), end.isoformat()),
     ).fetchone()
-    return float(row["total"] or 0)
+    return round(float(row["total"] or 0), 2)
 
 
 def weekly_session_count(conn, reference=None):

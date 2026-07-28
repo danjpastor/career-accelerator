@@ -1,4 +1,4 @@
-# Applied Lab 02: Clean, merge, append, pivot, and unpivot with Power Query
+# Applied Lab 15: Clean, merge, append, pivot, and unpivot with Power Query
 
 **Category:** Power BI  
 **Roadmap week:** 7  

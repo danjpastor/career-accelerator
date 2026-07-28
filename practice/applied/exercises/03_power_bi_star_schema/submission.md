@@ -1,4 +1,4 @@
-# Applied Lab 03 submission
+# Applied Lab 18 submission
 
 ## Build a star schema and date table
 

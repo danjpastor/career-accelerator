@@ -1,4 +1,4 @@
--- Applied Lab 30: Calculate cohort retention
+-- Applied Lab 13: Calculate cohort retention
 -- Concepts: cohort month, activity month, period index, retained users, retention rate, incomplete cohorts
 -- Run with DuckDB. Keep validation queries separate from the main result.
 

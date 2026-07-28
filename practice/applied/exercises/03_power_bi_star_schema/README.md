@@ -1,4 +1,4 @@
-# Applied Lab 03: Build a star schema and date table
+# Applied Lab 18: Build a star schema and date table
 
 **Category:** Power BI  
 **Roadmap week:** 8  

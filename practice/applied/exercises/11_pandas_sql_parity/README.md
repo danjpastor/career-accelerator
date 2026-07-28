@@ -1,4 +1,4 @@
-# Applied Lab 11: Reproduce a SQL analysis in pandas
+# Applied Lab 31: Reproduce a SQL analysis in pandas
 
 **Category:** Python  
 **Roadmap week:** 10  

@@ -17,79 +17,53 @@ class AppliedLabRunnerError(RuntimeError):
     """Raised when an Applied Lab SQL submission cannot be run safely."""
 
 
-SQL_LAB_PROFILES: dict[int, dict[str, Any]] = {
-    15: {
-        "label": "SQL validation checklist",
-        "minimum_statements": 4,
-        "required_any": [
-            ("row-count check", (r"\bcount\s*\(",)),
-            ("null-quality check", (r"\bis\s+null\b", r"\bcoalesce\s*\(")),
-            ("duplicate or uniqueness check", (r"\bgroup\s+by\b", r"\bdistinct\b")),
-            ("relationship check", (r"\bjoin\b", r"\bnot\s+exists\b")),
-        ],
-    },
-    16: {
-        "label": "broken join diagnosis",
-        "minimum_statements": 2,
-        "required_all": [
-            ("join logic", r"\bjoin\b"),
-            ("revenue aggregation", r"\bsum\s*\("),
-            ("grain-aware grouping", r"\bgroup\s+by\b"),
-        ],
-    },
-    17: {
-        "label": "KPI repair",
-        "minimum_statements": 2,
-        "required_any": [
-            ("numerator or denominator aggregation", (r"\bsum\s*\(", r"\bcount\s*\(")),
-            ("explicit date boundary", (r"\bbetween\b", r">=", r"<")),
-            ("weighted or ratio calculation", (r"\bnullif\s*\(", r"\bcast\s*\(", r"\*\s*1\.0", r"/")),
-        ],
-    },
-    29: {
-        "label": "conversion funnel",
-        "minimum_statements": 1,
-        "required_all": [
-            ("multi-step query", r"\bwith\b"),
-            ("deduplicated users", r"\bcount\s*\(\s*distinct\b"),
-            ("segmented aggregation", r"\bgroup\s+by\b"),
-        ],
-    },
-    30: {
-        "label": "cohort retention",
-        "minimum_statements": 1,
-        "required_all": [
-            ("multi-step cohort query", r"\bwith\b"),
-            ("unique-user counts", r"\bcount\s*\(\s*distinct\b"),
-        ],
-        "required_any": [
-            ("cohort-period date logic", (r"date_diff\s*\(", r"date_trunc\s*\(", r"strftime\s*\(", r"extract\s*\(")),
-        ],
-    },
-    31: {
-        "label": "churn analysis",
-        "minimum_statements": 1,
-        "required_all": [
-            ("multi-step churn query", r"\bwith\b"),
-            ("customer or revenue aggregation", r"\b(?:sum|count)\s*\("),
-        ],
-        "required_any": [
-            ("period comparison", (r"lag\s*\(", r"lead\s*\(", r"date_trunc\s*\(", r"\bjoin\b")),
-        ],
-    },
-    34: {
-        "label": "raw-to-analytics pipeline",
-        "minimum_statements": 4,
-        "required_all": [
-            ("layer creation", r"\bcreate\s+(?:or\s+replace\s+)?(?:temp(?:orary)?\s+)?(?:table|view)\b"),
-            ("final analytical query", r"\bselect\b"),
-        ],
-        "required_any": [
-            ("deduplication or quality logic", (r"row_number\s*\(", r"\bdistinct\b", r"\bgroup\s+by\b")),
-            ("relationship or reconciliation logic", (r"\bjoin\b", r"\bnot\s+exists\b", r"\bsum\s*\(")),
-        ],
-    },
-}
+SQL_LAB_PROFILES: dict[int, dict[str, Any]] = {3: {'label': 'SQL validation checklist',
+     'minimum_statements': 4,
+     'required_any': [('row-count check', ('\\bcount\\s*\\(',)),
+                      ('null-quality check', ('\\bis\\s+null\\b', '\\bcoalesce\\s*\\(')),
+                      ('duplicate or uniqueness check', ('\\bgroup\\s+by\\b', '\\bdistinct\\b')),
+                      ('relationship check', ('\\bjoin\\b', '\\bnot\\s+exists\\b'))]},
+ 4: {'label': 'broken join diagnosis',
+     'minimum_statements': 2,
+     'required_all': [('join logic', '\\bjoin\\b'),
+                      ('revenue aggregation', '\\bsum\\s*\\('),
+                      ('grain-aware grouping', '\\bgroup\\s+by\\b')]},
+ 7: {'label': 'KPI repair',
+     'minimum_statements': 2,
+     'required_any': [('numerator or denominator aggregation',
+                       ('\\bsum\\s*\\(', '\\bcount\\s*\\(')),
+                      ('explicit date boundary', ('\\bbetween\\b', '>=', '<')),
+                      ('weighted or ratio calculation',
+                       ('\\bnullif\\s*\\(', '\\bcast\\s*\\(', '\\*\\s*1\\.0', '/'))]},
+ 6: {'label': 'conversion funnel',
+     'minimum_statements': 1,
+     'required_all': [('multi-step query', '\\bwith\\b'),
+                      ('deduplicated users', '\\bcount\\s*\\(\\s*distinct\\b'),
+                      ('segmented aggregation', '\\bgroup\\s+by\\b')]},
+ 13: {'label': 'cohort retention',
+      'minimum_statements': 1,
+      'required_all': [('multi-step cohort query', '\\bwith\\b'),
+                       ('unique-user counts', '\\bcount\\s*\\(\\s*distinct\\b')],
+      'required_any': [('cohort-period date logic',
+                        ('date_diff\\s*\\(',
+                         'date_trunc\\s*\\(',
+                         'strftime\\s*\\(',
+                         'extract\\s*\\('))]},
+ 17: {'label': 'churn analysis',
+      'minimum_statements': 1,
+      'required_all': [('multi-step churn query', '\\bwith\\b'),
+                       ('customer or revenue aggregation', '\\b(?:sum|count)\\s*\\(')],
+      'required_any': [('period comparison',
+                        ('lag\\s*\\(', 'lead\\s*\\(', 'date_trunc\\s*\\(', '\\bjoin\\b'))]},
+ 29: {'label': 'raw-to-analytics pipeline',
+      'minimum_statements': 4,
+      'required_all': [('layer creation',
+                        '\\bcreate\\s+(?:or\\s+replace\\s+)?(?:temp(?:orary)?\\s+)?(?:table|view)\\b'),
+                       ('final analytical query', '\\bselect\\b')],
+      'required_any': [('deduplication or quality logic',
+                        ('row_number\\s*\\(', '\\bdistinct\\b', '\\bgroup\\s+by\\b')),
+                       ('relationship or reconciliation logic',
+                        ('\\bjoin\\b', '\\bnot\\s+exists\\b', '\\bsum\\s*\\('))]}}
 
 _BLOCKED_SQL = re.compile(
     r"\b(?:attach|detach|copy|export|import|install|load|pragma|call|create\s+secret|"
@@ -118,7 +92,8 @@ def lab_paths(root: Path, number: int, item: dict[str, Any]) -> dict[str, Path]:
     exercise_dir = practice / "exercises" / str(item["slug"])
     starter = exercise_dir / str(item["starter_filename"])
     suffix = starter.suffix
-    submission = practice / "submissions" / f"{int(number):02d}_{item['slug']}{suffix}"
+    submission_slug = str(item.get("submission_slug") or re.sub(r"^\d+_", "", str(item["slug"])))
+    submission = practice / "submissions" / f"{int(number):02d}_{submission_slug}{suffix}"
     return {
         "practice_root": practice,
         "exercise_dir": exercise_dir,

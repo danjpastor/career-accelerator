@@ -1,4 +1,4 @@
-# Applied Lab 18: Repair a misleading analytical story
+# Applied Lab 10: Repair a misleading analytical story
 
 **Category:** Broken Analysis  
 **Roadmap week:** 6  

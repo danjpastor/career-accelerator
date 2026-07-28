@@ -13,6 +13,7 @@ from career_app.data.applied_exercises import (
 from career_app.services import achievements as achievement_service
 from career_app.services import completion_contract
 from career_app.services import content_gates
+from career_app.services import weekly_checks
 from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
     exercise_for_label,
@@ -351,55 +352,55 @@ def normalize_google_checkpoint(conn, state):
     return normalized
 
 
-APPLIED_BRANCHES = {'Power BI': (1, 2, 3, 4, 5, 6, 36),
- 'Excel': (7,),
- 'pandas': (8, 9, 10, 11),
- 'Communication': (12, 13, 14),
- 'SQL Quality': (15, 16, 17, 18),
- 'Timed Requests': (19, 20, 21),
- 'Statistics': (22, 23, 24, 25, 26, 27, 28),
- 'Business Patterns': (29, 30, 31, 32),
- 'Data Workflow': (33, 34),
- 'Responsible AI': (35,)}
+APPLIED_BRANCHES = {'Google Sheets': (1,),
+ 'Statistics': (2, 5, 9, 12, 16, 22, 28),
+ 'SQL Quality': (3, 4, 7, 10),
+ 'Business Patterns': (6, 13, 17, 23),
+ 'Communication': (8, 27, 34),
+ 'Timed Requests': (11, 32, 35),
+ 'Power BI': (14, 15, 18, 19, 25, 26, 36),
+ 'pandas': (20, 21, 30, 31),
+ 'Data Workflow': (24, 29),
+ 'Responsible AI': (33,)}
 
 APPLIED_BRANCH_ORDER = tuple(
     APPLIED_BRANCHES
 )
 
-APPLIED_REQUIRED_SKILLS = {2: {'power_query'},
- 3: {'power_query'},
- 4: {'dimensional_modeling'},
- 5: {'dax_measures'},
- 6: {'report_design'},
- 7: {'data_preparation'},
- 11: {'sql_aggregation'},
- 12: {'analysis_foundations'},
- 15: {'sql_querying'},
- 16: {'sql_joins'},
- 17: {'sql_aggregation', 'sql_date_logic'},
- 18: {'data_storytelling'},
- 19: {'sql_validation', 'analyst_communication'},
- 21: {'analyst_communication'},
- 22: {'analysis_foundations'},
- 23: {'descriptive_statistics', 'data_preparation'},
- 24: {'sampling_bias', 'descriptive_statistics'},
- 25: {'confidence_intervals'},
- 26: {'hypothesis_testing', 'analyst_communication'},
- 27: {'experiment_analysis'},
- 28: {'causal_reasoning', 'python_pandas'},
- 29: {'business_framing', 'sql_aggregation'},
- 30: {'sql_date_logic', 'sql_ctes', 'funnel_analysis'},
- 31: {'cohort_analysis', 'sql_date_logic', 'sql_joins'},
- 32: {'analysis_foundations', 'sql_aggregation', 'churn_analysis'},
- 33: {'python_pandas', 'data_preparation'},
- 34: {'api_ingestion', 'data_cleaning', 'sql_ctes'},
- 35: {'diagnostic_reasoning', 'analyst_communication', 'sql_validation'},
+APPLIED_REQUIRED_SKILLS = {15: {'power_query'},
+ 18: {'power_query'},
+ 19: {'dimensional_modeling'},
+ 25: {'dax_measures'},
+ 26: {'report_design'},
+ 1: {'data_preparation'},
+ 31: {'sql_aggregation'},
+ 8: {'analysis_foundations'},
+ 3: {'sql_querying'},
+ 4: {'sql_joins'},
+ 7: {'sql_date_logic', 'sql_aggregation'},
+ 10: {'data_storytelling'},
+ 11: {'analyst_communication', 'sql_validation'},
+ 35: {'analyst_communication'},
+ 2: {'analysis_foundations'},
+ 5: {'data_preparation', 'descriptive_statistics'},
+ 9: {'sampling_bias', 'descriptive_statistics'},
+ 12: {'confidence_intervals'},
+ 16: {'hypothesis_testing', 'analyst_communication'},
+ 22: {'experiment_analysis'},
+ 28: {'python_pandas', 'causal_reasoning'},
+ 6: {'sql_aggregation', 'business_framing'},
+ 13: {'sql_date_logic', 'sql_ctes', 'funnel_analysis'},
+ 17: {'sql_date_logic', 'cohort_analysis', 'sql_joins'},
+ 23: {'sql_aggregation', 'analysis_foundations', 'churn_analysis'},
+ 24: {'python_pandas', 'data_preparation'},
+ 29: {'sql_ctes', 'api_ingestion', 'data_cleaning'},
+ 33: {'diagnostic_reasoning', 'analyst_communication', 'sql_validation'},
  36: {'power_bi_governance', 'report_design'}}
 
 APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
      'Business Patterns',
      'SQL Quality',
-     'Excel',
+     'Google Sheets',
      'Power BI',
      'pandas',
      'Communication',
@@ -409,14 +410,14 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
  2: ('Statistics',
      'Business Patterns',
      'SQL Quality',
-     'Excel',
+     'Google Sheets',
      'Power BI',
      'pandas',
      'Communication',
      'Data Workflow',
      'Responsible AI',
      'Timed Requests'),
- 3: ('Excel',
+ 3: ('Google Sheets',
      'SQL Quality',
      'Statistics',
      'Communication',
@@ -428,7 +429,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
      'Timed Requests'),
  4: ('Statistics',
      'SQL Quality',
-     'Excel',
+     'Google Sheets',
      'Communication',
      'Business Patterns',
      'Power BI',
@@ -440,7 +441,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
      'Business Patterns',
      'SQL Quality',
      'Communication',
-     'Excel',
+     'Google Sheets',
      'Power BI',
      'pandas',
      'Data Workflow',
@@ -451,7 +452,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
      'Business Patterns',
      'Timed Requests',
      'Communication',
-     'Excel',
+     'Google Sheets',
      'Power BI',
      'pandas',
      'Data Workflow',
@@ -462,7 +463,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
      'Communication',
      'SQL Quality',
      'Timed Requests',
-     'Excel',
+     'Google Sheets',
      'pandas',
      'Data Workflow',
      'Responsible AI'),
@@ -474,7 +475,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
      'SQL Quality',
      'Timed Requests',
      'Data Workflow',
-     'Excel',
+     'Google Sheets',
      'Responsible AI'),
  9: ('Statistics',
      'Business Patterns',
@@ -484,7 +485,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
      'pandas',
      'SQL Quality',
      'Timed Requests',
-     'Excel',
+     'Google Sheets',
      'Responsible AI'),
  10: ('Statistics',
       'Data Workflow',
@@ -494,7 +495,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
       'Communication',
       'Power BI',
       'SQL Quality',
-      'Excel',
+      'Google Sheets',
       'Responsible AI'),
  11: ('Responsible AI',
       'Data Workflow',
@@ -505,7 +506,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
       'pandas',
       'Power BI',
       'SQL Quality',
-      'Excel'),
+      'Google Sheets'),
  12: ('Responsible AI',
       'Data Workflow',
       'Statistics',
@@ -515,7 +516,7 @@ APPLIED_WEEK_BRANCH_PRIORITY = {1: ('Statistics',
       'Power BI',
       'pandas',
       'SQL Quality',
-      'Excel')}
+      'Google Sheets')}
 
 
 SKILL_DEFINITIONS = {
@@ -623,7 +624,7 @@ SKILL_DEFINITIONS = {
         "Career Readiness",
         "Google career course",
     ),
-    "excel_analytics": ("Excel Analysis and Controls", "Complete the Excel analyst workbook lab"),
+    "excel_analytics": ("Google Sheets Analysis and Controls", "Complete the Google Sheets analyst spreadsheet lab"),
     "power_query": ("Power Query Data Preparation", "Complete an approved Power Query lab"),
     "dimensional_modeling": ("Dimensional Modeling", "Complete the Power BI star-schema lab"),
     "dax_measures": ("DAX Measure Development", "Complete the DAX measures lab"),
@@ -635,22 +636,22 @@ SKILL_DEFINITIONS = {
     "diagnostic_reasoning": ("Diagnosing Broken Analyses", "Complete a broken-analysis diagnostic lab"),
     "timed_analysis": ("Timed Analytical Problem Solving", "Complete a timed analyst request"),
     "statistics_foundations": ('Statistics Foundations', 'Complete the descriptive-statistics and sampling labs'),
-    "descriptive_statistics": ('Descriptive Statistics and Distributions', 'Complete Applied Lab 22'),
-    "sampling_bias": ('Sampling and Bias Evaluation', 'Complete Applied Lab 23'),
-    "confidence_intervals": ('Confidence Intervals and Margin of Error', 'Complete Applied Lab 24'),
+    "descriptive_statistics": ('Descriptive Statistics and Distributions', 'Complete Applied Lab 02'),
+    "sampling_bias": ('Sampling and Bias Evaluation', 'Complete Applied Lab 05'),
+    "confidence_intervals": ('Confidence Intervals and Margin of Error', 'Complete Applied Lab 09'),
     "inferential_statistics": ('Inferential Statistics', 'Complete approved confidence-interval or hypothesis-testing work'),
-    "hypothesis_testing": ('Hypothesis Testing', 'Complete Applied Lab 25'),
-    "experiment_analysis": ('A/B-Test and Experiment Analysis', 'Complete Applied Lab 26'),
-    "causal_reasoning": ('Correlation and Causal Reasoning', 'Complete Applied Lab 27'),
+    "hypothesis_testing": ('Hypothesis Testing', 'Complete Applied Lab 12'),
+    "experiment_analysis": ('A/B-Test and Experiment Analysis', 'Complete Applied Lab 16'),
+    "causal_reasoning": ('Correlation and Causal Reasoning', 'Complete Applied Lab 22'),
     "regression_interpretation": ('Linear Regression Interpretation', 'Complete Applied Lab 28'),
-    "funnel_analysis": ('Conversion Funnel Analysis', 'Complete Applied Lab 29'),
-    "cohort_analysis": ('Cohort and Retention Analysis', 'Complete Applied Lab 30'),
-    "churn_analysis": ('Customer and Revenue Churn Analysis', 'Complete Applied Lab 31'),
-    "variance_analysis": ('Forecast and Variance Analysis', 'Complete Applied Lab 32'),
-    "api_ingestion": ('REST API and JSON Ingestion', 'Complete Applied Lab 33'),
-    "data_pipeline": ('Reproducible Analytics Pipeline', 'Complete Applied Lab 34'),
-    "data_lineage": ('Data Lineage and Layered Modeling', 'Complete Applied Lab 34'),
-    "ai_validation": ('Responsible AI-Assisted Analysis Validation', 'Complete Applied Lab 35'),
+    "funnel_analysis": ('Conversion Funnel Analysis', 'Complete Applied Lab 06'),
+    "cohort_analysis": ('Cohort and Retention Analysis', 'Complete Applied Lab 13'),
+    "churn_analysis": ('Customer and Revenue Churn Analysis', 'Complete Applied Lab 17'),
+    "variance_analysis": ('Forecast and Variance Analysis', 'Complete Applied Lab 23'),
+    "api_ingestion": ('REST API and JSON Ingestion', 'Complete Applied Lab 24'),
+    "data_pipeline": ('Reproducible Analytics Pipeline', 'Complete Applied Lab 29'),
+    "data_lineage": ('Data Lineage and Layered Modeling', 'Complete Applied Lab 29'),
+    "ai_validation": ('Responsible AI-Assisted Analysis Validation', 'Complete Applied Lab 33'),
     "power_bi_performance": ('Power BI Performance Optimization', 'Complete optional Applied Lab 36'),
 
 }
@@ -854,7 +855,7 @@ SKILL_CATEGORY = {
     "python_pandas": "Python",
     "portfolio_delivery": "Portfolio",
     "career_readiness": "Career",
-    "excel_analytics": "Excel",
+    "excel_analytics": "Google Sheets",
     "power_query": "Power BI",
     "dimensional_modeling": "Power BI",
     "dax_measures": "Power BI",
@@ -2653,7 +2654,7 @@ def _has_dashboard_artifact(
     conn,
     completed,
 ):
-    if 5 in completed:
+    if 25 in completed:
         return True
 
     row = conn.execute(
@@ -2762,8 +2763,12 @@ def applied_lab_readiness(
     if not datacamp_gate["ready"]:
         missing.append(datacamp_gate["summary"])
 
+    lab_week = int(item["week"])
+    if lab_week > 1 and not weekly_checks.passed(conn, lab_week - 1):
+        missing.append(f"Pass {weekly_checks.title(lab_week - 1)}")
+
     if (
-        number == 13
+        number == 27
         and not _has_dashboard_artifact(
             conn,
             completed,
@@ -2772,29 +2777,29 @@ def applied_lab_readiness(
         missing.append(
             (
                 "Complete a dashboard artifact "
-                "(Applied Lab 05 or equivalent)"
+                "(Applied Lab 25 or equivalent)"
             )
         )
 
     # Timed requests are deliberately cross-functional.
-    if number == 19:
-        if 12 not in completed and (
+    if number == 11:
+        if 8 not in completed and (
             "analyst_communication"
             not in unlocked
         ):
             missing.append(
                 (
-                    "Complete Applied Lab 12 "
+                    "Complete Applied Lab 08 "
                     "or equivalent communication evidence"
                 )
             )
-        if 15 not in completed and (
+        if 3 not in completed and (
             "sql_validation"
             not in unlocked
         ):
             missing.append(
                 (
-                    "Complete Applied Lab 15 "
+                    "Complete Applied Lab 03 "
                     "or equivalent validation evidence"
                 )
             )
@@ -3244,19 +3249,21 @@ def _sync_sprint_prerequisites(
                 applied_number,
                 unlocked,
             )
-            reason = (
-                (
+            if not readiness["ready"]:
+                reason = (
                     "Unlock first: "
-                    + "; ".join(
-                        readiness["missing"]
-                    )
+                    + "; ".join(readiness["missing"])
                 )
-                if not readiness["ready"]
-                else (
+            elif active_tracks.get(task_id) == "applied":
+                # The adaptive track has selected this exact lab and every
+                # content gate is satisfied. Do not immediately re-block the
+                # active task with the generic branch-waiting message.
+                reason = None
+            else:
+                reason = (
                     "Waiting for the Applied Labs "
                     "adaptive track to select this branch."
                 )
-            )
 
         google_match = re.match(
             r"^\[Google Course (\d+)\]",
@@ -5994,10 +6001,15 @@ def sql_problem_readiness(
     if not datacamp_gate["ready"]:
         missing_names.append(datacamp_gate["summary"])
 
+    problem_week = int(SQL_PROBLEM_WEEK.get(title) or 1)
+    prior_check_ready = problem_week <= 1 or weekly_checks.passed(conn, problem_week - 1)
+    if not prior_check_ready:
+        missing_names.append(f"Pass {weekly_checks.title(problem_week - 1)}")
+
     evidence_map = _skill_evidence(conn, state)
 
     return {
-        "ready": not missing and datacamp_gate["ready"],
+        "ready": not missing and datacamp_gate["ready"] and prior_check_ready,
         "required_keys": sorted(required),
         "required_names": [
             SKILL_DEFINITIONS[key][0]

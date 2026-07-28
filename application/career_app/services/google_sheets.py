@@ -188,3 +188,138 @@ def read_sheet(spreadsheet_id: str, sheet_name: str) -> list[list[Any]]:
         dateTimeRenderOption="FORMATTED_STRING",
     ).execute()
     return [list(row) for row in response.get("values", [])]
+
+
+def create_applied_lab_spreadsheet(
+    *,
+    title: str,
+    source_tables: dict[str, tuple[Iterable[str], Iterable[Iterable[Any]]]],
+) -> dict[str, Any]:
+    """Create the guided Google Sheets artifact for Applied Lab 01.
+
+    Raw source tabs are populated and protected with warning-only protection.
+    Analysis tabs contain structure and guidance, but no completed learner formulas.
+    """
+    sheets, drive = _services()
+    core_tabs = [
+        "START HERE",
+        "Controls",
+        "Order Analysis",
+        "Management Summary",
+        "Reconciliation",
+        "Data Dictionary",
+    ]
+    raw_tabs = [f"{name[:80]} - Raw" for name in source_tables]
+    requested_tabs = core_tabs + raw_tabs
+    spreadsheet = sheets.spreadsheets().create(
+        body={
+            "properties": {"title": title},
+            "sheets": [{"properties": {"title": name}} for name in requested_tabs],
+        },
+        fields="spreadsheetId,spreadsheetUrl,sheets.properties",
+    ).execute()
+    spreadsheet_id = str(spreadsheet["spreadsheetId"])
+    properties = spreadsheet.get("sheets") or []
+    ids = {
+        str(row.get("properties", {}).get("title")): int(row.get("properties", {}).get("sheetId", 0))
+        for row in properties
+    }
+
+    starter_values = {
+        "START HERE": [
+            ["Northstar Operations — Google Sheets Analyst Lab"],
+            ["Purpose", "Build a controlled one-row-per-order analysis and management summary."],
+            ["Workflow", "Review raw tabs → define grain → build Order Analysis → add Controls → build pivots/charts → reconcile revenue → complete handoff."],
+            ["Rule", "Do not edit the Raw tabs. Build calculations in the analysis tabs."],
+            ["Required output", "Management Summary with five KPIs, a regional comparison, two decision-supporting charts, and documented limitations."],
+        ],
+        "Controls": [
+            ["Control", "Selected value", "Definition / allowed values"],
+            ["Month", "All", "All or a valid reporting month from the source data"],
+            ["Region", "All", "All or a valid customer region"],
+            ["KPI definitions", "", "Document numerator, denominator, date rule, and missing-data behavior"],
+            ["Assumptions", "", "Record exclusions, data-quality decisions, and refresh steps"],
+        ],
+        "Order Analysis": [[
+            "order_id", "order_date", "customer_id", "customer_name", "region",
+            "product_id", "product_name", "quantity", "unit_price", "returned_quantity",
+            "gross_revenue", "net_revenue", "quality_flag"
+        ]],
+        "Management Summary": [
+            ["Management Summary"],
+            ["Selected month", "=Controls!B2", "Selected region", "=Controls!B3"],
+            ["KPI", "Value", "Definition"],
+            ["Order count", "", "Unique orders after filters"],
+            ["Gross revenue", "", "Quantity × unit price before returns"],
+            ["Net revenue", "", "Revenue after returned quantity"],
+            ["Return rate", "", "Document the chosen denominator"],
+            ["On-time ticket rate", "", "Document treatment of open tickets"],
+        ],
+        "Reconciliation": [["Month", "Calculated net revenue", "Finance report revenue", "Difference", "Status", "Explanation"]],
+        "Data Dictionary": [["Sheet", "Field", "Meaning", "Data type", "Source / formula", "Notes"]],
+    }
+    for tab, values in starter_values.items():
+        sheets.spreadsheets().values().update(
+            spreadsheetId=spreadsheet_id,
+            range=f"'{tab}'!A1",
+            valueInputOption="USER_ENTERED",
+            body={"values": values},
+        ).execute()
+
+    for (table_name, (headers, rows)), tab in zip(source_tables.items(), raw_tabs):
+        values = [list(headers)] + [list(row) for row in rows]
+        for start in range(0, len(values), 500):
+            sheets.spreadsheets().values().update(
+                spreadsheetId=spreadsheet_id,
+                range=f"'{tab}'!A{start + 1}",
+                valueInputOption="RAW",
+                body={"values": values[start:start + 500]},
+            ).execute()
+
+    requests: list[dict[str, Any]] = []
+    for tab in requested_tabs:
+        sheet_id = ids.get(tab)
+        if sheet_id is None:
+            continue
+        requests.extend([
+            {
+                "updateSheetProperties": {
+                    "properties": {"sheetId": sheet_id, "gridProperties": {"frozenRowCount": 1}},
+                    "fields": "gridProperties.frozenRowCount",
+                }
+            },
+            {
+                "repeatCell": {
+                    "range": {"sheetId": sheet_id, "startRowIndex": 0, "endRowIndex": 1},
+                    "cell": {"userEnteredFormat": {"textFormat": {"bold": True}}},
+                    "fields": "userEnteredFormat.textFormat.bold",
+                }
+            },
+        ])
+    for tab in raw_tabs:
+        sheet_id = ids.get(tab)
+        if sheet_id is not None:
+            requests.append({
+                "protectRange": {
+                    "protectedRange": {
+                        "range": {"sheetId": sheet_id},
+                        "description": "Raw source tab managed by Career Accelerator",
+                        "warningOnly": True,
+                    }
+                }
+            })
+    if requests:
+        sheets.spreadsheets().batchUpdate(
+            spreadsheetId=spreadsheet_id,
+            body={"requests": requests},
+        ).execute()
+    drive.files().get(fileId=spreadsheet_id, fields="id,name,modifiedTime").execute()
+    return {
+        "spreadsheet_id": spreadsheet_id,
+        "spreadsheet_url": spreadsheet.get(
+            "spreadsheetUrl",
+            f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit",
+        ),
+        "source_tabs": raw_tabs,
+        "analysis_tabs": core_tabs,
+    }

@@ -1,4 +1,4 @@
-# Applied Lab 08: Load and profile data with pandas
+# Applied Lab 20: Load and profile data with pandas
 
 **Category:** Python  
 **Roadmap week:** 8  

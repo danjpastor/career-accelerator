@@ -1,3 +1,3 @@
 # Operations Practice Dataset
 
-Fictional tables for Excel, pandas, SQL validation, diagnostic, and timed labs.
+Fictional tables for Google Sheets, pandas, SQL validation, diagnostic, and timed labs.

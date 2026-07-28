@@ -365,6 +365,82 @@ def duplicate_activity_groups(conn):
     }
 
 
+def repair_duplicate_activity_groups(conn):
+    """Collapse duplicate managed achievements without touching user data.
+
+    Achievement rows are display records derived from completed tasks, SQL
+    problems, and portfolio milestones. Legacy builds could create both a
+    generic ``task:`` achievement and a specialized achievement for the same
+    accomplishment, or duplicate generic task achievements with different
+    task ids. Keep one canonical row per logical accomplishment and preserve
+    the earliest unlock timestamp.
+    """
+    duplicate_groups = duplicate_activity_groups(conn)
+    if not duplicate_groups:
+        return []
+
+    repaired = []
+    for identity, keys in duplicate_groups.items():
+        placeholders = ",".join("?" for _ in keys)
+        rows = conn.execute(
+            f"""SELECT id,achievement_key,title,description,unlocked_at
+                  FROM achievements
+                  WHERE achievement_key IN ({placeholders})""",
+            tuple(keys),
+        ).fetchall()
+        if len(rows) < 2:
+            continue
+
+        def priority(row):
+            key = str(row["achievement_key"] or "")
+            if key.startswith("sql-problem:"):
+                rank = 0
+            elif key.startswith("project-task:"):
+                rank = 0
+            elif key.startswith("task:"):
+                rank = 1
+            else:
+                rank = 2
+            return (
+                rank,
+                str(row["unlocked_at"] or "9999-12-31 23:59:59"),
+                int(row["id"]),
+            )
+
+        keeper = min(rows, key=priority)
+        earliest_unlocked = min(
+            str(row["unlocked_at"] or "9999-12-31 23:59:59")
+            for row in rows
+        )
+        if earliest_unlocked != "9999-12-31 23:59:59":
+            conn.execute(
+                """UPDATE achievements
+                   SET unlocked_at=?
+                   WHERE id=?""",
+                (earliest_unlocked, int(keeper["id"])),
+            )
+
+        removed_keys = []
+        for row in rows:
+            if int(row["id"]) == int(keeper["id"]):
+                continue
+            conn.execute(
+                "DELETE FROM achievements WHERE id=?",
+                (int(row["id"]),),
+            )
+            removed_keys.append(str(row["achievement_key"]))
+
+        repaired.append(
+            {
+                "identity": identity,
+                "kept": str(keeper["achievement_key"]),
+                "removed": removed_keys,
+            }
+        )
+
+    return repaired
+
+
 
 def completed_sql_rows(conn):
     return conn.execute(

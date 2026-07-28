@@ -1,4 +1,4 @@
-# Applied Lab 06: Document publishing, refresh, and row-level security
+# Applied Lab 26: Document publishing, refresh, and row-level security
 
 **Category:** Power BI  
 **Roadmap week:** 9  

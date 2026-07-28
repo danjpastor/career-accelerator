@@ -1,4 +1,4 @@
-# Applied Lab 15: Build and apply a SQL validation checklist
+# Applied Lab 03: Build and apply a SQL validation checklist
 
 **Category:** SQL Validation  
 **Roadmap week:** 4  

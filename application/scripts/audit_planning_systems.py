@@ -102,7 +102,28 @@ def _current_state_audit(errors: list[str]) -> None:
             "Next Tasks does not begin with the active Today’s Focus assignments",
             errors,
         )
-        _assert(all(bool(item.get("ready")) for item in focus + next_items), "A locked task entered a ready planning surface", errors)
+        locked_focus = [item for item in focus if not bool(item.get("ready"))]
+        _assert(
+            all(
+                item.get("kind") == "datacamp_chapter"
+                and str(item.get("prerequisite_reason") or "").startswith("Complete ")
+                for item in locked_focus
+            ),
+            "A non-DataCamp or future-scheduled lock entered Today’s Focus",
+            errors,
+        )
+        _assert(
+            all(
+                bool(item.get("ready"))
+                or (
+                    item.get("kind") == "datacamp_chapter"
+                    and str(item.get("prerequisite_reason") or "").startswith("Complete ")
+                )
+                for item in next_items
+            ),
+            "Next Tasks contains an unsupported locked item",
+            errors,
+        )
         google_ready = [item for item in unified_tasks.ready_tasks(conn, week) if item.get("kind") == "google"]
         if google_ready and focus:
             _assert(focus[0].get("kind") == "google", "Google Certificate is not first priority", errors)
@@ -225,6 +246,22 @@ def _same_week_catchup_audit(errors: list[str]) -> None:
             "Same-week overdue chapter entered the new-work quota instead of Catch-Up",
             errors,
         )
+        _assert(
+            any(
+                item["id"] == second["id"]
+                and not bool(item.get("ready"))
+                and str(item.get("prerequisite_reason") or "").startswith("Complete ")
+                for item in focus
+            ),
+            "The due next DataCamp chapter is not shown as a locked Focus row",
+            errors,
+        )
+        focus_ids = [int(item["id"]) for item in focus]
+        _assert(
+            focus_ids.index(first["id"]) < focus_ids.index(second["id"]),
+            "The prerequisite chapter is not ordered before its locked successor",
+            errors,
+        )
         snapshot_row = conn.execute(
             "SELECT value FROM settings WHERE key=?",
             (f"daily_focus_snapshot_v2:{date.today().isoformat()}",),
@@ -240,7 +277,12 @@ def _same_week_catchup_audit(errors: list[str]) -> None:
         datacamp.reconcile(conn)
         focus_after = unified_tasks.daily_plan(conn, 1)
         next_after = unified_tasks.next_tasks(conn, 1)
-        _assert(second["id"] not in {item["id"] for item in focus_after}, "Completing Catch-Up pulled replacement new work into frozen Today’s Focus", errors)
+        second_after = next((item for item in focus_after if item["id"] == second["id"]), None)
+        _assert(
+            second_after is not None and bool(second_after.get("ready")),
+            "The already-visible locked chapter did not become actionable after its prerequisite completed",
+            errors,
+        )
         expected_prefix = [
             int(item["id"])
             for item in focus_after[: unified_tasks.MAX_NEXT_TASKS]
@@ -304,6 +346,42 @@ def main() -> int:
         "DataCamp Catch-Up metadata is not shortened",
         errors,
     )
+    _assert(
+        "QTimer.singleShot(0, self._refresh_after_session_log)" in main_source
+        and "self.refresh_all()" not in main_source[
+            main_source.index("    def save_session("):
+            main_source.index("    def add_evidence(")
+        ],
+        "Study Session logging still uses the blocking full-application refresh",
+        errors,
+    )
+    focus_segment = main_source[
+        main_source.index("        def add_focus_item(item):"):
+        main_source.index("        if focus_summary[")
+    ]
+    next_tasks_segment = main_source[
+        main_source.index("    def _refresh_dashboard_next_tasks(self, week):"):
+        main_source.index("    def refresh_dashboard(")
+    ]
+    _assert(
+        'locked = bool(not completed and not item.get("ready", True))' in focus_segment
+        and 'if locked:' in focus_segment
+        and 'locked=locked' in focus_segment,
+        "Locked DataCamp focus rows are not rendered as disabled prerequisite guidance",
+        errors,
+    )
+    _assert(
+        'locked_focus_items' in next_tasks_segment
+        and '[*locked_focus_items, *coming_soon]' in next_tasks_segment
+        and 'visible_items.append(("coming_soon", item))' in next_tasks_segment,
+        "Locked Focus chapters are not grouped beneath Coming Soon in Next Tasks",
+        errors,
+    )
+    _assert(
+        'f"{week_hours:.2f}h"' in main_source,
+        "Study-time totals are not formatted to two decimal places",
+        errors,
+    )
     if not errors:
         _current_state_audit(errors)
         _same_week_catchup_audit(errors)
@@ -315,10 +393,11 @@ def main() -> int:
         return 1
 
     print("Planning systems audit passed")
-    print("- Today’s Focus is mirrored at the start of Next Tasks, with Coming Soon and Current Sprint linked")
+    print("- Ready Focus work stays above the Next Tasks divider; locked Focus previews are grouped under Coming Soon")
     print("- Today’s Focus and Next Tasks both expose the canonical non-blocking completion flow")
     print("- Coming Soon has a separate divider and DataCamp Catch-Up metadata stays compact")
-    print("- Google remains first priority; DataCamp prerequisites and Catch-Up are sequential")
+    print("- Google remains first priority; due locked DataCamp chapters stay visible and sequential")
+    print("- Study Session logging avoids the full-application refresh and study totals use two decimals")
     print("- DataCamp open, complete, history, undo, weekly totals, and portfolio gates share one progress source")
     print("- all DataCamp chapter tasks resolve to the DataCamp logo")
     return 0

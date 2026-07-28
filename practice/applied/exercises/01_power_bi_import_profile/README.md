@@ -1,4 +1,4 @@
-# Applied Lab 01: Import and profile operational data in Power BI
+# Applied Lab 14: Import and profile operational data in Power BI
 
 **Category:** Power BI  
 **Roadmap week:** 7  

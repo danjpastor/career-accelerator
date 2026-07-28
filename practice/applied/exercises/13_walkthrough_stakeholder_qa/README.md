@@ -1,4 +1,4 @@
-# Applied Lab 13: Prepare a dashboard walkthrough and stakeholder Q&A
+# Applied Lab 27: Prepare a dashboard walkthrough and stakeholder Q&A
 
 **Category:** Communication  
 **Roadmap week:** 9  

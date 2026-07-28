@@ -106,44 +106,42 @@ SKILL_TERMINAL_CHAPTER = {
 # The terminal chapter is the last chapter that must be complete for that lab.
 # chapters_through() deliberately includes all earlier assigned DataCamp work,
 # ensuring a lab cannot leapfrog previous weeks.
-APPLIED_LAB_TERMINAL_CHAPTER = {
-    1: "w07_prep_powerbi_02",
-    2: "w07_prep_powerbi_04",
-    3: "w07_model_powerbi_04",
-    4: "w07_dax_powerbi_03",
-    5: "w07_churn_powerbi_03",
-    6: "w07_churn_powerbi_03",
-    7: "w02_pivot_sheets_04",
-    8: "w08_intermediate_python_02",
-    9: "w08_pandas_01",
-    10: "w08_pandas_02",
-    11: "w08_pandas_04",
-    12: "w04_manipulation_sql_04",
-    13: "w07_churn_powerbi_03",
-    14: "w08_pandas_04",
-    15: "w04_manipulation_sql_03",
-    16: "w04_joining_sql_03",
-    17: "w05_functions_sql_02",
-    18: "w06_database_design_04",
-    19: "w06_database_design_04",
-    20: "w08_pandas_04",
-    21: "w08_pandas_04",
-    22: "w03_intermediate_sql_04",
-    23: "w04_manipulation_sql_04",
-    24: "w05_functions_sql_02",
-    25: "w06_database_design_04",
-    26: "w07_churn_powerbi_03",
-    27: "w08_pandas_04",
-    28: "w08_pandas_04",
-    29: "w04_manipulation_sql_03",
-    30: "w06_database_design_04",
-    31: "w07_churn_powerbi_03",
-    32: "w08_pandas_04",
-    33: "w08_pandas_01",
-    34: "w08_pandas_04",
-    35: "w08_pandas_04",
-    36: "w07_churn_powerbi_03",
-}
+APPLIED_LAB_TERMINAL_CHAPTER = {14: 'w07_prep_powerbi_02',
+ 15: 'w07_prep_powerbi_04',
+ 18: 'w07_model_powerbi_04',
+ 19: 'w07_dax_powerbi_03',
+ 25: 'w07_churn_powerbi_03',
+ 26: 'w07_churn_powerbi_03',
+ 1: 'w02_pivot_sheets_04',
+ 20: 'w08_intermediate_python_02',
+ 21: 'w08_pandas_01',
+ 30: 'w08_pandas_02',
+ 31: 'w08_pandas_04',
+ 8: 'w04_manipulation_sql_04',
+ 27: 'w07_churn_powerbi_03',
+ 34: 'w08_pandas_04',
+ 3: 'w04_manipulation_sql_03',
+ 4: 'w04_joining_sql_03',
+ 7: 'w05_functions_sql_02',
+ 10: 'w06_database_design_04',
+ 11: 'w06_database_design_04',
+ 32: 'w08_pandas_04',
+ 35: 'w08_pandas_04',
+ 2: 'w03_intermediate_sql_04',
+ 5: 'w04_manipulation_sql_04',
+ 9: 'w05_functions_sql_02',
+ 12: 'w06_database_design_04',
+ 16: 'w07_churn_powerbi_03',
+ 22: 'w08_pandas_04',
+ 28: 'w08_pandas_04',
+ 6: 'w04_manipulation_sql_03',
+ 13: 'w06_database_design_04',
+ 17: 'w07_churn_powerbi_03',
+ 23: 'w08_pandas_04',
+ 24: 'w08_pandas_01',
+ 29: 'w08_pandas_04',
+ 33: 'w08_pandas_04',
+ 36: 'w07_churn_powerbi_03'}
 
 
 DUCKDB_TERMINAL_CHAPTER = {
@@ -288,12 +286,12 @@ def audit_contract() -> list[str]:
         extra = sorted(set(DUCKDB_TERMINAL_CHAPTER) - set(range(1, 19)))
         errors.append(f"DuckDB chapter map mismatch; missing={missing}, extra={extra}")
 
-    # Lab 07 is the key spreadsheet gate requested by the learner.
+    # Lab 01 is the Google Sheets gate and requires all Week 1–2 spreadsheet chapters.
     expected_lab_07 = {
         chapter.key for chapter in DATACAMP_CHAPTERS if chapter.week in {1, 2}
     }
-    actual_lab_07 = set(requirements_for_applied_lab(7))
-    if expected_lab_07 != actual_lab_07:
-        errors.append("Applied Lab 07 does not require every Week 1–2 DataCamp chapter.")
+    actual_lab_01 = set(requirements_for_applied_lab(1))
+    if expected_lab_07 != actual_lab_01:
+        errors.append("Applied Lab 01 does not require every Week 1–2 DataCamp spreadsheet chapter.")
 
     return errors

@@ -119,7 +119,7 @@ WEEKLY_GUIDANCE = {
 }
 
 
-APPLIED_LAB_SUMMARY = {3: ['Excel analyst workbook'],
+APPLIED_LAB_SUMMARY = {3: ['Google Sheets analyst spreadsheet'],
  4: ['Descriptive statistics and distributions',
      'SQL validation checklist',
      'Broken join diagnosis'],

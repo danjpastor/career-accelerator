@@ -1,4 +1,4 @@
-# Applied Lab 06 submission
+# Applied Lab 26 submission
 
 ## Document publishing, refresh, and row-level security
 

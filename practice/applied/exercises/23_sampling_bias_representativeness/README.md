@@ -1,4 +1,4 @@
-# Applied Lab 23: Evaluate sampling bias and representativeness
+# Applied Lab 05: Evaluate sampling bias and representativeness
 
 **Category:** Statistics  
 **Roadmap week:** 5  

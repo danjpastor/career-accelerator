@@ -38,7 +38,7 @@ from career_app.theme import COLORS
 from career_app.ui.course_ui import (
     CoursePageWidget, FeedbackLabel, RotatedLabel, SqlCodeEditor,
 )
-from career_app.ui.excel_lab_workspace import ExcelAnalystLabStudio
+from career_app.ui.google_sheets_lab_workspace import GoogleSheetsAnalystLabStudio
 from career_app.ui.widgets import Card
 
 
@@ -285,10 +285,10 @@ class AppliedLabsWidget(QWidget):
         sql_layout.addWidget(self.result_table)
         practice_layout.addWidget(self.sql_section)
 
-        self.excel_studio = ExcelAnalystLabStudio(self.root)
-        self.excel_studio.changed.connect(self._excel_studio_changed)
-        self.excel_studio.hide()
-        practice_layout.addWidget(self.excel_studio, 1)
+        self.sheets_studio = GoogleSheetsAnalystLabStudio(self.root)
+        self.sheets_studio.changed.connect(self._sheets_studio_changed)
+        self.sheets_studio.hide()
+        practice_layout.addWidget(self.sheets_studio, 1)
 
         progress_card = QFrame()
         progress_card.setObjectName("AppliedLabProgressCard")
@@ -533,23 +533,21 @@ class AppliedLabsWidget(QWidget):
         only a few vague bullets. The README is now the primary workspace
         guide, with a concise lab brief and tool-specific setup placed above it.
         """
-        if int(number) == 7:
+        if int(number) == 1:
             return (
                 f"# {item['title']}\n\n"
-                "> You are building a real analyst handoff, not filling out a text worksheet. "
-                "Use the **Excel Analyst Workbook Studio** directly below to move through seven "
-                "tracked stages, inspect the supplied source files, create the workbook shell, "
-                "record evidence, and complete the final review.\n\n"
+                "> This is your first applied spreadsheet lab. It is a guided practice project, "
+                "not a portfolio build. Work through four short stages using only the Google Sheets "
+                "skills introduced during Weeks 1–2.\n\n"
                 "## Business assignment\n\n"
-                "Turn the seven operations CSV files into a refreshable Excel workbook with an "
-                "order-level analysis table, controlled KPIs, a one-page Management Summary, "
-                "and an independent monthly revenue reconciliation.\n\n"
+                "Use a small order table and a four-row target table to clean text, create formulas, "
+                "summarize sales, build one pivot table, and explain one result. The Studio tells you "
+                "what to build and gives you checkpoints without completing the sheet for you.\n\n"
                 "## Required handoff\n\n"
-                "- `07_operations_analyst_workbook.xlsx`\n"
-                "- Management Summary screenshot\n"
-                "- Completed Studio evidence and final review\n\n"
-                "Select **Open Full Guide** for the complete written reference. The Studio is the "
-                "primary workspace for completing this lab.\n"
+                "- Shareable Google Sheets URL\n"
+                "- Four completed Studio stages\n"
+                "- A short two-to-three-sentence takeaway\n\n"
+                "Select **Open Full Guide** whenever you need the complete step-by-step reference.\n"
             )
 
         instructions_path = applied_lab_runner.lab_paths(self.root, number, item)["instructions"]
@@ -720,10 +718,10 @@ class AppliedLabsWidget(QWidget):
         self.notes.setPlainText(record.get("notes", ""))
 
         sql_lab = applied_lab_runner.is_sql_lab(item)
-        excel_studio_lab = int(number) == 7
-        self.excel_studio.setVisible(excel_studio_lab)
-        if excel_studio_lab:
-            self.excel_studio.refresh()
+        sheets_studio_lab = int(number) == 1
+        self.sheets_studio.setVisible(sheets_studio_lab)
+        if sheets_studio_lab:
+            self.sheets_studio.refresh()
         self.sql_section.setVisible(sql_lab)
         self.check_button.setVisible(sql_lab)
         self.run_button.setVisible(sql_lab)
@@ -764,7 +762,7 @@ class AppliedLabsWidget(QWidget):
             self.run_button,
             self.check_button,
             self.sql_editor,
-            self.excel_studio,
+            self.sheets_studio,
         ):
             widget.setEnabled(bool(ready))
 
@@ -789,7 +787,7 @@ class AppliedLabsWidget(QWidget):
             self.run_button,
             self.check_button,
             self.sql_editor,
-            self.excel_studio,
+            self.sheets_studio,
         ):
             widget.setEnabled(enabled)
 
@@ -917,6 +915,13 @@ class AppliedLabsWidget(QWidget):
             return "the default application"
         raise RuntimeError("No supported file-opening command was found.")
 
+    def _notify(self, message: str, timeout_ms: int = 4200) -> None:
+        """Use the application's floating notification without changing page geometry."""
+        window = self.window()
+        callback = getattr(window, "_notify", None)
+        if callable(callback):
+            callback(str(message), int(timeout_ms))
+
     def open_reference(self, kind: str) -> None:
         if self.current_number is None or self.current_item is None:
             return
@@ -930,7 +935,7 @@ class AppliedLabsWidget(QWidget):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Open Lab File", str(exc))
             return
-        self.window().statusBar().showMessage(f"Opened {path.name} in {app_name}.", 4200)
+        self._notify(f"Opened {path.name} in {app_name}.", 4200)
 
     def open_dataset_folder(self) -> None:
         if self.current_number is None or self.current_item is None:
@@ -943,7 +948,7 @@ class AppliedLabsWidget(QWidget):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Open Dataset Folder", str(exc))
             return
-        self.window().statusBar().showMessage(f"Opened dataset folder in {app_name}.", 4200)
+        self._notify(f"Opened dataset folder in {app_name}.", 4200)
 
     def open_submissions_folder(self) -> None:
         path = self.root / "practice" / "applied" / "submissions"
@@ -953,7 +958,7 @@ class AppliedLabsWidget(QWidget):
         except Exception as exc:
             QMessageBox.warning(self, "Could Not Open Submissions", str(exc))
             return
-        self.window().statusBar().showMessage(f"Opened submissions in {app_name}.", 4200)
+        self._notify(f"Opened submissions in {app_name}.", 4200)
 
     def open_submission(self) -> None:
         if self.current_number is None or self.current_item is None:
@@ -973,13 +978,13 @@ class AppliedLabsWidget(QWidget):
             return
         if self.status_combo.currentText() == "Not Started":
             self.status_combo.setCurrentText("In Progress")
-        self.window().statusBar().showMessage(f"Opened {path.name} in {app_name}.", 4200)
+        self._notify(f"Opened {path.name} in {app_name}.", 4200)
 
     def save_progress(self) -> None:
         if self.current_number is None or self.current_item is None:
             return
-        if self.current_number == 7:
-            self.excel_studio.save_all()
+        if self.current_number == 1:
+            self.sheets_studio.save_all()
         if applied_lab_runner.is_sql_lab(self.current_item):
             if self.save_sql_submission() is None:
                 return
@@ -993,6 +998,7 @@ class AppliedLabsWidget(QWidget):
         self.workspace_status.setText(
             f"{record['status']} • Progress saved • {self.current_item['concepts']}"
         )
+        self._notify("Applied Lab progress saved.")
         self.changed.emit()
 
     def mark_complete(self) -> None:
@@ -1009,13 +1015,13 @@ class AppliedLabsWidget(QWidget):
                 + "\n".join(f"• {reason}" for reason in readiness["missing"]),
             )
             return
-        if self.current_number == 7:
-            issues = self.excel_studio.completion_issues()
+        if self.current_number == 1:
+            issues = self.sheets_studio.completion_issues()
             if issues:
                 QMessageBox.warning(
                     self,
-                    "Excel Workbook Studio Review Needed",
-                    "Complete these items before marking Applied Lab 07 complete:\n\n"
+                    "Google Sheets Analyst Studio Review Needed",
+                    "Complete these items before marking Applied Lab 01 complete:\n\n"
                     + "\n".join(f"• {issue}" for issue in issues),
                 )
                 return
@@ -1058,8 +1064,8 @@ class AppliedLabsWidget(QWidget):
         self.changed.emit()
         self.refresh()
 
-    def _excel_studio_changed(self, message: str) -> None:
-        if self.current_number != 7:
+    def _sheets_studio_changed(self, message: str) -> None:
+        if self.current_number != 1:
             return
         current_status = self.status_combo.currentText()
         if current_status == "Not Started":
@@ -1070,11 +1076,13 @@ class AppliedLabsWidget(QWidget):
         applied_workspace.save_progress(
             self.conn,
             self.root,
-            7,
+            1,
             status=current_status,
             notes=self.notes.toPlainText(),
         )
         self.workspace_status.setText(f"{current_status} • {message}")
+        self._notify(message)
+        self.changed.emit()
 
     def _branch_changed(self, branch: str) -> None:
         if self._building:

@@ -1,0 +1,6 @@
+Applied: 2026-07-28T14:43:01
+Version: 10.37.1
+Backup: C:\Users\Dan\Documents\MEGA\Dev\GitHub\career-accelerator\backups\patch_10.37.1_20260728_144259
+Fixed: Applied Lab focus identity and frozen snapshot remapping.
+Fixed: transactional daily-focus position normalization.
+Installer database changes: none; validation uses a copy.

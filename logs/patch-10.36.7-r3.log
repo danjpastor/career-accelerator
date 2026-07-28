@@ -1,0 +1,4 @@
+Applied: 2026-07-28T10:45:03
+Version: 10.36.7-r3
+Backup: C:\Users\Dan\Documents\MEGA\Dev\GitHub\career-accelerator\backups\patch_10.36.7_r3_20260728_104503
+Fix: TaskRow locked state is now defined and passed explicitly.

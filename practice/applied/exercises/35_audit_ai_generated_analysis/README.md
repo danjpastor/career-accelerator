@@ -1,4 +1,4 @@
-# Applied Lab 35: Audit an AI-generated analysis
+# Applied Lab 33: Audit an AI-generated analysis
 
 **Category:** Responsible AI  
 **Roadmap week:** 11  

@@ -1,4 +1,4 @@
-# Applied Lab 32: Explain forecast-versus-actual variance
+# Applied Lab 23: Explain forecast-versus-actual variance
 
 **Category:** Business Analysis  
 **Roadmap week:** 9  

@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import date
 import os, shutil, subprocess, sys
 from pathlib import Path
+import re
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 
 VALID_STATUSES = ("Not Started", "In Progress", "Completed")
@@ -18,9 +19,12 @@ def paths(root, number):
     item = exercise(number); practice = Path(root)/'practice/applied'; d = practice/'exercises'/item['slug']
     return {'practice_root':practice,'exercise_dir':d,'instructions':d/'README.md','starter':d/item['starter_filename'],'validation':d/'validation.md','datasets':practice/'datasets'/item['dataset_slug'],'submissions':practice/'submissions'}
 
+def _submission_slug(item):
+    return str(item.get("submission_slug") or re.sub(r"^\d+_", "", str(item["slug"])))
+
 def submission_path(root, number):
     item = exercise(number); suffix = Path(item['starter_filename']).suffix
-    return paths(root,number)['submissions']/f"{int(number):02d}_{item['slug']}{suffix}"
+    return paths(root,number)['submissions']/f"{int(number):02d}_{_submission_slug(item)}{suffix}"
 
 def _template(root, number):
     item = exercise(number); starter = paths(root,number)['starter']; text = starter.read_text(encoding='utf-8')

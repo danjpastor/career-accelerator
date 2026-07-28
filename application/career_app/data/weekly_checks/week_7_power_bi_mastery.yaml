@@ -1,0 +1,367 @@
+assessment_id: week_7_power_bi_mastery
+title: Week 7 Knowledge Check
+order: 99
+description: An eight-question mastery check covering the required Week 7 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- A score of 80% or higher is required. With eight questions, you must answer at least seven correctly.
+- After grading, review every answer and use the recommendations beneath missed questions before retaking the check.
+requires:
+- roadmap.sql_mastery
+- powerbi.power_query
+- powerbi.dimensional_modeling
+- powerbi.star_schema
+passing_score: 0.8
+activities:
+- activity_id: w7_query
+  title: Power Query
+  type: mastery
+  runtime: recognition
+  prompt: 'Applied Steps should represent:'
+  answer_options:
+  - Reproducible source transformations
+  - Manual dashboard clicks only
+  - SQL interview answers
+  - Random formatting
+  starter: ''
+  solution: Reproducible source transformations
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Reproducible source transformations
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Applied Steps should represent:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 7 lesson or practice work related to Power Query.
+  required_for_completion: true
+- activity_id: w7_fact
+  title: Fact table
+  type: mastery
+  runtime: recognition
+  prompt: 'A fact table usually stores:'
+  answer_options:
+  - Events or measurements at a defined grain
+  - Only report colors
+  - Only descriptions
+  - Only lookup labels
+  starter: ''
+  solution: Events or measurements at a defined grain
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Events or measurements at a defined grain
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A fact table usually stores:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 7 lesson or practice work related to Fact table.
+  required_for_completion: true
+- activity_id: w7_dim
+  title: Dimension table
+  type: mastery
+  runtime: recognition
+  prompt: 'A dimension table usually stores:'
+  answer_options:
+  - Descriptive attributes used to filter or group facts
+  - Only measures
+  - Only duplicate events
+  - Only errors
+  starter: ''
+  solution: Descriptive attributes used to filter or group facts
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Descriptive attributes used to filter or group facts
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A dimension table usually stores:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 7 lesson or practice work related to Dimension table.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click any cell inside the complete data table.
+    - Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
+    - Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
+      and click **OK**.
+    - Leave the filter active so Career Accelerator can verify the finished workbook.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true
+- activity_id: w7_measure
+  title: Measure versus column
+  type: mastery
+  runtime: recognition
+  prompt: 'A measure is preferred for:'
+  answer_options:
+  - A calculation that responds to filter context
+  - A fixed row-level source value
+  - A file path
+  - A relationship key
+  starter: ''
+  solution: A calculation that responds to filter context
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A calculation that responds to filter context
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A measure is preferred for:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 7 lesson or practice work related to Measure versus column.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click any cell inside the complete data table.
+    - Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
+    - Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
+      and click **OK**.
+    - Leave the filter active so Career Accelerator can verify the finished workbook.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true
+- activity_id: w7_cardinality
+  title: Cardinality
+  type: mastery
+  runtime: recognition
+  prompt: 'The common star-schema relationship is:'
+  answer_options:
+  - One dimension row to many fact rows
+  - Many dimensions to one label only
+  - No relationships
+  - Many-to-many by default
+  starter: ''
+  solution: One dimension row to many fact rows
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: One dimension row to many fact rows
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'The common star-schema relationship is:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 7 lesson or practice work related to Cardinality.
+  required_for_completion: true
+- activity_id: w7_validate
+  title: Validation
+  type: mastery
+  runtime: recognition
+  prompt: 'Dashboard KPIs should be checked against:'
+  answer_options:
+  - Independent SQL or spreadsheet calculations
+  - Only visual appearance
+  - A screenshot
+  - A random sample only
+  starter: ''
+  solution: Independent SQL or spreadsheet calculations
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Independent SQL or spreadsheet calculations
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Dashboard KPIs should be checked against:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 7 lesson or practice work related to Validation.
+  required_for_completion: true
+- activity_id: w7_visual
+  title: Visual choice
+  type: mastery
+  runtime: recognition
+  prompt: 'A line chart is usually best for:'
+  answer_options:
+  - A measure over ordered time
+  - A single total
+  - A text lookup
+  - A key uniqueness test
+  starter: ''
+  solution: A measure over ordered time
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A measure over ordered time
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A line chart is usually best for:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 7 lesson or practice work related to Visual choice.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Select the completed summary range, including its labels.
+    - Choose **Insert → Chart**.
+    - Select the chart type named in the task and verify the data range, X-axis, and series.
+    - Add the required title and confirm no requested category is hidden.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true
+- activity_id: w7_filter
+  title: Filter context
+  type: mastery
+  runtime: recognition
+  prompt: 'CALCULATE is used to:'
+  answer_options:
+  - Evaluate an expression under modified filter context
+  - Import a CSV
+  - Rename a query
+  - Create a workbook
+  starter: ''
+  solution: Evaluate an expression under modified filter context
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Evaluate an expression under modified filter context
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 7 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'CALCULATE is used to:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    primary_workbook_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+    review_recommendation: Review the Week 7 lesson or practice work related to Filter context.
+  google_sheets:
+    source_of_truth: Google Sheets
+    steps:
+    - Click **Open Google Sheet** to open the continuing Northstar Operations workbook.
+    - Open **the worksheet named in the task** and work in the worksheet named in the task.
+    - Click any cell inside the complete data table.
+    - Choose **Data → Create a filter** and confirm a filter icon appears in every header cell.
+    - Open the filter for the column named in the task, choose **Clear**, select only the required value or condition,
+      and click **OK**.
+    - Leave the filter active so Career Accelerator can verify the finished workbook.
+    - 'Confirm the finished workbook matches this result: **One selected answer.**'
+    - Wait until Google Sheets shows that saving is complete.
+    - Return to Career Accelerator and click **Check My Work**.
+    workbook_flow: one_continuing_linked_google_sheet
+    primary_action: Open Google Sheet
+    check_action: Check My Work
+    hide_download_upload: true
+  required_for_completion: true

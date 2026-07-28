@@ -1,4 +1,4 @@
-"""Applied Lab 26: Analyze an A/B test for statistical and practical significance."""
+"""Applied Lab 16: Analyze an A/B test for statistical and practical significance."""
 
 from pathlib import Path
 import json

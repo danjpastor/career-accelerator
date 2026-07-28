@@ -1,4 +1,4 @@
-# Applied Lab 12: Write an executive summary and stakeholder memo
+# Applied Lab 08: Write an executive summary and stakeholder memo
 
 **Category:** Communication  
 **Roadmap week:** 5  

@@ -1,4 +1,4 @@
-# Applied Lab 34: Build a raw-to-analytics data workflow
+# Applied Lab 29: Build a raw-to-analytics data workflow
 
 **Category:** Data Workflow  
 **Roadmap week:** 10  

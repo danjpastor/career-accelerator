@@ -1279,7 +1279,7 @@ class TaskWorkspaceDialog(QDialog):
         self.session_list.clear()
         for row in workspace_service.sessions(self.conn, self.workspace_key):
             self.session_list.addItem(
-                f"{row['session_date']} • {row['hours']:g}h • "
+                f"{row['session_date']} • {float(row['hours']):.2f}h • "
                 f"Productivity {row['productivity_score'] or '-'}\n"
                 f"{row['notes'] or 'No notes recorded.'}"
             )

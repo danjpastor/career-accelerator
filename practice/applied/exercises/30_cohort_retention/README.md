@@ -1,4 +1,4 @@
-# Applied Lab 30: Calculate cohort retention
+# Applied Lab 13: Calculate cohort retention
 
 **Category:** Business Analysis  
 **Roadmap week:** 7  

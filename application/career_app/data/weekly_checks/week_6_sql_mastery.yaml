@@ -1,0 +1,299 @@
+assessment_id: week_6_sql_mastery
+title: Week 6 Knowledge Check
+order: 99
+description: An eight-question mastery check covering the required Week 6 topics.
+estimated_minutes: 25
+instructions:
+- Answer all eight multiple-choice questions independently.
+- A score of 80% or higher is required. With eight questions, you must answer at least seven correctly.
+- After grading, review every answer and use the recommendations beneath missed questions before retaking the check.
+requires:
+- roadmap.spreadsheet_mastery
+- sql.window_functions
+- sql.date_time_functions
+- database.schemas_normalization
+passing_score: 0.8
+activities:
+- activity_id: w6_rownum
+  title: ROW_NUMBER
+  type: mastery
+  runtime: recognition
+  prompt: 'ROW_NUMBER assigns:'
+  answer_options:
+  - A unique sequence within the defined window order
+  - A grouped total only
+  - A primary key in the source
+  - A chart rank
+  starter: ''
+  solution: A unique sequence within the defined window order
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: A unique sequence within the defined window order
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'ROW_NUMBER assigns:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to ROW_NUMBER.
+  required_for_completion: true
+- activity_id: w6_rank
+  title: RANK ties
+  type: mastery
+  runtime: recognition
+  prompt: 'RANK gives tied rows:'
+  answer_options:
+  - The same rank and leaves gaps afterward
+  - Different ranks with no gaps
+  - No rank
+  - A null value
+  starter: ''
+  solution: The same rank and leaves gaps afterward
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The same rank and leaves gaps afterward
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'RANK gives tied rows:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to RANK ties.
+  required_for_completion: true
+- activity_id: w6_partition
+  title: PARTITION BY
+  type: mastery
+  runtime: recognition
+  prompt: 'PARTITION BY:'
+  answer_options:
+  - Restarts the window calculation for each group
+  - Filters source rows
+  - Joins tables
+  - Creates a table
+  starter: ''
+  solution: Restarts the window calculation for each group
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Restarts the window calculation for each group
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'PARTITION BY:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to PARTITION BY.
+  required_for_completion: true
+- activity_id: w6_frame
+  title: Window frame
+  type: mastery
+  runtime: recognition
+  prompt: 'A rolling average requires attention to:'
+  answer_options:
+  - The ordered window frame
+  - Only the SELECT alias
+  - A workbook filter
+  - A primary key only
+  starter: ''
+  solution: The ordered window frame
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: The ordered window frame
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'A rolling average requires attention to:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Window frame.
+  required_for_completion: true
+- activity_id: w6_date
+  title: Date logic
+  type: mastery
+  runtime: recognition
+  prompt: 'Period comparisons require:'
+  answer_options:
+  - Consistent date grain and boundary definitions
+  - Text sorting only
+  - Random samples
+  - No time zone awareness
+  starter: ''
+  solution: Consistent date grain and boundary definitions
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Consistent date grain and boundary definitions
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Period comparisons require:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Date logic.
+  required_for_completion: true
+- activity_id: w6_design
+  title: Normalization
+  type: mastery
+  runtime: recognition
+  prompt: 'Normalization primarily reduces:'
+  answer_options:
+  - Redundant storage and update anomalies
+  - Every join
+  - All nulls
+  - All indexes
+  starter: ''
+  solution: Redundant storage and update anomalies
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Redundant storage and update anomalies
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Normalization primarily reduces:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Normalization.
+  required_for_completion: true
+- activity_id: w6_reconcile
+  title: Spreadsheet retention
+  type: mastery
+  runtime: recognition
+  prompt: 'Final SQL metrics should be:'
+  answer_options:
+  - Reconciled to source or spreadsheet checks
+  - Accepted without validation
+  - Rounded before validation
+  - Compared only visually
+  starter: ''
+  solution: Reconciled to source or spreadsheet checks
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: Reconciled to source or spreadsheet checks
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: beginner
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: 'Final SQL metrics should be:'
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - cumulative mastery
+    after_correct: This demonstrates the expected weekly knowledge.
+    common_errors: []
+    review_recommendation: Review the Week 6 lesson or practice work related to Spreadsheet retention.
+  required_for_completion: true
+- activity_id: w6_sql_rank
+  title: Rank inventory within category
+  type: mastery
+  runtime: recognition
+  prompt: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to lowest
+    within category. Sort category, stock_rank, item_name.
+  starter: 'SELECT
+
+    FROM inventory;'
+  solution: "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category ORDER BY\
+    \ units_on_hand DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
+  hints: []
+  validator:
+    type: exact_answer
+    expected_answer: "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category\
+      \ ORDER BY units_on_hand DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
+  required_for_practice: false
+  required_for_mastery: false
+  evidence_eligible: false
+  difficulty: intermediate
+  estimated_minutes: 3
+  presentation:
+    scenario: Week 6 Knowledge Check
+    introduction: Choose the best answer based on the skills you used this week.
+    task: Return category, item_name, units_on_hand, and stock_rank using DENSE_RANK from highest stock to lowest
+      within category. Sort category, stock_rank, item_name.
+    requirements:
+    - Choose one answer.
+    expected_output: One selected answer.
+    skills_practiced:
+    - independent SQL
+    after_correct: The query meets the requested grain and output.
+    common_errors: []
+    table: inventory
+    review_recommendation: Review the Week 6 lesson or practice work related to Rank inventory within category.
+  answer_options:
+  - "SELECT category, item_name, units_on_hand,\n       DENSE_RANK() OVER (PARTITION BY category ORDER BY units_on_hand\
+    \ DESC) AS stock_rank\nFROM inventory\nORDER BY category, stock_rank, item_name;"
+  - SELECT category, item_name, units_on_hand, DENSE_RANK() OVER (ORDER BY units_on_hand DESC) AS stock_rank FROM
+    inventory;
+  - SELECT category, item_name, units_on_hand, ROW_NUMBER() OVER (PARTITION BY category ORDER BY units_on_hand)
+    AS stock_rank FROM inventory;
+  - SELECT category, item_name, units_on_hand, DENSE_RANK() OVER (PARTITION BY category ORDER BY units_on_hand ASC)
+    AS stock_rank FROM inventory;
+  required_for_completion: true
