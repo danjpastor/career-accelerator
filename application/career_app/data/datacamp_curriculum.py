@@ -35,7 +35,7 @@ class DataCampChapter:
     @property
     def label(self) -> str:
         return (
-            f"DataCamp — {self.course_name} — "
+            f"{self.course_name} — "
             f"Chapter {self.chapter_number}: {self.chapter_name}"
         )
 

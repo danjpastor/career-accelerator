@@ -12,6 +12,7 @@ from career_app.data.applied_exercises import (
 )
 from career_app.services import achievements as achievement_service
 from career_app.services import completion_contract
+from career_app.services import content_gates
 from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
     exercise_for_label,
@@ -2262,6 +2263,46 @@ def _requirements_for_project(
     return requirements
 
 
+def portfolio_task_readiness(
+    conn,
+    state,
+    label,
+    stage=None,
+):
+    required = _requirements_for_project(label, stage)
+    unlocked = _derived_skills(conn, state)
+    missing_skill_names = _missing_skill_names(required, unlocked)
+    execution = str(label) not in PORTFOLIO_PREPARATION_LABELS
+    datacamp_gate = content_gates.gate_status(
+        conn,
+        content_gates.requirements_for_portfolio(
+            required,
+            execution=execution,
+        ),
+    )
+    execution_too_early = execution and int(state["current_week"]) < 9
+    missing_names = list(missing_skill_names)
+    if not datacamp_gate["ready"]:
+        missing_names.append(datacamp_gate["summary"])
+    if execution_too_early:
+        missing_names.insert(
+            0,
+            "Scheduled for Week 9 after the learning phase",
+        )
+    return {
+        "ready": not missing_names,
+        "required_skills": sorted(required),
+        "missing_skills": missing_skill_names,
+        "required_datacamp_keys": datacamp_gate["required_keys"],
+        "required_datacamp_names": datacamp_gate["required_names"],
+        "missing_datacamp_keys": datacamp_gate["missing_keys"],
+        "missing_datacamp_names": datacamp_gate["missing_names"],
+        "missing": missing_names,
+        "execution": execution,
+        "execution_too_early": execution_too_early,
+    }
+
+
 def _missing_skill_names(
     required,
     unlocked,
@@ -2306,12 +2347,12 @@ def _sql_target(
         if title in completed:
             continue
 
-        requirement_status = _sql_requirement_status(
+        requirement_status = sql_problem_readiness(
+            conn,
+            state,
             title,
-            topic,
-            unlocked,
         )
-        required = requirement_status["required"]
+        required = set(requirement_status["required_keys"])
         if not requirement_status["ready"]:
             locked_candidates.append(
                 (
@@ -2322,8 +2363,10 @@ def _sql_target(
                     concepts,
                     estimate,
                     required,
-                    requirement_status["missing"],
-                    requirement_status["missing_names"],
+                    set(requirement_status["missing_keys"]),
+                    list(requirement_status["missing_names"]),
+                    list(requirement_status["required_datacamp_keys"]),
+                    list(requirement_status["missing_datacamp_keys"]),
                 )
             )
             continue
@@ -2343,6 +2386,8 @@ def _sql_target(
             "required_skills": sorted(
                 required
             ),
+            "required_datacamp_keys": list(requirement_status["required_datacamp_keys"]),
+            "missing_datacamp_keys": [],
             "description": (
                 f"Open {title} in Learning Practice, write and save your own SQL "
                 "solution, then mark the problem complete. Use the notes area "
@@ -2382,6 +2427,8 @@ def _sql_target(
             required,
             missing,
             missing_names,
+            required_datacamp_keys,
+            missing_datacamp_keys,
         ) = locked_candidates[0]
         metadata = {
             "title": title,
@@ -2395,6 +2442,8 @@ def _sql_target(
                 required
             ),
             "missing_skills": missing_names,
+            "required_datacamp_keys": required_datacamp_keys,
+            "missing_datacamp_keys": missing_datacamp_keys,
             "blocked_reason": (
                 "Learn first: "
                 + ", ".join(
@@ -2451,18 +2500,15 @@ def _portfolio_target(
     if row is None:
         return None
 
-    required = _requirements_for_project(
+    readiness = portfolio_task_readiness(
+        conn,
+        state,
         row["label"],
         row["stage"],
     )
-    missing_names = _missing_skill_names(
-        required,
-        unlocked,
-    )
-    execution_too_early = (
-        int(state["current_week"]) < 9
-        and str(row["label"]) not in PORTFOLIO_PREPARATION_LABELS
-    )
+    required = set(readiness["required_skills"])
+    missing_names = list(readiness["missing"])
+    execution_too_early = bool(readiness["execution_too_early"])
 
     metadata = {
         "project_id": project_id,
@@ -2473,7 +2519,9 @@ def _portfolio_target(
         "required_skills": sorted(
             required
         ),
-        "missing_skills": missing_names,
+        "missing_skills": readiness["missing_skills"],
+        "required_datacamp_keys": readiness["required_datacamp_keys"],
+        "missing_datacamp_keys": readiness["missing_datacamp_keys"],
         "description": str(row["description"] or ""),
         "definition_of_done": str(row["definition_of_done"] or ""),
         "starter_path": str(row["starter_path"] or ""),
@@ -2483,14 +2531,7 @@ def _portfolio_target(
     metadata.update(pace)
 
     if missing_names or execution_too_early:
-        reasons = []
-        if execution_too_early:
-            reasons.append(
-                "Scheduled for Week 9 after the learning phase and Week 8 Knowledge Check"
-            )
-        if missing_names:
-            reasons.append("Learn first: " + ", ".join(missing_names))
-        metadata["blocked_reason"] = " • ".join(reasons)
+        metadata["blocked_reason"] = "Unlock first: " + "; ".join(missing_names)
         return {
             "locked": True,
             "position": completed,
@@ -2657,6 +2698,13 @@ def applied_lab_readiness(
             "missing": [],
             "missing_skills": [],
             "missing_labs": [],
+            "required_datacamp_keys": list(content_gates.requirements_for_applied_lab(number)),
+            "required_datacamp_names": [
+                content_gates.chapter_name(key)
+                for key in content_gates.requirements_for_applied_lab(number)
+            ],
+            "missing_datacamp_keys": [],
+            "missing_datacamp_names": [],
             "roadmap_week": int(
                 item["week"]
             ),
@@ -2707,19 +2755,12 @@ def applied_lab_readiness(
         for skill_key in missing_skill_keys
     )
 
-    if (
-        number == 1
-        and "power_bi_foundations" not in unlocked
-        and int(state["google_course"]) < 6
-    ):
-        missing.append(
-            "Begin DataCamp Power BI Foundations or reach Google Course 6"
-        )
-
-    if number == 8 and "python_pandas" not in unlocked:
-        missing.append(
-            "Begin DataCamp Python or pandas foundations"
-        )
+    datacamp_gate = content_gates.gate_status(
+        conn,
+        content_gates.requirements_for_applied_lab(number),
+    )
+    if not datacamp_gate["ready"]:
+        missing.append(datacamp_gate["summary"])
 
     if (
         number == 13
@@ -2769,6 +2810,10 @@ def applied_lab_readiness(
         "missing": missing,
         "missing_skills": missing_skill_keys,
         "missing_labs": missing_labs,
+        "required_datacamp_keys": datacamp_gate["required_keys"],
+        "required_datacamp_names": datacamp_gate["required_names"],
+        "missing_datacamp_keys": datacamp_gate["missing_keys"],
+        "missing_datacamp_names": datacamp_gate["missing_names"],
         "roadmap_week": int(
             item["week"]
         ),
@@ -3134,10 +3179,10 @@ def _sync_sprint_prerequisites(
     state,
     unlocked,
 ):
-    active_ids = {
-        int(row["task_id"])
+    active_tracks = {
+        int(row["task_id"]): str(row["track_key"])
         for row in conn.execute(
-            "SELECT task_id FROM track_tasks"
+            "SELECT task_id,track_key FROM track_tasks"
         ).fetchall()
     }
 
@@ -3168,7 +3213,10 @@ def _sync_sprint_prerequisites(
             )
             continue
 
-        if task_id in active_ids:
+        # Google is the only adaptive track that does not have a separate
+        # content-gate service. SQL, Portfolio, and Applied tasks must be
+        # re-evaluated here even when they are currently linked as active.
+        if active_tracks.get(task_id) == "google":
             conn.execute(
                 """UPDATE task_metadata
                    SET prerequisite_state='Ready',
@@ -3247,36 +3295,30 @@ def _sync_sprint_prerequisites(
             )
             item = sql_lookup.get(title)
             if item:
-                requirement_status = _sql_requirement_status(
+                readiness = sql_problem_readiness(
+                    conn,
+                    state,
                     title,
-                    item[2],
-                    unlocked,
                 )
-                required = requirement_status["required"]
-                explicit_missing = requirement_status["missing_names"]
+                required = set(readiness["required_keys"])
+                explicit_missing = list(readiness["missing_names"])
 
         elif (
             applied_number is None
             and row["category"] == "Portfolio"
         ):
-            required = (
-                _requirements_for_project(
-                    label
-                )
+            readiness = portfolio_task_readiness(
+                conn,
+                state,
+                label,
             )
-            if (
-                int(state["current_week"]) < 9
-                and label not in PORTFOLIO_PREPARATION_LABELS
-            ):
-                reason = (
-                    "Scheduled for Week 9 after the learning phase and "
-                    "Week 8 Knowledge Check."
+            required = set(readiness["required_skills"])
+            explicit_missing = list(readiness["missing"])
+            if readiness["execution_too_early"] and int(row["week"]) < 9:
+                conn.execute(
+                    "UPDATE sprint_tasks SET week=?,sort_order=? WHERE id=?",
+                    (9, _next_sort_order(conn, 9, "portfolio"), task_id),
                 )
-                if int(row["week"]) < 9:
-                    conn.execute(
-                        "UPDATE sprint_tasks SET week=?,sort_order=? WHERE id=?",
-                        (9, _next_sort_order(conn, 9, "portfolio"), task_id),
-                    )
 
         missing = (
             list(explicit_missing)
@@ -3337,10 +3379,10 @@ def repair_track_links(conn):
             (row["track_key"],),
         )
 
-    active_ids = {
-        int(row["task_id"])
+    active_tracks = {
+        int(row["task_id"]): str(row["track_key"])
         for row in conn.execute(
-            "SELECT task_id FROM track_tasks"
+            "SELECT task_id,track_key FROM track_tasks"
         ).fetchall()
     }
 
@@ -3399,7 +3441,7 @@ def repair_track_links(conn):
 
     for row in orphan_rows:
         task_id = int(row["id"])
-        if task_id in active_ids:
+        if task_id in active_tracks:
             continue
         conn.execute(
             """UPDATE task_metadata
@@ -3990,6 +4032,24 @@ def _has_completion_evidence(
     if event is not None:
         return True
 
+    # Canonical DataCamp chapters are durable sprint tasks rather than active
+    # track_tasks rows. Their chapter-progress record is the completion evidence
+    # that prevents repair_track_links() from resetting a legitimate checkbox.
+    metadata = conn.execute(
+        "SELECT managed_key FROM task_metadata WHERE task_id=?",
+        (int(task_id),),
+    ).fetchone()
+    managed_key = str(metadata["managed_key"] or "") if metadata is not None else ""
+    if managed_key.casefold().startswith("datacamp:"):
+        chapter_key = managed_key.split(":", 1)[1]
+        progress = conn.execute(
+            """SELECT 1 FROM datacamp_chapter_progress
+               WHERE chapter_key=? AND status='Completed'""",
+            (chapter_key,),
+        ).fetchone()
+        if progress is not None:
+            return True
+
     sql_title = _sql_title_from_task_label(
         label
     )
@@ -4050,7 +4110,8 @@ def completion_history(conn):
                s.sort_order,
                s.label,
                m.category,
-               m.status
+               m.status,
+               m.managed_key
            FROM sprint_tasks s
            JOIN task_metadata m
              ON m.task_id=s.id
@@ -4069,16 +4130,27 @@ def completion_history(conn):
             task_id=task_id,
             label=label,
         )
+        managed_key = str(row["managed_key"] or "")
+        is_datacamp = managed_key.casefold().startswith("datacamp:")
         event_track = (
             event["track_key"]
             if event is not None
-            else None
+            else ("datacamp" if is_datacamp else None)
         )
         completed_date = (
             event["completed_date"]
             if event is not None
             else None
         )
+        if is_datacamp:
+            chapter_key = managed_key.split(":", 1)[1]
+            chapter_row = conn.execute(
+                """SELECT completed_date FROM datacamp_chapter_progress
+                   WHERE chapter_key=? AND status='Completed'""",
+                (chapter_key,),
+            ).fetchone()
+            if chapter_row is not None:
+                completed_date = chapter_row["completed_date"] or completed_date
 
         sql_title = _sql_title_from_task_label(
             label
@@ -4195,7 +4267,8 @@ def undo_completion(
                    s.label,
                    s.completed,
                    m.status,
-                   m.category
+                   m.category,
+                   m.managed_key
                FROM sprint_tasks s
                JOIN task_metadata m
                  ON m.task_id=s.id
@@ -4227,13 +4300,19 @@ def undo_completion(
             "Select a completed task or SQL problem."
         )
 
+    managed_key = (
+        str(task_row["managed_key"] or "")
+        if task_row is not None and "managed_key" in task_row.keys()
+        else ""
+    )
+    is_datacamp_task = managed_key.casefold().startswith("datacamp:")
     track_key = (
         event["track_key"]
         if event is not None
         else (
-            "sql"
-            if sql_title
-            else None
+            "datacamp"
+            if is_datacamp_task
+            else ("sql" if sql_title else None)
         )
     )
 
@@ -4323,7 +4402,16 @@ def undo_completion(
                 "items first so the sequence remains valid."
             )
 
-    if task_row is not None:
+    if is_datacamp_task:
+        from career_app.services import datacamp
+
+        datacamp.mark_task_incomplete(
+            conn,
+            int(task_id),
+            enforce_sequence=True,
+        )
+
+    if task_row is not None and not is_datacamp_task:
         conn.execute(
             """UPDATE sprint_tasks
                SET completed=0
@@ -4375,22 +4463,9 @@ def undo_completion(
         )
 
     elif track_key == "datacamp":
-        position = int(
-            metadata.get(
-                "position",
-                0,
-            )
-        )
-        conn.execute(
-            """UPDATE track_state
-               SET position=?,
-                   subposition=0,
-                   status='Active',
-                   metadata='{}',
-                   updated_at=CURRENT_TIMESTAMP
-               WHERE track_key='datacamp'""",
-            (position,),
-        )
+        # Canonical chapter progress was reset above. Reconcile after the
+        # generic completion evidence is removed so every planning view agrees.
+        pass
 
     elif track_key == "portfolio":
         project_task_id = metadata.get(
@@ -4481,7 +4556,12 @@ def undo_completion(
             (track_key,),
         )
 
-    conn.commit()
+    if is_datacamp_task:
+        from career_app.services import datacamp
+
+        datacamp.reconcile(conn)
+    else:
+        conn.commit()
 
     label = (
         task_row["label"]
@@ -4513,10 +4593,13 @@ def task_edit_identity(
                s.id,
                s.label,
                tt.track_key,
-               tt.target_key
+               tt.target_key,
+               m.managed_key
            FROM sprint_tasks s
            LEFT JOIN track_tasks tt
              ON tt.task_id=s.id
+           LEFT JOIN task_metadata m
+             ON m.task_id=s.id
            WHERE s.id=?""",
         (int(task_id),),
     ).fetchone()
@@ -4526,6 +4609,10 @@ def task_edit_identity(
 
     track_key = row["track_key"]
     target_key = row["target_key"]
+    managed_key = str(row["managed_key"] or "")
+    if managed_key.casefold().startswith("datacamp:"):
+        track_key = "datacamp"
+        target_key = managed_key
 
     # Completed adaptive tasks normally have no active track_tasks row. Recover
     # their exact identity from the completion event before undoing it.
@@ -4581,6 +4668,14 @@ def resolve_task_edit_target(
     target_key = identity.get(
         "target_key"
     )
+
+    if str(track_key or "").casefold() == "datacamp" and str(target_key or "").startswith("datacamp:"):
+        row = conn.execute(
+            "SELECT task_id FROM task_metadata WHERE managed_key=?",
+            (target_key,),
+        ).fetchone()
+        if row is not None:
+            return int(row["task_id"])
 
     if track_key and target_key:
         row = conn.execute(
@@ -5103,12 +5198,16 @@ def complete_track_task(
             ).fetchone()
         project_label = str(project_task["label"] if project_task else label)
         project_stage = str(project_task["stage"] if project_task else "")
-        required = _requirements_for_project(project_label, project_stage)
-        missing = _missing_skill_names(required, _derived_skills(conn, state))
-        if missing:
+        readiness = portfolio_task_readiness(
+            conn,
+            state,
+            project_label,
+            project_stage,
+        )
+        if not readiness["ready"]:
             raise PermissionError(
                 "This portfolio milestone is locked. Complete "
-                + ", ".join(missing)
+                + ", ".join(readiness["missing"])
                 + " first."
             )
 
@@ -5885,10 +5984,20 @@ def sql_problem_readiness(
             )
         )
 
+    datacamp_gate = content_gates.gate_status(
+        conn,
+        content_gates.requirements_for_sql_problem(
+            required,
+            roadmap_week=SQL_PROBLEM_WEEK.get(title),
+        ),
+    )
+    if not datacamp_gate["ready"]:
+        missing_names.append(datacamp_gate["summary"])
+
     evidence_map = _skill_evidence(conn, state)
 
     return {
-        "ready": not missing,
+        "ready": not missing and datacamp_gate["ready"],
         "required_keys": sorted(required),
         "required_names": [
             SKILL_DEFINITIONS[key][0]
@@ -5900,6 +6009,10 @@ def sql_problem_readiness(
         "missing_names": missing_names,
         "missing_all_of": sorted(missing_all),
         "missing_any_of": sorted(missing_any),
+        "required_datacamp_keys": datacamp_gate["required_keys"],
+        "required_datacamp_names": datacamp_gate["required_names"],
+        "missing_datacamp_keys": datacamp_gate["missing_keys"],
+        "missing_datacamp_names": datacamp_gate["missing_names"],
         "evidence": {
             key: list(evidence_map.get(key, []))
             for key in sorted(required)
@@ -5931,13 +6044,18 @@ def next_sql_titles(
         title = item[0]
         if title in completed:
             continue
-        groups = _sql_requirement_groups(title, item[2])
-        if not set(groups["all_of"]).issubset(unlocked):
-            continue
-        if groups["any_of"] and not (set(groups["any_of"]) & set(unlocked)):
-            continue
-        if state is not None and int(SQL_PROBLEM_WEEK.get(title, 99)) > int(state["current_week"]):
-            continue
+        if state is not None:
+            readiness = sql_problem_readiness(conn, state, title)
+            if not readiness["ready"]:
+                continue
+            if int(SQL_PROBLEM_WEEK.get(title, 99)) > int(state["current_week"]):
+                continue
+        else:
+            groups = _sql_requirement_groups(title, item[2])
+            if not set(groups["all_of"]).issubset(unlocked):
+                continue
+            if groups["any_of"] and not (set(groups["any_of"]) & set(unlocked)):
+                continue
         titles.append(title)
         if len(titles) >= max(
             1,

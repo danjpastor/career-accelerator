@@ -1,0 +1,45 @@
+{
+  "steps": {
+    "1": {
+      "complete": false,
+      "evidence": ""
+    },
+    "2": {
+      "complete": false,
+      "evidence": ""
+    },
+    "3": {
+      "complete": false,
+      "evidence": ""
+    },
+    "4": {
+      "complete": false,
+      "evidence": ""
+    },
+    "5": {
+      "complete": false,
+      "evidence": ""
+    },
+    "6": {
+      "complete": false,
+      "evidence": ""
+    },
+    "7": {
+      "complete": false,
+      "evidence": ""
+    }
+  },
+  "artifact_path": "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\practice\\applied\\submissions\\07_operations_analyst_workbook.xlsx",
+  "screenshot_path": "C:\\Users\\Dan\\Documents\\MEGA\\Dev\\GitHub\\career-accelerator\\practice\\applied\\submissions\\07_management_summary.png",
+  "final_notes": "",
+  "final_checks": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ],
+  "updated_at": "2026-07-27T23:06:48"
+}

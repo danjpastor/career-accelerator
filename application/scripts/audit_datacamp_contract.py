@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Static release audit for the v10.36 DataCamp curriculum contract."""
+"""Static release audit for the v10.36.4 DataCamp curriculum contract."""
 
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -56,6 +56,9 @@ def main() -> int:
         chapter = by_key.get(key)
         if chapter is None or chapter.chapter_slug != expected_slug:
             errors.append(f"Incorrect exact Campus chapter route for {key}")
+    logo = ROOT / "application" / "assets" / "task_icons" / "datacamp.svg"
+    if not logo.is_file():
+        errors.append("DataCamp logo asset is missing")
     if unified_tasks.MAX_FOCUS_TASKS != 5:
         errors.append("Today’s Focus limit is not five")
     if unified_tasks.MAX_NEXT_TASKS != 4:

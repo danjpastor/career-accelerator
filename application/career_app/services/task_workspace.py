@@ -282,17 +282,22 @@ def _sprint_item_label_key(value: str) -> str:
     ).strip()
 
 
-def _sprint_item_category(track_key, category, label) -> tuple[str, str]:
+def _sprint_item_category(track_key, category, label, managed_key=None) -> tuple[str, str]:
     track = str(track_key or "").strip().casefold()
     category_text = str(category or "").strip()
     label_text = str(label or "").strip()
+    managed = str(managed_key or "").strip().casefold()
     if track == "google" or GOOGLE_ROADMAP_PATTERN.search(label_text):
         return "Google Course", "google"
     if track == "sql" or category_text.casefold() == "sql":
         return "SQL", "sql"
     if track == "portfolio" or category_text.casefold() == "portfolio":
         return "Portfolio", "portfolio"
-    if track == "datacamp":
+    if (
+        track == "datacamp"
+        or managed.startswith("datacamp:")
+        or label_text.casefold().startswith("datacamp")
+    ):
         return "DataCamp", "datacamp"
     if track == "applied":
         return "Applied Labs", "applied"
@@ -405,6 +410,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
             row["track_key"],
             row["category"],
             label,
+            row["managed_key"],
         )
         target_key = str(row["target_key"] or "").strip()
         label_key = _sprint_item_label_key(label)
@@ -559,6 +565,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
                 task.get("track_key"),
                 task.get("category"),
                 label,
+                task.get("managed_key"),
             )
             status = "In Progress" if task.get("ready") else "Planned"
             item = {
@@ -578,7 +585,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
                 "sort_order": int(task.get("sort_order") or 0),
                 "completed_date": "",
                 "scheduled_week": task_week,
-                "is_catch_up": task_week < week,
+                "is_catch_up": bool(task.get("is_catch_up")),
             }
             items.append(item)
             existing_task_ids.add(task_id)
@@ -591,7 +598,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
 
     section_order = {
         "Google Course": 0,
-        "DataCamp": PAGE_LEARNING,
+        "DataCamp": 1,
         "SQL": 2,
         "Portfolio": 3,
         "Applied Labs": 4,

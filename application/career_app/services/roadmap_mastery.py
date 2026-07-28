@@ -14,6 +14,7 @@ from pathlib import Path
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 from career_app.navigation import PAGE_LEARNING
 from career_app.services.task_titles import title_case_task
+from career_app.services import content_gates
 
 SQL_PROBLEM_SCHEDULE = {
     "Data Science Skills": 3,
@@ -34,26 +35,7 @@ SQL_PROBLEM_SCHEDULE = {
     "User Shopping Sprees": 7,
 }
 
-DUCKDB_CHAPTER_REQUIREMENTS = {
-    1: "w03_intro_sql_02",
-    2: "w03_intermediate_sql_03",
-    3: "w04_manipulation_sql_01",
-    4: "w04_manipulation_sql_01",
-    5: "w04_manipulation_sql_01",
-    6: "w04_joining_sql_02",
-    7: "w04_manipulation_sql_03",
-    8: "w05_window_sql_04",
-    9: "w06_database_design_04",
-    10: "w08_pandas_04",
-    11: "w05_window_sql_02",
-    12: "w04_manipulation_sql_03",
-    13: "w04_joining_sql_02",
-    14: "w05_functions_sql_02",
-    15: "w05_window_sql_03",
-    16: "w04_joining_sql_03",
-    17: "w05_functions_sql_03",
-    18: "w06_database_design_04",
-}
+DUCKDB_CHAPTER_REQUIREMENTS = dict(content_gates.DUCKDB_TERMINAL_CHAPTER)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS roadmap_requirement_state (
@@ -113,13 +95,25 @@ def duckdb_readiness(conn: sqlite3.Connection, number: int) -> dict:
 
     number = int(number)
     item = DUCKDB_EXERCISES[number]
+    datacamp_gate = content_gates.gate_status(
+        conn,
+        content_gates.requirements_for_duckdb(number),
+    )
     if _table_exists(conn, "duckdb_exercise_progress"):
         completed = conn.execute(
             "SELECT 1 FROM duckdb_exercise_progress WHERE exercise_number=? AND status='Completed'",
             (number,),
         ).fetchone()
         if completed:
-            return {"ready": True, "missing": [], "reason": "Already completed."}
+            return {
+                "ready": True,
+                "missing": [],
+                "required_datacamp_keys": datacamp_gate["required_keys"],
+                "required_datacamp_names": datacamp_gate["required_names"],
+                "missing_datacamp_keys": [],
+                "missing_datacamp_names": [],
+                "reason": "Already completed.",
+            }
 
     missing: list[str] = []
     for prior in dict(item.get("prerequisites") or {}).get("prior_exercises", ()):
@@ -130,27 +124,17 @@ def duckdb_readiness(conn: sqlite3.Connection, number: int) -> dict:
         if row is None:
             missing.append(f"DuckDB Exercise {int(prior):02d}")
 
-    chapter_key = DUCKDB_CHAPTER_REQUIREMENTS.get(number)
-    if chapter_key:
-        row = (
-            conn.execute(
-                "SELECT status FROM datacamp_chapter_progress WHERE chapter_key=?",
-                (chapter_key,),
-            ).fetchone()
-            if _table_exists(conn, "datacamp_chapter_progress")
-            else None
-        )
-        if row is None or str(row["status"]) != "Completed":
-            chapter = datacamp.chapter_for_key(chapter_key)
-            if chapter is not None:
-                missing.append(
-                    f"DataCamp: {chapter.course_name}, Chapter {chapter.chapter_number}"
-                )
+    if not datacamp_gate["ready"]:
+        missing.append(datacamp_gate["summary"])
 
     missing = list(dict.fromkeys(missing))
     return {
         "ready": not missing,
         "missing": missing,
+        "required_datacamp_keys": datacamp_gate["required_keys"],
+        "required_datacamp_names": datacamp_gate["required_names"],
+        "missing_datacamp_keys": datacamp_gate["missing_keys"],
+        "missing_datacamp_names": datacamp_gate["missing_names"],
         "reason": "" if not missing else "Complete " + ", ".join(missing) + " first.",
     }
 

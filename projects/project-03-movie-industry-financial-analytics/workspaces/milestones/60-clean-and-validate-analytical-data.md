@@ -62,7 +62,7 @@ Build the reproducible analytical database from the processed layer.
 ## Working notes
 
 **Milestone:** Clean and validate analytical data  
-**Started:** 2026-07-27
+**Started:** 2026-07-28
 
 ## 1. Profile before cleaning
 

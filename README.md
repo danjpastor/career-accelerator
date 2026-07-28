@@ -1,6 +1,6 @@
 # Career Accelerator
 
-Version **10.36.0** uses an explicit, chapter-level DataCamp curriculum and expanded DuckDB practice.
+Version **10.36.6** uses an explicit, chapter-level DataCamp curriculum and expanded DuckDB practice.
 
 ## Current learning model
 
@@ -10,7 +10,9 @@ Version **10.36.0** uses an explicit, chapter-level DataCamp curriculum and expa
 - Opening a DataCamp task launches the assigned chapter in the default browser and never marks it complete automatically.
 - Today’s Focus remains capped at five ready tasks.
 - Next Tasks remains a fixed four-row card combining ready work and Coming Soon prerequisite guidance.
-- Missed DataCamp chapters roll into Catch-Up in sequence; later chapters remain locked until earlier assigned days are completed.
+- Missed DataCamp chapters roll into Catch-Up in sequence without consuming the frozen daily new-task quota; later chapters remain locked until earlier assigned days are completed.
+- DataCamp chapter tasks use the DataCamp logomark consistently in Today’s Focus, Next Tasks, View All Tasks, Coming Soon, and Current Sprint.
+- DataCamp weekly totals, browser routing, completion history, undo, and portfolio gates all use the same canonical chapter-progress records.
 - The Learning tab contains Certificate, Practice, and Skills Lab. The retired Paths destination no longer exists.
 - DuckDB exercises provide local practice, targeted remediation, and the final SQL-readiness audit.
 - Portfolio execution remains gated until the required curriculum and final DuckDB readiness audit are complete.

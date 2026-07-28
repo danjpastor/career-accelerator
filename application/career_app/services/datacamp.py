@@ -290,6 +290,14 @@ def reconcile(conn: sqlite3.Connection) -> dict[str, int]:
             )
             stats["updated"] += 1
 
+        # Daily Focus is a frozen snapshot, so keep its visible title aligned
+        # with the canonical chapter title when presentation wording changes.
+        if _table_exists(conn, "daily_focus"):
+            conn.execute(
+                "UPDATE daily_focus SET title=? WHERE task_id=?",
+                (chapter.label, task_id),
+            )
+
         row = conn.execute("SELECT completed FROM sprint_tasks WHERE id=?", (task_id,)).fetchone()
         completed = bool(row and row["completed"])
         completed_date = None
@@ -328,34 +336,59 @@ def reconcile(conn: sqlite3.Connection) -> dict[str, int]:
 
     # DataCamp is an active supplemental summary track, but chapter tasks remain
     # ordinary sprint tasks so multiple chapters can be assigned on one day.
-    complete = conn.execute(
-        "SELECT COUNT(*) FROM datacamp_chapter_progress WHERE status='Completed'"
-    ).fetchone()[0]
+    progress_rows = {
+        str(row["chapter_key"]): row
+        for row in conn.execute(
+            "SELECT chapter_key,status,scheduled_date FROM datacamp_chapter_progress"
+        ).fetchall()
+    }
+    complete = sum(
+        1 for row in progress_rows.values() if str(row["status"]) == "Completed"
+    )
     total = len(DATACAMP_CHAPTERS)
-    next_row = conn.execute(
-        """SELECT chapter_name,course_name,scheduled_date
-           FROM datacamp_chapter_progress
-           WHERE status<>'Completed'
-           ORDER BY scheduled_date,chapter_key LIMIT 1"""
+    next_chapter = next(
+        (
+            chapter
+            for chapter in DATACAMP_CHAPTERS
+            if str(progress_rows[chapter.key]["status"]) != "Completed"
+        ),
+        None,
+    )
+    state_row = conn.execute(
+        "SELECT current_week FROM program_state WHERE id=1"
     ).fetchone()
+    current_week = max(1, int(state_row["current_week"] if state_row else 1))
+    week_chapters = [chapter for chapter in DATACAMP_CHAPTERS if chapter.week == current_week]
+    weekly_target = len(week_chapters)
+    weekly_completed = sum(
+        str(progress_rows[chapter.key]["status"]) == "Completed"
+        for chapter in week_chapters
+    )
     metadata = {
         "active": True,
         "provider": "DataCamp",
         "completed_chapters": int(complete),
         "total_chapters": total,
-        "next_chapter": str(next_row["chapter_name"]) if next_row else None,
-        "next_course": str(next_row["course_name"]) if next_row else None,
-        "next_date": str(next_row["scheduled_date"]) if next_row else None,
+        "current_week": current_week,
+        "weekly_completed": int(weekly_completed),
+        "weekly_target": int(weekly_target),
+        "next_chapter": next_chapter.chapter_name if next_chapter else None,
+        "next_course": next_chapter.course_name if next_chapter else None,
+        "next_date": (
+            str(progress_rows[next_chapter.key]["scheduled_date"])
+            if next_chapter else None
+        ),
     }
     conn.execute(
         """INSERT INTO track_state(track_key,display_name,position,subposition,weekly_target,status,metadata,updated_at)
-           VALUES('datacamp','DataCamp',?,?,1,?,?,CURRENT_TIMESTAMP)
+           VALUES('datacamp','DataCamp',?,?,?,?,?,CURRENT_TIMESTAMP)
            ON CONFLICT(track_key) DO UPDATE SET display_name='DataCamp',position=excluded.position,
-               subposition=excluded.subposition,weekly_target=1,status=excluded.status,
-               metadata=excluded.metadata,updated_at=CURRENT_TIMESTAMP""",
+               subposition=excluded.subposition,weekly_target=excluded.weekly_target,
+               status=excluded.status,metadata=excluded.metadata,updated_at=CURRENT_TIMESTAMP""",
         (
             int(complete),
             total,
+            int(weekly_target),
             "Completed" if complete >= total else "Active",
             json.dumps(metadata, sort_keys=True),
         ),
@@ -446,6 +479,59 @@ def mark_task_complete(conn: sqlite3.Connection, task_id: int) -> None:
         (date.today().isoformat(), key),
     )
     conn.commit()
+
+
+def mark_task_incomplete(
+    conn: sqlite3.Connection,
+    task_id: int,
+    *,
+    enforce_sequence: bool = True,
+) -> None:
+    """Restore one chapter to unfinished in every linked progress layer."""
+    row = conn.execute(
+        "SELECT managed_key FROM task_metadata WHERE task_id=?", (int(task_id),)
+    ).fetchone()
+    if row is None or not str(row["managed_key"] or "").startswith(MANAGED_PREFIX):
+        return
+    key = str(row["managed_key"])[len(MANAGED_PREFIX):]
+    chapter = chapter_for_key(key)
+    if chapter is None:
+        raise ValueError("The selected DataCamp chapter is no longer in the curriculum.")
+
+    if enforce_sequence:
+        target_index = next(
+            index for index, item in enumerate(DATACAMP_CHAPTERS) if item.key == key
+        )
+        later_completed = conn.execute(
+            "SELECT chapter_key FROM datacamp_chapter_progress WHERE status='Completed'"
+        ).fetchall()
+        completed_keys = {str(item["chapter_key"]) for item in later_completed}
+        later = [
+            item for item in DATACAMP_CHAPTERS[target_index + 1:]
+            if item.key in completed_keys
+        ]
+        if later:
+            latest = later[-1]
+            raise ValueError(
+                "Undo the later DataCamp chapter first: "
+                f"{latest.course_name}, Chapter {latest.chapter_number}."
+            )
+
+    due = chapter.scheduled_date(_program_start(conn)).isoformat()
+    conn.execute("UPDATE sprint_tasks SET completed=0 WHERE id=?", (int(task_id),))
+    conn.execute(
+        """UPDATE task_metadata
+           SET status='Not Started',deferred_until=?,prerequisite_state='Ready',
+               prerequisite_reason=NULL
+           WHERE task_id=?""",
+        (due, int(task_id)),
+    )
+    conn.execute(
+        """UPDATE datacamp_chapter_progress
+           SET status='Not Started',completed_date=NULL,updated_at=CURRENT_TIMESTAMP
+           WHERE chapter_key=?""",
+        (key,),
+    )
 
 
 def portfolio_ready(conn: sqlite3.Connection) -> bool:

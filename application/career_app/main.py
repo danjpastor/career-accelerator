@@ -2638,10 +2638,12 @@ class CareerAccelerator(QMainWindow):
         self.datacamp_status.setObjectName("Muted")
         self.datacamp_status.setWordWrap(True)
         datacamp_card.layout.addWidget(self.datacamp_status)
-        open_datacamp = QPushButton("Open Current DataCamp Chapter")
-        open_datacamp.setObjectName("Primary")
-        open_datacamp.clicked.connect(lambda: self.continue_learning_track("DataCamp"))
-        datacamp_card.layout.addWidget(open_datacamp)
+        self.open_datacamp_button = QPushButton("Open Current DataCamp Chapter")
+        self.open_datacamp_button.setObjectName("Primary")
+        self.open_datacamp_button.clicked.connect(
+            lambda: self.continue_learning_track("DataCamp")
+        )
+        datacamp_card.layout.addWidget(self.open_datacamp_button)
         certificate_layout.addWidget(datacamp_card)
         certificate_layout.addStretch(1)
         self.learning_tabs.addTab(certificate, "Certificate")
@@ -3041,7 +3043,14 @@ class CareerAccelerator(QMainWindow):
         form_grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.session_date = QLineEdit(date.today().isoformat())
-        self.session_hours = QLineEdit("1")
+        self.session_hours = QSpinBox()
+        self.session_hours.setRange(0, 40)
+        self.session_hours.setValue(1)
+        self.session_hours.setSuffix(" hr")
+        self.session_minutes = QSpinBox()
+        self.session_minutes.setRange(0, 59)
+        self.session_minutes.setValue(0)
+        self.session_minutes.setSuffix(" min")
         self.session_productivity = QSpinBox()
         self.session_productivity.setRange(1, 10)
         self.session_productivity.setValue(7)
@@ -3071,8 +3080,14 @@ class CareerAccelerator(QMainWindow):
 
         form_grid.addWidget(QLabel("Date"), 0, 0)
         form_grid.addWidget(self.session_date, 0, 1)
-        form_grid.addWidget(QLabel("Hours"), 0, 2)
-        form_grid.addWidget(self.session_hours, 0, 3)
+        form_grid.addWidget(QLabel("Duration"), 0, 2)
+        duration_host = QWidget()
+        duration_layout = QHBoxLayout(duration_host)
+        duration_layout.setContentsMargins(0, 0, 0, 0)
+        duration_layout.setSpacing(8)
+        duration_layout.addWidget(self.session_hours, 1)
+        duration_layout.addWidget(self.session_minutes, 1)
+        form_grid.addWidget(duration_host, 0, 3)
 
         form_grid.addWidget(QLabel("Productivity"), 1, 0)
         form_grid.addWidget(self.session_productivity, 1, 1)
@@ -5158,7 +5173,7 @@ class CareerAccelerator(QMainWindow):
             for item in ready:
                 minutes = int(item.get("estimated_minutes") or 30)
                 scheduled_week = int(item.get("week") or week)
-                prefix = "Catch-Up • " if scheduled_week < week else ""
+                prefix = "Catch-Up • " if (bool(item.get("is_catch_up")) or scheduled_week < week) else ""
                 metadata = str(
                     item.get("metadata_label")
                     or unified_tasks.task_type_label(item, week)
@@ -5326,7 +5341,24 @@ class CareerAccelerator(QMainWindow):
                 },
             ))
 
+        coming_soon_section_started = False
         for index, (status, item) in enumerate(visible_items):
+            if index > 0:
+                self.dashboard_tasks_layout.addWidget(Divider())
+
+            if status == "coming_soon" and not coming_soon_section_started:
+                coming_soon_section_started = True
+                section_label = QLabel("COMING SOON")
+                section_label.setObjectName("Tiny")
+                section_label.setStyleSheet(
+                    f"color:{COLORS['muted']};"
+                    "font-size:7.6pt;font-weight:700;"
+                    "letter-spacing:0.7px;"
+                    "background:transparent;border:none;"
+                )
+                section_label.setContentsMargins(0, 1, 0, 0)
+                self.dashboard_tasks_layout.addWidget(section_label)
+
             task_id = self._get_ahead_task_id(item)
             category = str(item.get("category") or "General")
             metadata_label = str(
@@ -5337,11 +5369,22 @@ class CareerAccelerator(QMainWindow):
 
             if status == "ready":
                 scheduled_week = int(item.get("week") or week)
-                is_catch_up = scheduled_week < int(week)
+                is_catch_up = (
+                    bool(item.get("is_catch_up"))
+                    or scheduled_week < int(week)
+                )
+                is_datacamp = (
+                    str(item.get("kind") or "") == "datacamp_chapter"
+                    or metadata_label.casefold() == "datacamp"
+                )
                 category_text = (
-                    f"Catch-Up • {metadata_label}"
-                    if is_catch_up
-                    else metadata_label
+                    "Catch-Up"
+                    if is_catch_up and is_datacamp
+                    else (
+                        f"Catch-Up • {metadata_label}"
+                        if is_catch_up
+                        else metadata_label
+                    )
                 )
                 workspace_available = (
                     task_id is not None
@@ -5349,6 +5392,15 @@ class CareerAccelerator(QMainWindow):
                         self.conn,
                         task_id,
                     )
+                )
+                datacamp_url = (
+                    datacamp.chapter_url_for_task(self.conn, task_id)
+                    if task_id is not None
+                    else None
+                )
+                open_available = bool(
+                    task_id is not None
+                    and (workspace_available or datacamp_url)
                 )
                 task_row = TaskRow(
                     title=str(item.get("label") or "Task"),
@@ -5366,13 +5418,13 @@ class CareerAccelerator(QMainWindow):
                         int(week),
                     ),
                     icon_fallback="•",
-                    action_text="Open" if workspace_available else None,
+                    action_text="Open" if open_available else None,
                     on_action=(
                         (
                             lambda _checked=False, task_id=task_id:
                             self.open_task_workspace(task_id=task_id)
                         )
-                        if workspace_available
+                        if open_available
                         else None
                     ),
                     completed=False,
@@ -5418,8 +5470,10 @@ class CareerAccelerator(QMainWindow):
             )
             self.dashboard_tasks_layout.addWidget(task_row, 1)
             self.dashboard_task_density_widgets.append(task_row)
-            if index < len(visible_items) - 1:
-                self.dashboard_tasks_layout.addWidget(Divider())
+            if status == "ready" and task_id is not None:
+                self.dashboard_task_rows_by_id.setdefault(
+                    int(task_id), []
+                ).append(task_row)
 
         self._sync_dashboard_tasks_scroll_extent()
         QTimer.singleShot(0, self._sync_dashboard_tasks_scroll_extent)
@@ -5547,6 +5601,11 @@ class CareerAccelerator(QMainWindow):
         self.dashboard_mission_detail.setToolTip(
             mission_detail
         )
+
+        # Focus and Next Tasks are two views of the same assigned work.
+        # Rebuild one shared widget registry so a completion click can hide and
+        # disable every visible copy immediately, before any refresh work runs.
+        self.dashboard_task_rows_by_id = {}
 
         # Focus rows.
         self.clear_layout(
@@ -5709,12 +5768,17 @@ class CareerAccelerator(QMainWindow):
                     task_id,
                 )
             )
+            datacamp_url = (
+                datacamp.chapter_url_for_task(self.conn, task_id)
+                if task_id is not None
+                else None
+            )
             action_text = None
             action_callback = None
 
             if (
                 task_id is not None
-                and workspace_available
+                and (workspace_available or bool(datacamp_url))
             ):
                 action_text = "Open"
                 action_callback = (
@@ -5733,6 +5797,20 @@ class CareerAccelerator(QMainWindow):
 
                 )
 
+            focus_row_holder = {}
+            on_toggle = None
+            if task_id is not None and not completed:
+                on_toggle = (
+                    lambda state_value,
+                    task_id=task_id,
+                    holder=focus_row_holder:
+                    self.queue_dashboard_task_completion(
+                        holder["row"],
+                        task_id,
+                        state_value,
+                    )
+                )
+
             focus_row = FocusRow(
                 icon_path,
                 title,
@@ -5747,7 +5825,14 @@ class CareerAccelerator(QMainWindow):
                 ),
                 completed=completed,
                 icon_fallback=icon_fallback,
+                checked=completed,
+                on_toggle=on_toggle,
             )
+            focus_row_holder["row"] = focus_row
+            if task_id is not None and not completed:
+                self.dashboard_task_rows_by_id.setdefault(
+                    int(task_id), []
+                ).append(focus_row)
             self.focus_layout.addWidget(focus_row)
             self.dashboard_focus_density_widgets.append(focus_row)
 
@@ -6193,6 +6278,7 @@ class CareerAccelerator(QMainWindow):
             ready_chapter = datacamp.current_ready_task(self.conn)
             self.datacamp_status.setText(
                 f"{dc.get('position', 0)} / {dc.get('subposition', 0)} chapters complete • "
+                f"This week {dc.get('weekly_completed', 0)}/{dc.get('weekly_target', 0)} • "
                 f"Next: {next_course}{' — ' + next_chapter if next_chapter else ''}"
             )
             if hasattr(self, "open_datacamp_button"):
@@ -6730,32 +6816,54 @@ class CareerAccelerator(QMainWindow):
         task_id,
         state_value,
     ):
-        """Complete a dashboard task after the checkbox event finishes."""
+        """Complete one assigned task without blocking the dashboard click."""
         if int(state_value) != Qt.Checked.value:
             return
 
-        task_row.checkbox.setEnabled(False)
-        task_row.hide()
+        task_id = int(task_id)
+        peer_rows = list(
+            getattr(self, "dashboard_task_rows_by_id", {}).get(
+                task_id,
+                [task_row],
+            )
+        )
+        if task_row not in peer_rows:
+            peer_rows.append(task_row)
+
+        # Today’s Focus and Next Tasks can show the same assignment. Hide and
+        # disable every copy immediately so the click feels instant and a
+        # second completion cannot be queued while the database is updating.
+        for row in peer_rows:
+            checkbox = getattr(row, "checkbox", None)
+            if checkbox is not None:
+                checkbox.setEnabled(False)
+            row.hide()
 
         QTimer.singleShot(
             0,
             lambda: self.finish_dashboard_task_completion(
-                task_row,
+                peer_rows,
                 task_id,
             ),
         )
 
     def finish_dashboard_task_completion(
         self,
-        task_row,
+        task_rows,
         task_id,
     ):
         try:
-            self.complete_task(task_id)
+            self.complete_task(
+                task_id,
+                refresh_scope="dashboard",
+            )
         except Exception as error:
-            task_row.show()
-            task_row.setEnabled(True)
-            task_row.checkbox.setChecked(False)
+            for row in task_rows:
+                row.show()
+                checkbox = getattr(row, "checkbox", None)
+                if checkbox is not None:
+                    checkbox.setChecked(False)
+                    checkbox.setEnabled(True)
             QMessageBox.critical(
                 self,
                 "Task Completion Failed",
@@ -6765,9 +6873,8 @@ class CareerAccelerator(QMainWindow):
                     f"Error: {error}"
                 ),
             )
-            raise
 
-    def complete_task(self, task_id):
+    def complete_task(self, task_id, *, refresh_scope="all"):
         # Task completion refreshes several pages. Preserve the active timer and
         # unsaved Study Session form so an unrelated checkbox cannot interrupt
         # the user's current study session.
@@ -6832,12 +6939,16 @@ class CareerAccelerator(QMainWindow):
                 )
                 self.conn.commit()
 
+            # Record provider-specific evidence before the track-repair pass.
+            # DataCamp chapter tasks intentionally use the planner's negative
+            # sort band; without this evidence, repair_track_links() can mistake
+            # a newly completed chapter for a detached false completion.
+            datacamp.mark_task_complete(self.conn, task_id)
             self.state = state(self.conn)
             tracks.sync_all(
                 self.conn,
                 self.state,
             )
-            datacamp.mark_task_complete(self.conn, task_id)
             datacamp.reconcile(self.conn)
             self.state = state(self.conn)
             completion_message = result.get(
@@ -6870,7 +6981,24 @@ class CareerAccelerator(QMainWindow):
                         " Another item is due today."
                     )
 
-            self.refresh_all()
+            if refresh_scope == "dashboard":
+                # A checkbox click should not refresh unrelated pages or run
+                # Git status. The database work above is already committed, so
+                # a redraw problem must never make the task appear incomplete.
+                try:
+                    self.refresh_dashboard(sync_tracks=False)
+                except Exception as refresh_error:
+                    self._notify(
+                        f"Task completed, but the dashboard could not refresh: {refresh_error}",
+                        6500,
+                    )
+                QTimer.singleShot(
+                    0,
+                    lambda task_id=int(task_id):
+                    self._refresh_linked_task_surfaces(task_id),
+                )
+            else:
+                self.refresh_all()
         finally:
             session_guard.restore(
                 self,
@@ -6882,10 +7010,49 @@ class CareerAccelerator(QMainWindow):
             5200,
         )
 
-        if result["handled"]:
+    def _refresh_linked_task_surfaces(self, task_id):
+        """Refresh only panels whose state can change after this task."""
+        try:
+            task = self.conn.execute(
+                "SELECT category FROM sprint_tasks WHERE id=?",
+                (int(task_id),),
+            ).fetchone()
+            category = str(task["category"] or "") if task is not None else ""
+            link = tracks.task_track(self.conn, int(task_id))
+            track_key = (
+                str(link["track_key"] or "").casefold()
+                if link is not None
+                else ""
+            )
+
+            # Learning and readiness summarize Google, DataCamp, DuckDB, SQL,
+            # and Applied Lab completion, so they always stay in sync.
+            self.refresh_learning()
+            self.refresh_readiness()
+
+            if category.casefold() == "portfolio" or track_key == "portfolio":
+                self.refresh_project()
+            if category.casefold() == "sql" or track_key in {"sql", "applied"}:
+                self.refresh_sql()
+
+            self.refresh_task_workspaces()
+            newly_unlocked = self.sync_achievement_records()
+            if newly_unlocked:
+                extra = (
+                    f"  +{len(newly_unlocked) - 1} more"
+                    if len(newly_unlocked) > 1
+                    else ""
+                )
+                self._notify(
+                    f"🏆 Achievement unlocked: {newly_unlocked[0]}{extra}",
+                    7000,
+                )
+        except Exception as error:
+            # The task is already durably completed. Keep the dashboard usable
+            # and surface a non-blocking warning instead of restoring stale rows.
             self._notify(
-                completion_message,
-                5200,
+                f"Task completed, but a secondary panel could not refresh: {error}",
+                6500,
             )
 
     def show_dashboard_tomorrow_preview(
@@ -8481,30 +8648,40 @@ class CareerAccelerator(QMainWindow):
             1800,
         )
 
+    def _copy_timer_duration_to_log(self):
+        total_minutes = int(round(self.elapsed_seconds / 60.0))
+        if self.elapsed_seconds > 0:
+            total_minutes = max(1, total_minutes)
+        hours, minutes = divmod(total_minutes, 60)
+        self.session_hours.setValue(min(hours, self.session_hours.maximum()))
+        self.session_minutes.setValue(minutes)
+
     def apply_timer_to_session_log(self):
         self.pause_study_timer()
-        hours = self.elapsed_seconds / 3600
-        self.session_hours.setText(
-            f"{hours:.2f}"
-        )
+        self._copy_timer_duration_to_log()
         self._notify(
-            "Current timer value copied into the session log.",
+            "Current timer duration copied into the session log.",
             3500,
         )
 
     def transfer_timer(self):
         self.pause_study_timer()
-        self.session_hours.setText(
-            f"{self.elapsed_seconds / 3600:.2f}"
-        )
+        self._copy_timer_duration_to_log()
         self.navigate(PAGE_STUDY)
 
     def save_session(self):
-        try:
-            hours = float(self.session_hours.text())
-        except ValueError:
-            QMessageBox.warning(self, "Invalid Hours", "Hours must be numeric.")
+        total_minutes = (
+            int(self.session_hours.value()) * 60
+            + int(self.session_minutes.value())
+        )
+        if total_minutes <= 0:
+            QMessageBox.warning(
+                self,
+                "Invalid Duration",
+                "Enter at least one minute for the study session.",
+            )
             return
+        hours = total_minutes / 60.0
         linked_task_id = self.session_task.currentData()
         (
             linked_task_id,

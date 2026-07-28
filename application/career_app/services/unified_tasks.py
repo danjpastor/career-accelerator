@@ -25,6 +25,7 @@ import sqlite3
 from typing import Iterable
 
 from career_app.data.applied_exercises import exercise_for_label as applied_for_label
+from career_app.data.applied_exercises import exercise_number_for_label as applied_number_for_label
 from career_app.data.duckdb_exercises import exercise_for_label as duckdb_for_label
 from career_app.data.duckdb_exercises import exercise_number_for_label
 from career_app.data.roadmap import SQL_COMPANION
@@ -342,11 +343,42 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
             result = roadmap_mastery.sql_problem_readiness(conn, title)
             return Readiness(bool(result.get("ready")), str(result.get("reason") or ""))
 
-    if kind == "portfolio_execution":
-        if current_week < 9:
-            return Readiness(False, "Portfolio execution begins in Week 9 after the learning phase.")
-        if not datacamp.portfolio_ready(conn):
-            return Readiness(False, "Complete the required Week 1–8 DataCamp chapters first.")
+    if kind == "applied_lab":
+        item = applied_for_label(str(task.get("label") or ""))
+        number = applied_number_for_label(str(task.get("label") or ""))
+        if item is not None and number is not None:
+            from career_app.services import tracks
+
+            state_row = conn.execute("SELECT * FROM program_state WHERE id=1").fetchone()
+            app_state = (
+                {key: state_row[key] for key in state_row.keys()}
+                if state_row is not None
+                else {"current_week": current_week, "google_course": 1, "google_module": 1}
+            )
+            result = tracks.applied_lab_readiness(
+                conn,
+                app_state,
+                int(number),
+            )
+            reason = "" if result.get("ready") else "Complete " + "; ".join(result.get("missing") or []) + " first."
+            return Readiness(bool(result.get("ready")), reason)
+
+    if kind in {"portfolio_preparation", "portfolio_execution"}:
+        from career_app.services import tracks
+
+        state_row = conn.execute("SELECT * FROM program_state WHERE id=1").fetchone()
+        app_state = (
+            {key: state_row[key] for key in state_row.keys()}
+            if state_row is not None
+            else {"current_week": current_week, "google_course": 1, "google_module": 1}
+        )
+        result = tracks.portfolio_task_readiness(
+            conn,
+            app_state,
+            str(task.get("label") or ""),
+        )
+        reason = "" if result.get("ready") else "Complete " + "; ".join(result.get("missing") or []) + " first."
+        return Readiness(bool(result.get("ready")), reason)
 
     if kind == "review":
         today = date.today()
@@ -703,7 +735,7 @@ def _migrate_today_focus_rows(
     for row in _daily_focus_rows(conn, focus_date):
         task = task_map.get(_safe_int(row["task_id"], 0))
         kind = str(row["focus_kind"] or "new")
-        if task is not None and _safe_int(task.get("week"), current_week) < int(current_week):
+        if task is not None and bool(task.get("is_catch_up")):
             kind = "catch_up"
         elif row["completed_at"] and task is None:
             kind = "history"
@@ -733,6 +765,7 @@ def _ensure_daily_snapshot(
                 if task.get("ready")
                 and not bool(task.get("completed"))
                 and _safe_int(task.get("week"), current_week) == int(current_week)
+                and not bool(task.get("is_catch_up"))
             ),
             key=lambda task: _roadmap_sort(task, current_week),
         )
@@ -820,7 +853,7 @@ def _active_new_tasks(
         # A migration may correct a task's scheduled week after the daily
         # snapshot was created. Do not keep an overdue task in the frozen
         # current-week quota; the rolling Catch-Up queue owns it instead.
-        if _safe_int(task.get("week"), current_week) < int(current_week):
+        if bool(task.get("is_catch_up")):
             continue
         item = dict(task)
         item["focus_kind"] = "new"
@@ -838,7 +871,7 @@ def _sync_active_catchup(
     catchup = [
         dict(task)
         for task in ready
-        if _safe_int(task.get("week"), current_week) < int(current_week)
+        if bool(task.get("is_catch_up"))
     ]
     selected = catchup[: max(0, int(slots))]
     selected_identities = {_task_identity(task) for task in selected}
@@ -899,14 +932,22 @@ def daily_plan(conn: sqlite3.Connection, current_week: int, max_items: int = MAX
 
 
 def next_tasks(conn: sqlite3.Connection, current_week: int, limit: int = MAX_NEXT_TASKS) -> list[dict]:
-    """Return the queue after the tasks currently visible in Today’s Focus."""
+    """Return the actionable queue, beginning with Today’s Focus.
+
+    Today’s Focus and Next Tasks are two views of the same assigned work.  The
+    dashboard summary therefore begins with the still-active focus tasks, then
+    fills any remaining slots with the next prerequisite-ready items.  This
+    keeps the compact card useful as a completion surface without allowing it
+    to mutate the frozen daily focus snapshot.
+    """
     focus = daily_plan(conn, current_week, max_items=MAX_FOCUS_TASKS)
     focus_ids = {_safe_int(item.get("id"), 0) for item in focus}
-    queue = [
+    following = [
         task
         for task in ready_tasks(conn, current_week)
         if _safe_int(task.get("id"), 0) not in focus_ids
     ]
+    queue = _dedupe([*focus, *following])
     return queue[: max(1, int(limit or MAX_NEXT_TASKS))]
 
 
@@ -1082,11 +1123,11 @@ def migrate_runtime(conn: sqlite3.Connection, current_week: int) -> dict:
 
     removed["navigation_routes"] = _migrate_navigation_destinations(conn)
     conn.execute(
-        """INSERT INTO settings(key,value) VALUES('unified_planner_version','10.36.0')
+        """INSERT INTO settings(key,value) VALUES('unified_planner_version','10.36.2')
            ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
     )
     conn.execute(
-        """INSERT INTO settings(key,value) VALUES('navigation_layout_version','10.36.0')
+        """INSERT INTO settings(key,value) VALUES('navigation_layout_version','10.36.2')
            ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
     )
     conn.commit()

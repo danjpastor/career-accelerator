@@ -17,6 +17,8 @@ Complete the work as a handoff-ready analyst artifact. A reviewer should be able
 
 ## Start here
 
+Use the in-app **Excel Analyst Workbook Studio** as the primary workspace for this lab. It provides seven tracked stages, source-file previews, a workbook structure plan, evidence capture, and a final handoff review. Select **Create / Open Workbook** in the Studio to copy the polished workbook shell into the Applied Labs submissions folder.
+
 1. Create the submission record first, then save a new `.xlsx` workbook in the Applied Labs submissions folder.
 2. Import or link to the supplied data rather than editing the source CSV files.
 3. Use named tables, clear sheet names, and a visible assumptions or controls area so another analyst can follow the workbook.

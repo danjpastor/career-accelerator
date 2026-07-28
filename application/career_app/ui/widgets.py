@@ -1552,6 +1552,8 @@ class FocusRow(QWidget):
         on_action=None,
         completed=False,
         icon_fallback="•",
+        checked=False,
+        on_toggle=None,
     ):
         super().__init__()
         self._forced_density = "comfortable"
@@ -1566,6 +1568,17 @@ class FocusRow(QWidget):
         self.row_layout = layout
         layout.setContentsMargins(0, 3, 0, 3)
         layout.setSpacing(9)
+
+        self.checkbox = None
+        if on_toggle is not None:
+            self.checkbox = VisibleCheckBox(checked=checked)
+            self.checkbox.stateChanged.connect(on_toggle)
+            self.checkbox.setEnabled(not completed)
+            layout.addWidget(
+                self.checkbox,
+                0,
+                Qt.AlignVCenter,
+            )
 
         self.icon_label = TaskIconLabel(
             icon, fallback=icon_fallback, size=27, parent=self

@@ -8,13 +8,14 @@ from typing import Any
 
 TEXT_FIELDS = (
     "session_date",
-    "session_hours",
     "session_google",
     "session_datacamp",
     "session_portfolio",
 )
 
 VALUE_FIELDS = (
+    "session_hours",
+    "session_minutes",
     "session_productivity",
     "session_sql",
     "session_goal_minutes",

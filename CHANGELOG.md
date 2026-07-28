@@ -1,3 +1,53 @@
+# 10.36.6
+
+- Added explicit DataCamp chapter prerequisites to every Applied Lab, DuckDB exercise, SQL interview problem, and portfolio milestone lock.
+- Applied Lab 07 now requires all Week 1–2 spreadsheet chapters before its workspace becomes active.
+- Locked Applied Labs remain visible for planning but cannot create, edit, run, save, or complete submissions.
+- Removed Google Certificate bypasses from Power BI and Python Applied Lab gates.
+- Added a content-lock regression audit covering all gated learning surfaces.
+
+# 10.36.5
+
+- Changed manual Study Session duration entry from decimal hours to separate Hours and Minutes controls.
+- Timer-to-log actions now convert elapsed time into hours and whole minutes while preserving decimal-hour storage for analytics.
+- Added a full Excel Analyst Workbook Studio for Applied Lab 07 with seven tracked stages, stage evidence, source-file profiles and previews, workbook planning, artifact controls, and a final review gate.
+- Added a polished Excel starter workbook shell with Controls, Order Analysis, Management Summary, Reconciliation, Data Dictionary, and handoff guidance sheets.
+- Made the in-app Studio the primary Applied Lab 07 workspace while retaining the full written guide as reference.
+- Linked Studio progress into the existing Applied Lab submission record without overwriting learner-authored content.
+
+# 10.36.4
+
+- Removed the redundant `DataCamp —` prefix from every DataCamp chapter task title.
+- Kept frozen Today’s Focus titles synchronized with the canonical shorter chapter title.
+
+# 10.36.3
+
+- Fixed dashboard completion checkboxes triggering an expensive full-application refresh and Git status operation.
+- Today’s Focus and Next Tasks now hide and disable both copies of an assignment immediately, then refresh only linked planning and learning surfaces.
+- Fixed failed checkbox callbacks leaving tasks visually stuck or apparently incomplete.
+- Fixed track repair resetting newly completed DataCamp chapters because their provider progress evidence was recorded too late.
+- Added a dedicated Coming Soon divider and section label in the Next Tasks card.
+- Shortened DataCamp Catch-Up metadata from `Catch-Up • DataCamp` to `Catch-Up` so more of the chapter title remains visible.
+
+# 10.36.2
+
+- Restored Today’s Focus tasks to the top of the four-row Next Tasks card.
+- Added completion checkboxes directly to active Today’s Focus rows.
+- Linked both dashboard cards to the same canonical task-completion handler.
+- Preserved the frozen five-task daily snapshot while allowing newly unlocked work to remain queued behind the active focus assignments.
+- Restored Open buttons for DataCamp focus and Next Tasks rows so assigned chapters launch in the browser.
+
+# 10.36.1
+
+- Audited the weekly plan, Today’s Focus, Next Tasks, Coming Soon, Current Sprint, completion history, and 90-day contract as one linked planning system.
+- Fixed same-week overdue DataCamp chapters so they enter rolling Catch-Up without consuming the frozen daily new-task quota.
+- Fixed Current Sprint grouping so canonical DataCamp chapters appear under DataCamp instead of generic Learning.
+- Linked DataCamp completion history and sequential undo to the canonical chapter-progress table.
+- Linked the Learning status card to real current-week DataCamp targets and completion totals.
+- Fixed the Open Current DataCamp Chapter button state and tooltip refresh.
+- Replaced spreadsheet, SQL, Power BI, and Python subject icons on all DataCamp chapter tasks with the DataCamp logomark.
+- Added an end-to-end planning-system release audit covering routing, readiness, Catch-Up rollover, completion, undo, weekly totals, icons, and database integrity.
+
 # 10.36.0
 
 - Replaced Accelerator Academy with 74 individual DataCamp chapter tasks across Weeks 1–8.

@@ -613,7 +613,7 @@ def _program_integrity_cleanup(conn, root: Path) -> dict:
 
     if _table_exists(conn, "settings"):
         conn.execute(
-            """INSERT INTO settings(key,value) VALUES('program_integrity_version','10.36.0')
+            """INSERT INTO settings(key,value) VALUES('program_integrity_version','10.36.2')
                ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
         )
     return result

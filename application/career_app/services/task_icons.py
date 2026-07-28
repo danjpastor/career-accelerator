@@ -11,6 +11,7 @@ from pathlib import Path
 
 ICON_FILES = {
     "google": "google_g.svg",
+    "datacamp": "datacamp.svg",
     "spreadsheet": "spreadsheet.svg",
     "sql": "sql.svg",
     "power_bi": "power_bi.svg",
@@ -43,6 +44,12 @@ def key_for_task(task: dict, current_week: int | None = None) -> str:
 
     if kind == "google" or str(task.get("track_key") or "").casefold() == "google":
         return "google"
+    if (
+        kind == "datacamp_chapter"
+        or str(task.get("track_key") or "").casefold() == "datacamp"
+        or str(task.get("managed_key") or "").casefold().startswith("datacamp:")
+    ):
+        return "datacamp"
     if kind in {"duckdb", "interview_problem", "sql_practice"}:
         return "sql"
     if kind in {"portfolio_preparation", "portfolio_execution"}:
@@ -86,7 +93,7 @@ def key_for_task(task: dict, current_week: int | None = None) -> str:
     )):
         return "spreadsheet"
 
-    if kind in {"datacamp_chapter", "guided_practice"}:
+    if kind == "guided_practice":
         week = int(current_week or task.get("week") or 1)
         if week <= 2:
             return "spreadsheet"
