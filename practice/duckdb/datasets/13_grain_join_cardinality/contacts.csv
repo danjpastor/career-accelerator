@@ -1,0 +1,11 @@
+contact_id,account_id,contact_name,role
+C001,A001,Maya Chen,Producer
+C002,A001,Leo Grant,Finance
+C003,A002,Priya Shah,Operations
+C004,A003,Noah Brooks,Director
+C005,A003,Amara King,Coordinator
+C006,A003,Eli Flores,Finance
+C007,A004,Sofia Reed,Manager
+C008,A005,Owen Price,Owner
+C009,A006,Nina Bell,Producer
+C010,A007,Ava Stone,Finance

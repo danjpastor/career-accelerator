@@ -1,6 +1,0 @@
-module_id: date_time_functions
-title: Work with Dates and Time
-order: 2
-description: Use date arithmetic, EXTRACT, and DATE_TRUNC for analysis periods.
-lessons:
-- lessons/sql_date_time_functions/lesson.yaml

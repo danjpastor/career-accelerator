@@ -29,19 +29,19 @@ from career_app.data.duckdb_exercises import exercise_for_label as duckdb_for_la
 from career_app.data.duckdb_exercises import exercise_number_for_label
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.services import roadmap_mastery
-from career_app.services import weekly_mastery
+from career_app.services import datacamp
 from career_app.services.task_titles import title_case_task
 from career_app.navigation import PAGE_LEARNING, PAGE_PORTFOLIO, PAGE_WORKSPACES
 
 
 GOOGLE_TRACK = "google"
-ACADEMY_TRACK = "academy"
+DATACAMP_TRACK = "datacamp"
 SQL_TRACK = "sql"
 PORTFOLIO_TRACK = "portfolio"
 APPLIED_TRACK = "applied"
 
 MAX_FOCUS_TASKS = 5
-MAX_NEXT_TASKS = 6
+MAX_NEXT_TASKS = 4
 MAX_COMING_UP = 3
 
 _SQL_TITLES = tuple(str(item[0]) for item in SQL_COMPANION)
@@ -124,7 +124,7 @@ def _task_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute(
         """SELECT
                  s.id,s.week,s.sort_order,s.label,s.completed,
-                 m.status,m.priority,m.estimated_minutes,m.energy,
+                 m.status,m.priority,m.estimated_minutes,m.energy,m.deferred_until,
                  m.destination,m.category,m.prerequisite_state,
                  m.prerequisite_reason,m.description,m.definition_of_done,
                  m.starter_path,m.managed_key,
@@ -176,12 +176,8 @@ def _kind(conn: sqlite3.Connection, task: dict) -> str:
 
     if track_key == GOOGLE_TRACK:
         return "google"
-    if managed_key.startswith("roadmap_v1026:assessment:"):
-        return "knowledge_check"
-    if managed_key.startswith("roadmap_v1026:lesson:"):
-        return "academy_lesson"
-    if track_key == ACADEMY_TRACK:
-        return "academy_lesson"
+    if managed_key.startswith("datacamp:") or track_key == DATACAMP_TRACK:
+        return "datacamp_chapter"
     if duckdb_for_label(label) is not None or managed_key.startswith("roadmap_v1026:duckdb:"):
         return "duckdb"
     if _sql_title(label, str(task.get("target_key") or "")) is not None:
@@ -192,8 +188,6 @@ def _kind(conn: sqlite3.Connection, task: dict) -> str:
         return _portfolio_kind(conn, task)
     if str(task.get("category") or "") == "Review" or "retrospective" in label.casefold():
         return "review"
-    if str(task.get("category") or "") == "Learning":
-        return "academy_practice"
     if str(task.get("category") or "") == "SQL":
         return "sql_practice"
     if _safe_int(task.get("week"), 99) >= 10:
@@ -215,48 +209,33 @@ def _phase_for_week(week: int) -> str:
 
 
 def _learning_area(task: dict) -> str:
-    """Return the specific Academy/learning area represented by a task."""
+    """Return the subject area represented by a learning task."""
+    chapter = datacamp.chapter_for_task(task)
+    if chapter is not None:
+        return {
+            "Spreadsheets": "spreadsheets",
+            "SQL": "sql",
+            "Power BI": "power_bi",
+            "Python": "python",
+        }.get(chapter.area, _phase_for_week(chapter.week))
+
     haystack = " ".join(
         str(task.get(key) or "")
-        for key in (
-            "managed_key",
-            "target_key",
-            "label",
-            "source_label",
-            "display_source",
-        )
+        for key in ("managed_key", "target_key", "label", "source_label", "display_source")
     ).casefold()
-
-    # Resolve the curriculum ID before title heuristics. The shared Academy
-    # prefix is not a subject: SQL, Power BI, Python, pandas, and spreadsheet
-    # lessons all use ``academy2_*`` identifiers.
-    if any(token in haystack for token in (
-        "academy2_spreadsheet_",
-        "academy2_conditional_",
-        "week_1_spreadsheet",
-        "week_2_spreadsheet",
-        "spreadsheet_analyst",
-    )):
-        return "spreadsheets"
     if any(token in haystack for token in (
         "spreadsheet", "google sheets", "cell reference", "pivot table",
         "vlookup", "xlookup", "countif", "sumif", "iferror",
     )):
         return "spreadsheets"
-    if any(token in haystack for token in (
-        "academy2_powerbi_", "power_bi", "power bi", "power query", "dax",
-    )):
+    if any(token in haystack for token in ("power_bi", "power bi", "power query", "dax")):
         return "power_bi"
-    if any(token in haystack for token in (
-        "academy2_python_", "academy2_pandas_", "python", "pandas", "dataframe",
-    )):
+    if any(token in haystack for token in ("python", "pandas", "dataframe", "numpy")):
         return "python"
     if any(token in haystack for token in (
-        "academy2_sql_", "academy2_database_", "sql", "duckdb", "select ", "join", "group by", "cte",
-        "window function",
+        "sql", "duckdb", "select ", "join", "group by", "cte", "window function",
     )):
         return "sql"
-
     return _phase_for_week(_safe_int(task.get("week"), 1))
 
 
@@ -277,10 +256,8 @@ def task_type_label(task: dict, current_week: int | None = None) -> str:
     short_area, _full_area = _area_labels(task)
     if kind == "google":
         return "Google"
-    if kind in {"academy_lesson", "academy_practice"}:
-        return short_area
-    if kind == "knowledge_check":
-        return f"{short_area} Check" if short_area != "Learning" else "Assessment"
+    if kind == "datacamp_chapter":
+        return "DataCamp"
     if kind in {"duckdb", "interview_problem", "sql_practice"}:
         return "SQL"
     if kind == "applied_lab":
@@ -308,11 +285,8 @@ def focus_context(task: dict, current_week: int) -> str:
 
     if kind == "google":
         detail = "Google Certification"
-    elif kind in {"academy_lesson", "academy_practice"}:
-        detail = f"{full_area} • Week {week}"
-    elif kind == "knowledge_check":
-        area = full_area if full_area != "Learning" else "Weekly"
-        detail = f"{area} Assessment • Week {week}"
+    elif kind == "datacamp_chapter":
+        detail = f"DataCamp • {full_area} • Week {week}"
     elif kind == "duckdb":
         detail = f"DuckDB SQL • Week {week}"
     elif kind == "interview_problem":
@@ -331,13 +305,7 @@ def focus_context(task: dict, current_week: int) -> str:
         label = task_type_label(task, current_week)
         detail = f"{label} • Week {week}"
 
-    return f"Catch-Up • {detail}" if week < int(current_week) else detail
-
-
-def _assessment_id_from_managed_key(managed_key: str) -> str | None:
-    prefix = "roadmap_v1026:assessment:"
-    text = str(managed_key or "")
-    return text[len(prefix):] if text.startswith(prefix) else None
+    return f"Catch-Up • {detail}" if bool(task.get("is_catch_up")) else detail
 
 
 def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readiness:
@@ -349,29 +317,12 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
     metadata_state = str(task.get("prerequisite_state") or "Ready")
     metadata_reason = str(task.get("prerequisite_reason") or "").strip()
 
+    if kind == "datacamp_chapter":
+        ready, reason = datacamp.readiness(conn, task)
+        return Readiness(ready, reason)
+
     if week > current_week and kind not in {"google"}:
         return Readiness(False, f"Scheduled for Week {week}.")
-
-    # The knowledge check itself must remain visible while locked. Evaluate its
-    # complete weekly gate directly and use one stable learner-facing message.
-    # Other tasks may say to pass the check; this row is the actionable check the
-    # learner needs in order to clear that gate.
-    if kind == "knowledge_check":
-        assessment_id = _assessment_id_from_managed_key(str(task.get("managed_key") or ""))
-        if assessment_id:
-            result = roadmap_mastery.assessment_readiness(conn, assessment_id)
-            if not bool(result.get("ready")):
-                return Readiness(False, f"Complete All Week {week} Coursework to Unlock")
-            return Readiness(True, "")
-
-    progression_gate = weekly_mastery.task_progression_gate(
-        conn,
-        task_week=week,
-        current_week=current_week,
-        kind=kind,
-    )
-    if not progression_gate.ready:
-        return Readiness(False, progression_gate.reason)
 
     if metadata_state.casefold() not in {"ready", "unlocked", ""}:
         return Readiness(False, metadata_reason or "Complete the prerequisite first.")
@@ -394,13 +345,10 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
     if kind == "portfolio_execution":
         if current_week < 9:
             return Readiness(False, "Portfolio execution begins in Week 9 after the learning phase.")
-        if not roadmap_mastery.assessment_passed(conn, "week_8_portfolio_readiness"):
-            return Readiness(False, "Pass the Week 8 Knowledge Check first.")
+        if not datacamp.portfolio_ready(conn):
+            return Readiness(False, "Complete the required Week 1–8 DataCamp chapters first.")
 
     if kind == "review":
-        # Weekly retrospectives become actionable Friday through Sunday even
-        # when other weekly work remains unfinished. A missed earlier-week
-        # retrospective remains available as catch-up.
         today = date.today()
         if week == current_week and today.weekday() < 4:
             return Readiness(False, "Available on the final study days of this week.")
@@ -412,19 +360,16 @@ def _source(task: dict) -> str:
     kind = str(task.get("kind") or "general")
     if kind == "google":
         return str(task.get("source_label") or "Google Certificate")
-    if kind in {"academy_lesson", "academy_practice"}:
-        _short, full = _area_labels(task)
-        return f"Accelerator Academy • {full}"
-    if kind == "knowledge_check":
-        _short, full = _area_labels(task)
-        return f"{full} Mastery Check"
+    if kind == "datacamp_chapter":
+        chapter = datacamp.chapter_for_task(task)
+        return f"DataCamp • {chapter.course_name}" if chapter else "DataCamp"
     if kind == "duckdb":
         item = duckdb_for_label(task.get("label"))
         return f"DuckDB Exercise • {item['title']}" if item else "DuckDB Exercise"
     if kind == "interview_problem":
         return "SQL Interview Practice"
     if kind == "applied_lab":
-        return "Accelerator Academy • Skills Lab"
+        return "Applied Lab"
     if kind == "portfolio_preparation":
         return "Portfolio Preparation"
     if kind == "portfolio_execution":
@@ -440,9 +385,7 @@ def _display_title(task: dict) -> str:
     kind = str(task.get("kind") or "general")
     return {
         "google": "Google Certificate",
-        "academy_lesson": "Accelerator Academy",
-        "academy_practice": "Accelerator Academy",
-        "knowledge_check": "Weekly Mastery Check",
+        "datacamp_chapter": "DataCamp Chapter",
         "duckdb": "DuckDB Practice",
         "interview_problem": "SQL Interview Practice",
         "sql_practice": "SQL Practice",
@@ -473,10 +416,17 @@ def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> d
     task["estimated_minutes"] = max(5, _safe_int(task.get("estimated_minutes"), 30))
     task["label"] = _normalize_label(task.get("label"))
     task["kind"] = _kind(conn, task)
-    # A task is catch-up only after its scheduled week has ended. Missing an
-    # earlier day in the same week does not change its status.
+    # Weekly work becomes catch-up after its week ends. DataCamp chapters are
+    # scheduled by day, so an unfinished chapter becomes catch-up the next day.
+    deferred_text = str(task.get("deferred_until") or "").strip()
+    overdue_datacamp = False
+    if task["kind"] == "datacamp_chapter" and deferred_text:
+        try:
+            overdue_datacamp = date.fromisoformat(deferred_text) < date.today()
+        except ValueError:
+            overdue_datacamp = False
     task["is_catch_up"] = (
-        task["week"] < int(current_week)
+        (task["week"] < int(current_week) or overdue_datacamp)
         and not bool(task.get("completed"))
     )
     readiness = _readiness(conn, task, current_week)
@@ -494,7 +444,7 @@ def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> d
 def all_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     tasks = [_as_task(conn, row, current_week) for row in _task_rows(conn)]
 
-    # Current-week work must remain visible even when earlier Academy work is
+    # Current-week work must remain visible even when earlier learning work is
     # unfinished. Readiness rules decide whether the current lesson is available;
     # the queue no longer hides an otherwise-ready current-week task merely
     # because a catch-up task exists.
@@ -527,9 +477,7 @@ def _roadmap_sort(task: dict, current_week: int) -> tuple:
     kind = str(task.get("kind") or "general")
     kind_rank = {
         "google": 0,
-        "knowledge_check": 10,
-        "academy_lesson": 20,
-        "academy_practice": 25,
+        "datacamp_chapter": 20,
         "duckdb": 30,
         "interview_problem": 31,
         "sql_practice": 32,
@@ -569,13 +517,11 @@ def ready_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
 def _locked_sort(task: dict, current_week: int) -> tuple:
     """Put the nearest missing prerequisite before distant mastery gates."""
     kind_rank = {
-        "academy_lesson": 10,
-        "academy_practice": 15,
+        "datacamp_chapter": 10,
         "duckdb": 20,
         "interview_problem": 21,
         "sql_practice": 22,
         "applied_lab": 25,
-        "knowledge_check": 30,
         "portfolio_preparation": 40,
         "portfolio_execution": 45,
         "review": 50,
@@ -1011,7 +957,7 @@ def completion_summary(conn: sqlite3.Connection, active_items: list[dict]) -> di
     remaining_catchup = [
         task
         for task in ready_tasks(conn, current_week)
-        if _safe_int(task.get("week"), current_week) < current_week
+        if bool(task.get("is_catch_up"))
     ]
     new_complete = completed_new >= new_total
     all_complete = bool(new_complete and not remaining_catchup and not active_items)
@@ -1068,7 +1014,7 @@ def _migrate_navigation_destinations(conn: sqlite3.Connection) -> int:
             """UPDATE task_metadata SET destination=?
                WHERE task_id IN (
                    SELECT task_id FROM track_tasks
-                   WHERE LOWER(track_key) IN ('google','academy','sql','applied')
+                   WHERE LOWER(track_key) IN ('google','datacamp','sql','applied')
                ) AND destination<>?""",
             (PAGE_LEARNING, PAGE_LEARNING),
         ),
@@ -1087,34 +1033,11 @@ def _migrate_navigation_destinations(conn: sqlite3.Connection) -> int:
 
 
 def migrate_runtime(conn: sqlite3.Connection, current_week: int) -> dict:
-    """Retire active legacy planners without deleting learner history."""
-    removed = {"datacamp_tasks": 0, "manual_focus": 0, "duplicate_google": 0, "navigation_routes": 0}
-
-    # DataCamp remains in historical study-session/event rows only.
-    datacamp_ids = [
-        int(row["id"])
-        for row in conn.execute(
-            """SELECT DISTINCT s.id
-               FROM sprint_tasks AS s
-               LEFT JOIN track_tasks AS tt ON tt.task_id=s.id
-               WHERE s.completed=0 AND (
-                   LOWER(s.label) LIKE '%datacamp%'
-                   OR LOWER(COALESCE(tt.track_key,''))='datacamp'
-               )"""
-        ).fetchall()
-    ]
-    for task_id in datacamp_ids:
-        conn.execute("DELETE FROM daily_focus WHERE task_id=?", (task_id,))
-        conn.execute("DELETE FROM track_tasks WHERE task_id=?", (task_id,))
-        conn.execute("DELETE FROM task_metadata WHERE task_id=?", (task_id,))
-        conn.execute("DELETE FROM sprint_tasks WHERE id=?", (task_id,))
-    removed["datacamp_tasks"] = len(datacamp_ids)
-    conn.execute("DELETE FROM track_tasks WHERE LOWER(track_key)='datacamp'")
-    conn.execute(
-        """UPDATE track_state SET status='Historical',weekly_target=0,
-           metadata='{"active": false, "historical": true}',
-           updated_at=CURRENT_TIMESTAMP WHERE LOWER(track_key)='datacamp'"""
-    )
+    """Retire legacy planner rows while preserving active DataCamp chapters."""
+    removed = {"academy_tasks": 0, "manual_focus": 0, "duplicate_google": 0, "navigation_routes": 0}
+    purge = datacamp.purge_academy(conn)
+    removed["academy_tasks"] = int(purge.get("tasks", 0))
+    datacamp.reconcile(conn)
 
     # Remove temporary presentation prefixes from canonical titles.
     rows = conn.execute(
@@ -1159,11 +1082,11 @@ def migrate_runtime(conn: sqlite3.Connection, current_week: int) -> dict:
 
     removed["navigation_routes"] = _migrate_navigation_destinations(conn)
     conn.execute(
-        """INSERT INTO settings(key,value) VALUES('unified_planner_version','10.28.0')
+        """INSERT INTO settings(key,value) VALUES('unified_planner_version','10.36.0')
            ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
     )
     conn.execute(
-        """INSERT INTO settings(key,value) VALUES('navigation_layout_version','10.28.0')
+        """INSERT INTO settings(key,value) VALUES('navigation_layout_version','10.36.0')
            ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
     )
     conn.commit()

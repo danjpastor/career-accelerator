@@ -20,7 +20,7 @@
 ### Google Certificate
 Continue the current certificate module while establishing a consistent weekly study rhythm.
 
-### Accelerator Academy
+### DataCamp
 Complete spreadsheet structure, references, formulas, conditional logic, and basic summaries.
 
 ### Portfolio
@@ -28,7 +28,7 @@ Preparation only: review the brief, confirm the business problem, create the pro
 
 ## Recommended Rhythm
 
-- **Academy:** Three spreadsheet learning sessions
+- **DataCamp:** Three spreadsheet learning sessions
 - **Google:** Two certificate sessions
 - **Practice:** Two guided spreadsheet activities
 - **Portfolio:** One short preparation block
@@ -45,7 +45,7 @@ Preparation only: review the brief, confirm the business problem, create the pro
 - [ ] Review the Flagship Project Brief and Stakeholder Problem
 - [ ] Create or Verify the Project Folder Structure
 - [ ] Preserve the Untouched Raw Source Files
-- [ ] Pass the Week 1 Knowledge Check
+- [ ] Pass the Week 1 Readiness Review
 - [ ] Complete the Week 1 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Preparation only: review the brief, confirm the business problem, create the pro
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

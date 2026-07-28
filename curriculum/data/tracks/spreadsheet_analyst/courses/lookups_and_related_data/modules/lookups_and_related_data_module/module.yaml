@@ -1,7 +1,0 @@
-module_id: lookups_and_related_data_module
-title: Lookups & Related Data
-order: 1
-description: Match related records safely and diagnose missing or duplicate lookup keys.
-lessons:
-- lessons/spreadsheet_lookups/lesson.yaml
-- lessons/spreadsheet_relationships/lesson.yaml

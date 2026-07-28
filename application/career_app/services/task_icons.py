@@ -56,7 +56,7 @@ def key_for_task(task: dict, current_week: int | None = None) -> str:
     if kind == "career_readiness":
         return "career"
 
-    # Curriculum IDs identify the Academy subject more reliably than the
+    # Curriculum IDs identify the learning subject more reliably than the
     # sprint week. The shared ``academy2_*`` prefix is not itself a Spreadsheet
     # signal because SQL, Power BI, Python, and pandas use it too.
     if any(token in text for token in (
@@ -86,7 +86,7 @@ def key_for_task(task: dict, current_week: int | None = None) -> str:
     )):
         return "spreadsheet"
 
-    if kind in {"academy_lesson", "academy_practice"}:
+    if kind in {"datacamp_chapter", "guided_practice"}:
         week = int(current_week or task.get("week") or 1)
         if week <= 2:
             return "spreadsheet"

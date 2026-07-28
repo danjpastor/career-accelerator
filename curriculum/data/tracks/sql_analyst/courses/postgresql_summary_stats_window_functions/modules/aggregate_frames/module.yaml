@@ -1,6 +1,0 @@
-module_id: aggregate_frames
-title: Running and Moving Calculations
-order: 3
-description: Use aggregate windows and frames for running and moving calculations.
-lessons:
-- lessons/sql_window_aggregate_frames/lesson.yaml

@@ -3,7 +3,7 @@
 ## Progress snapshot
 - Hours studied:
 - Google Certificate progress:
-- Accelerator Academy progress:
+- DataCamp progress:
 - Portfolio execution and targeted practice completed:
 - Portfolio preparation or execution completed:
 - Weekly project or program checkpoint result:

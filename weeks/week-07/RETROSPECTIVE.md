@@ -3,10 +3,10 @@
 ## Progress snapshot
 - Hours studied:
 - Google Certificate progress:
-- Accelerator Academy progress:
+- DataCamp progress:
 - Power BI and SQL-retention work completed:
 - Portfolio preparation or execution completed:
-- Weekly mastery result:
+- Weekly readiness result:
 
 ## Biggest win
 What moved forward, and why did it matter?

@@ -20,7 +20,7 @@
 ### Google Certificate
 Continue the current certificate module.
 
-### Accelerator Academy
+### DataCamp
 Complete SQL selection, filtering, sorting, aggregation, GROUP BY, HAVING, arithmetic, and introductory CASE.
 
 ### Portfolio
@@ -28,7 +28,7 @@ Preparation only: refine business questions, preliminary KPIs, and the analysis 
 
 ## Recommended Rhythm
 
-- **Academy:** Three SQL learning sessions
+- **DataCamp:** Three SQL learning sessions
 - **DuckDB:** Two guided exercise sessions
 - **Interview Practice:** One or two SQL Interview Practice sessions
 - **Google:** Two certificate sessions
@@ -45,7 +45,7 @@ Preparation only: refine business questions, preliminary KPIs, and the analysis 
 - [ ] Solve Data Science Skills in SQL Interview Practice
 - [ ] Solve Pharmacy Analytics Part 1 or Laptop Vs. Mobile Viewership
 - [ ] Refine Portfolio Business Questions and KPI Definitions
-- [ ] Pass the Week 3 Knowledge Check
+- [ ] Pass the Week 3 Readiness Review
 - [ ] Complete the Week 3 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Preparation only: refine business questions, preliminary KPIs, and the analysis 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

@@ -116,10 +116,7 @@ def profile_has_meaningful_data(conn: sqlite3.Connection) -> bool:
     if _count(conn, "sprint_tasks", "completed=1"):
         return True
     for table in (
-        "academy_activity_progress",
-        "academy_lesson_progress",
-        "academy_checkpoint_progress",
-        "academy_project_progress",
+        "datacamp_chapter_progress",
         "exercise_pack_progress",
         "duckdb_exercise_progress",
         "applied_exercise_progress",

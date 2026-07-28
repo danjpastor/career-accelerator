@@ -1,7 +1,0 @@
-module_id: spreadsheet_mastery_project_module
-title: Spreadsheet Mastery Project
-order: 1
-description: Apply the complete spreadsheet workflow and demonstrate readiness for SQL.
-lessons:
-- lessons/spreadsheet_workflow/lesson.yaml
-- lessons/spreadsheet_mastery_review/lesson.yaml

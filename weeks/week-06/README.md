@@ -20,7 +20,7 @@
 ### Google Certificate
 Complete or substantially finish the certificate learning scheduled for the first half.
 
-### Accelerator Academy
+### DataCamp
 Complete window functions, date analysis, rankings, running calculations, advanced workflows, and full SQL review.
 
 ### Portfolio
@@ -28,11 +28,11 @@ Execution remains locked. Use the week to prove spreadsheet and SQL mastery befo
 
 ## Recommended Rhythm
 
-- **Academy:** Three advanced SQL sessions
+- **DataCamp:** Three advanced SQL sessions
 - **DuckDB:** Two capstone-style sessions
 - **Interview Practice:** Two or three mixed sessions
 - **Google:** Certificate completion or catch-up
-- **Review:** Week 6 Knowledge Check
+- **Review:** Week 6 Readiness Review
 
 ## Checklist
 - [ ] Complete the Planned Google Certificate Work for the Week
@@ -45,7 +45,7 @@ Execution remains locked. Use the week to prove spreadsheet and SQL mastery befo
 - [ ] Solve User's Third Transaction in SQL Interview Practice
 - [ ] Solve Top Three Salaries or Odd and Even Measurements
 - [ ] Complete Targeted Remediation for Any Missing SQL Prerequisite
-- [ ] Pass the Week 6 Knowledge Check
+- [ ] Pass the Week 6 Readiness Review
 - [ ] Complete the Week 6 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Execution remains locked. Use the week to prove spreadsheet and SQL mastery befo
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

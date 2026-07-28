@@ -1,6 +1,0 @@
-module_id: case_operations
-title: Turn Business Rules into Labels
-order: 1
-description: Use ordered CASE logic to transform and summarize business rules.
-lessons:
-- lessons/sql_case_business_rules/lesson.yaml

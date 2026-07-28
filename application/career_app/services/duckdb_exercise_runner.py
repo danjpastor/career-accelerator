@@ -354,9 +354,13 @@ def _connect(root: Path, number: int):
             raise DuckDBExerciseRunnerError(
                 f"Could not open the practice database read-only: {exc}"
             ) from exc
-        return connection, inventory
+    else:
+        connection = duckdb.connect(":memory:")
 
-    connection = duckdb.connect(":memory:")
+    # Always expose the selected exercise's source files as temporary views.
+    # This lets newly added remediation lessons work immediately even when a
+    # learner already has an older on-disk practice database. Temporary views
+    # do not modify that database or overwrite any learner work.
     try:
         for dataset in inventory:
             path = Path(dataset["path"])
@@ -371,7 +375,9 @@ def _connect(root: Path, number: int):
             names = [str(dataset["table"]), str(dataset["prefixed_table"])]
             for table in dict.fromkeys(names):
                 quoted = table.replace('"', '""')
-                connection.execute(f'CREATE VIEW "{quoted}" AS SELECT * FROM {source}')
+                connection.execute(
+                    f'CREATE OR REPLACE TEMP VIEW "{quoted}" AS SELECT * FROM {source}'
+                )
     except Exception:
         connection.close()
         raise

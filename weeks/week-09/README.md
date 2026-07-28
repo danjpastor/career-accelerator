@@ -21,7 +21,7 @@
 Complete only remaining certificate catch-up that does not displace portfolio execution.
 
 ### Applied Skills
-Use targeted Academy, DuckDB, or interview review only when the active project exposes a skill gap.
+Use targeted DataCamp, DuckDB, or interview review only when the active project exposes a skill gap.
 
 ### Portfolio
 Clean and validate Project 1, build the analytical database, complete SQL analysis, and reconcile findings.
@@ -46,7 +46,7 @@ Clean and validate Project 1, build the analytical database, complete SQL analys
 - [ ] Complete Exploratory and Exception Analysis
 - [ ] Reconcile Project Findings to Source Totals
 - [ ] Update the Cleaning Log, Data Dictionary, and Limitations
-- [ ] Pass the Week 9 Knowledge Check
+- [ ] Pass the Week 9 Readiness Review
 - [ ] Complete the Week 9 Retrospective
 
 ## Daily Log
@@ -54,7 +54,7 @@ Clean and validate Project 1, build the analytical database, complete SQL analys
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

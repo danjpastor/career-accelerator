@@ -292,8 +292,8 @@ def _sprint_item_category(track_key, category, label) -> tuple[str, str]:
         return "SQL", "sql"
     if track == "portfolio" or category_text.casefold() == "portfolio":
         return "Portfolio", "portfolio"
-    if track == "academy":
-        return "Accelerator Academy", "academy"
+    if track == "datacamp":
+        return "DataCamp", "datacamp"
     if track == "applied":
         return "Applied Labs", "applied"
     if category_text:
@@ -306,7 +306,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
 
     Adaptive track task rows are reused as the learner advances. The current
     rows are combined with immutable completion-event history and the active
-    unified task pool so every named Google, Academy, SQL, DuckDB, portfolio,
+    unified task pool so every named Google, DataCamp, SQL, DuckDB, portfolio,
     assessment, and review requirement is represented in the sprint.
     """
     week = max(1, int(week))
@@ -439,7 +439,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
                 "Google Course": PAGE_LEARNING,
                 "SQL": PAGE_LEARNING,
                 "Portfolio": PAGE_PORTFOLIO,
-                "Accelerator Academy": PAGE_LEARNING,
+                "DataCamp": PAGE_LEARNING,
                 "Review": PAGE_WORKSPACES,
             }.get(section, PAGE_DASHBOARD)
         item = {
@@ -495,7 +495,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
             "Google Course": PAGE_LEARNING,
             "SQL": PAGE_LEARNING,
             "Portfolio": PAGE_PORTFOLIO,
-            "Accelerator Academy": PAGE_LEARNING,
+            "DataCamp": PAGE_LEARNING,
             "Applied Labs": PAGE_LEARNING,
         }.get(section, PAGE_DASHBOARD)
         item = {
@@ -522,7 +522,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
 
     # Add every active prerequisite-managed task that belongs to this sprint
     # or is carrying into it. The old tracker only counted adaptive targets,
-    # which omitted newly generated Academy and practice requirements.
+    # which omitted newly generated DataCamp and practice requirements.
     try:
         from career_app.services import unified_tasks
 
@@ -591,7 +591,7 @@ def current_sprint_items(conn, week: int) -> list[dict]:
 
     section_order = {
         "Google Course": 0,
-        "Accelerator Academy": PAGE_LEARNING,
+        "DataCamp": PAGE_LEARNING,
         "SQL": 2,
         "Portfolio": 3,
         "Applied Labs": 4,
@@ -622,7 +622,7 @@ def retrospective_weekly_milestones(conn, task_id: int) -> list[dict]:
         raise ValueError("The selected retrospective task no longer exists.")
     section_order = (
         "Google Course",
-        "Accelerator Academy",
+        "DataCamp",
         "Applied Labs",
         "SQL",
         "Portfolio",
@@ -677,39 +677,6 @@ def retrospective_weekly_evidence(conn, task_id: int) -> list[dict]:
         ).fetchall():
             add(item["title"], item["source"], item["created_at"], item["artifact_path"])
 
-    if _table_exists(conn, "academy_submissions"):
-        for item in conn.execute(
-            """SELECT title,artifact_path,updated_at,
-                      CASE item_type WHEN 'skills_lab' THEN 'Applied Lab' ELSE 'Academy' END AS source
-                 FROM academy_submissions
-                WHERE date(updated_at)>=date(?) AND date(updated_at)<date(?)
-                  AND (COALESCE(answer_text,'')<>'' OR COALESCE(artifact_path,'')<>'')
-                ORDER BY updated_at""",
-            (start_text, end_text),
-        ).fetchall():
-            add(item["title"], item["source"], item["updated_at"], item["artifact_path"])
-
-    if _table_exists(conn, "academy_assessment_attempts"):
-        for item in conn.execute(
-            """SELECT assessment_id,score,completed_at
-                 FROM academy_assessment_attempts
-                WHERE passed=1 AND date(completed_at)>=date(?) AND date(completed_at)<date(?)
-                ORDER BY completed_at""",
-            (start_text, end_text),
-        ).fetchall():
-            title = str(item["assessment_id"]).replace("_", " ").title()
-            add(f"{title} — {round(float(item['score'] or 0)*100)}%", "Assessment", item["completed_at"])
-
-    if _table_exists(conn, "academy_skill_evidence"):
-        for item in conn.execute(
-            """SELECT skill_key,source_type,source_id,submission_path,demonstrated_at
-                 FROM academy_skill_evidence
-                WHERE date(demonstrated_at)>=date(?) AND date(demonstrated_at)<date(?)
-                ORDER BY demonstrated_at""",
-            (start_text, end_text),
-        ).fetchall():
-            title = str(item["skill_key"]).replace(".", " ").replace("_", " ").title()
-            add(title, item["source_type"], item["demonstrated_at"], item["submission_path"])
 
     return [{key: value for key, value in item.items() if key != "_key"} for item in evidence]
 
@@ -1490,7 +1457,7 @@ def _template(conn, root: Path, row, workspace_type: str) -> str:
             "## Completion\n"
             "- Hours studied:\n"
             "- Google progress:\n"
-            "- Accelerator Academy progress:\n"
+            "- DataCamp progress:\n"
             "- SQL practice:\n"
             "- Portfolio or Applied Labs:\n\n"
             "## Biggest Wins\n\n- \n\n"
@@ -1631,7 +1598,7 @@ def ensure_workspace(
         raise ValueError("The selected task no longer exists.")
     if not workspace_supported(row):
         raise ValueError(
-            "Google Certificate and Accelerator Academy activities are tracked through "
+            "Google Certificate and DataCamp activities are tracked through "
             "Learning and Study Sessions. They do not need Task Workspaces."
         )
     key = workspace_key_for_task(conn, int(task_id))

@@ -1,0 +1,9 @@
+record_id,full_name,email,phone,signup_date,annual_spend
+R001,  Maya Chen ,MAYA.CHEN@EXAMPLE.COM ,(404) 555-0101,2026-01-05,"$1,250.00"
+R002,leo   grant,leo.grant@example.com,404.555.0102,01/18/2026,875
+R003,PRIYA SHAH, priya@sample.org ,404-555-0103,2026/02/03,"$2,100"
+R004,Noah Brooks,noah.brooks@example.com,4045550104,Feb 14 2026,not available
+R005, Amara King,amara.king@sample.org ,+1 404 555 0105,2026-02-27,$950.50
+R006,Eli Flores ,ELI@EXAMPLE.COM,404-555-0106,03/10/2026,"1,420"
+R007,Sofia Reed,bad-email,404-555-0107,2026-13-01,$600
+R008,Owen Price,owen.price@example.com,,2026-04-02,

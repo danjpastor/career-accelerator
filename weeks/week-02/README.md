@@ -18,9 +18,9 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Continue the current certificate module without allowing it to replace required Academy catch-up work.
+Continue the current certificate module without allowing it to replace required DataCamp catch-up work.
 
-### Accelerator Academy
+### DataCamp
 Complete spreadsheet cleaning, validation, lookups, related-data concepts, pivot tables, KPI analysis, and workflow documentation.
 
 ### Portfolio
@@ -28,11 +28,11 @@ Preparation only: document sources, draft the data dictionary, inspect schemas, 
 
 ## Recommended Rhythm
 
-- **Academy:** Three advanced spreadsheet sessions
+- **DataCamp:** Three advanced spreadsheet sessions
 - **Google:** Two certificate sessions
 - **Practice:** Two cleaning, lookup, or pivot activities
 - **Portfolio:** One documentation block
-- **Review:** Week 2 Knowledge Check and retrospective
+- **Review:** Week 2 Readiness Review and retrospective
 
 ## Checklist
 - [ ] Complete the Planned Google Certificate Work for the Week
@@ -45,7 +45,7 @@ Preparation only: document sources, draft the data dictionary, inspect schemas, 
 - [ ] Complete Plan a Reproducible Spreadsheet Workflow
 - [ ] Draft or Update the Portfolio Data Dictionary
 - [ ] Document Likely Keys, Relationships, and Source-Quality Risks
-- [ ] Pass the Week 2 Knowledge Check
+- [ ] Pass the Week 2 Readiness Review
 - [ ] Complete the Week 2 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Preparation only: document sources, draft the data dictionary, inspect schemas, 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

@@ -27,7 +27,7 @@ Build the spreadsheet and data-foundation skills required before SQL begins, whi
 
 ### Session 5 — Google Certificate
 - Complete the planned certificate work for the week.
-- Capture brief notes on concepts that overlap with Academy material.
+- Capture brief notes on concepts that overlap with DataCamp material.
 
 ### Session 6 — Portfolio preparation
 - Review the project brief and stakeholders.
@@ -36,7 +36,7 @@ Build the spreadsheet and data-foundation skills required before SQL begins, whi
 - Do not clean, transform, join, or analyze portfolio data.
 
 ### Session 7 — Mastery and review
-- Complete the Week 1 Knowledge Check.
+- Complete the Week 1 Readiness Review.
 - Complete targeted remediation for any weak topic.
 - Write the Week 1 retrospective.
 

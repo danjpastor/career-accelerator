@@ -43,7 +43,7 @@ CATEGORY_DESTINATIONS = {
 
 TRACK_DESTINATIONS = {
     "google": PAGE_LEARNING,
-    "academy": PAGE_LEARNING,
+    "datacamp": PAGE_LEARNING,
     "sql": PAGE_LEARNING,
     "applied": PAGE_LEARNING,
     "portfolio": PAGE_PORTFOLIO,

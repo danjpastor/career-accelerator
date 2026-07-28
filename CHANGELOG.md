@@ -1,3 +1,14 @@
+# 10.36.0
+
+- Replaced Accelerator Academy with 74 individual DataCamp chapter tasks across Weeks 1–8.
+- Distributed every multi-chapter course across multiple days, including the Week 7 Power BI intensive.
+- Added exact chapter-level Campus browser routing without automatic completion.
+- Removed the Paths destination and all active Academy curriculum, lesson, assessment, workspace, progress, and evidence systems.
+- Purged Academy-owned records without converting them into DataCamp completion.
+- Preserved the five-item Today’s Focus limit, ordered Catch-Up behavior, and fixed four-row Next Tasks card.
+- Added DuckDB Exercises 13–18 for grain/cardinality, cohorts, window frames, set/semi/anti joins, text/date quality, and final SQL readiness.
+- Preserved non-Academy learner progress during migration.
+
 # 10.35.3
 
 - Fixed installer rollback when preserved weekly retrospective files contained retired Academy lesson references.

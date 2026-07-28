@@ -71,7 +71,7 @@ TOUR_STEPS = (
     (
         1,
         "Learning",
-        "Learning now contains the complete learner journey: the Academy path, Google Certificate tracking, SQL and DuckDB practice, and Skills Lab work. Separate duplicate learning pages are no longer needed.",
+        "Learning contains Google Certificate tracking, chapter-level DataCamp assignments, SQL and DuckDB practice, and Skills Lab work.",
     ),
     (
         2,
@@ -177,7 +177,7 @@ class FullResetConfirmationDialog(QDialog):
         preserved_text = QLabel(
             "• Application source code and required folder structure<br>"
             "• Pathway definitions, approved logos, and onboarding files<br>"
-            "• Accelerator Academy curricula and integrated practice libraries<br>"
+            "• Chapter-level DataCamp assignments and integrated DuckDB practice<br>"
             "• Starter templates, static datasets, exercises, and validation guides<br>"
             "• Repository documentation, setup scripts, and build files"
         )
@@ -1075,7 +1075,7 @@ class GuidedTourDialog(QDialog):
                 break
         else:
             for position, button in enumerate(self.coordinator.nav_buttons):
-                # NAV order is not equal to stacked index because Academy is index 12.
+                # Navigation order is resolved through the consolidated page map.
                 text = button.text().strip().lower()
                 if title.lower() in text or (title == "Settings and Setup" and "settings" in text):
                     self._old_button_style = button.styleSheet()

@@ -46,7 +46,7 @@ Complete the Project 1 model, Power BI report, findings, recommendations, docume
 - [ ] Add Clear Screenshots and Project Artifacts
 - [ ] Prepare a Concise Project 1 Interview Walkthrough
 - [ ] Publish Project 1 and Verify All Repository Links
-- [ ] Pass the Week 10 Knowledge Check
+- [ ] Pass the Week 10 Readiness Review
 - [ ] Complete the Week 10 Retrospective
 
 ## Daily Log
@@ -54,7 +54,7 @@ Complete the Project 1 model, Power BI report, findings, recommendations, docume
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

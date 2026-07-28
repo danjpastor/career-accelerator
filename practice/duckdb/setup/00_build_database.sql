@@ -217,6 +217,114 @@ FROM read_csv(
     all_varchar = false
 );
 
+DROP TABLE IF EXISTS ex13_accounts;
+CREATE TABLE ex13_accounts AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/13_grain_join_cardinality/accounts.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex13_orders;
+CREATE TABLE ex13_orders AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/13_grain_join_cardinality/orders.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex13_contacts;
+CREATE TABLE ex13_contacts AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/13_grain_join_cardinality/contacts.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex14_subscriptions;
+CREATE TABLE ex14_subscriptions AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/14_date_cohort_analysis/subscriptions.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex15_daily_revenue;
+CREATE TABLE ex15_daily_revenue AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/15_window_frames/daily_revenue.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex16_previous_customers;
+CREATE TABLE ex16_previous_customers AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/16_set_semi_anti_joins/previous_customers.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex16_current_customers;
+CREATE TABLE ex16_current_customers AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/16_set_semi_anti_joins/current_customers.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex16_orders;
+CREATE TABLE ex16_orders AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/16_set_semi_anti_joins/orders.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex17_contacts_dirty;
+CREATE TABLE ex17_contacts_dirty AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/17_text_dates_quality/contacts_dirty.csv',
+    header = true,
+    all_varchar = true
+);
+
+DROP TABLE IF EXISTS ex18_customers;
+CREATE TABLE ex18_customers AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/18_sql_readiness_audit/customers.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex18_orders;
+CREATE TABLE ex18_orders AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/18_sql_readiness_audit/orders.csv',
+    header = true,
+    all_varchar = false
+);
+
+DROP TABLE IF EXISTS ex18_payments;
+CREATE TABLE ex18_payments AS
+SELECT *
+FROM read_csv(
+    'practice/duckdb/datasets/18_sql_readiness_audit/payments.csv',
+    header = true,
+    all_varchar = false
+);
+
 SELECT COUNT(*) AS practice_table_count
 FROM information_schema.tables
 WHERE table_schema = 'main'

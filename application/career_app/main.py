@@ -53,6 +53,7 @@ from career_app.services import (
     analytics,
     applied_workspace,
     coach,
+    datacamp,
     duckdb_workspace,
     planner,
     portfolio_evidence,
@@ -88,8 +89,6 @@ from career_app.ui.widgets import (
     make_card_scrollable
 )
 
-from career_app.academy import AcademyService
-from career_app.ui.academy import AcceleratorAcademyWidget
 from career_app.ui.first_run import FirstRunCoordinator
 from career_app.ui.notifications import OverlayNotifier
 from career_app.services import completion_contract
@@ -407,8 +406,9 @@ class CareerAccelerator(QMainWindow):
         # state, then use the persisted row as the sole dashboard source.
         sync_calendar_sprint_week(self.conn)
         self.state = state(self.conn)
-        AcademyService(self.conn, ROOT)
         roadmap_mastery.reconcile(self.conn, ROOT)
+        datacamp.purge_academy(self.conn)
+        datacamp.reconcile(self.conn)
         self.state = state(self.conn)
         planner.repair_persisted_planner_data(
             self.conn, self.state["current_week"]
@@ -797,8 +797,6 @@ class CareerAccelerator(QMainWindow):
     def navigate(self, index):
         index = max(0, min(int(index), self.stack.count() - 1))
         self.stack.setCurrentIndex(index)
-        if index == PAGE_LEARNING and hasattr(self, "academy_widget"):
-            self.academy_widget.refresh_all()
         for button in self.nav_buttons:
             button.setChecked(False)
         for button in self.nav_buttons:
@@ -807,10 +805,10 @@ class CareerAccelerator(QMainWindow):
                 button.setChecked(True)
                 break
 
-    def open_learning_section(self, section="Path", practice=None):
+    def open_learning_section(self, section="Certificate", practice=None):
         self.navigate(PAGE_LEARNING)
         index_map = getattr(self, "learning_section_index", {})
-        index = index_map.get(str(section or "Path"), index_map.get("Path", 0))
+        index = index_map.get(str(section or "Certificate"), index_map.get("Certificate", 0))
         if hasattr(self, "learning_tabs"):
             self.learning_tabs.setCurrentIndex(int(index))
         if practice is not None and hasattr(self, "sql_tabs"):
@@ -820,8 +818,6 @@ class CareerAccelerator(QMainWindow):
                 "DuckDB Exercises": 1,
             }
             self.sql_tabs.setCurrentIndex(practice_map.get(str(practice), 0))
-        if section == "Path" and hasattr(self, "academy_widget"):
-            self.academy_widget.refresh_all()
 
     def page(self, title, subtitle=None):
         page = ResponsiveScrollPage(
@@ -1133,17 +1129,6 @@ class CareerAccelerator(QMainWindow):
                 self.clear_layout(item.layout())
 
     # ---------- Dashboard ----------
-    def _academy_progress_changed(self):
-        """Refresh shared planner and Learning cards after an Academy action."""
-        self.state = state(self.conn)
-        tracks.sync_all(self.conn, self.state)
-        roadmap_mastery.reconcile(self.conn, ROOT)
-        unified_tasks.migrate_runtime(self.conn, int(self.state["current_week"]))
-        self.state = state(self.conn)
-        if hasattr(self, "learning_cards"):
-            self.refresh_learning()
-        self.refresh_dashboard(sync_tracks=False)
-
     def dashboard_page(self):
         page = ResponsiveScrollPage()
         page.setSizePolicy(
@@ -2542,7 +2527,7 @@ class CareerAccelerator(QMainWindow):
     def learning_page(self):
         page, root = self.page(
             "📚 Learning",
-            "Follow the Academy path, update the Google Certificate, and practice in one workspace.",
+            "Continue the Google Certificate, complete scheduled DataCamp chapters, and practice in DuckDB.",
         )
         page.set_outer_scroll_enabled(False)
 
@@ -2562,10 +2547,9 @@ class CareerAccelerator(QMainWindow):
         )
 
         self.learning_section_index = {
-            "Path": 0,
-            "Certificate": 1,
-            "Practice": 2,
-            "Skills Lab": 3,
+            "Certificate": 0,
+            "Practice": 1,
+            "Skills Lab": 2,
         }
         self.learning_section_nav = QWidget()
         self.learning_section_nav.setObjectName("LearningSectionNav")
@@ -2611,10 +2595,6 @@ class CareerAccelerator(QMainWindow):
         )
         root.addWidget(self.learning_section_nav)
 
-        self.academy_widget = AcceleratorAcademyWidget(self.conn, ROOT, self)
-        self.academy_widget.progressChanged.connect(self._academy_progress_changed)
-        self.learning_tabs.addTab(self.academy_widget, "Path")
-
         certificate = QWidget()
         certificate_layout = QVBoxLayout(certificate)
         certificate_layout.setContentsMargins(0, 8, 0, 0)
@@ -2649,6 +2629,20 @@ class CareerAccelerator(QMainWindow):
         certificate_actions.addStretch()
         certificate_card.layout.addLayout(certificate_actions)
         certificate_layout.addWidget(certificate_card)
+
+        datacamp_card = Card(
+            "DataCamp Chapter Schedule",
+            "Each required chapter is assigned as its own daily task. Opening a chapter does not mark it complete.",
+        )
+        self.datacamp_status = QLabel("")
+        self.datacamp_status.setObjectName("Muted")
+        self.datacamp_status.setWordWrap(True)
+        datacamp_card.layout.addWidget(self.datacamp_status)
+        open_datacamp = QPushButton("Open Current DataCamp Chapter")
+        open_datacamp.setObjectName("Primary")
+        open_datacamp.clicked.connect(lambda: self.continue_learning_track("DataCamp"))
+        datacamp_card.layout.addWidget(open_datacamp)
+        certificate_layout.addWidget(datacamp_card)
         certificate_layout.addStretch(1)
         self.learning_tabs.addTab(certificate, "Certificate")
 
@@ -2709,10 +2703,15 @@ class CareerAccelerator(QMainWindow):
     def continue_learning_track(self, track_key):
         """Route Learning controls into the consolidated Learning workspace."""
         key = str(track_key or "").strip()
-        if key in {"Academy", "Power BI", "Python", "Statistics"}:
-            self.open_learning_section("Path")
-            if hasattr(self, "academy_widget"):
-                self.academy_widget.open_recommendation()
+        if key in {"DataCamp", "Power BI", "Python", "Statistics"}:
+            row = datacamp.current_ready_task(self.conn)
+            if row is not None:
+                url = str(row["starter_path"] or "")
+                if url:
+                    QDesktopServices.openUrl(QUrl(url))
+                    return
+            self.open_learning_section("Certificate")
+            self._notify("No DataCamp chapter is currently available.", 5000)
             return
         if key == "SQL":
             self.open_learning_section("Practice", "SQL Interview Problems")
@@ -2740,7 +2739,7 @@ class CareerAccelerator(QMainWindow):
                     6000,
                 )
             return
-        self.open_learning_section("Path")
+        self.open_learning_section("Certificate")
 
     def _applied_labs_changed(self):
         self.state = state(self.conn)
@@ -3057,7 +3056,7 @@ class CareerAccelerator(QMainWindow):
         )
         self.session_datacamp = QLineEdit()
         self.session_datacamp.setPlaceholderText(
-            "Academy lesson, practice, lab, or assessment completed"
+            "DataCamp chapter or DuckDB practice completed"
         )
         self.session_portfolio = QLineEdit()
         self.session_portfolio.setPlaceholderText(
@@ -3086,7 +3085,7 @@ class CareerAccelerator(QMainWindow):
         form_grid.addWidget(QLabel("Google progress"), 3, 0)
         form_grid.addWidget(self.session_google, 3, 1, 1, 3)
 
-        form_grid.addWidget(QLabel("Academy / practice progress"), 4, 0)
+        form_grid.addWidget(QLabel("DataCamp / practice progress"), 4, 0)
         form_grid.addWidget(self.session_datacamp, 4, 1, 1, 3)
 
         form_grid.addWidget(QLabel("Portfolio progress"), 5, 0)
@@ -4828,6 +4827,7 @@ class CareerAccelerator(QMainWindow):
                 self.conn,
                 self.state,
             )
+            datacamp.reconcile(self.conn)
             sync_calendar_sprint_week(self.conn)
             self.state = state(self.conn)
 
@@ -4888,7 +4888,7 @@ class CareerAccelerator(QMainWindow):
         if category == "Learning":
             if "assessment" in lower_label or "knowledge check" in lower_label:
                 return "Weekly Mastery Check"
-            return "Accelerator Academy"
+            return "DataCamp"
         if category == "SQL":
             return "SQL Practice"
         if category == "Portfolio":
@@ -4903,7 +4903,7 @@ class CareerAccelerator(QMainWindow):
 
         Current Sprint now uses the same canonical task inventory as the sprint
         dialog. This includes current-week requirements, active carryover,
-        Academy lessons, DuckDB work, and SQL interview problems instead of
+        DataCamp chapters, DuckDB work, and SQL interview problems instead of
         relying on stale aggregate track targets.
         """
         sprint_week = int(
@@ -5441,6 +5441,7 @@ class CareerAccelerator(QMainWindow):
                 self.conn,
                 self.state,
             )
+            datacamp.reconcile(self.conn)
             # Re-assert the calendar sprint after any service refresh so every
             # dashboard component reads the same persisted week.
             sync_calendar_sprint_week(self.conn)
@@ -5454,7 +5455,7 @@ class CareerAccelerator(QMainWindow):
             (
                 "Keep Moving",
                 "Continue the current course",
-                "Continue Accelerator Academy",
+                "Continue DataCamp",
                 [],
                 "Advance the project",
             ),
@@ -5626,8 +5627,8 @@ class CareerAccelerator(QMainWindow):
                         "google": (
                             "Google Certificate"
                         ),
-                        "academy": (
-                            "Accelerator Academy"
+                        "datacamp": (
+                            "DataCamp"
                         ),
                         "sql": (
                             "SQL Practice"
@@ -6184,8 +6185,23 @@ class CareerAccelerator(QMainWindow):
             self.update_google_module_range(self.state["google_course"])
             self.module_input.setValue(self.state["google_module"])
             self.hours_input.setValue(int(self.state["weekly_target_hours"]))
-        if hasattr(self, "academy_widget"):
-            self.academy_widget.refresh_all()
+        if hasattr(self, "datacamp_status"):
+            dc = track_data.get("datacamp", {"metadata": {}, "position": 0, "subposition": 0})
+            meta = dc.get("metadata", {})
+            next_course = meta.get("next_course") or "All required courses complete"
+            next_chapter = meta.get("next_chapter") or ""
+            ready_chapter = datacamp.current_ready_task(self.conn)
+            self.datacamp_status.setText(
+                f"{dc.get('position', 0)} / {dc.get('subposition', 0)} chapters complete • "
+                f"Next: {next_course}{' — ' + next_chapter if next_chapter else ''}"
+            )
+            if hasattr(self, "open_datacamp_button"):
+                self.open_datacamp_button.setEnabled(ready_chapter is not None)
+                self.open_datacamp_button.setToolTip(
+                    str(ready_chapter["starter_path"] or "")
+                    if ready_chapter is not None
+                    else "Complete the earlier assigned chapter or wait until the scheduled day."
+                )
         if hasattr(self, "applied_labs_widget"):
             self.applied_labs_widget.refresh()
 
@@ -6632,7 +6648,7 @@ class CareerAccelerator(QMainWindow):
             f"{len(learned)} learned • "
             f"{len(progress)} in progress • "
             f"{len(locked)} locked • "
-            "Updated automatically from Google, Academy, DuckDB, and SQL practice."
+            "Updated automatically from Google, DataCamp, DuckDB, and SQL practice."
         )
         self.skills_tabs.setTabText(0, f"Learned ({len(learned)})")
         self.skills_tabs.setTabText(1, f"In Progress ({len(progress)})")
@@ -6821,11 +6837,9 @@ class CareerAccelerator(QMainWindow):
                 self.conn,
                 self.state,
             )
-            if result.get("track_key") == "academy" and hasattr(self, "academy_widget"):
-                self.academy_widget.service._reconcile_activity_events()
-                self.academy_widget.service._reconcile_today_focus_progress()
-                self.academy_widget.service.sync_planner_task()
-                self.state = state(self.conn)
+            datacamp.mark_task_complete(self.conn, task_id)
+            datacamp.reconcile(self.conn)
+            self.state = state(self.conn)
             completion_message = result.get(
                 "message",
                 "Task completed.",
@@ -7414,56 +7428,16 @@ class CareerAccelerator(QMainWindow):
         finally:
             session_guard.restore(self, session_snapshot)
 
-    def _route_roadmap_academy_task(self, task_id):
-        """Open the exact Academy target linked to a dashboard task.
-
-        Legacy roadmap rows stored an ``academy:lesson:*`` starter path. The
-        current adaptive Academy row stores the precise activity, assessment,
-        or Skills Lab target in ``track_tasks.target_key`` instead. Routing
-        only by starter path opened a generic task workspace and lost the
-        learner's exact place in the Path tab.
-        """
-        row = self.conn.execute(
-            """SELECT m.starter_path,tt.track_key,tt.target_key
-               FROM task_metadata AS m
-               LEFT JOIN track_tasks AS tt ON tt.task_id=m.task_id
-               WHERE m.task_id=?""",
-            (int(task_id),),
-        ).fetchone()
-        if row is None:
+    def _route_datacamp_task(self, task_id):
+        """Open the exact assigned DataCamp Campus chapter in a browser."""
+        url = datacamp.chapter_url_for_task(self.conn, int(task_id))
+        if not url:
             return False
-
-        starter = str(row["starter_path"] or "")
-        track_key = str(row["track_key"] or "").casefold()
-        target_key = str(row["target_key"] or "").strip()
-
-        if track_key == "academy" and target_key:
-            self.open_learning_section("Path")
-            try:
-                # Refresh first so a target created by the latest completion
-                # event exists in the widget's journey-node cache.
-                self.academy_widget.refresh_all()
-                self.academy_widget.open_target(target_key)
-            except (KeyError, ValueError):
-                # A curriculum migration can retire a saved target. The next
-                # canonical recommendation is the safest recovery.
-                self.academy_widget.open_recommendation()
-            return True
-
-        if starter.startswith("academy:lesson:"):
-            lesson_id = starter.split(":", 2)[2]
-            self.open_learning_section("Path")
-            self.academy_widget.open_lesson(lesson_id)
-            return True
-        if starter.startswith("academy:assessment:"):
-            assessment_id = starter.split(":", 2)[2]
-            self.open_learning_section("Path")
-            self.academy_widget.open_assessment(assessment_id)
-            return True
-        return False
+        QDesktopServices.openUrl(QUrl(url))
+        return True
 
     def open_task_workspace(self, *, task_id=None, workspace_key=None):
-        if task_id is not None and self._route_roadmap_academy_task(int(task_id)):
+        if task_id is not None and self._route_datacamp_task(int(task_id)):
             return
         if task_id is not None:
             portfolio_link = self.conn.execute(
@@ -7647,7 +7621,7 @@ class CareerAccelerator(QMainWindow):
             self.workspace_task_list.setCurrentRow(0)
         self.workspace_task_summary.setText(
             f"{len(rows)} task(s) • Documents are created only when opened • "
-            "Google Certificate and Accelerator Academy work stays in Learning and "
+            "Google Certificate and DataCamp work stays in Learning and "
             "Study Sessions rather than Task Workspaces."
         )
 
@@ -7967,7 +7941,7 @@ class CareerAccelerator(QMainWindow):
             self.sql_external_button.setToolTip(problem_url)
         else:
             self.sql_external_button.setToolTip(
-                "Locked until the listed Academy and mastery prerequisites are complete."
+                "Locked until the listed DataCamp chapters and practice prerequisites are complete."
             )
         self.sql_title.setText(match[0])
         self.sql_difficulty.setText(match[1])
@@ -8896,7 +8870,7 @@ class CareerAccelerator(QMainWindow):
             (
                 "Keep Moving",
                 "Continue the current course",
-                "Continue Accelerator Academy",
+                "Continue DataCamp",
                 [],
                 "Advance the project",
             ),
@@ -9060,7 +9034,7 @@ class CareerAccelerator(QMainWindow):
         commands = QListWidget()
         command_items = [
             ("🏠 Open Dashboard", lambda: self.navigate(PAGE_DASHBOARD)),
-            ("📚 Open Learning Path", lambda: self.open_learning_section("Path")),
+            ("📚 Open Learning", lambda: self.open_learning_section("Certificate")),
             ("🧩 Open Learning Practice", lambda: self.open_learning_section("Practice")),
             ("📁 Open Portfolio Workspace", lambda: self.navigate(PAGE_PORTFOLIO)),
             ("⏱️ Start Study Timer", self.start_study_timer),
@@ -9171,7 +9145,7 @@ def run():
                 "Loading curriculum and learning tracks",
                 76,
                 5,
-                "Preparing Academy, practice, and learning progress.",
+                "Preparing DataCamp, practice, and learning progress.",
             )
         else:
             splash.update_stage(

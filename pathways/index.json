@@ -14,5 +14,8 @@
     "it_support.json",
     "cybersecurity.json",
     "software_engineering.json"
-  ]
+  ],
+  "learning": {
+    "system_name": "Career Accelerator Learning"
+  }
 }

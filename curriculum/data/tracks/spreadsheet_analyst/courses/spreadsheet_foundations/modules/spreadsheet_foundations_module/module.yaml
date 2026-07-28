@@ -1,7 +1,0 @@
-module_id: spreadsheet_foundations_module
-title: Spreadsheet Foundations
-order: 1
-description: Understand spreadsheet structure, data types, references, sorting, filtering, and core formulas.
-lessons:
-- lessons/spreadsheet_structure/lesson.yaml
-- lessons/spreadsheet_references/lesson.yaml

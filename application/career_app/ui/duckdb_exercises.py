@@ -450,7 +450,7 @@ class DuckDBExercisesWidget(QWidget):
             self.feedback.show_message("Exercise locked. " + reason, "hint")
             self.question_prompt.setText(
                 "This exercise is visible so you can see what is coming next, but its editor and files "
-                "remain locked until the required Academy lessons, mastery checks, and earlier exercises are complete."
+                "remain locked until the required DataCamp chapters and earlier exercises are complete."
             )
             self.sql_editor.setPlaceholderText("Locked — complete the listed prerequisites first.")
         else:

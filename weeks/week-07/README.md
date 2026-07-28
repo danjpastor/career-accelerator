@@ -18,9 +18,9 @@
 ## Weekly Outcomes
 
 ### Google Certificate
-Use certificate work as supporting learning while Power BI is the primary Academy focus.
+Use certificate work as supporting learning while Power BI is the primary DataCamp focus.
 
-### Accelerator Academy
+### DataCamp
 Complete Power Query, data modeling, relationships, DAX foundations, report design, and validation against SQL.
 
 ### Portfolio
@@ -28,11 +28,11 @@ Preparation may continue, but dashboard construction remains locked until Power 
 
 ## Recommended Rhythm
 
-- **Academy:** Three Power BI and Power Query sessions
+- **DataCamp:** Three Power BI and Power Query sessions
 - **Applied Practice:** Two report-building sessions
 - **SQL Retention:** One DuckDB and one interview session
 - **Google:** One or two supporting sessions
-- **Review:** Week 7 Knowledge Check
+- **Review:** Week 7 Readiness Review
 
 ## Checklist
 - [ ] Complete the Planned Google Certificate Work for the Week
@@ -45,7 +45,7 @@ Preparation may continue, but dashboard construction remains locked until Power 
 - [ ] Complete DuckDB Exercise 09: Timed Product Challenge
 - [ ] Solve Tweets' Rolling Averages or User Shopping Sprees
 - [ ] Finalize the Portfolio Dashboard Requirements and KPI-to-Visual Map
-- [ ] Pass the Week 7 Knowledge Check
+- [ ] Pass the Week 7 Readiness Review
 - [ ] Complete the Week 7 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Preparation may continue, but dashboard construction remains locked until Power 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

@@ -1,6 +1,0 @@
-module_id: text_functions
-title: Clean and Reshape Text
-order: 3
-description: Use concatenation, case, replacement, length, substring, padding, and trimming.
-lessons:
-- lessons/sql_text_functions/lesson.yaml

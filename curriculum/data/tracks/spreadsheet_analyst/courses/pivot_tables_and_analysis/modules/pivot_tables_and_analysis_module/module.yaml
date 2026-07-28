@@ -1,7 +1,0 @@
-module_id: pivot_tables_and_analysis_module
-title: Pivot Tables & Analysis
-order: 1
-description: Summarize measures by dimensions, validate KPIs, and communicate findings.
-lessons:
-- lessons/spreadsheet_pivots/lesson.yaml
-- lessons/spreadsheet_kpis/lesson.yaml

@@ -1,6 +1,6 @@
 """Curated cross-track roadmap tasks.
 
-The adaptive tracks own learning, Academy, SQL practice, Applied Labs, and
+The adaptive tracks own Google learning, DataCamp chapters, SQL practice, Applied Labs, and
 portfolio milestones.  This module defines only the cross-track career tasks
 that still belong on the weekly roadmap after those systems are synchronized.
 """

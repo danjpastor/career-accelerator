@@ -1,7 +1,0 @@
-track_id: program_mastery
-title: Portfolio and Career Mastery
-navigation_title: Mastery
-order: 5
-description: Weekly checks covering project execution, publication, portfolio quality, and career launch.
-courses:
-- courses/weekly_knowledge_checks/course.yaml

@@ -1,9 +1,0 @@
-track_id: python_analyst
-title: Python for Data Analysts
-navigation_title: Python
-order: 4
-description: Learn Python for analysis through executable examples, guided coding, independent practice, and specific
-  feedback.
-courses:
-- courses/python_foundations/course.yaml
-- courses/pandas_foundations/course.yaml

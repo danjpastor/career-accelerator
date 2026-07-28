@@ -20,19 +20,19 @@
 ### Google Certificate
 Close remaining certificate gaps while completing the final learning-phase requirements.
 
-### Accelerator Academy
+### DataCamp
 Complete Python and pandas foundations, inspection, cleaning, grouping, merging, notebooks, and analytical communication.
 
 ### Portfolio
-Pass the Week 8 Knowledge Check to unlock portfolio cleaning, analysis, modeling, and dashboard execution.
+Pass the Week 8 Readiness Review to unlock portfolio cleaning, analysis, modeling, and dashboard execution.
 
 ## Recommended Rhythm
 
-- **Academy:** Three Python and pandas sessions
+- **DataCamp:** Three Python and pandas sessions
 - **Applied Practice:** Two notebook sessions
 - **SQL Retention:** One mixed DuckDB session
 - **Google:** Certificate catch-up or completion
-- **Review:** Week 8 Knowledge Check
+- **Review:** Week 8 Readiness Review
 
 ## Checklist
 - [ ] Complete the Planned Google Certificate Work for the Week
@@ -45,7 +45,7 @@ Pass the Week 8 Knowledge Check to unlock portfolio cleaning, analysis, modeling
 - [ ] Complete DuckDB Exercise 10: Mixed Workforce Assessment
 - [ ] Complete a Mixed SQL Retention Review
 - [ ] Finalize the Portfolio Execution Plan and Readiness Checklist
-- [ ] Pass the Week 8 Knowledge Check
+- [ ] Pass the Week 8 Readiness Review
 - [ ] Complete the Week 8 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Pass the Week 8 Knowledge Check to unlock portfolio cleaning, analysis, modeling
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

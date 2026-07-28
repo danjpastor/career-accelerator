@@ -46,7 +46,7 @@ Complete a focused Project 2 and begin or substantially complete Project 3 with 
 - [ ] Clean and Validate Project 3 Data
 - [ ] Begin Project 3 Analysis and Visual Design
 - [ ] Audit Projects 1 and 2 for Missing Evidence
-- [ ] Pass the Week 11 Knowledge Check
+- [ ] Pass the Week 11 Readiness Review
 - [ ] Complete the Week 11 Retrospective
 
 ## Daily Log
@@ -54,7 +54,7 @@ Complete a focused Project 2 and begin or substantially complete Project 3 with 
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

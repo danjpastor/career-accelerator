@@ -1,6 +1,0 @@
-module_id: correlated_ctes
-title: Organize Multi-Step Queries
-order: 3
-description: Structure row-specific and multi-stage analysis.
-lessons:
-- lessons/sql_ctes_correlated/lesson.yaml

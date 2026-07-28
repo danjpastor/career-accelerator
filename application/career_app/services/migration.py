@@ -62,7 +62,7 @@ def stage_for(label):
 
 
 
-ACTIVE_DYNAMIC_TRACKS = {"google", "academy", "sql", "portfolio", "applied"}
+ACTIVE_DYNAMIC_TRACKS = {"google", "datacamp", "sql", "portfolio", "applied"}
 ACADEMY_EVIDENCE_TYPES = {"Skills Lab", "Academy Project", "Academy Capstone"}
 
 
@@ -132,6 +132,16 @@ def _clean_legacy_roadmap_tasks(conn) -> dict:
         managed_key = str(row["managed_key"] or "").strip()
         starter_path = str(row["starter_path"] or "").strip()
 
+        # Current provider and practice tasks are durable runtime records. They
+        # must survive startup migration unchanged.
+        if managed_key.startswith((
+            "datacamp:",
+            "roadmap_v1026:duckdb:",
+            "roadmap_v1026:sql:",
+        )):
+            retained += 1
+            continue
+
         # Static Academy lesson/check rows were superseded by the one adaptive
         # Academy task. Archive both completed and incomplete copies so they
         # cannot return to Today’s Focus after a curriculum change.
@@ -150,24 +160,7 @@ def _clean_legacy_roadmap_tasks(conn) -> dict:
             continue
 
         if track_key in ACTIVE_DYNAMIC_TRACKS:
-            if track_key == "academy":
-                cleaned = re.sub(
-                    r"^\s*\[Accelerator Academy\]\s*",
-                    "",
-                    str(row["label"] or ""),
-                    flags=re.IGNORECASE,
-                )
-                cleaned = re.sub(r"^Learn:\s*", "", cleaned, flags=re.IGNORECASE)
-                if cleaned and cleaned != row["label"]:
-                    conn.execute(
-                        "UPDATE sprint_tasks SET label=? WHERE id=?",
-                        (cleaned, int(row["id"])),
-                    )
             retained += 1
-            continue
-        if track_key == "datacamp" or "datacamp" in str(row["label"] or "").casefold():
-            _archive_roadmap_task(conn, row, "Replaced by Accelerator Academy")
-            archived += 1
             continue
 
         spec = task_spec(str(row["label"] or ""))
@@ -205,18 +198,9 @@ def _clean_legacy_roadmap_tasks(conn) -> dict:
         updated += 1
 
     conn.execute(
-        """UPDATE track_state
-           SET status='Historical',weekly_target=0,
-               metadata=json_set(COALESCE(metadata,'{}'),'$.replacement','Accelerator Academy'),
-               updated_at=CURRENT_TIMESTAMP
-           WHERE track_key='datacamp'"""
-    )
-    conn.execute(
         """DELETE FROM daily_focus
            WHERE completed_at IS NULL
-             AND (source_key LIKE 'roadmap:%'
-                  OR track_key='datacamp'
-                  OR LOWER(title) LIKE '%datacamp%')"""
+             AND source_key LIKE 'roadmap:%'"""
     )
     return {"archived": archived, "retained": retained, "updated": updated}
 
@@ -629,7 +613,7 @@ def _program_integrity_cleanup(conn, root: Path) -> dict:
 
     if _table_exists(conn, "settings"):
         conn.execute(
-            """INSERT INTO settings(key,value) VALUES('program_integrity_version','10.35.3')
+            """INSERT INTO settings(key,value) VALUES('program_integrity_version','10.36.0')
                ON CONFLICT(key) DO UPDATE SET value=excluded.value"""
         )
     return result
@@ -648,6 +632,8 @@ def migrate(conn, root: Path):
             continue
         path = root / "weeks" / f"week-{week:02d}" / "README.md"
         for order, (label, completed) in enumerate(checkboxes(path), start=1):
+            if task_spec(label) is None:
+                continue
             conn.execute(
                 """INSERT OR IGNORE INTO sprint_tasks
                    (week,sort_order,label,completed) VALUES(?,?,?,?)""",
@@ -681,12 +667,14 @@ def migrate(conn, root: Path):
     integrity_cleanup = _program_integrity_cleanup(conn, root)
     normalized_task_titles = normalize_database_task_titles(conn)
 
-    from career_app.services import task_workspace
+    from career_app.services import task_workspace, datacamp
     workspace_cleanup = (
         task_workspace.cleanup_external_learning_workspaces(
             conn
         )
     )
+    academy_purge = datacamp.purge_academy(conn)
+    datacamp_tasks = datacamp.reconcile(conn)
 
     conn.commit()
     return {
@@ -710,4 +698,6 @@ def migrate(conn, root: Path):
         "academy_projects_consolidated": evidence_cleanup["projects_consolidated"],
         "program_integrity_cleanup": integrity_cleanup,
         "task_titles_normalized": normalized_task_titles,
+        "academy_purge": academy_purge,
+        "datacamp_tasks": datacamp_tasks,
     }

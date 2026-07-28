@@ -26,12 +26,11 @@ KEY_END_DATE = KEY_PREFIX + "end_date"
 KEY_DURATION_DAYS = KEY_PREFIX + "duration_days"
 KEY_REQUIRED_WEEKLY_HOURS = KEY_PREFIX + "required_weekly_hours"
 KEY_SNAPSHOT = KEY_PREFIX + "snapshot"
-KEY_ACADEMY_CATALOG = KEY_PREFIX + "academy_catalog"
 
 GOOGLE_MODULE_COUNTS = {1: 4, 2: 4, 3: 5, 4: 6, 5: 4, 6: 4, 7: 5, 8: 4, 9: 4}
 GOOGLE_TOTAL = sum(GOOGLE_MODULE_COUNTS.values())
 SQL_INTERVIEW_TOTAL_FALLBACK = 16
-DUCKDB_TOTAL = 12
+DUCKDB_TOTAL = 18
 APPLIED_TOTAL = 36
 
 TRACK_MINUTES = {
@@ -39,18 +38,21 @@ TRACK_MINUTES = {
     "sql": 45,
     "portfolio": 120,
     "applied": 45,
-    "academy": 30,
+    "datacamp": 45,
 }
 
 # The full program is deliberately scoped below the 90-day capacity of a learner
 # studying 18 hours each week. Quotas use item counts; hour forecasts use these
 # track budgets so large catalogs cannot silently make the plan impossible.
 TRACK_BUDGET_MINUTES = {
-    "google": 62 * 60,
-    "sql": 28 * 60,
+    # The complete fixed scope remains inside the original 228-hour envelope.
+    # DataCamp chapter estimates are normalized across the 74 assigned chapters;
+    # the planner redistributes unfinished work without extending Day 90.
+    "google": 55 * 60,
+    "sql": 24 * 60,
     "portfolio": 70 * 60,
-    "applied": 26 * 60,
-    "academy": 42 * 60,
+    "applied": 24 * 60,
+    "datacamp": 55 * 60,
 }
 PROGRAM_CAPACITY_MINUTES = round(PROGRAM_DAYS / 7 * DEFAULT_WEEKLY_HOURS * 60)
 
@@ -320,111 +322,16 @@ def _portfolio_counts(conn: sqlite3.Connection) -> tuple[int, int, int]:
     return total, min(total, completed), max(0, remaining_minutes)
 
 
-def register_academy_catalog(conn: sqlite3.Connection, catalog: Any) -> dict[str, Any]:
-    """Persist the complete Academy workload so all three learning tracks fit Day 90."""
-    track_totals: dict[str, int] = {}
-    required_activities = 0
-    for path in getattr(getattr(catalog, "program", None), "paths", ()):
-        for track in getattr(path, "tracks", ()):
-            track_id = str(getattr(track, "track_id", "academy") or "academy")
-            count = 0
-            for course in getattr(track, "courses", ()):
-                for module in getattr(course, "modules", ()):
-                    for lesson in getattr(module, "lessons", ()):
-                        for activity in getattr(lesson, "activities", ()):
-                            if bool(getattr(activity, "required_for_completion", True)):
-                                count += 1
-            track_totals[track_id] = count
-            required_activities += count
-
-    try:
-        assessment_count = len(tuple(catalog.assessments()))
-    except Exception:
-        assessment_count = 0
-    try:
-        skills_lab_count = len(tuple(catalog.skills_labs()))
-    except Exception:
-        skills_lab_count = 0
-
-    total_items = required_activities + assessment_count + skills_lab_count
-    metadata = {
-        "total_items": total_items,
-        "required_activities": required_activities,
-        "assessment_count": assessment_count,
-        "skills_lab_count": skills_lab_count,
-        "track_totals": track_totals,
-        "fixed_deadline": True,
-    }
-    _set_settings(
-        conn,
-        {KEY_ACADEMY_CATALOG: json.dumps(metadata, sort_keys=True, separators=(",", ":"))},
-    )
-    return metadata
-
-
-def _academy_counts(conn: sqlite3.Connection) -> tuple[int | None, int, dict[str, Any]]:
-    metadata: dict[str, Any] = {}
-    raw_catalog = _get_setting(conn, KEY_ACADEMY_CATALOG, "{}")
-    try:
-        metadata = json.loads(raw_catalog or "{}")
-    except (TypeError, ValueError, json.JSONDecodeError):
-        metadata = {}
-
-    total: int | None = None
-    try:
-        candidate = int(metadata.get("total_items", 0) or 0)
-    except (TypeError, ValueError):
-        candidate = 0
-    if candidate > 0:
-        total = candidate
-
-    completed_activities = 0
-    if _table_exists(conn, "academy_activity_progress"):
-        columns = _columns(conn, "academy_activity_progress")
-        if "state" in columns:
-            row = conn.execute(
-                "SELECT COUNT(*) FROM academy_activity_progress "
-                "WHERE state IN ('Passed','Completed')"
-            ).fetchone()
-            completed_activities = int(_row_value(row, "COUNT(*)", 0, 0) or 0)
-
-    completed_assessments = 0
-    if _table_exists(conn, "academy_assessment_attempts"):
-        columns = _columns(conn, "academy_assessment_attempts")
-        if {"assessment_id", "passed"}.issubset(columns):
-            row = conn.execute(
-                "SELECT COUNT(DISTINCT assessment_id) FROM academy_assessment_attempts "
-                "WHERE passed=1"
-            ).fetchone()
-            completed_assessments = int(_row_value(row, "COUNT", 0, 0) or 0)
-
-    completed_labs = 0
-    if _table_exists(conn, "academy_submissions"):
-        columns = _columns(conn, "academy_submissions")
-        if {"item_type", "item_id", "validation_status"}.issubset(columns):
-            row = conn.execute(
-                "SELECT COUNT(DISTINCT item_id) FROM academy_submissions "
-                "WHERE item_type='skills_lab' AND validation_status='Passed'"
-            ).fetchone()
-            completed_labs = int(_row_value(row, "COUNT", 0, 0) or 0)
-
-    completed = completed_activities + completed_assessments + completed_labs
-    if _table_exists(conn, "track_state"):
+def _datacamp_counts(conn: sqlite3.Connection) -> tuple[int, int, dict[str, Any]]:
+    from career_app.data.datacamp_curriculum import DATACAMP_CHAPTERS
+    total = len(DATACAMP_CHAPTERS)
+    completed = 0
+    if _table_exists(conn, "datacamp_chapter_progress"):
         row = conn.execute(
-            "SELECT status FROM track_state WHERE track_key='academy'"
+            "SELECT COUNT(*) FROM datacamp_chapter_progress WHERE status='Completed'"
         ).fetchone()
-        if str(_row_value(row, "status", 0, "")) == "Completed" and total is not None:
-            completed = total
-    if total is not None:
-        completed = min(total, completed)
-    metadata.update(
-        {
-            "completed_activities": completed_activities,
-            "completed_assessments": completed_assessments,
-            "completed_skills_labs": completed_labs,
-        }
-    )
-    return total, completed, metadata
+        completed = int(_row_value(row, "COUNT(*)", 0, 0) or 0)
+    return total, min(total, completed), {"provider": "DataCamp"}
 
 
 def _budget_remaining(track_key: str, total: int | None, completed: int) -> int:
@@ -440,7 +347,7 @@ def remaining_work(conn: sqlite3.Connection, state: Any) -> dict[str, dict[str, 
     sql_total, sql_completed = _sql_counts(conn)
     applied_total, applied_completed = _applied_counts(conn)
     portfolio_total, portfolio_completed, portfolio_minutes = _portfolio_counts(conn)
-    academy_total, academy_completed, _ = _academy_counts(conn)
+    datacamp_total, datacamp_completed, _ = _datacamp_counts(conn)
 
     result: dict[str, dict[str, Any]] = {
         "google": {
@@ -472,16 +379,12 @@ def remaining_work(conn: sqlite3.Connection, state: Any) -> dict[str, dict[str, 
             "minutes_per_item": TRACK_MINUTES["applied"],
             "budget_minutes_remaining": _budget_remaining("applied", applied_total, applied_completed),
         },
-        "academy": {
-            "total": academy_total,
-            "completed": academy_completed,
-            "remaining": (
-                max(0, academy_total - academy_completed)
-                if academy_total is not None
-                else None
-            ),
-            "minutes_per_item": TRACK_MINUTES["academy"],
-            "budget_minutes_remaining": _budget_remaining("academy", academy_total, academy_completed),
+        "datacamp": {
+            "total": datacamp_total,
+            "completed": datacamp_completed,
+            "remaining": max(0, datacamp_total - datacamp_completed),
+            "minutes_per_item": TRACK_MINUTES["datacamp"],
+            "budget_minutes_remaining": _budget_remaining("datacamp", datacamp_total, datacamp_completed),
         },
     }
     return result
@@ -504,50 +407,6 @@ def _weekly_target(remaining: int | None, weeks_remaining: int, fallback: int) -
     if remaining <= 0:
         return 0
     return max(1, math.ceil(int(remaining) / max(1, int(weeks_remaining))))
-
-
-def _sync_academy_contract(
-    conn: sqlite3.Connection,
-    contract_clock: dict[str, Any],
-    work: dict[str, dict[str, Any]],
-) -> None:
-    if not _table_exists(conn, "track_state"):
-        return
-    columns = _columns(conn, "track_state")
-    if not {"track_key", "metadata", "weekly_target"}.issubset(columns):
-        return
-    row = conn.execute(
-        "SELECT metadata,weekly_target FROM track_state WHERE track_key='academy'"
-    ).fetchone()
-    if row is None:
-        return
-    try:
-        metadata = json.loads(_row_value(row, "metadata", 0, "{}") or "{}")
-    except (TypeError, ValueError, json.JSONDecodeError):
-        metadata = {}
-    existing_target = int(_row_value(row, "weekly_target", 1, 0) or 0)
-    required = _weekly_target(
-        work["academy"].get("remaining"),
-        contract_clock["weeks_remaining"],
-        existing_target,
-    )
-    metadata.update(
-        {
-            "program_day": contract_clock["program_day"],
-            "program_days": PROGRAM_DAYS,
-            "program_end_date": contract_clock["end_date"],
-            "deadline_weekly_target": required,
-            "fixed_deadline": True,
-        }
-    )
-    assignments = "weekly_target=?,metadata=?"
-    if "updated_at" in columns:
-        assignments += ",updated_at=CURRENT_TIMESTAMP"
-    conn.execute(
-        f"UPDATE track_state SET {assignments} WHERE track_key='academy'",
-        (required, json.dumps(metadata, sort_keys=True, separators=(",", ":"))),
-    )
-    conn.commit()
 
 
 def ensure_contract(
@@ -625,7 +484,6 @@ def ensure_contract(
             KEY_SNAPSHOT: json.dumps(snapshot, sort_keys=True, separators=(",", ":")),
         },
     )
-    _sync_academy_contract(conn, contract_clock, work)
     return snapshot
 
 

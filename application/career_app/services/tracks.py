@@ -5,7 +5,6 @@ import math
 import re
 from datetime import date, timedelta
 
-from career_app.services import weekly_mastery
 from career_app.data.applied_exercises import (
     APPLIED_EXERCISES,
     APPLIED_SKILL_EVIDENCE,
@@ -41,22 +40,13 @@ TRACK_CONFIG = {
         "sort_band": -400000,
         "role": "Primary",
     },
-    "academy": {
-        "display_name": "Accelerator Academy",
+    "datacamp": {
+        "display_name": "DataCamp",
         "category": "Learning",
         "destination": PAGE_LEARNING,
         "priority": 1,
         "sort_band": -300000,
         "role": "Supplemental",
-    },
-    # Retained only for historical event mapping and legacy undo support.
-    "datacamp": {
-        "display_name": "External Learning History",
-        "category": "Learning",
-        "destination": PAGE_LEARNING,
-        "priority": 9,
-        "sort_band": -900000,
-        "role": "Historical",
     },
     "sql": {
         "display_name": "SQL Practice",
@@ -598,15 +588,15 @@ SKILL_DEFINITIONS = {
     ),
     "power_bi_foundations": (
         "Power BI Foundations",
-        "Complete the Accelerator Academy Power BI foundations course and practical checks",
+        "Complete the DataCamp Power BI foundations course and practical checks",
     ),
     "power_bi": (
         "Power BI Modeling and DAX",
-        "Complete the Accelerator Academy Power BI modeling and DAX practical checks",
+        "Complete the DataCamp Power BI modeling and DAX practical checks",
     ),
     "python_pandas": (
         "Python and pandas",
-        "Complete the Accelerator Academy Python and pandas practical checks",
+        "Complete the DataCamp Python and pandas practical checks",
     ),
     "roadmap.spreadsheet_mastery": (
         "Spreadsheet Mastery",
@@ -740,39 +730,39 @@ SQL_PROBLEM_WEEK = {
 
 SQL_SKILL_ACCEPTED_EVIDENCE = {
     "sql_fundamentals": (
-        "Complete Accelerator Academy SQL foundations, DuckDB Exercise 01, "
+        "Complete DataCamp SQL foundations, DuckDB Exercise 01, "
         "or validated introductory SQL practice"
     ),
     "sql_querying": (
-        "Complete Accelerator Academy selection, filtering, sorting, DISTINCT, and LIMIT lessons, "
+        "Complete DataCamp selection, filtering, sorting, DISTINCT, and LIMIT lessons, "
         "DuckDB Exercise 01, or validated querying practice"
     ),
     "sql_aggregation": (
-        "Complete Accelerator Academy aggregation and grouping lessons, DuckDB Exercise 02/04/05, "
+        "Complete DataCamp aggregation and grouping lessons, DuckDB Exercise 02/04/05, "
         "or a validated aggregation problem"
     ),
     "sql_date_logic": (
-        "Complete Accelerator Academy date and time functions, DuckDB Exercise 04, "
+        "Complete DataCamp date and time functions, DuckDB Exercise 04, "
         "or a validated date-logic problem"
     ),
     "sql_case": (
-        "Complete Accelerator Academy CASE and conditional aggregation lessons, DuckDB Exercise 03/04/05, "
+        "Complete DataCamp CASE and conditional aggregation lessons, DuckDB Exercise 03/04/05, "
         "or a validated CASE problem"
     ),
     "sql_joins": (
-        "Complete Accelerator Academy joins and relationship lessons, DuckDB Exercise 06, "
+        "Complete DataCamp joins and relationship lessons, DuckDB Exercise 06, "
         "or a validated join problem"
     ),
     "sql_subqueries": (
-        "Complete the Accelerator Academy subqueries lesson, DuckDB Exercise 07, "
+        "Complete the DataCamp subqueries lesson, DuckDB Exercise 07, "
         "or validated subquery practice"
     ),
     "sql_ctes": (
-        "Complete the Accelerator Academy CTE lesson, DuckDB Exercise 07/08/09/10/12, "
+        "Complete the DataCamp CTE lesson, DuckDB Exercise 07/08/09/10/12, "
         "or validated CTE practice"
     ),
     "sql_window_functions": (
-        "Complete Accelerator Academy window-function lessons, DuckDB Exercise 08/10/11, "
+        "Complete DataCamp window-function lessons, DuckDB Exercise 08/10/11, "
         "or a validated window-function problem"
     ),
     "sql_intermediate": (
@@ -806,6 +796,16 @@ DUCKDB_SKILL_EVIDENCE = {
     },
     11: {"sql_joins", "sql_window_functions", "sql_intermediate"},
     12: {"sql_ctes", "sql_intermediate"},
+    13: {"sql_joins", "sql_validation"},
+    14: {"sql_aggregation", "sql_date_logic", "sql_case"},
+    15: {"sql_window_functions", "sql_intermediate"},
+    16: {"sql_joins", "sql_subqueries"},
+    17: {"data_cleaning", "sql_date_logic", "sql_validation"},
+    18: {
+        "sql_fundamentals", "sql_querying", "sql_aggregation", "sql_case",
+        "sql_joins", "sql_ctes", "sql_window_functions", "sql_date_logic",
+        "sql_validation", "sql_intermediate"
+    },
 }
 
 DATACAMP_SKILL_THRESHOLDS = {
@@ -1914,75 +1914,95 @@ def completed_applied_numbers(conn):
     )
 
 
-ACADEMY_SKILL_EQUIVALENTS = {
-    "sql.table_structure": {"sql_fundamentals", "sql_querying"},
-    "sql.data_types": {"sql_fundamentals", "sql_querying"},
-    "sql.select_basics": {"sql_fundamentals", "sql_querying"},
-    "sql.column_selection": {"sql_fundamentals", "sql_querying"},
-    "sql.aliases": {"sql_fundamentals", "sql_querying"},
-    "sql.where": {"sql_fundamentals", "sql_querying"},
-    "sql.comparison_operators": {"sql_fundamentals", "sql_querying"},
-    "sql.boolean_logic": {"sql_fundamentals", "sql_querying"},
-    "sql.null_filtering": {"sql_fundamentals", "sql_querying"},
-    "sql.order_by": {"sql_fundamentals", "sql_querying"},
-    "sql.clause_composition": {"sql_fundamentals", "sql_querying"},
-    "sql.distinct": {"sql_fundamentals", "sql_querying"},
-    "sql.limit": {"sql_fundamentals", "sql_querying"},
-    "sql.advanced_filtering": {"sql_querying"},
-    "sql.multiple_conditions": {"sql_querying"},
-    "sql.complex_filters": {"sql_querying"},
-    "sql.aggregations": {"sql_aggregation"},
-    "sql.grouping_single": {"sql_aggregation"},
-    "sql.grouping_multiple": {"sql_aggregation"},
-    "sql.case_logic": {"sql_case"},
-    "sql.conditional_transform": {"sql_case"},
-    "sql.conditional_aggregation": {"sql_case", "sql_aggregation"},
-    "sql.date_time_functions": {"sql_date_logic"},
-    "sql.joins": {"sql_joins"},
-    "sql.left_join": {"sql_joins"},
-    "sql.multi_column_join": {"sql_joins"},
-    "sql.set_operations": {"sql_joins"},
-    "sql.subqueries": {"sql_subqueries", "sql_intermediate"},
-    "sql.ctes_correlated": {"sql_ctes", "sql_intermediate"},
-    "sql.window_functions": {"sql_window_functions", "sql_intermediate"},
-    "sql.window_basics": {"sql_window_functions", "sql_intermediate"},
-    "sql.window_frames": {"sql_window_functions", "sql_intermediate"},
-    "sql.window_ranking": {"sql_window_functions", "sql_intermediate"},
-    "sql.window_extensions": {"sql_window_functions", "sql_intermediate"},
-    "database.schemas_normalization": {"sql_fundamentals", "sql_validation"},
-    "database.views": {"sql_fundamentals"},
-    "database.processing_models": {"sql_fundamentals"},
-    "database.management": {"sql_fundamentals"},
+DATACAMP_SKILL_EVIDENCE = {
+    "w03_intro_sql_02": {"sql_fundamentals", "sql_querying"},
+    "w03_intermediate_sql_03": {"sql_aggregation"},
+    "w03_intermediate_sql_04": {"sql_aggregation"},
+    "w04_joining_sql_02": {"sql_joins"},
+    "w04_joining_sql_03": {"sql_joins"},
+    "w04_joining_sql_04": {"sql_subqueries", "sql_intermediate"},
+    "w04_manipulation_sql_01": {"sql_case"},
+    "w04_manipulation_sql_02": {"sql_subqueries", "sql_intermediate"},
+    "w04_manipulation_sql_03": {"sql_subqueries", "sql_ctes", "sql_intermediate"},
+    "w04_manipulation_sql_04": {"sql_window_functions", "sql_intermediate"},
+    "w05_window_sql_03": {"sql_window_functions", "sql_intermediate"},
+    "w05_functions_sql_02": {"sql_date_logic"},
+    "w05_functions_sql_03": {"data_cleaning", "sql_validation"},
+    "w06_database_design_04": {"sql_validation"},
+    "w07_intro_powerbi_04": {"power_bi_foundations"},
+    "w07_model_powerbi_04": {"power_bi_foundations"},
+    "w07_dax_powerbi_03": {"power_bi"},
+    "w07_visual_powerbi_04": {"power_bi"},
+    "w08_intermediate_python_05": {"python_pandas"},
+    "w08_pandas_04": {"python_pandas"},
 }
 
 
-def _academy_skill_evidence(conn):
+def _datacamp_skill_evidence(conn):
     tables = {
         row["name"] for row in conn.execute(
             "SELECT name FROM sqlite_master WHERE type='table'"
         ).fetchall()
     }
-    if "academy_skill_evidence" not in tables:
+    if "datacamp_chapter_progress" not in tables:
         return {}
-    evidence = {}
-    rows = conn.execute(
-        """SELECT skill_key,source_type,source_id,learning_item_id
-           FROM academy_skill_evidence
-           WHERE validation_status='passed'"""
+
+    completed_rows = conn.execute(
+        """SELECT chapter_key,course_name,chapter_number,chapter_name
+           FROM datacamp_chapter_progress WHERE status='Completed'"""
     ).fetchall()
-    for row in rows:
-        granular = str(row["skill_key"] or "").strip()
-        if not granular:
+    completed = {str(row["chapter_key"]): row for row in completed_rows}
+    evidence = {}
+    for key, skills in DATACAMP_SKILL_EVIDENCE.items():
+        row = completed.get(key)
+        if row is None:
             continue
-        broad = set(ACADEMY_SKILL_EQUIVALENTS.get(granular, set()))
-        if granular in SKILL_DEFINITIONS:
-            broad.add(granular)
-        if not broad:
-            continue
-        source_label = str(row["learning_item_id"] or row["source_id"] or granular).replace("_", " ").strip().title()
-        source = f"Accelerator Academy: {source_label}"
-        for skill_key in broad:
+        source = (
+            f"DataCamp: {row['course_name']}, "
+            f"Chapter {row['chapter_number']} — {row['chapter_name']}"
+        )
+        for skill_key in skills:
             _append_evidence(evidence, skill_key, source)
+
+    spreadsheet_keys = {
+        str(row["chapter_key"]) for row in completed_rows
+        if str(row["chapter_key"]).startswith(("w01_", "w02_"))
+    }
+    required_spreadsheets = {
+        str(row["chapter_key"]) for row in conn.execute(
+            "SELECT chapter_key FROM datacamp_chapter_progress "
+            "WHERE chapter_key LIKE 'w01_%' OR chapter_key LIKE 'w02_%'"
+        ).fetchall()
+    }
+    if required_spreadsheets and required_spreadsheets <= spreadsheet_keys:
+        _append_evidence(evidence, "roadmap.spreadsheet_mastery", "Completed required DataCamp spreadsheet chapters")
+
+    ex18 = conn.execute(
+        "SELECT 1 FROM duckdb_exercise_progress WHERE exercise_number=18 AND status='Completed'"
+    ).fetchone()
+    required_sql = {
+        str(row["chapter_key"]) for row in conn.execute(
+            "SELECT chapter_key FROM datacamp_chapter_progress "
+            "WHERE chapter_key LIKE 'w03_%' OR chapter_key LIKE 'w04_%' "
+            "OR chapter_key LIKE 'w05_%' OR chapter_key LIKE 'w06_%'"
+        ).fetchall()
+    }
+    if ex18 and required_sql and required_sql <= set(completed):
+        _append_evidence(evidence, "roadmap.sql_mastery", "Completed DataCamp SQL curriculum and DuckDB Exercise 18")
+
+    required_powerbi = {
+        str(row["chapter_key"]) for row in conn.execute(
+            "SELECT chapter_key FROM datacamp_chapter_progress WHERE chapter_key LIKE 'w07_%'"
+        ).fetchall()
+    }
+    if required_powerbi and required_powerbi <= set(completed):
+        _append_evidence(evidence, "roadmap.power_bi_mastery", "Completed required DataCamp Power BI chapters")
+
+    required_all = {str(row["chapter_key"]) for row in conn.execute(
+        "SELECT chapter_key FROM datacamp_chapter_progress"
+    ).fetchall()}
+    if ex18 and required_all and required_all <= set(completed):
+        _append_evidence(evidence, "roadmap.portfolio_readiness", "Completed required DataCamp curriculum and final DuckDB readiness audit")
     return evidence
 
 
@@ -2010,7 +2030,7 @@ def _skill_evidence(conn, state):
             )
 
 
-    for skill_key, sources in _academy_skill_evidence(conn).items():
+    for skill_key, sources in _datacamp_skill_evidence(conn).items():
         for source in sources:
             _append_evidence(evidence, skill_key, source)
 
@@ -2073,8 +2093,8 @@ def _evidence_source_track(evidence_items, skill_key):
     for item in evidence_items:
         if item.startswith("Completed Google"):
             sources.add("google")
-        elif item.startswith("Accelerator Academy:"):
-            sources.add("academy")
+        elif item.startswith("DataCamp:"):
+            sources.add("datacamp")
         elif item.startswith("DuckDB"):
             sources.add("duckdb")
         elif item.startswith("Completed SQL"):
@@ -2693,12 +2713,12 @@ def applied_lab_readiness(
         and int(state["google_course"]) < 6
     ):
         missing.append(
-            "Begin Accelerator Academy Power BI Foundations or reach Google Course 6"
+            "Begin DataCamp Power BI Foundations or reach Google Course 6"
         )
 
     if number == 8 and "python_pandas" not in unlocked:
         missing.append(
-            "Begin Accelerator Academy Python or pandas foundations"
+            "Begin DataCamp Python or pandas foundations"
         )
 
     if (
@@ -2737,13 +2757,6 @@ def applied_lab_readiness(
                     "or equivalent validation evidence"
                 )
             )
-
-
-    week_gate = weekly_mastery.previous_week_gate(
-        conn, int(item["week"])
-    )
-    if not week_gate.ready:
-        missing.append(week_gate.reason)
 
     # Preserve order while removing duplicate reasons.
     missing = list(
@@ -4741,12 +4754,6 @@ def task_detail(conn, task_id):
             if aligned_course
             else "Supports certificate progress"
         )
-    elif track_key == "academy":
-        specific_work = metadata.get(
-            "title",
-            "Continue your next Academy lesson",
-        )
-        context = "Built-in guided learning"
     elif track_key == "sql":
         specific_work = metadata.get(
             "title",
@@ -5087,40 +5094,6 @@ def complete_track_task(
                 + ", ".join(readiness["missing_names"])
                 + " first."
             )
-    elif track_key == "academy":
-        target_key = str(link["target_key"] or "")
-        parts = target_key.split(":")
-        target_complete = False
-        if len(parts) == 4 and parts[:2] == ["academy", "activity"]:
-            progress_row = conn.execute(
-                """SELECT state,last_attempt_solution_assisted
-                   FROM academy_activity_progress
-                   WHERE lesson_id=? AND activity_id=?""",
-                (parts[2], parts[3]),
-            ).fetchone()
-            target_complete = bool(
-                progress_row
-                and str(progress_row["state"] or "") == "Passed"
-                and not int(progress_row["last_attempt_solution_assisted"] or 0)
-            )
-        elif len(parts) == 3 and parts[:2] == ["academy", "assessment"]:
-            target_complete = conn.execute(
-                """SELECT 1 FROM academy_assessment_attempts
-                   WHERE assessment_id=? AND passed=1
-                     AND COALESCE(solution_assisted,0)=0 LIMIT 1""",
-                (parts[2],),
-            ).fetchone() is not None
-        elif len(parts) == 3 and parts[:2] == ["academy", "skills_lab"]:
-            target_complete = conn.execute(
-                """SELECT 1 FROM academy_submissions
-                   WHERE item_type='skills_lab' AND item_id=?
-                     AND validation_status='Passed' LIMIT 1""",
-                (parts[2],),
-            ).fetchone() is not None
-        if not target_complete:
-            raise ValueError(
-                "Complete and pass the linked Accelerator Academy activity before marking this task complete."
-            )
     elif track_key == "portfolio":
         project_task = None
         if link["linked_entity_id"] is not None:
@@ -5230,34 +5203,6 @@ def complete_track_task(
             "the next aligned lesson."
         )
 
-    elif track_key == "academy":
-        target_key = str(link["target_key"] or "")
-        parts = target_key.split(":")
-        metadata = {
-            "target_key": target_key,
-            "task_id": int(task_id),
-            "target_type": parts[1] if len(parts) > 1 else "academy",
-        }
-        if len(parts) == 4 and parts[:2] == ["academy", "activity"]:
-            metadata.update({"lesson_id": parts[2], "activity_id": parts[3]})
-        elif len(parts) == 3:
-            metadata["item_id"] = parts[2]
-        _record_event(
-            conn,
-            "academy",
-            target_key,
-            label,
-            metadata=metadata,
-        )
-        conn.execute(
-            """UPDATE daily_focus
-               SET completed_at=COALESCE(completed_at,CURRENT_TIMESTAMP)
-               WHERE focus_date=? AND target_key=?
-                 AND (LOWER(COALESCE(track_key,''))='academy'
-                      OR LOWER(COALESCE(source_key,''))='roadmap:academy')""",
-            (date.today().isoformat(), target_key),
-        )
-        message = f"Accelerator Academy completed: {label}"
 
     elif track_key == "sql":
         target_key = link[
@@ -5769,25 +5714,24 @@ def snapshot(conn, state):
             ),
         }
 
-    academy_row = _state_row(conn, "academy")
-    if academy_row is not None:
+    datacamp_row = _state_row(conn, "datacamp")
+    if datacamp_row is not None:
         try:
-            academy_metadata = json.loads(academy_row["metadata"] or "{}")
+            datacamp_metadata = json.loads(datacamp_row["metadata"] or "{}")
         except (TypeError, ValueError, json.JSONDecodeError):
-            academy_metadata = {}
-        academy_active = _active_link(conn, "academy")
-        result["academy"] = {
-            "track_key": "academy",
-            "display_name": academy_row["display_name"],
-            "position": int(academy_row["position"]),
-            "subposition": int(academy_row["subposition"]),
-            "weekly_target": int(academy_row["weekly_target"]),
-            "weekly_completed": int(academy_metadata.get("weekly_completed", 0)),
-            "status": academy_row["status"],
-            "metadata": academy_metadata,
-            "task_id": int(academy_active["task_id"]) if academy_active else None,
-            "task_label": academy_active["label"] if academy_active else None,
-            "source_label": academy_active["source_label"] if academy_active else None,
+            datacamp_metadata = {}
+        result["datacamp"] = {
+            "track_key": "datacamp",
+            "display_name": "DataCamp",
+            "position": int(datacamp_row["position"]),
+            "subposition": int(datacamp_row["subposition"]),
+            "weekly_target": int(datacamp_row["weekly_target"]),
+            "weekly_completed": int(datacamp_metadata.get("weekly_completed", 0)),
+            "status": datacamp_row["status"],
+            "metadata": datacamp_metadata,
+            "task_id": None,
+            "task_label": datacamp_metadata.get("next_chapter"),
+            "source_label": datacamp_metadata.get("next_course"),
         }
 
     return result

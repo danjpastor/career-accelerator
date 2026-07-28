@@ -515,19 +515,18 @@ def factory_reset(conn, start_date):
         "track_events",
         "track_state",
         "skill_state",
-        "academy_skill_evidence",
-        "academy_submissions",
-        "academy_assessment_attempts",
-        "academy_activity_progress",
-        "academy_lesson_progress",
-        "academy_enrollments",
-        "academy_packages",
+        "datacamp_chapter_progress",
         "external_learning_history",
     ]
 
     with conn:
         for table in progress_tables:
-            conn.execute(f"DELETE FROM {table}")
+            exists = conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+                (table,),
+            ).fetchone()
+            if exists:
+                conn.execute(f'DELETE FROM "{table}"')
 
         conn.execute(
             """INSERT INTO program_state

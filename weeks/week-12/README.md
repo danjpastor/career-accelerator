@@ -45,7 +45,7 @@ Finish Project 3, audit all projects, publish final versions, update career mate
 - [ ] Complete a Timed SQL and Spreadsheet Review
 - [ ] Complete a Mock Interview and Record Remediation Needs
 - [ ] Submit the First Targeted Applications and Record Follow-up Dates
-- [ ] Pass the Week 12 Knowledge Check
+- [ ] Pass the Week 12 Readiness Review
 - [ ] Complete the 90-Day Retrospective and Post-Program Plan
 
 ## Daily Log
@@ -53,7 +53,7 @@ Finish Project 3, audit all projects, publish final versions, update career mate
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

@@ -1,7 +1,0 @@
-module_id: formulas_and_logic_module
-title: Formulas & Conditional Logic
-order: 1
-description: Build reliable formulas, conditional calculations, and summary logic.
-lessons:
-- lessons/conditional_formulas/lesson.yaml
-- lessons/conditional_summaries/lesson.yaml

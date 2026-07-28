@@ -1,17 +1,17 @@
 # Curated Roadmap Tasks
 
-The weekly roadmap contains only work that is not already owned by a dedicated adaptive track.
+The weekly roadmap contains only work that is not already owned by a dedicated progress system.
 
 Dedicated systems own:
 
 - Google Certificate progression;
-- Accelerator Academy lessons, checkpoints, and projects;
+- chapter-level DataCamp assignments;
 - SQL interview-practice selection;
-- DuckDB exercises;
+- DuckDB exercises and remediation;
 - Applied Labs;
 - Portfolio project milestones.
 
-Historical static rows from those systems are archived in `roadmap_task_archive` and removed from active sprint counts, daily recommendations, and Task Workspaces.
+Historical static rows from retired or dedicated systems are removed from active sprint counts, daily recommendations, and Task Workspaces.
 
 ## Retained cross-track tasks
 
@@ -40,11 +40,4 @@ Historical static rows from those systems are archived in `roadmap_task_archive`
 - Submit the first targeted applications
 - Schedule follow-up dates
 
-Each retained task has:
-
-- a specific task brief;
-- a measurable definition of done;
-- an estimated duration and destination;
-- a purpose-built Markdown starter document under `roadmap_starters/`.
-
-Dynamic track tasks use their dedicated Academy, Learning, SQL, Applied Lab, or Portfolio workspace rather than a generic roadmap starter file.
+Each retained task has a specific task brief, measurable definition of done, estimated duration, destination, and purpose-built starter document. DataCamp tasks route to their exact Campus chapters; DuckDB, Applied Lab, Portfolio, and other tasks route to their dedicated workspaces.

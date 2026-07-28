@@ -34,7 +34,7 @@ def intelligent_focus_plan(conn, week, guide, state, max_items=5):
 
 
 def next_tasks(conn, week):
-    return unified_tasks.next_tasks(conn, int(week), limit=6)
+    return unified_tasks.next_tasks(conn, int(week), limit=4)
 
 
 def coming_up_tasks(conn, week, limit=3):

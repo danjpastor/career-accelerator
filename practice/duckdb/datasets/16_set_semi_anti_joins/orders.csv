@@ -1,0 +1,6 @@
+order_id,customer_id,order_total
+O001,C003,300
+O002,C003,250
+O003,C005,500
+O004,C007,900
+O005,C009,350

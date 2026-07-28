@@ -1,6 +1,0 @@
-module_id: processing_storage
-title: How Databases Store and Organize Data
-order: 1
-description: Compare operational and analytical workloads and organize facts and dimensions.
-lessons:
-- lessons/database_processing_models/lesson.yaml

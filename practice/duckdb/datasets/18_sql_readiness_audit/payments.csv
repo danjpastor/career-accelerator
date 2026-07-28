@@ -1,0 +1,8 @@
+payment_id,order_id,payment_amount,payment_status
+P001,O001,500,Paid
+P002,O002,750,Paid
+P003,O003,300,Paid
+P004,O004,450,Paid
+P005,O005,850,Partial
+P006,O999,200,Paid
+P007,O007,650,Paid

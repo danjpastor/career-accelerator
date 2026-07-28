@@ -20,7 +20,7 @@
 ### Google Certificate
 Continue the current certificate module.
 
-### Accelerator Academy
+### DataCamp
 Complete SQL cleaning functions, type conversion, null handling, advanced CASE, subqueries, CTEs, and readable multi-step workflows.
 
 ### Portfolio
@@ -28,7 +28,7 @@ Preparation only: finish the cleaning plan, validation plan, and decision-log te
 
 ## Recommended Rhythm
 
-- **Academy:** Three cleaning and query-structure sessions
+- **DataCamp:** Three cleaning and query-structure sessions
 - **DuckDB:** Two applied exercise sessions
 - **Interview Practice:** Two SQL Interview Practice sessions
 - **Google:** Two certificate sessions
@@ -45,7 +45,7 @@ Preparation only: finish the cleaning plan, validation plan, and decision-log te
 - [ ] Complete DuckDB Exercise 12: Refactor an Unreadable Analytics Query
 - [ ] Solve Histogram of Tweets or Duplicate Job Listings
 - [ ] Finish the Portfolio Cleaning and Validation Plan
-- [ ] Pass the Week 5 Knowledge Check
+- [ ] Pass the Week 5 Readiness Review
 - [ ] Complete the Week 5 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Preparation only: finish the cleaning plan, validation plan, and decision-log te
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

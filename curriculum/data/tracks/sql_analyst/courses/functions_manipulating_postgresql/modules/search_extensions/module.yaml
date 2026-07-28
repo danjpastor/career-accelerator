@@ -1,6 +1,0 @@
-module_id: search_extensions
-title: Search Text and Use Extensions
-order: 4
-description: Recognize full-text search, user-defined functions, extensions, and string similarity use cases.
-lessons:
-- lessons/sql_search_extensions/lesson.yaml

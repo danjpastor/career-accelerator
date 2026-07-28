@@ -118,5 +118,65 @@
     "exercise_path": "practice/duckdb/exercises/12_query_readability/README.md",
     "starter_path": "practice/duckdb/exercises/12_query_readability/starter.sql",
     "submission_path": "practice/duckdb/submissions/ex12_query_readability.sql"
+  },
+  {
+    "exercise": 13,
+    "week": 4,
+    "title": "Audit table grain and join cardinality",
+    "concepts": "table grain, primary keys, join cardinality, pre-aggregation",
+    "estimated_minutes": 50,
+    "exercise_path": "practice/duckdb/exercises/13_grain_join_cardinality/README.md",
+    "starter_path": "practice/duckdb/exercises/13_grain_join_cardinality/starter.sql",
+    "submission_path": "practice/duckdb/submissions/13_13_grain_join_cardinality.sql"
+  },
+  {
+    "exercise": 14,
+    "week": 5,
+    "title": "Build monthly cohorts and retention metrics",
+    "concepts": "DATE_TRUNC, DATE_DIFF, cohort logic, conditional aggregation",
+    "estimated_minutes": 50,
+    "exercise_path": "practice/duckdb/exercises/14_date_cohort_analysis/README.md",
+    "starter_path": "practice/duckdb/exercises/14_date_cohort_analysis/starter.sql",
+    "submission_path": "practice/duckdb/submissions/14_14_date_cohort_analysis.sql"
+  },
+  {
+    "exercise": 15,
+    "week": 5,
+    "title": "Calculate running totals and moving averages",
+    "concepts": "window frames, ROWS BETWEEN, LAG, running totals, moving averages",
+    "estimated_minutes": 50,
+    "exercise_path": "practice/duckdb/exercises/15_window_frames/README.md",
+    "starter_path": "practice/duckdb/exercises/15_window_frames/starter.sql",
+    "submission_path": "practice/duckdb/submissions/15_15_window_frames.sql"
+  },
+  {
+    "exercise": 16,
+    "week": 4,
+    "title": "Compare customer populations with set and existence logic",
+    "concepts": "UNION, INTERSECT, EXCEPT, semi joins, anti joins",
+    "estimated_minutes": 45,
+    "exercise_path": "practice/duckdb/exercises/16_set_semi_anti_joins/README.md",
+    "starter_path": "practice/duckdb/exercises/16_set_semi_anti_joins/starter.sql",
+    "submission_path": "practice/duckdb/submissions/16_16_set_semi_anti_joins.sql"
+  },
+  {
+    "exercise": 17,
+    "week": 5,
+    "title": "Standardize messy text, dates, and numeric fields",
+    "concepts": "TRIM, LOWER, SPLIT_PART, REGEXP, TRY_CAST, STRPTIME",
+    "estimated_minutes": 50,
+    "exercise_path": "practice/duckdb/exercises/17_text_dates_quality/README.md",
+    "starter_path": "practice/duckdb/exercises/17_text_dates_quality/starter.sql",
+    "submission_path": "practice/duckdb/submissions/17_17_text_dates_quality.sql"
+  },
+  {
+    "exercise": 18,
+    "week": 6,
+    "title": "Complete a full relational data-quality audit",
+    "concepts": "grain, duplicates, NULLs, referential integrity, reconciliation, CTEs",
+    "estimated_minutes": 65,
+    "exercise_path": "practice/duckdb/exercises/18_sql_readiness_audit/README.md",
+    "starter_path": "practice/duckdb/exercises/18_sql_readiness_audit/starter.sql",
+    "submission_path": "practice/duckdb/submissions/18_18_sql_readiness_audit.sql"
   }
 ]

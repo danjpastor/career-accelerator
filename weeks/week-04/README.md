@@ -20,7 +20,7 @@
 ### Google Certificate
 Continue the current certificate module.
 
-### Accelerator Academy
+### DataCamp
 Complete table grain, keys, INNER JOIN, LEFT JOIN, multi-table joins, set operations, and relationship validation.
 
 ### Portfolio
@@ -28,7 +28,7 @@ Preparation only: finalize the relationship map and planned validation checks. P
 
 ## Recommended Rhythm
 
-- **Academy:** Three relationship and join sessions
+- **DataCamp:** Three relationship and join sessions
 - **DuckDB:** Two validation sessions
 - **Interview Practice:** Two SQL Interview Practice sessions
 - **Google:** Two certificate sessions
@@ -45,7 +45,7 @@ Preparation only: finalize the relationship map and planned validation checks. P
 - [ ] Solve Page with No Likes in SQL Interview Practice
 - [ ] Solve Signup Activation Rate or Second Day Confirmation
 - [ ] Finalize the Portfolio Relationship Map and Validation Checklist
-- [ ] Pass the Week 4 Knowledge Check
+- [ ] Pass the Week 4 Readiness Review
 - [ ] Complete the Week 4 Retrospective
 
 ## Daily Log
@@ -53,7 +53,7 @@ Preparation only: finalize the relationship map and planned validation checks. P
 Add one row after each study session.
 
 <!-- DAILY_LOG_START -->
-| Date | Hours | Google | Academy | SQL Practice | Portfolio |
+| Date | Hours | Google | DataCamp | SQL Practice | Portfolio |
 |---|---:|---|---|---:|---|
 <!-- DAILY_LOG_END -->
 

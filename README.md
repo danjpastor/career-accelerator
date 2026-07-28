@@ -1,5 +1,18 @@
 # Career Accelerator
 
-Version **10.35.3** is a cumulative hotfix for the v10.35 program audit and mastery-gated planner release.
+Version **10.36.0** uses an explicit, chapter-level DataCamp curriculum and expanded DuckDB practice.
 
-It repairs the circular Week 1 coursework/Knowledge Check gate, keeps Academy tasks attached to their actual roadmap week, restores overdue coursework to Today’s Focus as Catch-Up, preserves one durable weekly Knowledge Check task, adds the missing Week 9–11 retrospectives, and retains all earlier Academy, Applied Lab, Next Tasks, sprint, and migration fixes.
+## Current learning model
+
+- The Google Data Analytics Certificate remains the highest-priority learning track until completed.
+- Every required DataCamp chapter is stored as an individual scheduled task with an exact Campus URL.
+- Multi-chapter courses are distributed across multiple days instead of being assigned as one course-sized task.
+- Opening a DataCamp task launches the assigned chapter in the default browser and never marks it complete automatically.
+- Today’s Focus remains capped at five ready tasks.
+- Next Tasks remains a fixed four-row card combining ready work and Coming Soon prerequisite guidance.
+- Missed DataCamp chapters roll into Catch-Up in sequence; later chapters remain locked until earlier assigned days are completed.
+- The Learning tab contains Certificate, Practice, and Skills Lab. The retired Paths destination no longer exists.
+- DuckDB exercises provide local practice, targeted remediation, and the final SQL-readiness audit.
+- Portfolio execution remains gated until the required curriculum and final DuckDB readiness audit are complete.
+
+Progress from the retired in-app curriculum is removed and is not treated as DataCamp credit. Existing Google Certificate, portfolio, DuckDB, Applied Lab, study-session, and career progress are preserved.
