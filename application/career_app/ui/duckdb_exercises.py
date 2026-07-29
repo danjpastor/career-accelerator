@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES, ordered_exercise_numbers, roadmap_number
 from career_app.services import duckdb_workspace
 from career_app.services import duckdb_exercise_runner as runner
+from career_app.services import duckdb_dataset_preview
 from career_app.services import roadmap_mastery
 from career_app.theme import COLORS
 from career_app.ui.course_ui import CoursePageWidget, SqlCodeEditor
@@ -80,6 +81,7 @@ class DuckDBExercisesWidget(QWidget):
         self.root = Path(root)
         self.current_number: int | None = None
         self._loading = False
+        self._readiness_refresh_pending = False
         self._settings = QSettings("CareerAccelerator", "CareerAccelerator")
         self._question_definitions: list[runner.QuestionBlock] = []
         self._question_answers: dict[int, str] = {}
@@ -408,6 +410,26 @@ class DuckDBExercisesWidget(QWidget):
             self.workspace_splitter.setSizes([520, 590])
         self.updateGeometry()
 
+    def showEvent(self, event) -> None:  # noqa: N802 - Qt API
+        """Refresh lock markers when Practice becomes visible.
+
+        DCA: refresh DuckDB readiness whenever the page becomes visible. Today’s
+        Focus and the exercise workspace use live prerequisite state; rebuilding
+        the navigation list here prevents an older lock icon from surviving
+        after a prerequisite is completed or a routed task is opened.
+        """
+        super().showEvent(event)
+        if self._readiness_refresh_pending:
+            return
+        self._readiness_refresh_pending = True
+
+        def refresh_visible_readiness() -> None:
+            self._readiness_refresh_pending = False
+            if self.isVisible():
+                self.refresh(preserve_number=True)
+
+        QTimer.singleShot(0, refresh_visible_readiness)
+
     def resizeEvent(self, event) -> None:  # noqa: N802 - Qt API
         super().resizeEvent(event)
         self._apply_responsive_layout()
@@ -481,7 +503,7 @@ class DuckDBExercisesWidget(QWidget):
         for row, number in enumerate(ordered_exercise_numbers()):
             item = DUCKDB_EXERCISES[number]
             status = statuses[number].get("status", "Not Started")
-            readiness = roadmap_mastery.duckdb_readiness(self.conn, number)
+            readiness = self._readiness(number)
             marker = (
                 "●" if status == "Completed"
                 else "🔒" if not readiness.get("ready")
@@ -511,15 +533,19 @@ class DuckDBExercisesWidget(QWidget):
             self._load_exercise(int(current.data(Qt.ItemDataRole.UserRole)))
 
     def select_exercise(self, number: int) -> None:
-        """Select the requested exercise and always refresh its workspace."""
+        """Select a routed exercise using a freshly rebuilt readiness list."""
+        requested = int(number)
+        # Rebuild first so the list marker, tooltip, editor access state, and
+        # Today’s Focus all reflect the same current prerequisite result.
+        self.refresh(preserve_number=True)
         for row in range(self.exercise_list.count()):
             item = self.exercise_list.item(row)
-            if int(item.data(Qt.ItemDataRole.UserRole)) != int(number):
+            if int(item.data(Qt.ItemDataRole.UserRole)) != requested:
                 continue
             if self.exercise_list.currentRow() != row:
                 self.exercise_list.setCurrentRow(row)
             else:
-                self._load_exercise(int(number))
+                self._load_exercise(requested)
             return
 
     def _exercise_selected(self, current: QListWidgetItem | None, _previous) -> None:
@@ -636,6 +662,13 @@ class DuckDBExercisesWidget(QWidget):
             f"duckdb_exercises/bookmarks/{number}", False, type=bool
         )
         inventory = runner.dataset_inventory(self.root, number)
+        markdown = duckdb_dataset_preview.inject_preview(
+            root=self.root,
+            number=number,
+            markdown=markdown,
+            inventory=inventory,
+            row_limit=5,
+        )
         completion_tables = {}
         for dataset in inventory:
             columns = list(dataset.get("columns") or [])
@@ -712,7 +745,7 @@ class DuckDBExercisesWidget(QWidget):
             f"{len(inventory)} dataset{'s' if len(inventory) != 1 else ''}"
         )
         self.back_button.setEnabled(list(ordered_exercise_numbers()).index(number) > 0)
-        readiness = roadmap_mastery.duckdb_readiness(self.conn, number)
+        readiness = self._readiness(number)
         self._apply_access_state(
             readiness,
             str(progress.get("status") or "") == "Completed",

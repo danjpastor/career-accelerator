@@ -9638,3 +9638,9 @@ def run():
         raise
 
     sys.exit(app.exec())
+
+# BEGIN DATACAMP PROJECT TASK INTEGRATION v10.36.1
+from career_app.services import datacamp_project_integration as _datacamp_project_integration
+_datacamp_project_integration.install(CareerAccelerator)
+# END DATACAMP PROJECT TASK INTEGRATION v10.36.1
+

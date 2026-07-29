@@ -7,7 +7,8 @@
 
 -- Q1. Return every order with order ID, quantity, unit price, and a calculated pre-discount line value.
 
-SELECT order_id, quantity, unit_price,
+SELECT order_id, quantity, unit_price, (unit_price*quantity) AS line_value
+FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
