@@ -33,7 +33,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+from career_app.data.duckdb_exercises import DUCKDB_EXERCISES, ordered_exercise_numbers
 from career_app.services import duckdb_workspace
 from career_app.services import duckdb_exercise_runner as runner
 from career_app.services import roadmap_mastery
@@ -464,7 +464,7 @@ class DuckDBExercisesWidget(QWidget):
             preferred = int(self._settings.value("duckdb_exercises/current_number", 1))
         statuses: dict[int, dict[str, Any]] = {}
         completed = 0
-        for number in sorted(DUCKDB_EXERCISES):
+        for number in ordered_exercise_numbers():
             try:
                 progress = duckdb_workspace.progress(self.conn, self.root, number)
             except Exception:
@@ -478,7 +478,7 @@ class DuckDBExercisesWidget(QWidget):
         self._loading = True
         self.exercise_list.clear()
         target_row = 0
-        for row, number in enumerate(sorted(DUCKDB_EXERCISES)):
+        for row, number in enumerate(ordered_exercise_numbers()):
             item = DUCKDB_EXERCISES[number]
             status = statuses[number].get("status", "Not Started")
             readiness = roadmap_mastery.duckdb_readiness(self.conn, number)
@@ -660,10 +660,13 @@ class DuckDBExercisesWidget(QWidget):
             subtitle=subtitle,
             bookmarked=bookmarked,
         )
-        next_item = DUCKDB_EXERCISES.get(number + 1)
+        ordered_numbers = list(ordered_exercise_numbers())
+        ordered_index = ordered_numbers.index(number)
+        next_number = ordered_numbers[ordered_index + 1] if ordered_index + 1 < len(ordered_numbers) else None
+        next_item = DUCKDB_EXERCISES.get(next_number) if next_number is not None else None
         self.learn_view.set_navigation(
             next_title=next_item["title"] if next_item else None,
-            show_back=number > min(DUCKDB_EXERCISES),
+            show_back=ordered_index > 0,
             continue_text="Next Exercise  →",
         )
         self.breadcrumb.setText(
@@ -708,7 +711,7 @@ class DuckDBExercisesWidget(QWidget):
         self.dataset_label.setText(
             f"{len(inventory)} dataset{'s' if len(inventory) != 1 else ''}"
         )
-        self.back_button.setEnabled(number > min(DUCKDB_EXERCISES))
+        self.back_button.setEnabled(list(ordered_exercise_numbers()).index(number) > 0)
         readiness = roadmap_mastery.duckdb_readiness(self.conn, number)
         self._apply_access_state(
             readiness,
@@ -962,7 +965,7 @@ class DuckDBExercisesWidget(QWidget):
     def previous_exercise(self) -> None:
         if self.current_number is None:
             return
-        numbers = sorted(DUCKDB_EXERCISES)
+        numbers = list(ordered_exercise_numbers())
         index = numbers.index(self.current_number)
         if index > 0:
             self.select_exercise(numbers[index - 1])
@@ -970,7 +973,7 @@ class DuckDBExercisesWidget(QWidget):
     def next_exercise(self) -> None:
         if self.current_number is None:
             return
-        numbers = sorted(DUCKDB_EXERCISES)
+        numbers = list(ordered_exercise_numbers())
         index = numbers.index(self.current_number)
         if index + 1 < len(numbers):
             self.select_exercise(numbers[index + 1])

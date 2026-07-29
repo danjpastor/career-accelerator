@@ -14,6 +14,8 @@ import math
 import sqlite3
 from typing import Any
 
+from career_app.data.google_certificate_curriculum import COURSE_MODULE_COUNTS
+
 
 PROGRAM_DAYS = 90
 PROGRAM_WEEKS = 13
@@ -27,7 +29,7 @@ KEY_DURATION_DAYS = KEY_PREFIX + "duration_days"
 KEY_REQUIRED_WEEKLY_HOURS = KEY_PREFIX + "required_weekly_hours"
 KEY_SNAPSHOT = KEY_PREFIX + "snapshot"
 
-GOOGLE_MODULE_COUNTS = {1: 4, 2: 4, 3: 5, 4: 6, 5: 4, 6: 4, 7: 5, 8: 4, 9: 4}
+GOOGLE_MODULE_COUNTS = dict(COURSE_MODULE_COUNTS)
 GOOGLE_TOTAL = sum(GOOGLE_MODULE_COUNTS.values())
 SQL_INTERVIEW_TOTAL_FALLBACK = 16
 DUCKDB_TOTAL = 18

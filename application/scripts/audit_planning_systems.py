@@ -91,8 +91,9 @@ def _current_state_audit(errors: list[str]) -> None:
         _assert(len(next_items) <= unified_tasks.MAX_NEXT_TASKS == 4, "Next Tasks limit/linkage failed", errors)
         expected_focus_prefix = [
             int(item["id"])
-            for item in focus[: unified_tasks.MAX_NEXT_TASKS]
-        ]
+            for item in focus
+            if bool(item.get("ready"))
+        ][: unified_tasks.MAX_NEXT_TASKS]
         actual_next_prefix = [
             int(item["id"])
             for item in next_items[: len(expected_focus_prefix)]
@@ -103,21 +104,26 @@ def _current_state_audit(errors: list[str]) -> None:
             errors,
         )
         locked_focus = [item for item in focus if not bool(item.get("ready"))]
+        supplementary_kinds = {
+            "datacamp_chapter", "duckdb", "interview_problem",
+            "sql_practice", "python_exercise",
+        }
         _assert(
             all(
-                item.get("kind") == "datacamp_chapter"
-                and str(item.get("prerequisite_reason") or "").startswith("Complete ")
+                item.get("kind") in supplementary_kinds
+                and int(item.get("week") or week) <= week
+                and bool(str(item.get("prerequisite_reason") or "").strip())
                 for item in locked_focus
             ),
-            "A non-DataCamp or future-scheduled lock entered Today’s Focus",
+            "An unsupported or future-scheduled lock entered Today’s Focus",
             errors,
         )
         _assert(
             all(
                 bool(item.get("ready"))
                 or (
-                    item.get("kind") == "datacamp_chapter"
-                    and str(item.get("prerequisite_reason") or "").startswith("Complete ")
+                    item.get("kind") in supplementary_kinds
+                    and bool(str(item.get("prerequisite_reason") or "").strip())
                 )
                 for item in next_items
             ),
@@ -285,8 +291,9 @@ def _same_week_catchup_audit(errors: list[str]) -> None:
         )
         expected_prefix = [
             int(item["id"])
-            for item in focus_after[: unified_tasks.MAX_NEXT_TASKS]
-        ]
+            for item in focus_after
+            if bool(item.get("ready"))
+        ][: unified_tasks.MAX_NEXT_TASKS]
         actual_prefix = [
             int(item["id"])
             for item in next_after[: len(expected_prefix)]

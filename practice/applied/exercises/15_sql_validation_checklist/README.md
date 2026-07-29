@@ -1,130 +1,196 @@
 # Applied Lab 03: Build and apply a SQL validation checklist
 
-**Category:** SQL Validation  
-**Roadmap week:** 4  
-**Estimated working time:** 45 minutes  
-**Skills:** row counts, uniqueness, nulls, referential integrity, duplicates, reconciliation, boundaries
+> This guide tells you what decisions to make, what output to produce, and how to validate it. It intentionally does not provide the finished formula, query, measure, code, or numerical answer.
 
-## Scenario
-
-You are the **senior analyst**. A query result cannot be approved until a reusable validation checklist proves row counts, grain, nulls, relationships, totals, and date boundaries.
-
-## Your assignment
+## Assignment
 
 Create reusable checks that must pass before results are trusted.
 
-Complete the work as a handoff-ready analyst artifact. A reviewer should be able to understand the business rule, reproduce the work, inspect the evidence, and see any limitation without guessing what you did.
+## Skills you will apply
 
-## Start here
+row counts, uniqueness, nulls, referential integrity, duplicates, reconciliation, boundaries
 
-1. Create the SQL submission and review the automatically loaded table names shown in the in-app workspace.
-2. Write one labeled validation query at a time and keep the result interpretable as pass/fail evidence.
-3. Run checks before and after any correction so the submission proves what changed.
+## Stage 1: Frame the request and define success
 
-## Provided files
+Turn the assignment into a clear analytical question before using a tool. The lab objective is to create reusable checks that must pass before results are trusted..
 
-| File | Purpose |
-|---|---|
-| `customers.csv` | Customer attributes used for grouping and joins. |
-| `finance_report.csv` | Independent finance totals used for reconciliation. |
-| `orders.csv` | Order-level operational records. |
-| `products.csv` | Product attributes, prices, or costs. |
-| `returns.csv` | Return transactions that may contain multiple rows per order. |
-| `targets.csv` | Regional or monthly performance targets. |
-| `tickets.csv` | Support-ticket dates, status, and service information. |
+### What to do
 
-Open the **Dataset Folder** from Career Accelerator. Do not change the packaged source files. Put working files, screenshots, and exports in the Applied Labs submissions area.
+1. Read the business assignment, deliverables, and validation criteria from beginning to end before opening the starter.
+2. Rewrite the request as one question that names the audience, decision, entity being analyzed, and time period.
+3. List the concepts you expect to use: row counts, uniqueness, nulls, referential integrity, duplicates, reconciliation, boundaries.
+4. Define what a trustworthy final result must contain and what would make the result unsafe to use.
+5. Create the submission and add a short assumptions section. Do not begin the final calculation yet.
 
-## What you must produce
+### Required output
 
-- Reusable validation SQL.
-- Pass/fail checklist.
-- One failed check and correction.
+A clearly stated business question, definition of done, and initial assumptions list inside the lab submission.
 
-## Guided workflow
+### Check your work
 
-### 1. Check source and output row counts
+- The question can be answered with the supplied data and does not assume a result.
+- The intended audience and decision are explicit.
+- The definition of done matches the lab deliverables rather than adding portfolio-scale work.
 
-- Use an independent check whenever possible. Record expected result, actual result, pass/fail status, and the action taken for any failure.
-- Keep each diagnostic query labeled with a comment describing the question it answers. The starter should guide the sequence without containing the finished solution.
+### Evidence to record
 
-**Checkpoint:** The evidence shows expected value, actual value, and a clear pass/fail conclusion.
+Record the business question, intended decision, and the most important assumption you identified.
 
-### 2. Test expected-grain uniqueness
+### Common mistakes
 
-- Use an independent check whenever possible. Record expected result, actual result, pass/fail status, and the action taken for any failure.
-- Compare total row count with distinct key count and return the offending keys with their occurrence counts so the failure can be investigated.
-- Keep each diagnostic query labeled with a comment describing the question it answers. The starter should guide the sequence without containing the finished solution.
+- Starting calculations before deciding what one row or observation represents.
+- Expanding the scope beyond the lab's requested decision.
+- Treating an assumption as a confirmed fact.
 
-**Checkpoint:** The expected key is unique or the duplicate keys and counts are returned as actionable evidence.
+## Stage 2: Inspect the sources and plan the method
 
-### 3. Measure nulls in required fields
+Understand the data and choose a safe analysis path before building the result.
 
-- Use a small profile table with field, expected type or rule, observed issue, affected rows, business impact, and proposed treatment.
-- Count nulls by required field and return example records. State whether a null is invalid, expected, or conditionally allowed.
-- Keep each diagnostic query labeled with a comment describing the question it answers. The starter should guide the sequence without containing the finished solution.
+### What to do
 
-**Checkpoint:** The issue counts and affected fields are recorded, and no treatment is applied without documenting its effect.
+1. Create or open the provided SQL submission and read every starter comment before writing a query.
+2. List the tables you need, the grain of each table, and the key fields that connect them.
+3. Write down the expected grain of the final result before joining or aggregating anything.
+4. Plan small diagnostic queries that prove row counts, uniqueness, null behavior, and join cardinality before the final analysis.
+5. Use the source preview or tool profiler to record row counts, columns, data types, missing fields, duplicate candidates, date coverage, and measurement units.
+6. Identify the candidate key for each source and state what one row represents.
+7. Write a short plan that names the intermediate outputs you will create and the order in which you will validate them.
+8. Note any source limitation that could weaken the final conclusion.
 
-### 4. Test referential integrity
+### Required output
 
-- Use an independent check whenever possible. Record expected result, actual result, pass/fail status, and the action taken for any failure.
-- Use an anti-join or equivalent check to return child keys that do not exist in the parent table, then count and inspect them.
-- Keep each diagnostic query labeled with a comment describing the question it answers. The starter should guide the sequence without containing the finished solution.
+A source inventory, grain statement, key map, and short analysis plan.
 
-**Checkpoint:** The evidence shows expected value, actual value, and a clear pass/fail conclusion.
+### Check your work
 
-### 5. Detect duplicates and reconcile totals
+- Every source has a stated grain and candidate key or a documented reason that no unique key exists.
+- The planned method uses only skills available from prerequisite coursework unless the guide explicitly introduces a new method.
+- The plan includes at least one check that is independent of the final calculation.
 
-- Use a small profile table with field, expected type or rule, observed issue, affected rows, business impact, and proposed treatment.
-- Use an independent check whenever possible. Record expected result, actual result, pass/fail status, and the action taken for any failure.
-- Compare total row count with distinct key count and return the offending keys with their occurrence counts so the failure can be investigated.
-- Keep each diagnostic query labeled with a comment describing the question it answers. The starter should guide the sequence without containing the finished solution.
+### Evidence to record
 
-**Checkpoint:** The expected key is unique or the duplicate keys and counts are returned as actionable evidence.
+Record the source grain, candidate key, row-count check, and one data-quality concern or limitation.
 
-### 6. Test date boundaries and explain the result
+### Common mistakes
 
-- Use an independent check whenever possible. Record expected result, actual result, pass/fail status, and the action taken for any failure.
-- Test the exact start and end dates plus one record just outside each boundary so inclusive and exclusive logic is visible.
-- Keep each diagnostic query labeled with a comment describing the question it answers. The starter should guide the sequence without containing the finished solution.
+- Joining or merging sources before checking whether the key is unique.
+- Changing raw data instead of creating a traceable cleaned layer.
+- Assuming dates, percentages, currency, or identifiers already use the correct type.
 
-**Checkpoint:** The evidence shows expected value, actual value, and a clear pass/fail conclusion.
+## Stage 3: Build the analysis in traceable steps
 
-## Evidence to record
+Apply the required skills while keeping each transformation and calculation understandable and testable.
 
-- The path to the main submission artifact and any supporting screenshots or exports.
-- The grain or unit of analysis used for the final result.
-- At least one row-count, total, or boundary check that supports the result.
-- One decision or assumption that materially affects the output.
-- Any unresolved issue, rejected record, mismatch, or limitation and its likely impact.
-- A two- or three-sentence stakeholder takeaway stating what the result means and what should happen next.
+### What to do
 
-## Definition of done
+1. Check source and output row counts. Before you begin, identify which source fields and assumptions this step depends on. Complete the work in a clearly labeled section of the submission, then run a small check that would expose a missing row, duplicate entity, incorrect filter, or mismatched unit.
+2. Test expected-grain uniqueness. Before you begin, identify which source fields and assumptions this step depends on. Complete the work in a clearly labeled section of the submission, then run a small check that would expose a missing row, duplicate entity, incorrect filter, or mismatched unit.
+3. Measure nulls in required fields. Before you begin, identify which source fields and assumptions this step depends on. Complete the work in a clearly labeled section of the submission, then run a small check that would expose a missing row, duplicate entity, incorrect filter, or mismatched unit.
+4. Test referential integrity. Before you begin, identify which source fields and assumptions this step depends on. Complete the work in a clearly labeled section of the submission, then run a small check that would expose a missing row, duplicate entity, incorrect filter, or mismatched unit.
+5. Detect duplicates and reconcile totals. Before you begin, identify which source fields and assumptions this step depends on. Complete the work in a clearly labeled section of the submission, then run a small check that would expose a missing row, duplicate entity, incorrect filter, or mismatched unit.
+6. Test date boundaries and explain the result. Before you begin, identify which source fields and assumptions this step depends on. Complete the work in a clearly labeled section of the submission, then run a small check that would expose a missing row, duplicate entity, incorrect filter, or mismatched unit.
+7. Use comments, readable names, or labeled worksheet sections so another learner can follow the order of operations.
+8. After each major step, compare row counts and unique entity counts with the prior stage before moving on.
+9. Keep exact solutions out of notes copied from external sources; explain why the method fits this business question in your own words.
 
-- [ ] Checks return interpretable evidence.
-- [ ] Reconciliation is independent.
-- [ ] Boundary tests cover both edges.
-- [ ] The work is saved outside the packaged starter files and can be reopened.
-- [ ] The submission is driven by data, formulas, queries, code, or documented evidence rather than manually typed final results.
-- [ ] A reviewer can reproduce the main result from the supplied source files.
-- [ ] The Progress & Evidence notes identify the artifact location, validation performed, and remaining limitations.
+### Required output
 
-## Common mistakes to avoid
+A working analysis that produces the requested intermediate and final outputs without manually typing calculated answers.
 
-- Writing checks that return numbers without stating what pass or fail means.
-- Checking only the final table and not the source or intermediate grain.
-- Using the same logic to calculate and validate a total.
-- Ignoring boundary dates, nulls, or unmatched keys.
+### Check your work
 
-## Submission workflow
+- The output grain matches the grain defined in Stage 2.
+- Filters, exclusions, and missing-value rules are visible and consistent.
+- Calculated results update when the source or selected input changes.
+- No step silently duplicates or removes entities without explanation.
 
-1. Select **Create / Open Submission** and work in the created copy, not the packaged starter.
-2. Save the main artifact and any screenshots or exports in the Applied Labs submissions folder.
-3. Record artifact paths, validation evidence, decisions, and limitations in **Progress & Evidence** and in the submission file when one is provided.
-4. Open **Validation** and resolve every required item you can verify.
-5. Select **Save Progress**. Mark the lab complete only when the minimum deliverables and definition of done are satisfied.
+### Evidence to record
 
-## Interview-ready reflection
+Record the main sections you built, the method chosen for each, and one intermediate check that passed.
 
-Be prepared to explain the business problem, your chosen grain or metric definition, the most important validation check, one issue you found, and how your final artifact supports a decision.
+### Common mistakes
+
+- Building the entire answer in one expression that cannot be inspected.
+- Using a row-level average when the business definition requires a weighted result.
+- Hard-coding a total, date, category, or rate that should come from the data or a control.
+
+### Progressive hints
+
+- Start with the smallest intermediate table or calculation that can be checked independently.
+- When multiple conditions are required, list each condition in words before selecting a function or clause.
+- When a result looks plausible, test a deliberately narrow subset to confirm the logic.
+
+## Stage 4: Validate, reconcile, and challenge the result
+
+Prove that the analysis is structurally correct before interpreting it.
+
+### What to do
+
+1. Verify this requirement independently: Checks return interpretable evidence.. Record how you checked it rather than only stating that it passed.
+2. Verify this requirement independently: Reconciliation is independent.. Record how you checked it rather than only stating that it passed.
+3. Verify this requirement independently: Boundary tests cover both edges.. Record how you checked it rather than only stating that it passed.
+4. Test at least one boundary condition, such as the first or last date, a missing value, a zero denominator, or an entity with multiple records.
+5. Compare the final result with a simpler independent calculation, source subtotal, or manually inspected sample.
+6. Investigate differences rather than changing valid logic merely to force agreement.
+7. Document every unresolved issue and explain whether it changes the strength of the conclusion.
+
+### Required output
+
+A completed validation record showing what was checked, how it was checked, and any unresolved difference.
+
+### Check your work
+
+- The final row count and distinct-entity count are consistent with the intended grain.
+- At least one total, rate, or distribution is reconciled independently.
+- Boundary and missing-value behavior are tested rather than assumed.
+- Unresolved differences remain visible and are not hidden by rounding or manual edits.
+
+### Evidence to record
+
+Record the validation checks, the comparison method, and the result of the most important boundary test.
+
+### Common mistakes
+
+- Reusing the same calculation as its own validation.
+- Checking only the final number and ignoring duplicated or missing rows.
+- Forcing a reconciliation to zero without understanding the difference.
+
+## Stage 5: Explain the finding and complete the handoff
+
+Turn a validated result into a concise, responsible analytical deliverable.
+
+### What to do
+
+1. Create the required deliverable: Reusable validation SQL.. Make its purpose, scope, and source clear to a reviewer.
+2. Create the required deliverable: Pass/fail checklist.. Make its purpose, scope, and source clear to a reviewer.
+3. Create the required deliverable: One failed check and correction.. Make its purpose, scope, and source clear to a reviewer.
+4. Write a short takeaway that states the result in plain language, explains why it matters, and names a reasonable next action.
+5. Add at least one limitation or assumption that changes how confidently the result should be used.
+6. Remove unnecessary technical detail from the main takeaway while keeping validation evidence in the submission.
+7. Reopen the saved artifact and confirm that its tables, code, visuals, links, and notes are readable.
+8. Complete the Studio checklist and save stage evidence before marking the lab complete.
+
+### Required output
+
+A saved, reopenable lab submission with a concise takeaway, supporting evidence, and visible limitations.
+
+### Check your work
+
+- Every requested deliverable is present and clearly labeled.
+- The takeaway is supported by the validated result and does not claim causation or certainty without evidence.
+- A reviewer can identify the source, method, assumptions, and remaining limitations.
+- The artifact path or share link opens successfully.
+
+### Evidence to record
+
+Record the artifact location, final takeaway, requested next action, and most important limitation.
+
+### Common mistakes
+
+- Repeating technical steps instead of explaining the business meaning.
+- Making a recommendation that is not supported by the analysis.
+- Marking the lab complete before reopening and checking the saved artifact.
+
+## Completion rule
+
+Complete every Studio stage, save a changed submission or linked artifact, record validation evidence, and finish the final handoff review. The main guide will not reveal the finished solution; use the prerequisite lessons and progressively stronger hints when you are stuck.

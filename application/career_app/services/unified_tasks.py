@@ -28,6 +28,8 @@ from career_app.data.applied_exercises import exercise_for_label as applied_for_
 from career_app.data.applied_exercises import exercise_number_for_label as applied_number_for_label
 from career_app.data.duckdb_exercises import exercise_for_label as duckdb_for_label
 from career_app.data.duckdb_exercises import exercise_number_for_label
+from career_app.data.python_exercises import exercise_for_label as python_for_label
+from career_app.data.python_exercises import exercise_number_for_label as python_exercise_number_for_label
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.services import roadmap_mastery
 from career_app.services import datacamp
@@ -186,6 +188,8 @@ def _kind(conn: sqlite3.Connection, task: dict) -> str:
         return "datacamp_chapter"
     if duckdb_for_label(label) is not None or managed_key.startswith("roadmap_v1026:duckdb:"):
         return "duckdb"
+    if python_for_label(label) is not None or managed_key.startswith("roadmap_v1026:python:"):
+        return "python_exercise"
     if _sql_title(label, str(task.get("target_key") or "")) is not None:
         return "interview_problem"
     if applied_for_label(label) is not None or track_key == APPLIED_TRACK:
@@ -268,6 +272,8 @@ def task_type_label(task: dict, current_week: int | None = None) -> str:
         return "DataCamp"
     if kind in {"duckdb", "interview_problem", "sql_practice"}:
         return "SQL"
+    if kind == "python_exercise":
+        return "Python"
     if kind == "applied_lab":
         return "Skills Lab"
     if kind in {"portfolio_preparation", "portfolio_execution"}:
@@ -301,6 +307,8 @@ def focus_context(task: dict, current_week: int) -> str:
         detail = f"DuckDB SQL • Week {week}"
     elif kind == "interview_problem":
         detail = f"SQL Interview Practice • Week {week}"
+    elif kind == "python_exercise":
+        detail = f"Python Practice • Week {week}"
     elif kind == "sql_practice":
         detail = f"SQL Practice • Week {week}"
     elif kind == "applied_lab":
@@ -363,6 +371,15 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
             result = roadmap_mastery.sql_problem_readiness(conn, title)
             return Readiness(bool(result.get("ready")), str(result.get("reason") or ""))
 
+    if kind == "python_exercise":
+        number = python_exercise_number_for_label(str(task.get("label") or ""))
+        if number is None:
+            match = re.search(r"roadmap_v1026:python:(\d+)", str(task.get("managed_key") or ""))
+            number = int(match.group(1)) if match else None
+        if number is not None:
+            result = roadmap_mastery.python_exercise_readiness(conn, int(number))
+            return Readiness(bool(result.get("ready")), str(result.get("reason") or ""))
+
     if kind == "applied_lab":
         item = applied_for_label(str(task.get("label") or ""))
         number = applied_number_for_label(str(task.get("label") or ""))
@@ -422,6 +439,9 @@ def _source(task: dict) -> str:
         return f"DuckDB Exercise • {item['title']}" if item else "DuckDB Exercise"
     if kind == "interview_problem":
         return "SQL Interview Practice"
+    if kind == "python_exercise":
+        item = python_for_label(task.get("label"))
+        return f"Python Exercise • {item['title']}" if item else "Python Exercise"
     if kind == "applied_lab":
         return "Applied Lab"
     if kind == "portfolio_preparation":
@@ -544,6 +564,7 @@ def _roadmap_sort(task: dict, current_week: int) -> tuple:
         "duckdb": 30,
         "interview_problem": 31,
         "sql_practice": 32,
+        "python_exercise": 33,
         "applied_lab": 35,
         "portfolio_preparation": 40,
         "portfolio_execution": 45,
@@ -598,6 +619,7 @@ def _locked_sort(task: dict, current_week: int) -> tuple:
         "duckdb": 20,
         "interview_problem": 21,
         "sql_practice": 22,
+        "python_exercise": 23,
         "applied_lab": 25,
         "portfolio_preparation": 40,
         "portfolio_execution": 45,
@@ -640,29 +662,40 @@ def _snapshot_setting_key(focus_date: str) -> str:
     return f"daily_focus_snapshot_v2:{focus_date}"
 
 
-def _locked_datacamp_focus_candidate(task: dict, current_week: int) -> bool:
-    """Allow due DataCamp chapters to remain visible while their chain is locked.
+def _locked_supplementary_focus_candidate(task: dict, current_week: int) -> bool:
+    """Keep scheduled practice visible even while its prerequisite is incomplete.
 
-    Future chapters stay out of Today's Focus. A chapter is eligible only when
-    its scheduled date has arrived and its lock is specifically another
-    unfinished DataCamp chapter.
+    DataCamp chapters, DuckDB exercises, SQL interview problems, and Python
+    exercises can occupy a grey Today's Focus row once their roadmap week has
+    arrived. Controls remain disabled and the second line names the missing
+    prerequisite. Future-week work stays hidden.
     """
-    if str(task.get("kind") or "") != "datacamp_chapter":
+    kind = str(task.get("kind") or "")
+    allowed = {
+        "datacamp_chapter",
+        "duckdb",
+        "interview_problem",
+        "sql_practice",
+        "python_exercise",
+    }
+    if kind not in allowed:
         return False
     if bool(task.get("completed")) or bool(task.get("ready")):
         return False
     if _safe_int(task.get("week"), current_week) > int(current_week):
         return False
     reason = str(task.get("prerequisite_reason") or "").strip()
-    if not reason.casefold().startswith("complete "):
+    if not reason:
         return False
-    due_text = str(task.get("deferred_until") or "").strip()
-    if not due_text:
-        return False
-    try:
-        return date.fromisoformat(due_text) <= date.today()
-    except ValueError:
-        return False
+    if kind == "datacamp_chapter":
+        due_text = str(task.get("deferred_until") or "").strip()
+        if not due_text:
+            return False
+        try:
+            return date.fromisoformat(due_text) <= date.today()
+        except ValueError:
+            return False
+    return True
 
 
 def _task_identity(task: dict) -> str:
@@ -956,6 +989,7 @@ def _promote_newly_ready_focus_task(
         "duckdb": 1,
         "interview_problem": 2,
         "sql_practice": 3,
+        "python_exercise": 3,
         "portfolio_preparation": 4,
         "portfolio_execution": 5,
         "datacamp_chapter": 20,
@@ -975,7 +1009,10 @@ def _promote_newly_ready_focus_task(
         if (
             task is not None
             and not bool(task.get("ready"))
-            and str(task.get("kind") or "") == "datacamp_chapter"
+            and str(task.get("kind") or "") in {
+                "datacamp_chapter", "duckdb", "interview_problem",
+                "sql_practice", "python_exercise"
+            }
         ):
             replaceable.append(index)
 
@@ -1028,7 +1065,7 @@ def _ensure_daily_snapshot(
             and not bool(task.get("is_catch_up"))
             and (
                 bool(task.get("ready"))
-                or _locked_datacamp_focus_candidate(task, current_week)
+                or _locked_supplementary_focus_candidate(task, current_week)
             )
         ),
         key=lambda task: _roadmap_sort(task, current_week),
@@ -1176,7 +1213,7 @@ def _sync_active_catchup(
         if bool(task.get("is_catch_up"))
         and (
             bool(task.get("ready"))
-            or _locked_datacamp_focus_candidate(task, current_week)
+            or _locked_supplementary_focus_candidate(task, current_week)
         )
     ]
     selected = catchup[: max(0, int(slots))]
@@ -1247,7 +1284,7 @@ def daily_plan(conn: sqlite3.Connection, current_week: int, max_items: int = MAX
 def next_tasks(conn: sqlite3.Connection, current_week: int, limit: int = MAX_NEXT_TASKS) -> list[dict]:
     """Return actionable work before locked Focus previews.
 
-    Today’s Focus may include greyed-out DataCamp chapters. Those rows still
+    Today’s Focus may include greyed-out learning and practice tasks. Those rows still
     belong beneath the Coming Soon divider in Next Tasks and must never consume
     the compact card before a newly unlocked actionable item such as an
     Applied Lab.

@@ -11,6 +11,7 @@ import tempfile
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 from career_app.data.datacamp_curriculum import DATACAMP_CHAPTERS
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+from career_app.data.python_exercises import PYTHON_EXERCISES
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.database import state
 from career_app.services import content_gates, datacamp, roadmap_mastery, tracks
@@ -127,6 +128,20 @@ def run(root: Path) -> list[str]:
                 errors,
             )
 
+
+        for number in PYTHON_EXERCISES:
+            result = roadmap_mastery.python_exercise_readiness(conn, number)
+            _assert(
+                bool(result.get("required_datacamp_keys")),
+                f"Python Exercise {number:02d} has no DataCamp prerequisite list.",
+                errors,
+            )
+            _assert(
+                bool(result.get("missing_datacamp_keys")),
+                f"Python Exercise {number:02d} did not lock with DataCamp reset.",
+                errors,
+            )
+
         for item in SQL_COMPANION:
             title = item[0]
             result = tracks.sql_problem_readiness(conn, app_state, title)
@@ -186,8 +201,9 @@ def main() -> int:
         return 1
     print("CONTENT LOCK AUDIT PASSED")
     print("- 36 Applied Labs have explicit DataCamp chapter gates")
-    print("- 18 DuckDB exercises have explicit DataCamp chapter gates")
+    print("- 33 DuckDB exercises have explicit DataCamp chapter gates")
     print("- Every SQL interview problem has an explicit DataCamp chapter gate")
+    print("- 13 Python exercises have explicit DataCamp chapter gates")
     print("- Portfolio milestones include DataCamp chapter prerequisites")
     print("- Applied Lab 01 requires all 13 Week 1–2 spreadsheet chapters")
     return 0

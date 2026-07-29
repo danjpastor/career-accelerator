@@ -20,6 +20,7 @@ from career_app.data.duckdb_exercises import (
     exercise_number_for_label,
 )
 from career_app.data.roadmap import SQL_COMPANION
+from career_app.data import google_certificate_curriculum as google_curriculum
 from career_app.navigation import PAGE_LEARNING, PAGE_PORTFOLIO
 
 
@@ -87,17 +88,7 @@ TRACK_ORDER = (
 # Current English Google Data Analytics Professional Certificate curriculum.
 # Progression must use course-specific module totals rather than assuming every
 # course has the same number of modules.
-GOOGLE_COURSE_MODULE_COUNTS = {
-    1: 4,
-    2: 4,
-    3: 5,
-    4: 6,
-    5: 4,
-    6: 4,
-    7: 5,
-    8: 4,
-    9: 4,
-}
+GOOGLE_COURSE_MODULE_COUNTS = dict(google_curriculum.COURSE_MODULE_COUNTS)
 
 
 def google_module_count(course):
@@ -701,16 +692,16 @@ SQL_REQUIREMENTS = {
     },
 }
 SQL_PROBLEM_REQUIREMENTS = {
-    "Histogram of Tweets": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_date_logic"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Histogram of Tweets": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": set()},
     "Data Science Skills": {"all_of": {"roadmap.spreadsheet_mastery", "sql_querying", "sql_aggregation"}, "any_of": set()},
     "Page With No Likes": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_querying"}, "any_of": set()},
     "Laptop vs. Mobile Viewership": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_case"}, "any_of": set()},
-    "Duplicate Job Listings": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Duplicate Job Listings": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": set()},
     "Teams Power Users": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_date_logic"}, "any_of": set()},
     "Pharmacy Analytics Part 1": {"all_of": {"roadmap.spreadsheet_mastery", "sql_querying"}, "any_of": set()},
     "Signup Activation Rate": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_joins", "sql_case"}, "any_of": set()},
     "User's Third Transaction": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions"}, "any_of": {"sql_subqueries", "sql_ctes"}},
-    "Second Highest Salary": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": {"sql_subqueries", "sql_ctes"}},
+    "Second Highest Salary": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_window_functions"}, "any_of": set()},
     "Top Three Salaries": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_window_functions"}, "any_of": {"sql_subqueries", "sql_ctes"}},
     "Tweets' Rolling Averages": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions"}, "any_of": set()},
     "Odd and Even Measurements": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions", "sql_date_logic", "sql_case"}, "any_of": {"sql_subqueries", "sql_ctes"}},
@@ -720,14 +711,22 @@ SQL_PROBLEM_REQUIREMENTS = {
 }
 
 SQL_PROBLEM_WEEK = {
-    "Data Science Skills": 3, "Pharmacy Analytics Part 1": 3,
-    "Laptop vs. Mobile Viewership": 3, "Teams Power Users": 3,
-    "Page With No Likes": 4, "Signup Activation Rate": 4, "Second Day Confirmation": 4,
-    "Histogram of Tweets": 5, "Duplicate Job Listings": 5,
-    "Second Highest Salary": 5, "Supercloud Customer": 5,
-    "User's Third Transaction": 6, "Top Three Salaries": 6,
-    "Odd and Even Measurements": 6, "Tweets' Rolling Averages": 7,
-    "User Shopping Sprees": 7,
+    "Data Science Skills": 3,
+    "Pharmacy Analytics Part 1": 3,
+    "Histogram of Tweets": 3,
+    "Duplicate Job Listings": 3,
+    "Laptop vs. Mobile Viewership": 4,
+    "Page With No Likes": 4,
+    "Signup Activation Rate": 4,
+    "Second Day Confirmation": 4,
+    "Supercloud Customer": 4,
+    "Teams Power Users": 5,
+    "Second Highest Salary": 5,
+    "User's Third Transaction": 5,
+    "Top Three Salaries": 5,
+    "Odd and Even Measurements": 5,
+    "Tweets' Rolling Averages": 5,
+    "User Shopping Sprees": 5,
 }
 
 SQL_SKILL_ACCEPTED_EVIDENCE = {
@@ -1115,6 +1114,30 @@ def _clear_target_schedule(conn, track_key):
         f"DELETE FROM {ADAPTIVE_SCHEDULE_TABLE} WHERE track_key=?",
         (str(track_key),),
     )
+
+
+def _remove_active_track_task(conn, track_key):
+    """Remove an uncompleted generated task when its roadmap topic is not active."""
+    row = conn.execute(
+        "SELECT task_id FROM track_tasks WHERE track_key=?",
+        (str(track_key),),
+    ).fetchone()
+    if row is None:
+        return None
+    task_id = int(row["task_id"])
+    completed = conn.execute(
+        "SELECT completed FROM sprint_tasks WHERE id=?",
+        (task_id,),
+    ).fetchone()
+    if completed is not None and bool(completed["completed"]):
+        conn.execute("DELETE FROM track_tasks WHERE track_key=?", (str(track_key),))
+        return task_id
+    conn.execute("UPDATE task_workspaces SET task_id=NULL WHERE task_id=?", (task_id,))
+    conn.execute("UPDATE study_sessions SET task_id=NULL WHERE task_id=?", (task_id,))
+    conn.execute("DELETE FROM daily_focus WHERE task_id=?", (task_id,))
+    conn.execute("DELETE FROM track_tasks WHERE track_key=?", (str(track_key),))
+    conn.execute("DELETE FROM sprint_tasks WHERE id=?", (task_id,))
+    return task_id
 
 
 def _days_remaining(reference=None):
@@ -1762,10 +1785,22 @@ def _google_target(
     state,
     pace,
 ):
+    """Return the next sequential Google module when its topic week is active.
+
+    Google remains the highest-priority track, but future-topic modules are held
+    outside the task queue.  This prevents Python, portfolio, or career modules
+    from displacing the spreadsheet and SQL work that prepares the learner for
+    them.
+    """
     course, module = normalize_google_position(
         state["google_course"],
         state["google_module"],
     )
+    item = google_curriculum.module_or_none(course, module)
+    if item is None:
+        return None
+
+    current_week = max(1, int(state.get("current_week", 1)))
     alignment = GOOGLE_ALIGNMENT.get(
         course,
         "the current certificate material",
@@ -1773,31 +1808,53 @@ def _google_target(
     metadata = {
         "course": course,
         "module": module,
+        "course_name": item.course_name,
+        "module_name": item.module_name,
+        "scheduled_week": item.week,
+        "assigned_week": item.week,
         "alignment": alignment,
         "primary_goal": (
-            "Complete the certificate as quickly "
-            "and efficiently as possible."
+            "Complete this module before lower-priority work once its topic "
+            "week is active."
         ),
+        "description": (
+            f"Complete Course {course}, Module {module}: {item.module_name}. "
+            f"This module is aligned to Week {item.week} of the roadmap."
+        ),
+        "definition_of_done": (
+            "Finish the complete Coursera module, including its required "
+            "activities and module assessment, then mark this task complete."
+        ),
+        "starter_path": item.url,
+        "managed_key": f"google:{item.key}",
     }
     metadata.update(pace)
 
-    return {
-        "target_key": (
-            f"course:{course}:module:{module}"
-        ),
-        "label": (
-            f"Continue Google Course {course}, "
-            f"Module {module}"
-        ),
-        "source_label": (
-            f"Google • Course {course}, "
-            f"Module {module}"
-        ),
-        "estimate": 90,
+    target = {
+        "target_key": item.key,
+        "label": item.task_label,
+        "source_label": item.source_label,
+        "estimate": item.estimated_minutes,
         "position": course,
         "subposition": module,
+        "assigned_week": item.week,
         "metadata": metadata,
     }
+    if item.week > current_week:
+        target.update(
+            {
+                "locked": True,
+                "metadata": {
+                    **metadata,
+                    "lock_reason": (
+                        f"Scheduled for Week {item.week}, when the roadmap "
+                        f"covers {alignment}."
+                    ),
+                    "future_topic": True,
+                },
+            }
+        )
+    return target
 
 
 def _datacamp_alignment(course):
@@ -3758,11 +3815,14 @@ def sync_all(conn, state):
             target
             and target.get("locked")
         ):
-            conn.execute(
-                """DELETE FROM track_tasks
-                   WHERE track_key=?""",
-                (track_key,),
-            )
+            if track_key == "google":
+                _remove_active_track_task(conn, track_key)
+            else:
+                conn.execute(
+                    """DELETE FROM track_tasks
+                       WHERE track_key=?""",
+                    (track_key,),
+                )
             _clear_target_schedule(conn, track_key)
             _upsert_state(
                 conn,
@@ -3857,11 +3917,12 @@ def sync_all(conn, state):
             )
             continue
 
+        assigned_week = int(target.get("assigned_week", week))
         recommended_date = _ensure_target_schedule(
             conn,
             track_key=track_key,
             target_key=target["target_key"],
-            week=week,
+            week=assigned_week,
             weekly_target=allocations[track_key]["weekly_target"],
             weekly_completed=weekly[track_key],
         )
@@ -3900,7 +3961,7 @@ def sync_all(conn, state):
         _ensure_task(
             conn,
             track_key=track_key,
-            week=week,
+            week=assigned_week,
             target_key=target[
                 "target_key"
             ],

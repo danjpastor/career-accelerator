@@ -19,6 +19,7 @@ from typing import Any
 import yaml
 
 from career_app.navigation import PAGE_LEARNING
+from career_app.data import google_certificate_curriculum as google_curriculum
 
 CHECKS: tuple[tuple[int, str, str], ...] = tuple(
     (
@@ -281,6 +282,15 @@ def incomplete_required_tasks(conn: sqlite3.Connection, week: int) -> list[dict[
             continue
         if managed.startswith("roadmap_v1026:lesson:"):
             continue
+        # Roadmap mastery exercises are supplementary reinforcement. They stay
+        # visible in Today's Focus/Next Tasks and can roll forward as Catch-Up,
+        # but they do not prevent the weekly curriculum checkpoint from opening.
+        if managed.startswith((
+            "roadmap_v1026:duckdb:",
+            "roadmap_v1026:sql:",
+            "roadmap_v1026:python:",
+        )):
+            continue
         if _is_optional(label, managed):
             continue
         if _is_post_check_review(label, managed, category):
@@ -295,6 +305,28 @@ def incomplete_required_tasks(conn: sqlite3.Connection, week: int) -> list[dict[
                 "catch_up": int(row["week"]) < int(week),
             }
         )
+
+    # Only one Google module is generated as an active task at a time.  The
+    # weekly check must still require every Google module assigned through that
+    # week, including later modules in the same week that have not been
+    # generated yet.  Synthetic blockers make the complete curriculum contract
+    # visible without creating future-topic tasks early.
+    existing_labels = {str(item["label"]).casefold() for item in blockers}
+    for item in google_curriculum.incomplete_modules_through_week(conn, int(week)):
+        label = item.task_label
+        if label.casefold() in existing_labels:
+            continue
+        blockers.append(
+            {
+                "task_id": None,
+                "label": label,
+                "week": int(item.week),
+                "catch_up": int(item.week) < int(week),
+                "synthetic": True,
+            }
+        )
+        existing_labels.add(label.casefold())
+    blockers.sort(key=lambda value: (int(value["week"]), str(value["label"])))
     return blockers
 
 

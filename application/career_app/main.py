@@ -49,6 +49,7 @@ from career_app.data.roadmap import (
     DATALEMUR_PROBLEM_URLS, PROJECT_DIRS, PROJECT_NAMES,
     PROJECT_STAGES, SQL_COMPANION, WEEKLY_GUIDANCE
 )
+from career_app.data import google_certificate_curriculum as google_curriculum
 from career_app.services import (
     achievements,
     analytics,
@@ -2632,10 +2633,10 @@ class CareerAccelerator(QMainWindow):
         save = QPushButton("Save Certificate Progress")
         save.setObjectName("Primary")
         save.clicked.connect(self.save_learning)
-        continue_google = QPushButton("Open Current Google Task")
-        continue_google.clicked.connect(lambda: self.continue_learning_track("Google"))
+        self.open_google_button = QPushButton("Open Current Google Task")
+        self.open_google_button.clicked.connect(lambda: self.continue_learning_track("Google"))
         certificate_actions.addWidget(save)
-        certificate_actions.addWidget(continue_google)
+        certificate_actions.addWidget(self.open_google_button)
         certificate_actions.addStretch()
         certificate_card.layout.addLayout(certificate_actions)
         certificate_layout.addWidget(certificate_card)
@@ -6284,11 +6285,38 @@ class CareerAccelerator(QMainWindow):
         })
         google_meta = google.get("metadata", {})
         if hasattr(self, "google_certificate_status"):
-            self.google_certificate_status.setText(
-                f"Course {self.state['google_course']} • Module {self.state['google_module']} • "
-                f"Weekly target {google.get('weekly_completed', 0)}/{google.get('weekly_target', 0)} • "
-                f"{google_meta.get('pace_status', 'On pace')}"
+            current_google = google_curriculum.module_or_none(
+                self.state["google_course"],
+                self.state["google_module"],
             )
+            if current_google is None:
+                google_text = "Google Certificate complete."
+                google_open = False
+                google_tip = "All scheduled Google Certificate modules are complete."
+            elif int(current_google.week) > int(self.state["current_week"]):
+                google_text = (
+                    f"Course {current_google.course} • Module {current_google.module}: "
+                    f"{current_google.module_name} • Held until Week {current_google.week} "
+                    "so it aligns with the roadmap topic."
+                )
+                google_open = False
+                google_tip = (
+                    f"This module becomes active in Week {current_google.week}. "
+                    "It is not Catch-Up work before then."
+                )
+            else:
+                google_text = (
+                    f"Course {current_google.course} • Module {current_google.module}: "
+                    f"{current_google.module_name} • Weekly target "
+                    f"{google.get('weekly_completed', 0)}/{google.get('weekly_target', 0)} • "
+                    f"{google_meta.get('pace_status', 'On pace')}"
+                )
+                google_open = True
+                google_tip = current_google.url
+            self.google_certificate_status.setText(google_text)
+            if hasattr(self, "open_google_button"):
+                self.open_google_button.setEnabled(google_open)
+                self.open_google_button.setToolTip(google_tip)
         if hasattr(self, "week_input"):
             self.week_input.setValue(self.state["current_week"])
             self.course_input.setValue(self.state["google_course"])

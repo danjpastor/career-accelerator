@@ -146,15 +146,15 @@ APPLIED_LAB_TERMINAL_CHAPTER = {14: 'w07_prep_powerbi_02',
 
 DUCKDB_TERMINAL_CHAPTER = {
     1: "w03_intro_sql_02",
-    2: "w03_intermediate_sql_03",
-    3: "w04_manipulation_sql_01",
+    2: "w03_intermediate_sql_04",
+    3: "w05_functions_sql_03",
     4: "w04_manipulation_sql_01",
     5: "w04_manipulation_sql_01",
     6: "w04_joining_sql_02",
     7: "w04_manipulation_sql_03",
-    8: "w05_window_sql_04",
+    8: "w06_database_design_04",
     9: "w06_database_design_04",
-    10: "w08_pandas_04",
+    10: "w06_database_design_04",
     11: "w05_window_sql_02",
     12: "w04_manipulation_sql_03",
     13: "w04_joining_sql_02",
@@ -163,6 +163,21 @@ DUCKDB_TERMINAL_CHAPTER = {
     16: "w04_joining_sql_03",
     17: "w05_functions_sql_03",
     18: "w06_database_design_04",
+    19: "w03_intermediate_sql_01",
+    20: "w03_intermediate_sql_02",
+    21: "w03_joining_sql_01",
+    22: "w04_joining_sql_02",
+    23: "w04_manipulation_sql_02",
+    24: "w04_manipulation_sql_04",
+    25: "w05_window_sql_02",
+    26: "w05_window_sql_03",
+    27: "w05_window_sql_04",
+    28: "w05_functions_sql_01",
+    29: "w06_functions_sql_04",
+    30: "w06_database_design_01",
+    31: "w06_database_design_02",
+    32: "w06_database_design_03",
+    33: "w06_database_design_04",
 }
 
 
@@ -281,9 +296,9 @@ def audit_contract() -> list[str]:
         extra = sorted(set(APPLIED_LAB_TERMINAL_CHAPTER) - set(range(1, 37)))
         errors.append(f"Applied Lab chapter map mismatch; missing={missing}, extra={extra}")
 
-    if set(DUCKDB_TERMINAL_CHAPTER) != set(range(1, 19)):
-        missing = sorted(set(range(1, 19)) - set(DUCKDB_TERMINAL_CHAPTER))
-        extra = sorted(set(DUCKDB_TERMINAL_CHAPTER) - set(range(1, 19)))
+    if set(DUCKDB_TERMINAL_CHAPTER) != set(range(1, 34)):
+        missing = sorted(set(range(1, 34)) - set(DUCKDB_TERMINAL_CHAPTER))
+        extra = sorted(set(DUCKDB_TERMINAL_CHAPTER) - set(range(1, 34)))
         errors.append(f"DuckDB chapter map mismatch; missing={missing}, extra={extra}")
 
     # Lab 01 is the Google Sheets gate and requires all Week 1–2 spreadsheet chapters.

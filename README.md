@@ -1,41 +1,65 @@
 # Career Accelerator
 
-Version **10.38.0** uses an explicit, chapter-level DataCamp curriculum and expanded DuckDB practice.
+Version **10.40.0** uses a topic-aligned Google Data Analytics Certificate roadmap, chapter-level DataCamp curriculum, guided Applied Lab Studios, and expanded DuckDB practice.
 
 ## Current learning model
 
-- The Google Data Analytics Certificate remains the highest-priority learning track until completed.
-- Every required DataCamp chapter is stored as an individual scheduled task with an exact Campus URL.
-- Multi-chapter courses are distributed across multiple days instead of being assigned as one course-sized task.
-- Opening a DataCamp task launches the assigned chapter in the default browser and never marks it complete automatically.
-- Today’s Focus remains capped at five assignments and can keep prerequisite-locked DataCamp chapters greyed out for guidance.
-- Newly unlocked applied work can replace one grey locked preview so it becomes actionable immediately instead of waiting for the next day.
-- Next Tasks remains a fixed four-row card combining ready work and Coming Soon prerequisite guidance.
-- Missed DataCamp chapters roll into Catch-Up in sequence without consuming the frozen daily new-task quota; later chapters remain locked until earlier assigned days are completed.
-- DataCamp chapter tasks use the DataCamp logomark consistently in Today’s Focus, Next Tasks, View All Tasks, Coming Soon, and Current Sprint.
-- DataCamp weekly totals, browser routing, completion history, undo, and portfolio gates all use the same canonical chapter-progress records.
-- The Learning tab contains Certificate, Practice, and Skills Lab. The retired Paths destination no longer exists.
-
-- Spreadsheet Applied Labs are Google Sheets-first and use a share-link-only workflow; the app does not connect to the learner’s Google account or read the spreadsheet.
-- Applied Labs are numbered in their actual unlock order, beginning with the Week 3 Google Sheets lab; existing lab progress is remapped automatically.
-- DuckDB exercises provide local practice, targeted remediation, and the final SQL-readiness audit.
+- Google Certificate modules remain the highest-priority learning tasks, but each module is held until the roadmap reaches the subject it teaches.
+- A future-topic module is hidden rather than labeled Catch-Up. For example, Course 7 Module 1 does not enter the planner until Week 8, when Python begins.
+- Completed Google modules are preserved. Only the next incomplete module is evaluated against the topic schedule.
+- Every required DataCamp chapter remains an individual task with an exact Campus URL and sequential chapter prerequisites.
+- Today’s Focus remains capped at five assignments and can show due, prerequisite-locked DataCamp chapters, DuckDB exercises, SQL interview problems, SQL practice, and Python exercises in grey for guidance.
+- Next Tasks remains a four-row card with actionable work above the Coming Soon divider.
+- Weekly Knowledge Checks contain eight multiple-choice questions, require 7/8 to pass, and gate the next week’s skill-dependent work.
+- Every Applied Lab has its own persisted Studio with guided stages, evidence capture, artifact tracking, validation, and a final review.
+- Applied Lab guides explain goals, decisions, actions, outputs, validation, evidence, hints, and common mistakes without revealing the finished formula, SQL query, DAX measure, Python code, or numeric answer.
+- Applied Lab 01 remains a beginner Google Sheets project and stores only a learner-provided shareable Sheets link.
+- DuckDB now provides 33 week-aligned SQL exercises across Weeks 3–6; 16 SQL interview problems reinforce Weeks 3–5; and 13 local Python exercises cover every required Week 8 Python/pandas chapter.
+- Supplementary practice remains visible and can roll forward as Catch-Up, but it does not block the weekly Knowledge Check once core Google/DataCamp coursework is complete.
 - Portfolio execution remains gated until the required curriculum and final DuckDB readiness audit are complete.
 
-Progress from the retired in-app curriculum is removed and is not treated as DataCamp credit. Existing Google Certificate, portfolio, DuckDB, Applied Lab, study-session, and career progress are preserved.
+## Google Certificate topic schedule
 
+| Week | Required Google modules |
+|---|---|
+| 1 | Course 1 Modules 1–3 |
+| 2 | Course 1 Module 4; Course 2 Modules 1–3 |
+| 3 | Course 2 Module 4; Course 3 Modules 1–3 |
+| 4 | Course 3 Modules 4–5; Course 4 Modules 1–2 |
+| 5 | Course 4 Modules 3–6; Course 5 Module 1 |
+| 6 | Course 5 Modules 2–4 |
+| 7 | Course 6 Modules 1–4 |
+| 8 | Course 7 Modules 1–4 |
+| 9 | Course 8 Module 1 |
+| 10 | Course 8 Module 2 |
+| 11 | Course 8 Modules 3–4; Course 9 Module 1 |
+| 12 | Course 9 Modules 2–4 |
 
-## Google Sheets Applied Labs
+## Practice distribution
 
-Paste a shareable Google Sheets URL into the Studio. Career Accelerator stores only the link and does not connect to your Google account or read the spreadsheet.
-## Weekly knowledge checks
+| Week | DuckDB exercises | SQL interview problems | Python exercises |
+|---|---:|---:|---:|
+| 1–2 | 0 | 0 | 0 |
+| 3 | 5 | 4 | 0 |
+| 4 | 10 | 5 | 0 |
+| 5 | 9 | 7 | 0 |
+| 6 | 9 | 0 | 0 |
+| 7 | 0 | 0 | 0 |
+| 8 | 0 | 0 | 13 |
+| 9–12 | 0 required | 0 required | 0 required |
 
-- Every week has one `Week N Knowledge Check` task.
-- The task unlocks only after all required coursework for that week and earlier catch-up work are complete.
-- Each check has exactly eight multiple-choice questions and requires seven correct answers to pass.
-- Failed attempts provide graded review, targeted study recommendations, and unlimited retakes.
-- Skill-dependent work for the following week remains locked until the prior check is passed. Google Certificate, review, and career-readiness tasks remain available.
+Each exercise is gated by its exact terminal DataCamp chapter. An exercise may be shown as a grey locked Focus row during its assigned week, but its controls remain unavailable until the required chapter and any earlier exercise in its sequence are complete.
 
-## Beginner Google Sheets Lab 01
+## Applied Lab guidance standard
 
-Applied Lab 01 is a guided four-stage practice project using two small CSV files. It uses only spreadsheet skills introduced in Weeks 1–2 and requires one summary, one pivot chart, and a short takeaway—not a portfolio-scale analyst workbook.
+Each stage must include:
 
+1. A plain-language goal and why it matters.
+2. What to inspect or prepare before building.
+3. The decisions the learner must make.
+4. Detailed actions that specify the required output without supplying the completed solution.
+5. Independent validation checks.
+6. Evidence to record in the Studio.
+7. Common mistakes and progressively stronger hints.
+
+Exact solutions are excluded from the primary guide unless a required method has not yet been taught and must be introduced safely.

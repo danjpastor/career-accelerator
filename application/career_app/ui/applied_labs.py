@@ -32,13 +32,18 @@ from PySide6.QtWidgets import (
 )
 
 from career_app.data.applied_exercises import APPLIED_EXERCISES, CATEGORY_ORDER
+from career_app.data.applied_lab_guidance import guide_markdown as applied_guide_markdown
 from career_app.database import save_setting, state
 from career_app.services import applied_lab_runner, applied_workspace, tracks
 from career_app.theme import COLORS
 from career_app.ui.course_ui import (
     CoursePageWidget, FeedbackLabel, RotatedLabel, SqlCodeEditor,
 )
-from career_app.ui.google_sheets_lab_workspace import GoogleSheetsAnalystLabStudio
+from career_app.ui.google_sheets_lab_workspace import (
+    GoogleSheetsAnalystLabStudio,
+    lab01_guide_markdown,
+)
+from career_app.ui.applied_lab_studio import GuidedAppliedLabStudio
 from career_app.ui.widgets import Card
 
 
@@ -290,6 +295,11 @@ class AppliedLabsWidget(QWidget):
         self.sheets_studio.hide()
         practice_layout.addWidget(self.sheets_studio, 1)
 
+        self.guided_studio = GuidedAppliedLabStudio(self.root)
+        self.guided_studio.changed.connect(self._guided_studio_changed)
+        self.guided_studio.hide()
+        practice_layout.addWidget(self.guided_studio, 1)
+
         progress_card = QFrame()
         progress_card.setObjectName("AppliedLabProgressCard")
         progress_card.setStyleSheet(
@@ -526,36 +536,11 @@ class AppliedLabsWidget(QWidget):
         )
 
     def _lab_markdown(self, number: int, item: dict[str, Any]) -> str:
-        """Render the full guided lab workspace in the main Learn panel.
-
-        Earlier builds showed a short catalog summary first and appended the
-        actual README at the very bottom. Most labs therefore appeared to have
-        only a few vague bullets. The README is now the primary workspace
-        guide, with a concise lab brief and tool-specific setup placed above it.
-        """
+        """Render the same detailed, solution-safe guide used by the Studio."""
         if int(number) == 1:
-            return (
-                f"# {item['title']}\n\n"
-                "> This is your first applied spreadsheet lab. It is a guided practice project, "
-                "not a portfolio build. Work through four short stages using only the Google Sheets "
-                "skills introduced during Weeks 1–2.\n\n"
-                "## Business assignment\n\n"
-                "Use a small order table and a four-row target table to clean text, create formulas, "
-                "summarize sales, build one pivot table, and explain one result. The Studio tells you "
-                "what to build and gives you checkpoints without completing the sheet for you.\n\n"
-                "## Required handoff\n\n"
-                "- Shareable Google Sheets URL\n"
-                "- Four completed Studio stages\n"
-                "- A short two-to-three-sentence takeaway\n\n"
-                "Select **Open Full Guide** whenever you need the complete step-by-step reference.\n"
-            )
-
-        instructions_path = applied_lab_runner.lab_paths(self.root, number, item)["instructions"]
-        guide = ""
-        if instructions_path.exists():
-            guide = instructions_path.read_text(encoding="utf-8").replace("\r\n", "\n").strip()
-            if guide.startswith("# ") and "\n" in guide:
-                guide = guide.split("\n", 1)[1].lstrip()
+            guide = lab01_guide_markdown()
+        else:
+            guide = applied_guide_markdown(number, item)
 
         sql_note = ""
         if applied_lab_runner.is_sql_lab(item):
@@ -567,38 +552,15 @@ class AppliedLabsWidget(QWidget):
                     f"| `{dataset['table']}` | `{dataset['relative_path']}` | {row_count} |"
                 )
             sql_note = (
-                "\n## Your SQL workspace\n\n"
-                "The files below are loaded automatically into an isolated DuckDB database. "
-                "Write and run the analysis in the SQL Workspace beneath this guide. Save your "
-                "submission as you work, then use **Check Lab** for execution and rubric feedback.\n\n"
+                "\n## In-app SQL workspace\n\n"
+                "The source files below load automatically into an isolated DuckDB database. "
+                "Use the SQL Workspace beneath the Studio to build the work in small, checkable "
+                "steps. The guide explains the required logic and validation but does not supply "
+                "the completed query.\n\n"
                 + ("\n".join(rows) if inventory else "No dataset tables were found.")
                 + "\n"
             )
-
-        if not guide:
-            steps = "\n".join(
-                f"{index}. {step}"
-                for index, step in enumerate(item.get("steps", []), start=1)
-            )
-            deliverables = "\n".join(
-                f"- {value}" for value in item.get("deliverables", [])
-            )
-            validation = "\n".join(
-                f"- {value}" for value in item.get("validation", [])
-            )
-            guide = (
-                "## Guided workflow\n\n" + steps + "\n\n"
-                "## Deliverables\n\n" + deliverables + "\n\n"
-                "## Definition of done\n\n" + validation
-            )
-
-        return (
-            f"# {item['title']}\n\n"
-            "> Work through the guide in order. Use **Create / Open Submission** to create the "
-            "artifact you will turn in, record evidence in **Progress & Evidence**, and use the "
-            "validation checklist before marking the lab complete.\n"
-            f"{sql_note}\n---\n\n{guide}\n"
-        )
+        return guide + sql_note
 
     # ---------- Refresh and selection ----------
     def _app_state(self) -> dict[str, Any]:
@@ -720,8 +682,11 @@ class AppliedLabsWidget(QWidget):
         sql_lab = applied_lab_runner.is_sql_lab(item)
         sheets_studio_lab = int(number) == 1
         self.sheets_studio.setVisible(sheets_studio_lab)
+        self.guided_studio.setVisible(not sheets_studio_lab)
         if sheets_studio_lab:
             self.sheets_studio.refresh()
+        else:
+            self.guided_studio.load_lab(number, item)
         self.sql_section.setVisible(sql_lab)
         self.check_button.setVisible(sql_lab)
         self.run_button.setVisible(sql_lab)
@@ -763,6 +728,7 @@ class AppliedLabsWidget(QWidget):
             self.check_button,
             self.sql_editor,
             self.sheets_studio,
+            self.guided_studio,
         ):
             widget.setEnabled(bool(ready))
 
@@ -788,6 +754,7 @@ class AppliedLabsWidget(QWidget):
             self.check_button,
             self.sql_editor,
             self.sheets_studio,
+            self.guided_studio,
         ):
             widget.setEnabled(enabled)
 
@@ -985,6 +952,8 @@ class AppliedLabsWidget(QWidget):
             return
         if self.current_number == 1:
             self.sheets_studio.save_all()
+        else:
+            self.guided_studio.save_all()
         if applied_lab_runner.is_sql_lab(self.current_item):
             if self.save_sql_submission() is None:
                 return
@@ -1017,14 +986,18 @@ class AppliedLabsWidget(QWidget):
             return
         if self.current_number == 1:
             issues = self.sheets_studio.completion_issues()
-            if issues:
-                QMessageBox.warning(
-                    self,
-                    "Google Sheets Analyst Studio Review Needed",
-                    "Complete these items before marking Applied Lab 01 complete:\n\n"
-                    + "\n".join(f"• {issue}" for issue in issues),
-                )
-                return
+            studio_title = "Google Sheets Analyst Studio Review Needed"
+        else:
+            issues = self.guided_studio.completion_issues()
+            studio_title = f"Applied Lab {self.current_number:02d} Studio Review Needed"
+        if issues:
+            QMessageBox.warning(
+                self,
+                studio_title,
+                f"Complete these Studio items before marking Applied Lab {self.current_number:02d} complete:\n\n"
+                + "\n".join(f"• {issue}" for issue in issues),
+            )
+            return
         if applied_lab_runner.is_sql_lab(self.current_item):
             self.save_sql_submission()
             if not self.current_sql_check_passed and not self.check_sql():
@@ -1077,6 +1050,26 @@ class AppliedLabsWidget(QWidget):
             self.conn,
             self.root,
             1,
+            status=current_status,
+            notes=self.notes.toPlainText(),
+        )
+        self.workspace_status.setText(f"{current_status} • {message}")
+        self._notify(message)
+        self.changed.emit()
+
+    def _guided_studio_changed(self, message: str) -> None:
+        if self.current_number is None or self.current_number == 1:
+            return
+        current_status = self.status_combo.currentText()
+        if current_status == "Not Started":
+            current_status = "In Progress"
+            self.status_combo.blockSignals(True)
+            self.status_combo.setCurrentText(current_status)
+            self.status_combo.blockSignals(False)
+        applied_workspace.save_progress(
+            self.conn,
+            self.root,
+            self.current_number,
             status=current_status,
             notes=self.notes.toPlainText(),
         )

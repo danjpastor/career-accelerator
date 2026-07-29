@@ -138,6 +138,7 @@ def _clean_legacy_roadmap_tasks(conn) -> dict:
             "datacamp:",
             "roadmap_v1026:duckdb:",
             "roadmap_v1026:sql:",
+            "roadmap_v1026:python:",
         )):
             retained += 1
             continue

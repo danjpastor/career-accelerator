@@ -1,5 +1,29 @@
 # Changelog
 
+## 10.40.0 - Week-aligned SQL and Python practice
+
+- Realigned every DuckDB exercise to the week in which its prerequisite SQL topic is taught.
+- Expanded the DuckDB library from 18 to 33 guided exercises, covering selection, filtering, joins, subqueries, CASE, CTEs, window functions, dates, text, data types, views, schemas, and database management.
+- Realigned the 16 DataLemur interview problems to Weeks 3–5 so each problem follows the concepts it tests.
+- Added 13 guided Python exercises in Week 8, one for every required Introduction to Python, Intermediate Python, and pandas chapter.
+- Added a shared local Python dataset and solution-safe README/starter files for every Python exercise.
+- Generalized Today’s Focus locked previews so due DataCamp chapters, DuckDB exercises, SQL interview problems, SQL practice, and Python exercises remain visible in grey when prerequisites are incomplete.
+- Kept locked supplementary controls disabled and retained their exact prerequisite explanation on the second line.
+- Kept supplementary mastery tasks out of weekly Knowledge Check blockers; unfinished exercises can roll forward as Catch-Up without preventing the core curriculum checkpoint.
+- Added schedule migration logic that moves existing incomplete practice tasks to their corrected roadmap week without losing completion history.
+
+## 10.39.0 - Topic-aligned Google roadmap and guided Applied Lab Studios
+
+- Rebuilt Google Certificate scheduling around a verified 39-module, nine-course curriculum mapped to the subject taught in each roadmap week.
+- Kept Google work first priority while holding future-topic modules outside Today’s Focus, Next Tasks, and Catch-Up until their assigned week.
+- Preserved completed Google progress and continued to advance modules sequentially without reopening prior work.
+- Added synthetic weekly-check blockers for every incomplete Google module assigned through that week, so a checkpoint cannot unlock after only the currently displayed module is finished.
+- Updated Learning status and Open Current Google Task behavior to distinguish active work from modules intentionally held for a future topic week.
+- Added a persisted Guided Applied Lab Studio for every Applied Lab, with five assignment-specific stages, evidence capture, artifact tracking, independent validation, and final handoff review.
+- Rewrote all active Applied Lab guides to explain goals, preparation, decisions, actions, outputs, validation, evidence, common mistakes, and progressive hints without revealing finished formulas, queries, DAX, Python code, or numeric answers.
+- Rebuilt beginner Google Sheets Lab 01 as four detailed, solution-safe stages aligned only to Week 1–2 spreadsheet skills.
+- Kept weekly eight-question Knowledge Checks, DataCamp chapter locks, Today’s Focus, Next Tasks, and portfolio gates linked to the new roadmap.
+
 ## 10.38.0 - Beginner Lab 01 and weekly knowledge checks
 
 - Simplified Applied Lab 01 into a four-stage beginner Google Sheets sales-summary project using only skills taught in Weeks 1–2.

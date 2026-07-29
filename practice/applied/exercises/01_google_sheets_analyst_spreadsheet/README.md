@@ -1,249 +1,181 @@
 # Applied Lab 01: Build a guided Google Sheets sales summary
 
-## Why you are doing this
+> This is a beginner application lab for the spreadsheet skills taught in Weeks 1–2. The guide explains exactly what to build and how to check it, but it does not provide the finished formula or numerical answer.
 
-You have completed two weeks of spreadsheet study. This lab gives you one small project where you can use the skills together without being expected to design a professional reporting system from scratch.
+## Assignment
 
-You will work with a 24-row order file and a four-row regional target file. The Google Sheets Analyst Studio in Career Accelerator breaks the work into four stages. Complete them in order.
+Use a small order table and regional target table to create one clean analysis table and one interactive management summary. The completed file should demonstrate references, text cleaning, dates, percentages, conditional logic, conditional counting and sums, exact-match lookup, error handling, pivot tables, and a chart.
 
-## What you will practice
+## Stage 1: Create the spreadsheet and inspect the sources
 
-- Importing and formatting CSV data
-- Relative and absolute cell references
-- `IF`, `TEXT`, `TRIM`, and `PROPER`
-- `COUNTIF`, `COUNTIFS`, `SUMIF`, and `SUMIFS`
-- `IFERROR` and `VLOOKUP`
-- A data-validation dropdown
-- Sorting and filtering
-- One pivot table and one chart
-- Explaining a result in plain language
+Set up a small, traceable Google Sheets file and understand the two source tables before writing formulas.
 
-## What you will build
+### What to do
 
-Create one Google Sheet with four tabs:
+1. Create a blank Google Sheet, give it a clear Northstar sales-analysis name, copy its shareable link, and save the link in this Studio.
+2. Create exactly four tabs named Raw Orders, Targets, Analysis, and Summary. Keep the Raw Orders and Targets tabs reserved for imported source data.
+3. Import each supplied CSV into the matching source tab. Confirm that the headers are in the first row and that no extra blank columns or title rows were introduced during import.
+4. Inspect the order table and write down what one row represents, which field appears to identify an order, and which columns contain dates, categories, status, quantity, and currency values.
+5. Inspect the target table and identify the field that can connect a region to its target. Confirm that each region appears only once before planning a lookup.
+6. Freeze the source header rows and apply readable date, number, percentage, and currency formatting without changing the underlying values.
 
-1. `Raw Orders`
-2. `Targets`
-3. `Analysis`
-4. `Summary`
+### Required output
 
-Career Accelerator stores only the shareable spreadsheet link. It does not connect to your Google account or read your sheet.
+A linked Google Sheet with four named tabs, both source files imported, and a short source-grain note recorded in the stage evidence.
 
----
+### Check your work
 
-# Stage 1: Create the workbook and import the data
+- The order identifier is populated and unique for the imported rows.
+- The target lookup field contains one row per region rather than repeated region values.
+- Source tabs still contain the imported values and have not been used for cleaning or calculations.
+- Dates, quantities, prices, and targets display with appropriate formats.
 
-1. Open a blank Google Sheet.
-2. Rename it `Northstar Sales Practice`.
-3. Create the four tabs listed above.
-4. Open the supplied dataset folder from the Studio.
-5. Import `orders.csv` into `Raw Orders`.
-6. Import `targets.csv` into `Targets`.
-7. Freeze row 1 on both source tabs.
-8. Format `order_date` as a date, `quantity` as a whole number, and `unit_price` as currency.
+### Evidence to record
 
-Check before continuing:
+Record the Google Sheets link, the grain and candidate key of each source, and any formatting or import issue you corrected.
 
-- `Raw Orders` contains 24 data rows and 24 unique order IDs.
-- `Targets` contains four data rows.
-- You have not edited or deleted any source row.
+### Common mistakes
 
-Save the Google Sheets link in the Studio and record Stage 1 evidence.
+- Building calculations directly on the source tabs.
+- Assuming a lookup field is unique without checking it.
+- Deleting a row that looks unusual before confirming whether it is a valid record.
 
----
+## Stage 2: Clean the fields and calculate order-level sales
 
-# Stage 2: Clean the fields and calculate sales
+Build one analysis row per order using the spreadsheet cleaning, reference, logic, and error-handling skills taught in Weeks 1–2.
 
-Create these headers in `Analysis!A1:M1`:
+### What to do
 
-| Column | Header |
-|---|---|
-| A | order_id |
-| B | order_date |
-| C | month |
-| D | raw_region |
-| E | clean_region |
-| F | product |
-| G | status |
-| H | quantity |
-| I | unit_price |
-| J | gross_sales |
-| K | processing_fee |
-| L | net_sales |
-| M | quality_check |
+1. Create Analysis headers for the original order fields plus Month, Clean Region, Gross Sales, Processing Fee, Net Sales, and Quality Check. Keep the columns in a logical left-to-right order.
+2. Bring the source order fields into Analysis using same-row references so the analysis remains connected to the imported data.
+3. Create a month field from the order date using the date-to-text technique taught in the spreadsheet coursework. Use a consistent year-month format that will sort correctly.
+4. Standardize region text by removing extra spaces and applying consistent capitalization. Combine the cleaning functions rather than editing individual region cells manually.
+5. On Summary, create one clearly labeled processing-fee input and enter the required percentage as a true percentage value.
+6. For Gross Sales, use conditional logic so only completed orders contribute sales. The calculation should use quantity and unit price from the same row.
+7. Calculate the processing fee as the row's gross sales multiplied by the single fee-rate input. Use an absolute reference for the fee-rate cell so the reference remains fixed when copied.
+8. Calculate Net Sales from the row's gross sales and processing fee. Think about whether subtracting the percentage cell itself is logically correct before writing the formula.
+9. Create a Quality Check that flags missing order identifiers, blank cleaned regions, or nonpositive quantities and otherwise marks the row as acceptable.
+10. Copy the calculated formulas through every imported order row, then use sorting and filtering to inspect completed, cancelled, and flagged records.
 
-Copy the matching source fields from `Raw Orders` into columns A, B, D, F, G, H, and I.
+### Required output
 
-Enter these formulas in row 2:
+An Analysis table with one row per order, cleaned region and month fields, formula-driven sales columns, and a visible quality check.
 
-**Month — C2**
+### Check your work
 
-```gs
-=TEXT(B2,"yyyy-mm")
-```
+- The Analysis row count and unique order count still match the imported order table.
+- Region variants that differ only by capitalization or extra spaces now group under one cleaned value.
+- Cancelled orders do not contribute gross or net sales.
+- Changing the fee-rate input updates Processing Fee and Net Sales but does not change Gross Sales.
+- The fee-rate reference remains fixed in every copied row.
+- No calculated cell contains an unexplained spreadsheet error.
 
-**Clean region — E2**
+### Evidence to record
 
-```gs
-=PROPER(TRIM(D2))
-```
+Record the Analysis range, the cleaning and calculation logic you used in words, the fee-reference test, and one row you checked manually.
 
-On `Summary`, enter `Processing Fee Rate` in A2 and `2%` in B2.
+### Common mistakes
 
-**Gross sales — J2**
+- Subtracting the percentage itself from a currency value instead of calculating the percentage of that value.
+- Using a relative reference for the single fee-rate input.
+- Typing cleaned regions or calculated sales manually instead of using formulas.
+- Copying formulas beyond the source rows and accidentally including blank records in later summaries.
 
-```gs
-=IF(G2="Completed",H2*I2,0)
-```
+### Progressive hints
 
-**Processing fee — K2**
+- For a percentage fee, first determine the fee amount, then subtract that amount from gross sales.
+- List the true and false outcomes of the completed-order rule in words before choosing the conditional formula structure.
+- Check the first copied row and the last copied row to confirm the fixed and relative references moved as intended.
 
-```gs
-=J2*Summary!$B$2
-```
+## Stage 3: Build an interactive summary, pivot table, and chart
 
-The dollar signs make `Summary!$B$2` an absolute reference, so the fee-rate cell stays fixed when the formula is copied.
+Create a small manager-facing summary that responds to a region selection and compares sales across regions and months.
 
-**Net sales — L2**
+### What to do
 
-```gs
-=J2-K2
-```
+1. On Summary, create a Selected Region control and use data validation to provide All plus every cleaned region represented in the data.
+2. Create clearly labeled KPI cells for Completed Orders, Gross Sales, Net Sales, Average Net Order Value, and Regional Sales Target.
+3. For Completed Orders, design two counting paths: one for All regions and one requiring both completed status and the selected region. Use conditional logic to choose the correct path.
+4. For Gross Sales and Net Sales, design the same All-versus-selected-region behavior using the conditional-sum functions taught in the coursework. Make sure each KPI sums the correct analysis column.
+5. Calculate Average Net Order Value from the already calculated Net Sales and Completed Orders KPI cells. Add error handling for a selection with no completed orders.
+6. Use the selected region to look up the matching target from the Targets tab. Use exact matching, keep the lookup table fixed, and show a clear message rather than an error when All is selected or no match exists.
+7. Test the dropdown with All and at least two individual regions. Confirm that every region-dependent KPI changes and that Gross Sales is not affected by the processing-fee rate.
+8. Create a pivot table from the complete Analysis table. Use Clean Region as rows, Month as columns, and the sum of Gross Sales as values.
+9. Confirm the pivot is summing the sales field rather than counting records, then create one readable column chart from the useful pivot-table range.
+10. Give the chart a decision-oriented title that names the metric and comparison. Remove totals from the chart if they create an extra misleading series.
 
-**Quality check — M2**
+### Required output
 
-```gs
-=IF(A2="","Missing order ID",IF(E2="","Missing region",IF(H2<=0,"Check quantity","OK")))
-```
+A Summary tab with a working region dropdown, five formula-driven KPIs, one region-by-month pivot table, and one column chart.
 
-Copy C2, E2, and J2:M2 through row 25.
+### Check your work
 
-Check before continuing:
+- All KPI cells update when the selected region changes and none are typed values.
+- The All-region completed-order count agrees with a filter or pivot count of completed rows.
+- The All-region gross-sales KPI reconciles with the pivot-table grand total.
+- Net Sales is lower than or equal to Gross Sales and responds to changes in the fee-rate input.
+- The regional target changes for each region and does not display a spreadsheet error for All.
+- Each cleaned region and month appears only once in the pivot layout.
+- The chart shows the intended regions, months, and sales values without an unnecessary grand-total series.
 
-- The Analysis tab contains 24 rows and 24 unique order IDs.
-- ` west ` and `east` are cleaned to `West` and `East`.
-- Cancelled orders show zero gross sales and zero net sales.
-- Every quality check says `OK`.
-- Changing the 2% fee rate changes processing fees and net sales.
+### Evidence to record
 
-Try sorting by order date and filtering the status column to `Completed`, then clear the filter.
+Record the dropdown selections tested, which KPIs changed, how the pivot total was reconciled, and one issue you corrected while building the summary.
 
----
+### Common mistakes
 
-# Stage 3: Build the summary and pivot table
+- Counting all orders instead of only completed orders.
+- Using the raw region field instead of the cleaned region field.
+- Using a one-condition function when the selected-region calculation requires both status and region.
+- Using approximate lookup matching or allowing the lookup range to move.
+- Building the chart directly from raw orders instead of the summarized pivot table.
 
-On `Summary`, create:
+### Progressive hints
 
-| Cell | Content |
-|---|---|
-| A2 | Processing Fee Rate |
-| B2 | 2% |
-| A4 | Selected Region |
-| B4 | Region dropdown |
-| A6 | Completed Orders |
-| A7 | Gross Sales |
-| A8 | Net Sales |
-| A9 | Average Net Order Value |
-| A10 | Regional Sales Target |
+- Write the All rule and the selected-region rule separately before wrapping them in one conditional calculation.
+- For conditional sums, identify the values to add separately from every condition range and condition.
+- If the pivot total and KPI disagree, check status filtering, the selected sum column, and whether blank rows were included.
 
-Create a dropdown in B4 containing:
+## Stage 4: Validate the spreadsheet and explain one finding
 
-- All
-- East
-- West
-- South
-- North
+Prove that the spreadsheet behaves correctly and communicate one useful observation without overstating the data.
 
-Use these formulas. Replace the descriptive cell names in the average formula with the actual KPI cells you use.
+### What to do
 
-**Completed orders**
+1. Return the region control to All and perform a full validation of source row count, Analysis row count, and unique order count.
+2. Choose one completed order and independently recalculate its gross sales, processing fee, and net sales using the source quantity, price, and fee rate. Compare your check with the row formulas.
+3. Filter Analysis to completed orders and independently total one region. Compare that subtotal with the corresponding Summary KPI.
+4. Compare the All-region Gross Sales KPI with the pivot-table grand total and investigate any difference before continuing.
+5. Test two different regions in the dropdown and confirm the KPI changes make sense relative to the filtered Analysis rows.
+6. Review the chart and identify the region with the strongest sales result. Check the underlying pivot values before writing the takeaway.
+7. Write two or three sentences stating the observed pattern, why a manager might care, and one reasonable question or action to investigate next.
+8. Add one limitation, such as the small time period, limited order fields, or the fact that the spreadsheet describes performance but does not prove why it occurred.
+9. Reopen the share link, review the spreadsheet as a viewer would, complete the Final Review checklist, and save the Studio evidence.
 
-```gs
-=IF(B4="All",COUNTIF(Analysis!G2:G25,"Completed"),COUNTIFS(Analysis!G2:G25,"Completed",Analysis!E2:E25,B4))
-```
+### Required output
 
-**Gross sales**
+A validated beginner spreadsheet, a working share link, and a concise evidence-based takeaway with a limitation.
 
-```gs
-=IF(B4="All",SUMIF(Analysis!G2:G25,"Completed",Analysis!J2:J25),SUMIFS(Analysis!J2:J25,Analysis!G2:G25,"Completed",Analysis!E2:E25,B4))
-```
+### Check your work
 
-**Net sales**
+- Source, Analysis, and unique-order counts reconcile.
+- The independently checked order agrees with its formula-driven row values.
+- The selected-region subtotal agrees with the Summary KPI.
+- The All-region Gross Sales KPI agrees with the pivot-table total.
+- The takeaway names a real observed pattern and does not claim a cause that the data cannot prove.
+- The shareable Google Sheets link opens and the four required tabs are readable.
 
-```gs
-=IF(B4="All",SUMIF(Analysis!G2:G25,"Completed",Analysis!L2:L25),SUMIFS(Analysis!L2:L25,Analysis!G2:G25,"Completed",Analysis!E2:E25,B4))
-```
+### Evidence to record
 
-**Average net order value**
+Record the row-count reconciliation, the independently checked order or region, the pivot comparison, the final takeaway, and the most important limitation.
 
-```gs
-=IFERROR(net_sales_cell/completed_orders_cell,0)
-```
+### Common mistakes
 
-For example, if Completed Orders is B6 and Net Sales is B8:
+- Treating a plausible total as validated without an independent comparison.
+- Writing that one region caused better performance when the data only shows a difference.
+- Giving a recommendation that is unrelated to the observed result.
+- Marking the lab complete without testing the share link and dropdown behavior.
 
-```gs
-=IFERROR(B8/B6,0)
-```
+## Completion rule
 
-**Regional target**
-
-```gs
-=IF(B4="All","—",IFERROR(VLOOKUP(B4,Targets!A2:B5,2,FALSE),"Not found"))
-```
-
-Now create a pivot table from `Analysis!A1:M25`:
-
-- Rows: `clean_region`
-- Columns: `month`
-- Values: SUM of `gross_sales`
-
-Create one column chart from the pivot table. Title it:
-
-> Sales by Region and Month
-
-Check the All-region values:
-
-- Completed orders: **20**
-- Gross sales: **$1,650.00**
-- Net sales: **$1,617.00**
-- Average net order value: **$80.85**
-
-Test at least two region selections and confirm all KPI values change.
-
----
-
-# Stage 4: Validate and explain one result
-
-Check the pivot table:
-
-- January gross sales: **$755.00**
-- February gross sales: **$895.00**
-
-Regional gross sales should be:
-
-- South: **$470.00**
-- East: **$455.00**
-- North: **$390.00**
-- West: **$335.00**
-
-Write two or three sentences in the Studio. A strong response:
-
-1. Identifies South as the highest-gross-sales region.
-2. States the amount without exaggerating what it proves.
-3. Names one useful follow-up question, such as whether product mix or order quantity explains the difference.
-
-Example structure:
-
-> South produced the highest gross sales at $470, slightly ahead of East at $455. This shows where sales were strongest in this small practice dataset, but it does not explain why. I would next compare product mix and average quantity by region.
-
-Use your own wording.
-
-## Completion requirements
-
-- A valid shareable Google Sheets URL is saved.
-- All four guided stages contain evidence and are marked complete.
-- All five final-review items are checked.
-- A two-to-three-sentence takeaway is saved.
-
-This lab is coursework, not a portfolio project. Clear formulas, correct checkpoints, and understanding what you built matter more than elaborate design.
+Complete all four Studio stages, save the shareable Google Sheets link, verify the final checklist, and write a two-to-three-sentence takeaway with one limitation.

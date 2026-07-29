@@ -12,6 +12,7 @@ import sqlite3
 from pathlib import Path
 
 from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+from career_app.data.python_exercises import PYTHON_EXERCISES
 from career_app.navigation import PAGE_LEARNING
 from career_app.services.task_titles import title_case_task
 from career_app.services import content_gates
@@ -19,20 +20,20 @@ from career_app.services import content_gates
 SQL_PROBLEM_SCHEDULE = {
     "Data Science Skills": 3,
     "Pharmacy Analytics Part 1": 3,
-    "Laptop vs. Mobile Viewership": 3,
-    "Teams Power Users": 3,
+    "Histogram of Tweets": 3,
+    "Duplicate Job Listings": 3,
+    "Laptop vs. Mobile Viewership": 4,
     "Page With No Likes": 4,
     "Signup Activation Rate": 4,
     "Second Day Confirmation": 4,
-    "Histogram of Tweets": 5,
-    "Duplicate Job Listings": 5,
+    "Supercloud Customer": 4,
+    "Teams Power Users": 5,
     "Second Highest Salary": 5,
-    "Supercloud Customer": 5,
-    "User's Third Transaction": 6,
-    "Top Three Salaries": 6,
-    "Odd and Even Measurements": 6,
-    "Tweets' Rolling Averages": 7,
-    "User Shopping Sprees": 7,
+    "User's Third Transaction": 5,
+    "Top Three Salaries": 5,
+    "Odd and Even Measurements": 5,
+    "Tweets' Rolling Averages": 5,
+    "User Shopping Sprees": 5,
 }
 
 DUCKDB_CHAPTER_REQUIREMENTS = dict(content_gates.DUCKDB_TERMINAL_CHAPTER)
@@ -144,6 +145,33 @@ def duckdb_readiness(conn: sqlite3.Connection, number: int) -> dict:
     }
 
 
+def python_exercise_readiness(conn: sqlite3.Connection, number: int) -> dict:
+    number = int(number)
+    item = PYTHON_EXERCISES[number]
+    required = content_gates.chapters_through(str(item["terminal_chapter"]))
+    datacamp_gate = content_gates.gate_status(conn, required)
+    missing: list[str] = []
+    for prior in item.get("prior_exercises", ()):
+        row = _task_for_managed_key(conn, f"roadmap_v1026:python:{int(prior)}")
+        if row is None or not bool(row["completed"]):
+            missing.append(f"Python Exercise {int(prior):02d}")
+    if not datacamp_gate["ready"]:
+        missing.append(datacamp_gate["summary"])
+    from career_app.services import weekly_checks
+    if not weekly_checks.passed(conn, 7):
+        missing.append("Pass Week 7 Knowledge Check")
+    missing = list(dict.fromkeys(item for item in missing if item))
+    return {
+        "ready": not missing,
+        "missing": missing,
+        "required_datacamp_keys": datacamp_gate["required_keys"],
+        "required_datacamp_names": datacamp_gate["required_names"],
+        "missing_datacamp_keys": datacamp_gate["missing_keys"],
+        "missing_datacamp_names": datacamp_gate["missing_names"],
+        "reason": "" if not missing else "Complete " + ", ".join(missing) + " first.",
+    }
+
+
 def assert_duckdb_ready(conn: sqlite3.Connection, number: int) -> None:
     result = duckdb_readiness(conn, number)
     if not result["ready"]:
@@ -166,6 +194,9 @@ def _catchup_sort_order(key: str) -> int:
     match = re.match(r"duckdb:(\d+)$", str(key))
     if match:
         return -760000 + int(match.group(1)) * 10
+    match = re.match(r"python:(\d+)$", str(key))
+    if match:
+        return -740000 + int(match.group(1)) * 10
     title = str(key).split(":", 1)[-1]
     try:
         index = list(SQL_PROBLEM_SCHEDULE).index(title)
@@ -312,6 +343,57 @@ def _complete_catchup(conn, key):
     )
 
 
+def _align_existing_task(
+    conn,
+    *,
+    key,
+    title,
+    task_week,
+    category,
+    minutes,
+    starter_path,
+    current_week,
+    status,
+    reason,
+    prerequisite_state,
+    prerequisite_reason,
+):
+    """Move an existing mastery task to its curriculum week without losing progress."""
+    row = _task_for_managed_key(conn, f"roadmap_v1026:{key}")
+    if row is None:
+        return None
+    task_id = int(row["id"])
+    completed = bool(row["completed"])
+    conn.execute(
+        "UPDATE sprint_tasks SET week=?,sort_order=?,label=? WHERE id=?",
+        (int(task_week), _catchup_sort_order(key), title_case_task(title), task_id),
+    )
+    conn.execute(
+        """UPDATE task_metadata SET status=?,priority=0,estimated_minutes=?,destination=?,
+           category=?,prerequisite_state=?,prerequisite_reason=?,description=?,
+           definition_of_done=?,starter_path=?,managed_key=? WHERE task_id=?""",
+        (
+            "Completed" if completed else str(status),
+            int(minutes),
+            PAGE_LEARNING,
+            category,
+            "Ready" if completed else prerequisite_state,
+            None if completed else prerequisite_reason,
+            reason,
+            "Complete the linked practice requirement and save its evidence.",
+            starter_path,
+            f"roadmap_v1026:{key}",
+            task_id,
+        ),
+    )
+    if not completed and int(task_week) > int(current_week):
+        conn.execute(
+            "DELETE FROM daily_focus WHERE task_id=? AND completed_at IS NULL",
+            (task_id,),
+        )
+    return task_id
+
+
 def reconcile(conn: sqlite3.Connection, root=None) -> dict:
     del root
     ensure_schema(conn)
@@ -322,7 +404,7 @@ def reconcile(conn: sqlite3.Connection, root=None) -> dict:
     overdue: list[str] = []
     completed: list[str] = []
 
-    conn.execute("DELETE FROM roadmap_requirement_state WHERE kind NOT IN ('duckdb','sql_problem')")
+    conn.execute("DELETE FROM roadmap_requirement_state WHERE kind NOT IN ('duckdb','sql_problem','python')")
 
     for number, item in DUCKDB_EXERCISES.items():
         due_week = int(item.get("week", 99))
@@ -336,6 +418,14 @@ def reconcile(conn: sqlite3.Connection, root=None) -> dict:
         reason = None if done else (readiness["reason"] or f"Expected by Week {due_week}.")
         key = f"duckdb:{number}"
         _upsert_requirement(conn, key, "duckdb", item["title"], due_week, str(number), status, reason)
+        _align_existing_task(
+            conn, key=key, title=item["label"], task_week=due_week, category="SQL",
+            minutes=int(item.get("minutes", 40)), starter_path=f"duckdb:{number}",
+            current_week=current_week, status=status,
+            reason=f"Expected by Week {due_week}. Complete this skill-gated DuckDB exercise.",
+            prerequisite_state="Ready" if readiness["ready"] else "Blocked",
+            prerequisite_reason=None if readiness["ready"] else readiness["reason"],
+        )
         if done:
             _complete_catchup(conn, key)
             completed.append(key)
@@ -365,6 +455,14 @@ def reconcile(conn: sqlite3.Connection, root=None) -> dict:
         status = "Completed" if done else (("Overdue" if readiness["ready"] else "Locked") if due_week <= current_week else "Future")
         reason = None if done else (readiness["reason"] or f"Expected by Week {due_week}.")
         _upsert_requirement(conn, key, "sql_problem", title, due_week, title, status, reason)
+        _align_existing_task(
+            conn, key=key, title=f"Solve {title}", task_week=due_week, category="SQL",
+            minutes=35, starter_path=f"sql-problem:{title}", current_week=current_week,
+            status=status,
+            reason=f"Expected by Week {due_week}. Complete this SQL interview problem in Learning Practice.",
+            prerequisite_state="Ready" if readiness["ready"] else "Blocked",
+            prerequisite_reason=None if readiness["ready"] else readiness["reason"],
+        )
         if done:
             _complete_catchup(conn, key)
             completed.append(key)
@@ -378,6 +476,41 @@ def reconcile(conn: sqlite3.Connection, root=None) -> dict:
                 reason=f"Expected by Week {due_week}. Complete this SQL interview problem in Learning Practice.",
                 minutes=35,
                 starter_path=f"sql-problem:{title}",
+                prerequisite_state="Ready" if readiness["ready"] else "Blocked",
+                prerequisite_reason=None if readiness["ready"] else readiness["reason"],
+            )
+            overdue.append(key)
+
+    for number, item in PYTHON_EXERCISES.items():
+        due_week = int(item.get("week", 8))
+        key = f"python:{number}"
+        existing = _task_for_managed_key(conn, f"roadmap_v1026:{key}")
+        done = bool(existing and existing["completed"])
+        readiness = python_exercise_readiness(conn, number)
+        status = "Completed" if done else (("Overdue" if readiness["ready"] else "Locked") if due_week <= current_week else "Future")
+        reason = None if done else (readiness["reason"] or f"Expected by Week {due_week}.")
+        _upsert_requirement(conn, key, "python", item["title"], due_week, str(number), status, reason)
+        _align_existing_task(
+            conn, key=key, title=item["label"], task_week=due_week, category="Python",
+            minutes=int(item.get("minutes", 40)),
+            starter_path=f"practice/python/exercises/{item['slug']}/README.md",
+            current_week=current_week, status=status,
+            reason=f"Expected by Week {due_week}. Complete this chapter-aligned Python exercise.",
+            prerequisite_state="Ready" if readiness["ready"] else "Blocked",
+            prerequisite_reason=None if readiness["ready"] else readiness["reason"],
+        )
+        if done:
+            completed.append(key)
+        elif due_week <= current_week:
+            _create_or_update_catchup(
+                conn,
+                key=key,
+                title=item["label"],
+                task_week=due_week,
+                category="Python",
+                reason=f"Expected by Week {due_week}. Complete this chapter-aligned Python exercise.",
+                minutes=int(item.get("minutes", 40)),
+                starter_path=f"practice/python/exercises/{item['slug']}/README.md",
                 prerequisite_state="Ready" if readiness["ready"] else "Blocked",
                 prerequisite_reason=None if readiness["ready"] else readiness["reason"],
             )
