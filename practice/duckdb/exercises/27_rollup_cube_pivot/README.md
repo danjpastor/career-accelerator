@@ -1,4 +1,4 @@
-# DuckDB Exercise 27: Build subtotal and pivot-style summaries
+# DuckDB Exercise 23: Build subtotal and pivot-style summaries
 
 **Week:** 5
 **Estimated time:** 50 minutes

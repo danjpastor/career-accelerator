@@ -1,4 +1,4 @@
-# DuckDB Exercise 26: Compare current values with prior and next rows
+# DuckDB Exercise 22: Compare current values with prior and next rows
 
 **Week:** 5
 **Estimated time:** 45 minutes

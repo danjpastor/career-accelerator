@@ -1,4 +1,4 @@
--- DuckDB Exercise 13: Audit table grain and join cardinality
+-- DuckDB Exercise 11: Audit table grain and join cardinality
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 

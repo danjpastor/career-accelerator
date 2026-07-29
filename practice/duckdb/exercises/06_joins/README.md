@@ -1,6 +1,6 @@
-# DuckDB Exercise 06: Join customers, orders, and payments
+# DuckDB Exercise 08: Join customers, orders, and payments
 
-**Week:** 6  
+**Week:** 4  
 **Estimated time:** 45 minutes  
 **Concepts:** INNER JOIN, LEFT JOIN, multi-table joins
 

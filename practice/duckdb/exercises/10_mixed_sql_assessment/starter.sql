@@ -1,4 +1,4 @@
--- DuckDB Exercise 10: Complete a mixed workforce assessment
+-- DuckDB Exercise 27: Mixed workforce assessment
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

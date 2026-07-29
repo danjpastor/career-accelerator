@@ -186,6 +186,16 @@ CREATE TABLE IF NOT EXISTS duckdb_exercise_progress (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS python_exercise_progress (
+    exercise_number INTEGER PRIMARY KEY,
+    status TEXT NOT NULL DEFAULT 'Not Started',
+    submission_path TEXT,
+    notes TEXT,
+    last_output TEXT NOT NULL DEFAULT '',
+    completed_date TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS exercise_pack_progress (
     pack_id TEXT NOT NULL,
     exercise_id TEXT NOT NULL,
@@ -504,6 +514,9 @@ def factory_reset(conn, start_date):
         "sql_practice",
         "task_concept_tags",
         "exercise_pack_progress",
+        "python_exercise_progress",
+        "duckdb_exercise_progress",
+        "applied_exercise_progress",
         "applications",
         "evidence",
         "project_notes",

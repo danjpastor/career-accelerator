@@ -1,4 +1,4 @@
--- DuckDB Exercise 11: Explain joins and window functions
+-- DuckDB Exercise 17: Explain joins and window functions
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

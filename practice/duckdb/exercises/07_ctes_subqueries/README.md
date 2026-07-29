@@ -1,6 +1,6 @@
-# DuckDB Exercise 07: Analyze order profitability
+# DuckDB Exercise 09: Analyze order profitability
 
-**Week:** 6  
+**Week:** 4  
 **Estimated time:** 50 minutes  
 **Concepts:** subqueries, CTEs, multi-step analysis
 

@@ -1,4 +1,4 @@
-# DuckDB Exercise 13: Audit table grain and join cardinality
+# DuckDB Exercise 11: Audit table grain and join cardinality
 
 **Week:** 4  
 **Estimated time:** 50 minutes  

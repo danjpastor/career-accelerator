@@ -1,4 +1,4 @@
-# DuckDB Exercise 17: Standardize messy text, dates, and numeric fields
+# DuckDB Exercise 20: Standardize messy text, dates, and numeric fields
 
 **Week:** 5  
 **Estimated time:** 50 minutes  

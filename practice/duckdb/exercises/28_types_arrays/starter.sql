@@ -1,4 +1,4 @@
--- DuckDB Exercise 28: Inspect data types and work with list values
+-- DuckDB Exercise 24: Inspect data types and work with list values
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

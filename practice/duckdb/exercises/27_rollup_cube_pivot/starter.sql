@@ -1,4 +1,4 @@
--- DuckDB Exercise 27: Build subtotal and pivot-style summaries
+-- DuckDB Exercise 23: Build subtotal and pivot-style summaries
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

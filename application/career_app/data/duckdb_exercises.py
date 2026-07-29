@@ -404,13 +404,80 @@ DUCKDB_EXERCISES = {1: {'concepts': 'SELECT, FROM, WHERE, ORDER BY, LIMIT',
       'week': 6}}
 
 
+
+# Internal exercise IDs remain stable so existing progress records and managed
+# task keys do not need to be rewritten.  The learner-facing number follows the
+# actual roadmap order instead of the historical creation order.
+_DUCKDB_ROADMAP_INTERNAL_ORDER = (
+    1, 2, 19, 20, 21,
+    4, 5, 6, 7, 12, 13, 16, 22, 23, 24,
+    3, 11, 14, 15, 17, 25, 26, 27, 28,
+    8, 9, 10, 18, 29, 30, 31, 32, 33,
+)
+DUCKDB_ROADMAP_NUMBER_BY_ID = {
+    internal_id: display_number
+    for display_number, internal_id in enumerate(_DUCKDB_ROADMAP_INTERNAL_ORDER, start=1)
+}
+DUCKDB_ID_BY_ROADMAP_NUMBER = {
+    display_number: internal_id
+    for internal_id, display_number in DUCKDB_ROADMAP_NUMBER_BY_ID.items()
+}
+
+for _internal_id, _item in DUCKDB_EXERCISES.items():
+    _legacy_label = str(_item.get("label") or "")
+    _item.setdefault("legacy_labels", [])
+    if _legacy_label and _legacy_label not in _item["legacy_labels"]:
+        _item["legacy_labels"].append(_legacy_label)
+    _display_number = DUCKDB_ROADMAP_NUMBER_BY_ID[_internal_id]
+    _item["roadmap_number"] = _display_number
+    _item["label"] = (
+        f"Complete DuckDB Exercise {_display_number:02d}: {_item['title']}"
+    )
+
+
+def roadmap_number(number: int) -> int:
+    number = int(number)
+    if number not in DUCKDB_ROADMAP_NUMBER_BY_ID:
+        raise ValueError(f"DuckDB exercise ID {number} is not in the catalog.")
+    return DUCKDB_ROADMAP_NUMBER_BY_ID[number]
+
+
+def internal_number_for_roadmap_number(number: int) -> int | None:
+    return DUCKDB_ID_BY_ROADMAP_NUMBER.get(int(number))
+
+
+def exercise_labels(number: int) -> tuple[str, ...]:
+    item = DUCKDB_EXERCISES[int(number)]
+    values = [item["label"], item.get("old_label", ""), *item.get("legacy_labels", [])]
+    return tuple(dict.fromkeys(str(value).strip() for value in values if str(value).strip()))
+
+
 def exercise_number_for_label(label):
     text = str(label or "").strip()
-    for number, item in DUCKDB_EXERCISES.items():
-        if text in {item["label"], item["old_label"]}:
+    if not text:
+        return None
+    for number in ordered_exercise_numbers():
+        if text in exercise_labels(number):
             return number
+
+    # Prefer the title when it is present.  This keeps old labels such as
+    # "Exercise 19: Build clear selected fields..." mapped to their stable
+    # internal ID even though the same learner-facing slot is now Exercise 03.
+    title_text = text.split(":", 1)[1].strip().casefold() if ":" in text else ""
+    if title_text:
+        for number, item in DUCKDB_EXERCISES.items():
+            if str(item["title"]).strip().casefold() == title_text:
+                return int(number)
+
     match = re.search(r"DuckDB Exercise\s+(\d+)", text, re.IGNORECASE)
-    return int(match.group(1)) if match and int(match.group(1)) in DUCKDB_EXERCISES else None
+    if match:
+        display_number = int(match.group(1))
+        internal = internal_number_for_roadmap_number(display_number)
+        if internal is not None:
+            return internal
+        if display_number in DUCKDB_EXERCISES:
+            return display_number
+    return None
 
 
 def exercise_for_label(label):
@@ -419,21 +486,26 @@ def exercise_for_label(label):
 
 
 def ordered_exercise_numbers():
-    return tuple(sorted(DUCKDB_EXERCISES, key=lambda number: (int(DUCKDB_EXERCISES[number].get("week", 99)), int(number))))
+    return _DUCKDB_ROADMAP_INTERNAL_ORDER
 
 
 def exercise_source(value):
-    """Return the display source for a DuckDB exercise label or number."""
+    """Return the learner-facing source for a DuckDB exercise label or ID."""
     number = None
     if isinstance(value, int):
         number = value
     else:
         text = str(value or "").strip()
         if text.isdigit():
-            number = int(text)
+            candidate = int(text)
+            number = (
+                internal_number_for_roadmap_number(candidate)
+                if candidate not in DUCKDB_EXERCISES
+                else candidate
+            )
         else:
             number = exercise_number_for_label(text)
     if number not in DUCKDB_EXERCISES:
         return None
     item = DUCKDB_EXERCISES[number]
-    return f"DuckDB Exercise {number:02d}: {item['title']}"
+    return f"DuckDB Exercise {roadmap_number(number):02d}: {item['title']}"

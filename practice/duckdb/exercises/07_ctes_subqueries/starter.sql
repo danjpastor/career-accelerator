@@ -1,4 +1,4 @@
--- DuckDB Exercise 07: Analyze order profitability
+-- DuckDB Exercise 09: Analyze order profitability
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

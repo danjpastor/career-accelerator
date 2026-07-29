@@ -1,4 +1,4 @@
-# DuckDB Exercise 18: Complete a full relational data-quality audit
+# DuckDB Exercise 28: Complete a full relational data-quality audit
 
 **Week:** 6  
 **Estimated time:** 65 minutes  

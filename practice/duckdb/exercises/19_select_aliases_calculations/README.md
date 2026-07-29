@@ -1,4 +1,4 @@
-# DuckDB Exercise 19: Build clear selected fields and calculated columns
+# DuckDB Exercise 03: Build clear selected fields and calculated columns
 
 **Week:** 3
 **Estimated time:** 35 minutes

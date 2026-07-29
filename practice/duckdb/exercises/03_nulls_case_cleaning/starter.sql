@@ -1,4 +1,4 @@
--- DuckDB Exercise 03: Clean customer feedback
+-- DuckDB Exercise 16: Clean customer feedback
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

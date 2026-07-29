@@ -1,6 +1,6 @@
-# DuckDB Exercise 08: Analyze a VFX production snapshot
+# DuckDB Exercise 25: Analyze a VFX production snapshot
 
-**Week:** 9  
+**Week:** 6  
 **Estimated time:** 60 minutes  
 **Concepts:** filtering, joins, aggregation, CASE, CTEs, ranking
 

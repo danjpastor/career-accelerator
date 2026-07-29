@@ -1,4 +1,4 @@
--- DuckDB Exercise 09: Complete a 30-minute product challenge
+-- DuckDB Exercise 26: Timed product challenge
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

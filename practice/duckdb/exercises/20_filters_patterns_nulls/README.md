@@ -1,4 +1,4 @@
-# DuckDB Exercise 20: Filter patterns, ranges, and missing values
+# DuckDB Exercise 04: Filter patterns, ranges, and missing values
 
 **Week:** 3
 **Estimated time:** 40 minutes

@@ -1,4 +1,4 @@
-# DuckDB Exercise 15: Calculate running totals and moving averages
+# DuckDB Exercise 19: Calculate running totals and moving averages
 
 **Week:** 5  
 **Estimated time:** 50 minutes  

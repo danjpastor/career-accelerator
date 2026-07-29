@@ -1,6 +1,6 @@
-# DuckDB Exercise 03: Clean customer feedback
+# DuckDB Exercise 16: Clean customer feedback
 
-**Week:** 4  
+**Week:** 5  
 **Estimated time:** 45 minutes  
 **Concepts:** NULLIF, TRIM, COALESCE, TRY_CAST, CASE
 

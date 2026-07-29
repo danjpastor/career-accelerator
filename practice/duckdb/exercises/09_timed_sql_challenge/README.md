@@ -1,6 +1,6 @@
-# DuckDB Exercise 09: Complete a 30-minute product challenge
+# DuckDB Exercise 26: Timed product challenge
 
-**Week:** 11  
+**Week:** 6  
 **Estimated time:** 30 minutes  
 **Concepts:** timed aggregation, joins, CASE, CTEs
 

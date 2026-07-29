@@ -11,6 +11,8 @@ import sys
 
 from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
+    exercise_labels,
+    roadmap_number,
 )
 from career_app.services import roadmap_mastery
 
@@ -112,7 +114,7 @@ def _submission_template(
     )
     return (
         "-- Career Accelerator DuckDB submission\n"
-        f"-- Exercise {number:02d}: {item['title']}\n"
+        f"-- Exercise {roadmap_number(number):02d}: {item['title']}\n"
         f"-- Concepts: {item['concepts']}\n"
         "-- Save your completed work in this file.\n"
         "\n"
@@ -176,20 +178,19 @@ def _task_rows(
     conn,
     number: int,
 ):
-    item = exercise(number)
+    labels = exercise_labels(number)
+    placeholders = ",".join("?" for _ in labels)
     return conn.execute(
-        """SELECT
+        f"""SELECT
                s.id,
                s.completed,
                m.status
            FROM sprint_tasks s
            JOIN task_metadata m
              ON m.task_id=s.id
-           WHERE s.label IN (?,?)""",
-        (
-            item["label"],
-            item["old_label"],
-        ),
+           WHERE s.label IN ({placeholders})
+              OR m.managed_key=?""",
+        (*labels, f"roadmap_v1026:duckdb:{int(number)}"),
     ).fetchall()
 
 
@@ -386,7 +387,7 @@ def save_progress(
         )
 
     source_name = (
-        f"DuckDB Exercise {number:02d}: "
+        f"DuckDB Exercise {roadmap_number(number):02d}: "
         f"{item['title']}"
     )
     if completed:

@@ -1,6 +1,6 @@
-# DuckDB Exercise 04: Calculate subscription KPIs
+# DuckDB Exercise 06: Calculate subscription KPIs
 
-**Week:** 5  
+**Week:** 4  
 **Estimated time:** 45 minutes  
 **Concepts:** ratios, conditional aggregation, date filters
 

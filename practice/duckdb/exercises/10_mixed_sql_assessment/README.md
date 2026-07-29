@@ -1,6 +1,6 @@
-# DuckDB Exercise 10: Complete a mixed workforce assessment
+# DuckDB Exercise 27: Mixed workforce assessment
 
-**Week:** 12  
+**Week:** 6  
 **Estimated time:** 45 minutes  
 **Concepts:** NULLs, joins, aggregation, CTEs, ranking
 

@@ -1,4 +1,4 @@
--- DuckDB Exercise 24: Add row-level context with window functions
+-- DuckDB Exercise 15: Add row-level context with window functions
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

@@ -1,16 +1,20 @@
 # Changelog
 
+## 10.40.1 - Integrated Python exercises and roadmap-order numbering
+
+- Added a dedicated **Python Exercises** tab under Learning → Practice beside SQL Interview Problems and DuckDB Exercises.
+- Added an integrated local Python editor with contextual completion, Run, Check Exercise, Save Draft, Submit Exercise, printed output, error-line navigation, and Matplotlib chart capture.
+- Added durable Python exercise progress, notes, local submissions, evidence records, and task-completion synchronization without uploading learner code.
+- Kept all 13 Python exercises locked to their Week 8 DataCamp chapters and prior-exercise sequence.
+- Renumbered all 33 learner-facing DuckDB exercises in the order they appear in the roadmap while preserving stable internal IDs, existing completion records, managed task keys, and submission compatibility.
+- Updated frozen Today’s Focus titles, task workspaces, evidence labels, guides, and the DuckDB task index to use the new roadmap-order numbers.
+- Preserved greyed-out prerequisite-locked supplementary tasks in Today’s Focus and the Coming Soon section in Next Tasks.
+
 ## 10.40.0 - Week-aligned SQL and Python practice
 
-- Realigned every DuckDB exercise to the week in which its prerequisite SQL topic is taught.
-- Expanded the DuckDB library from 18 to 33 guided exercises, covering selection, filtering, joins, subqueries, CASE, CTEs, window functions, dates, text, data types, views, schemas, and database management.
-- Realigned the 16 DataLemur interview problems to Weeks 3–5 so each problem follows the concepts it tests.
-- Added 13 guided Python exercises in Week 8, one for every required Introduction to Python, Intermediate Python, and pandas chapter.
-- Added a shared local Python dataset and solution-safe README/starter files for every Python exercise.
-- Generalized Today’s Focus locked previews so due DataCamp chapters, DuckDB exercises, SQL interview problems, SQL practice, and Python exercises remain visible in grey when prerequisites are incomplete.
-- Kept locked supplementary controls disabled and retained their exact prerequisite explanation on the second line.
-- Kept supplementary mastery tasks out of weekly Knowledge Check blockers; unfinished exercises can roll forward as Catch-Up without preventing the core curriculum checkpoint.
-- Added schedule migration logic that moves existing incomplete practice tasks to their corrected roadmap week without losing completion history.
+- Expanded DuckDB practice from 18 to 33 exercises and aligned every exercise to the week its DataCamp concept is taught.
+- Aligned 16 SQL interview problems across Weeks 3–5 and added 13 Python exercises for Week 8.
+- Kept due locked supplementary work visible as grey prerequisite guidance in Today’s Focus without making optional practice a weekly-check blocker.
 
 ## 10.39.0 - Topic-aligned Google roadmap and guided Applied Lab Studios
 

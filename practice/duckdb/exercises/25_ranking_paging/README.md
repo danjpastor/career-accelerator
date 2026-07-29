@@ -1,4 +1,4 @@
-# DuckDB Exercise 25: Rank results and select top records
+# DuckDB Exercise 21: Rank results and select top records
 
 **Week:** 5
 **Estimated time:** 45 minutes

@@ -33,7 +33,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from career_app.data.duckdb_exercises import DUCKDB_EXERCISES, ordered_exercise_numbers
+from career_app.data.duckdb_exercises import DUCKDB_EXERCISES, ordered_exercise_numbers, roadmap_number
 from career_app.services import duckdb_workspace
 from career_app.services import duckdb_exercise_runner as runner
 from career_app.services import roadmap_mastery
@@ -489,7 +489,7 @@ class DuckDBExercisesWidget(QWidget):
                 else "○"
             )
             list_item = QListWidgetItem(
-                f"{marker}  EXERCISE {number:02d}\n     {item['title']}"
+                f"{marker}  EXERCISE {roadmap_number(number):02d}\n     {item['title']}"
             )
             list_item.setData(Qt.ItemDataRole.UserRole, number)
             tooltip = f"{item['concepts']} • {item['minutes']} minutes"
@@ -670,7 +670,7 @@ class DuckDBExercisesWidget(QWidget):
             continue_text="Next Exercise  →",
         )
         self.breadcrumb.setText(
-            f"Learning  ›  Practice  ›  DuckDB Exercises  ›  Exercise {number:02d}  ›  {item['title']}"
+            f"Learning  ›  Practice  ›  DuckDB Exercises  ›  Exercise {roadmap_number(number):02d}  ›  {item['title']}"
         )
 
         self._question_notes = {}

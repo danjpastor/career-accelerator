@@ -1,6 +1,6 @@
-# DuckDB Exercise 12: Refactor an unreadable analytics query
+# DuckDB Exercise 10: Refactor an unreadable analytics query
 
-**Week:** 6  
+**Week:** 4  
 **Estimated time:** 30 minutes  
 **Concepts:** aliases, formatting, comments, CTE refactoring
 

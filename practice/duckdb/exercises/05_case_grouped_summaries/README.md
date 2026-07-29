@@ -1,6 +1,6 @@
-# DuckDB Exercise 05: Segment service performance
+# DuckDB Exercise 07: Segment service performance
 
-**Week:** 5  
+**Week:** 4  
 **Estimated time:** 40 minutes  
 **Concepts:** CASE expressions, SLA logic, grouped summaries
 

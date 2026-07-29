@@ -11,7 +11,9 @@ if str(APP) not in sys.path:
     sys.path.insert(0, str(APP))
 
 from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
-from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+from career_app.data.duckdb_exercises import (
+    DUCKDB_EXERCISES, ordered_exercise_numbers, roadmap_number, exercise_number_for_label
+)
 from career_app.data.python_exercises import PYTHON_EXERCISES
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.services import content_gates, roadmap_mastery, tracks
@@ -49,7 +51,14 @@ def main() -> int:
     if companion != roadmap_mastery.SQL_PROBLEM_SCHEDULE:
         issues.append("roadmap.SQL_COMPANION differs from roadmap_mastery.")
 
-    for number, item in DUCKDB_EXERCISES.items():
+    ordered_duckdb = list(ordered_exercise_numbers())
+    display_numbers = [roadmap_number(number) for number in ordered_duckdb]
+    if display_numbers != list(range(1, len(DUCKDB_EXERCISES) + 1)):
+        issues.append(f"DuckDB learner-facing numbers are {display_numbers}; expected 1-{len(DUCKDB_EXERCISES)}.")
+    for number in ordered_duckdb:
+        item = DUCKDB_EXERCISES[number]
+        if exercise_number_for_label(item["label"]) != number:
+            issues.append(f"DuckDB display label does not route back to internal exercise {number}.")
         key = content_gates.DUCKDB_TERMINAL_CHAPTER.get(int(number))
         chapter = CHAPTER_BY_KEY.get(str(key or ""))
         if chapter is None:
@@ -83,6 +92,22 @@ def main() -> int:
     for token in ("datacamp_chapter", "duckdb", "interview_problem", "sql_practice", "python_exercise"):
         if token not in unified:
             issues.append(f"Locked supplementary focus support is missing {token}.")
+    main_source = (app / "career_app" / "main.py").read_text(encoding="utf-8")
+    python_ui = app / "career_app" / "ui" / "python_exercises.py"
+    python_runner = app / "career_app" / "services" / "python_exercise_runner.py"
+    python_workspace = app / "career_app" / "services" / "python_workspace.py"
+    for path in (python_ui, python_runner, python_workspace):
+        if not path.is_file():
+            issues.append(f"Missing integrated Python workspace file: {path.relative_to(root)}.")
+    for token in ("PythonExercisesWidget", '"Python Exercises"', "python_exercise_number_for_label"):
+        if token not in main_source:
+            issues.append(f"Learning integration is missing {token}.")
+    if python_ui.is_file():
+        source = python_ui.read_text(encoding="utf-8")
+        for token in ("AssistedPlainTextEdit", "Run", "Check Exercise", "Submit Exercise", "chart_label"):
+            if token not in source:
+                issues.append(f"Python editor workspace is missing {token}.")
+
     checks = (app / "career_app" / "services" / "weekly_checks.py").read_text(encoding="utf-8")
     for prefix in ("roadmap_v1026:duckdb:", "roadmap_v1026:sql:", "roadmap_v1026:python:"):
         if prefix not in checks:

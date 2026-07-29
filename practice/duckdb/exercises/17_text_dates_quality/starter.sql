@@ -1,4 +1,4 @@
--- DuckDB Exercise 17: Standardize messy text, dates, and numeric fields
+-- DuckDB Exercise 20: Standardize messy text, dates, and numeric fields
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 

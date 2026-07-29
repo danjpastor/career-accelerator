@@ -1,4 +1,4 @@
--- DuckDB Exercise 14: Build monthly cohorts and retention metrics
+-- DuckDB Exercise 18: Build monthly cohorts and retention metrics
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 

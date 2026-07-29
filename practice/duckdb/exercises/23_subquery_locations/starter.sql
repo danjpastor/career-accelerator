@@ -1,4 +1,4 @@
--- DuckDB Exercise 23: Use subqueries in filters, sources, and calculations
+-- DuckDB Exercise 14: Use subqueries in filters, sources, and calculations
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

@@ -1,4 +1,4 @@
--- DuckDB Exercise 12: Refactor an unreadable analytics query
+-- DuckDB Exercise 10: Refactor an unreadable analytics query
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

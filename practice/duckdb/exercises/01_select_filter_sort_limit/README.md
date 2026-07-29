@@ -1,6 +1,6 @@
 # DuckDB Exercise 01: Filter and sort support tickets
 
-**Week:** 1  
+**Week:** 3  
 **Estimated time:** 35 minutes  
 **Concepts:** SELECT, FROM, WHERE, ORDER BY, LIMIT
 

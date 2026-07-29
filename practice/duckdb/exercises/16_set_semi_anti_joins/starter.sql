@@ -1,4 +1,4 @@
--- DuckDB Exercise 16: Compare customer populations with set and existence logic
+-- DuckDB Exercise 12: Compare customer populations with set and existence logic
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 

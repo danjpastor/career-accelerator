@@ -1,4 +1,4 @@
--- DuckDB Exercise 25: Rank results and select top records
+-- DuckDB Exercise 21: Rank results and select top records
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

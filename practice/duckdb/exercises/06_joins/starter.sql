@@ -1,4 +1,4 @@
--- DuckDB Exercise 06: Join customers, orders, and payments
+-- DuckDB Exercise 08: Join customers, orders, and payments
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

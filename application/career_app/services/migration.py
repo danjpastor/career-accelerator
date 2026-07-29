@@ -10,7 +10,7 @@ from career_app.services import roadmap_mastery, applied_lab_migration
 from career_app.services.task_titles import normalize_database_task_titles
 from career_app.data.applied_exercises import APPLIED_EXERCISES
 from career_app.navigation import PAGE_LEARNING
-from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+from career_app.data.duckdb_exercises import DUCKDB_EXERCISES, exercise_labels, exercise_source
 from career_app.data.roadmap_tasks import task_key, task_spec
 from career_app.data.portfolio_tasks import task_spec as portfolio_task_spec
 
@@ -282,15 +282,16 @@ def _clean_academy_evidence(conn) -> dict:
 
 def _update_duckdb_exercise_tasks(conn):
     updated = 0
-    for exercise in DUCKDB_EXERCISES.values():
+    for number, exercise in DUCKDB_EXERCISES.items():
+        labels = exercise_labels(number)
+        placeholders = ",".join("?" for _ in labels)
         rows = conn.execute(
-            """SELECT id,label
-               FROM sprint_tasks
-               WHERE label IN (?,?)""",
-            (
-                exercise["old_label"],
-                exercise["label"],
-            ),
+            f"""SELECT s.id,s.label
+                 FROM sprint_tasks s
+                 LEFT JOIN task_metadata m ON m.task_id=s.id
+                 WHERE s.label IN ({placeholders})
+                    OR m.managed_key=?""",
+            (*labels, f"roadmap_v1026:duckdb:{int(number)}"),
         ).fetchall()
 
         for row in rows:
@@ -300,6 +301,17 @@ def _update_duckdb_exercise_tasks(conn):
                     (exercise["label"], row["id"]),
                 )
                 updated += 1
+
+            if _table_exists(conn, "daily_focus"):
+                conn.execute(
+                    "UPDATE daily_focus SET title=? WHERE task_id=?",
+                    (exercise["label"], row["id"]),
+                )
+            if _table_exists(conn, "task_workspaces"):
+                conn.execute(
+                    "UPDATE task_workspaces SET task_label=? WHERE task_id=?",
+                    (exercise["label"], row["id"]),
+                )
 
             conn.execute(
                 """UPDATE task_metadata
@@ -316,6 +328,17 @@ def _update_duckdb_exercise_tasks(conn):
                     row["id"],
                 ),
             )
+
+        if _table_exists(conn, "evidence"):
+            current_source = exercise_source(number)
+            for legacy_label in exercise_labels(number):
+                legacy_source = legacy_label.removeprefix("Complete ")
+                if legacy_source != current_source:
+                    conn.execute(
+                        """UPDATE evidence SET source_name=?
+                           WHERE source_type='SQL Practice' AND source_name=?""",
+                        (current_source, legacy_source),
+                    )
     return updated
 
 

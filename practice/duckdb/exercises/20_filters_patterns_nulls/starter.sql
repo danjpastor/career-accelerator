@@ -1,4 +1,4 @@
--- DuckDB Exercise 20: Filter patterns, ranges, and missing values
+-- DuckDB Exercise 04: Filter patterns, ranges, and missing values
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

@@ -1,4 +1,4 @@
-# DuckDB Exercise 21: Connect orders to customers with inner joins
+# DuckDB Exercise 05: Connect orders to customers with inner joins
 
 **Week:** 3
 **Estimated time:** 40 minutes

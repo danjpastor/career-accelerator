@@ -45,6 +45,10 @@ from career_app.data.duckdb_exercises import (
     exercise_number_for_label as duckdb_exercise_number_for_label,
     exercise_source,
 )
+from career_app.data.python_exercises import (
+    PYTHON_EXERCISES,
+    exercise_number_for_label as python_exercise_number_for_label,
+)
 from career_app.data.roadmap import (
     DATALEMUR_PROBLEM_URLS, PROJECT_DIRS, PROJECT_NAMES,
     PROJECT_STAGES, SQL_COMPANION, WEEKLY_GUIDANCE
@@ -75,6 +79,7 @@ from career_app.services.migration import migrate
 from career_app.services.publisher import publish
 from career_app.theme import COLORS, stylesheet
 from career_app.ui.duckdb_exercises import DuckDBExercisesWidget
+from career_app.ui.python_exercises import PythonExercisesWidget
 from career_app.ui.course_ui import SqlCodeEditor
 from career_app.ui.applied_labs import AppliedLabsWidget
 from career_app.ui.task_workspace import TaskWorkspaceDialog
@@ -827,6 +832,7 @@ class CareerAccelerator(QMainWindow):
                 "Interview Problems": 0,
                 "SQL Interview Problems": 0,
                 "DuckDB Exercises": 1,
+                "Python Exercises": 2,
             }
             self.sql_tabs.setCurrentIndex(practice_map.get(str(practice), 0))
 
@@ -2676,6 +2682,9 @@ class CareerAccelerator(QMainWindow):
         self.duckdb_exercises_widget = DuckDBExercisesWidget(self.conn, ROOT, self)
         self.duckdb_exercises_widget.changed.connect(self._duckdb_exercises_changed)
         self.sql_tabs.addTab(self.duckdb_exercises_widget, "DuckDB Exercises")
+        self.python_exercises_widget = PythonExercisesWidget(self.conn, ROOT, self)
+        self.python_exercises_widget.changed.connect(self._python_exercises_changed)
+        self.sql_tabs.addTab(self.python_exercises_widget, "Python Exercises")
         practice_layout.addWidget(self.sql_tabs, 1)
         self.learning_tabs.addTab(practice, "Practice")
 
@@ -2814,8 +2823,19 @@ class CareerAccelerator(QMainWindow):
             self.open_learning_section("Practice", "DuckDB Exercises")
             self.sql_tabs.setCurrentWidget(self.duckdb_exercises_widget)
             self.duckdb_exercises_widget.select_exercise(int(duckdb_number))
+            display_number = int(DUCKDB_EXERCISES[int(duckdb_number)].get("roadmap_number", duckdb_number))
             self._notify(
-                f'Opened DuckDB Exercise {int(duckdb_number):02d}.', 3200
+                f'Opened DuckDB Exercise {display_number:02d}.', 3200
+            )
+            return True
+
+        python_number = python_exercise_number_for_label(label)
+        if python_number is not None and hasattr(self, 'python_exercises_widget'):
+            self.open_learning_section("Practice", "Python Exercises")
+            self.sql_tabs.setCurrentWidget(self.python_exercises_widget)
+            self.python_exercises_widget.select_exercise(int(python_number))
+            self._notify(
+                f'Opened Python Exercise {int(python_number):02d}.', 3200
             )
             return True
 
@@ -2871,6 +2891,14 @@ class CareerAccelerator(QMainWindow):
 
     # BEGIN EXERCISE PACKS
     def _duckdb_exercises_changed(self):
+        roadmap_mastery.reconcile(self.conn, ROOT)
+        self.state = state(self.conn)
+        tracks.sync_all(self.conn, self.state)
+        roadmap_mastery.reconcile(self.conn, ROOT)
+        self.state = state(self.conn)
+        self.refresh_all(sync_tracks=False)
+
+    def _python_exercises_changed(self):
         roadmap_mastery.reconcile(self.conn, ROOT)
         self.state = state(self.conn)
         tracks.sync_all(self.conn, self.state)
@@ -6503,6 +6531,8 @@ class CareerAccelerator(QMainWindow):
             )
         if hasattr(self, "duckdb_exercises_widget"):
             self.duckdb_exercises_widget.refresh()
+        if hasattr(self, "python_exercises_widget"):
+            self.python_exercises_widget.refresh()
 
 
     def refresh_session_task_choices(self):
@@ -7780,7 +7810,10 @@ class CareerAccelerator(QMainWindow):
             except Exception:
                 sql_task_label = ""
             if (
-                duckdb_exercise_number_for_label(sql_task_label) is not None
+                (
+                    duckdb_exercise_number_for_label(sql_task_label) is not None
+                    or python_exercise_number_for_label(sql_task_label) is not None
+                )
                 and self._route_sql_learning_task(task_id)
             ):
                 return

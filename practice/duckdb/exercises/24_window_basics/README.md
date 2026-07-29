@@ -1,4 +1,4 @@
-# DuckDB Exercise 24: Add row-level context with window functions
+# DuckDB Exercise 15: Add row-level context with window functions
 
 **Week:** 4
 **Estimated time:** 45 minutes

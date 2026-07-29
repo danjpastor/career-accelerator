@@ -1,4 +1,4 @@
--- DuckDB Exercise 05: Segment service performance
+-- DuckDB Exercise 07: Segment service performance
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

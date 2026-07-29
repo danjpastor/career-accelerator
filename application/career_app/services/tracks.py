@@ -18,6 +18,7 @@ from career_app.data.duckdb_exercises import (
     DUCKDB_EXERCISES,
     exercise_for_label,
     exercise_number_for_label,
+    roadmap_number as duckdb_roadmap_number,
 )
 from career_app.data.roadmap import SQL_COMPANION
 from career_app.data import google_certificate_curriculum as google_curriculum
@@ -2095,7 +2096,7 @@ def _skill_evidence(conn, state):
 
     for number in sorted(_completed_duckdb_exercises(conn)):
         exercise = DUCKDB_EXERCISES[number]
-        source = f"DuckDB Exercise {number:02d}: {exercise['title']}"
+        source = f"DuckDB Exercise {duckdb_roadmap_number(number):02d}: {exercise['title']}"
         for skill_key in DUCKDB_SKILL_EVIDENCE.get(number, set()):
             _append_evidence(evidence, skill_key, source)
 
@@ -5941,7 +5942,7 @@ def _skill_in_progress_sources(conn, state):
             _append_evidence(
                 sources,
                 skill_key,
-                f"DuckDB Exercise {number:02d}: {exercise['title']} in progress",
+                f"DuckDB Exercise {duckdb_roadmap_number(number):02d}: {exercise['title']} in progress",
             )
     applied_rows = conn.execute(
         """SELECT s.label FROM sprint_tasks s JOIN task_metadata m ON m.task_id=s.id

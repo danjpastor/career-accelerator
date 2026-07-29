@@ -1,4 +1,4 @@
--- DuckDB Exercise 04: Calculate subscription KPIs
+-- DuckDB Exercise 06: Calculate subscription KPIs
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

@@ -1,6 +1,6 @@
 # DuckDB Exercise 02: Summarize retail orders
 
-**Week:** 2  
+**Week:** 3  
 **Estimated time:** 40 minutes  
 **Concepts:** COUNT, SUM, AVG, GROUP BY, HAVING
 

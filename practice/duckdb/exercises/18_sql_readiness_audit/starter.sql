@@ -1,4 +1,4 @@
--- DuckDB Exercise 18: Complete a full relational data-quality audit
+-- DuckDB Exercise 28: Complete a full relational data-quality audit
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 

@@ -1,4 +1,4 @@
-# DuckDB Exercise 22: Compare outer, cross, and self joins
+# DuckDB Exercise 13: Compare outer, cross, and self joins
 
 **Week:** 4
 **Estimated time:** 45 minutes

@@ -1,4 +1,4 @@
--- DuckDB Exercise 08: Analyze a VFX production snapshot
+-- DuckDB Exercise 25: Analyze a VFX production snapshot
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 

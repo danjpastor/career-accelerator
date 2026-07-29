@@ -1,4 +1,4 @@
--- DuckDB Exercise 15: Calculate running totals and moving averages
+-- DuckDB Exercise 19: Calculate running totals and moving averages
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 

@@ -1,6 +1,6 @@
-# DuckDB Exercise 11: Explain joins and window functions
+# DuckDB Exercise 17: Explain joins and window functions
 
-**Week:** 12  
+**Week:** 5  
 **Estimated time:** 45 minutes  
 **Concepts:** LEFT JOIN, ROW_NUMBER, DENSE_RANK, rolling averages
 
