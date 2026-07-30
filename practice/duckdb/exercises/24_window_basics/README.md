@@ -1,6 +1,6 @@
-# DuckDB Exercise 15: Add row-level context with window functions
+# DuckDB Exercise 14: Add row-level context with window functions
 
-**Week:** 4
+**Week:** 5
 **Estimated time:** 45 minutes
 **Concepts:** OVER, PARTITION BY, window aggregates, row-level context
 
@@ -14,11 +14,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 ## Questions
 
-1. Return every order with the overall average revenue added as a window value.
-2. Return every order with the average revenue for its region.
-3. Return each order with its region total while preserving one row per order.
-4. Return each order with its percentage contribution to regional revenue.
-
+1. Task: Return every order with the overall average revenue added as a window value. Required output: return only these columns in this order: `order_id`, `revenue`, `overall_average_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+2. Task: Return every order with the average revenue for its region. Required output: return only these columns in this order: `order_id`, `region`, `revenue`, `regional_average_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+3. Task: Return each order with its region total while preserving one row per order. Required output: return only these columns in this order: `order_id`, `region`, `revenue`, `regional_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+4. Task: Return each order with its percentage contribution to regional revenue. Required output: return only these columns in this order: `order_id`, `region`, `revenue`, `regional_share`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

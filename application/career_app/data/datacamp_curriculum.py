@@ -187,3 +187,40 @@ def iter_before(chapter: DataCampChapter) -> Iterable[DataCampChapter]:
         for item in DATACAMP_CHAPTERS
         if (item.week, item.weekday, item.order_in_day) < target
     )
+
+# BEGIN DATACAMP WEEKDAY-ONLY CHAPTER SCHEDULE v10.40.2
+# Required DataCamp chapters are distributed across Monday-Friday. Their
+# original order is preserved, and intensive weeks use order_in_day to place
+# multiple chapters on the same weekday. Saturday and Sunday are reserved for
+# DataCamp project work.
+from dataclasses import replace as _datacamp_replace
+
+
+def _weekday_only_datacamp_schedule(chapters):
+    rebuilt = []
+    weeks = sorted({int(item.week) for item in chapters})
+    for week in weeks:
+        ordered = sorted(
+            (item for item in chapters if int(item.week) == week),
+            key=lambda item: (int(item.weekday), int(item.order_in_day)),
+        )
+        base, remainder = divmod(len(ordered), 5)
+        counts = [base + (1 if day < remainder else 0) for day in range(5)]
+        index = 0
+        for weekday, count in enumerate(counts):
+            for order_in_day in range(1, count + 1):
+                item = ordered[index]
+                rebuilt.append(
+                    _datacamp_replace(
+                        item,
+                        weekday=weekday,
+                        order_in_day=order_in_day,
+                    )
+                )
+                index += 1
+    return tuple(rebuilt)
+
+
+DATACAMP_CHAPTERS = _weekday_only_datacamp_schedule(DATACAMP_CHAPTERS)
+CHAPTER_BY_KEY = {chapter.key: chapter for chapter in DATACAMP_CHAPTERS}
+# END DATACAMP WEEKDAY-ONLY CHAPTER SCHEDULE v10.40.2

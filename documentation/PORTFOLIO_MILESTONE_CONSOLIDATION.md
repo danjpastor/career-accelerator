@@ -1,7 +1,7 @@
 # Portfolio Milestone Consolidation
 
 Migration: `true-milestones-v1`
-Applied: 2026-07-29T17:28:58
+Applied: 2026-07-29T21:45:27
 
 Minor implementation tasks were archived and merged into durable stage-gate milestones.
 

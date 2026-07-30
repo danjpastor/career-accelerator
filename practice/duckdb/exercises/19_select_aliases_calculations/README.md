@@ -1,4 +1,4 @@
-# DuckDB Exercise 03: Build clear selected fields and calculated columns
+# DuckDB Exercise 02: Select, rename, and calculate order fields
 
 **Week:** 3
 **Estimated time:** 35 minutes
@@ -14,11 +14,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 ## Questions
 
-1. Return every order with order ID, quantity, unit price, and a calculated pre-discount line value.
-2. Return every order with concise aliases for region, channel, and recorded revenue.
-3. Return each order with its recorded revenue and the difference between recorded revenue and quantity multiplied by unit price.
-4. Return the distinct combinations of region and sales channel, ordered consistently.
-
+1. Task: Return every order with order ID, quantity, unit price, and a calculated pre-discount line value. Required output: return only these columns in this order: `order_id`, `quantity`, `unit_price`, `line_value`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+2. Task: Return every order with concise aliases for region, channel, and recorded revenue. Required output: return only these columns in this order: `order_id`, `sales_region`, `channel`, `recorded_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+3. Task: Return each order with its recorded revenue and the difference between recorded revenue and quantity multiplied by unit price. Required output: return only these columns in this order: `order_id`, `recorded_revenue`, `revenue_difference`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+4. Task: Return the distinct combinations of region and sales channel, ordered consistently. Required output: return only these columns in this order: `region`, `sales_channel`. A correct result contains 12 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

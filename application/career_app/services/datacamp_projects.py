@@ -757,3 +757,424 @@ def optional_practice_recommendation(
 
 def catalog_for_week(week: int) -> list[dict[str, Any]]:
     return [dict(project) for project in PROJECTS if int(project["week"]) == int(week)]
+
+# BEGIN DATACAMP EXACT PROJECT PREREQUISITES v10.40.2
+# Projects use exact DataCamp chapter prerequisites and weekend scheduling.
+# A week number alone can never unlock a project.
+_WEEKEND_PROJECT_POLICY = {
+    "w2_excel_customer_churn": {
+        "scheduled_weekday": 5,
+        "required_chapters": (
+            "w02_intermediate_sheets_02", "w02_intermediate_sheets_03",
+            "w02_intermediate_sheets_04", "w02_pivot_sheets_01",
+            "w02_pivot_sheets_02", "w02_pivot_sheets_03",
+            "w02_pivot_sheets_04",
+        ),
+    },
+    "w2_excel_net_revenue": {"scheduled_weekday": 6, "required_chapters": ()},
+    "w3_sql_student_mental_health": {
+        "scheduled_weekday": 5,
+        "required_chapters": (
+            "w03_intro_sql_01", "w03_intro_sql_02",
+            "w03_intermediate_sql_01", "w03_intermediate_sql_02",
+            "w03_intermediate_sql_03", "w03_intermediate_sql_04",
+        ),
+    },
+    "w3_sql_international_debt": {"scheduled_weekday": 6, "required_chapters": ()},
+    "w4_sql_golden_era_games": {
+        "scheduled_weekday": 5,
+        "required_chapters": (
+            "w03_joining_sql_01", "w04_joining_sql_02",
+            "w04_joining_sql_03", "w04_joining_sql_04",
+        ),
+    },
+    "w4_sql_carbon_emissions": {"scheduled_weekday": 6, "required_chapters": ()},
+    "w5_sql_student_performance": {
+        "scheduled_weekday": 5,
+        "required_chapters": (
+            "w04_manipulation_sql_01", "w04_manipulation_sql_02",
+            "w04_manipulation_sql_03", "w04_manipulation_sql_04",
+        ),
+    },
+    "w5_sql_baby_names": {"scheduled_weekday": 6, "required_chapters": ()},
+    "w6_sql_goodthought": {
+        "scheduled_weekday": 5,
+        "required_chapters": (
+            "w05_window_sql_01", "w05_window_sql_02",
+            "w05_window_sql_03", "w05_window_sql_04",
+        ),
+    },
+    "w6_sql_manufacturing": {"scheduled_weekday": 6, "required_chapters": ()},
+    "w7_tableau_job_market": {
+        "scheduled_weekday": 5,
+        "required_chapters": (
+            "w07_intro_powerbi_01", "w07_intro_powerbi_02",
+            "w07_prep_powerbi_01", "w07_intro_powerbi_03",
+            "w07_intro_powerbi_04", "w07_prep_powerbi_02",
+            "w07_prep_powerbi_03", "w07_prep_powerbi_04",
+            "w07_model_powerbi_01", "w07_model_powerbi_02",
+            "w07_model_powerbi_03", "w07_dax_powerbi_01",
+            "w07_model_powerbi_04", "w07_dax_powerbi_02",
+            "w07_visual_powerbi_01", "w07_dax_powerbi_03",
+            "w07_visual_powerbi_02", "w07_visual_powerbi_03",
+            "w07_churn_powerbi_01", "w07_visual_powerbi_04",
+            "w07_churn_powerbi_02", "w07_churn_powerbi_03",
+        ),
+    },
+    "w7_powerbi_job_market": {"scheduled_weekday": 6, "required_chapters": ()},
+    "w8_python_nyc_schools": {
+        "scheduled_weekday": 5,
+        "required_chapters": (
+            "w08_pandas_01", "w08_pandas_02",
+            "w08_pandas_03", "w08_pandas_04",
+        ),
+    },
+    "w8_python_market_analysis": {"scheduled_weekday": 6, "required_chapters": ()},
+    "w9_python_netflix": {"scheduled_weekday": 5, "required_chapters": ()},
+    "w10_powerbi_hr": {"scheduled_weekday": 5, "required_chapters": ()},
+    "w11_python_crime": {"scheduled_weekday": 5, "required_chapters": ()},
+}
+
+for _weekend_project in PROJECTS:
+    _weekend_project.update(
+        _WEEKEND_PROJECT_POLICY.get(
+            str(_weekend_project.get("key") or ""),
+            {"scheduled_weekday": 5, "required_chapters": ()},
+        )
+    )
+PROJECT_BY_KEY = {project["key"]: project for project in PROJECTS}
+
+_weekend_legacy_sync_tasks = sync_tasks
+_weekend_legacy_project_for_task = project_for_task
+_weekend_legacy_optional_recommendation = optional_practice_recommendation
+
+
+def _weekend_row_value(row, key, index=0, default=None):
+    if row is None:
+        return default
+    try:
+        return row[key]
+    except Exception:
+        try:
+            return row[index]
+        except Exception:
+            return default
+
+
+def _weekend_program_start(conn):
+    row = conn.execute("SELECT start_date FROM program_state WHERE id=1").fetchone()
+    raw = _weekend_row_value(row, "start_date", 0, None)
+    try:
+        return date.fromisoformat(str(raw))
+    except (TypeError, ValueError):
+        return date.today()
+
+
+def _weekend_scheduled_date(conn, project):
+    start = _weekend_program_start(conn)
+    monday = start - timedelta(days=start.weekday())
+    return monday + timedelta(
+        days=(int(project["week"]) - 1) * 7 + int(project.get("scheduled_weekday", 5))
+    )
+
+
+def _weekend_chapter_label(key):
+    try:
+        from career_app.data.datacamp_curriculum import chapter_for_key
+        chapter = chapter_for_key(key)
+    except Exception:
+        chapter = None
+    if chapter is None:
+        return str(key)
+    return f"{chapter.course_name} — Chapter {chapter.chapter_number}: {chapter.chapter_name}"
+
+
+def _weekend_chapter_complete(conn, key):
+    if _table_exists(conn, "datacamp_chapter_progress"):
+        row = conn.execute(
+            "SELECT status,task_id FROM datacamp_chapter_progress WHERE chapter_key=?",
+            (str(key),),
+        ).fetchone()
+        if row is not None:
+            status = str(_weekend_row_value(row, "status", 0, "") or "")
+            if status.casefold() == "completed":
+                return True
+            task_id = _weekend_row_value(row, "task_id", 1, None)
+            if task_id is not None:
+                task = conn.execute(
+                    "SELECT completed FROM sprint_tasks WHERE id=?",
+                    (int(task_id),),
+                ).fetchone()
+                if task is not None and bool(int(_weekend_row_value(task, "completed", 0, 0) or 0)):
+                    return True
+    if _table_exists(conn, "task_metadata"):
+        row = conn.execute(
+            """SELECT s.completed,m.status
+               FROM sprint_tasks s JOIN task_metadata m ON m.task_id=s.id
+               WHERE m.managed_key=? LIMIT 1""",
+            (f"datacamp:{key}",),
+        ).fetchone()
+        if row is not None:
+            return bool(int(_weekend_row_value(row, "completed", 0, 0) or 0)) or (
+                str(_weekend_row_value(row, "status", 1, "") or "").casefold() == "completed"
+            )
+    return False
+
+
+def _weekend_required_chapters_ready(conn, project):
+    required = tuple(project.get("required_chapters") or ())
+    missing = [key for key in required if not _weekend_chapter_complete(conn, key)]
+    if not missing:
+        return True, "Required DataCamp chapters are complete."
+    first = _weekend_chapter_label(missing[0])
+    remaining = len(missing) - 1
+    if remaining:
+        return False, f"Complete {first} and {remaining} more required chapter{'s' if remaining != 1 else ''} first."
+    return False, f"Complete {first} first."
+
+
+def _weekend_project_from_identity(conn, task_id=None, project_key=None):
+    if project_key:
+        return PROJECT_BY_KEY.get(str(project_key))
+    if task_id:
+        stored = _weekend_legacy_project_for_task(conn, int(task_id))
+        if stored:
+            return PROJECT_BY_KEY.get(str(stored.get("project_key") or ""))
+    return None
+
+
+def _weekend_google_coursework_ready(conn, week):
+    if not (
+        _table_exists(conn, "track_tasks")
+        and _table_exists(conn, "task_metadata")
+        and _table_exists(conn, "sprint_tasks")
+    ):
+        return True, "Required Google Certificate work is complete."
+    rows = conn.execute(
+        """SELECT s.label,s.completed,m.status
+           FROM sprint_tasks s
+           JOIN task_metadata m ON m.task_id=s.id
+           JOIN track_tasks tt ON tt.task_id=s.id
+           WHERE s.week=? AND LOWER(COALESCE(tt.track_key,''))='google'
+             AND s.sort_order >= 0""",
+        (int(week),),
+    ).fetchall()
+    incomplete = [
+        str(_weekend_row_value(row, "label", 0, "Google Certificate module"))
+        for row in rows
+        if not bool(int(_weekend_row_value(row, "completed", 1, 0) or 0))
+        and str(_weekend_row_value(row, "status", 2, "") or "").casefold() != "completed"
+    ]
+    if not incomplete:
+        return True, "Required Google Certificate work is complete."
+    return False, f"Complete {incomplete[0]} before starting the weekend project."
+
+
+def project_readiness(conn, task_id=None, project_key=None, today=None):
+    today = today or date.today()
+    project = _weekend_project_from_identity(
+        conn, task_id=task_id, project_key=project_key
+    )
+    if project is None:
+        return False, "This DataCamp project is not configured."
+
+    resolved_task_id = _task_id_for_key(conn, str(project["key"]))
+    if resolved_task_id is not None and _completed(conn, resolved_task_id):
+        return False, "Already completed."
+
+    prerequisites_ready, prerequisite_reason = _weekend_required_chapters_ready(conn, project)
+    if not prerequisites_ready:
+        return False, prerequisite_reason
+
+    if str(project.get("role") or "") == "primary":
+        google_ready, google_reason = _weekend_google_coursework_ready(
+            conn, int(project["week"])
+        )
+        if not google_ready:
+            return False, google_reason
+
+    if str(project.get("role") or "") == "supplemental":
+        primary = _primary_for_week(int(project["week"]))
+        if primary is not None:
+            primary_id = _task_id_for_key(conn, str(primary["key"]))
+            if primary_id is None or not _completed(conn, primary_id):
+                return False, f"Complete {primary['title']} first."
+        else:
+            portfolio_ready, portfolio_reason = _portfolio_milestones_ready(
+                conn, int(project["week"])
+            )
+            if not portfolio_ready:
+                return False, portfolio_reason
+
+        row = conn.execute(
+            "SELECT capacity_selected FROM datacamp_project_tasks WHERE project_key=?",
+            (str(project["key"]),),
+        ).fetchone()
+        selected = bool(int(_weekend_row_value(row, "capacity_selected", 0, 0) or 0))
+        if not selected:
+            return False, (
+                "Optional practice — this project is not needed to reach the 18-hour plan. "
+                "It is recommended on Home after 18 logged hours."
+            )
+
+    scheduled = _weekend_scheduled_date(conn, project)
+    if today < scheduled:
+        return False, f"Scheduled for {scheduled.strftime('%A, %B %d')}."
+    if today.weekday() <= 4:
+        return False, "Weekend project — available Saturday or Sunday."
+    if today.weekday() < int(project.get("scheduled_weekday", 5)):
+        day_name = "Saturday" if int(project.get("scheduled_weekday", 5)) == 5 else "Sunday"
+        return False, f"Scheduled for {day_name}."
+    return True, "Ready for this weekend's project session."
+
+
+def _weekend_ensure_project_columns(conn):
+    ensure_schema(conn)
+    columns = _columns(conn, "datacamp_project_tasks")
+    additions = {
+        "scheduled_weekday": "INTEGER NOT NULL DEFAULT 5",
+        "scheduled_date": "TEXT",
+        "required_chapters": "TEXT NOT NULL DEFAULT ''",
+    }
+    for name, definition in additions.items():
+        if name not in columns:
+            conn.execute(
+                f"ALTER TABLE datacamp_project_tasks ADD COLUMN {name} {definition}"
+            )
+
+
+def _weekend_update_project_task(conn, project):
+    task_id = _task_id_for_key(conn, str(project["key"]))
+    if task_id is None:
+        return
+    scheduled = _weekend_scheduled_date(conn, project)
+    ready, reason = project_readiness(
+        conn, task_id=task_id, today=date.today()
+    )
+    _set_readiness(conn, task_id, ready=ready, reason=reason)
+    _update_dynamic(
+        conn,
+        "task_metadata",
+        {
+            "managed_key": f"datacamp_project:{project['key']}",
+            "deferred_until": scheduled.isoformat(),
+            "category": "Learning",
+            "icon_key": "datacamp_project",
+            "task_icon": "datacamp_project",
+            "source": f"DataCamp Project • {project['tool']}",
+            "description": (
+                f"Weekend {project['tool']} project that applies the completed "
+                "course chapters in a realistic analysis."
+            ),
+            "definition_of_done": "Complete the project on DataCamp and mark this task complete.",
+        },
+        "task_id=?",
+        (task_id,),
+    )
+    conn.execute(
+        """UPDATE datacamp_project_tasks
+           SET scheduled_weekday=?,scheduled_date=?,required_chapters=?,updated_at=CURRENT_TIMESTAMP
+           WHERE project_key=?""",
+        (
+            int(project.get("scheduled_weekday", 5)),
+            scheduled.isoformat(),
+            ",".join(project.get("required_chapters") or ()),
+            str(project["key"]),
+        ),
+    )
+
+
+def sync_tasks(conn, state=None):
+    result = _weekend_legacy_sync_tasks(conn, state)
+    _weekend_ensure_project_columns(conn)
+    for project in PROJECTS:
+        _weekend_update_project_task(conn, project)
+    conn.commit()
+    return result
+
+
+def project_for_task(conn, task_id):
+    result = _weekend_legacy_project_for_task(conn, task_id)
+    if result is None:
+        return None
+    policy = PROJECT_BY_KEY.get(str(result.get("project_key") or ""), {})
+    merged = dict(result)
+    merged.update(
+        {
+            "scheduled_weekday": int(policy.get("scheduled_weekday", 5)),
+            "required_chapters": tuple(policy.get("required_chapters") or ()),
+        }
+    )
+    try:
+        row = conn.execute(
+            "SELECT scheduled_date FROM datacamp_project_tasks WHERE task_id=?",
+            (int(task_id),),
+        ).fetchone()
+        merged["scheduled_date"] = _weekend_row_value(row, "scheduled_date", 0, None)
+    except Exception:
+        merged["scheduled_date"] = None
+    return merged
+
+
+def optional_practice_recommendation(conn, current_week, *, today=None):
+    result = _weekend_legacy_optional_recommendation(
+        conn, current_week, today=today
+    )
+    if result is None:
+        return None
+    policy = PROJECT_BY_KEY.get(str(result.get("project_key") or ""), {})
+    merged = dict(result)
+    merged["scheduled_weekday"] = int(policy.get("scheduled_weekday", 6))
+    merged["weekend_label"] = "Sunday project practice"
+    return merged
+# END DATACAMP EXACT PROJECT PREREQUISITES v10.40.2
+
+# BEGIN DATACAMP CATCH-UP PROJECT ACCESS v10.41.2
+# The weekend restriction applies only to projects assigned to the active week.
+# Once the roadmap advances, an unfinished earlier-week project is catch-up work
+# and may be opened on any day after all real prerequisites are satisfied.
+_catchup_legacy_project_readiness = project_readiness
+_CATCHUP_TIMING_REASONS = (
+    "Weekend project",
+    "Scheduled for ",
+)
+
+
+def _catchup_active_week(conn):
+    try:
+        row = conn.execute(
+            "SELECT current_week FROM program_state WHERE id=1"
+        ).fetchone()
+    except Exception:
+        row = None
+    value = _weekend_row_value(row, "current_week", 0, 1)
+    try:
+        return max(1, int(value or 1))
+    except (TypeError, ValueError):
+        return 1
+
+
+def _catchup_is_earlier_week(conn, project):
+    try:
+        project_week = max(1, int(project.get("week") or 1))
+    except (TypeError, ValueError):
+        project_week = 1
+    return project_week < _catchup_active_week(conn), project_week
+
+
+def project_readiness(conn, task_id=None, project_key=None, today=None):
+    project = _weekend_project_from_identity(
+        conn, task_id=task_id, project_key=project_key
+    )
+    ready, reason = _catchup_legacy_project_readiness(
+        conn, task_id=task_id, project_key=project_key, today=today
+    )
+    if project is None or ready:
+        return ready, reason
+
+    is_catch_up, project_week = _catchup_is_earlier_week(conn, project)
+    timing_only = str(reason or "").startswith(_CATCHUP_TIMING_REASONS)
+    if is_catch_up and timing_only:
+        return True, f"Catch-up project from Week {project_week} — ready now."
+    return ready, reason
+# END DATACAMP CATCH-UP PROJECT ACCESS v10.41.2

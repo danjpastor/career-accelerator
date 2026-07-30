@@ -1,4 +1,4 @@
-# DuckDB Exercise 04: Filter patterns, ranges, and missing values
+# DuckDB Exercise 03: Filter orders by ranges, patterns, and missing values
 
 **Week:** 3
 **Estimated time:** 40 minutes
@@ -15,11 +15,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 ## Questions
 
-1. Return the distinct ticket statuses in alphabetical order.
-2. Return tickets whose priority is High or Urgent and whose status is not Closed.
-3. Return tickets whose resolution hours are missing.
-4. Return feedback rows whose raw channel contains the word email after ignoring case and extra spaces.
-
+1. Task: Return the distinct ticket statuses in alphabetical order. Required output: return only these columns in this order: `status`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+2. Task: Return tickets whose priority is High or Urgent and whose status is not Closed. Required output: return only these columns in this order: `ticket_id`, `priority`, `status`. A correct result contains 5 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+3. Task: Return tickets whose resolution hours are missing. Required output: return only these columns in this order: `ticket_id`, `status`, `resolution_hours`. A correct result contains 9 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+4. Task: Return feedback rows whose raw channel contains the word email after ignoring case and extra spaces. Required output: return only these columns in this order: `response_id`, `channel_raw`. A correct result contains 6 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

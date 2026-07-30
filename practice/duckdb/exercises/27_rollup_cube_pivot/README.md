@@ -1,4 +1,4 @@
-# DuckDB Exercise 23: Build subtotal and pivot-style summaries
+# DuckDB Exercise 19: Build subtotal and pivot-style summaries
 
 **Week:** 5
 **Estimated time:** 50 minutes
@@ -14,11 +14,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 ## Questions
 
-1. Create region and product-category subtotals using ROLLUP.
-2. Create combinations of region and sales channel using CUBE.
-3. Build a pivot-style summary with one row per region and separate revenue columns for Online and Store.
-4. Use GROUPING SETS to return region totals, channel totals, and an overall total in one result.
-
+1. Task: Create region and product-category subtotals using ROLLUP. Required output: return only these columns in this order: `region`, `product_category`, `revenue`. Do not include extra columns; keep every filter and sort rule stated in the task.
+2. Task: Create combinations of region and sales channel using CUBE. Required output: return only these columns in this order: `region`, `sales_channel`, `revenue`. Do not include extra columns; keep every filter and sort rule stated in the task.
+3. Task: Build a pivot-style summary with one row per region and separate revenue columns for Online and Store. Required output: return only these columns in this order: `region`, `online_revenue`, `store_revenue`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+4. Task: Use GROUPING SETS to return region totals, channel totals, and an overall total in one result. Required output: return only these columns in this order: `region`, `sales_channel`, `revenue`. Do not include extra columns; keep every filter and sort rule stated in the task.
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

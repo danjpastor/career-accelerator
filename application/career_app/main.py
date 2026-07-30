@@ -9644,3 +9644,13 @@ from career_app.services import datacamp_project_integration as _datacamp_projec
 _datacamp_project_integration.install(CareerAccelerator)
 # END DATACAMP PROJECT TASK INTEGRATION v10.36.1
 
+# BEGIN DATACAMP WEEKEND POLICY v10.40.2
+from career_app.services import datacamp_weekend_policy as _datacamp_weekend_policy
+_datacamp_weekend_policy.install(CareerAccelerator)
+# END DATACAMP WEEKEND POLICY v10.40.2
+
+# BEGIN DUCKDB CURRICULUM AUDIT v10.41.1
+from career_app.services import duckdb_curriculum_policy as _duckdb_curriculum_policy
+_duckdb_curriculum_policy.install(CareerAccelerator)
+# END DUCKDB CURRICULUM AUDIT v10.41.1
+

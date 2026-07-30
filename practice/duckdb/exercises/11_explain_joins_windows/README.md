@@ -1,8 +1,8 @@
-# DuckDB Exercise 17: Explain joins and window functions
+# DuckDB Exercise 18: Explain join and window-function results
 
-**Week:** 5  
+**Week:** 5
 **Estimated time:** 45 minutes  
-**Concepts:** LEFT JOIN, ROW_NUMBER, DENSE_RANK, rolling averages
+**Concepts:** join reasoning, window reasoning, analyst communication
 
 ## Scenario
 
@@ -22,14 +22,13 @@ You must produce correct SQL and explain why the chosen join or window function 
 
 ## Questions
 
-1. INNER JOIN customer accounts to tickets. Explain which customers disappear and why.
-2. LEFT JOIN customer accounts to tickets. Explain why the row count differs from the INNER JOIN.
-3. Use `ROW_NUMBER` to return the latest ticket for each customer.
-4. Rank agents by average resolution time using `DENSE_RANK`; lower is better.
-5. Calculate each agent's three-ticket rolling average resolution time.
-6. Return customers without tickets.
-7. Write a 3–5 sentence explanation comparing aggregate queries with window-function queries.
-
+1. Task: INNER JOIN customer accounts to tickets. Explain which customers disappear and why. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+2. Task: LEFT JOIN customer accounts to tickets. Explain why the row count differs from the INNER JOIN. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+3. Task: Use `ROW_NUMBER` to return the latest ticket for each customer. Required output: return only these columns in this order: `customer_id`, `ticket_id`. A correct result contains 7 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+4. Task: Rank agents by average resolution time using `DENSE_RANK`; lower is better. Required output: return only these columns in this order: `agent_id`, `avg_hours`, `performance_rank`. Use these exact names for calculated or summarized columns: `avg_hours`, `performance_rank`. A correct result contains 6 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+5. Task: Calculate each agent's three-ticket rolling average resolution time. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+6. Task: Return customers without tickets. Required output: return only these columns in this order: `customer_id`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+7. Task: Write a 3–5 sentence explanation comparing aggregate queries with window-function queries. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
 ## Completion evidence
 
 1. Copy `starter.sql` to:
