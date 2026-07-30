@@ -9520,6 +9520,18 @@ def _update_external_startup_splash(
     except (OSError, TypeError, ValueError):
         return False
 
+# BEGIN PLANNER STATE CONSISTENCY v10.42.0
+# Keep provider completion, sprint-day promotion, and DuckDB schedule state on
+# one runtime path. Install order is intentional: persistence wraps provider
+# synchronization first; promotion then extends the canonical daily plan; the
+# same-day policy performs the final DuckDB calendar reconciliation.
+from career_app.services import datacamp_project_persistence as _datacamp_project_persistence_v1042
+_datacamp_project_persistence_v1042.install(CareerAccelerator)
+from career_app.services import sprint_day_integration as _sprint_day_integration_v1042
+_sprint_day_integration_v1042.install(CareerAccelerator)
+from career_app.services import duckdb_same_day_policy as _duckdb_same_day_policy_v1042
+_duckdb_same_day_policy_v1042.install(CareerAccelerator)
+# END PLANNER STATE CONSISTENCY v10.42.0
 
 def run():
     app = QApplication(sys.argv)
