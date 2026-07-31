@@ -1,4 +1,4 @@
-# DuckDB Exercise 18: Explain join and window-function results
+# DuckDB Exercise 18: Explain joins and window functions
 
 **Week:** 5
 **Estimated time:** 45 minutes  
@@ -6,7 +6,7 @@
 
 ## Scenario
 
-You must produce correct SQL and explain why the chosen join or window function is appropriate.
+A senior analyst is reviewing your SQL for a customer-support report. You must produce the correct result and explain why each join or window function is appropriate.
 
 ## Tables
 
@@ -24,23 +24,21 @@ You must produce correct SQL and explain why the chosen join or window function 
 
 ### Task 1
 
-INNER JOIN customer accounts to tickets. Explain which customers disappear and why.
+Use an inner join between customer accounts and tickets. Return the joined row count as `inner_join_rows` and add a SQL comment explaining which customers disappear and why.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `inner_join_rows`.
+- Return 1 row.
 
 ### Task 2
 
-LEFT JOIN customer accounts to tickets. Explain why the row count differs from the INNER JOIN.
+Use a left join between customer accounts and tickets. Return the joined row count as `left_join_rows` and add a SQL comment explaining why it differs from the inner join.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `left_join_rows`.
+- Return 1 row.
 
 ### Task 3
 
@@ -48,8 +46,8 @@ Use `ROW_NUMBER` to return the latest ticket for each customer.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`, `ticket_id`
-- **Expected rows:** 7
+- Return columns in this order: `customer_id`, `ticket_id`.
+- Return 7 rows.
 
 ### Task 4
 
@@ -57,19 +55,17 @@ Rank agents by average resolution time using `DENSE_RANK`; lower is better.
 
 **Result requirements**
 
-- **Return columns:** `agent_id`, `avg_hours`, `performance_rank`
-- **Exact names for new columns:** `avg_hours`, `performance_rank`
-- **Expected rows:** 6
+- Return columns in this order: `agent_id`, `avg_hours`, `performance_rank`.
+- Return 6 rows.
 
 ### Task 5
 
-Calculate each agent's three-ticket rolling average resolution time.
+Calculate each agent’s trailing three-ticket average resolution time, then return the number of result rows as `rolling_average_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `rolling_average_rows`.
+- Return 1 row.
 
 ### Task 6
 
@@ -77,25 +73,22 @@ Return customers without tickets.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`
-- **Expected rows:** 1
+- Return columns in this order: `customer_id`.
+- Return 1 row.
 
 ### Task 7
 
-Write a 3–5 sentence explanation comparing aggregate queries with window-function queries.
+Write a 3–5 sentence SQL comment comparing aggregate queries with window-function queries, then return the ticket row count as `comparison_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
-## Completion evidence
+- Return columns in this order: `comparison_rows`.
+- Return 1 row.
 
-1. Copy `starter.sql` to:
-   `practice/duckdb/submissions/ex11_explain_joins_windows.sql`
-2. Answer every question in that copied file.
-3. Run each query successfully in DuckDB.
-4. Compare your results with `validation.md` only after attempting the questions.
-5. Add a short comment at the bottom explaining one decision or mistake you corrected.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

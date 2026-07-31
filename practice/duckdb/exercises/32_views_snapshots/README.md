@@ -13,49 +13,53 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex06_customers`
 - `ex06_orders`
 
+## Scenario
+
+An analytics team wants a reusable delivered-orders view and a temporary snapshot that can be checked before a reporting workflow is published.
+
 ## Tasks
 
 ### Task 1
 
-Create a reusable view that joins delivered orders to customer region, then return the view rows.
+Create a temporary view that joins delivered orders to customer region, then return `order_id`, `customer_id`, `region`, and `order_total` from the view.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `customer_id`, `region`, `order_total`
-- **Expected rows:** 12
+- Return columns in this order: `order_id`, `customer_id`, `region`, `order_total`.
+- Return 12 rows.
 
 ### Task 2
 
-Query the reusable view to summarize delivered revenue by region.
+Create the temporary delivered-orders view in this task, then summarize its revenue by region. Return `region` and `delivered_revenue`.
 
 **Result requirements**
 
-- **Return columns:** `region`, `delivered_revenue`
+- Return columns in this order: `region`, `delivered_revenue`.
 
 ### Task 3
 
-Create a physical snapshot table from the view and return its row count.
+Create the temporary delivered-orders view and a temporary snapshot table from it, then return the snapshot row count as `snapshot_rows`.
 
 **Result requirements**
 
-- **Return columns:** `snapshot_rows`
-- **Expected rows:** 1
+- Return columns in this order: `snapshot_rows`.
+- Return 1 row.
 
 ### Task 4
 
-Compare the view and snapshot row counts to verify the snapshot was created correctly.
+Create the temporary delivered-orders view and snapshot table in this task. Return `view_rows`, `snapshot_rows`, and their `difference` to confirm they match.
 
 **Result requirements**
 
-- **Return columns:** `view_rows`, `snapshot_rows`, `difference`
-- **Expected rows:** 1
-## Completion evidence
+- Return columns in this order: `view_rows`, `snapshot_rows`, `difference`.
+- Return 1 row.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

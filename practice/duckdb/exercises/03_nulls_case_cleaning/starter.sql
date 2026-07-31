@@ -1,4 +1,4 @@
--- DuckDB Exercise 23: Clean and standardize customer feedback
+-- DuckDB Exercise 23: Clean customer feedback
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -7,42 +7,42 @@ DESCRIBE ex03_customer_feedback_dirty;
 
 
 -- -----------------------------------------------------------------
--- Q1. Inspect distinct raw values for `channel_raw` and `resolved_raw`.
+-- Q1. Before cleaning the feedback file, count the distinct trimmed labels in `channel_raw` and `resolved_raw`. Name the results `distinct_channel_labels` and `distinct_resolved_labels`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q2. Create a normalized channel using `UPPER(TRIM(channel_raw))`; convert blanks to NULL.
+-- Q2. Standardize `channel_raw` with `UPPER(TRIM(...))`, turn blank values into NULL, and count the rows that remain blank. Name the result `blank_channel_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q3. Create `rating_raw` with `TRY_CAST`; keep only ratings from 1 through 5.
+-- Q3. Convert `rating_raw` to a number safely, keep values from 1 through 5, and count the valid ratings. Name the result `valid_rating_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q4. Create `response_minutes_raw`; convert invalid or negative values to NULL.
+-- Q4. Convert `response_minutes_raw` to a number safely, treat invalid or negative values as NULL, and count the valid nonnegative response times. Name the result `valid_response_time_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q5. Create a numeric `resolved_raw` where common true values equal 1, false values equal 0, and unknown values remain NULL.
+-- Q5. Standardize common true and false values in `resolved_raw`. Return the true count as `resolved_yes_rows` and the false count as `resolved_no_rows`; leave unknown values out of both counts.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q6. Create an `issue_type_raw` value in title case or a fallback of `Unknown`.
+-- Q6. Standardize `issue_type_raw` to title case, replace missing values with `Unknown`, and count the rows labeled `Unknown`. Name the result `unknown_issue_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q7. Create a view named `ex03_feedback_clean` containing the cleaned fields and a `quality_issue_flag`.
+-- Q7. Build the cleaned feedback result and count the rows where `quality_issue_flag` identifies a problem. Name the result `quality_issue_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------

@@ -1,12 +1,12 @@
 # DuckDB Exercise 22: Calculate subscription KPIs
 
-**Week:** 5
+**Week:** 4
 **Estimated time:** 45 minutes  
 **Concepts:** ratios, conditional aggregation, date filters
 
 ## Scenario
 
-Leadership needs a June 30, 2026 subscription snapshot and a defensible set of recurring-revenue KPIs.
+Leadership needs a June 30, 2026 subscription snapshot with clearly defined recurring-revenue and churn metrics.
 
 ## Tables
 
@@ -20,80 +20,74 @@ Leadership needs a June 30, 2026 subscription snapshot and a defensible set of r
 
 ### Task 1
 
-Calculate active monthly recurring revenue (MRR).
+Leadership needs the monthly recurring revenue from subscriptions active on June 30, 2026. Return the total as `active_mrr`.
 
 **Result requirements**
 
-- **Return columns:** `sum(monthly_revenue)`
-- **Exact names for new columns:** `sum(monthly_revenue)`
-- **Expected rows:** 1
+- Return columns in this order: `active_mrr`.
+- Return 1 row.
 
 ### Task 2
 
-Count active subscriptions.
+Count the subscriptions active on June 30, 2026. Return the result as `active_subscriptions`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `active_subscriptions`.
+- Return 1 row.
 
 ### Task 3
 
-Calculate average revenue per active subscription.
+Calculate average monthly revenue per active subscription on June 30, 2026. Round it to two decimal places and name it `average_revenue_per_subscription`.
 
 **Result requirements**
 
-- **Return columns:** `round(avg(monthly_revenue), 2)`
-- **Exact names for new columns:** `round(avg(monthly_revenue), 2)`
-- **Expected rows:** 1
+- Return columns in this order: `average_revenue_per_subscription`.
+- Return 1 row.
+- Round the requested result to 2 decimal places.
 
 ### Task 4
 
-Calculate active MRR by plan.
+Show active monthly recurring revenue for each plan on June 30, 2026. Return `plan` and the total as `active_mrr`.
 
 **Result requirements**
 
-- **Return columns:** `plan`, `sum(monthly_revenue)`
-- **Exact names for new columns:** `sum(monthly_revenue)`
-- **Expected rows:** 3
+- Return columns in this order: `plan`, `active_mrr`.
+- Return 3 rows.
 
 ### Task 5
 
-Count June 2026 cancellations.
+Count subscriptions cancelled during June 2026. Return the result as `june_cancellations`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `june_cancellations`.
+- Return 1 row.
 
 ### Task 6
 
-Calculate June logo churn: June cancellations divided by subscriptions active at the start of June.
+Calculate June logo churn as June cancellations divided by subscriptions active at the start of June. Return a percentage rounded to two decimal places as `june_logo_churn_pct`.
 
 **Result requirements**
 
-- **Return columns:** `round(((100.0 * canceled) / opening), 2)`
-- **Exact names for new columns:** `round(((100.0 * canceled) / opening), 2)`
-- **Expected rows:** 1
+- Return columns in this order: `june_logo_churn_pct`.
+- Return 1 row.
+- Round the requested result to 2 decimal places.
 
 ### Task 7
 
-Return each region's share of active MRR as a percentage.
+Show each region’s share of active monthly recurring revenue. Return `region` and the percentage rounded to two decimal places as `active_mrr_share_pct`.
 
 **Result requirements**
 
-- **Return columns:** `region`, `round(((100.0 * mrr) / sum(mrr) OVER ()), 2)`
-- **Exact names for new columns:** `round(((100.0 * mrr) / sum(mrr) OVER ()), 2)`
-- **Expected rows:** 4
-## Completion evidence
+- Return columns in this order: `region`, `active_mrr_share_pct`.
+- Return 4 rows.
+- Round the requested result to 2 decimal places.
 
-1. Copy `starter.sql` to:
-   `practice/duckdb/submissions/ex04_business_metrics.sql`
-2. Answer every question in that copied file.
-3. Run each query successfully in DuckDB.
-4. Compare your results with `validation.md` only after attempting the questions.
-5. Add a short comment at the bottom explaining one decision or mistake you corrected.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

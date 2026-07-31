@@ -409,6 +409,9 @@ class CareerAccelerator(QMainWindow):
         )
         self.first_run.finalize_initialization()
         self.state = completion_contract.prepare_state(self.conn, state(self.conn))
+        # Restore durable DuckDB completion before any planner or track service
+        # calculates readiness. Sprint rows are reusable; submitted exercises are not.
+        duckdb_workspace.reconcile_completion_state(self.conn, ROOT)
         tracks.sync_all(self.conn, self.state)
         # Track synchronization must never undo the Monday rollover performed
         # above. Reconcile once more after all pacing services have written their
@@ -425,6 +428,10 @@ class CareerAccelerator(QMainWindow):
         # passed Week 2 check immediately promotes Applied Lab 01 and updates its
         # lock reason during this same launch.
         tracks.sync_all(self.conn, self.state)
+        # The final adaptive-track pass may repair/relink sprint rows. Reassert
+        # submitted DuckDB completion after that pass so persisted task rows,
+        # daily snapshots, Today's Focus, and Next Tasks begin in agreement.
+        duckdb_workspace.reconcile_completion_state(self.conn, ROOT)
         self.state = state(self.conn)
         planner.repair_persisted_planner_data(
             self.conn, self.state["current_week"]
@@ -2891,12 +2898,17 @@ class CareerAccelerator(QMainWindow):
 
     # BEGIN EXERCISE PACKS
     def _duckdb_exercises_changed(self):
-        roadmap_mastery.reconcile(self.conn, ROOT)
+        # DuckDB submission already persists completion and performs a targeted
+        # unlock update. Avoid two full roadmap reconciliations plus a complete
+        # application refresh on the button's UI thread.
         self.state = state(self.conn)
-        tracks.sync_all(self.conn, self.state)
-        roadmap_mastery.reconcile(self.conn, ROOT)
-        self.state = state(self.conn)
-        self.refresh_all(sync_tracks=False)
+        try:
+            self.refresh_dashboard(sync_tracks=False)
+        except TypeError:
+            self.refresh_dashboard()
+        self.refresh_learning()
+        self.refresh_readiness()
+        self.refresh_task_workspaces()
 
     def _python_exercises_changed(self):
         roadmap_mastery.reconcile(self.conn, ROOT)
@@ -7148,7 +7160,10 @@ class CareerAccelerator(QMainWindow):
         """Refresh only panels whose state can change after this task."""
         try:
             task = self.conn.execute(
-                "SELECT category FROM sprint_tasks WHERE id=?",
+                """SELECT COALESCE(m.category,'') AS category
+                   FROM sprint_tasks s
+                   LEFT JOIN task_metadata m ON m.task_id=s.id
+                   WHERE s.id=?""",
                 (int(task_id),),
             ).fetchone()
             category = str(task["category"] or "") if task is not None else ""
@@ -7782,6 +7797,17 @@ class CareerAccelerator(QMainWindow):
             if task is not None and str(task.get("kind") or "") == "weekly_check":
                 self.open_weekly_knowledge_check(int(task.get("week") or 1), int(task_id))
                 return
+            if (
+                task is not None
+                and str(task.get("kind") or "") == "review"
+                and "retrospective" in str(task.get("label") or "").casefold()
+                and not bool(task.get("ready"))
+            ):
+                self._notify(
+                    str(task.get("prerequisite_reason") or "Pass the weekly knowledge check first."),
+                    6500,
+                )
+                return
         if task_id is not None and self._route_datacamp_task(int(task_id)):
             return
         if task_id is not None:
@@ -7900,9 +7926,16 @@ class CareerAccelerator(QMainWindow):
         )
 
     def open_weekly_workspace(self, kind):
+        week = int(self.state["current_week"])
+        if kind == "retrospective" and not weekly_checks.passed(self.conn, week):
+            self._notify(
+                f"Pass Week {week} Knowledge Check to unlock this retrospective.",
+                6500,
+            )
+            return
         task_id = task_workspace.ensure_weekly_workspace_task(
             self.conn,
-            int(self.state["current_week"]),
+            week,
             kind,
         )
         self.refresh_all(sync_tracks=False)

@@ -186,6 +186,24 @@ CREATE TABLE IF NOT EXISTS duckdb_exercise_progress (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS duckdb_completion_evidence (
+    exercise_number INTEGER PRIMARY KEY,
+    completed_date TEXT NOT NULL,
+    submission_path TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS duckdb_task_validation (
+    exercise_number INTEGER NOT NULL,
+    task_number INTEGER NOT NULL,
+    answer_digest TEXT NOT NULL,
+    passed INTEGER NOT NULL DEFAULT 0,
+    checked_at TEXT,
+    PRIMARY KEY (exercise_number, task_number)
+);
+CREATE INDEX IF NOT EXISTS idx_duckdb_task_validation_passed
+    ON duckdb_task_validation(exercise_number, passed);
+
 CREATE TABLE IF NOT EXISTS python_exercise_progress (
     exercise_number INTEGER PRIMARY KEY,
     status TEXT NOT NULL DEFAULT 'Not Started',
@@ -515,6 +533,8 @@ def factory_reset(conn, start_date):
         "task_concept_tags",
         "exercise_pack_progress",
         "python_exercise_progress",
+        "duckdb_task_validation",
+        "duckdb_completion_evidence",
         "duckdb_exercise_progress",
         "applied_exercise_progress",
         "applications",

@@ -24,7 +24,7 @@ FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q3. Calculate the average revenue per order. Return it as `average_revenue`.
+-- Q3. The sales manager needs one average order value for the weekly summary. Calculate the average of `revenue`, round it to two decimal places, and name it `average_revenue`.
 
 SELECT
      ROUND(AVG(revenue), 2) AS average_revenue
@@ -54,7 +54,7 @@ HAVING COUNT(*) > 5
 
 -- -----------------------------------------------------------------
 
--- Q6. Calculate the average discount for each product category. Return `product_category` and the average as `average_discount`.
+-- Q6. Compare typical discount levels across product categories. Calculate the average `discount_pct` for each `product_category`, round it to two decimal places, and name it `average_discount`.
 
 SELECT
     product_category,
@@ -71,6 +71,7 @@ SELECT
     SUM(revenue) AS revenue
 FROM ex02_retail_orders
 GROUP BY region
-ORDER BY revenue DESC;
+ORDER BY revenue DESC
+LIMIT 1;
 
 -- -----------------------------------------------------------------

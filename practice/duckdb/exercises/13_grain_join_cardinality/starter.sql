@@ -1,4 +1,4 @@
--- DuckDB Exercise 09: Check table grain and join cardinality
+-- DuckDB Exercise 09: Audit table grain and join cardinality
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 
@@ -43,7 +43,7 @@ DESCRIBE ex13_contacts;
 
 
 -- -----------------------------------------------------------------
--- Q7. Write a short SQL comment stating the grain of the safe final result.
+-- Q7. Add a SQL comment stating the grain of the safe final result, then return its row count as `safe_result_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

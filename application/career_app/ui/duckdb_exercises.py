@@ -88,6 +88,12 @@ class DuckDBExercisesWidget(QWidget):
         self._question_notes: dict[int, str] = {}
         self._active_question_number: int | None = None
         self._question_results: dict[int, dict[str, Any]] = {}
+        self._passed_task_digests: dict[int, str] = {}
+        self._hint_levels: dict[tuple[int, int], int] = {}
+        self._autosave_timer = QTimer(self)
+        self._autosave_timer.setSingleShot(True)
+        self._autosave_timer.setInterval(650)
+        self._autosave_timer.timeout.connect(self._autosave_draft)
         self._responsive_mode: str | None = None
         self._build_ui()
         self.refresh()
@@ -264,6 +270,15 @@ class DuckDBExercisesWidget(QWidget):
         )
         practice_layout.addWidget(self.question_prompt)
 
+        self.requirements_label = QLabel("")
+        self.requirements_label.setWordWrap(True)
+        self.requirements_label.setStyleSheet(
+            "background:#0C1627;border:1px solid #263754;border-radius:8px;"
+            "color:#BFD0E8;padding:8px 10px;"
+        )
+        self.requirements_label.hide()
+        practice_layout.addWidget(self.requirements_label)
+
         self.sql_editor = SqlCodeEditor()
         self.sql_editor.setObjectName("DuckDBExerciseSqlEditor")
         self.sql_editor.setPlaceholderText(
@@ -281,13 +296,21 @@ class DuckDBExercisesWidget(QWidget):
         self.check_question_button = QPushButton("✓ Check Task")
         self.check_question_button.setObjectName("Secondary")
         self.check_question_button.clicked.connect(self.check_question)
+        self.hint_button = QPushButton("Hint")
+        self.hint_button.setObjectName("Secondary")
+        self.hint_button.clicked.connect(self.show_hint)
         self.check_exercise_button = QPushButton("Check Exercise")
         self.check_exercise_button.setObjectName("Secondary")
         self.check_exercise_button.clicked.connect(self.check_exercise)
+        self.submit_button = QPushButton("Submit Exercise")
+        self.submit_button.setObjectName("Primary")
+        self.submit_button.clicked.connect(self.submit_exercise)
         first_actions.addWidget(self.run_button)
         first_actions.addWidget(self.check_question_button)
-        first_actions.addWidget(self.check_exercise_button)
+        first_actions.addWidget(self.hint_button)
         first_actions.addStretch()
+        first_actions.addWidget(self.check_exercise_button)
+        first_actions.addWidget(self.submit_button)
         practice_layout.addLayout(first_actions)
 
         self.feedback = FeedbackBanner()
@@ -310,50 +333,14 @@ class DuckDBExercisesWidget(QWidget):
         )
         practice_layout.addWidget(self.result_table, 2)
 
-        notes_label = QLabel("Notes & reasoning")
-        notes_label.setStyleSheet("font-weight:650;color:#E9EFFA;")
-        practice_layout.addWidget(notes_label)
+        # Notes, file-reference buttons, and the separate Save Submission row
+        # were removed from the learner workspace. Draft SQL is autosaved. Keep
+        # an invisible notes object only so older saved note data remains readable.
         self.notes = QTextEdit()
-        self.notes.setPlaceholderText(
-            "Record what the query does, mistakes you corrected, and why the final answer works."
-        )
-        self.notes.setMinimumHeight(70)
-        self.notes.setMaximumHeight(135)
-        self.notes.textChanged.connect(self._notes_changed)
-        self.notes.setStyleSheet(
-            "QTextEdit {background:#151c2b;border:1px solid #2D3B58;border-radius:8px;padding:7px;}"
-        )
-        practice_layout.addWidget(self.notes)
-
-        reference_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.reference_row = reference_row
-        self.reference_buttons = []
-        for label, callback in (
-            ("Instructions", lambda: self.open_reference("instructions")),
-            ("Starter", lambda: self.open_reference("starter")),
-            ("Validation", lambda: self.open_reference("validation")),
-            ("Datasets", self.open_dataset_folder),
-        ):
-            button = QPushButton(label)
-            button.setObjectName("Secondary")
-            button.clicked.connect(callback)
-            self.reference_buttons.append(button)
-            reference_row.addWidget(button)
-        reference_row.addStretch()
-        practice_layout.addLayout(reference_row)
-
-        submission_row = QBoxLayout(QBoxLayout.Direction.LeftToRight)
-        self.submission_row = submission_row
-        self.save_button = QPushButton("Save Submission")
-        self.save_button.setObjectName("Secondary")
-        self.save_button.clicked.connect(self.save_progress)
-        self.submit_button = QPushButton("Submit Exercise")
-        self.submit_button.setObjectName("Primary")
-        self.submit_button.clicked.connect(self.submit_exercise)
-        submission_row.addWidget(self.save_button)
-        submission_row.addWidget(self.submit_button)
-        submission_row.addStretch()
-        practice_layout.addLayout(submission_row)
+        self.notes.hide()
+        self.reference_buttons: list[QPushButton] = []
+        self.save_button = QPushButton()
+        self.save_button.hide()
 
         self.workspace_splitter.addWidget(self.practice_card)
         self.workspace_splitter.setStretchFactor(0, 1)
@@ -378,7 +365,7 @@ class DuckDBExercisesWidget(QWidget):
             if mode == "compact"
             else QBoxLayout.Direction.LeftToRight
         )
-        for layout in (self.first_actions, self.reference_row, self.submission_row):
+        for layout in (self.first_actions,):
             layout.setDirection(
                 QBoxLayout.Direction.TopToBottom
                 if width < 680
@@ -459,9 +446,8 @@ class DuckDBExercisesWidget(QWidget):
             self.sql_editor,
             self.run_button,
             self.check_question_button,
+            self.hint_button,
             self.check_exercise_button,
-            self.notes,
-            self.save_button,
             self.submit_button,
         ):
             widget.setEnabled(enabled)
@@ -471,9 +457,10 @@ class DuckDBExercisesWidget(QWidget):
             reason = str(readiness.get("reason") or "Complete the prerequisites first.")
             self.feedback.show_message("Exercise locked. " + reason, "hint")
             self.question_prompt.setText(
-                "This exercise is visible so you can see what is coming next, but its editor and files "
-                "remain locked until the required DataCamp chapters and earlier exercises are complete."
+                "This exercise is visible so you can see what is coming next, but its editor remains "
+                "locked until the required DataCamp chapters and earlier exercises are complete."
             )
+            self.requirements_label.hide()
             self.sql_editor.setPlaceholderText("Locked — complete the listed prerequisites first.")
         else:
             self.sql_editor.setPlaceholderText(
@@ -532,6 +519,62 @@ class DuckDBExercisesWidget(QWidget):
         if current is not None:
             self._load_exercise(int(current.data(Qt.ItemDataRole.UserRole)))
 
+    def _refresh_navigation_statuses(self) -> None:
+        """Refresh list markers without reloading the current exercise workspace."""
+        completed = 0
+        statuses: dict[int, dict[str, Any]] = {}
+        numbers = list(ordered_exercise_numbers())
+        for number in numbers:
+            try:
+                progress = duckdb_workspace.progress(self.conn, self.root, number)
+            except Exception:
+                progress = {"status": "Not Started"}
+            statuses[number] = progress
+            if progress.get("status") == "Completed":
+                completed += 1
+
+        self.progress_count.setText(f"{completed}/{len(DUCKDB_EXERCISES)}")
+        self.progress_bar.setValue(
+            round(completed / max(len(DUCKDB_EXERCISES), 1) * 100)
+        )
+        self._loading = True
+        try:
+            for row, number in enumerate(numbers):
+                if row >= self.exercise_list.count():
+                    self.refresh(preserve_number=True)
+                    return
+                catalog_item = DUCKDB_EXERCISES[number]
+                status = statuses[number].get("status", "Not Started")
+                readiness = self._readiness(number)
+                marker_text = (
+                    "●" if status == "Completed"
+                    else "🔒" if not readiness.get("ready")
+                    else "◐" if status == "In Progress"
+                    else "○"
+                )
+                list_item = self.exercise_list.item(row)
+                list_item.setText(
+                    f"{marker_text}  EXERCISE {roadmap_number(number):02d}\n"
+                    f"     {catalog_item['title']}"
+                )
+                tooltip = f"{catalog_item['concepts']} • {catalog_item['minutes']} minutes"
+                if not readiness.get("ready") and status != "Completed":
+                    tooltip += "\nLocked — " + str(
+                        readiness.get("reason") or "Complete the prerequisites first."
+                    )
+                else:
+                    tooltip += "\nReady" if status != "Completed" else "\nCompleted"
+                list_item.setToolTip(tooltip)
+        finally:
+            self._loading = False
+
+        if self.current_number is not None:
+            current_progress = statuses.get(self.current_number, {})
+            self._apply_access_state(
+                self._readiness(self.current_number),
+                str(current_progress.get("status") or "") == "Completed",
+            )
+
     def select_exercise(self, number: int) -> None:
         """Select a routed exercise using a freshly rebuilt readiness list."""
         requested = int(number)
@@ -579,19 +622,54 @@ class DuckDBExercisesWidget(QWidget):
 
     def _question_passed(self, question_number: int) -> bool:
         answer = self._question_answers.get(question_number, "")
-        if not answer.strip():
+        if not answer.strip() or self.current_number is None:
             return False
-        saved = str(self._settings.value(self._question_pass_key(question_number), "") or "")
-        return bool(saved) and saved == self._answer_digest(answer)
+        digest = self._answer_digest(answer)
+        saved = self._passed_task_digests.get(int(question_number), "")
+        if saved and saved == digest:
+            return True
+        # Migrate older QSettings-only pass evidence once, then keep the hot
+        # editor path entirely in memory rather than querying SQLite per label.
+        legacy = str(self._settings.value(self._question_pass_key(question_number), "") or "")
+        if legacy and legacy == digest:
+            duckdb_workspace.save_task_validation(
+                self.conn,
+                self.current_number,
+                question_number,
+                answer_digest=digest,
+                passed=True,
+            )
+            self._passed_task_digests[int(question_number)] = digest
+            return True
+        return False
 
     def _set_question_passed(self, question_number: int, passed: bool) -> None:
         key = self._question_pass_key(question_number)
+        task_number = int(question_number)
+        digest = self._answer_digest(self._question_answers.get(task_number, ""))
+        saved = self._passed_task_digests.get(task_number, "")
         if passed:
-            self._settings.setValue(
-                key, self._answer_digest(self._question_answers.get(question_number, ""))
-            )
+            self._settings.setValue(key, digest)
+            if saved != digest and self.current_number is not None:
+                duckdb_workspace.save_task_validation(
+                    self.conn,
+                    self.current_number,
+                    task_number,
+                    answer_digest=digest,
+                    passed=True,
+                )
+                self._passed_task_digests[task_number] = digest
         else:
             self._settings.remove(key)
+            if saved and self.current_number is not None:
+                duckdb_workspace.save_task_validation(
+                    self.conn,
+                    self.current_number,
+                    task_number,
+                    answer_digest=digest,
+                    passed=False,
+                )
+                self._passed_task_digests.pop(task_number, None)
         self._update_question_labels()
 
     def _question_label(self, question: runner.QuestionBlock) -> str:
@@ -707,6 +785,21 @@ class DuckDBExercisesWidget(QWidget):
             f"Learning  ›  Practice  ›  DuckDB Exercises  ›  Exercise {roadmap_number(number):02d}  ›  {item['title']}"
         )
 
+        if str(progress.get("status") or "") == "Completed":
+            duckdb_workspace.seed_completed_task_validations(
+                self.conn,
+                number,
+                {
+                    question.number: self._answer_digest(
+                        self._question_answers.get(question.number, "")
+                    )
+                    for question in self._question_definitions
+                },
+            )
+        self._passed_task_digests = duckdb_workspace.task_validation_digests(
+            self.conn, number
+        )
+
         self._question_notes = {}
         legacy_notes = str(progress.get("notes") or "")
         for question in self._question_definitions:
@@ -774,8 +867,16 @@ class DuckDBExercisesWidget(QWidget):
         )
         self._loading = True
         self.question_prompt.setText(definition.prompt)
+        requirements = tuple(definition.requirements or ())
+        if requirements:
+            self.requirements_label.setText(
+                "Result requirements\n" + "\n".join(f"• {value}" for value in requirements)
+            )
+            self.requirements_label.show()
+        else:
+            self.requirements_label.clear()
+            self.requirements_label.hide()
         self.sql_editor.setPlainText(self._question_answers.get(definition.number, ""))
-        self.notes.setPlainText(self._question_notes.get(definition.number, ""))
         self._loading = False
         self.feedback.hide()
         self._populate_result(self._question_results.get(definition.number))
@@ -807,6 +908,7 @@ class DuckDBExercisesWidget(QWidget):
             self._set_question_passed(number, False)
             self.feedback.hide()
             self._populate_result(None)
+            self._autosave_timer.start()
 
     def _notes_changed(self) -> None:
         if self._loading or self._active_question_number is None:
@@ -841,12 +943,36 @@ class DuckDBExercisesWidget(QWidget):
             for item in checklist
         )
 
+    def _autosave_draft(self) -> None:
+        if self.current_number is None or self._loading:
+            return
+        try:
+            self._persist_submission_draft()
+        except Exception:
+            # Autosave is intentionally silent; explicit Run/Check/Submit paths
+            # still report actionable errors to the learner.
+            pass
+
+    def show_hint(self) -> None:
+        if self.current_number is None or not self._ensure_current_ready():
+            return
+        question_number = int(self._active_question_number or self.current_question_number())
+        key = (int(self.current_number), question_number)
+        level = self._hint_levels.get(key, 0)
+        hint = runner.task_hint(self.root, self.current_number, question_number, level)
+        self._hint_levels[key] = min(level + 1, 2)
+        self.feedback.show_message(f"Hint {min(level + 1, 3)} of 3: {hint}", "hint")
+
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt API
+        self._autosave_draft()
+        super().closeEvent(event)
+
     def run_question(self) -> None:
         if self.current_number is None:
             return
         if not self._ensure_current_ready():
             return
-        question_number = self.current_question_number()
+        question_number = int(self._active_question_number or self.current_question_number())
         full_sql = self._full_submission_sql()
         try:
             run = runner.run_question(
@@ -871,7 +997,7 @@ class DuckDBExercisesWidget(QWidget):
             return
         if not self._ensure_current_ready():
             return
-        question_number = self.current_question_number()
+        question_number = int(self._active_question_number or self.current_question_number())
         full_sql = self._full_submission_sql()
         try:
             result = runner.check_question(
@@ -885,8 +1011,11 @@ class DuckDBExercisesWidget(QWidget):
             self._question_results[question_number] = result["run"]
         self._populate_result(result.get("run"))
         self._set_question_passed(question_number, bool(result["passed"]))
+        message = self._checklist_text(result["checklist"])
+        if not result["passed"] and result.get("hint"):
+            message += "\n\nHint: " + str(result["hint"])
         self.feedback.show_message(
-            self._checklist_text(result["checklist"]),
+            message,
             "success" if result["passed"] else "hint",
         )
 
@@ -895,14 +1024,45 @@ class DuckDBExercisesWidget(QWidget):
             return None
         if not self._ensure_current_ready():
             return None
+        self._capture_current_question()
+        cached_numbers = {
+            question.number
+            for question in self._question_definitions
+            if self._question_passed(question.number)
+        }
+        pending_numbers = [
+            question.number
+            for question in self._question_definitions
+            if question.number not in cached_numbers
+        ]
+        total_count = len(self._question_definitions)
+        if not pending_numbers:
+            result = {
+                "passed": True,
+                "questions": [],
+                "passed_count": total_count,
+                "total_count": total_count,
+                "cached_numbers": sorted(cached_numbers),
+            }
+            self.feedback.show_message(
+                f"All {total_count} tasks still match their previously passed answers.",
+                "success",
+            )
+            return result
+
         full_sql = self._full_submission_sql()
         try:
-            result = runner.check_exercise(self.root, self.current_number, full_sql)
+            checked = runner.check_exercise(
+                self.root,
+                self.current_number,
+                full_sql,
+                question_numbers=pending_numbers,
+            )
         except runner.DuckDBExerciseRunnerError as exc:
             self.feedback.show_message(str(exc), "error")
             return None
         failed_details: list[str] = []
-        for question_result in result["questions"]:
+        for question_result in checked["questions"]:
             question = question_result["question"]
             self._set_question_passed(question.number, bool(question_result["passed"]))
             if question_result.get("run"):
@@ -915,18 +1075,30 @@ class DuckDBExercisesWidget(QWidget):
                 if not item.get("passed")
             ]
             failed_details.append(f"Task {question.number}: {', '.join(failed)}")
-        message = f"{result['passed_count']} of {result['total_count']} tasks passed."
+
+        passed_count = len(cached_numbers) + int(checked["passed_count"])
+        passed = passed_count == total_count
+        result = {
+            "passed": passed,
+            "questions": checked["questions"],
+            "passed_count": passed_count,
+            "total_count": total_count,
+            "cached_numbers": sorted(cached_numbers),
+        }
+        message = f"{passed_count} of {total_count} tasks passed."
+        if cached_numbers:
+            message += f" {len(cached_numbers)} unchanged task(s) used saved validation."
         if failed_details:
             message += "\n" + "\n".join(failed_details)
-        self.feedback.show_message(message, "success" if result["passed"] else "hint")
+        self.feedback.show_message(message, "success" if passed else "hint")
         selected_number = self.current_question_number()
         selected = next(
             (
                 item
-                for item in result["questions"]
+                for item in checked["questions"]
                 if item["question"].number == selected_number
             ),
-            result["questions"][0] if result["questions"] else None,
+            None,
         )
         if selected is not None:
             self._populate_result(selected.get("run"))
@@ -964,37 +1136,72 @@ class DuckDBExercisesWidget(QWidget):
             return
         if not self._ensure_current_ready():
             return
+        self.submit_button.setEnabled(False)
+        self.feedback.show_message("Submitting exercise…", "neutral")
         try:
-            self._persist_submission_draft()
-        except Exception as exc:
-            QMessageBox.critical(self, "Could not submit exercise", str(exc))
-            return
-        result = self.check_exercise()
-        if not result or not result["passed"]:
-            QMessageBox.information(
-                self,
-                "Exercise not ready",
-                "The submission was saved, but every task must pass before the exercise can be completed.",
-            )
-            return
-        try:
-            duckdb_workspace.save_progress(
+            try:
+                self._persist_submission_draft()
+            except Exception as exc:
+                QMessageBox.critical(self, "Could not submit exercise", str(exc))
+                return
+            result = self.check_exercise()
+            if not result or not result["passed"]:
+                QMessageBox.information(
+                    self,
+                    "Exercise not ready",
+                    "The submission was saved, but every task must pass before the exercise can be completed.",
+                )
+                return
+            try:
+                duckdb_workspace.save_progress(
+                    self.conn,
+                    self.root,
+                    self.current_number,
+                    status="Completed",
+                    notes=self._combined_notes(),
+                )
+            except Exception as exc:
+                QMessageBox.critical(self, "Could not submit exercise", str(exc))
+                return
+            # Submission is the final authority for the exercise. Reassert the
+            # validated task digests and repaint the selector immediately so a
+            # focused dashboard refresh cannot temporarily remove the checkmarks.
+            duckdb_workspace.seed_completed_task_validations(
                 self.conn,
-                self.root,
                 self.current_number,
-                status="Completed",
-                notes=self._combined_notes(),
+                {
+                    question.number: self._answer_digest(
+                        self._question_answers.get(question.number, "")
+                    )
+                    for question in self._question_definitions
+                },
             )
-        except Exception as exc:
-            QMessageBox.critical(self, "Could not submit exercise", str(exc))
-            return
-        self.status_combo.setCurrentText("Completed")
-        self.feedback.show_message(
-            f"All {result['total_count']} tasks passed. Exercise submitted and marked complete.",
-            "success",
-        )
-        self.changed.emit()
-        self.refresh()
+            self._passed_task_digests = duckdb_workspace.task_validation_digests(
+                self.conn, self.current_number
+            )
+            self._update_question_labels()
+
+            self._loading = True
+            self.status_combo.setCurrentText("Completed")
+            self._loading = False
+            self.feedback.show_message(
+                f"All {result['total_count']} tasks passed. Exercise submitted and marked complete.",
+                "success",
+            )
+            self._refresh_navigation_statuses()
+            # Notify the rest of the application after the DuckDB workspace has
+            # already painted its success state. The connected handler performs
+            # a focused refresh rather than a full roadmap rebuild.
+            QTimer.singleShot(0, self.changed.emit)
+        finally:
+            if self.current_number is not None:
+                progress = duckdb_workspace.progress(
+                    self.conn, self.root, self.current_number
+                )
+                readiness = self._readiness(self.current_number)
+                self.submit_button.setEnabled(
+                    bool(progress.get("status") == "Completed" or readiness.get("ready"))
+                )
 
     def previous_exercise(self) -> None:
         if self.current_number is None:

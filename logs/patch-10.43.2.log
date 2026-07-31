@@ -1,0 +1,8 @@
+Patch: 10.43.2 — Sprint performance, retrospective gates, and durable DuckDB completion
+Installed: 2026-07-30T22:03:32
+Repository: C:\Users\Dan\Documents\MEGA\Dev\GitHub\career-accelerator
+Backup: C:\Users\Dan\Documents\MEGA\Dev\GitHub\career-accelerator\patch_backups\v10.43.2-20260730-220331-394824
+Compiled Python files: 94
+Database files changed during installation: no
+Startup migration: adds durable DuckDB completion/task-validation tables
+Status: success

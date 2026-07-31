@@ -14,6 +14,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex06_orders`
 - `ex06_payments`
 
+## Scenario
+
+A reporting team wants to reshape operational customer and order data into a simple fact-and-dimension model without changing totals.
+
 ## Tasks
 
 ### Task 1
@@ -22,8 +26,8 @@ Return a customer dimension-style result with one row per customer.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`, `customer_name`, `region`, `signup_date`
-- **Expected rows:** 10
+- Return columns in this order: `customer_id`, `customer_name`, `region`, `signup_date`.
+- Return 10 rows.
 
 ### Task 2
 
@@ -31,8 +35,8 @@ Return an order fact-style result with order measures and customer key.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `customer_id`, `order_date`, `order_total`, `order_status`
-- **Expected rows:** 14
+- Return columns in this order: `order_id`, `customer_id`, `order_date`, `order_total`, `order_status`.
+- Return 14 rows.
 
 ### Task 3
 
@@ -40,8 +44,8 @@ Join the proposed fact and dimension outputs to summarize revenue by region.
 
 **Result requirements**
 
-- **Return columns:** `region`, `order_count`, `order_revenue`
-- **Expected rows:** 4
+- Return columns in this order: `region`, `order_count`, `order_revenue`.
+- Return 4 rows.
 
 ### Task 4
 
@@ -49,15 +53,15 @@ Validate that the dimension key remains unique and report any duplicates.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`, `duplicate_count`
-- **Expected rows:** 0
-## Completion evidence
+- Return columns in this order: `customer_id`, `duplicate_count`.
+- Return 0 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

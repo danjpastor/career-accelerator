@@ -123,14 +123,14 @@ AUTHORED_TASK_BY_ID = {
     },
     19: {
         1: (
-            "Check what each order would be worth before discounts. Return "
-            "`order_id`, `quantity`, `unit_price`, and `quantity * unit_price` "
-            "as `line_value`."
+            "The merchandising team wants to calculate the expected value of each "
+            "order from its quantity and unit price. Return `order_id`, `quantity`, "
+            "`unit_price`, and calculate `quantity * unit_price` as `line_value`."
         ),
         2: (
-            "Prepare a sales report with consistent headings. Return `order_id`; "
-            "rename `region` to `sales_region`, `sales_channel` to `channel`, "
-            "and `revenue` to `recorded_revenue`."
+            "The sales manager wants consistent column headings in a shared order "
+            "report. Return `order_id`; rename `region` to `sales_region`, "
+            "`sales_channel` to `channel`, and `revenue` to `recorded_revenue`."
         ),
         3: (
             "Check whether the revenue stored for each order matches quantity "
@@ -785,6 +785,20 @@ def _audited_prompt_specs(
         authored = AUTHORED_TASK_BY_ID.get(int(internal_id), {}).get(int(number))
         if authored:
             spec["task"] = str(authored).strip()
+        try:
+            from career_app.services import duckdb_exercise_runner as _runner
+            contract = _runner.task_contract(root, int(internal_id), int(number))
+        except Exception:
+            contract = {}
+        if contract:
+            spec["task"] = str(contract.get("prompt") or spec["task"]).strip()
+            spec["columns"] = tuple(str(value) for value in contract.get("columns") or spec.get("columns") or ())
+            spec["rows"] = contract.get("expected_rows", spec.get("rows"))
+            spec["aliases"] = tuple(
+                column for column in spec["columns"]
+                if column.casefold() not in {item.casefold() for item in source_columns}
+            )
+            spec["requirements"] = tuple(str(value) for value in contract.get("requirements") or ())
         prompts[number] = spec
     return prompts
 
@@ -841,7 +855,15 @@ def _rewrite_readme_text(root: Path, internal_id: int, text: str, starter: str, 
         f"**Concepts:** {item.get('concepts', '')}",
         result,
     )
-    scenario = str(SCENARIO_BY_ID.get(int(internal_id), "")).strip()
+    try:
+        from career_app.services import duckdb_exercise_runner as _runner
+        exercise_contract = _runner.exercise_contract(root, int(internal_id))
+    except Exception:
+        exercise_contract = {}
+    scenario = str(
+        exercise_contract.get("scenario")
+        or SCENARIO_BY_ID.get(int(internal_id), "")
+    ).strip()
     if scenario:
         scenario_block = "## Scenario\n\n" + scenario + "\n\n"
         scenario_pattern = re.compile(r"(?ms)^##\s+Scenario\s*\n.*?(?=^##\s+|\Z)")
@@ -853,26 +875,50 @@ def _rewrite_readme_text(root: Path, internal_id: int, text: str, starter: str, 
                 result = result[:tasks_heading.start()] + scenario_block + result[tasks_heading.start():]
             else:
                 result = result.rstrip() + "\n\n" + scenario_block
+    if int(internal_id) == 12:
+        starting_query = (
+            "## Starting query\n\n"
+            "Refactor this query inside the SQL editor. The query is intentionally "
+            "compressed so its logic is difficult to review.\n\n"
+            "```sql\n"
+            "SELECT campaign_channel, SUM(spend), SUM(revenue), "
+            "SUM(revenue) - SUM(spend), "
+            "ROUND(SUM(revenue) / NULLIF(SUM(spend), 0), 4)\n"
+            "FROM ex12_campaign_performance\n"
+            "WHERE campaign_date >= '2026-06-01'\n"
+            "GROUP BY campaign_channel\n"
+            "HAVING SUM(spend) > 500\n"
+            "ORDER BY 5 DESC;\n"
+            "```\n\n"
+        )
+        starting_pattern = re.compile(
+            r"(?ms)^##\s+Starting query\s*\n.*?(?=^##\s+|\Z)"
+        )
+        if starting_pattern.search(result):
+            result = starting_pattern.sub(starting_query, result, count=1)
+        else:
+            tasks_heading = re.search(r"(?m)^##\s+(?:Questions|Tasks)\s*$", result)
+            if tasks_heading:
+                result = result[:tasks_heading.start()] + starting_query + result[tasks_heading.start():]
+            else:
+                result = result.rstrip() + "\n\n" + starting_query
+
     task_lines = ["## Tasks", ""]
     for number in sorted(specs):
         spec = specs[number]
         task_lines.extend([f"### Task {number}", "", str(spec["task"]), ""])
-        requirements: list[str] = []
-        columns = tuple(spec.get("columns") or ())
-        aliases = tuple(spec.get("aliases") or ())
-        expected_rows = spec.get("rows")
-        if columns:
-            requirements.append(
-                "- **Return columns:** "
-                + ", ".join(f"`{column}`" for column in columns)
-            )
-        if aliases:
-            requirements.append(
-                "- **Exact names for new columns:** "
-                + ", ".join(f"`{column}`" for column in aliases)
-            )
-        if expected_rows is not None:
-            requirements.append(f"- **Expected rows:** {expected_rows}")
+        requirements = [f"- {value}" for value in spec.get("requirements") or ()]
+        if not requirements:
+            columns = tuple(spec.get("columns") or ())
+            expected_rows = spec.get("rows")
+            if columns:
+                requirements.append(
+                    "- Return columns in this order: "
+                    + ", ".join(f"`{column}`" for column in columns)
+                    + "."
+                )
+            if expected_rows is not None:
+                requirements.append(f"- Return {expected_rows} row(s).")
         if requirements:
             task_lines.extend(["**Result requirements**", "", *requirements, ""])
     replacement = "\n".join(task_lines).rstrip() + "\n"
@@ -881,6 +927,21 @@ def _rewrite_readme_text(root: Path, internal_id: int, text: str, starter: str, 
         result = pattern.sub(replacement, result, count=1)
     else:
         result = result.rstrip() + "\n\n" + replacement
+
+    completion = (
+        "\n## Complete the exercise\n\n"
+        "1. Complete each task in the SQL editor.\n"
+        "2. Use **Check Task** for specific feedback and hints.\n"
+        "3. Use **Check Exercise** after every task passes.\n"
+        "4. Select **Submit Exercise** to record completion.\n\n"
+    )
+    completion_pattern = re.compile(
+        r"(?ms)^##\s+(?:Completion evidence|Complete the exercise)\s*\n.*?(?=^##\s+|\Z)"
+    )
+    if completion_pattern.search(result):
+        result = completion_pattern.sub(completion, result, count=1)
+    else:
+        result = result.rstrip() + "\n\n" + completion
     return result
 
 def rewrite_static_content(root: Path) -> dict[str, Any]:
@@ -999,6 +1060,7 @@ def _install_runner_prompt_audit() -> None:
     original_starter = runner.starter_sql
     original_instructions = runner.instructions_markdown
     original_validation = runner.validation_markdown
+    original_question_definitions = runner.question_definitions
 
     def starter_sql(root: Path, number: int) -> str:
         root = Path(root)
@@ -1007,20 +1069,10 @@ def _install_runner_prompt_audit() -> None:
         return _rewrite_starter_text(root, int(number), raw, validation)
 
     def question_definitions(root: Path, number: int):
-        root = Path(root)
-        internal_id = int(number)
-        raw_starter = original_starter(root, internal_id)
-        validation = original_validation(root, internal_id)
-        questions = runner.parse_questions(starter_sql(root, internal_id))
-        if not questions:
-            raise runner.DuckDBExerciseRunnerError(
-                "The starter SQL does not contain any Q1, Q2, ... task sections."
-            )
-        prompts = _audited_prompts(root, internal_id, raw_starter, validation)
-        return [
-            replace(question, prompt=prompts.get(question.number, question.prompt))
-            for question in questions
-        ]
+        # The runner owns the audited task contract. Keep prompts, requirements,
+        # and hints together instead of rebuilding a long display paragraph here.
+        return original_question_definitions(Path(root), int(number))
+
 
     def instructions_markdown(root: Path, number: int) -> str:
         root = Path(root)

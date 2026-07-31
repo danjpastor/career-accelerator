@@ -4109,6 +4109,34 @@ def _has_completion_evidence(
         (int(task_id),),
     ).fetchone()
     managed_key = str(metadata["managed_key"] or "") if metadata is not None else ""
+
+    # Managed DuckDB roadmap rows use negative sort orders and are intentionally
+    # detached from the adaptive SQL track.  repair_track_links() must therefore
+    # consult the exercise's durable completion records before treating a
+    # completed row as a false completion.  Without this branch, every launch
+    # reset the sprint row to incomplete even though the submitted exercise was
+    # still completed in duckdb_exercise_progress / duckdb_completion_evidence.
+    duckdb_number = None
+    match = re.fullmatch(r"roadmap_v1026:duckdb:(\d+)", managed_key.casefold())
+    if match:
+        duckdb_number = int(match.group(1))
+    if duckdb_number is None:
+        duckdb_number = exercise_number_for_label(label)
+    if duckdb_number is not None:
+        progress = conn.execute(
+            """SELECT 1
+               FROM duckdb_exercise_progress
+               WHERE exercise_number=? AND status='Completed'
+               UNION ALL
+               SELECT 1
+               FROM duckdb_completion_evidence
+               WHERE exercise_number=?
+               LIMIT 1""",
+            (int(duckdb_number), int(duckdb_number)),
+        ).fetchone()
+        if progress is not None:
+            return True
+
     if managed_key.casefold().startswith("datacamp:"):
         chapter_key = managed_key.split(":", 1)[1]
         progress = conn.execute(
@@ -4598,6 +4626,14 @@ def undo_completion(
                    completed_date=NULL,
                    updated_at=CURRENT_TIMESTAMP
                WHERE exercise_number=?""",
+            (duckdb_number,),
+        )
+        conn.execute(
+            "DELETE FROM duckdb_completion_evidence WHERE exercise_number=?",
+            (duckdb_number,),
+        )
+        conn.execute(
+            "DELETE FROM duckdb_task_validation WHERE exercise_number=?",
             (duckdb_number,),
         )
         conn.execute(

@@ -394,6 +394,87 @@ def _align_existing_task(
     return task_id
 
 
+
+def reconcile_duckdb_completion(conn: sqlite3.Connection, number: int) -> dict:
+    """Update only the completed exercise and its immediate dependents.
+
+    Completing one exercise previously ran the full roadmap reconciliation for
+    all DuckDB, SQL interview, and Python requirements. That work is useful at
+    startup and full synchronization, but it is unnecessary on the Submit
+    button's UI thread. This targeted path preserves the same durable state and
+    makes the next sequential exercise eligible without rewriting unrelated
+    tasks or sort orders.
+    """
+    ensure_schema(conn)
+    number = int(number)
+    item = DUCKDB_EXERCISES[number]
+    state = _program_state(conn)
+    current_week = max(1, int(state["current_week"] if state else 1))
+
+    key = f"duckdb:{number}"
+    _upsert_requirement(
+        conn,
+        key,
+        "duckdb",
+        item["title"],
+        int(item.get("week", 99)),
+        str(number),
+        "Completed",
+        None,
+    )
+    _complete_catchup(conn, key)
+
+    updated_dependents: list[int] = []
+    for candidate, candidate_item in DUCKDB_EXERCISES.items():
+        prior = tuple(
+            int(value)
+            for value in dict(candidate_item.get("prerequisites") or {}).get(
+                "prior_exercises", ()
+            )
+        )
+        if number not in prior:
+            continue
+        readiness = duckdb_readiness(conn, int(candidate))
+        due_week = int(candidate_item.get("week", 99))
+        status = (
+            "Overdue" if readiness["ready"] and due_week <= current_week
+            else "Locked" if due_week <= current_week
+            else "Future"
+        )
+        reason = readiness["reason"] or (
+            None if readiness["ready"] else f"Expected by Week {due_week}."
+        )
+        dependent_key = f"duckdb:{int(candidate)}"
+        _upsert_requirement(
+            conn,
+            dependent_key,
+            "duckdb",
+            candidate_item["title"],
+            due_week,
+            str(candidate),
+            status,
+            reason,
+        )
+        row = _task_for_managed_key(conn, f"roadmap_v1026:{dependent_key}")
+        if row is not None and not bool(row["completed"]):
+            conn.execute(
+                """UPDATE task_metadata
+                   SET prerequisite_state=?, prerequisite_reason=?
+                   WHERE task_id=?""",
+                (
+                    "Ready" if readiness["ready"] else "Blocked",
+                    None if readiness["ready"] else readiness["reason"],
+                    int(row["id"]),
+                ),
+            )
+            updated_dependents.append(int(candidate))
+
+    conn.commit()
+    return {
+        "completed": number,
+        "updated_dependents": updated_dependents,
+    }
+
 def reconcile(conn: sqlite3.Connection, root=None) -> dict:
     del root
     ensure_schema(conn)

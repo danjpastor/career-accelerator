@@ -1,4 +1,4 @@
--- DuckDB Exercise 03: Filter support and feedback records
+-- DuckDB Exercise 03: Filter patterns, ranges, and missing values
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

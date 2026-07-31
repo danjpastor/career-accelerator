@@ -41,7 +41,7 @@ DESCRIBE ex14_subscriptions;
 
 
 -- -----------------------------------------------------------------
--- Q7. Explain in a SQL comment why cohort metrics need one consistent starting date.
+-- Q7. Add a SQL comment explaining why cohort metrics need one consistent starting date, then return the number of cohort rows as `cohort_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

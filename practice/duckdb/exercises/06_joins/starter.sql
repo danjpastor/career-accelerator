@@ -1,4 +1,4 @@
--- DuckDB Exercise 06: Combine customers, orders, and payments
+-- DuckDB Exercise 06: Join customers, orders, and payments
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -9,13 +9,13 @@ DESCRIBE ex06_payments;
 
 
 -- -----------------------------------------------------------------
--- Q1. INNER JOIN customers to orders and return customer name with each order.
+-- Q1. Check how many orders have a matching customer record. Use an inner join and return the count as `matched_orders`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q2. LEFT JOIN customers to orders so customers without orders remain visible.
+-- Q2. Check that a left join keeps customers who have no orders. Return the number of rows produced by the join as `customer_order_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
@@ -33,13 +33,13 @@ DESCRIBE ex06_payments;
 
 
 -- -----------------------------------------------------------------
--- Q5. Create a three-table result with customer, order total, payment amount, and payment method.
+-- Q5. Join customers, orders, and payments, then count the rows in the combined result. Return the count as `joined_payment_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q6. Calculate delivered-order revenue by region.
+-- Q6. Show delivered-order revenue by customer region. Return `region` and the total as `delivered_revenue`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

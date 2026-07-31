@@ -15,31 +15,31 @@ DESCRIBE ex08_time_entries;
 
 
 -- -----------------------------------------------------------------
--- Q2. Calculate actual logged hours per shot.
+-- Q2. Show actual logged hours for each shot. Return `shot_id` and total hours as `actual_hours`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q3. Compare estimated and actual hours for completed shots.
+-- Q3. Count completed shots whose actual logged hours exceeded their estimate. Return the result as `over_estimate_shots`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q4. Calculate on-time completion rate by department.
+-- Q4. Calculate the on-time completion percentage for each department. Round to two decimal places and name it `on_time_completion_pct`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q5. Create a risk flag using status, due date, revision count, and hours variance.
+-- Q5. Count unfinished shots that are overdue, have at least three revisions, or have logged more hours than estimated. Return the count as `risk_shots`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q6. Summarize estimated hours, actual hours, and revisions by project.
+-- Q6. Summarize workload by project. Return `project_id`, total `estimated_hours`, total `actual_hours`, and total `revisions`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

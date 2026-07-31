@@ -5,7 +5,7 @@
 
 -- -----------------------------------------------------------------
 
--- Q1. Check what each order would be worth before discounts. Return `order_id`, `quantity`, `unit_price`, and `quantity * unit_price` as `line_value`.
+-- Q1. The merchandising team wants to calculate the expected value of each order from its quantity and unit price. Return `order_id`, `quantity`, `unit_price`, and calculate `quantity * unit_price` as `line_value`.
 
 SELECT order_id,
     quantity,
@@ -15,7 +15,7 @@ FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q2. Prepare a sales report with consistent headings. Return `order_id`; rename `region` to `sales_region`, `sales_channel` to `channel`, and `revenue` to `recorded_revenue`.
+-- Q2. The sales manager wants consistent column headings in a shared order report. Return `order_id`; rename `region` to `sales_region`, `sales_channel` to `channel`, and `revenue` to `recorded_revenue`.
 
 SELECT
     order_id,

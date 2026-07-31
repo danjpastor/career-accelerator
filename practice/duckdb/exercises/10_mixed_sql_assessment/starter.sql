@@ -1,4 +1,4 @@
--- DuckDB Exercise 32: Complete an end-to-end workforce SQL assessment
+-- DuckDB Exercise 32: Mixed workforce assessment
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -15,31 +15,31 @@ DESCRIBE ex10_performance_reviews;
 
 
 -- -----------------------------------------------------------------
--- Q2. Calculate salary expense and headcount by department, retaining departments with no employees.
+-- Q2. Show workforce cost by department while keeping departments with no employees. Return `department_name`, employee `headcount`, and total `salary_expense`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q3. Calculate department salary expense as a percentage of annual budget.
+-- Q3. Calculate salary expense as a percentage of annual budget for each department. Round to two decimal places and name it `salary_budget_pct`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q4. Return each employee's manager name using a self join.
+-- Q4. Use a self join to connect each employee to their manager, then return the number of employee rows as `employee_count`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q5. Use a CTE to calculate each employee's average performance score.
+-- Q5. Use a CTE to calculate each employee’s average performance score. Return the number of employees as `employee_count` and the overall average of those scores, rounded to two decimal places, as `average_performance_score`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q6. Rank employees within each department by average performance using `DENSE_RANK`.
+-- Q6. Rank employees within each department by average performance using `DENSE_RANK`. Return `employee_id` and the rank as `performance_rank`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
@@ -51,6 +51,6 @@ DESCRIBE ex10_performance_reviews;
 
 
 -- -----------------------------------------------------------------
--- Q8. Create a risk flag for high salary, low performance, or missing department.
+-- Q8. Count employees flagged because they have no department, earn at least 115000, or have an average performance score below 4.0. Return the count as `risk_employee_count`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------

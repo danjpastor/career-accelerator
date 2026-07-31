@@ -1,4 +1,4 @@
-# DuckDB Exercise 11: Group service results with CASE
+# DuckDB Exercise 11: Segment service performance
 
 **Week:** 4
 **Estimated time:** 40 minutes  
@@ -6,7 +6,7 @@
 
 ## Scenario
 
-A service director wants SLA compliance and resolution-speed summaries that are easy to explain.
+A service director is reviewing response-time commitments, resolution speed, customer satisfaction, and reopened requests by department.
 
 ## Tables
 
@@ -24,9 +24,8 @@ Create an SLA target with CASE: Critical 2h, High 4h, Medium 8h, Low 12h.
 
 **Result requirements**
 
-- **Return columns:** `severity`, `target`
-- **Exact names for new columns:** `target`
-- **Expected rows:** 4
+- Return columns in this order: `severity`, `target`.
+- Return 4 rows.
 
 ### Task 2
 
@@ -34,66 +33,61 @@ Create an `sla_status` of `Met` or `Missed` by comparing first response to the t
 
 **Result requirements**
 
-- **Return columns:** `met`, `missed`
-- **Exact names for new columns:** `met`, `missed`
-- **Expected rows:** 1
+- Return columns in this order: `met`, `missed`.
+- Return 1 row.
 
 ### Task 3
 
-Count requests by department and SLA status.
+Show how many service requests met or missed the SLA in each department. Return `department`, `sla_status`, and the count as `request_count`.
 
 **Result requirements**
 
-- **Return columns:** `department`, `sla_status`, `count_star()`
-- **Exact names for new columns:** `sla_status`, `count_star()`
-- **Expected rows:** 6
+- Return columns in this order: `department`, `sla_status`, `request_count`.
+- Return 6 rows.
 
 ### Task 4
 
-Calculate SLA compliance percentage by department.
+Calculate the percentage of requests that met the SLA in each department. Round to two decimal places and name it `sla_compliance_pct`.
 
 **Result requirements**
 
-- **Return columns:** `department`, `round(((100.0 * sum(CASE  WHEN ((first_response_hours <= CASE  WHEN ((severity = 'Critical')) THEN (2) WHEN ((severity = 'High')) THEN (4) WHEN ((severity = 'Medium')) THEN (8) ELSE 12 END)) THEN (1) ELSE 0 END)) / count_star()), 2)`
-- **Exact names for new columns:** `round(((100.0 * sum(CASE  WHEN ((first_response_hours <= CASE  WHEN ((severity = 'Critical')) THEN (2) WHEN ((severity = 'High')) THEN (4) WHEN ((severity = 'Medium')) THEN (8) ELSE 12 END)) THEN (1) ELSE 0 END)) / count_star()), 2)`
-- **Expected rows:** 3
+- Return columns in this order: `department`, `sla_compliance_pct`.
+- Return 3 rows.
+- Round the requested result to 2 decimal places.
 
 ### Task 5
 
-Create resolution bands: `Fast` under 12 hours, `Standard` from 12 through 24, and `Slow` over 24.
+Group requests into `Fast` under 12 hours, `Standard` from 12 through 24 hours, and `Slow` over 24 hours. Return each `resolution_band` and its `request_count`.
 
 **Result requirements**
 
-- **Return columns:** `band`, `count_star()`
-- **Exact names for new columns:** `band`, `count_star()`
-- **Expected rows:** 3
+- Return columns in this order: `resolution_band`, `request_count`.
+- Return 3 rows.
 
 ### Task 6
 
-Return average CSAT by resolution band.
+Compare customer satisfaction across the three resolution bands. Return `resolution_band` and average `csat_score` rounded to two decimal places as `average_csat`.
 
 **Result requirements**
 
-- **Return columns:** `band`, `round(avg(csat_score), 2)`
-- **Exact names for new columns:** `band`, `round(avg(csat_score), 2)`
-- **Expected rows:** 3
+- Return columns in this order: `resolution_band`, `average_csat`.
+- Return 3 rows.
+- Round the requested result to 2 decimal places.
 
 ### Task 7
 
-Return reopened request count and reopen rate by department.
+For each department, count reopened requests and calculate the reopen rate as a percentage. Return `reopened_requests` and `reopen_rate_pct`, rounded to two decimal places.
 
 **Result requirements**
 
-- **Return columns:** `department`, `sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)`, `round(((100.0 * sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)) / count_star()), 2)`
-- **Exact names for new columns:** `sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)`, `round(((100.0 * sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)) / count_star()), 2)`
-- **Expected rows:** 3
-## Completion evidence
+- Return columns in this order: `department`, `reopened_requests`, `reopen_rate_pct`.
+- Return 3 rows.
+- Round the requested result to 2 decimal places.
 
-1. Copy `starter.sql` to:
-   `practice/duckdb/submissions/ex05_case_grouped_summaries.sql`
-2. Answer every question in that copied file.
-3. Run each query successfully in DuckDB.
-4. Compare your results with `validation.md` only after attempting the questions.
-5. Add a short comment at the bottom explaining one decision or mistake you corrected.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

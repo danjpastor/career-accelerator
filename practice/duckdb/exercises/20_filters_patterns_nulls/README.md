@@ -1,4 +1,4 @@
-# DuckDB Exercise 03: Filter support and feedback records
+# DuckDB Exercise 03: Filter patterns, ranges, and missing values
 
 **Week:** 3
 **Estimated time:** 40 minutes
@@ -15,7 +15,7 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 ## Scenario
 
-A support-operations analyst is checking service records before the weekly report is prepared. The analyst needs to identify active priority tickets, missing resolution times, and feedback submitted by email.
+A support-operations analyst is preparing the weekly service report and needs to identify active priority tickets, missing resolution times, and email feedback.
 
 ## Tasks
 
@@ -25,8 +25,8 @@ List the ticket statuses currently used by the support team. Return each unique 
 
 **Result requirements**
 
-- **Return columns:** `status`
-- **Expected rows:** 3
+- Return columns in this order: `status`.
+- Return 3 rows.
 
 ### Task 2
 
@@ -34,8 +34,8 @@ Find high-priority tickets that are still active. Return `ticket_id`, `priority`
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`, `priority`, `status`
-- **Expected rows:** 5
+- Return columns in this order: `ticket_id`, `priority`, `status`.
+- Return 5 rows.
 
 ### Task 3
 
@@ -43,8 +43,8 @@ Find tickets that do not have a recorded resolution time. Return `ticket_id`, `s
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`, `status`, `resolution_hours`
-- **Expected rows:** 9
+- Return columns in this order: `ticket_id`, `status`, `resolution_hours`.
+- Return 9 rows.
 
 ### Task 4
 
@@ -52,15 +52,15 @@ Find feedback submitted through email, even when the channel text uses different
 
 **Result requirements**
 
-- **Return columns:** `response_id`, `channel_raw`
-- **Expected rows:** 6
-## Completion evidence
+- Return columns in this order: `response_id`, `channel_raw`.
+- Return 6 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

@@ -1,0 +1,4329 @@
+{
+  "version": 1,
+  "exercises": {
+    "01_select_filter_sort_limit": {
+      "scenario": "A customer-support manager is preparing the daily service queue. The manager needs a clear ticket list, the most urgent open work, and a few simple views for follow-up.",
+      "tasks": {
+        "1": {
+          "prompt": "Prepare the manager's basic ticket list. Return `ticket_id`, `customer_name`, and `status` for every ticket.",
+          "columns": [
+            "ticket_id",
+            "customer_name",
+            "status"
+          ],
+          "expected_rows": 20,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`, `customer_name`, `status`.",
+            "Return 20 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `ticket_id`, `customer_name`, `status` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Find the tickets that are still open. Return only `ticket_id`.",
+          "columns": [
+            "ticket_id"
+          ],
+          "expected_rows": 6,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`.",
+            "Return 6 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `ticket_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Find active tickets that need the fastest attention. Return only `ticket_id` for tickets with High or Urgent priority whose status is Open or Pending.",
+          "columns": [
+            "ticket_id"
+          ],
+          "expected_rows": 5,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`.",
+            "Return 5 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `ticket_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Find tickets created after June 15, 2026. Return only `ticket_id`.",
+          "columns": [
+            "ticket_id"
+          ],
+          "expected_rows": 10,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`.",
+            "Return 10 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `ticket_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Review how long closed tickets took to resolve. Return `ticket_id` and `resolution_hours`, sorted from longest to shortest.",
+          "columns": [
+            "ticket_id",
+            "resolution_hours"
+          ],
+          "expected_rows": 11,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`, `resolution_hours`.",
+            "Return 11 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "ORDER BY"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ORDER BY.",
+            "Make the final SELECT return exactly `ticket_id`, `resolution_hours` in that order."
+          ],
+          "order_sensitive": true
+        },
+        "6": {
+          "prompt": "Show the five closed tickets with the highest satisfaction scores. Return `ticket_id` and `satisfaction_score`; when scores tie, show the newest ticket first.",
+          "columns": [
+            "ticket_id",
+            "satisfaction_score"
+          ],
+          "expected_rows": 5,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`, `satisfaction_score`.",
+            "Return 5 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `ticket_id`, `satisfaction_score` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Find open Billing tickets for follow-up. Return only `ticket_id`, sorted from oldest to newest.",
+          "columns": [
+            "ticket_id"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`.",
+            "Return 4 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "ORDER BY"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ORDER BY.",
+            "Make the final SELECT return exactly `ticket_id` in that order."
+          ],
+          "order_sensitive": true
+        }
+      }
+    },
+    "02_aggregations_grouping_having": {
+      "scenario": "A sales manager is preparing a weekly summary of retail orders. The manager needs overall totals, regional performance, channel volume, and discount patterns.",
+      "tasks": {
+        "1": {
+          "prompt": "Count the orders in the sales file. Return the count as `orders`.",
+          "columns": [
+            "orders"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `orders`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `orders` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Calculate the revenue recorded across all orders. Return it as `revenue`.",
+          "columns": [
+            "revenue"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `revenue`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "The sales manager needs one average order value for the weekly summary. Calculate the average of `revenue`, round it to two decimal places, and name it `average_revenue`.",
+          "columns": [
+            "average_revenue"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `average_revenue`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `average_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Show order volume and revenue for each region. Return `region`, the order count as `orders`, and total revenue as `revenue`.",
+          "columns": [
+            "region",
+            "orders",
+            "revenue"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `orders`, `revenue`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `region`, `orders`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Find sales channels that handled more than five orders. Return `sales_channel` and the order count as `orders`.",
+          "columns": [
+            "sales_channel",
+            "orders"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `sales_channel`, `orders`.",
+            "Return 2 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `sales_channel`, `orders` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Compare typical discount levels across product categories. Calculate the average `discount_pct` for each `product_category`, round it to two decimal places, and name it `average_discount`.",
+          "columns": [
+            "product_category",
+            "average_discount"
+          ],
+          "expected_rows": 4,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `product_category`, `average_discount`.",
+            "Return 4 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `product_category`, `average_discount` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Find the region that generated the most revenue. Return `region` and total `revenue`.",
+          "columns": [
+            "region",
+            "revenue"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `revenue`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `region`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "03_nulls_case_cleaning": {
+      "scenario": "A customer-experience export contains blanks, inconsistent labels, invalid numbers, and unreliable yes-or-no values. The analytics team must clean it before reporting.",
+      "tasks": {
+        "1": {
+          "prompt": "Before cleaning the feedback file, count the distinct trimmed labels in `channel_raw` and `resolved_raw`. Name the results `distinct_channel_labels` and `distinct_resolved_labels`.",
+          "columns": [
+            "distinct_channel_labels",
+            "distinct_resolved_labels"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `distinct_channel_labels`, `distinct_resolved_labels`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT.",
+            "Make the final SELECT return exactly `distinct_channel_labels`, `distinct_resolved_labels` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Standardize `channel_raw` with `UPPER(TRIM(...))`, turn blank values into NULL, and count the rows that remain blank. Name the result `blank_channel_rows`.",
+          "columns": [
+            "blank_channel_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `blank_channel_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `blank_channel_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Convert `rating_raw` to a number safely, keep values from 1 through 5, and count the valid ratings. Name the result `valid_rating_rows`.",
+          "columns": [
+            "valid_rating_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `valid_rating_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `valid_rating_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Convert `response_minutes_raw` to a number safely, treat invalid or negative values as NULL, and count the valid nonnegative response times. Name the result `valid_response_time_rows`.",
+          "columns": [
+            "valid_response_time_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `valid_response_time_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `valid_response_time_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Standardize common true and false values in `resolved_raw`. Return the true count as `resolved_yes_rows` and the false count as `resolved_no_rows`; leave unknown values out of both counts.",
+          "columns": [
+            "resolved_yes_rows",
+            "resolved_no_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `resolved_yes_rows`, `resolved_no_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `resolved_yes_rows`, `resolved_no_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Standardize `issue_type_raw` to title case, replace missing values with `Unknown`, and count the rows labeled `Unknown`. Name the result `unknown_issue_rows`.",
+          "columns": [
+            "unknown_issue_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `unknown_issue_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "CASE"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around CASE.",
+            "Make the final SELECT return exactly `unknown_issue_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Build the cleaned feedback result and count the rows where `quality_issue_flag` identifies a problem. Name the result `quality_issue_rows`.",
+          "columns": [
+            "quality_issue_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `quality_issue_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LAG"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LAG.",
+            "Make the final SELECT return exactly `quality_issue_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "04_business_metrics": {
+      "scenario": "Leadership needs a June 30, 2026 subscription snapshot with clearly defined recurring-revenue and churn metrics.",
+      "tasks": {
+        "1": {
+          "prompt": "Leadership needs the monthly recurring revenue from subscriptions active on June 30, 2026. Return the total as `active_mrr`.",
+          "columns": [
+            "active_mrr"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `active_mrr`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LEAD"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LEAD.",
+            "Make the final SELECT return exactly `active_mrr` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Count the subscriptions active on June 30, 2026. Return the result as `active_subscriptions`.",
+          "columns": [
+            "active_subscriptions"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `active_subscriptions`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `active_subscriptions` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Calculate average monthly revenue per active subscription on June 30, 2026. Round it to two decimal places and name it `average_revenue_per_subscription`.",
+          "columns": [
+            "average_revenue_per_subscription"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `average_revenue_per_subscription`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `average_revenue_per_subscription` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Show active monthly recurring revenue for each plan on June 30, 2026. Return `plan` and the total as `active_mrr`.",
+          "columns": [
+            "plan",
+            "active_mrr"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `plan`, `active_mrr`.",
+            "Return 3 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `plan`, `active_mrr` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Count subscriptions cancelled during June 2026. Return the result as `june_cancellations`.",
+          "columns": [
+            "june_cancellations"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `june_cancellations`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `june_cancellations` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Calculate June logo churn as June cancellations divided by subscriptions active at the start of June. Return a percentage rounded to two decimal places as `june_logo_churn_pct`.",
+          "columns": [
+            "june_logo_churn_pct"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `june_logo_churn_pct`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `june_logo_churn_pct` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Show each region’s share of active monthly recurring revenue. Return `region` and the percentage rounded to two decimal places as `active_mrr_share_pct`.",
+          "columns": [
+            "region",
+            "active_mrr_share_pct"
+          ],
+          "expected_rows": 4,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `region`, `active_mrr_share_pct`.",
+            "Return 4 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `region`, `active_mrr_share_pct` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "05_case_grouped_summaries": {
+      "scenario": "A service director is reviewing response-time commitments, resolution speed, customer satisfaction, and reopened requests by department.",
+      "tasks": {
+        "1": {
+          "prompt": "Create an SLA target with CASE: Critical 2h, High 4h, Medium 8h, Low 12h.",
+          "columns": [
+            "severity",
+            "target"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `severity`, `target`.",
+            "Return 4 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "CASE"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around CASE.",
+            "Make the final SELECT return exactly `severity`, `target` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Create an `sla_status` of `Met` or `Missed` by comparing first response to the target.",
+          "columns": [
+            "met",
+            "missed"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `met`, `missed`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `met`, `missed` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Show how many service requests met or missed the SLA in each department. Return `department`, `sla_status`, and the count as `request_count`.",
+          "columns": [
+            "department",
+            "sla_status",
+            "request_count"
+          ],
+          "expected_rows": 6,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `department`, `sla_status`, `request_count`.",
+            "Return 6 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `department`, `sla_status`, `request_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Calculate the percentage of requests that met the SLA in each department. Round to two decimal places and name it `sla_compliance_pct`.",
+          "columns": [
+            "department",
+            "sla_compliance_pct"
+          ],
+          "expected_rows": 3,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `department`, `sla_compliance_pct`.",
+            "Return 3 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `department`, `sla_compliance_pct` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Group requests into `Fast` under 12 hours, `Standard` from 12 through 24 hours, and `Slow` over 24 hours. Return each `resolution_band` and its `request_count`.",
+          "columns": [
+            "resolution_band",
+            "request_count"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `resolution_band`, `request_count`.",
+            "Return 3 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `resolution_band`, `request_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Compare customer satisfaction across the three resolution bands. Return `resolution_band` and average `csat_score` rounded to two decimal places as `average_csat`.",
+          "columns": [
+            "resolution_band",
+            "average_csat"
+          ],
+          "expected_rows": 3,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `resolution_band`, `average_csat`.",
+            "Return 3 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `resolution_band`, `average_csat` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "For each department, count reopened requests and calculate the reopen rate as a percentage. Return `reopened_requests` and `reopen_rate_pct`, rounded to two decimal places.",
+          "columns": [
+            "department",
+            "reopened_requests",
+            "reopen_rate_pct"
+          ],
+          "expected_rows": 3,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `department`, `reopened_requests`, `reopen_rate_pct`.",
+            "Return 3 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `department`, `reopened_requests`, `reopen_rate_pct` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "06_joins": {
+      "scenario": "Finance and Customer Success need one reliable view that connects customers, orders, and payments without dropping or duplicating important records.",
+      "tasks": {
+        "1": {
+          "prompt": "Check how many orders have a matching customer record. Use an inner join and return the count as `matched_orders`.",
+          "columns": [
+            "matched_orders"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `matched_orders`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "INNER JOIN"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around INNER JOIN.",
+            "Make the final SELECT return exactly `matched_orders` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Check that a left join keeps customers who have no orders. Return the number of rows produced by the join as `customer_order_rows`.",
+          "columns": [
+            "customer_order_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_order_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LEFT JOIN"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LEFT JOIN.",
+            "Make the final SELECT return exactly `customer_order_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Find customers with no orders.",
+          "columns": [
+            "customer_id"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `customer_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Join orders to payments and identify orders with no payment.",
+          "columns": [
+            "order_id"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`.",
+            "Return 2 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `order_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Join customers, orders, and payments, then count the rows in the combined result. Return the count as `joined_payment_rows`.",
+          "columns": [
+            "joined_payment_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `joined_payment_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `joined_payment_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Show delivered-order revenue by customer region. Return `region` and the total as `delivered_revenue`.",
+          "columns": [
+            "region",
+            "delivered_revenue"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `delivered_revenue`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `region`, `delivered_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Calculate customer lifetime delivered revenue, including customers with zero.",
+          "columns": [
+            "customer_id",
+            "revenue"
+          ],
+          "expected_rows": 10,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`, `revenue`.",
+            "Return 10 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `customer_id`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "07_ctes_subqueries": {
+      "scenario": "A merchandising analyst needs order-level revenue, cost, and profit calculations before identifying high-value orders, products, and regions.",
+      "tasks": {
+        "1": {
+          "prompt": "Use a CTE to calculate revenue for every order, then return the number of orders as `order_count` and total revenue rounded to two decimal places as `total_revenue`.",
+          "columns": [
+            "order_count",
+            "total_revenue"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `order_count`, `total_revenue`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around WITH, ROUND(..., 2).",
+            "Make the final SELECT return exactly `order_count`, `total_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Use a subquery to return orders whose revenue is above the average order revenue.",
+          "columns": [
+            "order_id"
+          ],
+          "expected_rows": 5,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`.",
+            "Return 5 rows."
+          ],
+          "rules": [
+            {
+              "type": "select_count",
+              "minimum": 2
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around a subquery with more than one SELECT.",
+            "Make the final SELECT return exactly `order_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Use a CTE to calculate revenue, cost, and profit for every order. Return the number of orders as `order_count` and total profit rounded to two decimal places as `total_profit`.",
+          "columns": [
+            "order_count",
+            "total_profit"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `order_count`, `total_profit`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around WITH, ROUND(..., 2).",
+            "Make the final SELECT return exactly `order_count`, `total_profit` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Compare revenue and profit by product category. Return `category`, total revenue rounded to two decimal places as `revenue`, and total profit rounded to two decimal places as `profit`.",
+          "columns": [
+            "category",
+            "revenue",
+            "profit"
+          ],
+          "expected_rows": 4,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `category`, `revenue`, `profit`.",
+            "Return 4 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `category`, `revenue`, `profit` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Return the three products with the highest total profit.",
+          "columns": [
+            "product_name",
+            "profit"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `product_name`, `profit`.",
+            "Return 3 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `product_name`, `profit` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Use one CTE for order profitability and a second CTE for regional summaries. Return each `region` and its total `profit` rounded to two decimal places.",
+          "columns": [
+            "region",
+            "profit"
+          ],
+          "expected_rows": 4,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `region`, `profit`.",
+            "Return 4 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around WITH, ROUND(..., 2).",
+            "Make the final SELECT return exactly `region`, `profit` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Return regions whose total profit is above the average regional profit.",
+          "columns": [
+            "region"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`.",
+            "Return 2 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `region` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "08_integrated_vfx_review": {
+      "scenario": "A VFX production manager needs a June 30, 2026 risk review covering deadlines, logged hours, revisions, workload, and artist capacity.",
+      "tasks": {
+        "1": {
+          "prompt": "Find unfinished shots due before June 30, 2026.",
+          "columns": [
+            "shot_id"
+          ],
+          "expected_rows": 5,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `shot_id`.",
+            "Return 5 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `shot_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Show actual logged hours for each shot. Return `shot_id` and total hours as `actual_hours`.",
+          "columns": [
+            "shot_id",
+            "actual_hours"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `shot_id`, `actual_hours`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `shot_id`, `actual_hours` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Count completed shots whose actual logged hours exceeded their estimate. Return the result as `over_estimate_shots`.",
+          "columns": [
+            "over_estimate_shots"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `over_estimate_shots`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `over_estimate_shots` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Calculate the on-time completion percentage for each department. Round to two decimal places and name it `on_time_completion_pct`.",
+          "columns": [
+            "department",
+            "on_time_completion_pct"
+          ],
+          "expected_rows": 4,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `department`, `on_time_completion_pct`.",
+            "Return 4 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `department`, `on_time_completion_pct` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Count unfinished shots that are overdue, have at least three revisions, or have logged more hours than estimated. Return the count as `risk_shots`.",
+          "columns": [
+            "risk_shots"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `risk_shots`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `risk_shots` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Summarize workload by project. Return `project_id`, total `estimated_hours`, total `actual_hours`, and total `revisions`.",
+          "columns": [
+            "project_id",
+            "estimated_hours",
+            "actual_hours",
+            "revisions"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `project_id`, `estimated_hours`, `actual_hours`, `revisions`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `project_id`, `estimated_hours`, `actual_hours`, `revisions` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Rank artists by total logged hours using `DENSE_RANK`.",
+          "columns": [
+            "artist_id",
+            "hours",
+            "workload_rank"
+          ],
+          "expected_rows": 7,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `artist_id`, `hours`, `workload_rank`.",
+            "Return 7 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DENSE_RANK"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DENSE_RANK.",
+            "Make the final SELECT return exactly `artist_id`, `hours`, `workload_rank` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "8": {
+          "prompt": "Return the highest-risk project and explain the drivers in two sentences.",
+          "columns": [
+            "project_id",
+            "risk_shots"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `project_id`, `risk_shots`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `project_id`, `risk_shots` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "09_timed_sql_challenge": {
+      "scenario": "A product manager needs five quick answers about acquisition, engagement, purchases, and activation. Complete as much as possible within the timed review.",
+      "tasks": {
+        "1": {
+          "prompt": "Show how many users were acquired through each channel. Return `acquisition_channel` and the count as `user_count`.",
+          "columns": [
+            "acquisition_channel",
+            "user_count"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `acquisition_channel`, `user_count`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `acquisition_channel`, `user_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Count distinct users who made a purchase in June and calculate their share of all users. Return `june_purchasers` and `purchaser_conversion_pct`, rounded to two decimal places.",
+          "columns": [
+            "june_purchasers",
+            "purchaser_conversion_pct"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `june_purchasers`, `purchaser_conversion_pct`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT, ROUND(..., 2).",
+            "Make the final SELECT return exactly `june_purchasers`, `purchaser_conversion_pct` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Return users with at least three events.",
+          "columns": [
+            "user_id"
+          ],
+          "expected_rows": 6,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `user_id`.",
+            "Return 6 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `user_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Show purchase revenue by acquisition channel. Return `acquisition_channel` and total `revenue`.",
+          "columns": [
+            "acquisition_channel",
+            "revenue"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `acquisition_channel`, `revenue`.",
+            "Return 3 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `acquisition_channel`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Use a CTE to find each user’s first event date. Return the number of users as `user_count` and average days from signup to first event, rounded to two decimal places, as `average_days_to_first_event`.",
+          "columns": [
+            "user_count",
+            "average_days_to_first_event"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `user_count`, `average_days_to_first_event`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around WITH, ROUND(..., 2).",
+            "Make the final SELECT return exactly `user_count`, `average_days_to_first_event` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "10_mixed_sql_assessment": {
+      "scenario": "People Operations needs a workforce assessment combining department budgets, salaries, reporting lines, and performance scores.",
+      "tasks": {
+        "1": {
+          "prompt": "Find employees with missing department assignments.",
+          "columns": [
+            "employee_id"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `employee_id`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Focus the filter or CASE expression on missing, blank, or invalid values before counting or returning rows.",
+            "Make the final SELECT return exactly `employee_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Show workforce cost by department while keeping departments with no employees. Return `department_name`, employee `headcount`, and total `salary_expense`.",
+          "columns": [
+            "department_name",
+            "headcount",
+            "salary_expense"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `department_name`, `headcount`, `salary_expense`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `department_name`, `headcount`, `salary_expense` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Calculate salary expense as a percentage of annual budget for each department. Round to two decimal places and name it `salary_budget_pct`.",
+          "columns": [
+            "department_name",
+            "salary_budget_pct"
+          ],
+          "expected_rows": 4,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `department_name`, `salary_budget_pct`.",
+            "Return 4 rows.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROUND(..., 2).",
+            "Make the final SELECT return exactly `department_name`, `salary_budget_pct` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Use a self join to connect each employee to their manager, then return the number of employee rows as `employee_count`.",
+          "columns": [
+            "employee_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `employee_count`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `employee_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Use a CTE to calculate each employee’s average performance score. Return the number of employees as `employee_count` and the overall average of those scores, rounded to two decimal places, as `average_performance_score`.",
+          "columns": [
+            "employee_count",
+            "average_performance_score"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `employee_count`, `average_performance_score`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around WITH, ROUND(..., 2).",
+            "Make the final SELECT return exactly `employee_count`, `average_performance_score` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Rank employees within each department by average performance using `DENSE_RANK`. Return `employee_id` and the rank as `performance_rank`.",
+          "columns": [
+            "employee_id",
+            "performance_rank"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `employee_id`, `performance_rank`.",
+            "Return 12 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DENSE_RANK"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DENSE_RANK.",
+            "Make the final SELECT return exactly `employee_id`, `performance_rank` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Return employees whose salary is above their department average.",
+          "columns": [
+            "employee_id"
+          ],
+          "expected_rows": 6,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `employee_id`.",
+            "Return 6 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `employee_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "8": {
+          "prompt": "Count employees flagged because they have no department, earn at least 115000, or have an average performance score below 4.0. Return the count as `risk_employee_count`.",
+          "columns": [
+            "risk_employee_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `risk_employee_count`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LAG"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LAG.",
+            "Make the final SELECT return exactly `risk_employee_count` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "11_explain_joins_windows": {
+      "scenario": "A senior analyst is reviewing your SQL for a customer-support report. You must produce the correct result and explain why each join or window function is appropriate.",
+      "tasks": {
+        "1": {
+          "prompt": "Use an inner join between customer accounts and tickets. Return the joined row count as `inner_join_rows` and add a SQL comment explaining which customers disappear and why.",
+          "columns": [
+            "inner_join_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `inner_join_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "INNER JOIN"
+            },
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around INNER JOIN, the requested SQL comment.",
+            "Make the final SELECT return exactly `inner_join_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Use a left join between customer accounts and tickets. Return the joined row count as `left_join_rows` and add a SQL comment explaining why it differs from the inner join.",
+          "columns": [
+            "left_join_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `left_join_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "INNER JOIN"
+            },
+            {
+              "type": "contains",
+              "value": "LEFT JOIN"
+            },
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around INNER JOIN, LEFT JOIN, the requested SQL comment.",
+            "Make the final SELECT return exactly `left_join_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Use `ROW_NUMBER` to return the latest ticket for each customer.",
+          "columns": [
+            "customer_id",
+            "ticket_id"
+          ],
+          "expected_rows": 7,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`, `ticket_id`.",
+            "Return 7 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "ROW_NUMBER"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROW_NUMBER.",
+            "Make the final SELECT return exactly `customer_id`, `ticket_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Rank agents by average resolution time using `DENSE_RANK`; lower is better.",
+          "columns": [
+            "agent_id",
+            "avg_hours",
+            "performance_rank"
+          ],
+          "expected_rows": 6,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `agent_id`, `avg_hours`, `performance_rank`.",
+            "Return 6 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DENSE_RANK"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DENSE_RANK.",
+            "Make the final SELECT return exactly `agent_id`, `avg_hours`, `performance_rank` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Calculate each agent’s trailing three-ticket average resolution time, then return the number of result rows as `rolling_average_rows`.",
+          "columns": [
+            "rolling_average_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `rolling_average_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `rolling_average_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Return customers without tickets.",
+          "columns": [
+            "customer_id"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `customer_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Write a 3–5 sentence SQL comment comparing aggregate queries with window-function queries, then return the ticket row count as `comparison_rows`.",
+          "columns": [
+            "comparison_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `comparison_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around the requested SQL comment.",
+            "Make the final SELECT return exactly `comparison_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "12_query_readability": {
+      "scenario": "A campaign-performance query returns the right numbers but is difficult for another analyst to review. Refactor it without changing the business result.",
+      "tasks": {
+        "1": {
+          "prompt": "Refactor the starting campaign query shown in the exercise guide without changing its result. Return `campaign_channel`, `spend`, `revenue`, `profit`, and `return_on_spend`, with return on spend rounded to four decimal places.",
+          "columns": [
+            "campaign_channel",
+            "spend",
+            "revenue",
+            "profit",
+            "return_on_spend"
+          ],
+          "expected_rows": 4,
+          "rounding": 4,
+          "requirements": [
+            "Return columns in this order: `campaign_channel`, `spend`, `revenue`, `profit`, `return_on_spend`.",
+            "Return 4 rows.",
+            "Round the requested result to 4 decimal places."
+          ],
+          "rules": [],
+          "hints": [
+            "Identify the business result produced by the starting query before changing its formatting or aliases.",
+            "Build the query around ROUND(..., 4).",
+            "Make the final SELECT return exactly `campaign_channel`, `spend`, `revenue`, `profit`, `return_on_spend` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Rewrite the starting query with each major SQL clause on its own line and consistent indentation. Then return the number of source rows as `formatted_rows`.",
+          "columns": [
+            "formatted_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `formatted_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "formatting",
+              "clauses": [
+                "SELECT",
+                "FROM",
+                "WHERE",
+                "GROUP BY",
+                "HAVING",
+                "ORDER BY"
+              ]
+            }
+          ],
+          "hints": [
+            "Identify the readable report or explanation the reviewer needs before changing the SQL.",
+            "Build the query around one major SQL clause per line.",
+            "Make the final SELECT return exactly `formatted_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Build the channel report so it sorts by the `return_on_spend` alias instead of column position 5. Then return the number of distinct channels as `channel_count`.",
+          "columns": [
+            "channel_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `channel_count`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            },
+            {
+              "type": "contains",
+              "value": "ORDER BY"
+            },
+            {
+              "type": "contains",
+              "value": "RETURN_ON_SPEND"
+            }
+          ],
+          "hints": [
+            "Identify the readable report or explanation the reviewer needs before changing the SQL.",
+            "Build the query around DISTINCT, ORDER BY, RETURN_ON_SPEND.",
+            "Make the final SELECT return exactly `channel_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Move channel aggregation into a clearly named CTE. Return total `total_spend` and `total_revenue`, each rounded to two decimal places.",
+          "columns": [
+            "total_spend",
+            "total_revenue"
+          ],
+          "expected_rows": 1,
+          "rounding": 2,
+          "requirements": [
+            "Return columns in this order: `total_spend`, `total_revenue`.",
+            "Return 1 row.",
+            "Round the requested result to 2 decimal places."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around WITH, ROUND(..., 2).",
+            "Make the final SELECT return exactly `total_spend`, `total_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Add short SQL comments that explain the channel-summary CTE and its final filter. Return `campaign_channel` and `profit` for the four report rows.",
+          "columns": [
+            "campaign_channel",
+            "profit"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `campaign_channel`, `profit`.",
+            "Return 4 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            },
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Identify the readable report or explanation the reviewer needs before changing the SQL.",
+            "Build the query around WITH, the requested SQL comment.",
+            "Make the final SELECT return exactly `campaign_channel`, `profit` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Confirm the refactored query still covers every source row. Return the matching row count as `matching_rows`.",
+          "columns": [
+            "matching_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `matching_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `matching_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Write two SQL-comment sentences explaining how readable SQL reduces analytics risk, then return the source row count as `reviewed_rows`.",
+          "columns": [
+            "reviewed_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `reviewed_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "comment",
+              "minimum_words": 18
+            }
+          ],
+          "hints": [
+            "Identify the readable report or explanation the reviewer needs before changing the SQL.",
+            "Build the query around the requested SQL comment.",
+            "Make the final SELECT return exactly `reviewed_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "13_grain_join_cardinality": {
+      "scenario": "An analyst joined order-level data to a one-to-many contact table and accidentally inflated revenue. Audit the table grains and rebuild the analysis safely.",
+      "tasks": {
+        "1": {
+          "prompt": "Profile the row count and distinct business key count for each table.",
+          "columns": [
+            "table_name",
+            "row_count",
+            "distinct_key_count"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `table_name`, `row_count`, `distinct_key_count`.",
+            "Return 3 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT.",
+            "Make the final SELECT return exactly `table_name`, `row_count`, `distinct_key_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Find account IDs that appear more than once in the contacts table.",
+          "columns": [
+            "account_id",
+            "contact_count"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `account_id`, `contact_count`.",
+            "Return 2 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `account_id`, `contact_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Join orders directly to contacts and compare the resulting row count with the original order count.",
+          "columns": [
+            "joined_rows",
+            "order_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `joined_rows`, `order_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `joined_rows`, `order_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Calculate the multiplication factor created by the direct join.",
+          "columns": [
+            "multiplication_factor"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `multiplication_factor`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `multiplication_factor` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Pre-aggregate contacts to one row per account, then join that result to orders without changing the order grain.",
+          "columns": [
+            "row_count",
+            "distinct_orders"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `row_count`, `distinct_orders`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `row_count`, `distinct_orders` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Find accounts with no orders.",
+          "columns": [
+            "account_id"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `account_id`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `account_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Add a SQL comment stating the grain of the safe final result, then return its row count as `safe_result_rows`.",
+          "columns": [
+            "safe_result_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `safe_result_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around the requested SQL comment.",
+            "Make the final SELECT return exactly `safe_result_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "14_date_cohort_analysis": {
+      "scenario": "The growth team wants to compare subscriptions that began in the same month using consistent activation, cancellation, and revenue definitions.",
+      "tasks": {
+        "1": {
+          "prompt": "Assign each subscription to a signup month using DATE_TRUNC.",
+          "columns": [
+            "signup_month",
+            "subscriptions"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `signup_month`, `subscriptions`.",
+            "Return 4 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DATE_TRUNC"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DATE_TRUNC.",
+            "Make the final SELECT return exactly `signup_month`, `subscriptions` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Calculate the number of days from signup to first activation.",
+          "columns": [
+            "subscription_id",
+            "days_to_activation"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `subscription_id`, `days_to_activation`.",
+            "Return 12 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `subscription_id`, `days_to_activation` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Count customers activated within 7 days for each signup cohort.",
+          "columns": [
+            "signup_month",
+            "activated_within_7_days"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `signup_month`, `activated_within_7_days`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `signup_month`, `activated_within_7_days` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Calculate the activation rate within 30 days for each cohort.",
+          "columns": [
+            "signup_month",
+            "activation_rate_30d"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `signup_month`, `activation_rate_30d`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `signup_month`, `activation_rate_30d` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Count cancellations within 60 days of signup by cohort.",
+          "columns": [
+            "signup_month",
+            "cancelled_within_60_days"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `signup_month`, `cancelled_within_60_days`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `signup_month`, `cancelled_within_60_days` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Calculate active monthly revenue by signup cohort as of 2026-06-30.",
+          "columns": [
+            "signup_month",
+            "active_mrr"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `signup_month`, `active_mrr`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `signup_month`, `active_mrr` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Add a SQL comment explaining why cohort metrics need one consistent starting date, then return the number of cohort rows as `cohort_rows`.",
+          "columns": [
+            "cohort_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `cohort_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around the requested SQL comment.",
+            "Make the final SELECT return exactly `cohort_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "15_window_frames": {
+      "scenario": "Operations wants daily revenue trends that keep every date visible while adding running totals, moving averages, changes, and ranks.",
+      "tasks": {
+        "1": {
+          "prompt": "Number each region’s rows in date order.",
+          "columns": [
+            "region",
+            "revenue_date",
+            "row_number"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `revenue_date`, `row_number`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `region`, `revenue_date`, `row_number` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Calculate cumulative revenue by region.",
+          "columns": [
+            "region",
+            "final_running_total"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `final_running_total`.",
+            "Return 2 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `region`, `final_running_total` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Calculate a trailing three-day moving average by region.",
+          "columns": [
+            "region",
+            "moving_avg_on_2026_06_07"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `moving_avg_on_2026_06_07`.",
+            "Return 2 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `region`, `moving_avg_on_2026_06_07` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Use LAG to calculate the day-over-day revenue change.",
+          "columns": [
+            "region",
+            "change_on_2026_06_07"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `change_on_2026_06_07`.",
+            "Return 2 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LAG"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LAG.",
+            "Make the final SELECT return exactly `region`, `change_on_2026_06_07` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Rank each day within its region from highest to lowest revenue.",
+          "columns": [
+            "region",
+            "highest_revenue_date"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `highest_revenue_date`.",
+            "Return 2 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "ORDER BY"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ORDER BY.",
+            "Make the final SELECT return exactly `region`, `highest_revenue_date` in that order."
+          ],
+          "order_sensitive": true
+        },
+        "6": {
+          "prompt": "Return only the top two revenue days per region.",
+          "columns": [
+            "region",
+            "revenue_date",
+            "revenue"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `revenue_date`, `revenue`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `region`, `revenue_date`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Add a SQL comment explaining how `ROWS BETWEEN` changes the moving-average frame, then return the source row count as `window_frame_rows`.",
+          "columns": [
+            "window_frame_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `window_frame_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around the requested SQL comment.",
+            "Make the final SELECT return exactly `window_frame_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "16_set_semi_anti_joins": {
+      "scenario": "Customer Success needs to compare previous and current customer lists and identify customers who did or did not place an order.",
+      "tasks": {
+        "1": {
+          "prompt": "Combine the previous and current customer IDs with UNION.",
+          "columns": [
+            "distinct_customer_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `distinct_customer_count`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Use a window function and choose the correct PARTITION BY and ORDER BY columns.",
+            "Make the final SELECT return exactly `distinct_customer_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Combine both customer tables with UNION ALL and count all rows.",
+          "columns": [
+            "all_row_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `all_row_count`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "UNION ALL"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around UNION ALL.",
+            "Make the final SELECT return exactly `all_row_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Find customers present in both periods with INTERSECT.",
+          "columns": [
+            "customer_id"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`.",
+            "Return 4 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "INTERSECT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around INTERSECT.",
+            "Make the final SELECT return exactly `customer_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Find customers that are new in the current period with EXCEPT.",
+          "columns": [
+            "customer_id"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`.",
+            "Return 3 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "EXCEPT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around EXCEPT.",
+            "Make the final SELECT return exactly `customer_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Return current customers that have at least one order using a semi-join pattern.",
+          "columns": [
+            "customer_id"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`.",
+            "Return 3 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `customer_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Return current customers with no orders using an anti-join pattern.",
+          "columns": [
+            "customer_id"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`.",
+            "Return 3 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `customer_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Add a SQL comment explaining when `UNION ALL` is safer than `UNION` for audit work, then return the combined customer row count as `customer_rows`.",
+          "columns": [
+            "customer_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "UNION ALL"
+            },
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around UNION ALL, the requested SQL comment.",
+            "Make the final SELECT return exactly `customer_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "17_text_dates_quality": {
+      "scenario": "A contact export contains inconsistent names, emails, phone numbers, dates, and currency values. Standardize it without allowing bad values to stop the query.",
+      "tasks": {
+        "1": {
+          "prompt": "Trim the full name and normalize repeated spaces.",
+          "columns": [
+            "record_id",
+            "clean_name"
+          ],
+          "expected_rows": 8,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `record_id`, `clean_name`.",
+            "Return 8 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `record_id`, `clean_name` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Normalize valid email values to lowercase and extract the email domain.",
+          "columns": [
+            "email_domain",
+            "record_count"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `email_domain`, `record_count`.",
+            "Return 2 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "CASE"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around CASE.",
+            "Make the final SELECT return exactly `email_domain`, `record_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Flag email values that do not match a basic email pattern.",
+          "columns": [
+            "invalid_email_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `invalid_email_count`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LAG"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LAG.",
+            "Make the final SELECT return exactly `invalid_email_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Remove phone punctuation and return digits only.",
+          "columns": [
+            "valid_phone_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `valid_phone_count`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `valid_phone_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Parse the different signup-date formats without failing on invalid dates.",
+          "columns": [
+            "invalid_date_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `invalid_date_count`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `invalid_date_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Convert annual_spend to a numeric value without failing on bad values.",
+          "columns": [
+            "invalid_spend_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `invalid_spend_count`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `invalid_spend_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Create one cleaned result with a data-quality flag for every record.",
+          "columns": [
+            "record_id",
+            "quality_flag"
+          ],
+          "expected_rows": 8,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `record_id`, `quality_flag`.",
+            "Return 8 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LAG"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LAG.",
+            "Make the final SELECT return exactly `record_id`, `quality_flag` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "18_sql_readiness_audit": {
+      "scenario": "Before portfolio analysis begins, the data team needs a complete quality audit across related customer, order, and payment tables.",
+      "tasks": {
+        "1": {
+          "prompt": "Document the grain and expected key for each table in SQL comments.",
+          "columns": [
+            "table_name",
+            "row_count"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `table_name`, `row_count`.",
+            "Return 3 rows."
+          ],
+          "rules": [
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around the requested SQL comment.",
+            "Make the final SELECT return exactly `table_name`, `row_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Find duplicate order IDs and report their duplicate count.",
+          "columns": [
+            "order_id",
+            "row_count"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `row_count`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `order_id`, `row_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Find orders whose customer_id does not exist in customers.",
+          "columns": [
+            "order_id",
+            "customer_id"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `customer_id`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `order_id`, `customer_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Find payments whose order_id does not exist in orders.",
+          "columns": [
+            "payment_id",
+            "order_id"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `payment_id`, `order_id`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `payment_id`, `order_id` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "5": {
+          "prompt": "Find required order fields that are NULL or blank.",
+          "columns": [
+            "order_id",
+            "issue"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `issue`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Focus the filter or CASE expression on missing, blank, or invalid values before counting or returning rows.",
+            "Make the final SELECT return exactly `order_id`, `issue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "6": {
+          "prompt": "Reconcile order totals to payment amounts at one row per order and flag differences.",
+          "columns": [
+            "order_id",
+            "difference"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `difference`.",
+            "Return 2 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LAG"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LAG.",
+            "Make the final SELECT return exactly `order_id`, `difference` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "7": {
+          "prompt": "Build one CTE-based quality summary with issue_type and issue_count.",
+          "columns": [
+            "issue_type",
+            "issue_count"
+          ],
+          "expected_rows": 5,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `issue_type`, `issue_count`.",
+            "Return 5 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "WITH"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around WITH.",
+            "Make the final SELECT return exactly `issue_type`, `issue_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "8": {
+          "prompt": "Write a three-sentence SQL comment naming the highest-risk data issue and the next action, then return the total audit row count as `audit_rows`.",
+          "columns": [
+            "audit_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `audit_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "comment",
+              "minimum_words": 8
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around the requested SQL comment.",
+            "Make the final SELECT return exactly `audit_rows` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "19_select_aliases_calculations": {
+      "scenario": "A retail operations manager is preparing order data for a shared sales report. The manager needs useful calculated fields, consistent headings, and a check against recorded revenue.",
+      "tasks": {
+        "1": {
+          "prompt": "The merchandising team wants to calculate the expected value of each order from its quantity and unit price. Return `order_id`, `quantity`, `unit_price`, and calculate `quantity * unit_price` as `line_value`.",
+          "columns": [
+            "order_id",
+            "quantity",
+            "unit_price",
+            "line_value"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `quantity`, `unit_price`, `line_value`.",
+            "Return 24 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `order_id`, `quantity`, `unit_price`, `line_value` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "The sales manager wants consistent column headings in a shared order report. Return `order_id`; rename `region` to `sales_region`, `sales_channel` to `channel`, and `revenue` to `recorded_revenue`.",
+          "columns": [
+            "order_id",
+            "sales_region",
+            "channel",
+            "recorded_revenue"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `sales_region`, `channel`, `recorded_revenue`.",
+            "Return 24 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `order_id`, `sales_region`, `channel`, `recorded_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Check whether the revenue stored for each order matches quantity multiplied by unit price. Return `order_id`, rename `revenue` to `recorded_revenue`, and calculate the difference as `revenue_difference`.",
+          "columns": [
+            "order_id",
+            "recorded_revenue",
+            "revenue_difference"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `recorded_revenue`, `revenue_difference`.",
+            "Return 24 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `order_id`, `recorded_revenue`, `revenue_difference` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "List every region and sales-channel combination used by the business. Return unique `region` and `sales_channel` pairs, sorted by region and then sales channel.",
+          "columns": [
+            "region",
+            "sales_channel"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `sales_channel`.",
+            "Return 12 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            },
+            {
+              "type": "contains",
+              "value": "ORDER BY"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT, ORDER BY.",
+            "Make the final SELECT return exactly `region`, `sales_channel` in that order."
+          ],
+          "order_sensitive": true
+        }
+      }
+    },
+    "20_filters_patterns_nulls": {
+      "scenario": "A support-operations analyst is preparing the weekly service report and needs to identify active priority tickets, missing resolution times, and email feedback.",
+      "tasks": {
+        "1": {
+          "prompt": "List the ticket statuses currently used by the support team. Return each unique `status` in alphabetical order.",
+          "columns": [
+            "status"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `status`.",
+            "Return 3 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            },
+            {
+              "type": "contains",
+              "value": "ORDER BY"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT, ORDER BY.",
+            "Make the final SELECT return exactly `status` in that order."
+          ],
+          "order_sensitive": true
+        },
+        "2": {
+          "prompt": "Find high-priority tickets that are still active. Return `ticket_id`, `priority`, and `status` for High or Urgent tickets that are not Closed.",
+          "columns": [
+            "ticket_id",
+            "priority",
+            "status"
+          ],
+          "expected_rows": 5,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`, `priority`, `status`.",
+            "Return 5 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `ticket_id`, `priority`, `status` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Find tickets that do not have a recorded resolution time. Return `ticket_id`, `status`, and `resolution_hours`.",
+          "columns": [
+            "ticket_id",
+            "status",
+            "resolution_hours"
+          ],
+          "expected_rows": 9,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`, `status`, `resolution_hours`.",
+            "Return 9 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `ticket_id`, `status`, `resolution_hours` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Find feedback submitted through email, even when the channel text uses different capitalization or extra spaces. Return `response_id` and `channel_raw`.",
+          "columns": [
+            "response_id",
+            "channel_raw"
+          ],
+          "expected_rows": 6,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `response_id`, `channel_raw`.",
+            "Return 6 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `response_id`, `channel_raw` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "21_inner_joins": {
+      "scenario": "A sales analyst needs to connect customers, orders, and payments so the business can report delivered sales and regional revenue.",
+      "tasks": {
+        "1": {
+          "prompt": "Join orders to customers and return one row per matched order with customer name and region.",
+          "columns": [
+            "order_id",
+            "customer_name",
+            "region",
+            "order_total"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `customer_name`, `region`, `order_total`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `order_id`, `customer_name`, `region`, `order_total` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Return only delivered orders after joining orders to customers.",
+          "columns": [
+            "order_id",
+            "customer_name",
+            "order_status"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `customer_name`, `order_status`.",
+            "Return 12 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `order_id`, `customer_name`, `order_status` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Join payments to orders and return the payment amount beside the order total.",
+          "columns": [
+            "payment_id",
+            "order_id",
+            "amount",
+            "order_total"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `payment_id`, `order_id`, `amount`, `order_total`.",
+            "Return 12 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `payment_id`, `order_id`, `amount`, `order_total` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Summarize matched order revenue by customer region.",
+          "columns": [
+            "region",
+            "order_count",
+            "order_revenue"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `order_count`, `order_revenue`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `region`, `order_count`, `order_revenue` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "22_outer_cross_self_joins": {
+      "scenario": "An operations analyst must preserve unmatched records, connect employees to managers, and build planning combinations without losing information.",
+      "tasks": {
+        "1": {
+          "prompt": "Use a left join to show every customer and any related orders, keeping customers with no order.",
+          "columns": [
+            "customer_id",
+            "customer_name",
+            "order_id",
+            "order_total"
+          ],
+          "expected_rows": 15,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`, `customer_name`, `order_id`, `order_total`.",
+            "Return 15 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "LEFT JOIN"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around LEFT JOIN.",
+            "Make the final SELECT return exactly `customer_id`, `customer_name`, `order_id`, `order_total` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Use a full join to identify customer IDs that appear on only one side of the customer-order relationship.",
+          "columns": [
+            "customer_id",
+            "customer_name",
+            "order_id",
+            "relationship_status"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`, `customer_name`, `order_id`, `relationship_status`."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "FULL JOIN"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around FULL JOIN.",
+            "Make the final SELECT return exactly `customer_id`, `customer_name`, `order_id`, `relationship_status` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Use a self join to show each employee beside their manager name when one exists.",
+          "columns": [
+            "employee_id",
+            "employee_name",
+            "manager_name"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `employee_id`, `employee_name`, `manager_name`.",
+            "Return 12 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `employee_id`, `employee_name`, `manager_name` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Use a cross join to build every combination of department and two named planning scenarios.",
+          "columns": [
+            "department_name",
+            "scenario"
+          ],
+          "expected_rows": 8,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `department_name`, `scenario`.",
+            "Return 8 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "CROSS JOIN"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around CROSS JOIN.",
+            "Make the final SELECT return exactly `department_name`, `scenario` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "23_subquery_locations": {
+      "scenario": "A retail analyst is investigating above-average orders, order-item revenue, and products that have actually sold. Different parts of the report call for subqueries in different locations.",
+      "tasks": {
+        "1": {
+          "prompt": "Use a subquery in WHERE to return retail orders whose revenue is above the overall average.",
+          "columns": [
+            "order_id",
+            "region",
+            "revenue"
+          ],
+          "expected_rows": 9,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `region`, `revenue`.",
+            "Return 9 rows."
+          ],
+          "rules": [
+            {
+              "type": "select_count",
+              "minimum": 2
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around a subquery with more than one SELECT.",
+            "Make the final SELECT return exactly `order_id`, `region`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Use a subquery in FROM to calculate total item revenue per order and then return the summarized rows.",
+          "columns": [
+            "order_id",
+            "order_revenue"
+          ],
+          "expected_rows": 10,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `order_revenue`.",
+            "Return 10 rows."
+          ],
+          "rules": [
+            {
+              "type": "select_count",
+              "minimum": 2
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around a subquery with more than one SELECT.",
+            "Make the final SELECT return exactly `order_id`, `order_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Use a scalar subquery in SELECT to show each retail order revenue beside the overall average revenue.",
+          "columns": [
+            "order_id",
+            "revenue",
+            "overall_average_revenue"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `revenue`, `overall_average_revenue`.",
+            "Return 24 rows."
+          ],
+          "rules": [
+            {
+              "type": "select_count",
+              "minimum": 2
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around a subquery with more than one SELECT.",
+            "Make the final SELECT return exactly `order_id`, `revenue`, `overall_average_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Use a nested or correlated subquery to return products that appear in at least one order item.",
+          "columns": [
+            "product_id",
+            "product_name"
+          ],
+          "expected_rows": 8,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `product_id`, `product_name`.",
+            "Return 8 rows."
+          ],
+          "rules": [
+            {
+              "type": "select_count",
+              "minimum": 2
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around a subquery with more than one SELECT.",
+            "Make the final SELECT return exactly `product_id`, `product_name` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "24_window_basics": {
+      "scenario": "A regional sales manager wants each individual order to remain visible while comparing it with company-wide and regional benchmarks.",
+      "tasks": {
+        "1": {
+          "prompt": "Return every order with the overall average revenue added as a window value.",
+          "columns": [
+            "order_id",
+            "revenue",
+            "overall_average_revenue"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `revenue`, `overall_average_revenue`.",
+            "Return 24 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `order_id`, `revenue`, `overall_average_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Return every order with the average revenue for its region.",
+          "columns": [
+            "order_id",
+            "region",
+            "revenue",
+            "regional_average_revenue"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `region`, `revenue`, `regional_average_revenue`.",
+            "Return 24 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `order_id`, `region`, `revenue`, `regional_average_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Return each order with its region total while preserving one row per order.",
+          "columns": [
+            "order_id",
+            "region",
+            "revenue",
+            "regional_revenue"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `region`, `revenue`, `regional_revenue`.",
+            "Return 24 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `order_id`, `region`, `revenue`, `regional_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Return each order with its percentage contribution to regional revenue.",
+          "columns": [
+            "order_id",
+            "region",
+            "revenue",
+            "regional_share"
+          ],
+          "expected_rows": 24,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `region`, `revenue`, `regional_share`.",
+            "Return 24 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `order_id`, `region`, `revenue`, `regional_share` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "25_ranking_paging": {
+      "scenario": "People Operations and Support need ranked lists that handle ties correctly and identify the highest-priority records within each group.",
+      "tasks": {
+        "1": {
+          "prompt": "Rank all employees from highest to lowest salary using a ranking function that preserves ties.",
+          "columns": [
+            "employee_id",
+            "employee_name",
+            "annual_salary",
+            "salary_rank"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `employee_id`, `employee_name`, `annual_salary`, `salary_rank`.",
+            "Return 12 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "ORDER BY"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ORDER BY.",
+            "Make the final SELECT return exactly `employee_id`, `employee_name`, `annual_salary`, `salary_rank` in that order."
+          ],
+          "order_sensitive": true
+        },
+        "2": {
+          "prompt": "Rank employees by salary inside each department.",
+          "columns": [
+            "employee_id",
+            "department_id",
+            "annual_salary",
+            "department_rank"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `employee_id`, `department_id`, `annual_salary`, `department_rank`.",
+            "Return 12 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Use a window function and choose the correct PARTITION BY and ORDER BY columns.",
+            "Make the final SELECT return exactly `employee_id`, `department_id`, `annual_salary`, `department_rank` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Return the top two salaries in each department using a window rank.",
+          "columns": [
+            "department_id",
+            "employee_name",
+            "annual_salary",
+            "department_rank"
+          ],
+          "expected_rows": 8,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `department_id`, `employee_name`, `annual_salary`, `department_rank`.",
+            "Return 8 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Use a window function and choose the correct PARTITION BY and ORDER BY columns.",
+            "Make the final SELECT return exactly `department_id`, `employee_name`, `annual_salary`, `department_rank` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Number tickets in opening order for each support agent.",
+          "columns": [
+            "agent_id",
+            "ticket_id",
+            "opened_at",
+            "ticket_sequence"
+          ],
+          "expected_rows": 18,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `agent_id`, `ticket_id`, `opened_at`, `ticket_sequence`.",
+            "Return 18 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `agent_id`, `ticket_id`, `opened_at`, `ticket_sequence` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "26_lag_lead_change": {
+      "scenario": "A regional manager wants to compare each day with the previous and next day so sudden revenue changes are easy to spot.",
+      "tasks": {
+        "1": {
+          "prompt": "Add the previous revenue value for the same region to every daily row.",
+          "columns": [
+            "revenue_date",
+            "region",
+            "revenue",
+            "previous_revenue"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `revenue_date`, `region`, `revenue`, `previous_revenue`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Use a window function and choose the correct PARTITION BY and ORDER BY columns.",
+            "Make the final SELECT return exactly `revenue_date`, `region`, `revenue`, `previous_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Calculate day-over-day revenue change for rows that have a prior regional value.",
+          "columns": [
+            "revenue_date",
+            "region",
+            "revenue",
+            "revenue_change"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `revenue_date`, `region`, `revenue`, `revenue_change`.",
+            "Return 12 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `revenue_date`, `region`, `revenue`, `revenue_change` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Add the next revenue value for the same region to every daily row.",
+          "columns": [
+            "revenue_date",
+            "region",
+            "revenue",
+            "next_revenue"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `revenue_date`, `region`, `revenue`, `next_revenue`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Use a window function and choose the correct PARTITION BY and ORDER BY columns.",
+            "Make the final SELECT return exactly `revenue_date`, `region`, `revenue`, `next_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Calculate the percentage change from the previous regional value and handle the first row safely.",
+          "columns": [
+            "revenue_date",
+            "region",
+            "revenue",
+            "percent_change"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `revenue_date`, `region`, `revenue`, `percent_change`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `revenue_date`, `region`, `revenue`, `percent_change` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "27_rollup_cube_pivot": {
+      "scenario": "Leadership needs one flexible sales summary that can show subtotals, cross-tab comparisons, and an overall total without separate reports.",
+      "tasks": {
+        "1": {
+          "prompt": "Create region and product-category subtotals using ROLLUP.",
+          "columns": [
+            "region",
+            "product_category",
+            "revenue"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `product_category`, `revenue`."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "ROLLUP"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around ROLLUP.",
+            "Make the final SELECT return exactly `region`, `product_category`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Create combinations of region and sales channel using CUBE.",
+          "columns": [
+            "region",
+            "sales_channel",
+            "revenue"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `sales_channel`, `revenue`."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "CUBE"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around CUBE.",
+            "Make the final SELECT return exactly `region`, `sales_channel`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Build a pivot-style summary with one row per region and separate revenue columns for Online and Store.",
+          "columns": [
+            "region",
+            "online_revenue",
+            "store_revenue"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `online_revenue`, `store_revenue`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `region`, `online_revenue`, `store_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Use GROUPING SETS to return region totals, channel totals, and an overall total in one result.",
+          "columns": [
+            "region",
+            "sales_channel",
+            "revenue"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `sales_channel`, `revenue`."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "GROUPING SETS"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around GROUPING SETS.",
+            "Make the final SELECT return exactly `region`, `sales_channel`, `revenue` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "28_types_arrays": {
+      "scenario": "A customer-experience analyst is cleaning mixed data types and grouping issue labels so the records can be summarized safely.",
+      "tasks": {
+        "1": {
+          "prompt": "Inspect the source columns and return safe numeric versions of rating and response minutes.",
+          "columns": [
+            "response_id",
+            "rating",
+            "response_minutes"
+          ],
+          "expected_rows": 18,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `response_id`, `rating`, `response_minutes`.",
+            "Return 18 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `response_id`, `rating`, `response_minutes` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Create a list of issue types for each cleaned channel.",
+          "columns": [
+            "channel",
+            "issue_types"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `channel`, `issue_types`."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `channel`, `issue_types` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Expand the list values back into one row per channel and issue type.",
+          "columns": [
+            "channel",
+            "issue_type"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `channel`, `issue_type`."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `channel`, `issue_type` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Calculate an average response time using only values that can be converted safely.",
+          "columns": [
+            "average_response_minutes"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `average_response_minutes`.",
+            "Return 1 row."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `average_response_minutes` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "29_text_search_extensions": {
+      "scenario": "A support analyst needs reliable text searches across messy customer and feedback fields and must verify which DuckDB extensions are available.",
+      "tasks": {
+        "1": {
+          "prompt": "Find tickets whose customer name contains the word mart without depending on letter case.",
+          "columns": [
+            "ticket_id",
+            "customer_name"
+          ],
+          "expected_rows": 2,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `ticket_id`, `customer_name`.",
+            "Return 2 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "CASE"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around CASE.",
+            "Make the final SELECT return exactly `ticket_id`, `customer_name` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Find feedback issue values that contain billing after trimming and ignoring case.",
+          "columns": [
+            "response_id",
+            "issue_type_raw"
+          ],
+          "expected_rows": 6,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `response_id`, `issue_type_raw`.",
+            "Return 6 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "CASE"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around CASE.",
+            "Make the final SELECT return exactly `response_id`, `issue_type_raw` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Use a regular expression to return feedback rows with a four-digit year in the submitted date text.",
+          "columns": [
+            "response_id",
+            "submitted_at_raw"
+          ],
+          "expected_rows": 17,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `response_id`, `submitted_at_raw`.",
+            "Return 17 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `response_id`, `submitted_at_raw` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Inspect the extensions known to DuckDB and return their name and loaded status.",
+          "columns": [
+            "extension_name",
+            "loaded"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `extension_name`, `loaded`."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `extension_name`, `loaded` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "30_storage_profiling": {
+      "scenario": "A data analyst is deciding how several practice tables should be stored and queried. The first step is to profile their size, keys, and analytical grain.",
+      "tasks": {
+        "1": {
+          "prompt": "List the practice tables available in the main schema.",
+          "columns": [
+            "table_name"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `table_name`."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `table_name` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Profile the row count and distinct business key count for the orders table.",
+          "columns": [
+            "row_count",
+            "distinct_order_ids"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `row_count`, `distinct_order_ids`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT.",
+            "Make the final SELECT return exactly `row_count`, `distinct_order_ids` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Compare row count with distinct order IDs in the order-items table to describe its grain.",
+          "columns": [
+            "row_count",
+            "distinct_order_ids"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `row_count`, `distinct_order_ids`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT.",
+            "Make the final SELECT return exactly `row_count`, `distinct_order_ids` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Create a compact table profile showing table name, row count, and stated analytical grain for three selected tables.",
+          "columns": [
+            "table_name",
+            "row_count",
+            "grain"
+          ],
+          "expected_rows": 3,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `table_name`, `row_count`, `grain`.",
+            "Return 3 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `table_name`, `row_count`, `grain` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "31_star_schema_normalization": {
+      "scenario": "A reporting team wants to reshape operational customer and order data into a simple fact-and-dimension model without changing totals.",
+      "tasks": {
+        "1": {
+          "prompt": "Return a customer dimension-style result with one row per customer.",
+          "columns": [
+            "customer_id",
+            "customer_name",
+            "region",
+            "signup_date"
+          ],
+          "expected_rows": 10,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`, `customer_name`, `region`, `signup_date`.",
+            "Return 10 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `customer_id`, `customer_name`, `region`, `signup_date` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Return an order fact-style result with order measures and customer key.",
+          "columns": [
+            "order_id",
+            "customer_id",
+            "order_date",
+            "order_total",
+            "order_status"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `customer_id`, `order_date`, `order_total`, `order_status`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `order_id`, `customer_id`, `order_date`, `order_total`, `order_status` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Join the proposed fact and dimension outputs to summarize revenue by region.",
+          "columns": [
+            "region",
+            "order_count",
+            "order_revenue"
+          ],
+          "expected_rows": 4,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `order_count`, `order_revenue`.",
+            "Return 4 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Identify the key shared by the tables and decide which table must keep all of its rows.",
+            "Make the final SELECT return exactly `region`, `order_count`, `order_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Validate that the dimension key remains unique and report any duplicates.",
+          "columns": [
+            "customer_id",
+            "duplicate_count"
+          ],
+          "expected_rows": 0,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`, `duplicate_count`.",
+            "Return 0 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "DISTINCT"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around DISTINCT.",
+            "Make the final SELECT return exactly `customer_id`, `duplicate_count` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "32_views_snapshots": {
+      "scenario": "An analytics team wants a reusable delivered-orders view and a temporary snapshot that can be checked before a reporting workflow is published.",
+      "tasks": {
+        "1": {
+          "prompt": "Create a temporary view that joins delivered orders to customer region, then return `order_id`, `customer_id`, `region`, and `order_total` from the view.",
+          "columns": [
+            "order_id",
+            "customer_id",
+            "region",
+            "order_total"
+          ],
+          "expected_rows": 12,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `customer_id`, `region`, `order_total`.",
+            "Return 12 rows."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "TEMP VIEW"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around TEMP VIEW.",
+            "Make the final SELECT return exactly `order_id`, `customer_id`, `region`, `order_total` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Create the temporary delivered-orders view in this task, then summarize its revenue by region. Return `region` and `delivered_revenue`.",
+          "columns": [
+            "region",
+            "delivered_revenue"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `delivered_revenue`."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "TEMP VIEW"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around TEMP VIEW.",
+            "Make the final SELECT return exactly `region`, `delivered_revenue` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Create the temporary delivered-orders view and a temporary snapshot table from it, then return the snapshot row count as `snapshot_rows`.",
+          "columns": [
+            "snapshot_rows"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `snapshot_rows`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "TEMP TABLE"
+            },
+            {
+              "type": "contains",
+              "value": "TEMP VIEW"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around TEMP TABLE, TEMP VIEW.",
+            "Make the final SELECT return exactly `snapshot_rows` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Create the temporary delivered-orders view and snapshot table in this task. Return `view_rows`, `snapshot_rows`, and their `difference` to confirm they match.",
+          "columns": [
+            "view_rows",
+            "snapshot_rows",
+            "difference"
+          ],
+          "expected_rows": 1,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `view_rows`, `snapshot_rows`, `difference`.",
+            "Return 1 row."
+          ],
+          "rules": [
+            {
+              "type": "contains",
+              "value": "TEMP VIEW"
+            },
+            {
+              "type": "contains",
+              "value": "TEMP TABLE"
+            }
+          ],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query around TEMP VIEW, TEMP TABLE.",
+            "Make the final SELECT return exactly `view_rows`, `snapshot_rows`, `difference` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    },
+    "33_partition_access_outputs": {
+      "scenario": "A data platform analyst is evaluating partition choices and preparing restricted outputs that expose useful fields without unnecessary sensitive details.",
+      "tasks": {
+        "1": {
+          "prompt": "Summarize order volume by month to evaluate a possible date partition key.",
+          "columns": [
+            "order_month",
+            "order_count"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_month`, `order_count`."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `order_month`, `order_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "2": {
+          "prompt": "Summarize order volume by region to evaluate whether region would create balanced partitions.",
+          "columns": [
+            "region",
+            "order_count"
+          ],
+          "expected_rows": null,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `region`, `order_count`."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `region`, `order_count` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "3": {
+          "prompt": "Create a restricted customer output that excludes signup date while retaining the analytical key and region.",
+          "columns": [
+            "customer_id",
+            "customer_name",
+            "region"
+          ],
+          "expected_rows": 10,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `customer_id`, `customer_name`, `region`.",
+            "Return 10 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Build the query one clause at a time: SELECT the requested fields, choose the source table, then add only the filters, grouping, or sorting the task asks for.",
+            "Make the final SELECT return exactly `customer_id`, `customer_name`, `region` in that order."
+          ],
+          "order_sensitive": false
+        },
+        "4": {
+          "prompt": "Create a restricted order output that exposes order status and total without customer names.",
+          "columns": [
+            "order_id",
+            "customer_id",
+            "order_total",
+            "order_status"
+          ],
+          "expected_rows": 14,
+          "rounding": null,
+          "requirements": [
+            "Return columns in this order: `order_id`, `customer_id`, `order_total`, `order_status`.",
+            "Return 14 rows."
+          ],
+          "rules": [],
+          "hints": [
+            "Restate the business result in your own words, then identify the records or metric the stakeholder needs.",
+            "Decide which rows belong in the calculation, then apply the needed aggregate function and grouping.",
+            "Make the final SELECT return exactly `order_id`, `customer_id`, `order_total`, `order_status` in that order."
+          ],
+          "order_sensitive": false
+        }
+      }
+    }
+  }
+}

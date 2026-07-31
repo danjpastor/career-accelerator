@@ -1,4 +1,4 @@
--- DuckDB Exercise 31: Complete a timed product analysis
+-- DuckDB Exercise 31: Timed product challenge
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -9,13 +9,13 @@ DESCRIBE ex09_purchases;
 
 
 -- -----------------------------------------------------------------
--- Q1. Count users by acquisition channel.
+-- Q1. Show how many users were acquired through each channel. Return `acquisition_channel` and the count as `user_count`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q2. Calculate June purchasers and purchaser conversion rate.
+-- Q2. Count distinct users who made a purchase in June and calculate their share of all users. Return `june_purchasers` and `purchaser_conversion_pct`, rounded to two decimal places.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
@@ -27,12 +27,12 @@ DESCRIBE ex09_purchases;
 
 
 -- -----------------------------------------------------------------
--- Q4. Calculate revenue by acquisition channel.
+-- Q4. Show purchase revenue by acquisition channel. Return `acquisition_channel` and total `revenue`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q5. Use a CTE to return each user's first event date and days from signup to first event.
+-- Q5. Use a CTE to find each user’s first event date. Return the number of users as `user_count` and average days from signup to first event, rounded to two decimal places, as `average_days_to_first_event`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------

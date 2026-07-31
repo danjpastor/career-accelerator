@@ -1,4 +1,4 @@
-# DuckDB Exercise 02: Prepare a retail order review
+# DuckDB Exercise 02: Build clear selected fields and calculated columns
 
 **Week:** 3
 **Estimated time:** 35 minutes
@@ -14,27 +14,27 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 ## Scenario
 
-A retail operations manager is reviewing order data before it is used in a sales report. The manager needs a focused set of fields, clear report headings, and a quick check that stored revenue agrees with the order details.
+A retail operations manager is preparing order data for a shared sales report. The manager needs useful calculated fields, consistent headings, and a check against recorded revenue.
 
 ## Tasks
 
 ### Task 1
 
-Check what each order would be worth before discounts. Return `order_id`, `quantity`, `unit_price`, and `quantity * unit_price` as `line_value`.
+The merchandising team wants to calculate the expected value of each order from its quantity and unit price. Return `order_id`, `quantity`, `unit_price`, and calculate `quantity * unit_price` as `line_value`.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `quantity`, `unit_price`, `line_value`
-- **Expected rows:** 24
+- Return columns in this order: `order_id`, `quantity`, `unit_price`, `line_value`.
+- Return 24 rows.
 
 ### Task 2
 
-Prepare a sales report with consistent headings. Return `order_id`; rename `region` to `sales_region`, `sales_channel` to `channel`, and `revenue` to `recorded_revenue`.
+The sales manager wants consistent column headings in a shared order report. Return `order_id`; rename `region` to `sales_region`, `sales_channel` to `channel`, and `revenue` to `recorded_revenue`.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `sales_region`, `channel`, `recorded_revenue`
-- **Expected rows:** 24
+- Return columns in this order: `order_id`, `sales_region`, `channel`, `recorded_revenue`.
+- Return 24 rows.
 
 ### Task 3
 
@@ -42,8 +42,8 @@ Check whether the revenue stored for each order matches quantity multiplied by u
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `recorded_revenue`, `revenue_difference`
-- **Expected rows:** 24
+- Return columns in this order: `order_id`, `recorded_revenue`, `revenue_difference`.
+- Return 24 rows.
 
 ### Task 4
 
@@ -51,15 +51,15 @@ List every region and sales-channel combination used by the business. Return uni
 
 **Result requirements**
 
-- **Return columns:** `region`, `sales_channel`
-- **Expected rows:** 12
-## Completion evidence
+- Return columns in this order: `region`, `sales_channel`.
+- Return 12 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

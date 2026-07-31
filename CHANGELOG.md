@@ -1,5 +1,36 @@
 # Changelog
 
+## 10.43.4 — DuckDB planner completion exclusion hotfix
+
+- Fixed completed DuckDB exercises returning to Today’s Focus and Next Tasks after restart.
+- Added DuckDB durable completion evidence to adaptive-track completion repair.
+- Made the unified planner treat DuckDB completion evidence as authoritative even if a sprint row is stale.
+- Reasserted submitted DuckDB completion after the final startup track synchronization.
+
+## 10.43.3 — DuckDB live completion and dashboard checkbox hotfix
+
+- Fixed dashboard completion refreshes querying `category` from the wrong SQLite table.
+- Prevented the `no such column: category` error after clicking a task checkbox.
+- Reasserted every validated DuckDB task digest after successful exercise submission.
+- Repainted DuckDB task checkmarks immediately after submission instead of waiting for restart restoration.
+- Upgraded completed-exercise task restoration so an existing failed/stale validation row is repaired to the submitted answer digest.
+
+## 10.43.2 — Durable DuckDB completion and responsive planner follow-up
+
+- Persisted DuckDB task pass evidence in the learner database instead of relying only on local UI settings.
+- Added durable DuckDB completion evidence and restored it before startup planning and track synchronization.
+- Prevented routine autosave or synchronization from downgrading an already submitted exercise.
+- Kept explicit Undo Completion behavior by clearing the durable exercise and task evidence only on an intentional undo.
+- Includes the v10.43.1 sprint-dialog, retrospective-gate, and DuckDB submission performance corrections.
+
+## 10.43.1 — Sprint, retrospective, and DuckDB performance
+
+- Reduced View Sprint Tasks database work by using one canonical task-pool lookup instead of rebuilding it for each row.
+- Locked weekly retrospectives until the matching Week N Knowledge Check is passed, including direct workspace routes.
+- Reused unchanged passed DuckDB task validations during Check Exercise and Submit Exercise.
+- Replaced full roadmap reconciliation on DuckDB submission with a targeted completion/unlock update.
+- Replaced the full DuckDB workspace/application reload after submission with focused navigation and dashboard refreshes.
+
 ## 10.40.1 - Integrated Python exercises and roadmap-order numbering
 
 - Added a dedicated **Python Exercises** tab under Learning → Practice beside SQL Interview Problems and DuckDB Exercises.

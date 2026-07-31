@@ -210,21 +210,33 @@ def _enrich_row(
     conn: sqlite3.Connection,
     current_week: int,
     row: dict[str, Any],
+    canonical_by_id: dict[int, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    """Merge one sprint row with a precomputed canonical task.
+
+    Earlier builds called ``unified_tasks.task_by_id`` for every row. That
+    function rebuilds the full task pool, turning one dialog click into
+    thousands of database queries. The caller now supplies a one-pass lookup.
+    """
     result = dict(row)
     task_id = _safe_int(result.get("task_id") or result.get("id"), 0)
-    try:
-        from career_app.services import unified_tasks
-        canonical = unified_tasks.task_by_id(conn, int(current_week), task_id) if task_id else None
-    except Exception:
-        canonical = None
+    canonical = (canonical_by_id or {}).get(task_id) if task_id else None
     if canonical:
         merged = dict(canonical)
         merged.update({key: value for key, value in result.items() if value is not None})
         result = merged
     result["task_id"] = task_id
     result["id"] = task_id
-    ready, reason = prerequisite_readiness(conn, current_week, result)
+
+    if bool(result.get("completed")) or str(result.get("status") or "") == "Completed":
+        ready, reason = True, "Completed."
+    elif canonical is not None:
+        reason = str(canonical.get("prerequisite_reason") or "")
+        ready = bool(canonical.get("ready")) or _timing_only(reason)
+        if ready:
+            reason = "All prerequisites are complete."
+    else:
+        ready, reason = prerequisite_readiness(conn, current_week, result)
     result["prerequisites_ready"] = bool(ready)
     result["prerequisite_reason"] = "" if ready else reason
     return result
@@ -239,8 +251,24 @@ def current_sprint_day_groups(
     from career_app.services import task_workspace
 
     week_start, week_end = week_bounds(conn, current_week)
-    raw_rows = [dict(item) for item in task_workspace.current_sprint_items(conn, current_week)]
-    rows = [_enrich_row(conn, current_week, row) for row in raw_rows]
+    from career_app.services import unified_tasks
+
+    canonical_tasks = list(unified_tasks.all_tasks(conn, current_week))
+    canonical_by_id = {
+        _safe_int(task.get("id") or task.get("task_id"), 0): task
+        for task in canonical_tasks
+        if _safe_int(task.get("id") or task.get("task_id"), 0)
+    }
+    raw_rows = [
+        dict(item)
+        for item in task_workspace.current_sprint_items(
+            conn, current_week, canonical_tasks=canonical_tasks
+        )
+    ]
+    rows = [
+        _enrich_row(conn, current_week, row, canonical_by_id)
+        for row in raw_rows
+    ]
 
     known: dict[int, date] = {}
     unscheduled: list[dict[str, Any]] = []

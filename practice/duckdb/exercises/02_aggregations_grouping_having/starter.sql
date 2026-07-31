@@ -1,4 +1,4 @@
--- DuckDB Exercise 04: Summarize retail orders with grouped metrics
+-- DuckDB Exercise 04: Summarize retail orders
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -19,7 +19,7 @@ DESCRIBE ex02_retail_orders;
 
 
 -- -----------------------------------------------------------------
--- Q3. Calculate the average revenue per order. Return it as `average_revenue`.
+-- Q3. The sales manager needs one average order value for the weekly summary. Calculate the average of `revenue`, round it to two decimal places, and name it `average_revenue`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
@@ -37,7 +37,7 @@ DESCRIBE ex02_retail_orders;
 
 
 -- -----------------------------------------------------------------
--- Q6. Calculate the average discount for each product category. Return `product_category` and the average as `average_discount`.
+-- Q6. Compare typical discount levels across product categories. Calculate the average `discount_pct` for each `product_category`, round it to two decimal places, and name it `average_discount`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

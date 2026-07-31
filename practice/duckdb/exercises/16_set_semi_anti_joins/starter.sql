@@ -1,4 +1,4 @@
--- DuckDB Exercise 08: Compare customer groups with set logic
+-- DuckDB Exercise 08: Compare customer populations with set and existence logic
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 
@@ -43,7 +43,7 @@ DESCRIBE ex16_orders;
 
 
 -- -----------------------------------------------------------------
--- Q7. Explain when UNION ALL is safer than UNION for audit work.
+-- Q7. Add a SQL comment explaining when `UNION ALL` is safer than `UNION` for audit work, then return the combined customer row count as `customer_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-# DuckDB Exercise 08: Compare customer groups with set logic
+# DuckDB Exercise 08: Compare customer populations with set and existence logic
 
 **Week:** 4
 **Estimated time:** 45 minutes  
@@ -6,7 +6,7 @@
 
 ## Scenario
 
-Customer success needs to compare old and current customer populations and identify who did or did not purchase.
+Customer Success needs to compare previous and current customer lists and identify customers who did or did not place an order.
 
 ## Tables
 
@@ -22,9 +22,8 @@ Combine the previous and current customer IDs with UNION.
 
 **Result requirements**
 
-- **Return columns:** `distinct_customer_count`
-- **Exact names for new columns:** `distinct_customer_count`
-- **Expected rows:** 1
+- Return columns in this order: `distinct_customer_count`.
+- Return 1 row.
 
 ### Task 2
 
@@ -32,9 +31,8 @@ Combine both customer tables with UNION ALL and count all rows.
 
 **Result requirements**
 
-- **Return columns:** `all_row_count`
-- **Exact names for new columns:** `all_row_count`
-- **Expected rows:** 1
+- Return columns in this order: `all_row_count`.
+- Return 1 row.
 
 ### Task 3
 
@@ -42,8 +40,8 @@ Find customers present in both periods with INTERSECT.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`
-- **Expected rows:** 4
+- Return columns in this order: `customer_id`.
+- Return 4 rows.
 
 ### Task 4
 
@@ -51,8 +49,8 @@ Find customers that are new in the current period with EXCEPT.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`
-- **Expected rows:** 3
+- Return columns in this order: `customer_id`.
+- Return 3 rows.
 
 ### Task 5
 
@@ -60,8 +58,8 @@ Return current customers that have at least one order using a semi-join pattern.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`
-- **Expected rows:** 3
+- Return columns in this order: `customer_id`.
+- Return 3 rows.
 
 ### Task 6
 
@@ -69,23 +67,22 @@ Return current customers with no orders using an anti-join pattern.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`
-- **Expected rows:** 3
+- Return columns in this order: `customer_id`.
+- Return 3 rows.
 
 ### Task 7
 
-Explain when UNION ALL is safer than UNION for audit work.
+Add a SQL comment explaining when `UNION ALL` is safer than `UNION` for audit work, then return the combined customer row count as `customer_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
-## Completion evidence
+- Return columns in this order: `customer_rows`.
+- Return 1 row.
 
-1. Work in the standard submission file created by Career Accelerator.
-2. Answer every question and run each query successfully.
-3. Use `validation.md` only after making a genuine attempt.
-4. Add the requested explanation comments in your own words.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

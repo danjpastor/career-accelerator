@@ -116,6 +116,33 @@ def _table_exists(conn: sqlite3.Connection, table: str) -> bool:
     ).fetchone() is not None
 
 
+def _durable_duckdb_completions(conn: sqlite3.Connection) -> set[int]:
+    """Load submitted DuckDB exercises once for the entire planner pass.
+
+    Sprint rows are presentation records and may be repaired or replaced during
+    startup.  The planner must never show a submitted exercise merely because a
+    reusable sprint row temporarily says incomplete.
+    """
+    completed: set[int] = set()
+    if _table_exists(conn, "duckdb_exercise_progress"):
+        completed.update(
+            int(row["exercise_number"])
+            for row in conn.execute(
+                """SELECT exercise_number
+                   FROM duckdb_exercise_progress
+                   WHERE status='Completed'"""
+            ).fetchall()
+        )
+    if _table_exists(conn, "duckdb_completion_evidence"):
+        completed.update(
+            int(row["exercise_number"])
+            for row in conn.execute(
+                "SELECT exercise_number FROM duckdb_completion_evidence"
+            ).fetchall()
+        )
+    return completed
+
+
 def _normalize_label(value: object) -> str:
     text = str(value or "").strip()
     # Early v10.26 reconciliation stored presentation prefixes in the title.
@@ -418,6 +445,17 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
         return Readiness(bool(result.get("ready")), reason)
 
     if kind == "review":
+        label = str(task.get("label") or "")
+        managed_key = str(task.get("managed_key") or "")
+        is_retrospective = (
+            "retrospective" in label.casefold()
+            or managed_key.casefold().startswith("weekly_retrospective_")
+        )
+        if is_retrospective and not weekly_checks.passed(conn, week):
+            return Readiness(
+                False,
+                f"Pass Week {week} Knowledge Check to unlock this retrospective.",
+            )
         today = date.today()
         if week == current_week and today.weekday() < 4:
             return Readiness(False, "Available on the final study days of this week.")
@@ -479,7 +517,12 @@ def _reason(task: dict, current_week: int) -> str:
     return focus_context(task, current_week)
 
 
-def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> dict:
+def _as_task(
+    conn: sqlite3.Connection,
+    row: sqlite3.Row,
+    current_week: int,
+    durable_duckdb_completed: set[int] | None = None,
+) -> dict:
     task = {key: row[key] for key in row.keys()}
     task["id"] = _safe_int(task.get("id"), 0)
     task["task_id"] = task["id"]
@@ -491,6 +534,26 @@ def _as_task(conn: sqlite3.Connection, row: sqlite3.Row, current_week: int) -> d
     task["estimated_minutes"] = max(5, _safe_int(task.get("estimated_minutes"), 30))
     task["label"] = _normalize_label(task.get("label"))
     task["kind"] = _kind(conn, task)
+
+    # Durable exercise evidence is the source of truth for DuckDB completion.
+    # Overlay it before readiness, catch-up, Focus, and Next Tasks are derived so
+    # a stale/recreated sprint row cannot resurrect a submitted exercise.
+    if task["kind"] == "duckdb" and durable_duckdb_completed:
+        # managed_key stores the stable internal exercise number. The visible
+        # label contains the learner-facing roadmap number, which may differ
+        # after curriculum resequencing (for example internal 19 is Exercise 02).
+        match = re.search(
+            r"roadmap_v1026:duckdb:(\d+)",
+            str(task.get("managed_key") or ""),
+        )
+        number = int(match.group(1)) if match else None
+        if number is None:
+            number = exercise_number_for_label(task.get("label"))
+        if number is not None and int(number) in durable_duckdb_completed:
+            task["completed"] = 1
+            task["status"] = "Completed"
+            task["durable_completion"] = True
+
     # Weekly work becomes catch-up after its week ends. DataCamp chapters are
     # scheduled by day, so an unfinished chapter becomes catch-up the next day.
     deferred_text = str(task.get("deferred_until") or "").strip()
@@ -524,7 +587,16 @@ def task_by_id(conn: sqlite3.Connection, current_week: int, task_id: int) -> dic
 
 
 def all_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
-    tasks = [_as_task(conn, row, current_week) for row in _task_rows(conn)]
+    durable_duckdb_completed = _durable_duckdb_completions(conn)
+    tasks = [
+        _as_task(
+            conn,
+            row,
+            current_week,
+            durable_duckdb_completed,
+        )
+        for row in _task_rows(conn)
+    ]
 
     # Current-week work must remain visible even when earlier learning work is
     # unfinished. Readiness rules decide whether the current lesson is available;

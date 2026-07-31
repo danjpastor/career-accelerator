@@ -41,7 +41,7 @@ DESCRIBE ex15_daily_revenue;
 
 
 -- -----------------------------------------------------------------
--- Q7. Explain in a SQL comment how ROWS BETWEEN changes the moving-average frame.
+-- Q7. Add a SQL comment explaining how `ROWS BETWEEN` changes the moving-average frame, then return the source row count as `window_frame_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

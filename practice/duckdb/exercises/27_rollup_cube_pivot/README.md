@@ -12,6 +12,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 - `ex02_retail_orders`
 
+## Scenario
+
+Leadership needs one flexible sales summary that can show subtotals, cross-tab comparisons, and an overall total without separate reports.
+
 ## Tasks
 
 ### Task 1
@@ -20,7 +24,7 @@ Create region and product-category subtotals using ROLLUP.
 
 **Result requirements**
 
-- **Return columns:** `region`, `product_category`, `revenue`
+- Return columns in this order: `region`, `product_category`, `revenue`.
 
 ### Task 2
 
@@ -28,7 +32,7 @@ Create combinations of region and sales channel using CUBE.
 
 **Result requirements**
 
-- **Return columns:** `region`, `sales_channel`, `revenue`
+- Return columns in this order: `region`, `sales_channel`, `revenue`.
 
 ### Task 3
 
@@ -36,8 +40,8 @@ Build a pivot-style summary with one row per region and separate revenue columns
 
 **Result requirements**
 
-- **Return columns:** `region`, `online_revenue`, `store_revenue`
-- **Expected rows:** 4
+- Return columns in this order: `region`, `online_revenue`, `store_revenue`.
+- Return 4 rows.
 
 ### Task 4
 
@@ -45,14 +49,14 @@ Use GROUPING SETS to return region totals, channel totals, and an overall total 
 
 **Result requirements**
 
-- **Return columns:** `region`, `sales_channel`, `revenue`
-## Completion evidence
+- Return columns in this order: `region`, `sales_channel`, `revenue`.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

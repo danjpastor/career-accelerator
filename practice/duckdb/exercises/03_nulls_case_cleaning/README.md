@@ -1,12 +1,12 @@
-# DuckDB Exercise 23: Clean and standardize customer feedback
+# DuckDB Exercise 23: Clean customer feedback
 
-**Week:** 6
+**Week:** 5
 **Estimated time:** 45 minutes  
 **Concepts:** NULLIF, TRIM, COALESCE, TRY_CAST, CASE
 
 ## Scenario
 
-A customer-experience export contains blanks, inconsistent labels, invalid numbers, and unreliable boolean values.
+A customer-experience export contains blanks, inconsistent labels, invalid numbers, and unreliable yes-or-no values. The analytics team must clean it before reporting.
 
 ## Tables
 
@@ -20,80 +20,71 @@ A customer-experience export contains blanks, inconsistent labels, invalid numbe
 
 ### Task 1
 
-Inspect distinct raw values for `channel_raw` and `resolved_raw`.
+Before cleaning the feedback file, count the distinct trimmed labels in `channel_raw` and `resolved_raw`. Name the results `distinct_channel_labels` and `distinct_resolved_labels`.
 
 **Result requirements**
 
-- **Return columns:** `count(DISTINCT main."trim"(channel_raw))`, `count(DISTINCT main."trim"(resolved_raw))`
-- **Exact names for new columns:** `count(DISTINCT main."trim"(channel_raw))`, `count(DISTINCT main."trim"(resolved_raw))`
-- **Expected rows:** 1
+- Return columns in this order: `distinct_channel_labels`, `distinct_resolved_labels`.
+- Return 1 row.
 
 ### Task 2
 
-Create a normalized channel using `UPPER(TRIM(channel_raw))`; convert blanks to NULL.
+Standardize `channel_raw` with `UPPER(TRIM(...))`, turn blank values into NULL, and count the rows that remain blank. Name the result `blank_channel_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `blank_channel_rows`.
+- Return 1 row.
 
 ### Task 3
 
-Create `rating_raw` with `TRY_CAST`; keep only ratings from 1 through 5.
+Convert `rating_raw` to a number safely, keep values from 1 through 5, and count the valid ratings. Name the result `valid_rating_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `valid_rating_rows`.
+- Return 1 row.
 
 ### Task 4
 
-Create `response_minutes_raw`; convert invalid or negative values to NULL.
+Convert `response_minutes_raw` to a number safely, treat invalid or negative values as NULL, and count the valid nonnegative response times. Name the result `valid_response_time_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `valid_response_time_rows`.
+- Return 1 row.
 
 ### Task 5
 
-Create a numeric `resolved_raw` where common true values equal 1, false values equal 0, and unknown values remain NULL.
+Standardize common true and false values in `resolved_raw`. Return the true count as `resolved_yes_rows` and the false count as `resolved_no_rows`; leave unknown values out of both counts.
 
 **Result requirements**
 
-- **Return columns:** `sum(CASE  WHEN ((lower(main."trim"(resolved_raw)) IN ('yes', 'y', '1', 'true'))) THEN (1) ELSE 0 END)`, `sum(CASE  WHEN ((lower(main."trim"(resolved_raw)) IN ('no', 'n', '0', 'false'))) THEN (1) ELSE 0 END)`
-- **Exact names for new columns:** `sum(CASE  WHEN ((lower(main."trim"(resolved_raw)) IN ('yes', 'y', '1', 'true'))) THEN (1) ELSE 0 END)`, `sum(CASE  WHEN ((lower(main."trim"(resolved_raw)) IN ('no', 'n', '0', 'false'))) THEN (1) ELSE 0 END)`
-- **Expected rows:** 1
+- Return columns in this order: `resolved_yes_rows`, `resolved_no_rows`.
+- Return 1 row.
 
 ### Task 6
 
-Create an `issue_type_raw` value in title case or a fallback of `Unknown`.
+Standardize `issue_type_raw` to title case, replace missing values with `Unknown`, and count the rows labeled `Unknown`. Name the result `unknown_issue_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `unknown_issue_rows`.
+- Return 1 row.
 
 ### Task 7
 
-Create a view named `ex03_feedback_clean` containing the cleaned fields and a `quality_issue_flag`.
+Build the cleaned feedback result and count the rows where `quality_issue_flag` identifies a problem. Name the result `quality_issue_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
-## Completion evidence
+- Return columns in this order: `quality_issue_rows`.
+- Return 1 row.
 
-1. Copy `starter.sql` to:
-   `practice/duckdb/submissions/ex03_nulls_case_cleaning.sql`
-2. Answer every question in that copied file.
-3. Run each query successfully in DuckDB.
-4. Compare your results with `validation.md` only after attempting the questions.
-5. Add a short comment at the bottom explaining one decision or mistake you corrected.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

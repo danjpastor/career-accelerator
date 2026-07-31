@@ -1,4 +1,4 @@
-# DuckDB Exercise 07: Use outer, cross, and self joins
+# DuckDB Exercise 07: Compare outer, cross, and self joins
 
 **Week:** 4
 **Estimated time:** 45 minutes
@@ -15,6 +15,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex10_employees`
 - `ex10_departments`
 
+## Scenario
+
+An operations analyst must preserve unmatched records, connect employees to managers, and build planning combinations without losing information.
+
 ## Tasks
 
 ### Task 1
@@ -23,8 +27,8 @@ Use a left join to show every customer and any related orders, keeping customers
 
 **Result requirements**
 
-- **Return columns:** `customer_id`, `customer_name`, `order_id`, `order_total`
-- **Expected rows:** 15
+- Return columns in this order: `customer_id`, `customer_name`, `order_id`, `order_total`.
+- Return 15 rows.
 
 ### Task 2
 
@@ -32,7 +36,7 @@ Use a full join to identify customer IDs that appear on only one side of the cus
 
 **Result requirements**
 
-- **Return columns:** `customer_id`, `customer_name`, `order_id`, `relationship_status`
+- Return columns in this order: `customer_id`, `customer_name`, `order_id`, `relationship_status`.
 
 ### Task 3
 
@@ -40,8 +44,8 @@ Use a self join to show each employee beside their manager name when one exists.
 
 **Result requirements**
 
-- **Return columns:** `employee_id`, `employee_name`, `manager_name`
-- **Expected rows:** 12
+- Return columns in this order: `employee_id`, `employee_name`, `manager_name`.
+- Return 12 rows.
 
 ### Task 4
 
@@ -49,15 +53,15 @@ Use a cross join to build every combination of department and two named planning
 
 **Result requirements**
 
-- **Return columns:** `department_name`, `scenario`
-- **Expected rows:** 8
-## Completion evidence
+- Return columns in this order: `department_name`, `scenario`.
+- Return 8 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

@@ -1,4 +1,4 @@
--- DuckDB Exercise 18: Explain join and window-function results
+-- DuckDB Exercise 18: Explain joins and window functions
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -9,13 +9,13 @@ DESCRIBE ex11_tickets;
 
 
 -- -----------------------------------------------------------------
--- Q1. INNER JOIN customer accounts to tickets. Explain which customers disappear and why.
+-- Q1. Use an inner join between customer accounts and tickets. Return the joined row count as `inner_join_rows` and add a SQL comment explaining which customers disappear and why.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q2. LEFT JOIN customer accounts to tickets. Explain why the row count differs from the INNER JOIN.
+-- Q2. Use a left join between customer accounts and tickets. Return the joined row count as `left_join_rows` and add a SQL comment explaining why it differs from the inner join.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
@@ -33,7 +33,7 @@ DESCRIBE ex11_tickets;
 
 
 -- -----------------------------------------------------------------
--- Q5. Calculate each agent's three-ticket rolling average resolution time.
+-- Q5. Calculate each agent’s trailing three-ticket average resolution time, then return the number of result rows as `rolling_average_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
@@ -45,6 +45,6 @@ DESCRIBE ex11_tickets;
 
 
 -- -----------------------------------------------------------------
--- Q7. Write a 3–5 sentence explanation comparing aggregate queries with window-function queries.
+-- Q7. Write a 3–5 sentence SQL comment comparing aggregate queries with window-function queries, then return the ticket row count as `comparison_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------

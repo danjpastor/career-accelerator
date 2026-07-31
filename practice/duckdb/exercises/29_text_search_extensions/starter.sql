@@ -1,4 +1,4 @@
--- DuckDB Exercise 25: Search text safely and inspect DuckDB extensions
+-- DuckDB Exercise 25: Explore text search and extension-safe SQL
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

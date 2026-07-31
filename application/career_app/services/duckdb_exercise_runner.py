@@ -8,6 +8,7 @@ Accelerator.
 from __future__ import annotations
 
 import csv
+import json
 import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
@@ -27,6 +28,8 @@ class QuestionBlock:
     number: int
     prompt: str
     sql: str
+    requirements: tuple[str, ...] = ()
+    hints: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -41,8 +44,8 @@ _QUESTION_MARKER = re.compile(
     r"(?mi)^\s*--\s*Q(?:uestion\s*)?(\d+)\s*[.):-]?\s*(.*?)\s*$"
 )
 _BLOCKED_WRITE_SQL = re.compile(
-    r"\b(?:INSERT|UPDATE|DELETE|MERGE|UPSERT|CREATE|DROP|ALTER|TRUNCATE|"
-    r"REPLACE|VACUUM|CHECKPOINT|EXPORT|IMPORT|COPY|ATTACH|DETACH|INSTALL|LOAD|"
+    r"\b(?:INSERT|UPDATE|DELETE|MERGE|UPSERT|DROP|ALTER|TRUNCATE|"
+    r"VACUUM|CHECKPOINT|EXPORT|IMPORT|COPY|ATTACH|DETACH|INSTALL|LOAD|"
     r"CALL|SET|RESET)\b",
     re.IGNORECASE,
 )
@@ -60,6 +63,50 @@ _PLACEHOLDER = re.compile(
     r"(?i)(?:\bTODO\b|\bREPLACE\s+ME\b|write\s+(?:and\s+run\s+)?your\s+query|"
     r"<[^>]+>|\.\.\.)"
 )
+
+
+
+
+def _contract_path(root: Path) -> Path:
+    return Path(root) / "practice" / "duckdb" / "task_contracts.json"
+
+
+def _task_contracts(root: Path) -> dict[str, Any]:
+    path = _contract_path(root)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    except FileNotFoundError:
+        return {}
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise DuckDBExerciseRunnerError(f"Could not read DuckDB task contracts: {exc}") from exc
+    return dict(payload.get("exercises") or {})
+
+
+def exercise_contract(root: Path, number: int) -> dict[str, Any]:
+    """Return the audited contract for one stable exercise ID."""
+    slug = exercise_paths(Path(root), int(number))["exercise_dir"].name
+    return dict(_task_contracts(Path(root)).get(slug) or {})
+
+
+def task_contract(root: Path, number: int, question_number: int) -> dict[str, Any]:
+    exercise = exercise_contract(Path(root), int(number))
+    task = (exercise.get("tasks") or {}).get(str(int(question_number))) or {}
+    return dict(task)
+
+
+def task_requirements(root: Path, number: int, question_number: int) -> tuple[str, ...]:
+    return tuple(str(value) for value in task_contract(root, number, question_number).get("requirements") or ())
+
+
+def task_hints(root: Path, number: int, question_number: int) -> tuple[str, ...]:
+    return tuple(str(value) for value in task_contract(root, number, question_number).get("hints") or ())
+
+
+def task_hint(root: Path, number: int, question_number: int, level: int = 0) -> str:
+    hints = task_hints(root, number, question_number)
+    if not hints:
+        return "Review the requested columns, filters, calculations, and sorting one part at a time."
+    return hints[min(max(int(level), 0), len(hints) - 1)]
 
 
 def exercise_paths(root: Path, number: int) -> dict[str, Path]:
@@ -139,13 +186,26 @@ def parse_questions(sql: str) -> list[QuestionBlock]:
 
 
 def question_definitions(root: Path, number: int) -> list[QuestionBlock]:
-    """Return the canonical question order and prompts from starter.sql."""
-    questions = parse_questions(starter_sql(Path(root), int(number)))
+    """Return task prompts and requirements from the audited task contract."""
+    root = Path(root)
+    questions = parse_questions(starter_sql(root, int(number)))
     if not questions:
         raise DuckDBExerciseRunnerError(
             "The starter SQL does not contain any Q1, Q2, ... task sections."
         )
-    return questions
+    enriched: list[QuestionBlock] = []
+    for question in questions:
+        contract = task_contract(root, number, question.number)
+        enriched.append(
+            QuestionBlock(
+                number=question.number,
+                prompt=str(contract.get("prompt") or question.prompt).strip(),
+                sql=question.sql,
+                requirements=tuple(str(value) for value in contract.get("requirements") or ()),
+                hints=tuple(str(value) for value in contract.get("hints") or ()),
+            )
+        )
+    return enriched
 
 
 def question_answers(root: Path, number: int) -> dict[int, str]:
@@ -267,6 +327,17 @@ def _mask_sql_literals_and_comments(sql: str) -> str:
     return _scan_sql(sql, mask_literals=True)
 
 
+def _is_safe_temp_create(statement: str) -> bool:
+    code = _mask_sql_literals_and_comments(statement).strip()
+    return bool(
+        re.match(
+            r"(?is)^CREATE\s+(?:OR\s+REPLACE\s+)?TEMP(?:ORARY)?\s+"
+            r"(?:VIEW|TABLE)\s+[A-Za-z_][A-Za-z0-9_]*\s+AS\s+(?:SELECT|WITH)\b",
+            code,
+        )
+    )
+
+
 def validate_read_only_sql(sql: str) -> None:
     code = _mask_sql_literals_and_comments(sql)
     comments_removed = _strip_sql_comments(sql)
@@ -274,7 +345,7 @@ def validate_read_only_sql(sql: str) -> None:
     if blocked:
         raise DuckDBExerciseRunnerError(
             f"'{blocked.group(0)}' is not allowed in guided exercises. "
-            "Use read-only SELECT, WITH, VALUES, DESCRIBE, SHOW, or EXPLAIN queries."
+            "Use SELECT queries or temporary views and tables created only for this task."
         )
     file_call = _BLOCKED_FILE_SQL.search(code)
     if file_call:
@@ -289,13 +360,16 @@ def validate_read_only_sql(sql: str) -> None:
     statements = split_sql_statements(sql)
     if not statements:
         raise DuckDBExerciseRunnerError("Write a SQL query before running this task.")
+    allowed = {"SELECT", "WITH", "VALUES", "DESCRIBE", "DESC", "SHOW", "EXPLAIN", "SUMMARIZE"}
     for statement in statements:
         first = re.match(r"\s*([A-Za-z]+)", _mask_sql_literals_and_comments(statement))
         keyword = first.group(1).upper() if first else ""
-        if keyword not in {"SELECT", "WITH", "VALUES", "DESCRIBE", "DESC", "SHOW", "EXPLAIN", "SUMMARIZE"}:
+        if keyword == "CREATE" and _is_safe_temp_create(statement):
+            continue
+        if keyword not in allowed:
             raise DuckDBExerciseRunnerError(
                 f"Statements beginning with '{keyword or 'unknown'}' are not allowed. "
-                "Guided exercises run read-only queries only."
+                "Use read-only queries or CREATE TEMP VIEW/TABLE ... AS SELECT for this task only."
             )
 
 
@@ -454,7 +528,7 @@ def parse_validation(markdown: str) -> dict[int, ValidationCheckpoint]:
         number = int(match.group(1))
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         section = text[match.end():end]
-        rows_match = re.search(r"(?im)Expected\s+rows?\s*:\s*(\d+)", section)
+        rows_match = re.search(r"(?im)Expected\s+rows?\s*:\s*(?:\*\*)?\s*(\d+)", section)
         expected_rows = int(rows_match.group(1)) if rows_match else None
         lines = []
         in_fence = False
@@ -524,46 +598,179 @@ def _normal(value: Any) -> str:
         return re.sub(r"\s+", " ", text).lower()
 
 
-def _compare_checkpoint(run: dict[str, Any], checkpoint: ValidationCheckpoint | None) -> list[dict[str, Any]]:
+def _rule_check(sql: str, rule: dict[str, Any]) -> tuple[bool, str]:
+    code = _mask_sql_literals_and_comments(sql).upper()
+    kind = str(rule.get("type") or "")
+    if kind == "contains":
+        value = str(rule.get("value") or "").upper()
+        passed = value in code
+        return passed, f"This task specifically asks you to use {value}."
+    if kind == "select_count":
+        minimum = int(rule.get("minimum") or 2)
+        count = len(re.findall(r"\bSELECT\b", code))
+        return count >= minimum, f"This task needs a subquery with at least {minimum} SELECT statements."
+    if kind == "comment":
+        comments = re.findall(r"--[^\n]*|/\*.*?\*/", str(sql or ""), flags=re.S)
+        words = len(re.findall(r"[A-Za-z0-9']+", " ".join(comments)))
+        minimum = int(rule.get("minimum_words") or 8)
+        return words >= minimum, f"Add the requested SQL comment ({minimum} or more words)."
+    if kind == "formatting":
+        clauses = [str(value).upper() for value in rule.get("clauses") or ()]
+        raw = _strip_sql_comments(str(sql or ""))
+        missing = [
+            clause for clause in clauses
+            if re.search(rf"(?im)^\s*{re.escape(clause)}\b", raw) is None
+        ]
+        passed = not missing
+        if passed:
+            return True, "Each requested SQL clause starts on its own line."
+        return False, "Put each major clause on its own line. Missing line starts: " + ", ".join(missing) + "."
+    return True, ""
+
+
+def _structure_checks(sql: str, contract: dict[str, Any]) -> list[dict[str, Any]]:
+    checks: list[dict[str, Any]] = []
+    for rule in contract.get("rules") or ():
+        passed, detail = _rule_check(sql, dict(rule))
+        checks.append({"label": "Required SQL section", "passed": passed, "detail": detail})
+    rounding = contract.get("rounding")
+    if rounding is not None:
+        code = _mask_sql_literals_and_comments(sql)
+        pattern = rf"(?i)\bROUND\s*\([^;]+?,\s*{int(rounding)}\s*\)"
+        passed = bool(re.search(pattern, code))
+        checks.append({
+            "label": "Required rounding",
+            "passed": passed,
+            "detail": f"Round the requested value to {int(rounding)} decimal place(s) with ROUND(..., {int(rounding)}).",
+        })
+    return checks
+
+
+def _friendly_execution_error(message: str) -> str:
+    text = str(message or "")
+    lowered = text.lower()
+    if "referenced column" in lowered or "binder error" in lowered and "not found" in lowered:
+        return "DuckDB could not find one of the column names. Compare every name in SELECT, WHERE, GROUP BY, and ORDER BY with the dataset preview.\n\nTechnical detail: " + text
+    if "syntax error" in lowered or "parser error" in lowered:
+        return "DuckDB found a SQL syntax problem. Check commas in SELECT, matching parentheses, and the order of FROM, WHERE, GROUP BY, HAVING, and ORDER BY.\n\nTechnical detail: " + text
+    if "ambiguous" in lowered:
+        return "A column name exists in more than one table. Prefix it with the correct table alias, such as `o.order_id`.\n\nTechnical detail: " + text
+    if "conversion error" in lowered or "could not convert" in lowered:
+        return "A value could not be converted to the requested type. Use a safe conversion such as TRY_CAST when the task allows invalid source values.\n\nTechnical detail: " + text
+    return text
+
+
+def _compare_checkpoint(
+    run: dict[str, Any],
+    checkpoint: ValidationCheckpoint | None,
+    contract: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     result = run["last_result"]
     columns = list(result["columns"])
     rows = list(result["rows"])
+    contract = dict(contract or {})
     checks: list[dict[str, Any]] = []
 
     def add(label: str, passed: bool, detail: str) -> None:
         checks.append({"label": label, "passed": bool(passed), "detail": detail})
 
-    add("Query executes", True, f"Returned {len(rows)} displayed row(s).")
-    if checkpoint is None:
-        add(
-            "Validation checkpoint available",
-            False,
-            "The validation file does not contain a matching task checkpoint.",
-        )
+    add("Query executes", True, f"Returned {len(rows)} row(s).")
+    if checkpoint is None and not contract:
+        add("Validation checkpoint available", False, "This task does not have an audited validation contract.")
         return checks
-    if checkpoint.expected_rows is not None:
-        add(
-            "Expected row count",
-            len(rows) == checkpoint.expected_rows,
-            f"Expected {checkpoint.expected_rows}; received {len(rows)}.",
-        )
-    if checkpoint.columns:
-        actual_columns = [_normal(value) for value in columns]
-        expected_columns = [_normal(value) for value in checkpoint.columns]
-        add(
-            "Expected columns",
-            actual_columns == expected_columns,
-            "Expected " + ", ".join(checkpoint.columns) + "; received " + ", ".join(columns) + ".",
-        )
-    if checkpoint.rows:
+
+    expected_rows = contract.get("expected_rows")
+    if expected_rows is None and checkpoint is not None:
+        expected_rows = checkpoint.expected_rows
+    if expected_rows is not None:
+        expected_rows = int(expected_rows)
+        if len(rows) == expected_rows:
+            detail = f"Returned the expected {expected_rows} row(s)."
+        elif len(rows) > expected_rows:
+            detail = f"Expected {expected_rows} row(s), but received {len(rows)}. Check whether the filter, grouping, duplicate removal, or row limit is too broad."
+        else:
+            detail = f"Expected {expected_rows} row(s), but received {len(rows)}. Check whether the filter or join removes records that should remain."
+        add("Expected row count", len(rows) == expected_rows, detail)
+
+    expected_columns = list(contract.get("columns") or ())
+    if not expected_columns and checkpoint is not None:
+        expected_columns = list(checkpoint.columns)
+    if expected_columns:
+        actual_normal = [_normal(value) for value in columns]
+        expected_normal = [_normal(value) for value in expected_columns]
+        missing = [col for col, norm in zip(expected_columns, expected_normal) if norm not in actual_normal]
+        extra = [col for col, norm in zip(columns, actual_normal) if norm not in expected_normal]
+        if actual_normal == expected_normal:
+            detail = "Returned the required columns in the correct order."
+        else:
+            parts = ["Expected " + ", ".join(expected_columns) + "; received " + ", ".join(columns) + "."]
+            if missing:
+                parts.append("Missing or incorrectly aliased: " + ", ".join(missing) + ".")
+            if extra:
+                parts.append("Remove or rename: " + ", ".join(extra) + ".")
+            detail = " ".join(parts)
+        add("Expected columns and aliases", actual_normal == expected_normal, detail)
+
+    if checkpoint is not None and checkpoint.rows:
         actual_preview = [tuple(_normal(value) for value in row) for row in rows[: len(checkpoint.rows)]]
         expected_preview = [tuple(_normal(value) for value in row) for row in checkpoint.rows]
-        add(
-            "Expected checkpoint values",
-            actual_preview == expected_preview,
-            f"Compared the first {len(expected_preview)} validation row(s) in order.",
-        )
+        order_sensitive = bool(contract.get("order_sensitive"))
+        if order_sensitive:
+            passed = actual_preview == expected_preview
+            detail = f"Compared the first {len(expected_preview)} expected row(s) in the required order."
+        else:
+            actual_all = [tuple(_normal(value) for value in row) for row in rows]
+            remaining = list(actual_all)
+            passed = True
+            for expected_row in expected_preview:
+                try:
+                    remaining.remove(expected_row)
+                except ValueError:
+                    passed = False
+                    break
+            detail = f"Confirmed that all {len(expected_preview)} checkpoint row(s) appear in the result; row order was ignored because the task does not require sorting."
+        if not passed:
+            detail += " The values differ, so review the calculation, filter, grouping, or join before changing aliases."
+        add("Expected result values", passed, detail)
     return checks
+
+
+
+
+def _diagnostic_hint(
+    checklist: list[dict[str, Any]],
+    root: Path,
+    number: int,
+    question_number: int,
+) -> str:
+    """Choose a useful next step from the section that actually failed."""
+    failed = [item for item in checklist if not item.get("passed")]
+    if not failed:
+        return ""
+    first = failed[0]
+    label = str(first.get("label") or "")
+    detail = str(first.get("detail") or "").strip()
+    contract = task_contract(root, number, question_number)
+    columns = [str(value) for value in contract.get("columns") or ()]
+
+    if label == "Task answered":
+        return task_hint(root, number, question_number, 0)
+    if label == "Query executes":
+        return "Fix the execution error first. Read the technical detail, then check the named column and the clause DuckDB points to."
+    if label == "Required SQL section":
+        return detail or task_hint(root, number, question_number, 1)
+    if label == "Required rounding":
+        places = int(contract.get("rounding") or 0)
+        return f"Wrap the requested calculation in ROUND(..., {places}); do not round unrelated fields."
+    if label == "Expected columns and aliases":
+        if columns:
+            return "Review only the SELECT list. Return these columns in this order and use AS for any renamed or calculated field: " + ", ".join(columns) + "."
+        return "Review the SELECT list and remove any fields the task did not request."
+    if label == "Expected row count":
+        return "The SELECT list may be correct, but the number of records is not. Review WHERE, JOIN, GROUP BY, HAVING, DISTINCT, and LIMIT in that order."
+    if label == "Expected result values":
+        return "The shape of the result is close, but at least one value is wrong. Check the calculation first, then the filter, grouping, join key, and null handling."
+    return task_hint(root, number, question_number, min(2, len(failed)))
 
 
 def check_question(
@@ -577,35 +784,55 @@ def check_question(
     question = questions.get(int(question_number))
     if question is None:
         raise DuckDBExerciseRunnerError(f"Task {question_number} was not found in the SQL file.")
+    contract = task_contract(root, number, question_number)
     if not question.sql.strip() or _PLACEHOLDER.search(_strip_sql_comments(question.sql)):
         return {
             "passed": False,
             "question": question,
             "run": None,
-            "checklist": [
-                {
-                    "label": "Task answered",
-                    "passed": False,
-                    "detail": "Replace the starter prompt with your own SQL before checking.",
-                }
-            ],
+            "checklist": [{
+                "label": "Task answered",
+                "passed": False,
+                "detail": "Write your SQL in the editor before checking this task.",
+            }],
+            "hint": task_hint(root, number, question_number, 0),
         }
-    run = run_sql(root, number, question.sql)
+    structure = _structure_checks(question.sql, contract)
+    try:
+        run = run_sql(root, number, question.sql)
+    except DuckDBExerciseRunnerError as exc:
+        return {
+            "passed": False,
+            "question": question,
+            "run": None,
+            "checklist": [{"label": "Query executes", "passed": False, "detail": _friendly_execution_error(str(exc))}],
+            "hint": task_hint(root, number, question_number, 1),
+        }
     checkpoints = parse_validation(validation_markdown(root, number))
-    checklist = _compare_checkpoint(run, checkpoints.get(int(question_number)))
+    checklist = structure + _compare_checkpoint(run, checkpoints.get(int(question_number)), contract)
+    passed = bool(checklist) and all(item["passed"] for item in checklist)
     return {
-        "passed": bool(checklist) and all(item["passed"] for item in checklist),
+        "passed": passed,
         "question": question,
         "run": run,
         "checklist": checklist,
+        "hint": "" if passed else _diagnostic_hint(checklist, root, number, question_number),
     }
 
 
-def check_exercise(root: Path, number: int, full_sql: str) -> dict[str, Any]:
+def check_exercise(
+    root: Path,
+    number: int,
+    full_sql: str,
+    question_numbers: Iterable[int] | None = None,
+) -> dict[str, Any]:
     roadmap_mastery.assert_duckdb_ready_from_root(root, number)
     questions = parse_questions(full_sql)
+    if question_numbers is not None:
+        selected = {int(value) for value in question_numbers}
+        questions = [question for question in questions if question.number in selected]
     if not questions:
-        raise DuckDBExerciseRunnerError("The submission does not contain any exercise tasks.")
+        raise DuckDBExerciseRunnerError("The submission does not contain any selected exercise tasks.")
     results: list[dict[str, Any]] = []
     for question in questions:
         try:

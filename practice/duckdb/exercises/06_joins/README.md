@@ -1,4 +1,4 @@
-# DuckDB Exercise 06: Combine customers, orders, and payments
+# DuckDB Exercise 06: Join customers, orders, and payments
 
 **Week:** 4
 **Estimated time:** 45 minutes  
@@ -6,7 +6,7 @@
 
 ## Scenario
 
-Finance and customer success need one view combining customer, order, and payment information.
+Finance and Customer Success need one reliable view that connects customers, orders, and payments without dropping or duplicating important records.
 
 ## Tables
 
@@ -24,23 +24,21 @@ Finance and customer success need one view combining customer, order, and paymen
 
 ### Task 1
 
-INNER JOIN customers to orders and return customer name with each order.
+Check how many orders have a matching customer record. Use an inner join and return the count as `matched_orders`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `matched_orders`.
+- Return 1 row.
 
 ### Task 2
 
-LEFT JOIN customers to orders so customers without orders remain visible.
+Check that a left join keeps customers who have no orders. Return the number of rows produced by the join as `customer_order_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `customer_order_rows`.
+- Return 1 row.
 
 ### Task 3
 
@@ -48,8 +46,8 @@ Find customers with no orders.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`
-- **Expected rows:** 1
+- Return columns in this order: `customer_id`.
+- Return 1 row.
 
 ### Task 4
 
@@ -57,28 +55,26 @@ Join orders to payments and identify orders with no payment.
 
 **Result requirements**
 
-- **Return columns:** `order_id`
-- **Expected rows:** 2
+- Return columns in this order: `order_id`.
+- Return 2 rows.
 
 ### Task 5
 
-Create a three-table result with customer, order total, payment amount, and payment method.
+Join customers, orders, and payments, then count the rows in the combined result. Return the count as `joined_payment_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `joined_payment_rows`.
+- Return 1 row.
 
 ### Task 6
 
-Calculate delivered-order revenue by region.
+Show delivered-order revenue by customer region. Return `region` and the total as `delivered_revenue`.
 
 **Result requirements**
 
-- **Return columns:** `region`, `sum(o.order_total)`
-- **Exact names for new columns:** `sum(o.order_total)`
-- **Expected rows:** 4
+- Return columns in this order: `region`, `delivered_revenue`.
+- Return 4 rows.
 
 ### Task 7
 
@@ -86,16 +82,13 @@ Calculate customer lifetime delivered revenue, including customers with zero.
 
 **Result requirements**
 
-- **Return columns:** `customer_id`, `revenue`
-- **Exact names for new columns:** `revenue`
-- **Expected rows:** 10
-## Completion evidence
+- Return columns in this order: `customer_id`, `revenue`.
+- Return 10 rows.
 
-1. Copy `starter.sql` to:
-   `practice/duckdb/submissions/ex06_joins.sql`
-2. Answer every question in that copied file.
-3. Run each query successfully in DuckDB.
-4. Compare your results with `validation.md` only after attempting the questions.
-5. Add a short comment at the bottom explaining one decision or mistake you corrected.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

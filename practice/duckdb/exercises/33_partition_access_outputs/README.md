@@ -1,6 +1,6 @@
 # DuckDB Exercise 29: Plan partitioning and access-safe outputs
 
-**Week:** 7
+**Week:** 6
 **Estimated time:** 45 minutes
 **Concepts:** partition-key analysis, restricted projections, database management reasoning
 
@@ -13,6 +13,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex06_customers`
 - `ex06_orders`
 
+## Scenario
+
+A data platform analyst is evaluating partition choices and preparing restricted outputs that expose useful fields without unnecessary sensitive details.
+
 ## Tasks
 
 ### Task 1
@@ -21,7 +25,7 @@ Summarize order volume by month to evaluate a possible date partition key.
 
 **Result requirements**
 
-- **Return columns:** `order_month`, `order_count`
+- Return columns in this order: `order_month`, `order_count`.
 
 ### Task 2
 
@@ -29,7 +33,7 @@ Summarize order volume by region to evaluate whether region would create balance
 
 **Result requirements**
 
-- **Return columns:** `region`, `order_count`
+- Return columns in this order: `region`, `order_count`.
 
 ### Task 3
 
@@ -37,8 +41,8 @@ Create a restricted customer output that excludes signup date while retaining th
 
 **Result requirements**
 
-- **Return columns:** `customer_id`, `customer_name`, `region`
-- **Expected rows:** 10
+- Return columns in this order: `customer_id`, `customer_name`, `region`.
+- Return 10 rows.
 
 ### Task 4
 
@@ -46,15 +50,15 @@ Create a restricted order output that exposes order status and total without cus
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `customer_id`, `order_total`, `order_status`
-- **Expected rows:** 14
-## Completion evidence
+- Return columns in this order: `order_id`, `customer_id`, `order_total`, `order_status`.
+- Return 14 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

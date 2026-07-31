@@ -1,4 +1,4 @@
-# DuckDB Exercise 13: Refactor a complex query with readable CTEs
+# DuckDB Exercise 13: Refactor an unreadable analytics query
 
 **Week:** 4
 **Estimated time:** 30 minutes  
@@ -6,7 +6,7 @@
 
 ## Scenario
 
-A working query produces the right answer but is difficult to review. Refactor it without changing the result.
+A campaign-performance query returns the right numbers but is difficult for another analyst to review. Refactor it without changing the business result.
 
 ## Tables
 
@@ -16,84 +16,90 @@ A working query produces the right answer but is difficult to review. Refactor i
 
 - `campaign_performance.csv`
 
+## Starting query
+
+Refactor this query inside the SQL editor. The query is intentionally compressed so its logic is difficult to review.
+
+```sql
+SELECT campaign_channel, SUM(spend), SUM(revenue), SUM(revenue) - SUM(spend), ROUND(SUM(revenue) / NULLIF(SUM(spend), 0), 4)
+FROM ex12_campaign_performance
+WHERE campaign_date >= '2026-06-01'
+GROUP BY campaign_channel
+HAVING SUM(spend) > 500
+ORDER BY 5 DESC;
+```
+
 ## Tasks
 
 ### Task 1
 
-Run `messy_query.sql` and record its output.
+Refactor the starting campaign query shown in the exercise guide without changing its result. Return `campaign_channel`, `spend`, `revenue`, `profit`, and `return_on_spend`, with return on spend rounded to four decimal places.
 
 **Result requirements**
 
-- **Return columns:** `campaign_channel`, `sum(spend)`, `sum(revenue)`, `(sum(revenue) - sum(spend))`, `round((sum(revenue) / "nullif"(sum(spend), 0)), 4)`
-- **Exact names for new columns:** `sum(spend)`, `sum(revenue)`, `(sum(revenue) - sum(spend))`, `round((sum(revenue) / "nullif"(sum(spend), 0)), 4)`
-- **Expected rows:** 4
+- Return columns in this order: `campaign_channel`, `spend`, `revenue`, `profit`, `return_on_spend`.
+- Return 4 rows.
+- Round the requested result to 4 decimal places.
 
 ### Task 2
 
-Reformat the query using one clause per line and consistent indentation.
+Rewrite the starting query with each major SQL clause on its own line and consistent indentation. Then return the number of source rows as `formatted_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `formatted_rows`.
+- Return 1 row.
 
 ### Task 3
 
-Replace positional `ORDER BY 5` with a descriptive alias.
+Build the channel report so it sorts by the `return_on_spend` alias instead of column position 5. Then return the number of distinct channels as `channel_count`.
 
 **Result requirements**
 
-- **Return columns:** `count(DISTINCT campaign_channel)`
-- **Exact names for new columns:** `count(DISTINCT campaign_channel)`
-- **Expected rows:** 1
+- Return columns in this order: `channel_count`.
+- Return 1 row.
 
 ### Task 4
 
-Move channel aggregation into a clearly named CTE.
+Move channel aggregation into a clearly named CTE. Return total `total_spend` and `total_revenue`, each rounded to two decimal places.
 
 **Result requirements**
 
-- **Return columns:** `round(sum(spend), 2)`, `round(sum(revenue), 2)`
-- **Exact names for new columns:** `round(sum(spend), 2)`, `round(sum(revenue), 2)`
-- **Expected rows:** 1
+- Return columns in this order: `total_spend`, `total_revenue`.
+- Return 1 row.
+- Round the requested result to 2 decimal places.
 
 ### Task 5
 
-Add short comments explaining the CTE and final filter.
+Add short SQL comments that explain the channel-summary CTE and its final filter. Return `campaign_channel` and `profit` for the four report rows.
 
 **Result requirements**
 
-- **Return columns:** `campaign_channel`, `profit`
-- **Exact names for new columns:** `profit`
-- **Expected rows:** 4
+- Return columns in this order: `campaign_channel`, `profit`.
+- Return 4 rows.
 
 ### Task 6
 
-Confirm the refactored result exactly matches the original.
+Confirm the refactored query still covers every source row. Return the matching row count as `matching_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
+- Return columns in this order: `matching_rows`.
+- Return 1 row.
 
 ### Task 7
 
-Write two sentences explaining how readability reduces analytics risk.
+Write two SQL-comment sentences explaining how readable SQL reduces analytics risk, then return the source row count as `reviewed_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
-## Completion evidence
+- Return columns in this order: `reviewed_rows`.
+- Return 1 row.
 
-1. Copy `starter.sql` to:
-   `practice/duckdb/submissions/ex12_query_readability.sql`
-2. Answer every question in that copied file.
-3. Run each query successfully in DuckDB.
-4. Compare your results with `validation.md` only after attempting the questions.
-5. Add a short comment at the bottom explaining one decision or mistake you corrected.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

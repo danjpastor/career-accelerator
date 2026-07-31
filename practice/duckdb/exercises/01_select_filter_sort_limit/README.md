@@ -24,8 +24,8 @@ Prepare the manager's basic ticket list. Return `ticket_id`, `customer_name`, an
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`, `customer_name`, `status`
-- **Expected rows:** 20
+- Return columns in this order: `ticket_id`, `customer_name`, `status`.
+- Return 20 rows.
 
 ### Task 2
 
@@ -33,8 +33,8 @@ Find the tickets that are still open. Return only `ticket_id`.
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`
-- **Expected rows:** 6
+- Return columns in this order: `ticket_id`.
+- Return 6 rows.
 
 ### Task 3
 
@@ -42,8 +42,8 @@ Find active tickets that need the fastest attention. Return only `ticket_id` for
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`
-- **Expected rows:** 5
+- Return columns in this order: `ticket_id`.
+- Return 5 rows.
 
 ### Task 4
 
@@ -51,8 +51,8 @@ Find tickets created after June 15, 2026. Return only `ticket_id`.
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`
-- **Expected rows:** 10
+- Return columns in this order: `ticket_id`.
+- Return 10 rows.
 
 ### Task 5
 
@@ -60,8 +60,8 @@ Review how long closed tickets took to resolve. Return `ticket_id` and `resoluti
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`, `resolution_hours`
-- **Expected rows:** 11
+- Return columns in this order: `ticket_id`, `resolution_hours`.
+- Return 11 rows.
 
 ### Task 6
 
@@ -69,8 +69,8 @@ Show the five closed tickets with the highest satisfaction scores. Return `ticke
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`, `satisfaction_score`
-- **Expected rows:** 5
+- Return columns in this order: `ticket_id`, `satisfaction_score`.
+- Return 5 rows.
 
 ### Task 7
 
@@ -78,15 +78,13 @@ Find open Billing tickets for follow-up. Return only `ticket_id`, sorted from ol
 
 **Result requirements**
 
-- **Return columns:** `ticket_id`
-- **Expected rows:** 4
-## Completion evidence
+- Return columns in this order: `ticket_id`.
+- Return 4 rows.
 
-1. Copy `starter.sql` to:
-   `practice/duckdb/submissions/ex01_select_filter_sort_limit.sql`
-2. Answer every question in that copied file.
-3. Run each query successfully in DuckDB.
-4. Compare your results with `validation.md` only after attempting the questions.
-5. Add a short comment at the bottom explaining one decision or mistake you corrected.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

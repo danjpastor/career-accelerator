@@ -6,7 +6,7 @@
 
 ## Scenario
 
-Operations wants trends that preserve daily rows while adding running totals, moving averages, changes, and ranks.
+Operations wants daily revenue trends that keep every date visible while adding running totals, moving averages, changes, and ranks.
 
 ## Tables
 
@@ -20,9 +20,8 @@ Number each region’s rows in date order.
 
 **Result requirements**
 
-- **Return columns:** `region`, `revenue_date`, `row_number`
-- **Exact names for new columns:** `row_number`
-- **Expected rows:** 14
+- Return columns in this order: `region`, `revenue_date`, `row_number`.
+- Return 14 rows.
 
 ### Task 2
 
@@ -30,9 +29,8 @@ Calculate cumulative revenue by region.
 
 **Result requirements**
 
-- **Return columns:** `region`, `final_running_total`
-- **Exact names for new columns:** `final_running_total`
-- **Expected rows:** 2
+- Return columns in this order: `region`, `final_running_total`.
+- Return 2 rows.
 
 ### Task 3
 
@@ -40,9 +38,8 @@ Calculate a trailing three-day moving average by region.
 
 **Result requirements**
 
-- **Return columns:** `region`, `moving_avg_on_2026_06_07`
-- **Exact names for new columns:** `moving_avg_on_2026_06_07`
-- **Expected rows:** 2
+- Return columns in this order: `region`, `moving_avg_on_2026_06_07`.
+- Return 2 rows.
 
 ### Task 4
 
@@ -50,9 +47,8 @@ Use LAG to calculate the day-over-day revenue change.
 
 **Result requirements**
 
-- **Return columns:** `region`, `change_on_2026_06_07`
-- **Exact names for new columns:** `change_on_2026_06_07`
-- **Expected rows:** 2
+- Return columns in this order: `region`, `change_on_2026_06_07`.
+- Return 2 rows.
 
 ### Task 5
 
@@ -60,9 +56,8 @@ Rank each day within its region from highest to lowest revenue.
 
 **Result requirements**
 
-- **Return columns:** `region`, `highest_revenue_date`
-- **Exact names for new columns:** `highest_revenue_date`
-- **Expected rows:** 2
+- Return columns in this order: `region`, `highest_revenue_date`.
+- Return 2 rows.
 
 ### Task 6
 
@@ -70,23 +65,22 @@ Return only the top two revenue days per region.
 
 **Result requirements**
 
-- **Return columns:** `region`, `revenue_date`, `revenue`
-- **Expected rows:** 4
+- Return columns in this order: `region`, `revenue_date`, `revenue`.
+- Return 4 rows.
 
 ### Task 7
 
-Explain in a SQL comment how ROWS BETWEEN changes the moving-average frame.
+Add a SQL comment explaining how `ROWS BETWEEN` changes the moving-average frame, then return the source row count as `window_frame_rows`.
 
 **Result requirements**
 
-- **Return columns:** `count_star()`
-- **Exact names for new columns:** `count_star()`
-- **Expected rows:** 1
-## Completion evidence
+- Return columns in this order: `window_frame_rows`.
+- Return 1 row.
 
-1. Work in the standard submission file created by Career Accelerator.
-2. Answer every question and run each query successfully.
-3. Use `validation.md` only after making a genuine attempt.
-4. Add the requested explanation comments in your own words.
+## Complete the exercise
 
-The validation file contains result checkpoints, not completed SQL solutions.
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
+

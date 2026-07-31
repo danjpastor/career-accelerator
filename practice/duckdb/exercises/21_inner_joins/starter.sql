@@ -1,4 +1,4 @@
--- DuckDB Exercise 05: Join orders to customers
+-- DuckDB Exercise 05: Connect orders to customers with inner joins
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

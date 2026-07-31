@@ -13,6 +13,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex10_employees`
 - `ex11_tickets`
 
+## Scenario
+
+People Operations and Support need ranked lists that handle ties correctly and identify the highest-priority records within each group.
+
 ## Tasks
 
 ### Task 1
@@ -21,8 +25,8 @@ Rank all employees from highest to lowest salary using a ranking function that p
 
 **Result requirements**
 
-- **Return columns:** `employee_id`, `employee_name`, `annual_salary`, `salary_rank`
-- **Expected rows:** 12
+- Return columns in this order: `employee_id`, `employee_name`, `annual_salary`, `salary_rank`.
+- Return 12 rows.
 
 ### Task 2
 
@@ -30,8 +34,8 @@ Rank employees by salary inside each department.
 
 **Result requirements**
 
-- **Return columns:** `employee_id`, `department_id`, `annual_salary`, `department_rank`
-- **Expected rows:** 12
+- Return columns in this order: `employee_id`, `department_id`, `annual_salary`, `department_rank`.
+- Return 12 rows.
 
 ### Task 3
 
@@ -39,8 +43,8 @@ Return the top two salaries in each department using a window rank.
 
 **Result requirements**
 
-- **Return columns:** `department_id`, `employee_name`, `annual_salary`, `department_rank`
-- **Expected rows:** 8
+- Return columns in this order: `department_id`, `employee_name`, `annual_salary`, `department_rank`.
+- Return 8 rows.
 
 ### Task 4
 
@@ -48,15 +52,15 @@ Number tickets in opening order for each support agent.
 
 **Result requirements**
 
-- **Return columns:** `agent_id`, `ticket_id`, `opened_at`, `ticket_sequence`
-- **Expected rows:** 18
-## Completion evidence
+- Return columns in this order: `agent_id`, `ticket_id`, `opened_at`, `ticket_sequence`.
+- Return 18 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

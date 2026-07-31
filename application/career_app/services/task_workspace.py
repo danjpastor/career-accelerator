@@ -306,7 +306,7 @@ def _sprint_item_category(track_key, category, label, managed_key=None) -> tuple
     return "General", track
 
 
-def current_sprint_items(conn, week: int) -> list[dict]:
+def current_sprint_items(conn, week: int, *, canonical_tasks=None) -> list[dict]:
     """Return every named assignment or completion in one sprint week.
 
     Adaptive track task rows are reused as the learner advances. The current
@@ -545,7 +545,8 @@ def current_sprint_items(conn, week: int) -> list[dict]:
             for item in items
             if item.get("track_key") and item.get("target_key")
         }
-        for task in unified_tasks.all_tasks(conn, week):
+        task_pool = canonical_tasks if canonical_tasks is not None else unified_tasks.all_tasks(conn, week)
+        for task in task_pool:
             task_id = int(task.get("task_id") or task.get("id") or 0)
             task_week = int(task.get("week") or week)
             if not task_id or bool(task.get("completed")) or task_week > week:
@@ -2206,7 +2207,11 @@ def mark_in_progress(conn, task_id: int) -> None:
 
 def ensure_weekly_workspace_task(conn, week: int, kind: str) -> int:
     week = int(week)
+    prerequisite_state = "Ready"
+    prerequisite_reason = None
     if kind == "retrospective":
+        from career_app.services import weekly_checks
+
         row = conn.execute(
             """SELECT id FROM sprint_tasks
                WHERE week=? AND LOWER(label) LIKE '%retrospective%'
@@ -2219,6 +2224,9 @@ def ensure_weekly_workspace_task(conn, week: int, kind: str) -> int:
             else f"Complete the Week {week} retrospective"
         )
         minutes = 25
+        if not weekly_checks.passed(conn, week):
+            prerequisite_state = "Blocked"
+            prerequisite_reason = f"Pass Week {week} Knowledge Check to unlock this retrospective."
     elif kind == "study_plan":
         row = conn.execute(
             """SELECT id FROM sprint_tasks
@@ -2235,7 +2243,16 @@ def ensure_weekly_workspace_task(conn, week: int, kind: str) -> int:
         raise ValueError("Unsupported weekly workspace type.")
 
     if row is not None:
-        return int(row["id"])
+        task_id = int(row["id"])
+        if kind == "retrospective":
+            conn.execute(
+                """UPDATE task_metadata
+                   SET prerequisite_state=?, prerequisite_reason=?
+                   WHERE task_id=?""",
+                (prerequisite_state, prerequisite_reason, task_id),
+            )
+            conn.commit()
+        return task_id
 
     sort_order = conn.execute(
         """SELECT COALESCE(MAX(sort_order),0)+100
@@ -2253,10 +2270,10 @@ def ensure_weekly_workspace_task(conn, week: int, kind: str) -> int:
         """INSERT INTO task_metadata
            (
                task_id,status,priority,estimated_minutes,energy,
-               destination,category,prerequisite_state
+               destination,category,prerequisite_state,prerequisite_reason
            )
-           VALUES(?,'Not Started',3,?,'Low',11,'Review','Ready')""",
-        (task_id, minutes),
+           VALUES(?,'Not Started',3,?,'Low',11,'Review',?,?)""",
+        (task_id, minutes, prerequisite_state, prerequisite_reason),
     )
     conn.commit()
     return task_id

@@ -1,4 +1,4 @@
--- DuckDB Exercise 33: Complete the final relational data-quality audit
+-- DuckDB Exercise 33: Complete a full relational data-quality audit
 -- Source instructions: README.md
 -- Save your completed work through Career Accelerator.
 
@@ -49,7 +49,7 @@ DESCRIBE ex18_payments;
 
 
 -- -----------------------------------------------------------------
--- Q8. Write a three-sentence findings comment naming the highest-risk issue and the next action.
+-- Q8. Write a three-sentence SQL comment naming the highest-risk data issue and the next action, then return the total audit row count as `audit_rows`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 

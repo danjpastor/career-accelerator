@@ -1,4 +1,4 @@
--- DuckDB Exercise 07: Use outer, cross, and self joins
+-- DuckDB Exercise 07: Compare outer, cross, and self joins
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 

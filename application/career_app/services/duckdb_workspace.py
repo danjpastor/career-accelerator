@@ -24,6 +24,202 @@ VALID_STATUSES = (
 )
 
 
+PROGRESS_SCHEMA = """
+CREATE TABLE IF NOT EXISTS duckdb_completion_evidence (
+    exercise_number INTEGER PRIMARY KEY,
+    completed_date TEXT NOT NULL,
+    submission_path TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS duckdb_task_validation (
+    exercise_number INTEGER NOT NULL,
+    task_number INTEGER NOT NULL,
+    answer_digest TEXT NOT NULL,
+    passed INTEGER NOT NULL DEFAULT 0,
+    checked_at TEXT,
+    PRIMARY KEY (exercise_number, task_number)
+);
+CREATE INDEX IF NOT EXISTS idx_duckdb_task_validation_passed
+    ON duckdb_task_validation(exercise_number, passed);
+"""
+
+
+def ensure_progress_schema(conn) -> None:
+    conn.executescript(PROGRESS_SCHEMA)
+
+
+def task_validation_digests(conn, number: int) -> dict[int, str]:
+    ensure_progress_schema(conn)
+    return {
+        int(row["task_number"]): str(row["answer_digest"])
+        for row in conn.execute(
+            """SELECT task_number,answer_digest
+               FROM duckdb_task_validation
+               WHERE exercise_number=? AND passed=1""",
+            (int(number),),
+        ).fetchall()
+    }
+
+
+def task_validation_digest(conn, number: int, task_number: int) -> str:
+    return task_validation_digests(conn, number).get(int(task_number), "")
+
+
+def save_task_validation(
+    conn,
+    number: int,
+    task_number: int,
+    *,
+    answer_digest: str,
+    passed: bool,
+) -> None:
+    ensure_progress_schema(conn)
+    conn.execute(
+        """INSERT INTO duckdb_task_validation
+           (exercise_number,task_number,answer_digest,passed,checked_at)
+           VALUES(?,?,?,?,CURRENT_TIMESTAMP)
+           ON CONFLICT(exercise_number,task_number)
+           DO UPDATE SET answer_digest=excluded.answer_digest,
+                         passed=excluded.passed,
+                         checked_at=CURRENT_TIMESTAMP""",
+        (int(number), int(task_number), str(answer_digest or ""), 1 if passed else 0),
+    )
+    conn.commit()
+
+
+def seed_completed_task_validations(
+    conn,
+    number: int,
+    digests: dict[int, str],
+) -> None:
+    """Restore task checkmarks for an exercise already completed durably."""
+    ensure_progress_schema(conn)
+    row = conn.execute(
+        "SELECT status FROM duckdb_exercise_progress WHERE exercise_number=?",
+        (int(number),),
+    ).fetchone()
+    if row is None or str(row["status"]) != "Completed":
+        return
+    for task_number, digest in digests.items():
+        if not str(digest or ""):
+            continue
+        conn.execute(
+            """INSERT INTO duckdb_task_validation
+               (exercise_number,task_number,answer_digest,passed,checked_at)
+               VALUES(?,?,?,?,CURRENT_TIMESTAMP)
+               ON CONFLICT(exercise_number,task_number) DO UPDATE SET
+                   answer_digest=excluded.answer_digest,
+                   passed=1,
+                   checked_at=CURRENT_TIMESTAMP""",
+            (int(number), int(task_number), str(digest), 1),
+        )
+    conn.commit()
+
+
+def reconcile_completion_state(conn, root: Path | None = None) -> dict:
+    """Repair DuckDB completion from durable evidence before planner startup.
+
+    Completion can be represented by the exercise progress row, the stable
+    completion-evidence row, or an already-completed managed sprint task. The
+    union is intentional: routine task synchronization may replace a sprint row,
+    but it must never erase a submitted exercise.
+    """
+    del root
+    ensure_progress_schema(conn)
+    completed: set[int] = {
+        int(row["exercise_number"])
+        for row in conn.execute(
+            "SELECT exercise_number FROM duckdb_completion_evidence"
+        ).fetchall()
+    }
+    completed.update(
+        int(row["exercise_number"])
+        for row in conn.execute(
+            """SELECT exercise_number
+               FROM duckdb_exercise_progress
+               WHERE status='Completed'"""
+        ).fetchall()
+    )
+    for row in conn.execute(
+        """SELECT m.managed_key
+           FROM sprint_tasks s
+           JOIN task_metadata m ON m.task_id=s.id
+           WHERE (s.completed=1 OR m.status='Completed')
+             AND m.managed_key LIKE 'roadmap_v1026:duckdb:%'"""
+    ).fetchall():
+        try:
+            completed.add(int(str(row["managed_key"]).rsplit(":", 1)[-1]))
+        except (TypeError, ValueError):
+            continue
+
+    repaired = 0
+    for number in sorted(value for value in completed if value in DUCKDB_EXERCISES):
+        prior = conn.execute(
+            """SELECT status,submission_path,completed_date
+               FROM duckdb_exercise_progress WHERE exercise_number=?""",
+            (number,),
+        ).fetchone()
+        durable = conn.execute(
+            """SELECT completed_date,submission_path
+               FROM duckdb_completion_evidence WHERE exercise_number=?""",
+            (number,),
+        ).fetchone()
+        submission = (
+            prior["submission_path"]
+            if prior is not None and prior["submission_path"]
+            else durable["submission_path"] if durable is not None else None
+        )
+        completed_date = (
+            prior["completed_date"]
+            if prior is not None and prior["completed_date"]
+            else durable["completed_date"]
+            if durable is not None and durable["completed_date"]
+            else date.today().isoformat()
+        )
+        conn.execute(
+            """INSERT INTO duckdb_exercise_progress
+               (exercise_number,status,submission_path,notes,completed_date,updated_at)
+               VALUES(?,'Completed',?,'',?,CURRENT_TIMESTAMP)
+               ON CONFLICT(exercise_number) DO UPDATE SET
+                   status='Completed',
+                   submission_path=COALESCE(duckdb_exercise_progress.submission_path,excluded.submission_path),
+                   completed_date=COALESCE(duckdb_exercise_progress.completed_date,excluded.completed_date),
+                   updated_at=CURRENT_TIMESTAMP""",
+            (number, submission, completed_date),
+        )
+        conn.execute(
+            """INSERT INTO duckdb_completion_evidence
+               (exercise_number,completed_date,submission_path,updated_at)
+               VALUES(?,?,?,CURRENT_TIMESTAMP)
+               ON CONFLICT(exercise_number) DO UPDATE SET
+                   completed_date=COALESCE(duckdb_completion_evidence.completed_date,excluded.completed_date),
+                   submission_path=COALESCE(duckdb_completion_evidence.submission_path,excluded.submission_path),
+                   updated_at=CURRENT_TIMESTAMP""",
+            (number, completed_date, submission),
+        )
+        labels = exercise_labels(number)
+        placeholders = ",".join("?" for _ in labels)
+        rows = conn.execute(
+            f"""SELECT s.id
+                FROM sprint_tasks s
+                JOIN task_metadata m ON m.task_id=s.id
+                WHERE s.label IN ({placeholders}) OR m.managed_key=?""",
+            (*labels, f"roadmap_v1026:duckdb:{number}"),
+        ).fetchall()
+        for task in rows:
+            task_id = int(task["id"])
+            conn.execute("UPDATE sprint_tasks SET completed=1 WHERE id=?", (task_id,))
+            conn.execute(
+                """UPDATE task_metadata
+                   SET status='Completed',prerequisite_state='Ready',prerequisite_reason=NULL
+                   WHERE task_id=?""",
+                (task_id,),
+            )
+        repaired += 1
+    conn.commit()
+    return {"completed": sorted(completed), "repaired": repaired}
+
+
 def exercise(number: int) -> dict:
     number = int(number)
     if number not in DUCKDB_EXERCISES:
@@ -199,6 +395,7 @@ def progress(
     root: Path,
     number: int,
 ) -> dict:
+    ensure_progress_schema(conn)
     item = exercise(number)
     row = conn.execute(
         """SELECT *
@@ -296,6 +493,7 @@ def save_progress(
     status: str,
     notes: str = "",
 ) -> dict:
+    ensure_progress_schema(conn)
     roadmap_mastery.assert_duckdb_ready(conn, number)
     if status not in VALID_STATUSES:
         raise ValueError(
@@ -319,10 +517,19 @@ def save_progress(
         if path.exists()
         else None
     )
+    existing = conn.execute(
+        "SELECT status,completed_date FROM duckdb_exercise_progress WHERE exercise_number=?",
+        (int(number),),
+    ).fetchone()
+    # Routine autosave or task synchronization must never downgrade an exercise
+    # that was already submitted. Explicit undo uses tracks.undo_completion and
+    # clears the durable completion evidence separately.
+    if existing is not None and str(existing["status"]) == "Completed":
+        status = "Completed"
     completed_date = (
-        date.today().isoformat()
-        if status == "Completed"
-        else None
+        str(existing["completed_date"])
+        if existing is not None and existing["completed_date"] and status == "Completed"
+        else date.today().isoformat() if status == "Completed" else None
     )
 
     conn.execute(
@@ -391,6 +598,16 @@ def save_progress(
         f"{item['title']}"
     )
     if completed:
+        conn.execute(
+            """INSERT INTO duckdb_completion_evidence
+               (exercise_number,completed_date,submission_path,updated_at)
+               VALUES(?,?,?,CURRENT_TIMESTAMP)
+               ON CONFLICT(exercise_number) DO UPDATE SET
+                   completed_date=excluded.completed_date,
+                   submission_path=COALESCE(excluded.submission_path,duckdb_completion_evidence.submission_path),
+                   updated_at=CURRENT_TIMESTAMP""",
+            (int(number), completed_date or date.today().isoformat(), relative_path),
+        )
         description = (
             "Completed a guided DuckDB exercise using "
             f"{item['concepts']}."
@@ -434,7 +651,7 @@ def save_progress(
 
     conn.commit()
     if completed:
-        roadmap_mastery.reconcile(conn, root)
+        roadmap_mastery.reconcile_duckdb_completion(conn, number)
     return progress(
         conn,
         root,

@@ -1,6 +1,6 @@
 # DuckDB Exercise 14: Add row-level context with window functions
 
-**Week:** 5
+**Week:** 4
 **Estimated time:** 45 minutes
 **Concepts:** OVER, PARTITION BY, window aggregates, row-level context
 
@@ -12,6 +12,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 - `ex02_retail_orders`
 
+## Scenario
+
+A regional sales manager wants each individual order to remain visible while comparing it with company-wide and regional benchmarks.
+
 ## Tasks
 
 ### Task 1
@@ -20,8 +24,8 @@ Return every order with the overall average revenue added as a window value.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `revenue`, `overall_average_revenue`
-- **Expected rows:** 24
+- Return columns in this order: `order_id`, `revenue`, `overall_average_revenue`.
+- Return 24 rows.
 
 ### Task 2
 
@@ -29,8 +33,8 @@ Return every order with the average revenue for its region.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `region`, `revenue`, `regional_average_revenue`
-- **Expected rows:** 24
+- Return columns in this order: `order_id`, `region`, `revenue`, `regional_average_revenue`.
+- Return 24 rows.
 
 ### Task 3
 
@@ -38,8 +42,8 @@ Return each order with its region total while preserving one row per order.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `region`, `revenue`, `regional_revenue`
-- **Expected rows:** 24
+- Return columns in this order: `order_id`, `region`, `revenue`, `regional_revenue`.
+- Return 24 rows.
 
 ### Task 4
 
@@ -47,15 +51,15 @@ Return each order with its percentage contribution to regional revenue.
 
 **Result requirements**
 
-- **Return columns:** `order_id`, `region`, `revenue`, `regional_share`
-- **Expected rows:** 24
-## Completion evidence
+- Return columns in this order: `order_id`, `region`, `revenue`, `regional_share`.
+- Return 24 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

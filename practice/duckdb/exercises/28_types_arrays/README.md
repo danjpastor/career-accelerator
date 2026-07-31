@@ -12,6 +12,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 - `ex03_customer_feedback_dirty`
 
+## Scenario
+
+A customer-experience analyst is cleaning mixed data types and grouping issue labels so the records can be summarized safely.
+
 ## Tasks
 
 ### Task 1
@@ -20,8 +24,8 @@ Inspect the source columns and return safe numeric versions of rating and respon
 
 **Result requirements**
 
-- **Return columns:** `response_id`, `rating`, `response_minutes`
-- **Expected rows:** 18
+- Return columns in this order: `response_id`, `rating`, `response_minutes`.
+- Return 18 rows.
 
 ### Task 2
 
@@ -29,7 +33,7 @@ Create a list of issue types for each cleaned channel.
 
 **Result requirements**
 
-- **Return columns:** `channel`, `issue_types`
+- Return columns in this order: `channel`, `issue_types`.
 
 ### Task 3
 
@@ -37,7 +41,7 @@ Expand the list values back into one row per channel and issue type.
 
 **Result requirements**
 
-- **Return columns:** `channel`, `issue_type`
+- Return columns in this order: `channel`, `issue_type`.
 
 ### Task 4
 
@@ -45,15 +49,15 @@ Calculate an average response time using only values that can be converted safel
 
 **Result requirements**
 
-- **Return columns:** `average_response_minutes`
-- **Expected rows:** 1
-## Completion evidence
+- Return columns in this order: `average_response_minutes`.
+- Return 1 row.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 

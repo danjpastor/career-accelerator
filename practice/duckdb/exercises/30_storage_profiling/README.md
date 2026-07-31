@@ -14,6 +14,10 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex06_orders`
 - `ex07_order_items`
 
+## Scenario
+
+A data analyst is deciding how several practice tables should be stored and queried. The first step is to profile their size, keys, and analytical grain.
+
 ## Tasks
 
 ### Task 1
@@ -22,7 +26,7 @@ List the practice tables available in the main schema.
 
 **Result requirements**
 
-- **Return columns:** `table_name`
+- Return columns in this order: `table_name`.
 
 ### Task 2
 
@@ -30,8 +34,8 @@ Profile the row count and distinct business key count for the orders table.
 
 **Result requirements**
 
-- **Return columns:** `row_count`, `distinct_order_ids`
-- **Expected rows:** 1
+- Return columns in this order: `row_count`, `distinct_order_ids`.
+- Return 1 row.
 
 ### Task 3
 
@@ -39,8 +43,8 @@ Compare row count with distinct order IDs in the order-items table to describe i
 
 **Result requirements**
 
-- **Return columns:** `row_count`, `distinct_order_ids`
-- **Expected rows:** 1
+- Return columns in this order: `row_count`, `distinct_order_ids`.
+- Return 1 row.
 
 ### Task 4
 
@@ -48,15 +52,15 @@ Create a compact table profile showing table name, row count, and stated analyti
 
 **Result requirements**
 
-- **Return columns:** `table_name`, `row_count`, `grain`
-- **Expected rows:** 3
-## Completion evidence
+- Return columns in this order: `table_name`, `row_count`, `grain`.
+- Return 3 rows.
 
-1. Copy `starter.sql` to the DuckDB submissions folder.
-2. Answer every question with your own SQL.
-3. Use **Check Answer** only after you have attempted the query.
-4. Add a short comment describing one mistake you corrected or validation decision you made.
-5. Mark the exercise complete only after every checkpoint passes.
+## Complete the exercise
+
+1. Complete each task in the SQL editor.
+2. Use **Check Task** for specific feedback and hints.
+3. Use **Check Exercise** after every task passes.
+4. Select **Submit Exercise** to record completion.
 
 ## Common mistakes
 
