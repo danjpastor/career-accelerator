@@ -1,35 +1,37 @@
-# Week 3 Retrospective — SQL Foundations and Aggregation
+# Week 3 Retrospective
 
-## Progress snapshot
-- Hours studied:
-- Google Certificate progress:
-- DataCamp progress:
-- SQL, DuckDB, and interview practice completed:
-- Portfolio preparation or execution completed:
-- Weekly readiness result:
+Completed inside Career Accelerator's Retrospective task.
 
-## Biggest win
-What moved forward, and why did it matter?
+## Automatic progress snapshot
 
-## Friction or blocker
-What slowed progress? Identify the underlying concept, workflow, or scheduling problem.
+2026-07-27 through 2026-08-02 • 13.07 study hours • 12/14 sprint tasks • 0 SQL problems • 5/42 portfolio milestones completed overall
 
-## Mastery evidence
-What can you now do independently that you could not do at the start of the week?
-- 
+## Learning Progress This Week
 
-## Remaining gaps
-List only gaps that require catch-up or targeted remediation.
-- 
+- Introduction to SQL — Chapter 1: Relational Databases
+- Introduction to SQL — Chapter 2: Querying
+- Intermediate SQL — Chapter 1: Selecting Data
+- Intermediate SQL — Chapter 2: Filtering Records
+- Intermediate SQL — Chapter 3: Aggregate Functions
+- Intermediate SQL — Chapter 4: Sorting and Grouping
+- Joining Data in SQL — Chapter 1: Introducing Inner Joins
+- Complete DuckDB Exercise 02: Prepare a Retail Order Review
+- Complete DuckDB Exercise 03: Filter Support and Feedback Records
+- Complete DuckDB Exercise 04: Summarize Retail Orders with Grouped Metrics
+- Complete the Week 3 Retrospective
 
-## Evidence created
-Link substantial work that could support an assessment, portfolio review, or interview.
-- 
+## Evidence Created This Week
 
-## Next-sprint adjustments
-- [ ] Adjustment 1:
-- [ ] Adjustment 2:
+- Applied Lab submission (Complete Applied Lab 07: Build an Excel analyst workbook)
 
-## Confidence
-- Score from 1–10:
-- Reason:
+## Biggest Win
+
+I successfully restructured my learning program to include real-world projects and datacamp lessons to build a stronger learning foundation before entering the portfolio building phase.
+
+## Friction or Blocker
+
+At the beginning of the week i was being asked to complete portfolio tasks without the proper skill foundation having been learned.
+
+## What I Learned
+
+I need to make sure I'm structuring things correctly and pacing myself to learn successfully and not burn myself out or cause frustration.
