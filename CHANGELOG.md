@@ -1,3 +1,16 @@
+# Career Accelerator Changelog
+
+## v10.44.0 — Day-Assigned Focus and Weekly Gate Update
+
+- Today’s Focus now shows every incomplete task assigned to the current day, including locked tasks in grey.
+- Completed tasks are removed immediately from Today’s Focus and Next Tasks.
+- Catch-up work enters Today’s Focus only after all tasks assigned to today are complete.
+- Next Tasks orders today’s tasks first, then catch-up tasks, while preserving locked rows in place.
+- Weekly knowledge checks are normal Friday tasks and exclude Saturday/Sunday DataCamp projects from the coursework gate.
+- Weekly retrospectives remain locked until the matching knowledge check is passed.
+- Weekend DataCamp projects now require the matching weekly knowledge check in addition to their existing prerequisites.
+- Current and missed retrospective tasks are reconciled automatically as normal planner tasks.
+
 # Changelog
 
 ## 10.43.4 — DuckDB planner completion exclusion hotfix

@@ -5317,16 +5317,23 @@ class CareerAccelerator(QMainWindow):
 
 
     def _refresh_dashboard_next_tasks(self, week):
+        """Render the ordered active queue without separating locked day tasks.
+
+        The planner now returns today's incomplete assignments first, followed
+        by catch-up work and then future current-week work. A locked task keeps
+        its exact place in that queue and is shown grey with its prerequisite.
+        """
         self.clear_layout(self.dashboard_tasks_layout)
         self.dashboard_task_density_widgets = []
 
-        ready = [
+        queue = [
             dict(row)
             for row in unified_tasks.next_tasks(
                 self.conn,
                 int(week),
                 limit=DASHBOARD_NEXT_TASK_LIMIT,
             )
+            if not bool(row.get("completed"))
         ]
         coming_soon = [
             dict(row)
@@ -5335,6 +5342,7 @@ class CareerAccelerator(QMainWindow):
                 int(week),
                 limit=DASHBOARD_NEXT_TASK_LIMIT,
             )
+            if not bool(row.get("completed"))
         ]
         task_category_colors = {
             "Learning": COLORS["blue"],
@@ -5343,17 +5351,6 @@ class CareerAccelerator(QMainWindow):
             "Review": COLORS["green"],
             "General": COLORS["muted"],
         }
-
-        # Today’s Focus may intentionally include locked DataCamp chapters so
-        # the learner can see the full due sequence. Next Tasks uses a cleaner
-        # presentation: actionable assignments stay above the divider and every
-        # locked preview is grouped beneath COMING SOON.
-        ready_items = [item for item in ready if bool(item.get("ready"))]
-        locked_focus_items = [item for item in ready if not bool(item.get("ready"))]
-        visible_items = [
-            ("ready", item)
-            for item in ready_items[:DASHBOARD_NEXT_TASK_LIMIT]
-        ]
 
         def next_task_identity(item):
             task_id = self._get_ahead_task_id(item)
@@ -5367,47 +5364,36 @@ class CareerAccelerator(QMainWindow):
                 )
             )
 
-        seen = {next_task_identity(item) for _, item in visible_items}
-        remaining_slots = DASHBOARD_NEXT_TASK_LIMIT - len(visible_items)
-        if remaining_slots > 0:
-            for item in [*locked_focus_items, *coming_soon]:
+        visible_items = list(queue[:DASHBOARD_NEXT_TASK_LIMIT])
+        seen = {next_task_identity(item) for item in visible_items}
+        if len(visible_items) < DASHBOARD_NEXT_TASK_LIMIT:
+            for item in coming_soon:
                 identity = next_task_identity(item)
                 if identity in seen:
                     continue
-                visible_items.append(("coming_soon", item))
+                item = dict(item)
+                item.setdefault("queue_section", "upcoming")
+                visible_items.append(item)
                 seen.add(identity)
                 if len(visible_items) >= DASHBOARD_NEXT_TASK_LIMIT:
                     break
 
         while len(visible_items) < DASHBOARD_NEXT_TASK_LIMIT:
-            visible_items.append((
-                "coming_soon",
+            visible_items.append(
                 {
                     "label": "More Tasks Coming Soon",
                     "category": "General",
+                    "ready": False,
+                    "queue_section": "upcoming",
                     "prerequisite_reason": (
                         "The planner will add another task when its prerequisites are complete."
                     ),
-                },
-            ))
+                }
+            )
 
-        coming_soon_section_started = False
-        for index, (status, item) in enumerate(visible_items):
+        for index, item in enumerate(visible_items):
             if index > 0:
                 self.dashboard_tasks_layout.addWidget(Divider())
-
-            if status == "coming_soon" and not coming_soon_section_started:
-                coming_soon_section_started = True
-                section_label = QLabel("COMING SOON")
-                section_label.setObjectName("Tiny")
-                section_label.setStyleSheet(
-                    f"color:{COLORS['muted']};"
-                    "font-size:7.6pt;font-weight:700;"
-                    "letter-spacing:0.7px;"
-                    "background:transparent;border:none;"
-                )
-                section_label.setContentsMargins(0, 1, 0, 0)
-                self.dashboard_tasks_layout.addWidget(section_label)
 
             task_id = self._get_ahead_task_id(item)
             category = str(item.get("category") or "General")
@@ -5416,115 +5402,94 @@ class CareerAccelerator(QMainWindow):
                 or unified_tasks.task_type_label(item, int(week))
                 or category
             )
+            queue_section = str(item.get("queue_section") or "upcoming")
+            is_catch_up = bool(item.get("is_catch_up")) or queue_section == "catch_up"
+            locked = not bool(item.get("ready"))
 
-            if status == "ready":
-                scheduled_week = int(item.get("week") or week)
-                is_catch_up = (
-                    bool(item.get("is_catch_up"))
-                    or scheduled_week < int(week)
-                )
-                is_datacamp = (
-                    str(item.get("kind") or "") == "datacamp_chapter"
-                    or metadata_label.casefold() == "datacamp"
-                )
-                category_text = (
-                    "Catch-Up"
-                    if is_catch_up and is_datacamp
-                    else (
-                        f"Catch-Up • {metadata_label}"
-                        if is_catch_up
-                        else metadata_label
-                    )
-                )
-                workspace_available = (
-                    task_id is not None
-                    and task_workspace.workspace_supported_task_id(
-                        self.conn,
-                        task_id,
-                    )
-                )
-                datacamp_url = (
-                    datacamp.chapter_url_for_task(self.conn, task_id)
-                    if task_id is not None
-                    else None
-                )
-                is_weekly_check = str(item.get("kind") or "") == "weekly_check"
-                open_available = bool(
-                    task_id is not None
-                    and (workspace_available or datacamp_url or is_weekly_check)
-                )
-                task_row = TaskRow(
-                    title=str(item.get("label") or "Task"),
-                    source=self.dashboard_task_source(item),
-                    checked=False,
-                    status_text="",
-                    category_text=category_text,
-                    category_color=task_category_colors.get(
-                        category,
-                        COLORS["muted"],
-                    ),
-                    icon=task_icons.path_for_task(
-                        ASSET_ROOT,
-                        item,
-                        int(week),
-                    ),
-                    icon_fallback="•",
-                    action_text="Open" if open_available else None,
-                    on_action=(
-                        (
-                            lambda _checked=False, task_id=task_id:
-                            self.open_task_workspace(task_id=task_id)
-                        )
-                        if open_available
-                        else None
-                    ),
-                    completed=False,
-                    preserve_source_in_compact=True,
-                    locked=False,
-                )
-                if task_id is None:
-                    task_row.checkbox.setEnabled(False)
-                elif is_weekly_check:
-                    task_row.checkbox.hide()
-                else:
-                    task_row.checkbox.stateChanged.connect(
-                        lambda state_value, task_row=task_row, task_id=task_id:
-                        self.queue_dashboard_task_completion(
-                            task_row,
-                            task_id,
-                            state_value,
-                        )
-                    )
+            if is_catch_up:
+                category_text = f"Catch-Up • {metadata_label}"
+            elif queue_section in {"today", "promoted"}:
+                category_text = f"Today • {metadata_label}"
             else:
-                reason = str(
-                    item.get("prerequisite_reason")
-                    or "Complete the prerequisite first."
+                category_text = f"Upcoming • {metadata_label}"
+
+            workspace_available = (
+                task_id is not None
+                and task_workspace.workspace_supported_task_id(
+                    self.conn,
+                    task_id,
                 )
-                task_row = TaskRow(
-                    title=str(item.get("label") or "Upcoming task"),
-                    source=reason,
-                    checked=False,
-                    category_text="Coming Soon",
-                    category_color=COLORS["muted"],
-                    icon=task_icons.path_for_task(
-                        ASSET_ROOT,
-                        item,
-                        int(week),
-                    ),
-                    icon_fallback="🔒",
-                    completed=False,
-                    preserve_source_in_compact=True,
-                )
+            )
+            datacamp_url = (
+                datacamp.chapter_url_for_task(self.conn, task_id)
+                if task_id is not None
+                else None
+            )
+            is_weekly_check = str(item.get("kind") or "") == "weekly_check"
+            open_available = bool(
+                not locked
+                and task_id is not None
+                and (workspace_available or datacamp_url or is_weekly_check)
+            )
+            source_text = (
+                str(item.get("prerequisite_reason") or "Complete the prerequisite first.")
+                if locked
+                else self.dashboard_task_source(item)
+            )
+
+            task_row = TaskRow(
+                title=str(item.get("label") or "Task"),
+                source=source_text,
+                checked=False,
+                status_text="",
+                category_text=category_text,
+                category_color=(
+                    COLORS["muted"]
+                    if locked
+                    else task_category_colors.get(category, COLORS["muted"])
+                ),
+                icon=task_icons.path_for_task(
+                    ASSET_ROOT,
+                    item,
+                    int(week),
+                ),
+                icon_fallback="🔒" if locked else "•",
+                action_text="Open" if open_available else None,
+                on_action=(
+                    (
+                        lambda _checked=False, task_id=task_id:
+                        self.open_task_workspace(task_id=task_id)
+                    )
+                    if open_available
+                    else None
+                ),
+                completed=False,
+                preserve_source_in_compact=True,
+                locked=locked,
+            )
+            if task_id is None or locked:
                 task_row.checkbox.hide()
-                task_row.setToolTip(reason)
+            elif is_weekly_check:
+                task_row.checkbox.hide()
+            else:
+                task_row.checkbox.stateChanged.connect(
+                    lambda state_value, task_row=task_row, task_id=task_id:
+                    self.queue_dashboard_task_completion(
+                        task_row,
+                        task_id,
+                        state_value,
+                    )
+                )
 
             task_row.setSizePolicy(
                 QSizePolicy.Policy.Expanding,
                 QSizePolicy.Policy.Expanding,
             )
+            if locked:
+                task_row.setToolTip(source_text)
             self.dashboard_tasks_layout.addWidget(task_row, 1)
             self.dashboard_task_density_widgets.append(task_row)
-            if status == "ready" and task_id is not None:
+            if not locked and task_id is not None:
                 self.dashboard_task_rows_by_id.setdefault(
                     int(task_id), []
                 ).append(task_row)
@@ -9698,4 +9663,9 @@ _datacamp_weekend_policy.install(CareerAccelerator)
 from career_app.services import duckdb_curriculum_policy as _duckdb_curriculum_policy
 _duckdb_curriculum_policy.install(CareerAccelerator)
 # END DUCKDB CURRICULUM AUDIT v10.42.2
+
+# BEGIN DAY-ASSIGNED TASK POLICY v10.44.0
+from career_app.services import daily_task_policy as _daily_task_policy_v1044
+_daily_task_policy_v1044.install(CareerAccelerator)
+# END DAY-ASSIGNED TASK POLICY v10.44.0
 
