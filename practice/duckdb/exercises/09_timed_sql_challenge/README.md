@@ -20,13 +20,56 @@ You have 30 minutes to answer five product-analytics questions. Stop when the ti
 - `purchases.csv`
 - `users.csv`
 
-## Questions
+## Tasks
 
-1. Task: Count users by acquisition channel. Required output: return only these columns in this order: `acquisition_channel`, `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Calculate June purchasers and purchaser conversion rate. Required output: return only these columns in this order: `count(DISTINCT p.user_id)`, `round(((100.0 * count(DISTINCT p.user_id)) / (SELECT count_star() FROM ex09_users)), 2)`. Use these exact names for calculated or summarized columns: `count(DISTINCT p.user_id)`, `round(((100.0 * count(DISTINCT p.user_id)) / (SELECT count_star() FROM ex09_users)), 2)`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Return users with at least three events. Required output: return only these columns in this order: `user_id`. A correct result contains 6 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Calculate revenue by acquisition channel. Required output: return only these columns in this order: `acquisition_channel`, `sum(p.amount)`. Use these exact names for calculated or summarized columns: `sum(p.amount)`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Use a CTE to return each user's first event date and days from signup to first event. Required output: return only these columns in this order: `count_star()`, `round(avg(date_diff('day', u.signup_date, f.first_event_date)), 2)`. Use these exact names for calculated or summarized columns: `count_star()`, `round(avg(date_diff('day', u.signup_date, f.first_event_date)), 2)`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Count users by acquisition channel.
+
+**Result requirements**
+
+- **Return columns:** `acquisition_channel`, `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 4
+
+### Task 2
+
+Calculate June purchasers and purchaser conversion rate.
+
+**Result requirements**
+
+- **Return columns:** `count(DISTINCT p.user_id)`, `round(((100.0 * count(DISTINCT p.user_id)) / (SELECT count_star() FROM ex09_users)), 2)`
+- **Exact names for new columns:** `count(DISTINCT p.user_id)`, `round(((100.0 * count(DISTINCT p.user_id)) / (SELECT count_star() FROM ex09_users)), 2)`
+- **Expected rows:** 1
+
+### Task 3
+
+Return users with at least three events.
+
+**Result requirements**
+
+- **Return columns:** `user_id`
+- **Expected rows:** 6
+
+### Task 4
+
+Calculate revenue by acquisition channel.
+
+**Result requirements**
+
+- **Return columns:** `acquisition_channel`, `sum(p.amount)`
+- **Exact names for new columns:** `sum(p.amount)`
+- **Expected rows:** 3
+
+### Task 5
+
+Use a CTE to return each user's first event date and days from signup to first event.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`, `round(avg(date_diff('day', u.signup_date, f.first_event_date)), 2)`
+- **Exact names for new columns:** `count_star()`, `round(avg(date_diff('day', u.signup_date, f.first_event_date)), 2)`
+- **Expected rows:** 1
 ## Completion evidence
 
 1. Copy `starter.sql` to:

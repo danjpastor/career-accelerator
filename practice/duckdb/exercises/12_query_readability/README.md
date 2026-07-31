@@ -16,15 +16,77 @@ A working query produces the right answer but is difficult to review. Refactor i
 
 - `campaign_performance.csv`
 
-## Questions
+## Tasks
 
-1. Task: Run `messy_query.sql` and record its output. Required output: return only these columns in this order: `campaign_channel`, `sum(spend)`, `sum(revenue)`, `(sum(revenue) - sum(spend))`, `round((sum(revenue) / "nullif"(sum(spend), 0)), 4)`. Use these exact names for calculated or summarized columns: `sum(spend)`, `sum(revenue)`, `(sum(revenue) - sum(spend))`, `round((sum(revenue) / "nullif"(sum(spend), 0)), 4)`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Reformat the query using one clause per line and consistent indentation. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Replace positional `ORDER BY 5` with a descriptive alias. Required output: return only these columns in this order: `count(DISTINCT campaign_channel)`. Use these exact names for calculated or summarized columns: `count(DISTINCT campaign_channel)`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Move channel aggregation into a clearly named CTE. Required output: return only these columns in this order: `round(sum(spend), 2)`, `round(sum(revenue), 2)`. Use these exact names for calculated or summarized columns: `round(sum(spend), 2)`, `round(sum(revenue), 2)`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Add short comments explaining the CTE and final filter. Required output: return only these columns in this order: `campaign_channel`, `profit`. Use these exact names for calculated or summarized columns: `profit`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-6. Task: Confirm the refactored result exactly matches the original. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-7. Task: Write two sentences explaining how readability reduces analytics risk. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Run `messy_query.sql` and record its output.
+
+**Result requirements**
+
+- **Return columns:** `campaign_channel`, `sum(spend)`, `sum(revenue)`, `(sum(revenue) - sum(spend))`, `round((sum(revenue) / "nullif"(sum(spend), 0)), 4)`
+- **Exact names for new columns:** `sum(spend)`, `sum(revenue)`, `(sum(revenue) - sum(spend))`, `round((sum(revenue) / "nullif"(sum(spend), 0)), 4)`
+- **Expected rows:** 4
+
+### Task 2
+
+Reformat the query using one clause per line and consistent indentation.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
+
+### Task 3
+
+Replace positional `ORDER BY 5` with a descriptive alias.
+
+**Result requirements**
+
+- **Return columns:** `count(DISTINCT campaign_channel)`
+- **Exact names for new columns:** `count(DISTINCT campaign_channel)`
+- **Expected rows:** 1
+
+### Task 4
+
+Move channel aggregation into a clearly named CTE.
+
+**Result requirements**
+
+- **Return columns:** `round(sum(spend), 2)`, `round(sum(revenue), 2)`
+- **Exact names for new columns:** `round(sum(spend), 2)`, `round(sum(revenue), 2)`
+- **Expected rows:** 1
+
+### Task 5
+
+Add short comments explaining the CTE and final filter.
+
+**Result requirements**
+
+- **Return columns:** `campaign_channel`, `profit`
+- **Exact names for new columns:** `profit`
+- **Expected rows:** 4
+
+### Task 6
+
+Confirm the refactored result exactly matches the original.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
+
+### Task 7
+
+Write two sentences explaining how readability reduces analytics risk.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
 ## Completion evidence
 
 1. Copy `starter.sql` to:

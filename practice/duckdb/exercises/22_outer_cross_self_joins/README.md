@@ -15,12 +15,42 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex10_employees`
 - `ex10_departments`
 
-## Questions
+## Tasks
 
-1. Task: Use a left join to show every customer and any related orders, keeping customers with no order. Required output: return only these columns in this order: `customer_id`, `customer_name`, `order_id`, `order_total`. A correct result contains 15 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Use a full join to identify customer IDs that appear on only one side of the customer-order relationship. Required output: return only these columns in this order: `customer_id`, `customer_name`, `order_id`, `relationship_status`. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Use a self join to show each employee beside their manager name when one exists. Required output: return only these columns in this order: `employee_id`, `employee_name`, `manager_name`. A correct result contains 12 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Use a cross join to build every combination of department and two named planning scenarios. Required output: return only these columns in this order: `department_name`, `scenario`. A correct result contains 8 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Use a left join to show every customer and any related orders, keeping customers with no order.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`, `customer_name`, `order_id`, `order_total`
+- **Expected rows:** 15
+
+### Task 2
+
+Use a full join to identify customer IDs that appear on only one side of the customer-order relationship.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`, `customer_name`, `order_id`, `relationship_status`
+
+### Task 3
+
+Use a self join to show each employee beside their manager name when one exists.
+
+**Result requirements**
+
+- **Return columns:** `employee_id`, `employee_name`, `manager_name`
+- **Expected rows:** 12
+
+### Task 4
+
+Use a cross join to build every combination of department and two named planning scenarios.
+
+**Result requirements**
+
+- **Return columns:** `department_name`, `scenario`
+- **Expected rows:** 8
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

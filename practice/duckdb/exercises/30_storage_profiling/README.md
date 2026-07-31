@@ -14,12 +14,42 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex06_orders`
 - `ex07_order_items`
 
-## Questions
+## Tasks
 
-1. Task: List the practice tables available in the main schema. Required output: return only these columns in this order: `table_name`. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Profile the row count and distinct business key count for the orders table. Required output: return only these columns in this order: `row_count`, `distinct_order_ids`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Compare row count with distinct order IDs in the order-items table to describe its grain. Required output: return only these columns in this order: `row_count`, `distinct_order_ids`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Create a compact table profile showing table name, row count, and stated analytical grain for three selected tables. Required output: return only these columns in this order: `table_name`, `row_count`, `grain`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+List the practice tables available in the main schema.
+
+**Result requirements**
+
+- **Return columns:** `table_name`
+
+### Task 2
+
+Profile the row count and distinct business key count for the orders table.
+
+**Result requirements**
+
+- **Return columns:** `row_count`, `distinct_order_ids`
+- **Expected rows:** 1
+
+### Task 3
+
+Compare row count with distinct order IDs in the order-items table to describe its grain.
+
+**Result requirements**
+
+- **Return columns:** `row_count`, `distinct_order_ids`
+- **Expected rows:** 1
+
+### Task 4
+
+Create a compact table profile showing table name, row count, and stated analytical grain for three selected tables.
+
+**Result requirements**
+
+- **Return columns:** `table_name`, `row_count`, `grain`
+- **Expected rows:** 3
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

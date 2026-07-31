@@ -121,7 +121,7 @@ def parse_questions(sql: str) -> list[QuestionBlock]:
     blocks: list[QuestionBlock] = []
     for index, match in enumerate(matches):
         number = int(match.group(1))
-        prompt = match.group(2).strip() or f"Question {number}"
+        prompt = match.group(2).strip() or f"Task {number}"
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         body = text[match.end():end]
         # Keep learner comments that explain their reasoning, but remove the
@@ -143,7 +143,7 @@ def question_definitions(root: Path, number: int) -> list[QuestionBlock]:
     questions = parse_questions(starter_sql(Path(root), int(number)))
     if not questions:
         raise DuckDBExerciseRunnerError(
-            "The starter SQL does not contain any Q1, Q2, ... question sections."
+            "The starter SQL does not contain any Q1, Q2, ... task sections."
         )
     return questions
 
@@ -288,7 +288,7 @@ def validate_read_only_sql(sql: str) -> None:
         )
     statements = split_sql_statements(sql)
     if not statements:
-        raise DuckDBExerciseRunnerError("Write a SQL query before running this question.")
+        raise DuckDBExerciseRunnerError("Write a SQL query before running this task.")
     for statement in statements:
         first = re.match(r"\s*([A-Za-z]+)", _mask_sql_literals_and_comments(statement))
         keyword = first.group(1).upper() if first else ""
@@ -413,7 +413,7 @@ def run_sql(root: Path, number: int, sql: str, *, row_limit: int = 500) -> dict[
         connection.close()
     if not result_sets:
         raise DuckDBExerciseRunnerError(
-            "The question ran, but it did not return a result table to review."
+            "The task ran, but it did not return a result table to review."
         )
     return {
         "statement_count": len(statements),
@@ -428,7 +428,7 @@ def run_question(root: Path, number: int, full_sql: str, question_number: int) -
     questions = {question.number: question for question in parse_questions(full_sql)}
     question = questions.get(int(question_number))
     if question is None:
-        raise DuckDBExerciseRunnerError(f"Question {question_number} was not found in the SQL file.")
+        raise DuckDBExerciseRunnerError(f"Task {question_number} was not found in the SQL file.")
     return run_sql(root, number, question.sql)
 
 
@@ -538,7 +538,7 @@ def _compare_checkpoint(run: dict[str, Any], checkpoint: ValidationCheckpoint | 
         add(
             "Validation checkpoint available",
             False,
-            "The validation file does not contain a matching Q heading for this question.",
+            "The validation file does not contain a matching task checkpoint.",
         )
         return checks
     if checkpoint.expected_rows is not None:
@@ -576,7 +576,7 @@ def check_question(
     questions = {question.number: question for question in parse_questions(full_sql)}
     question = questions.get(int(question_number))
     if question is None:
-        raise DuckDBExerciseRunnerError(f"Question {question_number} was not found in the SQL file.")
+        raise DuckDBExerciseRunnerError(f"Task {question_number} was not found in the SQL file.")
     if not question.sql.strip() or _PLACEHOLDER.search(_strip_sql_comments(question.sql)):
         return {
             "passed": False,
@@ -584,7 +584,7 @@ def check_question(
             "run": None,
             "checklist": [
                 {
-                    "label": "Question answered",
+                    "label": "Task answered",
                     "passed": False,
                     "detail": "Replace the starter prompt with your own SQL before checking.",
                 }
@@ -605,7 +605,7 @@ def check_exercise(root: Path, number: int, full_sql: str) -> dict[str, Any]:
     roadmap_mastery.assert_duckdb_ready_from_root(root, number)
     questions = parse_questions(full_sql)
     if not questions:
-        raise DuckDBExerciseRunnerError("The submission does not contain any exercise questions.")
+        raise DuckDBExerciseRunnerError("The submission does not contain any exercise tasks.")
     results: list[dict[str, Any]] = []
     for question in questions:
         try:

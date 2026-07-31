@@ -9661,8 +9661,8 @@ from career_app.services import datacamp_weekend_policy as _datacamp_weekend_pol
 _datacamp_weekend_policy.install(CareerAccelerator)
 # END DATACAMP WEEKEND POLICY v10.40.2
 
-# BEGIN DUCKDB CURRICULUM AUDIT v10.41.1
+# BEGIN DUCKDB CURRICULUM AUDIT v10.42.2
 from career_app.services import duckdb_curriculum_policy as _duckdb_curriculum_policy
 _duckdb_curriculum_policy.install(CareerAccelerator)
-# END DUCKDB CURRICULUM AUDIT v10.41.1
+# END DUCKDB CURRICULUM AUDIT v10.42.2
 

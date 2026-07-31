@@ -20,15 +20,75 @@ A merchandising analyst must calculate order revenue, cost, and profit before id
 - `orders.csv`
 - `products.csv`
 
-## Questions
+## Tasks
 
-1. Task: Use a CTE to calculate revenue for every order. Required output: return only these columns in this order: `count_star()`, `round(sum(revenue), 2)`. Use these exact names for calculated or summarized columns: `count_star()`, `round(sum(revenue), 2)`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Use a subquery to return orders whose revenue is above the average order revenue. Required output: return only these columns in this order: `order_id`. A correct result contains 5 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Use a CTE to calculate revenue, cost, and profit by order. Required output: return only these columns in this order: `count_star()`, `round(sum(profit), 2)`. Use these exact names for calculated or summarized columns: `count_star()`, `round(sum(profit), 2)`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Calculate revenue and profit by product category. Required output: return only these columns in this order: `category`, `round(sum((i.quantity * i.sale_price)), 2)`, `round(sum((i.quantity * (i.sale_price - p.unit_cost))), 2)`. Use these exact names for calculated or summarized columns: `round(sum((i.quantity * i.sale_price)), 2)`, `round(sum((i.quantity * (i.sale_price - p.unit_cost))), 2)`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Return the three products with the highest total profit. Required output: return only these columns in this order: `product_name`, `profit`. Use these exact names for calculated or summarized columns: `profit`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-6. Task: Create two CTEs: one for order profitability and one for regional summaries. Required output: return only these columns in this order: `region`, `round(profit, 2)`. Use these exact names for calculated or summarized columns: `round(profit, 2)`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-7. Task: Return regions whose total profit is above the average regional profit. Required output: return only these columns in this order: `region`. A correct result contains 2 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Use a CTE to calculate revenue for every order.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`, `round(sum(revenue), 2)`
+- **Exact names for new columns:** `count_star()`, `round(sum(revenue), 2)`
+- **Expected rows:** 1
+
+### Task 2
+
+Use a subquery to return orders whose revenue is above the average order revenue.
+
+**Result requirements**
+
+- **Return columns:** `order_id`
+- **Expected rows:** 5
+
+### Task 3
+
+Use a CTE to calculate revenue, cost, and profit by order.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`, `round(sum(profit), 2)`
+- **Exact names for new columns:** `count_star()`, `round(sum(profit), 2)`
+- **Expected rows:** 1
+
+### Task 4
+
+Calculate revenue and profit by product category.
+
+**Result requirements**
+
+- **Return columns:** `category`, `round(sum((i.quantity * i.sale_price)), 2)`, `round(sum((i.quantity * (i.sale_price - p.unit_cost))), 2)`
+- **Exact names for new columns:** `round(sum((i.quantity * i.sale_price)), 2)`, `round(sum((i.quantity * (i.sale_price - p.unit_cost))), 2)`
+- **Expected rows:** 4
+
+### Task 5
+
+Return the three products with the highest total profit.
+
+**Result requirements**
+
+- **Return columns:** `product_name`, `profit`
+- **Exact names for new columns:** `profit`
+- **Expected rows:** 3
+
+### Task 6
+
+Create two CTEs: one for order profitability and one for regional summaries.
+
+**Result requirements**
+
+- **Return columns:** `region`, `round(profit, 2)`
+- **Exact names for new columns:** `round(profit, 2)`
+- **Expected rows:** 4
+
+### Task 7
+
+Return regions whose total profit is above the average regional profit.
+
+**Result requirements**
+
+- **Return columns:** `region`
+- **Expected rows:** 2
 ## Completion evidence
 
 1. Copy `starter.sql` to:

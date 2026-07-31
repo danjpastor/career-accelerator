@@ -1,4 +1,4 @@
-# DuckDB Exercise 02: Select, rename, and calculate order fields
+# DuckDB Exercise 02: Prepare a retail order review
 
 **Week:** 3
 **Estimated time:** 35 minutes
@@ -12,12 +12,47 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 - `ex02_retail_orders`
 
-## Questions
+## Scenario
 
-1. Task: Return every order with order ID, quantity, unit price, and a calculated pre-discount line value. Required output: return only these columns in this order: `order_id`, `quantity`, `unit_price`, `line_value`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Return every order with concise aliases for region, channel, and recorded revenue. Required output: return only these columns in this order: `order_id`, `sales_region`, `channel`, `recorded_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Return each order with its recorded revenue and the difference between recorded revenue and quantity multiplied by unit price. Required output: return only these columns in this order: `order_id`, `recorded_revenue`, `revenue_difference`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Return the distinct combinations of region and sales channel, ordered consistently. Required output: return only these columns in this order: `region`, `sales_channel`. A correct result contains 12 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+A retail operations manager is reviewing order data before it is used in a sales report. The manager needs a focused set of fields, clear report headings, and a quick check that stored revenue agrees with the order details.
+
+## Tasks
+
+### Task 1
+
+Check what each order would be worth before discounts. Return `order_id`, `quantity`, `unit_price`, and `quantity * unit_price` as `line_value`.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `quantity`, `unit_price`, `line_value`
+- **Expected rows:** 24
+
+### Task 2
+
+Prepare a sales report with consistent headings. Return `order_id`; rename `region` to `sales_region`, `sales_channel` to `channel`, and `revenue` to `recorded_revenue`.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `sales_region`, `channel`, `recorded_revenue`
+- **Expected rows:** 24
+
+### Task 3
+
+Check whether the revenue stored for each order matches quantity multiplied by unit price. Return `order_id`, rename `revenue` to `recorded_revenue`, and calculate the difference as `revenue_difference`.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `recorded_revenue`, `revenue_difference`
+- **Expected rows:** 24
+
+### Task 4
+
+List every region and sales-channel combination used by the business. Return unique `region` and `sales_channel` pairs, sorted by region and then sales channel.
+
+**Result requirements**
+
+- **Return columns:** `region`, `sales_channel`
+- **Expected rows:** 12
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

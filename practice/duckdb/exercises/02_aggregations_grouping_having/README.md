@@ -6,7 +6,7 @@
 
 ## Scenario
 
-A retail manager wants a concise summary of May sales by region, channel, and category.
+A sales manager needs a short weekly summary of the retail order file. The report should show overall performance, regional results, channel volume, and discount patterns.
 
 ## Tables
 
@@ -16,15 +16,75 @@ A retail manager wants a concise summary of May sales by region, channel, and ca
 
 - `retail_orders.csv`
 
-## Questions
+## Tasks
 
-1. Task: Count all orders. Required output: return only these columns in this order: `orders`. Use these exact names for calculated or summarized columns: `orders`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Calculate total revenue. Required output: return only these columns in this order: `revenue`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Calculate average order revenue. Required output: return only these columns in this order: `average_revenue`. Use these exact names for calculated or summarized columns: `average_revenue`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Return order count and revenue by region. Required output: return only these columns in this order: `region`, `orders`, `revenue`. Use these exact names for calculated or summarized columns: `orders`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Return sales channels with more than five orders using `HAVING`. Required output: return only these columns in this order: `sales_channel`, `orders`. Use these exact names for calculated or summarized columns: `orders`. A correct result contains 2 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-6. Task: Calculate average discount by product category. Required output: return only these columns in this order: `product_category`, `average_discount`. Use these exact names for calculated or summarized columns: `average_discount`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-7. Task: Return the region with the highest total revenue. Required output: return only these columns in this order: `region`, `revenue`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Count the orders in the sales file. Return the count as `orders`.
+
+**Result requirements**
+
+- **Return columns:** `orders`
+- **Exact names for new columns:** `orders`
+- **Expected rows:** 1
+
+### Task 2
+
+Calculate the revenue recorded across all orders. Return it as `revenue`.
+
+**Result requirements**
+
+- **Return columns:** `revenue`
+- **Expected rows:** 1
+
+### Task 3
+
+Calculate the average revenue per order. Return it as `average_revenue`.
+
+**Result requirements**
+
+- **Return columns:** `average_revenue`
+- **Exact names for new columns:** `average_revenue`
+- **Expected rows:** 1
+
+### Task 4
+
+Show order volume and revenue for each region. Return `region`, the order count as `orders`, and total revenue as `revenue`.
+
+**Result requirements**
+
+- **Return columns:** `region`, `orders`, `revenue`
+- **Exact names for new columns:** `orders`
+- **Expected rows:** 4
+
+### Task 5
+
+Find sales channels that handled more than five orders. Return `sales_channel` and the order count as `orders`.
+
+**Result requirements**
+
+- **Return columns:** `sales_channel`, `orders`
+- **Exact names for new columns:** `orders`
+- **Expected rows:** 2
+
+### Task 6
+
+Calculate the average discount for each product category. Return `product_category` and the average as `average_discount`.
+
+**Result requirements**
+
+- **Return columns:** `product_category`, `average_discount`
+- **Exact names for new columns:** `average_discount`
+- **Expected rows:** 4
+
+### Task 7
+
+Find the region that generated the most revenue. Return `region` and total `revenue`.
+
+**Result requirements**
+
+- **Return columns:** `region`, `revenue`
+- **Expected rows:** 1
 ## Completion evidence
 
 1. Copy `starter.sql` to:

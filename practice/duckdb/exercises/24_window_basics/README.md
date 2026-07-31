@@ -12,12 +12,43 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 
 - `ex02_retail_orders`
 
-## Questions
+## Tasks
 
-1. Task: Return every order with the overall average revenue added as a window value. Required output: return only these columns in this order: `order_id`, `revenue`, `overall_average_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Return every order with the average revenue for its region. Required output: return only these columns in this order: `order_id`, `region`, `revenue`, `regional_average_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Return each order with its region total while preserving one row per order. Required output: return only these columns in this order: `order_id`, `region`, `revenue`, `regional_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Return each order with its percentage contribution to regional revenue. Required output: return only these columns in this order: `order_id`, `region`, `revenue`, `regional_share`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Return every order with the overall average revenue added as a window value.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `revenue`, `overall_average_revenue`
+- **Expected rows:** 24
+
+### Task 2
+
+Return every order with the average revenue for its region.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `region`, `revenue`, `regional_average_revenue`
+- **Expected rows:** 24
+
+### Task 3
+
+Return each order with its region total while preserving one row per order.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `region`, `revenue`, `regional_revenue`
+- **Expected rows:** 24
+
+### Task 4
+
+Return each order with its percentage contribution to regional revenue.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `region`, `revenue`, `regional_share`
+- **Expected rows:** 24
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

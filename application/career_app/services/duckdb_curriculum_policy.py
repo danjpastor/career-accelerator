@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Cumulative DuckDB curriculum, prerequisite, scheduling, prompt, and startup-order audit.
+"""Cumulative DuckDB curriculum, prerequisite, scheduling, task-language, and startup-order audit.
 
 Stable exercise IDs are preserved for progress and submissions. Learners see a
 separate roadmap number whose order follows the actual SQL curriculum.
@@ -33,8 +33,8 @@ ROADMAP_INTERNAL_ORDER = (
 # avoid vague labels such as "mixed assessment" without context.
 TITLE_BY_ID = {
     1: "Filter and sort support tickets",
-    19: "Select, rename, and calculate order fields",
-    20: "Filter orders by ranges, patterns, and missing values",
+    19: "Prepare a retail order review",
+    20: "Filter support and feedback records",
     2: "Summarize retail orders with grouped metrics",
     21: "Join orders to customers",
     6: "Combine customers, orders, and payments",
@@ -67,6 +67,127 @@ TITLE_BY_ID = {
     18: "Complete the final relational data-quality audit",
 }
 
+# Authored workplace context and task wording. These entries are deliberately
+# written by hand instead of being generated from validation metadata.
+SCENARIO_BY_ID = {
+    1: (
+        "A customer-support manager is preparing the daily service queue. The "
+        "manager needs a clear ticket list, the most urgent open work, and a few "
+        "simple views for follow-up."
+    ),
+    19: (
+        "A retail operations manager is reviewing order data before it is used "
+        "in a sales report. The manager needs a focused set of fields, clear "
+        "report headings, and a quick check that stored revenue agrees with "
+        "the order details."
+    ),
+    20: (
+        "A support-operations analyst is checking service records before the "
+        "weekly report is prepared. The analyst needs to identify active priority "
+        "tickets, missing resolution times, and feedback submitted by email."
+    ),
+    2: (
+        "A sales manager needs a short weekly summary of the retail order file. "
+        "The report should show overall performance, regional results, channel "
+        "volume, and discount patterns."
+    ),
+}
+AUTHORED_TASK_BY_ID = {
+    1: {
+        1: (
+            "Prepare the manager's basic ticket list. Return `ticket_id`, "
+            "`customer_name`, and `status` for every ticket."
+        ),
+        2: "Find the tickets that are still open. Return only `ticket_id`.",
+        3: (
+            "Find active tickets that need the fastest attention. Return only "
+            "`ticket_id` for tickets with High or Urgent priority whose status "
+            "is Open or Pending."
+        ),
+        4: (
+            "Find tickets created after June 15, 2026. Return only `ticket_id`."
+        ),
+        5: (
+            "Review how long closed tickets took to resolve. Return `ticket_id` "
+            "and `resolution_hours`, sorted from longest to shortest."
+        ),
+        6: (
+            "Show the five closed tickets with the highest satisfaction scores. "
+            "Return `ticket_id` and `satisfaction_score`; when scores tie, show "
+            "the newest ticket first."
+        ),
+        7: (
+            "Find open Billing tickets for follow-up. Return only `ticket_id`, "
+            "sorted from oldest to newest."
+        ),
+    },
+    19: {
+        1: (
+            "Check what each order would be worth before discounts. Return "
+            "`order_id`, `quantity`, `unit_price`, and `quantity * unit_price` "
+            "as `line_value`."
+        ),
+        2: (
+            "Prepare a sales report with consistent headings. Return `order_id`; "
+            "rename `region` to `sales_region`, `sales_channel` to `channel`, "
+            "and `revenue` to `recorded_revenue`."
+        ),
+        3: (
+            "Check whether the revenue stored for each order matches quantity "
+            "multiplied by unit price. Return `order_id`, rename `revenue` to "
+            "`recorded_revenue`, and calculate the difference as "
+            "`revenue_difference`."
+        ),
+        4: (
+            "List every region and sales-channel combination used by the business. "
+            "Return unique `region` and `sales_channel` pairs, sorted by region "
+            "and then sales channel."
+        ),
+    },
+    20: {
+        1: (
+            "List the ticket statuses currently used by the support team. Return "
+            "each unique `status` in alphabetical order."
+        ),
+        2: (
+            "Find high-priority tickets that are still active. Return `ticket_id`, "
+            "`priority`, and `status` for High or Urgent tickets that are not Closed."
+        ),
+        3: (
+            "Find tickets that do not have a recorded resolution time. Return "
+            "`ticket_id`, `status`, and `resolution_hours`."
+        ),
+        4: (
+            "Find feedback submitted through email, even when the channel text "
+            "uses different capitalization or extra spaces. Return `response_id` "
+            "and `channel_raw`."
+        ),
+    },
+    2: {
+        1: "Count the orders in the sales file. Return the count as `orders`.",
+        2: "Calculate the revenue recorded across all orders. Return it as `revenue`.",
+        3: (
+            "Calculate the average revenue per order. Return it as "
+            "`average_revenue`."
+        ),
+        4: (
+            "Show order volume and revenue for each region. Return `region`, the "
+            "order count as `orders`, and total revenue as `revenue`."
+        ),
+        5: (
+            "Find sales channels that handled more than five orders. Return "
+            "`sales_channel` and the order count as `orders`."
+        ),
+        6: (
+            "Calculate the average discount for each product category. Return "
+            "`product_category` and the average as `average_discount`."
+        ),
+        7: (
+            "Find the region that generated the most revenue. Return `region` "
+            "and total `revenue`."
+        ),
+    },
+}
 # Exact terminal DataCamp chapter for each exercise. An exercise cannot appear
 # as ready until this chapter and every preceding required chapter are complete.
 # All four Week 3 foundation exercises intentionally wait for Intermediate SQL
@@ -452,7 +573,7 @@ def _sync_task_metadata(conn: Any) -> None:
                     f"{TERMINAL_CHAPTER_BY_ID[internal_id]}. "
                     "Complete the exact DataCamp chapter and listed earlier exercises first."
                 ),
-                "Answer every question, pass each result check, and save the completed SQL submission.",
+                "Complete every task, pass each result check, and save the completed SQL submission.",
                 f"duckdb:{internal_id}",
                 task_id,
             ),
@@ -510,10 +631,61 @@ def _csv_schema_columns(dataset_folder: Path) -> set[str]:
 
 
 def _base_prompt(prompt: str) -> str:
+    """Recover the learner action from legacy or v10.41 enriched text."""
     text = re.sub(r"\s+", " ", str(prompt or "").strip())
-    text = re.sub(r"^Task:\s*", "", text, flags=re.I)
-    text = re.split(r"\s+Required output:\s*", text, maxsplit=1, flags=re.I)[0]
-    return text.rstrip(" .") + "."
+    text = re.sub(r"^(?:Task|Question)\s*:\s*", "", text, flags=re.I)
+    # v10.41 placed validation details inside the task paragraph. Remove those
+    # generated details so the action can be displayed on its own again.
+    markers = (
+        r"\s+Required output\s*:",
+        r"\s+Return columns?\s*:",
+        r"\s+Use these exact names for calculated or summarized columns\s*:",
+        r"\s+A correct result contains\s+\d+\s+rows?\b",
+        r"\s+Expected rows?\s*:",
+        r"\s+Do not include extra columns\b",
+    )
+    for marker in markers:
+        text = re.split(marker, text, maxsplit=1, flags=re.I)[0]
+    return text.strip().rstrip(" .")
+
+
+def _task_sentence(prompt: str) -> str:
+    """Return one direct, plain-language instruction without validation prose."""
+    text = _base_prompt(prompt)
+    text = re.sub(
+        r"^(?:For this (?:question|task),?\s*|Please\s+|"
+        r"Write (?:a|one) (?:SQL )?query (?:that|to)\s+|"
+        r"Create (?:a|one) (?:SQL )?query (?:that|to)\s+|"
+        r"Use (?:SQL|a SQL query) to\s+)",
+        "",
+        text,
+        flags=re.I,
+    ).strip()
+    verb_normalizations = (
+        (r"^returns?\s+all\b", "Return all"),
+        (r"^returns?\b", "Return"),
+        (r"^selects?\b", "Select"),
+        (r"^calculates?\b", "Calculate"),
+        (r"^counts?\b", "Count"),
+        (r"^finds?\b", "Find"),
+        (r"^lists?\b", "List"),
+        (r"^shows?\b", "Show"),
+        (r"^identifies?\b", "Identify"),
+        (r"^compares?\b", "Compare"),
+        (r"^creates?\b", "Create"),
+        (r"^builds?\b", "Build"),
+    )
+    for pattern, replacement in verb_normalizations:
+        if re.match(pattern, text, flags=re.I):
+            text = re.sub(pattern, replacement, text, count=1, flags=re.I)
+            break
+    if text:
+        text = text[0].upper() + text[1:]
+    else:
+        text = "Complete the requested analysis"
+    if text[-1] not in ".?!":
+        text += "."
+    return text
 
 
 def _correct_backticked_columns(prompt: str, source_columns: set[str], expected_columns: set[str]) -> str:
@@ -525,7 +697,7 @@ def _correct_backticked_columns(prompt: str, source_columns: set[str], expected_
         "inner", "left", "right", "full", "cross", "case", "select", "where",
     }
 
-    def replace(match: re.Match[str]) -> str:
+    def replace_token(match: re.Match[str]) -> str:
         token = match.group(1).strip()
         folded = token.casefold()
         if folded in allowed or folded in sql_terms or " " in token:
@@ -535,42 +707,56 @@ def _correct_backticked_columns(prompt: str, source_columns: set[str], expected_
             return match.group(0)
         return f"`{allowed[candidates[0]]}`"
 
-    return re.sub(r"`([^`]+)`", replace, prompt)
+    return re.sub(r"`([^`]+)`", replace_token, prompt)
 
 
-def _enriched_prompt(
+def _prompt_spec(
     prompt: str,
     *,
     expected_rows: int | None,
     expected_columns: tuple[str, ...],
     source_columns: set[str],
-) -> str:
-    base = _correct_backticked_columns(
-        _base_prompt(prompt), source_columns, set(expected_columns)
+) -> dict[str, Any]:
+    task = _correct_backticked_columns(
+        _task_sentence(prompt), source_columns, set(expected_columns)
     )
-    details: list[str] = [f"Task: {base}"]
-    if expected_columns:
-        formatted = ", ".join(f"`{column}`" for column in expected_columns)
-        details.append(f"Required output: return only these columns in this order: {formatted}.")
-        aliases = (
-            [
-                column
-                for column in expected_columns
-                if column.casefold() not in {item.casefold() for item in source_columns}
-            ]
-            if source_columns
-            else []
+    source_folded = {item.casefold() for item in source_columns}
+    aliases = tuple(
+        column for column in expected_columns
+        if source_columns and column.casefold() not in source_folded
+    )
+    return {
+        "task": task,
+        "columns": tuple(expected_columns),
+        "aliases": aliases,
+        "rows": expected_rows,
+    }
+
+
+def _ui_prompt(spec: dict[str, Any]) -> str:
+    """Format the Practice card as a short task plus scannable requirements."""
+    lines = [str(spec["task"])]
+    columns = tuple(spec.get("columns") or ())
+    aliases = tuple(spec.get("aliases") or ())
+    expected_rows = spec.get("rows")
+    requirement_lines: list[str] = []
+    if columns:
+        requirement_lines.append(
+            "Return columns: " + ", ".join(f"`{column}`" for column in columns) + "."
         )
-        if aliases:
-            details.append(
-                "Use these exact names for calculated or summarized columns: "
-                + ", ".join(f"`{column}`" for column in aliases)
-                + "."
-            )
+    if aliases:
+        requirement_lines.append(
+            "Use these exact names for new columns: "
+            + ", ".join(f"`{column}`" for column in aliases)
+            + "."
+        )
     if expected_rows is not None:
-        details.append(f"A correct result contains {expected_rows} row{'s' if expected_rows != 1 else ''}.")
-    details.append("Do not include extra columns; keep every filter and sort rule stated in the task.")
-    return " ".join(details)
+        requirement_lines.append(
+            f"Expected rows: {expected_rows}."
+        )
+    if requirement_lines:
+        lines.extend(["", "Result requirements", *[f"• {line}" for line in requirement_lines]])
+    return "\n".join(lines)
 
 
 def _parse_question_markers(sql: str) -> list[tuple[int, str]]:
@@ -578,31 +764,45 @@ def _parse_question_markers(sql: str) -> list[tuple[int, str]]:
     return [(int(match.group(1)), match.group(2).strip()) for match in pattern.finditer(sql)]
 
 
-def _audited_prompts(root: Path, internal_id: int, raw_starter: str, raw_validation: str) -> dict[int, str]:
+def _audited_prompt_specs(
+    root: Path, internal_id: int, raw_starter: str, raw_validation: str
+) -> dict[int, dict[str, Any]]:
     from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 
     item = DUCKDB_EXERCISES[int(internal_id)]
     dataset_folder = root / "practice" / "duckdb" / "datasets" / item["slug"]
     source_columns = _csv_schema_columns(dataset_folder)
     checkpoints = _validation_columns(raw_validation)
-    prompts: dict[int, str] = {}
+    prompts: dict[int, dict[str, Any]] = {}
     for number, prompt in _parse_question_markers(raw_starter):
         expected_rows, expected_columns = checkpoints.get(number, (None, ()))
-        prompts[number] = _enriched_prompt(
+        spec = _prompt_spec(
             prompt,
             expected_rows=expected_rows,
             expected_columns=expected_columns,
             source_columns=source_columns,
         )
+        authored = AUTHORED_TASK_BY_ID.get(int(internal_id), {}).get(int(number))
+        if authored:
+            spec["task"] = str(authored).strip()
+        prompts[number] = spec
     return prompts
 
+
+def _audited_prompts(root: Path, internal_id: int, raw_starter: str, raw_validation: str) -> dict[int, str]:
+    return {
+        number: _ui_prompt(spec)
+        for number, spec in _audited_prompt_specs(
+            root, internal_id, raw_starter, raw_validation
+        ).items()
+    }
 
 def _rewrite_starter_text(root: Path, internal_id: int, text: str, validation: str) -> str:
     from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
 
     item = DUCKDB_EXERCISES[int(internal_id)]
     display = _DISPLAY_BY_ID[int(internal_id)]
-    prompts = _audited_prompts(root, internal_id, text, validation)
+    specs = _audited_prompt_specs(root, internal_id, text, validation)
     result = re.sub(
         r"(?m)^--\s*DuckDB Exercise\s+\d+\s*:[^\n]*$",
         f"-- DuckDB Exercise {display:02d}: {item['title']}",
@@ -612,7 +812,8 @@ def _rewrite_starter_text(root: Path, internal_id: int, text: str, validation: s
 
     def replace(match: re.Match[str]) -> str:
         number = int(match.group(1))
-        prompt = prompts.get(number, _base_prompt(match.group(2)))
+        spec = specs.get(number)
+        prompt = str(spec["task"]) if spec else _task_sentence(match.group(2))
         return f"-- Q{number}. {prompt}"
 
     return re.sub(
@@ -627,7 +828,7 @@ def _rewrite_readme_text(root: Path, internal_id: int, text: str, starter: str, 
 
     item = DUCKDB_EXERCISES[int(internal_id)]
     display = _DISPLAY_BY_ID[int(internal_id)]
-    prompts = _audited_prompts(root, internal_id, starter, validation)
+    specs = _audited_prompt_specs(root, internal_id, starter, validation)
     result = re.sub(
         r"(?m)^#\s*DuckDB Exercise\s+\d+\s*:[^\n]*$",
         f"# DuckDB Exercise {display:02d}: {item['title']}",
@@ -640,17 +841,47 @@ def _rewrite_readme_text(root: Path, internal_id: int, text: str, starter: str, 
         f"**Concepts:** {item.get('concepts', '')}",
         result,
     )
-    question_lines = ["## Questions", ""]
-    for number in sorted(prompts):
-        question_lines.append(f"{number}. {prompts[number]}")
-    replacement = "\n".join(question_lines).rstrip() + "\n"
-    pattern = re.compile(r"(?ms)^## Questions\s*\n.*?(?=^##\s+|\Z)")
+    scenario = str(SCENARIO_BY_ID.get(int(internal_id), "")).strip()
+    if scenario:
+        scenario_block = "## Scenario\n\n" + scenario + "\n\n"
+        scenario_pattern = re.compile(r"(?ms)^##\s+Scenario\s*\n.*?(?=^##\s+|\Z)")
+        if scenario_pattern.search(result):
+            result = scenario_pattern.sub(scenario_block, result, count=1)
+        else:
+            tasks_heading = re.search(r"(?m)^##\s+(?:Questions|Tasks)\s*$", result)
+            if tasks_heading:
+                result = result[:tasks_heading.start()] + scenario_block + result[tasks_heading.start():]
+            else:
+                result = result.rstrip() + "\n\n" + scenario_block
+    task_lines = ["## Tasks", ""]
+    for number in sorted(specs):
+        spec = specs[number]
+        task_lines.extend([f"### Task {number}", "", str(spec["task"]), ""])
+        requirements: list[str] = []
+        columns = tuple(spec.get("columns") or ())
+        aliases = tuple(spec.get("aliases") or ())
+        expected_rows = spec.get("rows")
+        if columns:
+            requirements.append(
+                "- **Return columns:** "
+                + ", ".join(f"`{column}`" for column in columns)
+            )
+        if aliases:
+            requirements.append(
+                "- **Exact names for new columns:** "
+                + ", ".join(f"`{column}`" for column in aliases)
+            )
+        if expected_rows is not None:
+            requirements.append(f"- **Expected rows:** {expected_rows}")
+        if requirements:
+            task_lines.extend(["**Result requirements**", "", *requirements, ""])
+    replacement = "\n".join(task_lines).rstrip() + "\n"
+    pattern = re.compile(r"(?ms)^##\s+(?:Questions|Tasks)\s*\n.*?(?=^##\s+|\Z)")
     if pattern.search(result):
         result = pattern.sub(replacement, result, count=1)
     else:
         result = result.rstrip() + "\n\n" + replacement
     return result
-
 
 def rewrite_static_content(root: Path) -> dict[str, Any]:
     """Rewrite all 33 exercise READMEs and starter prompts in place.
@@ -678,7 +909,7 @@ def rewrite_static_content(root: Path) -> dict[str, Any]:
         prompts = _audited_prompts(root, internal_id, raw_starter, raw_validation)
         checkpoints = _validation_columns(raw_validation)
         if not prompts:
-            errors.append(f"Exercise {internal_id}: no Q1/Q2 question markers found")
+            errors.append(f"Exercise {internal_id}: no Q1/Q2 task markers found")
             continue
         missing_checkpoints = sorted(set(prompts) - set(checkpoints))
         if missing_checkpoints:
@@ -701,6 +932,15 @@ def audit_contract(root: Path | None = None) -> list[str]:
         errors.append("Roadmap order must include every stable DuckDB ID exactly once.")
     if set(TITLE_BY_ID) != set(ROADMAP_INTERNAL_ORDER):
         errors.append("Title map does not cover every DuckDB exercise.")
+    for internal_id, tasks in AUTHORED_TASK_BY_ID.items():
+        if internal_id not in ROADMAP_INTERNAL_ORDER:
+            errors.append(f"Authored tasks reference unknown exercise {internal_id}.")
+        for number, task in tasks.items():
+            if not str(task).strip():
+                errors.append(f"Exercise {internal_id} task {number} has empty authored wording.")
+            lowered = str(task).casefold()
+            if "concise aliases" in lowered or "pre-discount line value" in lowered:
+                errors.append(f"Exercise {internal_id} task {number} retains confusing wording.")
     if set(TERMINAL_CHAPTER_BY_ID) != set(ROADMAP_INTERNAL_ORDER):
         errors.append("Terminal chapter map does not cover every DuckDB exercise.")
     if set(PRIOR_EXERCISES_BY_ID) != set(ROADMAP_INTERNAL_ORDER):
@@ -767,12 +1007,20 @@ def _install_runner_prompt_audit() -> None:
         return _rewrite_starter_text(root, int(number), raw, validation)
 
     def question_definitions(root: Path, number: int):
-        questions = runner.parse_questions(starter_sql(Path(root), int(number)))
+        root = Path(root)
+        internal_id = int(number)
+        raw_starter = original_starter(root, internal_id)
+        validation = original_validation(root, internal_id)
+        questions = runner.parse_questions(starter_sql(root, internal_id))
         if not questions:
             raise runner.DuckDBExerciseRunnerError(
-                "The starter SQL does not contain any Q1, Q2, ... question sections."
+                "The starter SQL does not contain any Q1, Q2, ... task sections."
             )
-        return questions
+        prompts = _audited_prompts(root, internal_id, raw_starter, validation)
+        return [
+            replace(question, prompt=prompts.get(question.number, question.prompt))
+            for question in questions
+        ]
 
     def instructions_markdown(root: Path, number: int) -> str:
         root = Path(root)

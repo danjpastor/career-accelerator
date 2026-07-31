@@ -1,31 +1,47 @@
--- DuckDB Exercise 02: Select, rename, and calculate order fields
+-- DuckDB Exercise 02: Prepare a retail order review
 -- Read README.md before starting.
 -- Save your completed copy under practice/duckdb/submissions/
 
 
 -- -----------------------------------------------------------------
 
--- Q1. Task: Return every order with order ID, quantity, unit price, and a calculated pre-discount line value. Required output: return only these columns in this order: `order_id`, `quantity`, `unit_price`, `line_value`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q1. Check what each order would be worth before discounts. Return `order_id`, `quantity`, `unit_price`, and `quantity * unit_price` as `line_value`.
 
-SELECT order_id, quantity, unit_price, (unit_price*quantity) AS line_value
+SELECT order_id,
+    quantity,
+    unit_price,
+    (quantity*unit_price) AS line_value
 FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q2. Task: Return every order with concise aliases for region, channel, and recorded revenue. Required output: return only these columns in this order: `order_id`, `sales_region`, `channel`, `recorded_revenue`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q2. Prepare a sales report with consistent headings. Return `order_id`; rename `region` to `sales_region`, `sales_channel` to `channel`, and `revenue` to `recorded_revenue`.
 
--- Write and run your query below this comment.
+SELECT
+    order_id,
+    region AS sales_region,
+    sales_channel AS channel,
+    revenue AS recorded_revenue
+FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q3. Task: Return each order with its recorded revenue and the difference between recorded revenue and quantity multiplied by unit price. Required output: return only these columns in this order: `order_id`, `recorded_revenue`, `revenue_difference`. A correct result contains 24 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q3. Check whether the revenue stored for each order matches quantity multiplied by unit price. Return `order_id`, rename `revenue` to `recorded_revenue`, and calculate the difference as `revenue_difference`.
 
--- Write and run your query below this comment.
+SELECT
+    order_id,
+    revenue AS recorded_revenue,
+    quantity*unit_price AS revenue_difference
+FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q4. Task: Return the distinct combinations of region and sales channel, ordered consistently. Required output: return only these columns in this order: `region`, `sales_channel`. A correct result contains 12 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q4. List every region and sales-channel combination used by the business. Return unique `region` and `sales_channel` pairs, sorted by region and then sales channel.
 
--- Write and run your query below this comment.
+SELECT
+    DISTINCT region,
+    sales_channel
+FROM ex02_retail_orders
+ORDER BY region, sales_channel;
 
 -- -----------------------------------------------------------------

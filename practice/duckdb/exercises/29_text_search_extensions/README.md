@@ -13,12 +13,42 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex01_support_tickets`
 - `ex03_customer_feedback_dirty`
 
-## Questions
+## Tasks
 
-1. Task: Find tickets whose customer name contains the word mart without depending on letter case. Required output: return only these columns in this order: `ticket_id`, `customer_name`. A correct result contains 2 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Find feedback issue values that contain billing after trimming and ignoring case. Required output: return only these columns in this order: `response_id`, `issue_type_raw`. A correct result contains 6 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Use a regular expression to return feedback rows with a four-digit year in the submitted date text. Required output: return only these columns in this order: `response_id`, `submitted_at_raw`. A correct result contains 17 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Inspect the extensions known to DuckDB and return their name and loaded status. Required output: return only these columns in this order: `extension_name`, `loaded`. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Find tickets whose customer name contains the word mart without depending on letter case.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`, `customer_name`
+- **Expected rows:** 2
+
+### Task 2
+
+Find feedback issue values that contain billing after trimming and ignoring case.
+
+**Result requirements**
+
+- **Return columns:** `response_id`, `issue_type_raw`
+- **Expected rows:** 6
+
+### Task 3
+
+Use a regular expression to return feedback rows with a four-digit year in the submitted date text.
+
+**Result requirements**
+
+- **Return columns:** `response_id`, `submitted_at_raw`
+- **Expected rows:** 17
+
+### Task 4
+
+Inspect the extensions known to DuckDB and return their name and loaded status.
+
+**Result requirements**
+
+- **Return columns:** `extension_name`, `loaded`
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

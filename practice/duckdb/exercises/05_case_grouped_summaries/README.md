@@ -16,15 +16,77 @@ A service director wants SLA compliance and resolution-speed summaries that are 
 
 - `service_requests.csv`
 
-## Questions
+## Tasks
 
-1. Task: Create an SLA target with CASE: Critical 2h, High 4h, Medium 8h, Low 12h. Required output: return only these columns in this order: `severity`, `target`. Use these exact names for calculated or summarized columns: `target`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Create an `sla_status` of `Met` or `Missed` by comparing first response to the target. Required output: return only these columns in this order: `met`, `missed`. Use these exact names for calculated or summarized columns: `met`, `missed`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Count requests by department and SLA status. Required output: return only these columns in this order: `department`, `sla_status`, `count_star()`. Use these exact names for calculated or summarized columns: `sla_status`, `count_star()`. A correct result contains 6 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Calculate SLA compliance percentage by department. Required output: return only these columns in this order: `department`, `round(((100.0 * sum(CASE  WHEN ((first_response_hours <= CASE  WHEN ((severity = 'Critical')) THEN (2) WHEN ((severity = 'High')) THEN (4) WHEN ((severity = 'Medium')) THEN (8) ELSE 12 END)) THEN (1) ELSE 0 END)) / count_star()), 2)`. Use these exact names for calculated or summarized columns: `round(((100.0 * sum(CASE  WHEN ((first_response_hours <= CASE  WHEN ((severity = 'Critical')) THEN (2) WHEN ((severity = 'High')) THEN (4) WHEN ((severity = 'Medium')) THEN (8) ELSE 12 END)) THEN (1) ELSE 0 END)) / count_star()), 2)`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Create resolution bands: `Fast` under 12 hours, `Standard` from 12 through 24, and `Slow` over 24. Required output: return only these columns in this order: `band`, `count_star()`. Use these exact names for calculated or summarized columns: `band`, `count_star()`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-6. Task: Return average CSAT by resolution band. Required output: return only these columns in this order: `band`, `round(avg(csat_score), 2)`. Use these exact names for calculated or summarized columns: `band`, `round(avg(csat_score), 2)`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-7. Task: Return reopened request count and reopen rate by department. Required output: return only these columns in this order: `department`, `sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)`, `round(((100.0 * sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)) / count_star()), 2)`. Use these exact names for calculated or summarized columns: `sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)`, `round(((100.0 * sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)) / count_star()), 2)`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Create an SLA target with CASE: Critical 2h, High 4h, Medium 8h, Low 12h.
+
+**Result requirements**
+
+- **Return columns:** `severity`, `target`
+- **Exact names for new columns:** `target`
+- **Expected rows:** 4
+
+### Task 2
+
+Create an `sla_status` of `Met` or `Missed` by comparing first response to the target.
+
+**Result requirements**
+
+- **Return columns:** `met`, `missed`
+- **Exact names for new columns:** `met`, `missed`
+- **Expected rows:** 1
+
+### Task 3
+
+Count requests by department and SLA status.
+
+**Result requirements**
+
+- **Return columns:** `department`, `sla_status`, `count_star()`
+- **Exact names for new columns:** `sla_status`, `count_star()`
+- **Expected rows:** 6
+
+### Task 4
+
+Calculate SLA compliance percentage by department.
+
+**Result requirements**
+
+- **Return columns:** `department`, `round(((100.0 * sum(CASE  WHEN ((first_response_hours <= CASE  WHEN ((severity = 'Critical')) THEN (2) WHEN ((severity = 'High')) THEN (4) WHEN ((severity = 'Medium')) THEN (8) ELSE 12 END)) THEN (1) ELSE 0 END)) / count_star()), 2)`
+- **Exact names for new columns:** `round(((100.0 * sum(CASE  WHEN ((first_response_hours <= CASE  WHEN ((severity = 'Critical')) THEN (2) WHEN ((severity = 'High')) THEN (4) WHEN ((severity = 'Medium')) THEN (8) ELSE 12 END)) THEN (1) ELSE 0 END)) / count_star()), 2)`
+- **Expected rows:** 3
+
+### Task 5
+
+Create resolution bands: `Fast` under 12 hours, `Standard` from 12 through 24, and `Slow` over 24.
+
+**Result requirements**
+
+- **Return columns:** `band`, `count_star()`
+- **Exact names for new columns:** `band`, `count_star()`
+- **Expected rows:** 3
+
+### Task 6
+
+Return average CSAT by resolution band.
+
+**Result requirements**
+
+- **Return columns:** `band`, `round(avg(csat_score), 2)`
+- **Exact names for new columns:** `band`, `round(avg(csat_score), 2)`
+- **Expected rows:** 3
+
+### Task 7
+
+Return reopened request count and reopen rate by department.
+
+**Result requirements**
+
+- **Return columns:** `department`, `sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)`, `round(((100.0 * sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)) / count_star()), 2)`
+- **Exact names for new columns:** `sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)`, `round(((100.0 * sum(CASE  WHEN ((reopened = 'Yes')) THEN (1) ELSE 0 END)) / count_star()), 2)`
+- **Expected rows:** 3
 ## Completion evidence
 
 1. Copy `starter.sql` to:

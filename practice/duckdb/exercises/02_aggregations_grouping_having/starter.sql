@@ -7,42 +7,42 @@ DESCRIBE ex02_retail_orders;
 
 
 -- -----------------------------------------------------------------
--- Q1. Task: Count all orders. Required output: return only these columns in this order: `orders`. Use these exact names for calculated or summarized columns: `orders`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q1. Count the orders in the sales file. Return the count as `orders`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q2. Task: Calculate total revenue. Required output: return only these columns in this order: `revenue`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q2. Calculate the revenue recorded across all orders. Return it as `revenue`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q3. Task: Calculate average order revenue. Required output: return only these columns in this order: `average_revenue`. Use these exact names for calculated or summarized columns: `average_revenue`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q3. Calculate the average revenue per order. Return it as `average_revenue`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q4. Task: Return order count and revenue by region. Required output: return only these columns in this order: `region`, `orders`, `revenue`. Use these exact names for calculated or summarized columns: `orders`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q4. Show order volume and revenue for each region. Return `region`, the order count as `orders`, and total revenue as `revenue`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q5. Task: Return sales channels with more than five orders using `HAVING`. Required output: return only these columns in this order: `sales_channel`, `orders`. Use these exact names for calculated or summarized columns: `orders`. A correct result contains 2 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q5. Find sales channels that handled more than five orders. Return `sales_channel` and the order count as `orders`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q6. Task: Calculate average discount by product category. Required output: return only these columns in this order: `product_category`, `average_discount`. Use these exact names for calculated or summarized columns: `average_discount`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q6. Calculate the average discount for each product category. Return `product_category` and the average as `average_discount`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------
 
 
 -- -----------------------------------------------------------------
--- Q7. Task: Return the region with the highest total revenue. Required output: return only these columns in this order: `region`, `revenue`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+-- Q7. Find the region that generated the most revenue. Return `region` and total `revenue`.
 -- Write and run your query below this comment.
 -- -----------------------------------------------------------------

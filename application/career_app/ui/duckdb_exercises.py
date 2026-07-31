@@ -237,7 +237,7 @@ class DuckDBExercisesWidget(QWidget):
         practice_layout.addLayout(practice_heading)
 
         selector_row = QHBoxLayout()
-        selector_label = QLabel("Question")
+        selector_label = QLabel("Task")
         selector_label.setObjectName("Muted")
         selector_row.addWidget(selector_label)
         self.question_combo = QComboBox()
@@ -267,7 +267,7 @@ class DuckDBExercisesWidget(QWidget):
         self.sql_editor = SqlCodeEditor()
         self.sql_editor.setObjectName("DuckDBExerciseSqlEditor")
         self.sql_editor.setPlaceholderText(
-            "Write the SQL answer for the selected question. Each question is saved independently."
+            "Write the SQL for the selected task. Each task is saved independently."
         )
         self.sql_editor.setMinimumHeight(190)
         self.sql_editor.textChanged.connect(self._answer_changed)
@@ -275,10 +275,10 @@ class DuckDBExercisesWidget(QWidget):
 
         first_actions = QBoxLayout(QBoxLayout.Direction.LeftToRight)
         self.first_actions = first_actions
-        self.run_button = QPushButton("▶ Run Question")
+        self.run_button = QPushButton("▶ Run Task")
         self.run_button.setObjectName("Secondary")
         self.run_button.clicked.connect(self.run_question)
-        self.check_question_button = QPushButton("✓ Check Question")
+        self.check_question_button = QPushButton("✓ Check Task")
         self.check_question_button.setObjectName("Secondary")
         self.check_question_button.clicked.connect(self.check_question)
         self.check_exercise_button = QPushButton("Check Exercise")
@@ -477,7 +477,7 @@ class DuckDBExercisesWidget(QWidget):
             self.sql_editor.setPlaceholderText("Locked — complete the listed prerequisites first.")
         else:
             self.sql_editor.setPlaceholderText(
-                "Write the SQL answer for the selected question. Each question is saved independently."
+                "Write the SQL for the selected task. Each task is saved independently."
             )
 
     def refresh(self, *, preserve_number: bool = True) -> None:
@@ -596,7 +596,8 @@ class DuckDBExercisesWidget(QWidget):
 
     def _question_label(self, question: runner.QuestionBlock) -> str:
         marker = "✓" if self._question_passed(question.number) else "○"
-        return f"{marker}  Q{question.number}: {question.prompt}"
+        summary = str(question.prompt).splitlines()[0].strip()
+        return f"{marker}  Task {question.number}: {summary}"
 
     def _update_question_labels(self) -> None:
         for index, question in enumerate(self._question_definitions):
@@ -616,7 +617,7 @@ class DuckDBExercisesWidget(QWidget):
         for question in self._question_definitions:
             value = self._question_notes.get(question.number, "").strip()
             if value:
-                notes.append(f"Q{question.number}: {value}")
+                notes.append(f"Task {question.number}: {value}")
         return "\n\n".join(notes)
 
     def _full_submission_sql(self) -> str:
@@ -684,7 +685,7 @@ class DuckDBExercisesWidget(QWidget):
         question_count = len(self._question_definitions)
         subtitle = (
             f"Week {item['week']} • {item['minutes']} minutes • "
-            f"{question_count} question{'s' if question_count != 1 else ''} • "
+            f"{question_count} task{'s' if question_count != 1 else ''} • "
             f"{len(inventory)} dataset{'s' if len(inventory) != 1 else ''} • {item['concepts']}"
         )
         self.learn_view.set_markdown(
@@ -913,8 +914,8 @@ class DuckDBExercisesWidget(QWidget):
                 for item in question_result["checklist"]
                 if not item.get("passed")
             ]
-            failed_details.append(f"Q{question.number}: {', '.join(failed)}")
-        message = f"{result['passed_count']} of {result['total_count']} questions passed."
+            failed_details.append(f"Task {question.number}: {', '.join(failed)}")
+        message = f"{result['passed_count']} of {result['total_count']} tasks passed."
         if failed_details:
             message += "\n" + "\n".join(failed_details)
         self.feedback.show_message(message, "success" if result["passed"] else "hint")
@@ -954,7 +955,7 @@ class DuckDBExercisesWidget(QWidget):
             return
         if show_confirmation and path is not None:
             self.feedback.show_message(
-                f"All question drafts were saved to {path.name}.", "success"
+                f"All task drafts were saved to {path.name}.", "success"
             )
         self.changed.emit()
 
@@ -973,7 +974,7 @@ class DuckDBExercisesWidget(QWidget):
             QMessageBox.information(
                 self,
                 "Exercise not ready",
-                "The submission was saved, but every question must pass before the exercise can be completed.",
+                "The submission was saved, but every task must pass before the exercise can be completed.",
             )
             return
         try:
@@ -989,7 +990,7 @@ class DuckDBExercisesWidget(QWidget):
             return
         self.status_combo.setCurrentText("Completed")
         self.feedback.show_message(
-            f"All {result['total_count']} questions passed. Exercise submitted and marked complete.",
+            f"All {result['total_count']} tasks passed. Exercise submitted and marked complete.",
             "success",
         )
         self.changed.emit()

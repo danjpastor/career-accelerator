@@ -13,12 +13,42 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex06_customers`
 - `ex06_orders`
 
-## Questions
+## Tasks
 
-1. Task: Create a reusable view that joins delivered orders to customer region, then return the view rows. Required output: return only these columns in this order: `order_id`, `customer_id`, `region`, `order_total`. A correct result contains 12 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Query the reusable view to summarize delivered revenue by region. Required output: return only these columns in this order: `region`, `delivered_revenue`. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Create a physical snapshot table from the view and return its row count. Required output: return only these columns in this order: `snapshot_rows`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Compare the view and snapshot row counts to verify the snapshot was created correctly. Required output: return only these columns in this order: `view_rows`, `snapshot_rows`, `difference`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Create a reusable view that joins delivered orders to customer region, then return the view rows.
+
+**Result requirements**
+
+- **Return columns:** `order_id`, `customer_id`, `region`, `order_total`
+- **Expected rows:** 12
+
+### Task 2
+
+Query the reusable view to summarize delivered revenue by region.
+
+**Result requirements**
+
+- **Return columns:** `region`, `delivered_revenue`
+
+### Task 3
+
+Create a physical snapshot table from the view and return its row count.
+
+**Result requirements**
+
+- **Return columns:** `snapshot_rows`
+- **Expected rows:** 1
+
+### Task 4
+
+Compare the view and snapshot row counts to verify the snapshot was created correctly.
+
+**Result requirements**
+
+- **Return columns:** `view_rows`, `snapshot_rows`, `difference`
+- **Expected rows:** 1
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

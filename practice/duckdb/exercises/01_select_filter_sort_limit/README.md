@@ -6,7 +6,7 @@
 
 ## Scenario
 
-You support a SaaS company. Operations wants a quick view of ticket volume and the most urgent unresolved work.
+A customer-support manager is preparing the daily service queue. The manager needs a clear ticket list, the most urgent open work, and a few simple views for follow-up.
 
 ## Tables
 
@@ -16,15 +16,70 @@ You support a SaaS company. Operations wants a quick view of ticket volume and t
 
 - `support_tickets.csv`
 
-## Questions
+## Tasks
 
-1. Task: Return `ticket_id`, `customer_name`, and `status` for every ticket. Required output: return only these columns in this order: `ticket_id`, `customer_name`, `status`. A correct result contains 20 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Return all tickets whose status is `Open`. Required output: return only these columns in this order: `ticket_id`. A correct result contains 6 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Return open or pending tickets with `High` or `Urgent` priority. Required output: return only these columns in this order: `ticket_id`. A correct result contains 5 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Return tickets created after June 15, 2026. Required output: return only these columns in this order: `ticket_id`. A correct result contains 10 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Return closed tickets ordered from longest to shortest `resolution_hours`. Required output: return only these columns in this order: `ticket_id`, `resolution_hours`. A correct result contains 11 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-6. Task: Return the five highest satisfaction scores among closed tickets; break ties by newest `created_at`. Required output: return only these columns in this order: `ticket_id`, `satisfaction_score`. A correct result contains 5 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-7. Task: Return open Billing tickets ordered from oldest to newest. Required output: return only these columns in this order: `ticket_id`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Prepare the manager's basic ticket list. Return `ticket_id`, `customer_name`, and `status` for every ticket.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`, `customer_name`, `status`
+- **Expected rows:** 20
+
+### Task 2
+
+Find the tickets that are still open. Return only `ticket_id`.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`
+- **Expected rows:** 6
+
+### Task 3
+
+Find active tickets that need the fastest attention. Return only `ticket_id` for tickets with High or Urgent priority whose status is Open or Pending.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`
+- **Expected rows:** 5
+
+### Task 4
+
+Find tickets created after June 15, 2026. Return only `ticket_id`.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`
+- **Expected rows:** 10
+
+### Task 5
+
+Review how long closed tickets took to resolve. Return `ticket_id` and `resolution_hours`, sorted from longest to shortest.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`, `resolution_hours`
+- **Expected rows:** 11
+
+### Task 6
+
+Show the five closed tickets with the highest satisfaction scores. Return `ticket_id` and `satisfaction_score`; when scores tie, show the newest ticket first.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`, `satisfaction_score`
+- **Expected rows:** 5
+
+### Task 7
+
+Find open Billing tickets for follow-up. Return only `ticket_id`, sorted from oldest to newest.
+
+**Result requirements**
+
+- **Return columns:** `ticket_id`
+- **Expected rows:** 4
 ## Completion evidence
 
 1. Copy `starter.sql` to:

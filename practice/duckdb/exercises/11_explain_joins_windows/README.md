@@ -20,15 +20,75 @@ You must produce correct SQL and explain why the chosen join or window function 
 - `support_agents.csv`
 - `tickets.csv`
 
-## Questions
+## Tasks
 
-1. Task: INNER JOIN customer accounts to tickets. Explain which customers disappear and why. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: LEFT JOIN customer accounts to tickets. Explain why the row count differs from the INNER JOIN. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Use `ROW_NUMBER` to return the latest ticket for each customer. Required output: return only these columns in this order: `customer_id`, `ticket_id`. A correct result contains 7 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Rank agents by average resolution time using `DENSE_RANK`; lower is better. Required output: return only these columns in this order: `agent_id`, `avg_hours`, `performance_rank`. Use these exact names for calculated or summarized columns: `avg_hours`, `performance_rank`. A correct result contains 6 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Calculate each agent's three-ticket rolling average resolution time. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-6. Task: Return customers without tickets. Required output: return only these columns in this order: `customer_id`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-7. Task: Write a 3–5 sentence explanation comparing aggregate queries with window-function queries. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+INNER JOIN customer accounts to tickets. Explain which customers disappear and why.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
+
+### Task 2
+
+LEFT JOIN customer accounts to tickets. Explain why the row count differs from the INNER JOIN.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
+
+### Task 3
+
+Use `ROW_NUMBER` to return the latest ticket for each customer.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`, `ticket_id`
+- **Expected rows:** 7
+
+### Task 4
+
+Rank agents by average resolution time using `DENSE_RANK`; lower is better.
+
+**Result requirements**
+
+- **Return columns:** `agent_id`, `avg_hours`, `performance_rank`
+- **Exact names for new columns:** `avg_hours`, `performance_rank`
+- **Expected rows:** 6
+
+### Task 5
+
+Calculate each agent's three-ticket rolling average resolution time.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
+
+### Task 6
+
+Return customers without tickets.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`
+- **Expected rows:** 1
+
+### Task 7
+
+Write a 3–5 sentence explanation comparing aggregate queries with window-function queries.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
 ## Completion evidence
 
 1. Copy `starter.sql` to:

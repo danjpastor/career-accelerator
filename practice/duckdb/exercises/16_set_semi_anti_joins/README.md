@@ -14,15 +14,73 @@ Customer success needs to compare old and current customer populations and ident
 - `ex16_current_customers`
 - `ex16_orders`
 
-## Questions
+## Tasks
 
-1. Task: Combine the previous and current customer IDs with UNION. Required output: return only these columns in this order: `distinct_customer_count`. Use these exact names for calculated or summarized columns: `distinct_customer_count`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Combine both customer tables with UNION ALL and count all rows. Required output: return only these columns in this order: `all_row_count`. Use these exact names for calculated or summarized columns: `all_row_count`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Find customers present in both periods with INTERSECT. Required output: return only these columns in this order: `customer_id`. A correct result contains 4 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Find customers that are new in the current period with EXCEPT. Required output: return only these columns in this order: `customer_id`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-5. Task: Return current customers that have at least one order using a semi-join pattern. Required output: return only these columns in this order: `customer_id`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-6. Task: Return current customers with no orders using an anti-join pattern. Required output: return only these columns in this order: `customer_id`. A correct result contains 3 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-7. Task: Explain when UNION ALL is safer than UNION for audit work. Required output: return only these columns in this order: `count_star()`. Use these exact names for calculated or summarized columns: `count_star()`. A correct result contains 1 row. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Combine the previous and current customer IDs with UNION.
+
+**Result requirements**
+
+- **Return columns:** `distinct_customer_count`
+- **Exact names for new columns:** `distinct_customer_count`
+- **Expected rows:** 1
+
+### Task 2
+
+Combine both customer tables with UNION ALL and count all rows.
+
+**Result requirements**
+
+- **Return columns:** `all_row_count`
+- **Exact names for new columns:** `all_row_count`
+- **Expected rows:** 1
+
+### Task 3
+
+Find customers present in both periods with INTERSECT.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`
+- **Expected rows:** 4
+
+### Task 4
+
+Find customers that are new in the current period with EXCEPT.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`
+- **Expected rows:** 3
+
+### Task 5
+
+Return current customers that have at least one order using a semi-join pattern.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`
+- **Expected rows:** 3
+
+### Task 6
+
+Return current customers with no orders using an anti-join pattern.
+
+**Result requirements**
+
+- **Return columns:** `customer_id`
+- **Expected rows:** 3
+
+### Task 7
+
+Explain when UNION ALL is safer than UNION for audit work.
+
+**Result requirements**
+
+- **Return columns:** `count_star()`
+- **Exact names for new columns:** `count_star()`
+- **Expected rows:** 1
 ## Completion evidence
 
 1. Work in the standard submission file created by Career Accelerator.

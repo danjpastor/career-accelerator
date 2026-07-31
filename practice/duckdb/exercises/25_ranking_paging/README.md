@@ -13,12 +13,43 @@ Practice the SQL concepts introduced in the matching DataCamp chapter. Complete 
 - `ex10_employees`
 - `ex11_tickets`
 
-## Questions
+## Tasks
 
-1. Task: Rank all employees from highest to lowest salary using a ranking function that preserves ties. Required output: return only these columns in this order: `employee_id`, `employee_name`, `annual_salary`, `salary_rank`. A correct result contains 12 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-2. Task: Rank employees by salary inside each department. Required output: return only these columns in this order: `employee_id`, `department_id`, `annual_salary`, `department_rank`. A correct result contains 12 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-3. Task: Return the top two salaries in each department using a window rank. Required output: return only these columns in this order: `department_id`, `employee_name`, `annual_salary`, `department_rank`. A correct result contains 8 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
-4. Task: Number tickets in opening order for each support agent. Required output: return only these columns in this order: `agent_id`, `ticket_id`, `opened_at`, `ticket_sequence`. A correct result contains 18 rows. Do not include extra columns; keep every filter and sort rule stated in the task.
+### Task 1
+
+Rank all employees from highest to lowest salary using a ranking function that preserves ties.
+
+**Result requirements**
+
+- **Return columns:** `employee_id`, `employee_name`, `annual_salary`, `salary_rank`
+- **Expected rows:** 12
+
+### Task 2
+
+Rank employees by salary inside each department.
+
+**Result requirements**
+
+- **Return columns:** `employee_id`, `department_id`, `annual_salary`, `department_rank`
+- **Expected rows:** 12
+
+### Task 3
+
+Return the top two salaries in each department using a window rank.
+
+**Result requirements**
+
+- **Return columns:** `department_id`, `employee_name`, `annual_salary`, `department_rank`
+- **Expected rows:** 8
+
+### Task 4
+
+Number tickets in opening order for each support agent.
+
+**Result requirements**
+
+- **Return columns:** `agent_id`, `ticket_id`, `opened_at`, `ticket_sequence`
+- **Expected rows:** 18
 ## Completion evidence
 
 1. Copy `starter.sql` to the DuckDB submissions folder.

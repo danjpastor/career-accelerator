@@ -1,4 +1,4 @@
--- DuckDB Exercise 02: Summarize retail orders
+-- DuckDB Exercise 04: Summarize retail orders with grouped metrics
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -8,44 +8,69 @@ DESCRIBE ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q1. Count all orders.
+-- Q1. Count the orders in the sales file. Return the count as `orders`.
 
--- Write and run your query below this comment.
-
--- -----------------------------------------------------------------
-
--- Q2. Calculate total revenue.
-
--- Write and run your query below this comment.
+SELECT
+    COUNT(order_id) AS orders
+FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q3. Calculate average order revenue.
+-- Q2. Calculate the revenue recorded across all orders. Return it as `revenue`.
 
--- Write and run your query below this comment.
-
--- -----------------------------------------------------------------
-
--- Q4. Return order count and revenue by region.
-
--- Write and run your query below this comment.
+SELECT
+    SUM(revenue) AS revenue
+FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q5. Return sales channels with more than five orders using `HAVING`.
+-- Q3. Calculate the average revenue per order. Return it as `average_revenue`.
 
--- Write and run your query below this comment.
-
--- -----------------------------------------------------------------
-
--- Q6. Calculate average discount by product category.
-
--- Write and run your query below this comment.
+SELECT
+     ROUND(AVG(revenue), 2) AS average_revenue
+FROM ex02_retail_orders;
 
 -- -----------------------------------------------------------------
 
--- Q7. Return the region with the highest total revenue.
+-- Q4. Show order volume and revenue for each region. Return `region`, the order count as `orders`, and total revenue as `revenue`.
 
--- Write and run your query below this comment.
+SELECT
+    DISTINCT region,
+    COUNT(*) AS orders,
+    SUM(revenue) AS revenue
+FROM ex02_retail_orders
+GROUP BY region;
+
+-- -----------------------------------------------------------------
+
+-- Q5. Find sales channels that handled more than five orders. Return `sales_channel` and the order count as `orders`.
+
+SELECT
+    sales_channel,
+    COUNT(*) AS orders
+FROM ex02_retail_orders
+GROUP BY sales_channel
+HAVING COUNT(*) > 5
+
+-- -----------------------------------------------------------------
+
+-- Q6. Calculate the average discount for each product category. Return `product_category` and the average as `average_discount`.
+
+SELECT
+    product_category,
+    ROUND(AVG(discount_pct), 2) AS average_discount
+FROM ex02_retail_orders
+GROUP BY product_category;
+
+-- -----------------------------------------------------------------
+
+-- Q7. Find the region that generated the most revenue. Return `region` and total `revenue`.
+
+SELECT
+    region,
+    SUM(revenue) AS revenue
+FROM ex02_retail_orders
+GROUP BY region
+ORDER BY revenue DESC;
 
 -- -----------------------------------------------------------------
