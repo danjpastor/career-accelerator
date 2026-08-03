@@ -59,7 +59,7 @@ Create or acquire the immutable raw dataset.
 ## Working notes
 
 **Milestone:** Approve data source and specification  
-**Started:** 2026-07-31
+**Started:** 2026-08-01
 
 ## Source record
 
