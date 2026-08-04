@@ -59,7 +59,7 @@ Validate the table model and relationships before transformation.
 ## Working notes
 
 **Milestone:** Create or acquire raw dataset  
-**Started:** 2026-08-03
+**Started:** 2026-08-04
 
 ## Source record
 

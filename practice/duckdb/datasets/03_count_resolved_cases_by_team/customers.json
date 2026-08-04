@@ -1,0 +1,120 @@
+{
+  "name": "customers",
+  "columns": [
+    {
+      "name": "customer_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "first_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "last_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "city",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "region_code",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "phone",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "joined_date",
+      "type": "DATE"
+    }
+  ],
+  "rows": [
+    [
+      101,
+      "Maya",
+      "Chen",
+      "Atlanta",
+      "SE",
+      "maya.chen@example.com",
+      "(404) 555-0141",
+      "2025-01-12"
+    ],
+    [
+      102,
+      "Owen",
+      "Brooks",
+      "Savannah",
+      "SE",
+      "owen.brooks@example.com",
+      null,
+      "2025-02-03"
+    ],
+    [
+      103,
+      "Priya",
+      "Shah",
+      "Boston",
+      "NE",
+      "priya.shah@example.com",
+      "617.555.0198",
+      "2025-02-14"
+    ],
+    [
+      104,
+      "Luis",
+      "Martinez",
+      "Austin",
+      "SW",
+      "luis.martinez@example.com",
+      "512-555-0177",
+      "2025-03-01"
+    ],
+    [
+      105,
+      "Nora",
+      "Kim",
+      "Atlanta",
+      "SE",
+      "nora.kim@example.com",
+      "404 555 0119",
+      "2025-03-18"
+    ],
+    [
+      106,
+      "Eli",
+      "Turner",
+      "Denver",
+      "MW",
+      "eli.turner@example.com",
+      null,
+      "2025-04-07"
+    ],
+    [
+      107,
+      "Ava",
+      "Reed",
+      "Raleigh",
+      "SE",
+      "ava.reed@example.com",
+      "919-555-0108",
+      "2025-04-19"
+    ],
+    [
+      108,
+      "Jonah",
+      "Price",
+      "Boston",
+      "NE",
+      "jonah.price@example.com",
+      "617-555-0182",
+      "2025-05-02"
+    ]
+  ],
+  "grain": "one row per customer"
+}

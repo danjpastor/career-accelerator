@@ -1,0 +1,54 @@
+{
+  "name": "raw_contacts",
+  "columns": [
+    {
+      "name": "contact_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "full_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "region",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "ana@example.com",
+      "Ana Ruiz",
+      "East"
+    ],
+    [
+      2,
+      "ben@example.com",
+      "Ben Cole",
+      "West"
+    ],
+    [
+      3,
+      "ana@example.com",
+      "Ana R.",
+      "East"
+    ],
+    [
+      4,
+      null,
+      "Cara Fox",
+      "North"
+    ],
+    [
+      5,
+      "dev@example.com",
+      "Dev Shah",
+      "West"
+    ]
+  ],
+  "grain": "one row per imported contact record"
+}

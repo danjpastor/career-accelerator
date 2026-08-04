@@ -732,39 +732,39 @@ SQL_PROBLEM_WEEK = {
 
 SQL_SKILL_ACCEPTED_EVIDENCE = {
     "sql_fundamentals": (
-        "Complete DataCamp SQL foundations, DuckDB Exercise 01, "
+        "Complete DataCamp SQL foundations, SQL Challenge 01, "
         "or validated introductory SQL practice"
     ),
     "sql_querying": (
         "Complete DataCamp selection, filtering, sorting, DISTINCT, and LIMIT lessons, "
-        "DuckDB Exercise 01, or validated querying practice"
+        "SQL Challenge 01, or validated querying practice"
     ),
     "sql_aggregation": (
-        "Complete DataCamp aggregation and grouping lessons, DuckDB Exercise 02/04/05, "
+        "Complete DataCamp aggregation and grouping lessons, SQL Challenge 03/09/13, "
         "or a validated aggregation problem"
     ),
     "sql_date_logic": (
-        "Complete DataCamp date and time functions, DuckDB Exercise 04, "
+        "Complete DataCamp date and time functions, SQL Challenge 18/21/22, "
         "or a validated date-logic problem"
     ),
     "sql_case": (
-        "Complete DataCamp CASE and conditional aggregation lessons, DuckDB Exercise 03/04/05, "
+        "Complete DataCamp CASE and conditional aggregation lessons, SQL Challenge 11/19/30, "
         "or a validated CASE problem"
     ),
     "sql_joins": (
-        "Complete DataCamp joins and relationship lessons, DuckDB Exercise 06, "
+        "Complete DataCamp joins and relationship lessons, SQL Challenge 05/06/07/29, "
         "or a validated join problem"
     ),
     "sql_subqueries": (
-        "Complete the DataCamp subqueries lesson, DuckDB Exercise 07, "
+        "Complete the DataCamp subqueries lesson, SQL Challenge 10/12, "
         "or validated subquery practice"
     ),
     "sql_ctes": (
-        "Complete the DataCamp CTE lesson, DuckDB Exercise 07/08/09/10/12, "
+        "Complete the DataCamp CTE lesson, SQL Challenge 13/17/22, "
         "or validated CTE practice"
     ),
     "sql_window_functions": (
-        "Complete DataCamp window-function lessons, DuckDB Exercise 08/10/11, "
+        "Complete DataCamp window-function lessons, SQL Challenge 14–19, "
         "or a validated window-function problem"
     ),
     "sql_intermediate": (
@@ -778,37 +778,44 @@ SQL_SKILL_ACCEPTED_EVIDENCE = {
 
 DUCKDB_SKILL_EVIDENCE = {
     1: {"sql_fundamentals", "sql_querying"},
-    2: {"sql_aggregation"},
-    3: {"sql_case"},
-    4: {"sql_aggregation", "sql_date_logic", "sql_case"},
-    5: {"sql_aggregation", "sql_case"},
+    19: {"sql_fundamentals", "sql_querying"},
+    20: {"sql_aggregation"},
+    2: {"sql_querying"},
+    21: {"sql_joins"},
     6: {"sql_joins"},
-    7: {"sql_subqueries", "sql_ctes", "sql_intermediate"},
-    8: {
-        "sql_aggregation", "sql_case", "sql_joins", "sql_ctes",
-        "sql_window_functions", "sql_intermediate"
-    },
-    9: {
-        "sql_aggregation", "sql_case", "sql_joins", "sql_ctes",
-        "sql_intermediate"
-    },
-    10: {
-        "sql_aggregation", "sql_joins", "sql_ctes",
-        "sql_window_functions", "sql_intermediate"
-    },
-    11: {"sql_joins", "sql_window_functions", "sql_intermediate"},
-    12: {"sql_ctes", "sql_intermediate"},
-    13: {"sql_joins", "sql_validation"},
-    14: {"sql_aggregation", "sql_date_logic", "sql_case"},
-    15: {"sql_window_functions", "sql_intermediate"},
-    16: {"sql_joins", "sql_subqueries"},
-    17: {"data_cleaning", "sql_date_logic", "sql_validation"},
+    22: {"sql_joins"},
+    16: {"sql_querying", "sql_intermediate"},
+    13: {"sql_aggregation", "sql_joins", "sql_validation"},
+    23: {"sql_subqueries", "sql_intermediate"},
+    5: {"sql_case"},
+    7: {"sql_subqueries", "sql_intermediate"},
+    12: {"sql_aggregation", "sql_ctes", "sql_intermediate"},
+    24: {"sql_window_functions"},
+    25: {"sql_window_functions"},
+    26: {"sql_window_functions", "sql_intermediate"},
+    15: {"sql_ctes", "sql_window_functions", "sql_date_logic", "sql_intermediate"},
+    11: {"sql_window_functions", "sql_date_logic", "sql_intermediate"},
+    27: {"sql_aggregation", "sql_case", "sql_window_functions", "sql_intermediate"},
+    28: {"data_cleaning", "sql_validation"},
+    14: {"sql_date_logic"},
+    4: {"sql_aggregation", "sql_ctes", "sql_date_logic", "cohort_analysis"},
+    3: {"data_cleaning", "sql_validation"},
+    17: {"data_cleaning", "sql_querying"},
+    29: {"data_cleaning", "sql_querying"},
+    30: {"sql_aggregation", "sql_validation"},
+    31: {"sql_aggregation", "sql_validation"},
+    32: {"sql_querying", "sql_validation"},
+    33: {"sql_joins", "sql_validation"},
+    8: {"sql_aggregation", "sql_case", "sql_joins", "sql_intermediate"},
+    9: {"sql_aggregation", "timed_analysis"},
+    10: {"sql_aggregation", "sql_joins", "sql_intermediate"},
     18: {
         "sql_fundamentals", "sql_querying", "sql_aggregation", "sql_case",
         "sql_joins", "sql_ctes", "sql_window_functions", "sql_date_logic",
         "sql_validation", "sql_intermediate"
     },
 }
+
 
 DATACAMP_SKILL_THRESHOLDS = {
     "sql_fundamentals": 2,
@@ -2048,7 +2055,7 @@ def _datacamp_skill_evidence(conn):
         ).fetchall()
     }
     if ex18 and required_sql and required_sql <= set(completed):
-        _append_evidence(evidence, "roadmap.sql_mastery", "Completed DataCamp SQL curriculum and DuckDB Exercise 18")
+        _append_evidence(evidence, "roadmap.sql_mastery", "Completed DataCamp SQL curriculum and SQL Challenge 33")
 
     required_powerbi = {
         str(row["chapter_key"]) for row in conn.execute(
@@ -2062,7 +2069,7 @@ def _datacamp_skill_evidence(conn):
         "SELECT chapter_key FROM datacamp_chapter_progress"
     ).fetchall()}
     if ex18 and required_all and required_all <= set(completed):
-        _append_evidence(evidence, "roadmap.portfolio_readiness", "Completed required DataCamp curriculum and final DuckDB readiness audit")
+        _append_evidence(evidence, "roadmap.portfolio_readiness", "Completed required DataCamp curriculum and final SQL Challenge audit")
     return evidence
 
 
@@ -2096,7 +2103,7 @@ def _skill_evidence(conn, state):
 
     for number in sorted(_completed_duckdb_exercises(conn)):
         exercise = DUCKDB_EXERCISES[number]
-        source = f"DuckDB Exercise {duckdb_roadmap_number(number):02d}: {exercise['title']}"
+        source = f"SQL Challenge {duckdb_roadmap_number(number):02d}: {exercise['title']}"
         for skill_key in DUCKDB_SKILL_EVIDENCE.get(number, set()):
             _append_evidence(evidence, skill_key, source)
 
@@ -2155,7 +2162,7 @@ def _evidence_source_track(evidence_items, skill_key):
             sources.add("google")
         elif item.startswith("DataCamp:"):
             sources.add("datacamp")
-        elif item.startswith("DuckDB"):
+        elif item.startswith("SQL Challenge"):
             sources.add("duckdb")
         elif item.startswith("Completed SQL"):
             sources.add("sql")
@@ -4641,7 +4648,7 @@ def undo_completion(
                WHERE source_type='SQL Practice'
                  AND source_name=?""",
             (
-                f"DuckDB Exercise "
+                f"SQL Challenge "
                 f"{duckdb_number:02d}: "
                 f"{item['title']}",
             ),
@@ -5978,7 +5985,7 @@ def _skill_in_progress_sources(conn, state):
             _append_evidence(
                 sources,
                 skill_key,
-                f"DuckDB Exercise {duckdb_roadmap_number(number):02d}: {exercise['title']} in progress",
+                f"SQL Challenge {duckdb_roadmap_number(number):02d}: {exercise['title']} in progress",
             )
     applied_rows = conn.execute(
         """SELECT s.label FROM sprint_tasks s JOIN task_metadata m ON m.task_id=s.id

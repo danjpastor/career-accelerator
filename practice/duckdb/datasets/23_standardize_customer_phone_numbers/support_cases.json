@@ -1,0 +1,176 @@
+{
+  "name": "support_cases",
+  "columns": [
+    {
+      "name": "case_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "customer_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "subject",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "priority",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "opened_date",
+      "type": "DATE"
+    },
+    {
+      "name": "resolved_date",
+      "type": "DATE"
+    },
+    {
+      "name": "assigned_team",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "satisfaction_score",
+      "type": "INTEGER"
+    }
+  ],
+  "rows": [
+    [
+      5001,
+      101,
+      "Duplicate charge",
+      "Open",
+      "Critical",
+      "2026-07-01",
+      null,
+      "Billing",
+      null
+    ],
+    [
+      5002,
+      102,
+      "Password reset",
+      "Resolved",
+      "Low",
+      "2026-07-01",
+      "2026-07-01",
+      "Access",
+      5
+    ],
+    [
+      5003,
+      103,
+      "Missing shipment",
+      "Open",
+      "High",
+      "2026-07-02",
+      null,
+      "Logistics",
+      null
+    ],
+    [
+      5004,
+      104,
+      "Wrong subscription tier",
+      "Resolved",
+      "Medium",
+      "2026-07-02",
+      "2026-07-04",
+      "Billing",
+      3
+    ],
+    [
+      5005,
+      105,
+      "Invoice total mismatch",
+      "Open",
+      "Critical",
+      "2026-07-03",
+      null,
+      "Billing",
+      null
+    ],
+    [
+      5006,
+      106,
+      "App crash on login",
+      "Investigating",
+      "High",
+      "2026-07-03",
+      null,
+      "Technical",
+      null
+    ],
+    [
+      5007,
+      107,
+      "Refund status",
+      "Resolved",
+      "Medium",
+      "2026-07-04",
+      "2026-07-06",
+      "Billing",
+      4
+    ],
+    [
+      5008,
+      108,
+      "Cannot update address",
+      "Open",
+      "Low",
+      "2026-07-04",
+      null,
+      "Account",
+      null
+    ],
+    [
+      5009,
+      101,
+      "Second duplicate charge",
+      "Resolved",
+      "High",
+      "2026-07-05",
+      "2026-07-08",
+      "Billing",
+      2
+    ],
+    [
+      5010,
+      103,
+      "Shipment arrived damaged",
+      "Resolved",
+      "Critical",
+      "2026-07-05",
+      "2026-07-09",
+      "Logistics",
+      1
+    ],
+    [
+      5011,
+      105,
+      "Coupon not applied",
+      "Resolved",
+      "Low",
+      "2026-07-06",
+      "2026-07-06",
+      "Checkout",
+      5
+    ],
+    [
+      5012,
+      107,
+      "Export is blank",
+      "Investigating",
+      "Critical",
+      "2026-07-06",
+      null,
+      "Technical",
+      null
+    ]
+  ],
+  "grain": "one row per support case"
+}

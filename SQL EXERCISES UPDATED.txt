@@ -1,0 +1,14 @@
+This repository contains the rebuilt SQL challenge curriculum.
+
+The first five active exercises are:
+01. Create Customer Display Names
+02. Filter Urgent Open Cases
+03. Count Resolved Cases by Team
+04. Find Southeast Customers Missing Phone Numbers
+05. Show Customers with Full Region Names
+
+Launch this repository with:
+START THIS UPDATED COPY.bat
+
+Do not use an older desktop shortcut unless you regenerate it by running:
+create-desktop-shortcut.vbs

@@ -1,0 +1,32 @@
+{
+  "name": "departments",
+  "columns": [
+    {
+      "name": "department_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "department_name",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      10,
+      "Customer Operations"
+    ],
+    [
+      20,
+      "Data & Insights"
+    ],
+    [
+      30,
+      "Product"
+    ],
+    [
+      40,
+      "Finance"
+    ]
+  ],
+  "grain": "one row per department"
+}

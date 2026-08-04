@@ -1,0 +1,40 @@
+{
+  "name": "projects",
+  "columns": [
+    {
+      "name": "project_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "project_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "sponsor_department_id",
+      "type": "INTEGER"
+    }
+  ],
+  "rows": [
+    [
+      301,
+      "Case Routing Refresh",
+      10
+    ],
+    [
+      302,
+      "Retention Dashboard",
+      20
+    ],
+    [
+      303,
+      "Mobile Checkout",
+      30
+    ],
+    [
+      304,
+      "Forecast Automation",
+      40
+    ]
+  ],
+  "grain": "one row per project"
+}

@@ -1,0 +1,50 @@
+{
+  "name": "products",
+  "columns": [
+    {
+      "name": "product_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "product_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "category",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      201,
+      "Desk Lamp",
+      "Office"
+    ],
+    [
+      202,
+      "Monitor Stand",
+      "Office"
+    ],
+    [
+      203,
+      "Travel Mug",
+      "Kitchen"
+    ],
+    [
+      204,
+      "Keyboard",
+      "Technology"
+    ],
+    [
+      205,
+      "Webcam",
+      "Technology"
+    ],
+    [
+      206,
+      "Notebook Set",
+      "Office"
+    ]
+  ],
+  "grain": "one row per product"
+}

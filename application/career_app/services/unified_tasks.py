@@ -474,7 +474,7 @@ def _source(task: dict) -> str:
         return f"DataCamp • {chapter.course_name}" if chapter else "DataCamp"
     if kind == "duckdb":
         item = duckdb_for_label(task.get("label"))
-        return f"DuckDB Exercise • {item['title']}" if item else "DuckDB Exercise"
+        return f"SQL Challenge • {item['title']}" if item else "SQL Challenge"
     if kind == "interview_problem":
         return "SQL Interview Practice"
     if kind == "python_exercise":

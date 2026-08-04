@@ -144,41 +144,13 @@ APPLIED_LAB_TERMINAL_CHAPTER = {14: 'w07_prep_powerbi_02',
  36: 'w07_churn_powerbi_03'}
 
 
+from career_app.data.duckdb_exercises import DUCKDB_EXERCISES
+
 DUCKDB_TERMINAL_CHAPTER = {
-    1: "w03_intro_sql_02",
-    2: "w03_intermediate_sql_04",
-    3: "w05_functions_sql_03",
-    4: "w04_manipulation_sql_01",
-    5: "w04_manipulation_sql_01",
-    6: "w04_joining_sql_02",
-    7: "w04_manipulation_sql_03",
-    8: "w06_database_design_04",
-    9: "w06_database_design_04",
-    10: "w06_database_design_04",
-    11: "w05_window_sql_02",
-    12: "w04_manipulation_sql_03",
-    13: "w04_joining_sql_02",
-    14: "w05_functions_sql_02",
-    15: "w05_window_sql_03",
-    16: "w04_joining_sql_03",
-    17: "w05_functions_sql_03",
-    18: "w06_database_design_04",
-    19: "w03_intermediate_sql_01",
-    20: "w03_intermediate_sql_02",
-    21: "w03_joining_sql_01",
-    22: "w04_joining_sql_02",
-    23: "w04_manipulation_sql_02",
-    24: "w04_manipulation_sql_04",
-    25: "w05_window_sql_02",
-    26: "w05_window_sql_03",
-    27: "w05_window_sql_04",
-    28: "w05_functions_sql_01",
-    29: "w06_functions_sql_04",
-    30: "w06_database_design_01",
-    31: "w06_database_design_02",
-    32: "w06_database_design_03",
-    33: "w06_database_design_04",
+    int(number): str(item["terminal_chapter"])
+    for number, item in DUCKDB_EXERCISES.items()
 }
+
 
 
 def requirements_for_skills(skill_keys: Iterable[str]) -> tuple[str, ...]:

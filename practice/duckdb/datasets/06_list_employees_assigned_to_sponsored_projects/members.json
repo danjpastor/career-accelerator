@@ -1,0 +1,72 @@
+{
+  "name": "members",
+  "columns": [
+    {
+      "name": "member_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "first_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "last_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "recommended_by",
+      "type": "INTEGER"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Ari",
+      "Morgan",
+      null
+    ],
+    [
+      2,
+      "Bea",
+      "Lopez",
+      1
+    ],
+    [
+      3,
+      "Cal",
+      "Nguyen",
+      1
+    ],
+    [
+      4,
+      "Dara",
+      "Patel",
+      2
+    ],
+    [
+      5,
+      "Evan",
+      "Stone",
+      null
+    ],
+    [
+      6,
+      "Fern",
+      "Owens",
+      5
+    ],
+    [
+      7,
+      "Gia",
+      "Bennett",
+      99
+    ],
+    [
+      8,
+      "Hugo",
+      "Diaz",
+      3
+    ]
+  ],
+  "grain": "one row per program member"
+}

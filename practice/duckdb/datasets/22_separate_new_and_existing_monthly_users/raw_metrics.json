@@ -1,0 +1,48 @@
+{
+  "name": "raw_metrics",
+  "columns": [
+    {
+      "name": "metric_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "metric_value",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "42.5"
+    ],
+    [
+      2,
+      "18"
+    ],
+    [
+      3,
+      "unknown"
+    ],
+    [
+      4,
+      " 73.25 "
+    ],
+    [
+      5,
+      "N/A"
+    ],
+    [
+      6,
+      "0"
+    ],
+    [
+      7,
+      "-4.5"
+    ],
+    [
+      8,
+      "125.00"
+    ]
+  ],
+  "grain": "one row per raw metric reading"
+}

@@ -1,0 +1,45 @@
+{
+  "name": "account_orders",
+  "columns": [
+    {
+      "name": "order_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "account_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "order_total",
+      "type": "DECIMAL(10,2)"
+    }
+  ],
+  "rows": [
+    [
+      101,
+      1,
+      250.0
+    ],
+    [
+      102,
+      2,
+      180.0
+    ],
+    [
+      103,
+      5,
+      95.0
+    ],
+    [
+      104,
+      3,
+      410.0
+    ],
+    [
+      105,
+      null,
+      70.0
+    ]
+  ],
+  "grain": "one row per account order; invalid or missing account IDs are deliberate"
+}

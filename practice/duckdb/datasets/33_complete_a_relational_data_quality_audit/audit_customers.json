@@ -1,0 +1,36 @@
+{
+  "name": "audit_customers",
+  "columns": [
+    {
+      "name": "customer_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "a@example.com"
+    ],
+    [
+      2,
+      "b@example.com"
+    ],
+    [
+      2,
+      "b2@example.com"
+    ],
+    [
+      3,
+      null
+    ],
+    [
+      4,
+      "d@example.com"
+    ]
+  ],
+  "grain": "one row per imported customer record; duplicate IDs are deliberate"
+}

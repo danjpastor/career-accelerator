@@ -1,0 +1,42 @@
+{
+  "name": "facilities",
+  "columns": [
+    {
+      "name": "facility_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "facility_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "member_rate",
+      "type": "DECIMAL(10,2)"
+    },
+    {
+      "name": "guest_rate",
+      "type": "DECIMAL(10,2)"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Analytics Lab",
+      15.0,
+      40.0
+    ],
+    [
+      2,
+      "Interview Studio",
+      10.0,
+      30.0
+    ],
+    [
+      3,
+      "Presentation Room",
+      25.0,
+      60.0
+    ]
+  ],
+  "grain": "one row per reservable facility"
+}

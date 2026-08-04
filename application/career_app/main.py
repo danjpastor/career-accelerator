@@ -839,6 +839,7 @@ class CareerAccelerator(QMainWindow):
                 "Interview Problems": 0,
                 "SQL Interview Problems": 0,
                 "DuckDB Exercises": 1,
+                "SQL Challenges": 1,
                 "Python Exercises": 2,
             }
             self.sql_tabs.setCurrentIndex(practice_map.get(str(practice), 0))
@@ -2688,7 +2689,7 @@ class CareerAccelerator(QMainWindow):
         )
         self.duckdb_exercises_widget = DuckDBExercisesWidget(self.conn, ROOT, self)
         self.duckdb_exercises_widget.changed.connect(self._duckdb_exercises_changed)
-        self.sql_tabs.addTab(self.duckdb_exercises_widget, "DuckDB Exercises")
+        self.sql_tabs.addTab(self.duckdb_exercises_widget, "SQL Challenges")
         self.python_exercises_widget = PythonExercisesWidget(self.conn, ROOT, self)
         self.python_exercises_widget.changed.connect(self._python_exercises_changed)
         self.sql_tabs.addTab(self.python_exercises_widget, "Python Exercises")
@@ -2827,12 +2828,12 @@ class CareerAccelerator(QMainWindow):
 
         duckdb_number = duckdb_exercise_number_for_label(label)
         if duckdb_number is not None and hasattr(self, 'duckdb_exercises_widget'):
-            self.open_learning_section("Practice", "DuckDB Exercises")
+            self.open_learning_section("Practice", "SQL Challenges")
             self.sql_tabs.setCurrentWidget(self.duckdb_exercises_widget)
             self.duckdb_exercises_widget.select_exercise(int(duckdb_number))
             display_number = int(DUCKDB_EXERCISES[int(duckdb_number)].get("roadmap_number", duckdb_number))
             self._notify(
-                f'Opened DuckDB Exercise {display_number:02d}.', 3200
+                f'Opened SQL Challenge {display_number:02d}.', 3200
             )
             return True
 
@@ -7666,14 +7667,14 @@ class CareerAccelerator(QMainWindow):
                 )
                 if not submission.exists():
                     raise ValueError(
-                        "Create the DuckDB submission before marking it complete."
+                        "Create the SQL challenge submission before marking it complete."
                     )
                 if not duckdb_workspace.submission_has_changes(
                     ROOT,
                     duckdb_number,
                 ):
                     raise ValueError(
-                        "The DuckDB submission still matches the starter SQL. "
+                        "The SQL challenge submission still matches the starter SQL. "
                         "Complete and validate the exercise first."
                     )
                 progress = duckdb_workspace.progress(
@@ -7688,7 +7689,7 @@ class CareerAccelerator(QMainWindow):
                     status="Completed",
                     notes=progress["notes"],
                 )
-                message = f"DuckDB Exercise {duckdb_number:02d} completed."
+                message = f"SQL Challenge {DUCKDB_EXERCISES[duckdb_number]['roadmap_number']:02d} completed."
 
             else:
                 self.complete_task(task_id)
@@ -8989,7 +8990,7 @@ class CareerAccelerator(QMainWindow):
         source_name = QLineEdit()
         source_name.setPlaceholderText(
             (
-                "Example: DuckDB Exercise 02 — "
+                "Example: SQL Challenge 03 — "
                 "Summarize retail orders"
             )
         )
