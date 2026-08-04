@@ -3088,10 +3088,9 @@ class CareerAccelerator(QMainWindow):
         log_card.layout.setSpacing(10)
 
         form_grid = QGridLayout()
+        form_grid.setContentsMargins(0, 0, 0, 0)
         form_grid.setHorizontalSpacing(12)
         form_grid.setVerticalSpacing(9)
-        form_grid.setColumnStretch(1, 1)
-        form_grid.setColumnStretch(3, 1)
         form_grid.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.session_date = QLineEdit(date.today().isoformat())
@@ -3130,36 +3129,105 @@ class CareerAccelerator(QMainWindow):
         self.session_notes.setMinimumHeight(72)
         self.session_notes.setMaximumHeight(150)
 
-        form_grid.addWidget(QLabel("Date"), 0, 0)
-        form_grid.addWidget(self.session_date, 0, 1)
-        form_grid.addWidget(QLabel("Duration"), 0, 2)
         duration_host = QWidget()
+        duration_host.setMinimumWidth(0)
+        duration_host.setSizePolicy(
+            QSizePolicy.Policy.Ignored,
+            QSizePolicy.Policy.Fixed,
+        )
         duration_layout = QHBoxLayout(duration_host)
         duration_layout.setContentsMargins(0, 0, 0, 0)
         duration_layout.setSpacing(8)
         duration_layout.addWidget(self.session_hours, 1)
         duration_layout.addWidget(self.session_minutes, 1)
-        form_grid.addWidget(duration_host, 0, 3)
 
-        form_grid.addWidget(QLabel("Productivity"), 1, 0)
-        form_grid.addWidget(self.session_productivity, 1, 1)
-        form_grid.addWidget(QLabel("SQL problems"), 1, 2)
-        form_grid.addWidget(self.session_sql, 1, 3)
+        form_labels = {
+            "date": QLabel("Date"),
+            "duration": QLabel("Duration"),
+            "productivity": QLabel("Productivity"),
+            "sql": QLabel("SQL problems"),
+            "task": QLabel("Linked task"),
+            "google": QLabel("Google progress"),
+            "datacamp": QLabel("DataCamp / practice progress"),
+            "portfolio": QLabel("Portfolio progress"),
+            "notes": QLabel("Notes"),
+        }
+        for label in form_labels.values():
+            label.setMinimumWidth(0)
+            label.setWordWrap(True)
+            label.setSizePolicy(
+                QSizePolicy.Policy.Preferred,
+                QSizePolicy.Policy.Preferred,
+            )
 
-        form_grid.addWidget(QLabel("Linked task"), 2, 0)
-        form_grid.addWidget(self.session_task, 2, 1, 1, 3)
+        for field in (
+            self.session_date,
+            self.session_hours,
+            self.session_minutes,
+            self.session_productivity,
+            self.session_sql,
+            self.session_task,
+            self.session_google,
+            self.session_datacamp,
+            self.session_portfolio,
+            self.session_notes,
+        ):
+            field.setMinimumWidth(0)
+            field.setSizePolicy(
+                QSizePolicy.Policy.Ignored,
+                field.sizePolicy().verticalPolicy(),
+            )
 
-        form_grid.addWidget(QLabel("Google progress"), 3, 0)
-        form_grid.addWidget(self.session_google, 3, 1, 1, 3)
+        def layout_study_log_form(compact):
+            clear_layout_positions(form_grid)
+            form_grid.setHorizontalSpacing(10 if compact else 12)
+            form_grid.setVerticalSpacing(8 if compact else 9)
+            if compact:
+                form_grid.setColumnStretch(0, 0)
+                form_grid.setColumnStretch(1, 1)
+                rows = (
+                    (form_labels["date"], self.session_date),
+                    (form_labels["duration"], duration_host),
+                    (form_labels["productivity"], self.session_productivity),
+                    (form_labels["sql"], self.session_sql),
+                    (form_labels["task"], self.session_task),
+                    (form_labels["google"], self.session_google),
+                    (form_labels["datacamp"], self.session_datacamp),
+                    (form_labels["portfolio"], self.session_portfolio),
+                    (form_labels["notes"], self.session_notes),
+                )
+                for row, (label, field) in enumerate(rows):
+                    form_grid.addWidget(label, row, 0)
+                    form_grid.addWidget(field, row, 1)
+            else:
+                form_grid.setColumnStretch(0, 0)
+                form_grid.setColumnStretch(1, 1)
+                form_grid.setColumnStretch(2, 0)
+                form_grid.setColumnStretch(3, 1)
+                form_grid.addWidget(form_labels["date"], 0, 0)
+                form_grid.addWidget(self.session_date, 0, 1)
+                form_grid.addWidget(form_labels["duration"], 0, 2)
+                form_grid.addWidget(duration_host, 0, 3)
 
-        form_grid.addWidget(QLabel("DataCamp / practice progress"), 4, 0)
-        form_grid.addWidget(self.session_datacamp, 4, 1, 1, 3)
+                form_grid.addWidget(form_labels["productivity"], 1, 0)
+                form_grid.addWidget(self.session_productivity, 1, 1)
+                form_grid.addWidget(form_labels["sql"], 1, 2)
+                form_grid.addWidget(self.session_sql, 1, 3)
 
-        form_grid.addWidget(QLabel("Portfolio progress"), 5, 0)
-        form_grid.addWidget(self.session_portfolio, 5, 1, 1, 3)
+                form_grid.addWidget(form_labels["task"], 2, 0)
+                form_grid.addWidget(self.session_task, 2, 1, 1, 3)
+                form_grid.addWidget(form_labels["google"], 3, 0)
+                form_grid.addWidget(self.session_google, 3, 1, 1, 3)
+                form_grid.addWidget(form_labels["datacamp"], 4, 0)
+                form_grid.addWidget(self.session_datacamp, 4, 1, 1, 3)
+                form_grid.addWidget(form_labels["portfolio"], 5, 0)
+                form_grid.addWidget(self.session_portfolio, 5, 1, 1, 3)
+                form_grid.addWidget(form_labels["notes"], 6, 0)
+                form_grid.addWidget(self.session_notes, 6, 1, 1, 3)
 
-        form_grid.addWidget(QLabel("Notes"), 6, 0)
-        form_grid.addWidget(self.session_notes, 6, 1, 1, 3)
+        # Start from the compact layout so the scroll area's initial size hint
+        # never forces the card wider than its viewport before the first resize.
+        layout_study_log_form(True)
 
         form_host = QWidget()
         form_host.setMinimumWidth(0)
@@ -3210,6 +3278,14 @@ class CareerAccelerator(QMainWindow):
 
             set_box_direction(self.study_timer_controls, width < 500, 6)
             set_box_direction(self.study_recent_actions, width < 520, 6)
+
+            body_gap = max(0, self.study_body_grid.horizontalSpacing())
+            estimated_log_width = (
+                round(max(0, width - body_gap) * 0.60)
+                if horizontal
+                else width
+            )
+            layout_study_log_form(estimated_log_width < 1080)
 
             viewport_height = max(0, page.viewport().height())
             compact_height = viewport_height < 790
