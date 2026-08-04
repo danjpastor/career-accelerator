@@ -58,7 +58,7 @@ Build and test the report on the validated model.
 ## Working notes
 
 **Milestone:** Build and validate Power BI semantic model  
-**Started:** 2026-08-01
+**Started:** 2026-08-03
 
 ## Table roles
 

@@ -1,4 +1,4 @@
--- DuckDB Exercise 06: Join customers, orders, and payments
+-- DuckDB Exercise 06: Combine customers, orders, and payments
 -- Source instructions: README.md
 -- Save your completed copy under practice/duckdb/submissions/
 
@@ -10,44 +10,75 @@ DESCRIBE ex06_payments;
 
 -- -----------------------------------------------------------------
 
--- Q1. INNER JOIN customers to orders and return customer name with each order.
+-- Q1. Check how many orders have a matching customer record. Use an inner join and return the count as `matched_orders`.
 
--- Write and run your query below this comment.
+SELECT
+    COUNT(*) AS matched_orders
+FROM ex06_customers AS c
+    INNER JOIN ex06_orders AS o ON c.customer_id = o.customer_id
 
 -- -----------------------------------------------------------------
 
--- Q2. LEFT JOIN customers to orders so customers without orders remain visible.
+-- Q2. Check that a left join keeps customers who have no orders. Return the number of rows produced by the join as `customer_order_rows`.
 
--- Write and run your query below this comment.
+SELECT
+    COUNT(*) AS customer_order_rows
+FROM ex06_customers AS c
+    LEFT JOIN ex06_orders AS o ON o.customer_id = c.customer_id
 
 -- -----------------------------------------------------------------
 
 -- Q3. Find customers with no orders.
 
--- Write and run your query below this comment.
+SELECT
+    c.customer_id
+FROM ex06_customers AS c
+    LEFT JOIN ex06_orders AS o ON o.customer_id = c.customer_id
+WHERE order_id IS NULL
 
 -- -----------------------------------------------------------------
 
 -- Q4. Join orders to payments and identify orders with no payment.
 
--- Write and run your query below this comment.
+SELECT
+    o.order_id AS order_id
+FROM ex06_orders AS o
+    LEFT JOIN ex06_payments AS p ON o.order_id = p.order_id
+WHERE p.payment_date IS NULL
 
 -- -----------------------------------------------------------------
 
--- Q5. Create a three-table result with customer, order total, payment amount, and payment method.
+-- Q5. Join customers, orders, and payments, then count the rows in the combined result. Return the count as `joined_payment_rows`.
 
--- Write and run your query below this comment.
+SELECT
+    COUNT(*) AS joined_payment_rows
+FROM ex06_orders AS o
+    LEFT JOIN ex06_payments AS p ON p.order_id = o.order_id
+    LEFT JOIN ex06_customers AS c ON c.customer_id = o.customer_id
 
 -- -----------------------------------------------------------------
 
--- Q6. Calculate delivered-order revenue by region.
+-- Q6. Show delivered-order revenue by customer region. Return `region` and the total as `delivered_revenue`.
 
--- Write and run your query below this comment.
+SELECT
+    c.region AS region,
+    SUM(o.order_total) AS delivered_revenue
+FROM ex06_customers AS c
+    INNER JOIN ex06_orders AS o ON c.customer_id = o.customer_id
+WHERE o.order_status = 'Delivered'
+GROUP BY region
 
 -- -----------------------------------------------------------------
 
 -- Q7. Calculate customer lifetime delivered revenue, including customers with zero.
 
--- Write and run your query below this comment.
+SELECT
+    c.customer_id AS customer_id,
+    COALESCE(SUM(o.order_total), 0) AS revenue
+FROM ex06_customers AS c
+    LEFT JOIN ex06_orders AS o ON c.customer_id = o.customer_id
+    AND o.order_status = 'Delivered'
+GROUP BY c.customer_id
+ORDER BY c.customer_id
 
 -- -----------------------------------------------------------------
