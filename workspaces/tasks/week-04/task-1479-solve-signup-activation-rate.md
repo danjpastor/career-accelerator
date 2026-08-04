@@ -1,0 +1,42 @@
+# Solve Signup Activation Rate
+
+**Week:** 4  
+**Category:** SQL  
+**Created:** 2026-08-04
+
+## Task Brief
+
+Open Signup Activation Rate in Learning Practice, write and save your own SQL solution, then mark the problem complete. Use the notes area to record your approach, checks, or anything you want to review.
+
+## Definition of Done
+
+A non-template SQL query is saved for the problem, the SQL practice record is marked Completed, and the linked roadmap task advances to the next eligible interview problem.
+
+## Plan
+
+- [ ] 
+
+## Work Log
+
+### 2026-08-04
+- 
+
+## Decisions and Assumptions
+
+- 
+
+## Validation or Review
+
+- 
+
+## Blockers
+
+- 
+
+## Result and Evidence
+
+- 
+
+## Next Action
+
+- 

@@ -693,7 +693,7 @@ SQL_REQUIREMENTS = {
     },
 }
 SQL_PROBLEM_REQUIREMENTS = {
-    "Histogram of Tweets": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": set()},
+    "Histogram of Tweets": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation"}, "any_of": {"sql_subqueries", "sql_ctes"}},
     "Data Science Skills": {"all_of": {"roadmap.spreadsheet_mastery", "sql_querying", "sql_aggregation"}, "any_of": set()},
     "Page With No Likes": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_querying"}, "any_of": set()},
     "Laptop vs. Mobile Viewership": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_case"}, "any_of": set()},
@@ -702,19 +702,28 @@ SQL_PROBLEM_REQUIREMENTS = {
     "Pharmacy Analytics Part 1": {"all_of": {"roadmap.spreadsheet_mastery", "sql_querying"}, "any_of": set()},
     "Signup Activation Rate": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_joins", "sql_case"}, "any_of": set()},
     "User's Third Transaction": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions"}, "any_of": {"sql_subqueries", "sql_ctes"}},
-    "Second Highest Salary": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_window_functions"}, "any_of": set()},
+    "Second Highest Salary": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_window_functions"}, "any_of": {"sql_subqueries", "sql_ctes"}},
     "Top Three Salaries": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_window_functions"}, "any_of": {"sql_subqueries", "sql_ctes"}},
     "Tweets' Rolling Averages": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions"}, "any_of": set()},
     "Odd and Even Measurements": {"all_of": {"roadmap.spreadsheet_mastery", "sql_window_functions", "sql_date_logic", "sql_case"}, "any_of": {"sql_subqueries", "sql_ctes"}},
-    "User Shopping Sprees": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_date_logic"}, "any_of": set()},
+    "User Shopping Sprees": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_date_logic"}, "any_of": {"sql_subqueries", "sql_ctes"}},
     "Supercloud Customer": {"all_of": {"roadmap.spreadsheet_mastery", "sql_aggregation", "sql_joins"}, "any_of": {"sql_subqueries", "sql_ctes"}},
     "Second Day Confirmation": {"all_of": {"roadmap.spreadsheet_mastery", "sql_joins", "sql_date_logic"}, "any_of": set()},
 }
 
+SQL_INTERVIEW_SEQUENCE = tuple(item[0] for item in SQL_COMPANION)
+
+SQL_PROBLEM_PREREQUISITES = {
+    title: (SQL_INTERVIEW_SEQUENCE[index - 1],)
+    for index, title in enumerate(SQL_INTERVIEW_SEQUENCE)
+    if index > 0
+}
+
+
 SQL_PROBLEM_WEEK = {
     "Data Science Skills": 3,
     "Pharmacy Analytics Part 1": 3,
-    "Histogram of Tweets": 3,
+    "Histogram of Tweets": 4,
     "Duplicate Job Listings": 3,
     "Laptop vs. Mobile Viewership": 4,
     "Page With No Likes": 4,
@@ -1986,10 +1995,8 @@ DATACAMP_SKILL_EVIDENCE = {
     "w03_intermediate_sql_03": {"sql_aggregation"},
     "w03_intermediate_sql_04": {"sql_aggregation"},
     "w04_joining_sql_02": {"sql_joins"},
-    "w04_joining_sql_03": {"sql_joins"},
-    "w04_joining_sql_04": {"sql_subqueries", "sql_intermediate"},
     "w04_manipulation_sql_01": {"sql_case"},
-    "w04_manipulation_sql_02": {"sql_subqueries", "sql_intermediate"},
+    "w04_manipulation_sql_02": {"sql_intermediate"},
     "w04_manipulation_sql_03": {"sql_subqueries", "sql_ctes", "sql_intermediate"},
     "w04_manipulation_sql_04": {"sql_window_functions", "sql_intermediate"},
     "w05_window_sql_03": {"sql_window_functions", "sql_intermediate"},
@@ -6083,6 +6090,13 @@ def sql_problem_readiness(
     if groups["any_of"] and not (set(groups["any_of"]) & set(unlocked)):
         missing_any = set(groups["any_of"])
     missing = missing_all | missing_any
+    completed_problems = _completed_sql(conn)
+    required_problem_titles = list(SQL_PROBLEM_PREREQUISITES.get(title, ()))
+    missing_problem_titles = [
+        problem_title
+        for problem_title in required_problem_titles
+        if problem_title not in completed_problems
+    ]
     missing_names = [
         SKILL_DEFINITIONS[key][0]
         for key in sorted(missing_all)
@@ -6095,6 +6109,10 @@ def sql_problem_readiness(
                 for key in sorted(missing_any)
             )
         )
+    missing_names.extend(
+        f"SQL Interview Problem: {problem_title}"
+        for problem_title in missing_problem_titles
+    )
 
     datacamp_gate = content_gates.gate_status(
         conn,
@@ -6114,7 +6132,12 @@ def sql_problem_readiness(
     evidence_map = _skill_evidence(conn, state)
 
     return {
-        "ready": not missing and datacamp_gate["ready"] and prior_check_ready,
+        "ready": (
+            not missing
+            and not missing_problem_titles
+            and datacamp_gate["ready"]
+            and prior_check_ready
+        ),
         "required_keys": sorted(required),
         "required_names": [
             SKILL_DEFINITIONS[key][0]
@@ -6126,6 +6149,8 @@ def sql_problem_readiness(
         "missing_names": missing_names,
         "missing_all_of": sorted(missing_all),
         "missing_any_of": sorted(missing_any),
+        "required_problem_titles": required_problem_titles,
+        "missing_problem_titles": missing_problem_titles,
         "required_datacamp_keys": datacamp_gate["required_keys"],
         "required_datacamp_names": datacamp_gate["required_names"],
         "missing_datacamp_keys": datacamp_gate["missing_keys"],

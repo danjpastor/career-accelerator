@@ -5155,18 +5155,14 @@ class CareerAccelerator(QMainWindow):
         week = int(self.state["current_week"])
         ready = [
             dict(item)
-            for item in unified_tasks.next_tasks(
-                self.conn,
-                week,
-                limit=0,
-            )
+            for item in unified_tasks.ready_tasks(self.conn, week)
         ]
         coming_soon = [
             dict(item)
             for item in planner.coming_up_tasks(
                 self.conn,
                 week,
-                limit=0,
+                limit=12,
             )
         ]
 
@@ -5322,31 +5318,30 @@ class CareerAccelerator(QMainWindow):
 
 
     def _refresh_dashboard_next_tasks(self, week):
-        """Render ready work above the original Coming Soon divider.
+        """Render the ordered active queue without separating locked day tasks.
 
-        The compact card contains at most four task rows. Today's actionable
-        work appears first, followed by actionable catch-up work. Any task with
-        an unmet prerequisite—and every task scheduled for a later day—appears
-        grey below Coming Soon and cannot be opened early.
+        The planner now returns today's incomplete assignments first, followed
+        by catch-up work and then future current-week work. A locked task keeps
+        its exact place in that queue and is shown grey with its prerequisite.
         """
         self.clear_layout(self.dashboard_tasks_layout)
         self.dashboard_task_density_widgets = []
 
-        active_queue = [
+        queue = [
             dict(row)
             for row in unified_tasks.next_tasks(
                 self.conn,
                 int(week),
-                limit=0,
+                limit=DASHBOARD_NEXT_TASK_LIMIT,
             )
             if not bool(row.get("completed"))
         ]
-        coming_queue = [
+        coming_soon = [
             dict(row)
             for row in planner.coming_up_tasks(
                 self.conn,
                 int(week),
-                limit=0,
+                limit=DASHBOARD_NEXT_TASK_LIMIT,
             )
             if not bool(row.get("completed"))
         ]
@@ -5362,77 +5357,43 @@ class CareerAccelerator(QMainWindow):
             task_id = self._get_ahead_task_id(item)
             if task_id is not None:
                 return f"task:{int(task_id)}"
-            return unified_tasks._semantic_task_identity(item)
+            return "|".join(
+                (
+                    str(item.get("kind") or ""),
+                    str(item.get("source_key") or item.get("identity") or ""),
+                    str(item.get("label") or ""),
+                )
+            )
 
-        active_items = []
-        seen = set()
-        for item in active_queue:
-            identity = next_task_identity(item)
-            if identity in seen:
-                continue
-            active_items.append(dict(item))
-            seen.add(identity)
-            if len(active_items) >= DASHBOARD_NEXT_TASK_LIMIT:
-                break
+        visible_items = list(queue[:DASHBOARD_NEXT_TASK_LIMIT])
+        seen = {next_task_identity(item) for item in visible_items}
+        if len(visible_items) < DASHBOARD_NEXT_TASK_LIMIT:
+            for item in coming_soon:
+                identity = next_task_identity(item)
+                if identity in seen:
+                    continue
+                item = dict(item)
+                item.setdefault("queue_section", "upcoming")
+                visible_items.append(item)
+                seen.add(identity)
+                if len(visible_items) >= DASHBOARD_NEXT_TASK_LIMIT:
+                    break
 
-        remaining_slots = max(0, DASHBOARD_NEXT_TASK_LIMIT - len(active_items))
-        coming_items = []
-        for item in coming_queue:
-            identity = next_task_identity(item)
-            if identity in seen:
-                continue
-            preview = dict(item)
-            preview["ready"] = False
-            preview.setdefault("queue_section", "upcoming")
-            coming_items.append(preview)
-            seen.add(identity)
-            if len(coming_items) >= remaining_slots:
-                break
-
-        if remaining_slots and not coming_items:
-            coming_items.append(
+        while len(visible_items) < DASHBOARD_NEXT_TASK_LIMIT:
+            visible_items.append(
                 {
                     "label": "More Tasks Coming Soon",
                     "category": "General",
                     "ready": False,
                     "queue_section": "upcoming",
                     "prerequisite_reason": (
-                        "The planner will add another task when it is scheduled or unlocked."
+                        "The planner will add another task when its prerequisites are complete."
                     ),
                 }
             )
 
-        visible_items = [
-            *( (item, "active") for item in active_items ),
-            *( (item, "coming_soon") for item in coming_items ),
-        ][:DASHBOARD_NEXT_TASK_LIMIT]
-
-        def add_coming_soon_divider():
-            host = QWidget()
-            host.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-            host.setSizePolicy(
-                QSizePolicy.Policy.Expanding,
-                QSizePolicy.Policy.Fixed,
-            )
-            row_layout = QHBoxLayout(host)
-            row_layout.setContentsMargins(0, 2, 0, 2)
-            row_layout.setSpacing(8)
-            row_layout.addWidget(Divider(), 1)
-            label = QLabel("COMING SOON")
-            label.setStyleSheet(
-                f"color:{COLORS['muted']};font-size:8pt;font-weight:700;"
-                "background:transparent;border:none;"
-            )
-            row_layout.addWidget(label, 0, Qt.AlignCenter)
-            row_layout.addWidget(Divider(), 1)
-            self.dashboard_tasks_layout.addWidget(host, 0)
-
-        coming_divider_added = False
-        for index, (item, section) in enumerate(visible_items):
-            if section == "coming_soon" and not coming_divider_added:
-                add_coming_soon_divider()
-                coming_divider_added = True
-            elif index > 0:
+        for index, item in enumerate(visible_items):
+            if index > 0:
                 self.dashboard_tasks_layout.addWidget(Divider())
 
             task_id = self._get_ahead_task_id(item)
@@ -5442,17 +5403,16 @@ class CareerAccelerator(QMainWindow):
                 or unified_tasks.task_type_label(item, int(week))
                 or category
             )
-            queue_section = str(item.get("queue_section") or "today")
+            queue_section = str(item.get("queue_section") or "upcoming")
             is_catch_up = bool(item.get("is_catch_up")) or queue_section == "catch_up"
-            locked = section == "coming_soon" or not bool(item.get("ready"))
+            locked = not bool(item.get("ready"))
 
-            # Keep the original simple metadata labels. The section divider
-            # already communicates that a grey task is coming soon.
-            category_text = (
-                f"Catch-Up • {metadata_label}"
-                if is_catch_up
-                else metadata_label
-            )
+            if is_catch_up:
+                category_text = f"Catch-Up • {metadata_label}"
+            elif queue_section in {"today", "promoted"}:
+                category_text = f"Today • {metadata_label}"
+            else:
+                category_text = f"Upcoming • {metadata_label}"
 
             workspace_available = (
                 task_id is not None
@@ -7828,9 +7788,8 @@ class CareerAccelerator(QMainWindow):
                     int(portfolio_link["linked_entity_id"])
                 )
                 return
-        # Guided DuckDB tasks still open directly in their native workspace.
-        # DataLemur interview tasks open the Task Workspace first, where a
-        # prominent button routes to the exact Learning Practice problem.
+        # Guided SQL Challenges, Python exercises, and SQL interview tasks
+        # open directly to the exact matching item in Learning Practice.
         if task_id is not None:
             try:
                 sql_task_row = task_workspace.task_record(self.conn, int(task_id))
@@ -7839,12 +7798,15 @@ class CareerAccelerator(QMainWindow):
                     if sql_task_row is not None
                     else ""
                 )
+                sql_problem_title = task_workspace.sql_problem_title(sql_task_row)
             except Exception:
                 sql_task_label = ""
+                sql_problem_title = None
             if (
                 (
                     duckdb_exercise_number_for_label(sql_task_label) is not None
                     or python_exercise_number_for_label(sql_task_label) is not None
+                    or sql_problem_title is not None
                 )
                 and self._route_sql_learning_task(task_id)
             ):

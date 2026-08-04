@@ -785,7 +785,6 @@ _WEEKEND_PROJECT_POLICY = {
         "scheduled_weekday": 5,
         "required_chapters": (
             "w03_joining_sql_01", "w04_joining_sql_02",
-            "w04_joining_sql_03", "w04_joining_sql_04",
         ),
     },
     "w4_sql_carbon_emissions": {"scheduled_weekday": 6, "required_chapters": ()},

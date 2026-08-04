@@ -51,14 +51,14 @@ WEEKLY_GUIDANCE = {
         "SQL Foundations & Aggregation",
         f"Google priority: {google_curriculum.roadmap_summary(3)}",
         "Complete SQL selection, filtering, sorting, aggregation, grouping, HAVING, arithmetic, and introductory CASE lessons.",
-        ["Data Science Skills", "Pharmacy Analytics Part 1", "Histogram of Tweets", "Duplicate Job Listings"],
+        ["Data Science Skills", "Pharmacy Analytics Part 1", "Duplicate Job Listings"],
         "Portfolio preparation only: refine business questions, KPI definitions, and the analysis plan.",
     ),
     4: (
         "Relationships & Joins",
         f"Google priority: {google_curriculum.roadmap_summary(4)}",
         "Complete table grain, keys, joins, set operations, relationship validation, and the Week 4 cumulative check.",
-        ["Laptop vs. Mobile Viewership", "Page With No Likes", "Signup Activation Rate", "Supercloud Customer"],
+        ["Page With No Likes", "Signup Activation Rate", "Laptop vs. Mobile Viewership", "Histogram of Tweets", "Supercloud Customer"],
         "Portfolio preparation only: finalize the relationship map and planned validation checks.",
     ),
     5: (
@@ -167,20 +167,23 @@ DATALEMUR_PROBLEM_URLS = {
 
 
 SQL_COMPANION = [
-    ("Histogram of Tweets", "Easy", "Multi-step Aggregation", "COUNT, GROUP BY, subquery or CTE", 3, 30),
+    # Week 3 foundations.
     ("Data Science Skills", "Easy", "Aggregation", "GROUP BY, HAVING", 3, 20),
-    ("Page With No Likes", "Easy", "Joins", "LEFT JOIN, NULL", 4, 25),
-    ("Laptop vs. Mobile Viewership", "Easy", "Conditional Logic", "CASE, COUNT", 4, 20),
-    ("Duplicate Job Listings", "Easy", "Aggregation", "GROUP BY, HAVING", 3, 20),
-    ("Teams Power Users", "Easy", "Aggregation", "COUNT, ORDER BY", 5, 20),
     ("Pharmacy Analytics Part 1", "Easy", "Arithmetic", "SUM, subtraction", 3, 25),
+    ("Duplicate Job Listings", "Easy", "Aggregation", "GROUP BY, HAVING", 3, 20),
+    # Week 4 joins, CASE, subqueries, and relational division.
+    ("Page With No Likes", "Easy", "Joins", "LEFT JOIN, NULL", 4, 25),
     ("Signup Activation Rate", "Medium", "Joins", "JOIN, ratios", 4, 30),
-    ("User's Third Transaction", "Medium", "Window Functions", "ROW_NUMBER", 5, 35),
-    ("Second Highest Salary", "Medium", "Ranking", "DENSE_RANK", 5, 30),
-    ("Top Three Salaries", "Medium", "Ranking", "PARTITION BY", 5, 40),
-    ("Tweets' Rolling Averages", "Medium", "Window Functions", "AVG OVER", 5, 40),
-    ("Odd and Even Measurements", "Medium", "Window Functions", "ROW_NUMBER, SUM", 5, 40),
-    ("User Shopping Sprees", "Medium", "Date Logic", "GROUP BY, dates", 5, 35),
+    ("Laptop vs. Mobile Viewership", "Easy", "Conditional Logic", "CASE, COUNT", 4, 20),
+    ("Histogram of Tweets", "Easy", "Multi-step Aggregation", "COUNT, GROUP BY, subquery or CTE", 4, 30),
     ("Supercloud Customer", "Medium", "Relational Division", "COUNT DISTINCT", 4, 40),
+    # Week 5 advanced practice.
+    ("Teams Power Users", "Easy", "Aggregation", "COUNT, ORDER BY", 5, 20),
+    ("Second Highest Salary", "Medium", "Ranking", "DENSE_RANK", 5, 30),
+    ("User's Third Transaction", "Medium", "Window Functions", "ROW_NUMBER", 5, 35),
+    ("Top Three Salaries", "Medium", "Ranking", "PARTITION BY", 5, 40),
+    ("Odd and Even Measurements", "Medium", "Window Functions", "ROW_NUMBER, SUM", 5, 40),
+    ("Tweets' Rolling Averages", "Medium", "Window Functions", "AVG OVER", 5, 40),
+    ("User Shopping Sprees", "Medium", "Date Logic", "GROUP BY, dates", 5, 35),
     ("Second Day Confirmation", "Medium", "Joins", "dates, filtering", 5, 35),
 ]

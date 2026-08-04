@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "content_version": "10.45.0-rebuilt-native",
+  "content_version": "10.46.6-prerequisite-alignment",
   "track_title": "SQL Challenges",
   "track_subtitle": "Focused one-task SQL practice using original Career Accelerator datasets and the native DuckDB editor.",
   "authoring_policy": {
@@ -2715,11 +2715,11 @@
       "learning_objective": "Connect two tables through a matching key and select fields from both.",
       "gate": {
         "course": "Joining Data in SQL",
-        "chapter": 1,
-        "week": 3,
-        "weekday": "Friday",
+        "chapter": 2,
+        "week": 4,
+        "weekday": "Monday",
         "order_in_day": 1,
-        "chapter_key": "w03_joining_sql_01"
+        "chapter_key": "w04_joining_sql_02"
       },
       "prerequisite_exercises": [],
       "estimated_minutes": 25,
@@ -2749,7 +2749,7 @@
       ],
       "allow_multi_statement": false,
       "internal_id": 21,
-      "terminal_chapter": "w03_joining_sql_01"
+      "terminal_chapter": "w04_joining_sql_02"
     },
     {
       "display_number": 6,
@@ -2766,11 +2766,11 @@
       "learning_objective": "Join three related tables to produce one deduplicated assignment list.",
       "gate": {
         "course": "Joining Data in SQL",
-        "chapter": 1,
-        "week": 3,
-        "weekday": "Friday",
+        "chapter": 2,
+        "week": 4,
+        "weekday": "Monday",
         "order_in_day": 1,
-        "chapter_key": "w03_joining_sql_01"
+        "chapter_key": "w04_joining_sql_02"
       },
       "prerequisite_exercises": [
         5
@@ -2801,7 +2801,7 @@
       ],
       "allow_multi_statement": false,
       "internal_id": 6,
-      "terminal_chapter": "w03_joining_sql_01"
+      "terminal_chapter": "w04_joining_sql_02"
     },
     {
       "display_number": 7,
@@ -2867,21 +2867,23 @@
       "learning_objective": "Combine compatible result sets into one duplicate-free list.",
       "gate": {
         "course": "Joining Data in SQL",
-        "chapter": 3,
+        "chapter": 2,
         "week": 4,
         "weekday": "Monday",
-        "order_in_day": 2,
-        "chapter_key": "w04_joining_sql_03"
+        "order_in_day": 1,
+        "chapter_key": "w04_joining_sql_02"
       },
       "prerequisite_exercises": [],
       "estimated_minutes": 25,
-      "scenario": "The facilities coordinator needs one list from the `bookings` table showing whether each booking belongs to a member or a guest. The `booking_type` field does not exist in the dataset; create it as a text alias in each SELECT.",
-      "task": "Using the `bookings` table, return each `booking_id` and create a calculated text column named `booking_type`. Label rows with a nonzero `member_id` as `Member`, label rows with `member_id = 0` as `Guest`, and combine the two compatible queries with `UNION`.",
+      "scenario": "The facilities coordinator wants one list showing whether each booking belongs to a member or a guest. The source data is in the `bookings` table.",
+      "task": "Using the `bookings` table, return one combined list containing `booking_id` and a calculated text column named `booking_type`. The `booking_type` column does not exist in the dataset: create it in your SELECT statements by returning the literal text `Member` for member bookings and `Guest` for guest bookings, then combine the two result sets with `UNION`.",
       "result_requirements": [
-        "Use the `bookings` table for both SELECT statements.",
-        "Return `booking_id` and a calculated alias named `booking_type`.",
-        "Use `'Member' AS booking_type` when `member_id <> 0` and `'Guest' AS booking_type` when `member_id = 0`.",
-        "Combine the two result sets with `UNION` and sort by `booking_id`."
+        "Read the booking records from the `bookings` table.",
+        "Return `booking_id` and a calculated column aliased as `booking_type`.",
+        "For rows where `member_id <> 0`, select the literal text `'Member' AS booking_type`.",
+        "For rows where `member_id = 0`, select the literal text `'Guest' AS booking_type`.",
+        "Combine the member and guest queries with `UNION`.",
+        "Sort the final combined result by `booking_id`."
       ],
       "solution_sql": "SELECT booking_id, 'Member' AS booking_type\n      FROM bookings\n      WHERE member_id <> 0\n      UNION\n      SELECT booking_id, 'Guest' AS booking_type\n      FROM bookings\n      WHERE member_id = 0\n      ORDER BY booking_id;\n",
       "expected_columns": [
@@ -2895,13 +2897,15 @@
         "\\border\\s+by\\b"
       ],
       "hints": [
-        "`booking_type` is not a stored column. Create it by selecting a text literal with `AS booking_type`.",
-        "Write one query against `bookings` for nonzero member IDs and a second query against `bookings` for member ID 0.",
-        "Both queries must return `booking_id` followed by the calculated `booking_type`, then be combined with `UNION`."
+        "`booking_type` is not stored in any table. You create it with a text literal and an alias, such as `'Member' AS booking_type`.",
+        "Write one SELECT from `bookings` for rows where `member_id <> 0` and label those rows `Member`.",
+        "Write a second SELECT from `bookings` for rows where `member_id = 0` and label those rows `Guest`.",
+        "Both SELECT statements must return `booking_id` first and `booking_type` second before you combine them with `UNION`.",
+        "Place `ORDER BY booking_id` after the second query so it sorts the complete combined result."
       ],
       "allow_multi_statement": false,
       "internal_id": 16,
-      "terminal_chapter": "w04_joining_sql_03"
+      "terminal_chapter": "w04_joining_sql_02"
     },
     {
       "display_number": 9,
@@ -2918,11 +2922,11 @@
       "learning_objective": "Aggregate a small relational hierarchy without multiplying counts.",
       "gate": {
         "course": "Joining Data in SQL",
-        "chapter": 3,
+        "chapter": 2,
         "week": 4,
         "weekday": "Monday",
-        "order_in_day": 2,
-        "chapter_key": "w04_joining_sql_03"
+        "order_in_day": 1,
+        "chapter_key": "w04_joining_sql_02"
       },
       "prerequisite_exercises": [
         6
@@ -2955,7 +2959,7 @@
       ],
       "allow_multi_statement": false,
       "internal_id": 13,
-      "terminal_chapter": "w04_joining_sql_03"
+      "terminal_chapter": "w04_joining_sql_02"
     },
     {
       "display_number": 10,
@@ -2971,12 +2975,12 @@
       "concept": "Correlated subquery",
       "learning_objective": "Compare each row with an aggregate calculated for its own group.",
       "gate": {
-        "course": "Joining Data in SQL",
-        "chapter": 4,
+        "course": "Data Manipulation in SQL",
+        "chapter": 3,
         "week": 4,
-        "weekday": "Tuesday",
+        "weekday": "Thursday",
         "order_in_day": 1,
-        "chapter_key": "w04_joining_sql_04"
+        "chapter_key": "w04_manipulation_sql_03"
       },
       "prerequisite_exercises": [],
       "estimated_minutes": 25,
@@ -3005,7 +3009,7 @@
       ],
       "allow_multi_statement": false,
       "internal_id": 23,
-      "terminal_chapter": "w04_joining_sql_04"
+      "terminal_chapter": "w04_manipulation_sql_03"
     },
     {
       "display_number": 11,
@@ -3025,7 +3029,7 @@
         "chapter": 1,
         "week": 4,
         "weekday": "Tuesday",
-        "order_in_day": 2,
+        "order_in_day": 1,
         "chapter_key": "w04_manipulation_sql_01"
       },
       "prerequisite_exercises": [],
@@ -3073,11 +3077,11 @@
       "learning_objective": "Use a one-value subquery as a filter threshold.",
       "gate": {
         "course": "Data Manipulation in SQL",
-        "chapter": 2,
+        "chapter": 3,
         "week": 4,
-        "weekday": "Wednesday",
+        "weekday": "Thursday",
         "order_in_day": 1,
-        "chapter_key": "w04_manipulation_sql_02"
+        "chapter_key": "w04_manipulation_sql_03"
       },
       "prerequisite_exercises": [],
       "estimated_minutes": 25,
@@ -3106,7 +3110,7 @@
       ],
       "allow_multi_statement": false,
       "internal_id": 7,
-      "terminal_chapter": "w04_manipulation_sql_02"
+      "terminal_chapter": "w04_manipulation_sql_03"
     },
     {
       "display_number": 13,

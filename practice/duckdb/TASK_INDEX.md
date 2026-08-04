@@ -8,14 +8,14 @@ The existing DuckDB exercise workspace now contains 33 focused SQL challenges. E
 | 02 | 3 | Filter Urgent Open Cases | WHERE filters | Intermediate SQL — Chapter 2 |
 | 03 | 3 | Count Resolved Cases by Team | Aggregate functions and GROUP BY | Intermediate SQL — Chapter 3 |
 | 04 | 3 | Find Southeast Customers Missing Phone Numbers | NULL handling and multi-level sorting | Intermediate SQL — Chapter 4 |
-| 05 | 3 | Show Customers with Full Region Names | INNER JOIN | Joining Data in SQL — Chapter 1 |
-| 06 | 3 | List Employees Assigned to Sponsored Projects | Multiple INNER JOINs | Joining Data in SQL — Chapter 1 |
+| 05 | 3 | Show Customers with Full Region Names | INNER JOIN | Joining Data in SQL — Chapter 2 |
+| 06 | 3 | List Employees Assigned to Sponsored Projects | Multiple INNER JOINs | Joining Data in SQL — Chapter 2 |
 | 07 | 4 | Show Employees and Their Managers | Self join and LEFT JOIN | Joining Data in SQL — Chapter 2 |
-| 08 | 4 | Combine Members and Guests into One Booking List | UNION | Joining Data in SQL — Chapter 3 |
-| 09 | 4 | Count Employees and Assignments by Department | Hierarchy joins and distinct counts | Joining Data in SQL — Chapter 3 |
-| 10 | 4 | Find Bookings Above Their Facility Average | Correlated subquery | Joining Data in SQL — Chapter 4 |
+| 08 | 4 | Combine Members and Guests into One Booking List | UNION | Joining Data in SQL — Chapter 2 |
+| 09 | 4 | Count Employees and Assignments by Department | Hierarchy joins and distinct counts | Joining Data in SQL — Chapter 2 |
+| 10 | 4 | Find Bookings Above Their Facility Average | Correlated subquery | Data Manipulation in SQL — Chapter 3 |
 | 11 | 4 | Classify Orders by Value | CASE expressions | Data Manipulation in SQL — Chapter 1 |
-| 12 | 4 | Find Orders Above the Overall Average | Scalar subquery | Data Manipulation in SQL — Chapter 2 |
+| 12 | 4 | Find Orders Above the Overall Average | Scalar subquery | Data Manipulation in SQL — Chapter 3 |
 | 13 | 4 | Identify High-Value Repeat Customers | CTEs and staged aggregation | Data Manipulation in SQL — Chapter 3 |
 | 14 | 4 | Add the Total Customer Count to Every Row | Aggregate window function | Data Manipulation in SQL — Chapter 4 |
 | 15 | 5 | Number Sessions Within Each Team | ROW_NUMBER window function | PostgreSQL Summary Stats and Window Functions — Chapter 1 |

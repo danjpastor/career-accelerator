@@ -212,12 +212,64 @@ def _retire_noncanonical_datacamp_tasks(conn: sqlite3.Connection) -> int:
     return len(rows)
 
 
+def _retire_obsolete_chapter_tasks(conn: sqlite3.Connection) -> int:
+    """Remove managed chapter rows that no longer exist in the live curriculum.
+
+    DataCamp replaced the four-chapter Joining Data in SQL course with a
+    two-chapter version in July 2026. Reconciliation must remove the obsolete
+    Chapter 3/4 tasks instead of leaving them behind as ghost roadmap items.
+    Existing progress for chapter keys that remain canonical is preserved.
+    """
+    canonical = {str(chapter.key) for chapter in DATACAMP_CHAPTERS}
+    rows = conn.execute(
+        """SELECT m.task_id,m.managed_key
+           FROM task_metadata m
+           WHERE LOWER(COALESCE(m.managed_key,'')) LIKE 'datacamp:%'"""
+    ).fetchall()
+    retired = 0
+    for row in rows:
+        managed_key = str(row["managed_key"] or "")
+        chapter_key = managed_key.split(":", 1)[1] if ":" in managed_key else ""
+        if chapter_key in canonical:
+            continue
+        task_id = int(row["task_id"])
+        if _table_exists(conn, "task_day_promotions"):
+            conn.execute("DELETE FROM task_day_promotions WHERE task_id=?", (task_id,))
+        if _table_exists(conn, "daily_focus"):
+            conn.execute("DELETE FROM daily_focus WHERE task_id=?", (task_id,))
+        if _table_exists(conn, "track_tasks"):
+            conn.execute("DELETE FROM track_tasks WHERE task_id=?", (task_id,))
+        if _table_exists(conn, "task_workspaces"):
+            conn.execute("UPDATE task_workspaces SET task_id=NULL WHERE task_id=?", (task_id,))
+        conn.execute("DELETE FROM sprint_tasks WHERE id=?", (task_id,))
+        retired += 1
+
+    if _table_exists(conn, "datacamp_chapter_progress"):
+        progress_rows = conn.execute(
+            "SELECT chapter_key FROM datacamp_chapter_progress"
+        ).fetchall()
+        obsolete = [
+            str(row["chapter_key"])
+            for row in progress_rows
+            if str(row["chapter_key"]) not in canonical
+        ]
+        for chapter_key in obsolete:
+            conn.execute(
+                "DELETE FROM datacamp_chapter_progress WHERE chapter_key=?",
+                (chapter_key,),
+            )
+    return retired
+
+
 def reconcile(conn: sqlite3.Connection) -> dict[str, int]:
     """Seed/update one durable task per required chapter and sync progress."""
     ensure_schema(conn)
     start = _program_start(conn)
     stats = {"created": 0, "updated": 0, "completed": 0, "retired": 0}
-    stats["retired"] = _retire_noncanonical_datacamp_tasks(conn)
+    stats["retired"] = (
+        _retire_noncanonical_datacamp_tasks(conn)
+        + _retire_obsolete_chapter_tasks(conn)
+    )
 
     for sequence, chapter in enumerate(DATACAMP_CHAPTERS, start=1):
         due = chapter.scheduled_date(start).isoformat()

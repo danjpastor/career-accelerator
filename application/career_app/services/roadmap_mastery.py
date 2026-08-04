@@ -20,12 +20,11 @@ from career_app.services import content_gates
 SQL_PROBLEM_SCHEDULE = {
     "Data Science Skills": 3,
     "Pharmacy Analytics Part 1": 3,
-    "Histogram of Tweets": 3,
     "Duplicate Job Listings": 3,
-    "Laptop vs. Mobile Viewership": 4,
     "Page With No Likes": 4,
     "Signup Activation Rate": 4,
-    "Second Day Confirmation": 5,
+    "Laptop vs. Mobile Viewership": 4,
+    "Histogram of Tweets": 4,
     "Supercloud Customer": 4,
     "Teams Power Users": 5,
     "Second Highest Salary": 5,
@@ -34,6 +33,7 @@ SQL_PROBLEM_SCHEDULE = {
     "Odd and Even Measurements": 5,
     "Tweets' Rolling Averages": 5,
     "User Shopping Sprees": 5,
+    "Second Day Confirmation": 5,
 }
 
 DUCKDB_CHAPTER_REQUIREMENTS = dict(content_gates.DUCKDB_TERMINAL_CHAPTER)

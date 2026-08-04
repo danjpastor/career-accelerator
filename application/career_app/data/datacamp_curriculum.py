@@ -2,8 +2,8 @@ from __future__ import annotations
 
 """Required DataCamp chapter schedule for the 12-week Data Analytics pathway.
 
-Every row is one planner task.  URLs are deliberately stored explicitly so the
-application opens the assigned Campus chapter instead of a generic course page.
+Every row is one planner task. Classic courses use direct Campus chapter links;
+AI Tutor courses may use DataCamp's official course-resume URL instead.
 """
 
 from dataclasses import dataclass
@@ -24,9 +24,12 @@ class DataCampChapter:
     order_in_day: int = 1
     estimated_minutes: int = 45
     area: str = "Learning"
+    direct_url: str = ""
 
     @property
     def url(self) -> str:
+        if self.direct_url:
+            return self.direct_url
         return (
             f"https://campus.datacamp.com/courses/{self.course_slug}/"
             f"{self.chapter_slug}?ex=1"
@@ -56,6 +59,7 @@ def _chapter(
     order: int = 1,
     minutes: int = 45,
     area: str = "Learning",
+    direct_url: str = "",
 ) -> DataCampChapter:
     return DataCampChapter(
         key=key,
@@ -69,6 +73,7 @@ def _chapter(
         order_in_day=order,
         estimated_minutes=minutes,
         area=area,
+        direct_url=direct_url,
     )
 
 
@@ -90,23 +95,21 @@ DATACAMP_CHAPTERS: tuple[DataCampChapter, ...] = (
     _chapter("w02_pivot_sheets_03", "Pivot Tables in Google Sheets", "pivot-tables-in-google-sheets", 3, "Advanced Options", "advanced-options", 2, 5, area="Spreadsheets"),
     _chapter("w02_pivot_sheets_04", "Pivot Tables in Google Sheets", "pivot-tables-in-google-sheets", 4, "Editing Data and Troubleshooting", "editing-data-and-troubleshooting", 2, 6, area="Spreadsheets"),
 
-    # Week 3 — SQL foundations and the first join chapter.
+    # Week 3 — SQL foundations and vertical table combination.
     _chapter("w03_intro_sql_01", "Introduction to SQL", "introduction-to-sql", 1, "Relational Databases", "relational-databases", 3, 0, area="SQL"),
     _chapter("w03_intro_sql_02", "Introduction to SQL", "introduction-to-sql", 2, "Querying", "querying", 3, 1, area="SQL"),
     _chapter("w03_intermediate_sql_01", "Intermediate SQL", "intermediate-sql", 1, "Selecting Data", "selecting-data", 3, 2, area="SQL"),
     _chapter("w03_intermediate_sql_02", "Intermediate SQL", "intermediate-sql", 2, "Filtering Records", "filtering-records-2", 3, 3, area="SQL"),
     _chapter("w03_intermediate_sql_03", "Intermediate SQL", "intermediate-sql", 3, "Aggregate Functions", "aggregate-functions-3", 3, 4, area="SQL"),
     _chapter("w03_intermediate_sql_04", "Intermediate SQL", "intermediate-sql", 4, "Sorting and Grouping", "sorting-and-grouping-4", 3, 5, area="SQL"),
-    _chapter("w03_joining_sql_01", "Joining Data in SQL", "joining-data-in-sql", 1, "Introducing Inner Joins", "introducing-inner-joins", 3, 6, area="SQL"),
+    _chapter("w03_joining_sql_01", "Joining Data in SQL", "joining-data-in-sql", 1, "Combining Data Vertically", "combining-data-vertically", 3, 6, area="SQL", direct_url="https://www.datacamp.com/courses/joining-data-in-sql/continue?variant=ai_native"),
 
-    # Week 4 — joins, set theory, subqueries, CASE, CTEs, windows.
-    _chapter("w04_joining_sql_02", "Joining Data in SQL", "joining-data-in-sql", 2, "Outer Joins, Cross Joins and Self Joins", "outer-joins-cross-joins-and-self-joins", 4, 0, area="SQL"),
-    _chapter("w04_joining_sql_03", "Joining Data in SQL", "joining-data-in-sql", 3, "Set Theory for SQL Joins", "set-theory-for-sql-joins", 4, 1, area="SQL"),
-    _chapter("w04_joining_sql_04", "Joining Data in SQL", "joining-data-in-sql", 4, "Subqueries", "subqueries-4", 4, 2, area="SQL"),
-    _chapter("w04_manipulation_sql_01", "Data Manipulation in SQL", "data-manipulation-in-sql", 1, "We'll Take the CASE", "well-take-the-case", 4, 3, area="SQL"),
-    _chapter("w04_manipulation_sql_02", "Data Manipulation in SQL", "data-manipulation-in-sql", 2, "Short and Simple Subqueries", "short-and-simple-subqueries", 4, 4, area="SQL"),
-    _chapter("w04_manipulation_sql_03", "Data Manipulation in SQL", "data-manipulation-in-sql", 3, "Correlated Queries, Nested Queries, and Common Table Expressions", "correlated-queries-nested-queries-and-common-table-expressions", 4, 5, area="SQL"),
-    _chapter("w04_manipulation_sql_04", "Data Manipulation in SQL", "data-manipulation-in-sql", 4, "Window Functions", "window-functions-4", 4, 6, area="SQL"),
+    # Week 4 — horizontal joins, CASE, subqueries, CTEs, and windows.
+    _chapter("w04_joining_sql_02", "Joining Data in SQL", "joining-data-in-sql", 2, "Combining Data Horizontally", "combining-data-horizontally", 4, 0, area="SQL", direct_url="https://www.datacamp.com/courses/joining-data-in-sql/continue?variant=ai_native"),
+    _chapter("w04_manipulation_sql_01", "Data Manipulation in SQL", "data-manipulation-in-sql", 1, "We'll Take the CASE", "well-take-the-case", 4, 1, area="SQL"),
+    _chapter("w04_manipulation_sql_02", "Data Manipulation in SQL", "data-manipulation-in-sql", 2, "Short and Simple Subqueries", "short-and-simple-subqueries", 4, 2, area="SQL"),
+    _chapter("w04_manipulation_sql_03", "Data Manipulation in SQL", "data-manipulation-in-sql", 3, "Correlated Queries, Nested Queries, and Common Table Expressions", "correlated-queries-nested-queries-and-common-table-expressions", 4, 3, area="SQL"),
+    _chapter("w04_manipulation_sql_04", "Data Manipulation in SQL", "data-manipulation-in-sql", 4, "Window Functions", "window-functions-4", 4, 4, area="SQL"),
 
     # Week 5 — windows plus PostgreSQL data/date functions.
     _chapter("w05_window_sql_01", "PostgreSQL Summary Stats and Window Functions", "postgresql-summary-stats-and-window-functions", 1, "Introduction to Window Functions", "introduction-to-window-functions", 5, 0, area="SQL"),

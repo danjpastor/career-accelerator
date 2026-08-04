@@ -153,7 +153,8 @@ def _show_current_sprint_dialog(self: Any) -> None:
                 elif bool(row.get("promoted_today")):
                     icon, detail = "↗", "Added to Today’s Focus until midnight"
                 elif bool(row.get("prerequisites_ready")):
-                    icon, detail = "○", "Prerequisites complete"
+                    icon = "○"
+                    detail = str(row.get("prerequisite_detail") or "No prerequisite")
                 else:
                     icon = "🔒"
                     detail = str(row.get("prerequisite_reason") or "Complete the prerequisite first.")

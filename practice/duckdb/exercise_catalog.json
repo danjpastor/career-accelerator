@@ -1,5 +1,5 @@
 {
-  "version": "sql-challenges-1",
+  "version": "10.46.6",
   "exercises": [
     {
       "display_number": 1,
@@ -50,7 +50,7 @@
       "concept": "INNER JOIN",
       "dataset_id": "northstar_service",
       "estimated_minutes": 25,
-      "terminal_chapter": "w03_joining_sql_01",
+      "terminal_chapter": "w04_joining_sql_02",
       "prerequisite_exercises": []
     },
     {
@@ -60,7 +60,7 @@
       "concept": "Multiple INNER JOINs",
       "dataset_id": "northstar_people_projects",
       "estimated_minutes": 25,
-      "terminal_chapter": "w03_joining_sql_01",
+      "terminal_chapter": "w04_joining_sql_02",
       "prerequisite_exercises": [
         5
       ]
@@ -82,7 +82,7 @@
       "concept": "UNION",
       "dataset_id": "northstar_people_projects",
       "estimated_minutes": 25,
-      "terminal_chapter": "w04_joining_sql_03",
+      "terminal_chapter": "w04_joining_sql_02",
       "prerequisite_exercises": []
     },
     {
@@ -92,7 +92,7 @@
       "concept": "Hierarchy joins and distinct counts",
       "dataset_id": "northstar_people_projects",
       "estimated_minutes": 25,
-      "terminal_chapter": "w04_joining_sql_03",
+      "terminal_chapter": "w04_joining_sql_02",
       "prerequisite_exercises": [
         6
       ]
@@ -104,7 +104,7 @@
       "concept": "Correlated subquery",
       "dataset_id": "northstar_people_projects",
       "estimated_minutes": 25,
-      "terminal_chapter": "w04_joining_sql_04",
+      "terminal_chapter": "w04_manipulation_sql_03",
       "prerequisite_exercises": []
     },
     {
@@ -124,7 +124,7 @@
       "concept": "Scalar subquery",
       "dataset_id": "northstar_service",
       "estimated_minutes": 25,
-      "terminal_chapter": "w04_manipulation_sql_02",
+      "terminal_chapter": "w04_manipulation_sql_03",
       "prerequisite_exercises": []
     },
     {

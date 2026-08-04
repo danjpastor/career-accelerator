@@ -253,9 +253,164 @@ def _prior_semantic_keys(task: dict[str, Any]) -> tuple[str, ...]:
             ) if number is not None else ()
         except Exception:
             return ()
+    if kind == "interview_problem":
+        try:
+            from career_app.services import tracks
+            title = _sql_problem_title(task)
+            return tuple(
+                "sql_problem:" + value.casefold()
+                for value in tracks.SQL_PROBLEM_PREREQUISITES.get(title, ())
+            ) if title else ()
+        except Exception:
+            return ()
     if kind == "review":
         return (f"weekly_check:{_safe_int(task.get('week'), 0)}",)
     return ()
+
+
+def _compact_chapter_prerequisites(chapter_keys: tuple[str, ...] | list[str]) -> list[str]:
+    """Return readable named chapter gates without dumping the whole curriculum."""
+    try:
+        from career_app.services import content_gates
+    except Exception:
+        return [str(value) for value in chapter_keys if str(value)]
+    ordered: list[str] = []
+    for key in chapter_keys:
+        name = content_gates.chapter_name(str(key))
+        if name and name not in ordered:
+            ordered.append(name)
+    if len(ordered) <= 3:
+        return ordered
+    return [f"Required through {ordered[-1]} ({len(ordered)} assigned chapters total)"]
+
+
+def prerequisite_detail(
+    conn: sqlite3.Connection,
+    current_week: int,
+    task: dict[str, Any],
+) -> str:
+    """Describe the task's actual named prerequisites for the sprint dialog."""
+    kind = str(task.get("kind") or "").casefold()
+    names: list[str] = []
+
+    try:
+        if kind == "datacamp_chapter":
+            from career_app.data.datacamp_curriculum import DATACAMP_CHAPTERS
+            from career_app.services import datacamp
+            chapter = datacamp.chapter_for_task(task)
+            if chapter is not None:
+                index = next(
+                    i for i, item in enumerate(DATACAMP_CHAPTERS)
+                    if item.key == chapter.key
+                )
+                if index > 0:
+                    previous = DATACAMP_CHAPTERS[index - 1]
+                    names.append(previous.label)
+
+        elif kind == "datacamp_project":
+            project = _datacamp_project(
+                conn, _safe_int(task.get("task_id") or task.get("id"), 0)
+            )
+            if project:
+                names.extend(
+                    _compact_chapter_prerequisites(
+                        tuple(project.get("required_chapters") or ())
+                    )
+                )
+
+        elif kind == "duckdb":
+            from career_app.data.duckdb_exercises import DUCKDB_EXERCISES, roadmap_number
+            from career_app.services import content_gates
+            from career_app.services import duckdb_curriculum_policy as policy
+            internal = policy._task_internal_id(task)
+            if internal is not None:
+                terminal = policy.TERMINAL_CHAPTER_BY_ID.get(int(internal))
+                if terminal:
+                    names.append(content_gates.chapter_name(terminal))
+                for prior in policy.PRIOR_EXERCISES_BY_ID.get(int(internal), ()):
+                    item = DUCKDB_EXERCISES.get(int(prior), {})
+                    title = str(item.get("title") or f"SQL Challenge {roadmap_number(int(prior)):02d}")
+                    names.append(f"SQL Challenge {roadmap_number(int(prior)):02d}: {title}")
+
+        elif kind == "python_exercise":
+            from career_app.data.python_exercises import (
+                PYTHON_EXERCISES,
+                exercise_number_for_label,
+            )
+            from career_app.services import content_gates
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            if number is not None:
+                exercise = PYTHON_EXERCISES[int(number)]
+                terminal = str(exercise.get("terminal_chapter") or "")
+                if terminal:
+                    names.append(content_gates.chapter_name(terminal))
+                for prior in exercise.get("prior_exercises", ()):
+                    prior_item = PYTHON_EXERCISES.get(int(prior), {})
+                    names.append(
+                        f"Python Exercise {int(prior):02d}: "
+                        f"{prior_item.get('title') or 'Complete the earlier exercise'}"
+                    )
+
+        elif kind == "interview_problem":
+            from career_app.services import content_gates, tracks
+            title = _sql_problem_title(task)
+            if title:
+                names.extend(
+                    f"SQL Interview Problem: {problem_title}"
+                    for problem_title in tracks.SQL_PROBLEM_PREREQUISITES.get(title, ())
+                )
+                groups = tracks.SQL_PROBLEM_REQUIREMENTS.get(title, {})
+                all_skills = set(groups.get("all_of", ()))
+                any_skills = set(groups.get("any_of", ()))
+                all_keys = [
+                    content_gates.SKILL_TERMINAL_CHAPTER.get(skill)
+                    for skill in sorted(all_skills)
+                ]
+                names.extend(
+                    _compact_chapter_prerequisites(
+                        tuple(key for key in all_keys if key)
+                    )
+                )
+                any_keys = {
+                    content_gates.SKILL_TERMINAL_CHAPTER.get(skill)
+                    for skill in any_skills
+                }
+                any_names = _compact_chapter_prerequisites(
+                    tuple(key for key in any_keys if key)
+                )
+                for name in any_names:
+                    if name not in names:
+                        names.append(name)
+
+        elif kind == "applied_lab":
+            from career_app.data.applied_exercises import exercise_number_for_label
+            from career_app.services import content_gates
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            if number is not None:
+                terminal = content_gates.APPLIED_LAB_TERMINAL_CHAPTER.get(int(number))
+                if terminal:
+                    names.append(content_gates.chapter_name(terminal))
+
+        elif kind == "review":
+            names.append(f"Week {_safe_int(task.get('week'), current_week)} Knowledge Check")
+    except Exception:
+        names = []
+
+    unique: list[str] = []
+    for name in names:
+        cleaned = str(name or "").strip()
+        if cleaned and cleaned not in unique:
+            unique.append(cleaned)
+    if not unique:
+        reason = str(task.get("prerequisite_reason") or "").strip()
+        if reason and not _timing_only(reason) and reason.casefold() not in {
+            "all prerequisites are complete.",
+            "prerequisites complete",
+        }:
+            return reason
+        return "No prerequisite"
+    prefix = "Prerequisite" if len(unique) == 1 else "Prerequisites"
+    return f"{prefix}: " + "; ".join(unique)
 
 
 def _dependency_earliest_date(
@@ -475,6 +630,9 @@ def _enrich_row(
         ready, reason = prerequisite_readiness(conn, current_week, result)
     result["prerequisites_ready"] = bool(ready)
     result["prerequisite_reason"] = "" if ready else reason
+    result["prerequisite_detail"] = prerequisite_detail(
+        conn, current_week, result
+    )
     return result
 
 
