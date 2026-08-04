@@ -1,0 +1,54 @@
+{
+  "name": "workers",
+  "columns": [
+    {
+      "name": "worker_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "worker_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "team_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "hourly_rate",
+      "type": "DECIMAL(8,2)"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Ari Long",
+      1,
+      32.0
+    ],
+    [
+      2,
+      "Bea Moss",
+      1,
+      30.0
+    ],
+    [
+      3,
+      "Cam Reed",
+      2,
+      42.0
+    ],
+    [
+      4,
+      "Dee Shah",
+      2,
+      45.0
+    ],
+    [
+      5,
+      "Eli Park",
+      3,
+      40.0
+    ]
+  ],
+  "grain": "one row per worker"
+}

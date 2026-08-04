@@ -1,0 +1,28 @@
+{
+  "name": "teams",
+  "columns": [
+    {
+      "name": "team_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "team_name",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Support"
+    ],
+    [
+      2,
+      "Data"
+    ],
+    [
+      3,
+      "Product"
+    ]
+  ],
+  "grain": "one row per team"
+}

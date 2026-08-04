@@ -102,6 +102,11 @@ def title_case_task(value: object) -> str:
     text = re.sub(r"\s+", " ", str(value or "").strip())
     if not text:
         return ""
+    # SQL challenge titles are authored and audited in the curriculum catalog.
+    # Preserve their exact human-readable capitalization instead of converting
+    # ordinary words such as "Count" into SQL keyword casing.
+    if text.startswith("Complete SQL Challenge "):
+        return text
 
     words = list(_WORD_RE.finditer(text))
     if not words:

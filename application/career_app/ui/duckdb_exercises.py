@@ -1,4 +1,4 @@
-"""Native course workspace for Learning Practice guided DuckDB exercises."""
+"""Native course workspace for focused Career Accelerator SQL challenges."""
 from __future__ import annotations
 
 import hashlib
@@ -118,7 +118,7 @@ class DuckDBExercisesWidget(QWidget):
         self.back_button.setFixedSize(36, 34)
         self.back_button.clicked.connect(self.previous_exercise)
         toolbar_layout.addWidget(self.back_button)
-        self.breadcrumb = QLabel("Learning  ›  Practice  ›  DuckDB Exercises")
+        self.breadcrumb = QLabel("Learning  ›  Practice  ›  SQL Challenges")
         self.breadcrumb.setStyleSheet("color:#c4cde0;font-size:9.5pt;")
         toolbar_layout.addWidget(self.breadcrumb, 1)
         open_folder = QPushButton("Open Practice Folder")
@@ -141,7 +141,7 @@ class DuckDBExercisesWidget(QWidget):
         self.navigation_card.layout.setContentsMargins(12, 12, 12, 12)
         self.navigation_card.layout.setSpacing(9)
         nav_title_row = QHBoxLayout()
-        nav_title = QLabel("▤  DuckDB Exercises")
+        nav_title = QLabel("▤  SQL Challenges")
         nav_title.setStyleSheet("font-size:13pt;font-weight:700;color:#FFFFFF;")
         nav_title_row.addWidget(nav_title, 1)
         self.progress_count = QLabel("0/12")
@@ -154,7 +154,7 @@ class DuckDBExercisesWidget(QWidget):
         self.progress_bar.setFixedHeight(7)
         self.navigation_card.layout.addWidget(self.progress_bar)
         self.track_caption = QLabel(
-            "Complete each exercise inside Career Accelerator and save a reviewable SQL submission."
+            "Complete each focused challenge in the native editor. Each challenge contains one required SQL task."
         )
         self.track_caption.setObjectName("Muted")
         self.track_caption.setWordWrap(True)
@@ -768,7 +768,7 @@ class DuckDBExercisesWidget(QWidget):
         )
         self.learn_view.set_markdown(
             markdown,
-            eyebrow="DuckDB Exercise",
+            eyebrow="SQL Challenge",
             subtitle=subtitle,
             bookmarked=bookmarked,
         )
@@ -782,7 +782,7 @@ class DuckDBExercisesWidget(QWidget):
             continue_text="Next Exercise  →",
         )
         self.breadcrumb.setText(
-            f"Learning  ›  Practice  ›  DuckDB Exercises  ›  Exercise {roadmap_number(number):02d}  ›  {item['title']}"
+            f"Learning  ›  Practice  ›  SQL Challenges  ›  Exercise {roadmap_number(number):02d}  ›  {item['title']}"
         )
 
         if str(progress.get("status") or "") == "Completed":

@@ -1,856 +1,604 @@
-"""Safe in-app execution and result checking for guided DuckDB exercises.
+"""Catalog-backed execution and validation for native SQL challenges.
 
-The existing DuckDB exercise folders remain the source of truth.  This module
-reads their README, starter SQL, validation checkpoints, datasets, and standard
-submission file so the exercises can be completed without leaving Career
-Accelerator.
+The public API intentionally matches the original guided DuckDB runner so the
+existing DuckDBExercisesWidget remains the UI and behavior source of truth.
+Only the curriculum, datasets, prompts, hints, solutions, and validation
+contracts are replaced.
 """
 from __future__ import annotations
 
-import csv
 import json
 import re
 from dataclasses import dataclass
-from decimal import Decimal, InvalidOperation
+from datetime import date, datetime
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, Iterable
 
+try:
+    import duckdb
+except Exception:  # pragma: no cover - surfaced to the learner at runtime
+    duckdb = None
+
+from career_app.data.duckdb_exercises import ordered_exercise_numbers, roadmap_number
+from career_app.data.sql_challenge_practice import load_catalog
 from career_app.services import duckdb_workspace, roadmap_mastery
-from career_app.services.applied_lab_runner import split_sql_statements
 
 
 class DuckDBExerciseRunnerError(RuntimeError):
-    """Raised when a guided exercise cannot safely run or be checked."""
+    """Raised when a SQL challenge cannot be loaded, run, or checked safely."""
 
 
 @dataclass(frozen=True)
 class QuestionBlock:
     number: int
     prompt: str
-    sql: str
+    sql: str = ""
     requirements: tuple[str, ...] = ()
     hints: tuple[str, ...] = ()
 
 
-@dataclass(frozen=True)
-class ValidationCheckpoint:
-    number: int
-    expected_rows: int | None
-    columns: tuple[str, ...]
-    rows: tuple[tuple[str, ...], ...]
-
-
-_QUESTION_MARKER = re.compile(
-    r"(?mi)^\s*--\s*Q(?:uestion\s*)?(\d+)\s*[.):-]?\s*(.*?)\s*$"
-)
-_BLOCKED_WRITE_SQL = re.compile(
-    r"\b(?:INSERT|UPDATE|DELETE|MERGE|UPSERT|DROP|ALTER|TRUNCATE|"
-    r"VACUUM|CHECKPOINT|EXPORT|IMPORT|COPY|ATTACH|DETACH|INSTALL|LOAD|"
-    r"CALL|SET|RESET)\b",
+_BLOCKED_SQL = re.compile(
+    r"\b(?:ATTACH|DETACH|INSTALL|LOAD|COPY|EXPORT|IMPORT|PRAGMA|CALL|"
+    r"READ_CSV|READ_PARQUET|READ_JSON|HTTPFS|GLOB|SHELL|SECRET|SYSTEM)\b",
     re.IGNORECASE,
 )
-_BLOCKED_FILE_SQL = re.compile(
-    r"\b(?:read_csv|read_csv_auto|read_parquet|read_json|read_json_auto|"
-    r"read_ndjson|glob|parquet_scan|csv_scan|sqlite_scan|postgres_scan|"
-    r"httpfs|shell|system)\s*\(",
-    re.IGNORECASE,
+_ALLOWED_TEMP_VIEW = re.compile(
+    r"^CREATE\s+(?:OR\s+REPLACE\s+)?TEMP(?:ORARY)?\s+VIEW\b",
+    re.IGNORECASE | re.DOTALL,
 )
-_PATH_LITERAL = re.compile(
-    r"['\"](?:[A-Za-z]:[\\/]|\\\\|/|https?://|s3://|gs://|azure://)[^'\"]*['\"]",
-    re.IGNORECASE,
-)
-_PLACEHOLDER = re.compile(
-    r"(?i)(?:\bTODO\b|\bREPLACE\s+ME\b|write\s+(?:and\s+run\s+)?your\s+query|"
-    r"<[^>]+>|\.\.\.)"
-)
+_QUERY_START = re.compile(r"^(?:SELECT|WITH)\b", re.IGNORECASE | re.DOTALL)
 
 
-
-
-def _contract_path(root: Path) -> Path:
-    return Path(root) / "practice" / "duckdb" / "task_contracts.json"
-
-
-def _task_contracts(root: Path) -> dict[str, Any]:
-    path = _contract_path(root)
+def _catalog() -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8-sig"))
-    except FileNotFoundError:
-        return {}
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise DuckDBExerciseRunnerError(f"Could not read DuckDB task contracts: {exc}") from exc
-    return dict(payload.get("exercises") or {})
+        return load_catalog()
+    except Exception as exc:
+        raise DuckDBExerciseRunnerError(
+            f"The SQL challenge catalog could not be loaded: {exc}"
+        ) from exc
 
 
-def exercise_contract(root: Path, number: int) -> dict[str, Any]:
-    """Return the audited contract for one stable exercise ID."""
-    slug = exercise_paths(Path(root), int(number))["exercise_dir"].name
-    return dict(_task_contracts(Path(root)).get(slug) or {})
+def _display_number(number: int) -> int:
+    try:
+        return int(roadmap_number(int(number)))
+    except Exception:
+        numbers = list(ordered_exercise_numbers())
+        try:
+            return numbers.index(int(number)) + 1
+        except ValueError as exc:
+            raise DuckDBExerciseRunnerError(
+                f"Unknown SQL challenge number: {number}"
+            ) from exc
 
 
-def task_contract(root: Path, number: int, question_number: int) -> dict[str, Any]:
-    exercise = exercise_contract(Path(root), int(number))
-    task = (exercise.get("tasks") or {}).get(str(int(question_number))) or {}
-    return dict(task)
+def _exercise(number: int) -> dict[str, Any]:
+    display = _display_number(number)
+    exercises = list(_catalog().get("exercises") or [])
+    if display < 1 or display > len(exercises):
+        raise DuckDBExerciseRunnerError(f"SQL challenge {display} is not defined.")
+    return dict(exercises[display - 1])
 
 
-def task_requirements(root: Path, number: int, question_number: int) -> tuple[str, ...]:
-    return tuple(str(value) for value in task_contract(root, number, question_number).get("requirements") or ())
-
-
-def task_hints(root: Path, number: int, question_number: int) -> tuple[str, ...]:
-    return tuple(str(value) for value in task_contract(root, number, question_number).get("hints") or ())
-
-
-def task_hint(root: Path, number: int, question_number: int, level: int = 0) -> str:
-    hints = task_hints(root, number, question_number)
-    if not hints:
-        return "Review the requested columns, filters, calculations, and sorting one part at a time."
-    return hints[min(max(int(level), 0), len(hints) - 1)]
+def _dataset_tables(number: int) -> list[dict[str, Any]]:
+    catalog = _catalog()
+    spec = _exercise(number)
+    tables = (catalog.get("datasets") or {}).get(spec.get("dataset_id"))
+    if not isinstance(tables, list):
+        raise DuckDBExerciseRunnerError(
+            f"Dataset {spec.get('dataset_id')!r} is missing for "
+            f"SQL challenge {_display_number(number)}."
+        )
+    return [dict(table) for table in tables]
 
 
 def exercise_paths(root: Path, number: int) -> dict[str, Path]:
-    return duckdb_workspace.paths(Path(root), int(number))
+    paths = dict(duckdb_workspace.paths(Path(root), int(number)))
+    paths["submission"] = duckdb_workspace.submission_path(Path(root), int(number))
+    return paths
 
 
-def read_text(path: Path, *, required: bool = False) -> str:
-    try:
-        return path.read_text(encoding="utf-8-sig")
-    except FileNotFoundError:
-        if required:
-            raise DuckDBExerciseRunnerError(f"Required exercise file was not found: {path}")
-        return ""
-    except (OSError, UnicodeError) as exc:
-        raise DuckDBExerciseRunnerError(f"Could not read {path.name}: {exc}") from exc
+def _source_banner(spec: dict[str, Any]) -> str:
+    source = dict(spec.get("source") or {})
+    provider = str(source.get("provider") or "Source challenge")
+    challenge = str(source.get("challenge") or "Original challenge structure")
+    url = str(source.get("url") or "").strip()
+    linked = f"[{provider} — {challenge}]({url})" if url else f"{provider} — {challenge}"
+    return (
+        f"> **Challenge structure source:** {linked}  \n"
+        "> Career Accelerator rebuilt this exercise with original wording, scenario, "
+        "schema, records, expected output, hints, and solution."
+    )
 
 
 def instructions_markdown(root: Path, number: int) -> str:
-    path = exercise_paths(root, number)["instructions"]
-    text = read_text(path, required=True).strip()
-    if not text:
-        raise DuckDBExerciseRunnerError(f"Exercise instructions are empty: {path}")
-    return text
+    del root
+    spec = _exercise(number)
+    requirements = "\n".join(
+        f"- {item}" for item in spec.get("result_requirements", ())
+    )
+    return (
+        f"# {spec['title']}\n\n"
+        f"{_source_banner(spec)}\n\n"
+        f"## Scenario\n\n{spec['scenario']}\n\n"
+        f"## Your task\n\n{spec['task']}\n\n"
+        f"## Result requirements\n\n{requirements}\n\n"
+        f"## Skill focus\n\n**{spec['concept']}**\n\n"
+        f"{spec['learning_objective']}\n"
+    )
 
 
 def starter_sql(root: Path, number: int) -> str:
-    return read_text(exercise_paths(root, number)["starter"], required=True)
+    del root
+    spec = _exercise(number)
+    return (
+        f"-- SQL Challenge {_display_number(number):02d}: {spec['title']}\n"
+        "-- Write one query that returns the requested result.\n\n"
+    )
 
 
 def validation_markdown(root: Path, number: int) -> str:
-    return read_text(exercise_paths(root, number)["validation"], required=True)
+    del root
+    spec = _exercise(number)
+    columns = ", ".join(str(value) for value in spec.get("expected_columns", ()))
+    return (
+        f"# Validation — SQL Challenge {_display_number(number):02d}\n\n"
+        f"- Expected columns: {columns}\n"
+        f"- Expected rows: {int(spec.get('expected_row_count', 0))}\n"
+        f"- Ordering checked: {'Yes' if spec.get('order_matters') else 'No'}\n"
+    )
+
+
+def _ensure_reference_files(root: Path, number: int) -> dict[str, Path]:
+    paths = exercise_paths(root, number)
+    paths["exercise_dir"].mkdir(parents=True, exist_ok=True)
+    paths["datasets"].mkdir(parents=True, exist_ok=True)
+    paths["submissions"].mkdir(parents=True, exist_ok=True)
+    paths["instructions"].write_text(
+        instructions_markdown(root, number), encoding="utf-8", newline="\n"
+    )
+    paths["starter"].write_text(
+        starter_sql(root, number), encoding="utf-8", newline="\n"
+    )
+    paths["validation"].write_text(
+        validation_markdown(root, number), encoding="utf-8", newline="\n"
+    )
+    for table in _dataset_tables(number):
+        path = paths["datasets"] / f"{table['name']}.json"
+        path.write_text(
+            json.dumps(table, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    return paths
+
+
+def question_definitions(root: Path, number: int) -> list[QuestionBlock]:
+    del root
+    spec = _exercise(number)
+    hints = tuple(str(value) for value in spec.get("hints", ()))
+    return [
+        QuestionBlock(
+            number=1,
+            prompt=str(spec["task"]),
+            sql="",
+            requirements=tuple(
+                str(item) for item in spec.get("result_requirements", ())
+            ),
+            hints=hints,
+        )
+    ]
+
+
+def question_answers(root: Path, number: int) -> dict[int, str]:
+    _ensure_reference_files(Path(root), int(number))
+    path = exercise_paths(root, number)["submission"]
+    if not path.is_file():
+        return {1: ""}
+    try:
+        return {1: path.read_text(encoding="utf-8-sig").strip()}
+    except OSError as exc:
+        raise DuckDBExerciseRunnerError(
+            f"The saved SQL submission could not be read: {exc}"
+        ) from exc
+
+
+def compose_submission(root: Path, number: int, answers: dict[int, str]) -> str:
+    del root, number
+    return str(answers.get(1, "") or "").strip()
 
 
 def submission_sql(root: Path, number: int) -> str:
-    path = duckdb_workspace.submission_path(Path(root), int(number))
-    if path.exists():
-        return read_text(path, required=True)
-    return starter_sql(root, number)
+    return question_answers(root, number).get(1, "")
 
 
 def save_submission(root: Path, number: int, sql: str) -> Path:
     roadmap_mastery.assert_duckdb_ready_from_root(root, number)
-    path = duckdb_workspace.submission_path(Path(root), int(number))
-    path.parent.mkdir(parents=True, exist_ok=True)
-    content = str(sql or "").replace("\r\n", "\n").replace("\r", "\n")
-    if content and not content.endswith("\n"):
-        content += "\n"
-    path.write_text(content, encoding="utf-8", newline="\n")
-    return path
-
-
-def parse_questions(sql: str) -> list[QuestionBlock]:
-    """Split a starter/submission script into its Q1, Q2, ... sections."""
-    text = str(sql or "").replace("\r\n", "\n").replace("\r", "\n")
-    matches = list(_QUESTION_MARKER.finditer(text))
-    if not matches:
-        return [QuestionBlock(1, "Exercise query", text.strip())] if text.strip() else []
-
-    blocks: list[QuestionBlock] = []
-    for index, match in enumerate(matches):
-        number = int(match.group(1))
-        prompt = match.group(2).strip() or f"Task {number}"
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
-        body = text[match.end():end]
-        # Keep learner comments that explain their reasoning, but remove the
-        # repeated scaffold instruction and decorative comment separators.
-        cleaned_lines: list[str] = []
-        for line in body.splitlines():
-            stripped = line.strip()
-            if re.fullmatch(r"--\s*[-=#_*]{3,}", stripped):
-                continue
-            if re.search(r"(?i)write\s+(?:and\s+run\s+)?your\s+query", stripped):
-                continue
-            cleaned_lines.append(line)
-        blocks.append(QuestionBlock(number, prompt, "\n".join(cleaned_lines).strip()))
-    return blocks
-
-
-def question_definitions(root: Path, number: int) -> list[QuestionBlock]:
-    """Return task prompts and requirements from the audited task contract."""
-    root = Path(root)
-    questions = parse_questions(starter_sql(root, int(number)))
-    if not questions:
-        raise DuckDBExerciseRunnerError(
-            "The starter SQL does not contain any Q1, Q2, ... task sections."
-        )
-    enriched: list[QuestionBlock] = []
-    for question in questions:
-        contract = task_contract(root, number, question.number)
-        enriched.append(
-            QuestionBlock(
-                number=question.number,
-                prompt=str(contract.get("prompt") or question.prompt).strip(),
-                sql=question.sql,
-                requirements=tuple(str(value) for value in contract.get("requirements") or ()),
-                hints=tuple(str(value) for value in contract.get("hints") or ()),
-            )
-        )
-    return enriched
-
-
-def question_answers(root: Path, number: int) -> dict[int, str]:
-    """Load independently editable answers from the standard submission file."""
-    definitions = question_definitions(Path(root), int(number))
-    current = {item.number: item.sql for item in parse_questions(submission_sql(root, number))}
-    return {item.number: current.get(item.number, item.sql).strip() for item in definitions}
-
-
-def compose_submission(root: Path, number: int, answers: dict[int, str]) -> str:
-    """Build the reviewable standard SQL file from per-question answers.
-
-    The original exercise preamble is retained, while each question receives
-    only its own learner-authored SQL. This keeps the repository submission
-    format compatible with the existing DuckDB practice library.
-    """
-    template = starter_sql(Path(root), int(number)).replace("\r\n", "\n").replace("\r", "\n")
-    matches = list(_QUESTION_MARKER.finditer(template))
-    if not matches:
-        answer = str(answers.get(1, "") or "").strip()
-        return (answer + "\n") if answer else ""
-
-    preamble = template[: matches[0].start()].rstrip()
-    parts: list[str] = [preamble] if preamble else []
-    separator = "-- -----------------------------------------------------------------"
-    for match in matches:
-        question_number = int(match.group(1))
-        marker = template[match.start() : match.end()].strip()
-        answer = str(answers.get(question_number, "") or "").strip()
-        parts.append(marker)
-        if answer:
-            parts.append(answer)
-        else:
-            parts.append("-- Write and run your query below this comment.")
-        parts.append(separator)
-    return "\n\n".join(parts).rstrip() + "\n"
-
-
-def _scan_sql(sql: str, *, mask_literals: bool) -> str:
-    """Remove comments and optionally mask quoted literals/identifiers.
-
-    The scanner keeps newlines so error locations remain readable. Doubled quote
-    escapes are handled for both SQL string literals and quoted identifiers.
-    """
-    text = str(sql or "")
-    output: list[str] = []
-    index = 0
-    state = "normal"
-    while index < len(text):
-        char = text[index]
-        next_char = text[index + 1] if index + 1 < len(text) else ""
-
-        if state == "normal":
-            if char == "-" and next_char == "-":
-                output.extend((" ", " "))
-                index += 2
-                state = "line_comment"
-                continue
-            if char == "/" and next_char == "*":
-                output.extend((" ", " "))
-                index += 2
-                state = "block_comment"
-                continue
-            if char == "'":
-                output.append(" " if mask_literals else char)
-                index += 1
-                state = "single_quote"
-                continue
-            if char == '"':
-                output.append(" " if mask_literals else char)
-                index += 1
-                state = "double_quote"
-                continue
-            output.append(char)
-            index += 1
-            continue
-
-        if state == "line_comment":
-            if char == "\n":
-                output.append("\n")
-                state = "normal"
-            else:
-                output.append(" ")
-            index += 1
-            continue
-
-        if state == "block_comment":
-            if char == "*" and next_char == "/":
-                output.extend((" ", " "))
-                index += 2
-                state = "normal"
-            else:
-                output.append("\n" if char == "\n" else " ")
-                index += 1
-            continue
-
-        quote = "'" if state == "single_quote" else '"'
-        if char == quote and next_char == quote:
-            replacement = "  " if mask_literals else quote + quote
-            output.append(replacement)
-            index += 2
-            continue
-        if char == quote:
-            output.append(" " if mask_literals else char)
-            index += 1
-            state = "normal"
-            continue
-        output.append("\n" if char == "\n" else (" " if mask_literals else char))
-        index += 1
-
-    return "".join(output)
-
-
-def _strip_sql_comments(sql: str) -> str:
-    return _scan_sql(sql, mask_literals=False)
-
-
-def _mask_sql_literals_and_comments(sql: str) -> str:
-    return _scan_sql(sql, mask_literals=True)
-
-
-def _is_safe_temp_create(statement: str) -> bool:
-    code = _mask_sql_literals_and_comments(statement).strip()
-    return bool(
-        re.match(
-            r"(?is)^CREATE\s+(?:OR\s+REPLACE\s+)?TEMP(?:ORARY)?\s+"
-            r"(?:VIEW|TABLE)\s+[A-Za-z_][A-Za-z0-9_]*\s+AS\s+(?:SELECT|WITH)\b",
-            code,
-        )
-    )
-
-
-def validate_read_only_sql(sql: str) -> None:
-    code = _mask_sql_literals_and_comments(sql)
-    comments_removed = _strip_sql_comments(sql)
-    blocked = _BLOCKED_WRITE_SQL.search(code)
-    if blocked:
-        raise DuckDBExerciseRunnerError(
-            f"'{blocked.group(0)}' is not allowed in guided exercises. "
-            "Use SELECT queries or temporary views and tables created only for this task."
-        )
-    file_call = _BLOCKED_FILE_SQL.search(code)
-    if file_call:
-        raise DuckDBExerciseRunnerError(
-            "Direct file-reading functions are disabled. The exercise datasets "
-            "are already available as DuckDB tables."
-        )
-    if _PATH_LITERAL.search(comments_removed):
-        raise DuckDBExerciseRunnerError(
-            "External file and URL paths are disabled in the in-app exercise runner."
-        )
-    statements = split_sql_statements(sql)
-    if not statements:
-        raise DuckDBExerciseRunnerError("Write a SQL query before running this task.")
-    allowed = {"SELECT", "WITH", "VALUES", "DESCRIBE", "DESC", "SHOW", "EXPLAIN", "SUMMARIZE"}
-    for statement in statements:
-        first = re.match(r"\s*([A-Za-z]+)", _mask_sql_literals_and_comments(statement))
-        keyword = first.group(1).upper() if first else ""
-        if keyword == "CREATE" and _is_safe_temp_create(statement):
-            continue
-        if keyword not in allowed:
-            raise DuckDBExerciseRunnerError(
-                f"Statements beginning with '{keyword or 'unknown'}' are not allowed. "
-                "Use read-only queries or CREATE TEMP VIEW/TABLE ... AS SELECT for this task only."
-            )
-
-
-def _dataset_table_name(path: Path) -> str:
-    return re.sub(r"[^A-Za-z0-9_]+", "_", path.stem).strip("_").lower() or "dataset"
+    paths = _ensure_reference_files(Path(root), int(number))
+    text = str(sql or "").rstrip()
+    if text:
+        text += "\n"
+    paths["submission"].write_text(text, encoding="utf-8", newline="\n")
+    return paths["submission"]
 
 
 def dataset_inventory(root: Path, number: int) -> list[dict[str, Any]]:
-    paths = exercise_paths(root, number)
-    folder = paths["datasets"]
+    del root
     inventory: list[dict[str, Any]] = []
-    if not folder.exists():
-        return inventory
-    for path in sorted(folder.rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in {".csv", ".parquet", ".json"}:
-            continue
-        rows: int | None = None
-        columns: list[str] = []
-        if path.suffix.lower() == ".csv":
-            try:
-                with path.open("r", encoding="utf-8-sig", newline="") as handle:
-                    reader = csv.reader(handle)
-                    columns = next(reader, [])
-                    rows = sum(1 for _ in reader)
-            except (OSError, UnicodeError, csv.Error):
-                pass
-        stem = _dataset_table_name(path)
+    for table in _dataset_tables(number):
+        columns = list(table.get("columns") or [])
         inventory.append(
             {
-                "path": path,
-                "table": stem,
-                "prefixed_table": f"ex{int(number):02d}_{stem}",
-                "rows": rows,
-                "columns": columns,
+                "table": str(table["name"]),
+                "prefixed_table": str(table["name"]),
+                "columns": [str(column["name"]) for column in columns],
+                "column_types": [str(column["type"]) for column in columns],
+                "rows": list(table.get("rows") or []),
+                "row_count": len(table.get("rows") or []),
+                "grain": str(table.get("grain") or ""),
             }
         )
     return inventory
 
 
-def _connect(root: Path, number: int):
-    try:
-        import duckdb
-    except ImportError as exc:  # pragma: no cover - user environment only
-        raise DuckDBExerciseRunnerError(
-            "DuckDB is required for the in-app exercise runner. Restart Career "
-            "Accelerator through its launcher so requirements are installed."
-        ) from exc
+def task_contract(root: Path, number: int, question_number: int) -> dict[str, Any]:
+    del root
+    if int(question_number) != 1:
+        return {}
+    spec = _exercise(number)
+    return {
+        "prompt": spec["task"],
+        "requirements": list(spec.get("result_requirements") or []),
+        "hints": list(spec.get("hints") or []),
+    }
 
-    paths = exercise_paths(root, number)
-    database = paths["database"]
-    inventory = dataset_inventory(root, number)
-    if database.exists():
-        try:
-            connection = duckdb.connect(str(database), read_only=True)
-        except Exception as exc:
-            raise DuckDBExerciseRunnerError(
-                f"Could not open the practice database read-only: {exc}"
-            ) from exc
-    else:
-        connection = duckdb.connect(":memory:")
 
-    # Always expose the selected exercise's source files as temporary views.
-    # This lets newly added remediation lessons work immediately even when a
-    # learner already has an older on-disk practice database. Temporary views
-    # do not modify that database or overwrite any learner work.
-    try:
-        for dataset in inventory:
-            path = Path(dataset["path"])
-            escaped = str(path.resolve()).replace("'", "''")
-            suffix = path.suffix.lower()
-            if suffix == ".csv":
-                source = f"read_csv_auto('{escaped}', header=true, sample_size=-1)"
-            elif suffix == ".parquet":
-                source = f"read_parquet('{escaped}')"
+def task_requirements(root: Path, number: int, question_number: int) -> tuple[str, ...]:
+    return tuple(
+        str(value)
+        for value in task_contract(root, number, question_number).get(
+            "requirements", ()
+        )
+    )
+
+
+def task_hints(root: Path, number: int, question_number: int) -> tuple[str, ...]:
+    return tuple(
+        str(value)
+        for value in task_contract(root, number, question_number).get("hints", ())
+    )
+
+
+def task_hint(root: Path, number: int, question_number: int, level: int = 0) -> str:
+    hints = task_hints(root, number, question_number)
+    if not hints:
+        return (
+            "Review the requested columns, filters, calculations, grouping, and "
+            "sorting one requirement at a time."
+        )
+    return hints[min(max(int(level), 0), len(hints) - 1)]
+
+
+def _split_statements(sql: str) -> list[str]:
+    statements: list[str] = []
+    current: list[str] = []
+    in_single = False
+    in_double = False
+    in_line_comment = False
+    in_block_comment = False
+    index = 0
+    while index < len(sql):
+        char = sql[index]
+        nxt = sql[index + 1] if index + 1 < len(sql) else ""
+        if in_line_comment:
+            current.append(char)
+            if char == "\n":
+                in_line_comment = False
+            index += 1
+            continue
+        if in_block_comment:
+            current.append(char)
+            if char == "*" and nxt == "/":
+                current.append(nxt)
+                in_block_comment = False
+                index += 2
             else:
-                source = f"read_json_auto('{escaped}')"
-            names = [str(dataset["table"]), str(dataset["prefixed_table"])]
-            for table in dict.fromkeys(names):
-                quoted = table.replace('"', '""')
-                connection.execute(
-                    f'CREATE OR REPLACE TEMP VIEW "{quoted}" AS SELECT * FROM {source}'
-                )
-    except Exception:
-        connection.close()
-        raise
-    return connection, inventory
+                index += 1
+            continue
+        if not in_single and not in_double and char == "-" and nxt == "-":
+            current.extend([char, nxt])
+            in_line_comment = True
+            index += 2
+            continue
+        if not in_single and not in_double and char == "/" and nxt == "*":
+            current.extend([char, nxt])
+            in_block_comment = True
+            index += 2
+            continue
+        if char == "'" and not in_double:
+            if in_single and nxt == "'":
+                current.extend([char, nxt])
+                index += 2
+                continue
+            in_single = not in_single
+        elif char == '"' and not in_single:
+            if in_double and nxt == '"':
+                current.extend([char, nxt])
+                index += 2
+                continue
+            in_double = not in_double
+        if char == ";" and not in_single and not in_double:
+            text = "".join(current).strip()
+            if text:
+                statements.append(text)
+            current = []
+        else:
+            current.append(char)
+        index += 1
+    text = "".join(current).strip()
+    if text:
+        statements.append(text)
+    return statements
 
 
-def run_sql(root: Path, number: int, sql: str, *, row_limit: int = 500) -> dict[str, Any]:
-    validate_read_only_sql(sql)
-    statements = split_sql_statements(sql)
-    connection, inventory = _connect(Path(root), int(number))
-    result_sets: list[dict[str, Any]] = []
+def _without_comments(sql: str) -> str:
+    text = re.sub(r"/\*.*?\*/", " ", str(sql or ""), flags=re.DOTALL)
+    return re.sub(r"--[^\n]*", " ", text).strip()
+
+
+def _validate_sql(spec: dict[str, Any], sql: str) -> list[str]:
+    executable = _without_comments(sql)
+    if not executable:
+        raise DuckDBExerciseRunnerError("Write a SQL query before running this task.")
+    if _BLOCKED_SQL.search(executable):
+        raise DuckDBExerciseRunnerError(
+            "This exercise only allows SQL against its bundled in-memory tables. "
+            "File access, database attachment, extensions, and external commands are disabled."
+        )
+    statements = _split_statements(executable)
+    if not statements:
+        raise DuckDBExerciseRunnerError("Write a SQL query before running this task.")
+    if len(statements) > 1 and not bool(spec.get("allow_multi_statement")):
+        raise DuckDBExerciseRunnerError("This challenge expects one SQL statement.")
+    for statement in statements:
+        if _QUERY_START.match(statement) or _ALLOWED_TEMP_VIEW.match(statement):
+            continue
+        raise DuckDBExerciseRunnerError(
+            "Only SELECT/WITH queries are allowed. A temporary view is allowed only "
+            "when the task explicitly requests one."
+        )
+    if not _QUERY_START.match(statements[-1]):
+        raise DuckDBExerciseRunnerError(
+            "The final statement must return the result requested by the task."
+        )
+    return statements
+
+
+def _connection(number: int):
+    if duckdb is None:
+        raise DuckDBExerciseRunnerError(
+            "DuckDB is not installed in the active Career Accelerator environment. "
+            "Restart through the launcher so requirements can be repaired."
+        )
+    connection = duckdb.connect(database=":memory:")
+    for table in _dataset_tables(number):
+        columns = list(table.get("columns") or [])
+        column_sql = ", ".join(
+            f'"{str(column["name"]).replace(chr(34), chr(34) * 2)}" {column["type"]}'
+            for column in columns
+        )
+        name = str(table["name"]).replace('"', '""')
+        connection.execute(f'CREATE TABLE "{name}" ({column_sql})')
+        rows = list(table.get("rows") or [])
+        if rows:
+            placeholders = ", ".join("?" for _ in columns)
+            connection.executemany(
+                f'INSERT INTO "{name}" VALUES ({placeholders})', rows
+            )
+    return connection
+
+
+def _execute(number: int, sql: str) -> dict[str, Any]:
+    spec = _exercise(number)
+    statements = _validate_sql(spec, sql)
+    connection = _connection(number)
     try:
-        for position, statement in enumerate(statements, start=1):
-            try:
-                cursor = connection.execute(statement)
-            except Exception as exc:
-                raise DuckDBExerciseRunnerError(f"Statement {position} failed: {exc}") from exc
-            if cursor.description:
-                columns = [str(column[0]) for column in cursor.description]
-                rows = cursor.fetchmany(row_limit + 1)
-                truncated = len(rows) > row_limit
-                if truncated:
-                    rows = rows[:row_limit]
-                result_sets.append(
-                    {
-                        "statement_number": position,
-                        "columns": columns,
-                        "rows": [list(row) for row in rows],
-                        "truncated": truncated,
-                    }
-                )
+        cursor = None
+        for statement in statements:
+            cursor = connection.execute(statement)
+        if cursor is None or cursor.description is None:
+            raise DuckDBExerciseRunnerError(
+                "The final SQL statement did not return a result table."
+            )
+        columns = [str(item[0]) for item in cursor.description]
+        all_rows = cursor.fetchall()
+        limit = 250
+        return {
+            "last_result": {
+                "columns": columns,
+                "rows": all_rows[:limit],
+                "all_rows": all_rows,
+                "truncated": len(all_rows) > limit,
+            }
+        }
+    except DuckDBExerciseRunnerError:
+        raise
+    except Exception as exc:
+        raise DuckDBExerciseRunnerError(str(exc)) from exc
     finally:
         connection.close()
-    if not result_sets:
-        raise DuckDBExerciseRunnerError(
-            "The task ran, but it did not return a result table to review."
-        )
-    return {
-        "statement_count": len(statements),
-        "result_sets": result_sets,
-        "last_result": result_sets[-1],
-        "datasets": inventory,
-    }
 
 
 def run_question(root: Path, number: int, full_sql: str, question_number: int) -> dict[str, Any]:
-    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
-    questions = {question.number: question for question in parse_questions(full_sql)}
-    question = questions.get(int(question_number))
-    if question is None:
-        raise DuckDBExerciseRunnerError(f"Task {question_number} was not found in the SQL file.")
-    return run_sql(root, number, question.sql)
+    del root
+    if int(question_number) != 1:
+        raise DuckDBExerciseRunnerError("This compact exercise contains one task.")
+    return _execute(number, full_sql)
 
 
-def _split_table_line(line: str) -> list[str]:
-    if "|" in line:
-        return [part.strip() for part in line.strip().strip("|").split("|")]
-    # Validation checkpoints use aligned whitespace; two or more spaces are
-    # the reliable delimiter while preserving single spaces inside values.
-    return [part.strip() for part in re.split(r"\s{2,}|\t+", line.strip()) if part.strip()]
+def _normal_cell(value: Any) -> Any:
+    if isinstance(value, Decimal):
+        return round(float(value), 8)
+    if isinstance(value, float):
+        return round(value, 8)
+    if isinstance(value, datetime):
+        return value.isoformat(sep=" ")
+    if isinstance(value, date):
+        return value.isoformat()
+    return value
 
 
-def _is_separator_row(parts: Iterable[str]) -> bool:
-    values = list(parts)
-    return bool(values) and all(re.fullmatch(r":?-{2,}:?", value or "") for value in values)
+def _normal_rows(rows: Iterable[Iterable[Any]]) -> list[tuple[Any, ...]]:
+    return [tuple(_normal_cell(value) for value in row) for row in rows]
 
 
-def parse_validation(markdown: str) -> dict[int, ValidationCheckpoint]:
-    text = str(markdown or "").replace("\r\n", "\n").replace("\r", "\n")
-    heading = re.compile(r"(?mi)^\s*##+\s*Q(?:uestion\s*)?(\d+)\b[^\n]*$")
-    matches = list(heading.finditer(text))
-    checkpoints: dict[int, ValidationCheckpoint] = {}
-    for index, match in enumerate(matches):
-        number = int(match.group(1))
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
-        section = text[match.end():end]
-        rows_match = re.search(r"(?im)Expected\s+rows?\s*:\s*(?:\*\*)?\s*(\d+)", section)
-        expected_rows = int(rows_match.group(1)) if rows_match else None
-        lines = []
-        in_fence = False
-        for raw in section.splitlines():
-            line = raw.rstrip()
-            stripped = line.strip()
-            if stripped.startswith("```"):
-                in_fence = not in_fence
-                continue
-            if not stripped:
-                continue
-            if re.match(r"(?i)Expected\s+rows?\s*:", stripped):
-                continue
-            if re.match(r"(?i)(Only\s+the\s+first|Checkpoint|Notes?|Expected\s+columns?)", stripped):
-                continue
-            if stripped.startswith(("- ", "* ", "> ")) and not in_fence:
-                continue
-            if in_fence or "|" in stripped or re.search(r"\s{2,}|\t", stripped):
-                lines.append(stripped)
-        columns: list[str] = []
-        expected_data: list[tuple[str, ...]] = []
-        if lines:
-            first = _split_table_line(lines[0])
-            if first and not _is_separator_row(first):
-                columns = first
-            cursor = 1
-            if cursor < len(lines) and _is_separator_row(_split_table_line(lines[cursor])):
-                cursor += 1
-            for line in lines[cursor:]:
-                parts = _split_table_line(line)
-                if not parts or _is_separator_row(parts):
-                    continue
-                if columns and len(parts) != len(columns):
-                    continue
-                expected_data.append(tuple(parts))
-        checkpoints[number] = ValidationCheckpoint(
-            number=number,
-            expected_rows=expected_rows,
-            columns=tuple(columns),
-            rows=tuple(expected_data),
-        )
-    return checkpoints
+def _sort_key(row: tuple[Any, ...]) -> tuple[str, ...]:
+    return tuple("<NULL>" if value is None else repr(value) for value in row)
 
 
-def _normal(value: Any) -> str:
-    if value is None:
-        return "null"
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, (int, float, Decimal)):
-        try:
-            decimal = Decimal(str(value))
-            if decimal == decimal.to_integral():
-                return str(decimal.quantize(Decimal("1")))
-            return format(decimal.normalize(), "f").rstrip("0").rstrip(".")
-        except (InvalidOperation, ValueError):
-            pass
-    text = str(value).strip()
-    if text.lower() in {"none", "null", "nan"}:
-        return "null"
-    try:
-        decimal = Decimal(text.replace(",", ""))
-        if decimal == decimal.to_integral():
-            return str(decimal.quantize(Decimal("1")))
-        return format(decimal.normalize(), "f").rstrip("0").rstrip(".")
-    except (InvalidOperation, ValueError):
-        return re.sub(r"\s+", " ", text).lower()
+def _reference(number: int) -> dict[str, Any]:
+    return _execute(number, str(_exercise(number)["solution_sql"]))
 
 
-def _rule_check(sql: str, rule: dict[str, Any]) -> tuple[bool, str]:
-    code = _mask_sql_literals_and_comments(sql).upper()
-    kind = str(rule.get("type") or "")
-    if kind == "contains":
-        value = str(rule.get("value") or "").upper()
-        passed = value in code
-        return passed, f"This task specifically asks you to use {value}."
-    if kind == "select_count":
-        minimum = int(rule.get("minimum") or 2)
-        count = len(re.findall(r"\bSELECT\b", code))
-        return count >= minimum, f"This task needs a subquery with at least {minimum} SELECT statements."
-    if kind == "comment":
-        comments = re.findall(r"--[^\n]*|/\*.*?\*/", str(sql or ""), flags=re.S)
-        words = len(re.findall(r"[A-Za-z0-9']+", " ".join(comments)))
-        minimum = int(rule.get("minimum_words") or 8)
-        return words >= minimum, f"Add the requested SQL comment ({minimum} or more words)."
-    if kind == "formatting":
-        clauses = [str(value).upper() for value in rule.get("clauses") or ()]
-        raw = _strip_sql_comments(str(sql or ""))
-        missing = [
-            clause for clause in clauses
-            if re.search(rf"(?im)^\s*{re.escape(clause)}\b", raw) is None
-        ]
-        passed = not missing
-        if passed:
-            return True, "Each requested SQL clause starts on its own line."
-        return False, "Put each major clause on its own line. Missing line starts: " + ", ".join(missing) + "."
-    return True, ""
-
-
-def _structure_checks(sql: str, contract: dict[str, Any]) -> list[dict[str, Any]]:
-    checks: list[dict[str, Any]] = []
-    for rule in contract.get("rules") or ():
-        passed, detail = _rule_check(sql, dict(rule))
-        checks.append({"label": "Required SQL section", "passed": passed, "detail": detail})
-    rounding = contract.get("rounding")
-    if rounding is not None:
-        code = _mask_sql_literals_and_comments(sql)
-        pattern = rf"(?i)\bROUND\s*\([^;]+?,\s*{int(rounding)}\s*\)"
-        passed = bool(re.search(pattern, code))
-        checks.append({
-            "label": "Required rounding",
-            "passed": passed,
-            "detail": f"Round the requested value to {int(rounding)} decimal place(s) with ROUND(..., {int(rounding)}).",
-        })
-    return checks
-
-
-def _friendly_execution_error(message: str) -> str:
-    text = str(message or "")
-    lowered = text.lower()
-    if "referenced column" in lowered or "binder error" in lowered and "not found" in lowered:
-        return "DuckDB could not find one of the column names. Compare every name in SELECT, WHERE, GROUP BY, and ORDER BY with the dataset preview.\n\nTechnical detail: " + text
-    if "syntax error" in lowered or "parser error" in lowered:
-        return "DuckDB found a SQL syntax problem. Check commas in SELECT, matching parentheses, and the order of FROM, WHERE, GROUP BY, HAVING, and ORDER BY.\n\nTechnical detail: " + text
-    if "ambiguous" in lowered:
-        return "A column name exists in more than one table. Prefix it with the correct table alias, such as `o.order_id`.\n\nTechnical detail: " + text
-    if "conversion error" in lowered or "could not convert" in lowered:
-        return "A value could not be converted to the requested type. Use a safe conversion such as TRY_CAST when the task allows invalid source values.\n\nTechnical detail: " + text
-    return text
-
-
-def _compare_checkpoint(
-    run: dict[str, Any],
-    checkpoint: ValidationCheckpoint | None,
-    contract: dict[str, Any] | None = None,
-) -> list[dict[str, Any]]:
-    result = run["last_result"]
-    columns = list(result["columns"])
-    rows = list(result["rows"])
-    contract = dict(contract or {})
-    checks: list[dict[str, Any]] = []
-
-    def add(label: str, passed: bool, detail: str) -> None:
-        checks.append({"label": label, "passed": bool(passed), "detail": detail})
-
-    add("Query executes", True, f"Returned {len(rows)} row(s).")
-    if checkpoint is None and not contract:
-        add("Validation checkpoint available", False, "This task does not have an audited validation contract.")
-        return checks
-
-    expected_rows = contract.get("expected_rows")
-    if expected_rows is None and checkpoint is not None:
-        expected_rows = checkpoint.expected_rows
-    if expected_rows is not None:
-        expected_rows = int(expected_rows)
-        if len(rows) == expected_rows:
-            detail = f"Returned the expected {expected_rows} row(s)."
-        elif len(rows) > expected_rows:
-            detail = f"Expected {expected_rows} row(s), but received {len(rows)}. Check whether the filter, grouping, duplicate removal, or row limit is too broad."
-        else:
-            detail = f"Expected {expected_rows} row(s), but received {len(rows)}. Check whether the filter or join removes records that should remain."
-        add("Expected row count", len(rows) == expected_rows, detail)
-
-    expected_columns = list(contract.get("columns") or ())
-    if not expected_columns and checkpoint is not None:
-        expected_columns = list(checkpoint.columns)
-    if expected_columns:
-        actual_normal = [_normal(value) for value in columns]
-        expected_normal = [_normal(value) for value in expected_columns]
-        missing = [col for col, norm in zip(expected_columns, expected_normal) if norm not in actual_normal]
-        extra = [col for col, norm in zip(columns, actual_normal) if norm not in expected_normal]
-        if actual_normal == expected_normal:
-            detail = "Returned the required columns in the correct order."
-        else:
-            parts = ["Expected " + ", ".join(expected_columns) + "; received " + ", ".join(columns) + "."]
-            if missing:
-                parts.append("Missing or incorrectly aliased: " + ", ".join(missing) + ".")
-            if extra:
-                parts.append("Remove or rename: " + ", ".join(extra) + ".")
-            detail = " ".join(parts)
-        add("Expected columns and aliases", actual_normal == expected_normal, detail)
-
-    if checkpoint is not None and checkpoint.rows:
-        actual_preview = [tuple(_normal(value) for value in row) for row in rows[: len(checkpoint.rows)]]
-        expected_preview = [tuple(_normal(value) for value in row) for row in checkpoint.rows]
-        order_sensitive = bool(contract.get("order_sensitive"))
-        if order_sensitive:
-            passed = actual_preview == expected_preview
-            detail = f"Compared the first {len(expected_preview)} expected row(s) in the required order."
-        else:
-            actual_all = [tuple(_normal(value) for value in row) for row in rows]
-            remaining = list(actual_all)
-            passed = True
-            for expected_row in expected_preview:
-                try:
-                    remaining.remove(expected_row)
-                except ValueError:
-                    passed = False
-                    break
-            detail = f"Confirmed that all {len(expected_preview)} checkpoint row(s) appear in the result; row order was ignored because the task does not require sorting."
-        if not passed:
-            detail += " The values differ, so review the calculation, filter, grouping, or join before changing aliases."
-        add("Expected result values", passed, detail)
-    return checks
-
-
+def _pattern_check(spec: dict[str, Any], sql: str) -> tuple[bool, str]:
+    missing: list[str] = []
+    for pattern in spec.get("required_patterns") or []:
+        if re.search(str(pattern), sql, flags=re.IGNORECASE | re.DOTALL) is None:
+            missing.append(str(pattern))
+    if not missing:
+        return True, f"The query uses the SQL technique required for {spec['concept']}."
+    return (
+        False,
+        f"The result may be close, but the query does not yet demonstrate "
+        f"{spec['concept']}, which is the concept this exercise checks.",
+    )
 
 
 def _diagnostic_hint(
-    checklist: list[dict[str, Any]],
-    root: Path,
-    number: int,
-    question_number: int,
+    spec: dict[str, Any], *, columns_ok: bool, row_count_ok: bool,
+    values_ok: bool, pattern_ok: bool
 ) -> str:
-    """Choose a useful next step from the section that actually failed."""
-    failed = [item for item in checklist if not item.get("passed")]
-    if not failed:
-        return ""
-    first = failed[0]
-    label = str(first.get("label") or "")
-    detail = str(first.get("detail") or "").strip()
-    contract = task_contract(root, number, question_number)
-    columns = [str(value) for value in contract.get("columns") or ()]
-
-    if label == "Task answered":
-        return task_hint(root, number, question_number, 0)
-    if label == "Query executes":
-        return "Fix the execution error first. Read the technical detail, then check the named column and the clause DuckDB points to."
-    if label == "Required SQL section":
-        return detail or task_hint(root, number, question_number, 1)
-    if label == "Required rounding":
-        places = int(contract.get("rounding") or 0)
-        return f"Wrap the requested calculation in ROUND(..., {places}); do not round unrelated fields."
-    if label == "Expected columns and aliases":
-        if columns:
-            return "Review only the SELECT list. Return these columns in this order and use AS for any renamed or calculated field: " + ", ".join(columns) + "."
-        return "Review the SELECT list and remove any fields the task did not request."
-    if label == "Expected row count":
-        return "The SELECT list may be correct, but the number of records is not. Review WHERE, JOIN, GROUP BY, HAVING, DISTINCT, and LIMIT in that order."
-    if label == "Expected result values":
-        return "The shape of the result is close, but at least one value is wrong. Check the calculation first, then the filter, grouping, join key, and null handling."
-    return task_hint(root, number, question_number, min(2, len(failed)))
+    hints = [str(value) for value in spec.get("hints") or []]
+    if not columns_ok:
+        return (
+            "Match the exact requested column names and order. Check every alias "
+            "listed under Result requirements."
+        )
+    if not row_count_ok:
+        return hints[0] if hints else (
+            "The query includes too many or too few rows. Recheck the requested "
+            "filters, join type, grouping grain, and HAVING condition."
+        )
+    if not values_ok:
+        return hints[1] if len(hints) > 1 else (
+            "The correct rows are present, but at least one value differs. Recheck "
+            "the calculation, aggregation, NULL handling, and final sort order."
+        )
+    if not pattern_ok:
+        return hints[-1] if hints else (
+            f"Rewrite the query so it explicitly practices {spec['concept']}."
+        )
+    return "Review each result requirement one at a time."
 
 
-def check_question(
-    root: Path,
-    number: int,
-    full_sql: str,
-    question_number: int,
-) -> dict[str, Any]:
-    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
-    questions = {question.number: question for question in parse_questions(full_sql)}
-    question = questions.get(int(question_number))
-    if question is None:
-        raise DuckDBExerciseRunnerError(f"Task {question_number} was not found in the SQL file.")
-    contract = task_contract(root, number, question_number)
-    if not question.sql.strip() or _PLACEHOLDER.search(_strip_sql_comments(question.sql)):
-        return {
-            "passed": False,
-            "question": question,
-            "run": None,
-            "checklist": [{
-                "label": "Task answered",
-                "passed": False,
-                "detail": "Write your SQL in the editor before checking this task.",
-            }],
-            "hint": task_hint(root, number, question_number, 0),
-        }
-    structure = _structure_checks(question.sql, contract)
-    try:
-        run = run_sql(root, number, question.sql)
-    except DuckDBExerciseRunnerError as exc:
-        return {
-            "passed": False,
-            "question": question,
-            "run": None,
-            "checklist": [{"label": "Query executes", "passed": False, "detail": _friendly_execution_error(str(exc))}],
-            "hint": task_hint(root, number, question_number, 1),
-        }
-    checkpoints = parse_validation(validation_markdown(root, number))
-    checklist = structure + _compare_checkpoint(run, checkpoints.get(int(question_number)), contract)
-    passed = bool(checklist) and all(item["passed"] for item in checklist)
+def _check(number: int, sql: str) -> dict[str, Any]:
+    spec = _exercise(number)
+    run = _execute(number, sql)
+    expected = _reference(number)
+    actual_result = run["last_result"]
+    expected_result = expected["last_result"]
+
+    actual_columns = list(actual_result["columns"])
+    expected_columns = list(
+        spec.get("expected_columns") or expected_result["columns"]
+    )
+    columns_ok = actual_columns == expected_columns
+
+    actual_rows = _normal_rows(actual_result["all_rows"])
+    expected_rows = _normal_rows(expected_result["all_rows"])
+    row_count_ok = len(actual_rows) == len(expected_rows)
+    values_ok = (
+        actual_rows == expected_rows
+        if bool(spec.get("order_matters"))
+        else sorted(actual_rows, key=_sort_key) == sorted(expected_rows, key=_sort_key)
+    )
+    pattern_ok, pattern_detail = _pattern_check(spec, sql)
+
+    checklist = [
+        {
+            "label": "Query",
+            "passed": True,
+            "detail": "The SQL ran successfully against the exercise dataset.",
+        },
+        {"label": "Required SQL", "passed": pattern_ok, "detail": pattern_detail},
+        {
+            "label": "Columns",
+            "passed": columns_ok,
+            "detail": (
+                f"Returned the required columns in order: {', '.join(expected_columns)}."
+                if columns_ok
+                else f"Expected {expected_columns}, but received {actual_columns}."
+            ),
+        },
+        {
+            "label": "Row count",
+            "passed": row_count_ok,
+            "detail": (
+                f"Returned the expected {len(expected_rows)} row(s)."
+                if row_count_ok
+                else f"Expected {len(expected_rows)} row(s), but received {len(actual_rows)}."
+            ),
+        },
+        {
+            "label": "Values and order" if spec.get("order_matters") else "Values",
+            "passed": values_ok,
+            "detail": (
+                "The values and required ordering match the challenge."
+                if values_ok
+                else (
+                    "At least one value or row position differs from the requested result. "
+                    "The feedback hint below points to the most likely part to review."
+                )
+            ),
+        },
+    ]
+    passed = all(bool(item["passed"]) for item in checklist)
     return {
         "passed": passed,
-        "question": question,
-        "run": run,
         "checklist": checklist,
-        "hint": "" if passed else _diagnostic_hint(checklist, root, number, question_number),
+        "run": run,
+        "hint": None if passed else _diagnostic_hint(
+            spec,
+            columns_ok=columns_ok,
+            row_count_ok=row_count_ok,
+            values_ok=values_ok,
+            pattern_ok=pattern_ok,
+        ),
     }
+
+
+def check_question(root: Path, number: int, full_sql: str, question_number: int) -> dict[str, Any]:
+    del root
+    if int(question_number) != 1:
+        raise DuckDBExerciseRunnerError("This compact exercise contains one task.")
+    return _check(number, full_sql)
 
 
 def check_exercise(
     root: Path,
     number: int,
     full_sql: str,
-    question_numbers: Iterable[int] | None = None,
+    question_numbers: list[int] | None = None,
 ) -> dict[str, Any]:
-    roadmap_mastery.assert_duckdb_ready_from_root(root, number)
-    questions = parse_questions(full_sql)
-    if question_numbers is not None:
-        selected = {int(value) for value in question_numbers}
-        questions = [question for question in questions if question.number in selected]
-    if not questions:
-        raise DuckDBExerciseRunnerError("The submission does not contain any selected exercise tasks.")
-    results: list[dict[str, Any]] = []
-    for question in questions:
-        try:
-            result = check_question(root, number, full_sql, question.number)
-        except DuckDBExerciseRunnerError as exc:
-            result = {
-                "passed": False,
-                "question": question,
-                "run": None,
-                "checklist": [
-                    {"label": "Query executes", "passed": False, "detail": str(exc)}
-                ],
-            }
-        results.append(result)
-    passed = bool(results) and all(result["passed"] for result in results)
+    requested = [int(value) for value in (question_numbers or [1])]
+    if requested != [1]:
+        requested = [value for value in requested if value == 1]
+    if not requested:
+        return {"passed": False, "questions": [], "passed_count": 0, "total_count": 1}
+    result = _check(number, full_sql)
+    question = question_definitions(root, number)[0]
     return {
-        "passed": passed,
-        "questions": results,
-        "passed_count": sum(1 for result in results if result["passed"]),
-        "total_count": len(results),
+        "passed": bool(result["passed"]),
+        "questions": [{"question": question, **result}],
+        "passed_count": int(bool(result["passed"])),
+        "total_count": 1,
     }

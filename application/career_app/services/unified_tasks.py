@@ -474,7 +474,7 @@ def _source(task: dict) -> str:
         return f"DataCamp • {chapter.course_name}" if chapter else "DataCamp"
     if kind == "duckdb":
         item = duckdb_for_label(task.get("label"))
-        return f"DuckDB Exercise • {item['title']}" if item else "DuckDB Exercise"
+        return f"SQL Challenge • {item['title']}" if item else "SQL Challenge"
     if kind == "interview_problem":
         return "SQL Interview Practice"
     if kind == "python_exercise":
@@ -615,11 +615,40 @@ def all_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     return filtered
 
 
+def _semantic_task_identity(task: dict) -> str:
+    """Return one logical identity even when legacy rows use different keys.
+
+    SQL interview problems historically existed both as durable roadmap rows and
+    reusable adaptive-track rows. Their managed keys differ, so key-only
+    deduplication displayed the same problem twice. Resolve those rows through
+    the canonical SQL catalog title before falling back to durable identifiers.
+    """
+    kind = str(task.get("kind") or "")
+    if kind == "interview_problem":
+        title = _sql_title(
+            str(task.get("label") or ""),
+            str(task.get("target_key") or ""),
+        )
+        if title:
+            return "interview_problem:" + re.sub(
+                r"[^a-z0-9]+", " ", title.casefold()
+            ).strip()
+    if kind == "datacamp_chapter":
+        chapter = datacamp.chapter_for_task(task)
+        if chapter is not None:
+            return f"datacamp:{chapter.key}"
+    return str(
+        task.get("managed_key")
+        or task.get("target_key")
+        or f"task:{task.get('id')}"
+    )
+
+
 def _dedupe(tasks: Iterable[dict]) -> list[dict]:
     seen: set[str] = set()
     result: list[dict] = []
     for task in tasks:
-        key = str(task.get("managed_key") or task.get("target_key") or f"task:{task.get('id')}")
+        key = _semantic_task_identity(task)
         if key in seen:
             continue
         seen.add(key)
@@ -651,9 +680,14 @@ def _roadmap_sort(task: dict, current_week: int) -> tuple:
         week_rank = 1
     else:
         week_rank = 2
+    # Across every ready/open queue, Google remains first and DataCamp is
+    # immediately next. Week/catch-up placement only breaks ties inside those
+    # priority bands; it must not place an unrelated practice item above an
+    # open DataCamp chapter.
+    priority_band = 0 if kind == "google" else 1 if kind == "datacamp_chapter" else 2
     return (
+        priority_band,
         week_rank,
-        0 if kind == "google" else 1,
         kind_rank,
         scheduled_week,
         _safe_int(task.get("sort_order"), 0),
@@ -674,11 +708,32 @@ def _focus_display_sort(task: dict, current_week: int) -> tuple:
     return (0, *_roadmap_sort(task, current_week))
 
 
+def _queue_incomplete_tasks(tasks: Iterable[dict]) -> list[dict]:
+    """Return incomplete logical assignments with completion merged by identity.
+
+    A legacy roadmap row and an adaptive-track row can represent the same SQL
+    problem. If either row is complete, the logical assignment is complete and
+    must not reappear through the other row.
+    """
+    pool = list(tasks)
+    completed_identities = {
+        _semantic_task_identity(task)
+        for task in pool
+        if bool(task.get("completed"))
+    }
+    return [
+        task
+        for task in pool
+        if not bool(task.get("completed"))
+        and _semantic_task_identity(task) not in completed_identities
+    ]
+
+
 def ready_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     tasks = [
         task
-        for task in all_tasks(conn, current_week)
-        if task["ready"] and not bool(task.get("completed"))
+        for task in _queue_incomplete_tasks(all_tasks(conn, current_week))
+        if task["ready"]
     ]
     return sorted(_dedupe(tasks), key=lambda task: _roadmap_sort(task, current_week))
 
@@ -712,9 +767,8 @@ def _locked_sort(task: dict, current_week: int) -> tuple:
 def locked_tasks(conn: sqlite3.Connection, current_week: int) -> list[dict]:
     tasks = [
         task
-        for task in all_tasks(conn, current_week)
+        for task in _queue_incomplete_tasks(all_tasks(conn, current_week))
         if not task["ready"]
-        and not bool(task.get("completed"))
         and str(task.get("kind") or "") != "weekly_check"
     ]
     return sorted(_dedupe(tasks), key=lambda task: _locked_sort(task, current_week))

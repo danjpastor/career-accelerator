@@ -1,0 +1,75 @@
+{
+  "name": "project_assignments",
+  "columns": [
+    {
+      "name": "project_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "employee_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "hours_allocated",
+      "type": "INTEGER"
+    }
+  ],
+  "rows": [
+    [
+      301,
+      2,
+      60
+    ],
+    [
+      301,
+      3,
+      45
+    ],
+    [
+      301,
+      5,
+      20
+    ],
+    [
+      302,
+      3,
+      30
+    ],
+    [
+      302,
+      5,
+      80
+    ],
+    [
+      302,
+      6,
+      70
+    ],
+    [
+      303,
+      8,
+      90
+    ],
+    [
+      303,
+      9,
+      75
+    ],
+    [
+      303,
+      6,
+      25
+    ],
+    [
+      304,
+      5,
+      40
+    ],
+    [
+      304,
+      10,
+      55
+    ]
+  ],
+  "grain": "one row per employee assignment to a project"
+}

@@ -1,0 +1,128 @@
+{
+  "name": "orders",
+  "columns": [
+    {
+      "name": "order_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "customer_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "order_date",
+      "type": "DATE"
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "channel",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "total_amount",
+      "type": "DECIMAL(10,2)"
+    }
+  ],
+  "rows": [
+    [
+      7001,
+      101,
+      "2026-06-01",
+      "Completed",
+      "Web",
+      240.0
+    ],
+    [
+      7002,
+      102,
+      "2026-06-02",
+      "Completed",
+      "Mobile",
+      85.5
+    ],
+    [
+      7003,
+      101,
+      "2026-06-08",
+      "Returned",
+      "Web",
+      120.0
+    ],
+    [
+      7004,
+      103,
+      "2026-06-10",
+      "Completed",
+      "Partner",
+      410.25
+    ],
+    [
+      7005,
+      104,
+      "2026-06-12",
+      "Completed",
+      "Web",
+      75.0
+    ],
+    [
+      7006,
+      105,
+      "2026-06-16",
+      "Completed",
+      "Mobile",
+      198.0
+    ],
+    [
+      7007,
+      106,
+      "2026-06-18",
+      "Cancelled",
+      "Web",
+      55.0
+    ],
+    [
+      7008,
+      107,
+      "2026-06-20",
+      "Completed",
+      "Web",
+      320.4
+    ],
+    [
+      7009,
+      108,
+      "2026-06-24",
+      "Completed",
+      "Partner",
+      149.99
+    ],
+    [
+      7010,
+      103,
+      "2026-06-27",
+      "Completed",
+      "Web",
+      260.0
+    ],
+    [
+      7011,
+      105,
+      "2026-07-01",
+      "Completed",
+      "Mobile",
+      520.0
+    ],
+    [
+      7012,
+      107,
+      "2026-07-03",
+      "Completed",
+      "Web",
+      95.75
+    ]
+  ],
+  "grain": "one row per order"
+}

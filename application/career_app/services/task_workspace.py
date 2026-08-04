@@ -597,6 +597,42 @@ def current_sprint_items(conn, week: int, *, canonical_tasks=None) -> list[dict]
         # planner is unavailable during an older database migration.
         pass
 
+    # Collapse logical duplicates before the sprint is split into days. Older
+    # databases can contain both a durable roadmap SQL problem row and a reusable
+    # adaptive SQL-track row for the same DataLemur problem. They use different
+    # task IDs and managed keys, but are one learner assignment.
+    def semantic_item_key(item):
+        label = str(item.get("label") or "").strip()
+        label_key = _sprint_item_label_key(label)
+        if str(item.get("section") or "") == "SQL":
+            haystack = label.casefold()
+            for entry in SQL_COMPANION:
+                title = str(entry[0])
+                if title.casefold() in haystack:
+                    return ("sql_problem", _sprint_item_label_key(title))
+        track = str(item.get("track_key") or "").casefold()
+        target = str(item.get("target_key") or "")
+        if track and target:
+            return (track, target)
+        task_id = item.get("task_id")
+        return ("task", int(task_id)) if task_id is not None else ("label", label_key)
+
+    deduped_items = []
+    item_index = {}
+    for item in items:
+        key = semantic_item_key(item)
+        existing_index = item_index.get(key)
+        if existing_index is None:
+            item_index[key] = len(deduped_items)
+            deduped_items.append(item)
+            continue
+        existing = deduped_items[existing_index]
+        if bool(item.get("completed")) and not bool(existing.get("completed")):
+            existing["completed"] = True
+            existing["status"] = "Completed"
+            existing["completed_date"] = str(item.get("completed_date") or "")
+    items = deduped_items
+
     section_order = {
         "Google Course": 0,
         "DataCamp": 1,

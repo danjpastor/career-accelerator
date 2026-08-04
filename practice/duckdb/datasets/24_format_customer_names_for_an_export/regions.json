@@ -1,0 +1,32 @@
+{
+  "name": "regions",
+  "columns": [
+    {
+      "name": "region_code",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "region_name",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      "SE",
+      "Southeast"
+    ],
+    [
+      "NE",
+      "Northeast"
+    ],
+    [
+      "SW",
+      "Southwest"
+    ],
+    [
+      "MW",
+      "Mountain West"
+    ]
+  ],
+  "grain": "one row per region code"
+}

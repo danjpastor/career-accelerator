@@ -1,0 +1,4219 @@
+{
+  "schema_version": 2,
+  "content_version": "10.45.0-rebuilt-native",
+  "track_title": "SQL Challenges",
+  "track_subtitle": "Focused one-task SQL practice using original Career Accelerator datasets and the native DuckDB editor.",
+  "authoring_policy": {
+    "task_limit": "Exactly one required task per exercise. A second task is allowed only when inseparable from the same result.",
+    "originality": "All learner-facing wording, scenarios, schemas, records, solutions, hints, and expected outputs are original Career Accelerator content.",
+    "source_use": "External challenges are credited only as structure and concept blueprints.",
+    "scope": "Every exercise tests one primary concept and uses only SQL taught by its terminal DataCamp chapter."
+  },
+  "datasets": {
+    "northstar_service": [
+      {
+        "name": "customers",
+        "columns": [
+          {
+            "name": "customer_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "city",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "region_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "phone",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "joined_date",
+            "type": "DATE"
+          }
+        ],
+        "rows": [
+          [
+            101,
+            "Maya",
+            "Chen",
+            "Atlanta",
+            "SE",
+            "maya.chen@example.com",
+            "(404) 555-0141",
+            "2025-01-12"
+          ],
+          [
+            102,
+            "Owen",
+            "Brooks",
+            "Savannah",
+            "SE",
+            "owen.brooks@example.com",
+            null,
+            "2025-02-03"
+          ],
+          [
+            103,
+            "Priya",
+            "Shah",
+            "Boston",
+            "NE",
+            "priya.shah@example.com",
+            "617.555.0198",
+            "2025-02-14"
+          ],
+          [
+            104,
+            "Luis",
+            "Martinez",
+            "Austin",
+            "SW",
+            "luis.martinez@example.com",
+            "512-555-0177",
+            "2025-03-01"
+          ],
+          [
+            105,
+            "Nora",
+            "Kim",
+            "Atlanta",
+            "SE",
+            "nora.kim@example.com",
+            "404 555 0119",
+            "2025-03-18"
+          ],
+          [
+            106,
+            "Eli",
+            "Turner",
+            "Denver",
+            "MW",
+            "eli.turner@example.com",
+            null,
+            "2025-04-07"
+          ],
+          [
+            107,
+            "Ava",
+            "Reed",
+            "Raleigh",
+            "SE",
+            "ava.reed@example.com",
+            "919-555-0108",
+            "2025-04-19"
+          ],
+          [
+            108,
+            "Jonah",
+            "Price",
+            "Boston",
+            "NE",
+            "jonah.price@example.com",
+            "617-555-0182",
+            "2025-05-02"
+          ]
+        ],
+        "grain": "one row per customer"
+      },
+      {
+        "name": "regions",
+        "columns": [
+          {
+            "name": "region_code",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "region_name",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            "SE",
+            "Southeast"
+          ],
+          [
+            "NE",
+            "Northeast"
+          ],
+          [
+            "SW",
+            "Southwest"
+          ],
+          [
+            "MW",
+            "Mountain West"
+          ]
+        ],
+        "grain": "one row per region code"
+      },
+      {
+        "name": "support_cases",
+        "columns": [
+          {
+            "name": "case_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "customer_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "subject",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "status",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "priority",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "opened_date",
+            "type": "DATE"
+          },
+          {
+            "name": "resolved_date",
+            "type": "DATE"
+          },
+          {
+            "name": "assigned_team",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "satisfaction_score",
+            "type": "INTEGER"
+          }
+        ],
+        "rows": [
+          [
+            5001,
+            101,
+            "Duplicate charge",
+            "Open",
+            "Critical",
+            "2026-07-01",
+            null,
+            "Billing",
+            null
+          ],
+          [
+            5002,
+            102,
+            "Password reset",
+            "Resolved",
+            "Low",
+            "2026-07-01",
+            "2026-07-01",
+            "Access",
+            5
+          ],
+          [
+            5003,
+            103,
+            "Missing shipment",
+            "Open",
+            "High",
+            "2026-07-02",
+            null,
+            "Logistics",
+            null
+          ],
+          [
+            5004,
+            104,
+            "Wrong subscription tier",
+            "Resolved",
+            "Medium",
+            "2026-07-02",
+            "2026-07-04",
+            "Billing",
+            3
+          ],
+          [
+            5005,
+            105,
+            "Invoice total mismatch",
+            "Open",
+            "Critical",
+            "2026-07-03",
+            null,
+            "Billing",
+            null
+          ],
+          [
+            5006,
+            106,
+            "App crash on login",
+            "Investigating",
+            "High",
+            "2026-07-03",
+            null,
+            "Technical",
+            null
+          ],
+          [
+            5007,
+            107,
+            "Refund status",
+            "Resolved",
+            "Medium",
+            "2026-07-04",
+            "2026-07-06",
+            "Billing",
+            4
+          ],
+          [
+            5008,
+            108,
+            "Cannot update address",
+            "Open",
+            "Low",
+            "2026-07-04",
+            null,
+            "Account",
+            null
+          ],
+          [
+            5009,
+            101,
+            "Second duplicate charge",
+            "Resolved",
+            "High",
+            "2026-07-05",
+            "2026-07-08",
+            "Billing",
+            2
+          ],
+          [
+            5010,
+            103,
+            "Shipment arrived damaged",
+            "Resolved",
+            "Critical",
+            "2026-07-05",
+            "2026-07-09",
+            "Logistics",
+            1
+          ],
+          [
+            5011,
+            105,
+            "Coupon not applied",
+            "Resolved",
+            "Low",
+            "2026-07-06",
+            "2026-07-06",
+            "Checkout",
+            5
+          ],
+          [
+            5012,
+            107,
+            "Export is blank",
+            "Investigating",
+            "Critical",
+            "2026-07-06",
+            null,
+            "Technical",
+            null
+          ]
+        ],
+        "grain": "one row per support case"
+      },
+      {
+        "name": "orders",
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "customer_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "order_date",
+            "type": "DATE"
+          },
+          {
+            "name": "status",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "channel",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "total_amount",
+            "type": "DECIMAL(10,2)"
+          }
+        ],
+        "rows": [
+          [
+            7001,
+            101,
+            "2026-06-01",
+            "Completed",
+            "Web",
+            240.0
+          ],
+          [
+            7002,
+            102,
+            "2026-06-02",
+            "Completed",
+            "Mobile",
+            85.5
+          ],
+          [
+            7003,
+            101,
+            "2026-06-08",
+            "Returned",
+            "Web",
+            120.0
+          ],
+          [
+            7004,
+            103,
+            "2026-06-10",
+            "Completed",
+            "Partner",
+            410.25
+          ],
+          [
+            7005,
+            104,
+            "2026-06-12",
+            "Completed",
+            "Web",
+            75.0
+          ],
+          [
+            7006,
+            105,
+            "2026-06-16",
+            "Completed",
+            "Mobile",
+            198.0
+          ],
+          [
+            7007,
+            106,
+            "2026-06-18",
+            "Cancelled",
+            "Web",
+            55.0
+          ],
+          [
+            7008,
+            107,
+            "2026-06-20",
+            "Completed",
+            "Web",
+            320.4
+          ],
+          [
+            7009,
+            108,
+            "2026-06-24",
+            "Completed",
+            "Partner",
+            149.99
+          ],
+          [
+            7010,
+            103,
+            "2026-06-27",
+            "Completed",
+            "Web",
+            260.0
+          ],
+          [
+            7011,
+            105,
+            "2026-07-01",
+            "Completed",
+            "Mobile",
+            520.0
+          ],
+          [
+            7012,
+            107,
+            "2026-07-03",
+            "Completed",
+            "Web",
+            95.75
+          ]
+        ],
+        "grain": "one row per order"
+      },
+      {
+        "name": "products",
+        "columns": [
+          {
+            "name": "product_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "product_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "category",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            201,
+            "Desk Lamp",
+            "Office"
+          ],
+          [
+            202,
+            "Monitor Stand",
+            "Office"
+          ],
+          [
+            203,
+            "Travel Mug",
+            "Kitchen"
+          ],
+          [
+            204,
+            "Keyboard",
+            "Technology"
+          ],
+          [
+            205,
+            "Webcam",
+            "Technology"
+          ],
+          [
+            206,
+            "Notebook Set",
+            "Office"
+          ]
+        ],
+        "grain": "one row per product"
+      },
+      {
+        "name": "order_items",
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "product_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "quantity",
+            "type": "INTEGER"
+          },
+          {
+            "name": "unit_price",
+            "type": "DECIMAL(10,2)"
+          }
+        ],
+        "rows": [
+          [
+            7001,
+            204,
+            2,
+            80.0
+          ],
+          [
+            7001,
+            206,
+            4,
+            20.0
+          ],
+          [
+            7002,
+            203,
+            3,
+            28.5
+          ],
+          [
+            7003,
+            201,
+            2,
+            60.0
+          ],
+          [
+            7004,
+            205,
+            3,
+            110.0
+          ],
+          [
+            7004,
+            206,
+            4,
+            20.0625
+          ],
+          [
+            7005,
+            201,
+            1,
+            60.0
+          ],
+          [
+            7005,
+            206,
+            1,
+            15.0
+          ],
+          [
+            7006,
+            202,
+            2,
+            99.0
+          ],
+          [
+            7008,
+            204,
+            2,
+            80.0
+          ],
+          [
+            7008,
+            205,
+            1,
+            110.4
+          ],
+          [
+            7008,
+            206,
+            2,
+            25.0
+          ],
+          [
+            7009,
+            203,
+            1,
+            29.99
+          ],
+          [
+            7009,
+            202,
+            1,
+            120.0
+          ],
+          [
+            7010,
+            205,
+            2,
+            110.0
+          ],
+          [
+            7010,
+            206,
+            2,
+            20.0
+          ],
+          [
+            7011,
+            204,
+            4,
+            90.0
+          ],
+          [
+            7011,
+            205,
+            1,
+            120.0
+          ],
+          [
+            7011,
+            206,
+            2,
+            20.0
+          ],
+          [
+            7012,
+            203,
+            1,
+            30.75
+          ],
+          [
+            7012,
+            206,
+            5,
+            13.0
+          ]
+        ],
+        "grain": "one row per product line on an order"
+      }
+    ],
+    "northstar_people_projects": [
+      {
+        "name": "employees",
+        "columns": [
+          {
+            "name": "employee_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "employee_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "manager_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "department_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "hire_date",
+            "type": "DATE"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Amara Cole",
+            null,
+            10,
+            "2021-02-10"
+          ],
+          [
+            2,
+            "Ben Ortiz",
+            1,
+            10,
+            "2022-04-18"
+          ],
+          [
+            3,
+            "Chloe Park",
+            1,
+            10,
+            "2023-01-09"
+          ],
+          [
+            4,
+            "Diego Ross",
+            null,
+            20,
+            "2020-11-02"
+          ],
+          [
+            5,
+            "Elena Fox",
+            4,
+            20,
+            "2022-06-14"
+          ],
+          [
+            6,
+            "Farah Singh",
+            4,
+            20,
+            "2024-03-11"
+          ],
+          [
+            7,
+            "Gavin Moore",
+            null,
+            30,
+            "2021-09-27"
+          ],
+          [
+            8,
+            "Hana Lee",
+            7,
+            30,
+            "2023-08-07"
+          ],
+          [
+            9,
+            "Isaac Bell",
+            7,
+            30,
+            "2024-01-15"
+          ],
+          [
+            10,
+            "Jules Grant",
+            null,
+            40,
+            "2025-05-05"
+          ]
+        ],
+        "grain": "one row per employee"
+      },
+      {
+        "name": "departments",
+        "columns": [
+          {
+            "name": "department_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "department_name",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            10,
+            "Customer Operations"
+          ],
+          [
+            20,
+            "Data & Insights"
+          ],
+          [
+            30,
+            "Product"
+          ],
+          [
+            40,
+            "Finance"
+          ]
+        ],
+        "grain": "one row per department"
+      },
+      {
+        "name": "projects",
+        "columns": [
+          {
+            "name": "project_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "project_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "sponsor_department_id",
+            "type": "INTEGER"
+          }
+        ],
+        "rows": [
+          [
+            301,
+            "Case Routing Refresh",
+            10
+          ],
+          [
+            302,
+            "Retention Dashboard",
+            20
+          ],
+          [
+            303,
+            "Mobile Checkout",
+            30
+          ],
+          [
+            304,
+            "Forecast Automation",
+            40
+          ]
+        ],
+        "grain": "one row per project"
+      },
+      {
+        "name": "project_assignments",
+        "columns": [
+          {
+            "name": "project_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "employee_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "hours_allocated",
+            "type": "INTEGER"
+          }
+        ],
+        "rows": [
+          [
+            301,
+            2,
+            60
+          ],
+          [
+            301,
+            3,
+            45
+          ],
+          [
+            301,
+            5,
+            20
+          ],
+          [
+            302,
+            3,
+            30
+          ],
+          [
+            302,
+            5,
+            80
+          ],
+          [
+            302,
+            6,
+            70
+          ],
+          [
+            303,
+            8,
+            90
+          ],
+          [
+            303,
+            9,
+            75
+          ],
+          [
+            303,
+            6,
+            25
+          ],
+          [
+            304,
+            5,
+            40
+          ],
+          [
+            304,
+            10,
+            55
+          ]
+        ],
+        "grain": "one row per employee assignment to a project"
+      },
+      {
+        "name": "members",
+        "columns": [
+          {
+            "name": "member_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "recommended_by",
+            "type": "INTEGER"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Ari",
+            "Morgan",
+            null
+          ],
+          [
+            2,
+            "Bea",
+            "Lopez",
+            1
+          ],
+          [
+            3,
+            "Cal",
+            "Nguyen",
+            1
+          ],
+          [
+            4,
+            "Dara",
+            "Patel",
+            2
+          ],
+          [
+            5,
+            "Evan",
+            "Stone",
+            null
+          ],
+          [
+            6,
+            "Fern",
+            "Owens",
+            5
+          ],
+          [
+            7,
+            "Gia",
+            "Bennett",
+            99
+          ],
+          [
+            8,
+            "Hugo",
+            "Diaz",
+            3
+          ]
+        ],
+        "grain": "one row per program member"
+      },
+      {
+        "name": "facilities",
+        "columns": [
+          {
+            "name": "facility_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "facility_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "member_rate",
+            "type": "DECIMAL(10,2)"
+          },
+          {
+            "name": "guest_rate",
+            "type": "DECIMAL(10,2)"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Analytics Lab",
+            15.0,
+            40.0
+          ],
+          [
+            2,
+            "Interview Studio",
+            10.0,
+            30.0
+          ],
+          [
+            3,
+            "Presentation Room",
+            25.0,
+            60.0
+          ]
+        ],
+        "grain": "one row per reservable facility"
+      },
+      {
+        "name": "bookings",
+        "columns": [
+          {
+            "name": "booking_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "facility_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "member_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "start_time",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "slots",
+            "type": "INTEGER"
+          }
+        ],
+        "rows": [
+          [
+            9001,
+            1,
+            1,
+            "2026-07-01 09:00:00",
+            2
+          ],
+          [
+            9002,
+            1,
+            2,
+            "2026-07-01 11:00:00",
+            3
+          ],
+          [
+            9003,
+            2,
+            2,
+            "2026-07-02 10:00:00",
+            1
+          ],
+          [
+            9004,
+            3,
+            0,
+            "2026-07-02 13:00:00",
+            2
+          ],
+          [
+            9005,
+            2,
+            3,
+            "2026-07-03 15:30:00",
+            2
+          ],
+          [
+            9006,
+            1,
+            4,
+            "2026-07-04 08:00:00",
+            4
+          ],
+          [
+            9007,
+            3,
+            5,
+            "2026-07-04 12:00:00",
+            1
+          ],
+          [
+            9008,
+            1,
+            6,
+            "2026-07-05 09:30:00",
+            2
+          ],
+          [
+            9009,
+            2,
+            0,
+            "2026-07-05 14:00:00",
+            3
+          ],
+          [
+            9010,
+            3,
+            8,
+            "2026-07-06 16:00:00",
+            2
+          ],
+          [
+            9011,
+            1,
+            1,
+            "2026-07-07 10:00:00",
+            2
+          ],
+          [
+            9012,
+            2,
+            3,
+            "2026-07-07 17:00:00",
+            1
+          ]
+        ],
+        "grain": "one row per facility booking; member_id 0 represents a guest"
+      }
+    ],
+    "northstar_analytics": [
+      {
+        "name": "daily_revenue",
+        "columns": [
+          {
+            "name": "revenue_date",
+            "type": "DATE"
+          },
+          {
+            "name": "revenue",
+            "type": "DECIMAL(10,2)"
+          }
+        ],
+        "rows": [
+          [
+            "2026-07-01",
+            1200.0
+          ],
+          [
+            "2026-07-02",
+            1500.0
+          ],
+          [
+            "2026-07-03",
+            900.0
+          ],
+          [
+            "2026-07-04",
+            1800.0
+          ],
+          [
+            "2026-07-05",
+            2100.0
+          ],
+          [
+            "2026-07-06",
+            1600.0
+          ],
+          [
+            "2026-07-07",
+            2400.0
+          ],
+          [
+            "2026-07-08",
+            1950.0
+          ]
+        ],
+        "grain": "one row per calendar day"
+      },
+      {
+        "name": "work_sessions",
+        "columns": [
+          {
+            "name": "session_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "employee_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "team",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "session_date",
+            "type": "DATE"
+          },
+          {
+            "name": "hours",
+            "type": "DECIMAL(6,2)"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            2,
+            "Customer Operations",
+            "2026-07-01",
+            6.5
+          ],
+          [
+            2,
+            2,
+            "Customer Operations",
+            "2026-07-02",
+            7.0
+          ],
+          [
+            3,
+            3,
+            "Customer Operations",
+            "2026-07-01",
+            8.0
+          ],
+          [
+            4,
+            3,
+            "Customer Operations",
+            "2026-07-03",
+            6.0
+          ],
+          [
+            5,
+            5,
+            "Data & Insights",
+            "2026-07-01",
+            7.5
+          ],
+          [
+            6,
+            5,
+            "Data & Insights",
+            "2026-07-02",
+            8.0
+          ],
+          [
+            7,
+            6,
+            "Data & Insights",
+            "2026-07-01",
+            5.0
+          ],
+          [
+            8,
+            6,
+            "Data & Insights",
+            "2026-07-03",
+            9.0
+          ],
+          [
+            9,
+            8,
+            "Product",
+            "2026-07-02",
+            8.0
+          ],
+          [
+            10,
+            8,
+            "Product",
+            "2026-07-03",
+            7.0
+          ],
+          [
+            11,
+            9,
+            "Product",
+            "2026-07-01",
+            7.0
+          ],
+          [
+            12,
+            9,
+            "Product",
+            "2026-07-03",
+            7.5
+          ]
+        ],
+        "grain": "one row per employee work session"
+      },
+      {
+        "name": "project_days",
+        "columns": [
+          {
+            "name": "task_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "start_date",
+            "type": "DATE"
+          },
+          {
+            "name": "end_date",
+            "type": "DATE"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "2026-07-01",
+            "2026-07-02"
+          ],
+          [
+            2,
+            "2026-07-02",
+            "2026-07-03"
+          ],
+          [
+            3,
+            "2026-07-03",
+            "2026-07-04"
+          ],
+          [
+            4,
+            "2026-07-06",
+            "2026-07-07"
+          ],
+          [
+            5,
+            "2026-07-07",
+            "2026-07-08"
+          ],
+          [
+            6,
+            "2026-07-10",
+            "2026-07-11"
+          ],
+          [
+            7,
+            "2026-07-11",
+            "2026-07-12"
+          ],
+          [
+            8,
+            "2026-07-12",
+            "2026-07-13"
+          ]
+        ],
+        "grain": "one row per one-day task interval"
+      },
+      {
+        "name": "specialists",
+        "columns": [
+          {
+            "name": "specialist_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "specialty",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            "Amina",
+            "Analyst"
+          ],
+          [
+            "Blake",
+            "Engineer"
+          ],
+          [
+            "Carmen",
+            "Analyst"
+          ],
+          [
+            "Dev",
+            "Manager"
+          ],
+          [
+            "Elise",
+            "Engineer"
+          ],
+          [
+            "Finn",
+            "Designer"
+          ],
+          [
+            "Grace",
+            "Manager"
+          ],
+          [
+            "Hector",
+            "Designer"
+          ],
+          [
+            "Iris",
+            "Analyst"
+          ],
+          [
+            "Jamal",
+            "Engineer"
+          ],
+          [
+            "Kira",
+            "Designer"
+          ]
+        ],
+        "grain": "one row per specialist"
+      }
+    ],
+    "northstar_events": [
+      {
+        "name": "users",
+        "columns": [
+          {
+            "name": "user_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "signup_date",
+            "type": "DATE"
+          },
+          {
+            "name": "status",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "country",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "2026-01-05",
+            "Active",
+            "US"
+          ],
+          [
+            2,
+            "2026-01-18",
+            "Active",
+            "US"
+          ],
+          [
+            3,
+            "2026-02-02",
+            "Inactive",
+            "CA"
+          ],
+          [
+            4,
+            "2026-02-20",
+            "Active",
+            "UK"
+          ],
+          [
+            5,
+            "2026-03-03",
+            "Active",
+            "US"
+          ],
+          [
+            6,
+            "2026-03-28",
+            "Inactive",
+            "CA"
+          ],
+          [
+            7,
+            "2026-04-11",
+            "Active",
+            "UK"
+          ],
+          [
+            8,
+            "2026-04-23",
+            "Active",
+            "US"
+          ],
+          [
+            9,
+            "2026-05-02",
+            "Active",
+            "CA"
+          ],
+          [
+            10,
+            "2026-05-17",
+            "Inactive",
+            "US"
+          ]
+        ],
+        "grain": "one row per registered user"
+      },
+      {
+        "name": "user_events",
+        "columns": [
+          {
+            "name": "event_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "user_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "event_time",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "event_type",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            1,
+            "2026-01-05 09:00:00",
+            "login"
+          ],
+          [
+            2,
+            1,
+            "2026-02-04 10:00:00",
+            "report_view"
+          ],
+          [
+            3,
+            2,
+            "2026-01-18 11:00:00",
+            "login"
+          ],
+          [
+            4,
+            2,
+            "2026-03-02 12:00:00",
+            "export"
+          ],
+          [
+            5,
+            3,
+            "2026-02-02 09:30:00",
+            "login"
+          ],
+          [
+            6,
+            4,
+            "2026-02-20 14:00:00",
+            "login"
+          ],
+          [
+            7,
+            4,
+            "2026-03-15 15:00:00",
+            "report_view"
+          ],
+          [
+            8,
+            5,
+            "2026-03-03 08:00:00",
+            "login"
+          ],
+          [
+            9,
+            5,
+            "2026-04-09 16:00:00",
+            "export"
+          ],
+          [
+            10,
+            6,
+            "2026-03-28 09:00:00",
+            "login"
+          ],
+          [
+            11,
+            7,
+            "2026-04-11 10:00:00",
+            "login"
+          ],
+          [
+            12,
+            7,
+            "2026-05-01 10:30:00",
+            "report_view"
+          ],
+          [
+            13,
+            8,
+            "2026-04-23 12:00:00",
+            "login"
+          ],
+          [
+            14,
+            8,
+            "2026-05-06 13:00:00",
+            "export"
+          ],
+          [
+            15,
+            9,
+            "2026-05-02 09:00:00",
+            "login"
+          ],
+          [
+            16,
+            10,
+            "2026-05-17 11:00:00",
+            "login"
+          ]
+        ],
+        "grain": "one row per user activity event"
+      },
+      {
+        "name": "raw_metrics",
+        "columns": [
+          {
+            "name": "metric_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "metric_value",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "42.5"
+          ],
+          [
+            2,
+            "18"
+          ],
+          [
+            3,
+            "unknown"
+          ],
+          [
+            4,
+            " 73.25 "
+          ],
+          [
+            5,
+            "N/A"
+          ],
+          [
+            6,
+            "0"
+          ],
+          [
+            7,
+            "-4.5"
+          ],
+          [
+            8,
+            "125.00"
+          ]
+        ],
+        "grain": "one row per raw metric reading"
+      }
+    ],
+    "northstar_design": [
+      {
+        "name": "raw_contacts",
+        "columns": [
+          {
+            "name": "contact_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "full_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "region",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "ana@example.com",
+            "Ana Ruiz",
+            "East"
+          ],
+          [
+            2,
+            "ben@example.com",
+            "Ben Cole",
+            "West"
+          ],
+          [
+            3,
+            "ana@example.com",
+            "Ana R.",
+            "East"
+          ],
+          [
+            4,
+            null,
+            "Cara Fox",
+            "North"
+          ],
+          [
+            5,
+            "dev@example.com",
+            "Dev Shah",
+            "West"
+          ]
+        ],
+        "grain": "one row per imported contact record"
+      },
+      {
+        "name": "raw_order_lines",
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "customer_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "customer_email",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "product_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "product_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "unit_price",
+            "type": "DECIMAL(10,2)"
+          },
+          {
+            "name": "quantity",
+            "type": "INTEGER"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Ana Ruiz",
+            "ana@example.com",
+            10,
+            "Desk Lamp",
+            45.0,
+            1
+          ],
+          [
+            1,
+            "Ana Ruiz",
+            "ana@example.com",
+            11,
+            "Keyboard",
+            80.0,
+            1
+          ],
+          [
+            2,
+            "Ben Cole",
+            "ben@example.com",
+            10,
+            "Desk Lamp",
+            45.0,
+            2
+          ],
+          [
+            3,
+            "Cara Fox",
+            "cara@example.com",
+            11,
+            "Keyboard",
+            80.0,
+            1
+          ],
+          [
+            4,
+            "Dev Shah",
+            "dev@example.com",
+            10,
+            "Desk Lamp",
+            49.0,
+            1
+          ],
+          [
+            5,
+            "Ana Ruiz",
+            "ana@example.com",
+            12,
+            "Webcam",
+            110.0,
+            1
+          ]
+        ],
+        "grain": "one row per order product line in a denormalized import"
+      },
+      {
+        "name": "secure_customers",
+        "columns": [
+          {
+            "name": "customer_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "customer_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "phone",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "region",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "lifetime_value",
+            "type": "DECIMAL(12,2)"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Ana Ruiz",
+            "ana@example.com",
+            "404-555-0101",
+            "East",
+            840.0
+          ],
+          [
+            2,
+            "Ben Cole",
+            "ben@example.com",
+            "206-555-0102",
+            "West",
+            420.0
+          ],
+          [
+            3,
+            "Cara Fox",
+            "cara@example.com",
+            "312-555-0103",
+            "North",
+            510.0
+          ],
+          [
+            4,
+            "Dev Shah",
+            "dev@example.com",
+            "512-555-0104",
+            "West",
+            1200.0
+          ]
+        ],
+        "grain": "one row per customer including restricted contact fields"
+      },
+      {
+        "name": "accounts",
+        "columns": [
+          {
+            "name": "account_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "account_name",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Arbor Health"
+          ],
+          [
+            2,
+            "Brightline Media"
+          ],
+          [
+            3,
+            "Cedar Works"
+          ],
+          [
+            4,
+            "Delta Foods"
+          ]
+        ],
+        "grain": "one row per account"
+      },
+      {
+        "name": "account_orders",
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "account_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "order_total",
+            "type": "DECIMAL(10,2)"
+          }
+        ],
+        "rows": [
+          [
+            101,
+            1,
+            250.0
+          ],
+          [
+            102,
+            2,
+            180.0
+          ],
+          [
+            103,
+            5,
+            95.0
+          ],
+          [
+            104,
+            3,
+            410.0
+          ],
+          [
+            105,
+            null,
+            70.0
+          ]
+        ],
+        "grain": "one row per account order; invalid or missing account IDs are deliberate"
+      }
+    ],
+    "northstar_vfx": [
+      {
+        "name": "vfx_projects",
+        "columns": [
+          {
+            "name": "project_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "project_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "client_name",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Aurora Run",
+            "Silver Frame"
+          ],
+          [
+            2,
+            "Harbor Lights",
+            "Northstar Pictures"
+          ],
+          [
+            3,
+            "Glass City",
+            "Silver Frame"
+          ]
+        ],
+        "grain": "one row per VFX project"
+      },
+      {
+        "name": "vfx_shots",
+        "columns": [
+          {
+            "name": "shot_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "project_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "department",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "status",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "deadline",
+            "type": "DATE"
+          },
+          {
+            "name": "delivery_date",
+            "type": "DATE"
+          },
+          {
+            "name": "estimated_hours",
+            "type": "DECIMAL(8,2)"
+          },
+          {
+            "name": "actual_hours",
+            "type": "DECIMAL(8,2)"
+          }
+        ],
+        "rows": [
+          [
+            101,
+            1,
+            "Compositing",
+            "Final",
+            "2026-06-10",
+            "2026-06-09",
+            40,
+            38
+          ],
+          [
+            102,
+            1,
+            "Compositing",
+            "Final",
+            "2026-06-12",
+            "2026-06-15",
+            32,
+            45
+          ],
+          [
+            103,
+            1,
+            "FX",
+            "Final",
+            "2026-06-14",
+            "2026-06-14",
+            55,
+            60
+          ],
+          [
+            104,
+            2,
+            "Compositing",
+            "In Progress",
+            "2026-07-01",
+            null,
+            28,
+            20
+          ],
+          [
+            105,
+            2,
+            "Lighting",
+            "Final",
+            "2026-06-20",
+            "2026-06-23",
+            70,
+            82
+          ],
+          [
+            106,
+            2,
+            "Compositing",
+            "Final",
+            "2026-06-21",
+            "2026-06-21",
+            36,
+            34
+          ],
+          [
+            107,
+            3,
+            "FX",
+            "Final",
+            "2026-06-25",
+            "2026-06-28",
+            48,
+            58
+          ],
+          [
+            108,
+            3,
+            "Lighting",
+            "Final",
+            "2026-06-26",
+            "2026-06-25",
+            62,
+            59
+          ],
+          [
+            109,
+            3,
+            "Compositing",
+            "Final",
+            "2026-06-28",
+            "2026-07-02",
+            44,
+            56
+          ]
+        ],
+        "grain": "one row per VFX shot"
+      }
+    ],
+    "northstar_product": [
+      {
+        "name": "restaurant_orders",
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "restaurant_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "order_time",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "subtotal",
+            "type": "DECIMAL(10,2)"
+          },
+          {
+            "name": "service_fee",
+            "type": "DECIMAL(10,2)"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Basil & Brick",
+            "2026-07-06 11:20:00",
+            42.0,
+            4.2
+          ],
+          [
+            2,
+            "Basil & Brick",
+            "2026-07-06 18:10:00",
+            76.0,
+            7.6
+          ],
+          [
+            3,
+            "Cedar Bowl",
+            "2026-07-07 12:00:00",
+            31.0,
+            3.1
+          ],
+          [
+            4,
+            "Cedar Bowl",
+            "2026-07-08 19:30:00",
+            58.0,
+            5.8
+          ],
+          [
+            5,
+            "Dawn Cafe",
+            "2026-07-07 08:15:00",
+            18.0,
+            1.8
+          ],
+          [
+            6,
+            "Dawn Cafe",
+            "2026-07-09 09:10:00",
+            24.0,
+            2.4
+          ],
+          [
+            7,
+            "Ember Pizza",
+            "2026-07-08 17:45:00",
+            95.0,
+            9.5
+          ],
+          [
+            8,
+            "Ember Pizza",
+            "2026-07-10 20:05:00",
+            120.0,
+            12.0
+          ],
+          [
+            9,
+            "Fern Kitchen",
+            "2026-07-09 13:25:00",
+            44.0,
+            4.4
+          ],
+          [
+            10,
+            "Fern Kitchen",
+            "2026-07-10 18:30:00",
+            52.0,
+            5.2
+          ]
+        ],
+        "grain": "one row per restaurant order"
+      }
+    ],
+    "northstar_workforce": [
+      {
+        "name": "teams",
+        "columns": [
+          {
+            "name": "team_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "team_name",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Support"
+          ],
+          [
+            2,
+            "Data"
+          ],
+          [
+            3,
+            "Product"
+          ]
+        ],
+        "grain": "one row per team"
+      },
+      {
+        "name": "workers",
+        "columns": [
+          {
+            "name": "worker_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "worker_name",
+            "type": "VARCHAR"
+          },
+          {
+            "name": "team_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "hourly_rate",
+            "type": "DECIMAL(8,2)"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "Ari Long",
+            1,
+            32.0
+          ],
+          [
+            2,
+            "Bea Moss",
+            1,
+            30.0
+          ],
+          [
+            3,
+            "Cam Reed",
+            2,
+            42.0
+          ],
+          [
+            4,
+            "Dee Shah",
+            2,
+            45.0
+          ],
+          [
+            5,
+            "Eli Park",
+            3,
+            40.0
+          ]
+        ],
+        "grain": "one row per worker"
+      },
+      {
+        "name": "shifts",
+        "columns": [
+          {
+            "name": "shift_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "worker_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "shift_date",
+            "type": "DATE"
+          },
+          {
+            "name": "regular_hours",
+            "type": "DECIMAL(6,2)"
+          },
+          {
+            "name": "overtime_hours",
+            "type": "DECIMAL(6,2)"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            1,
+            "2026-07-01",
+            8,
+            2
+          ],
+          [
+            2,
+            1,
+            "2026-07-02",
+            8,
+            0
+          ],
+          [
+            3,
+            2,
+            "2026-07-01",
+            7.5,
+            0
+          ],
+          [
+            4,
+            3,
+            "2026-07-01",
+            8,
+            1
+          ],
+          [
+            5,
+            3,
+            "2026-07-02",
+            8,
+            2
+          ],
+          [
+            6,
+            4,
+            "2026-07-01",
+            8,
+            0
+          ],
+          [
+            7,
+            4,
+            "2026-07-03",
+            6,
+            3
+          ],
+          [
+            8,
+            5,
+            "2026-07-02",
+            8,
+            0
+          ],
+          [
+            9,
+            5,
+            "2026-07-03",
+            8,
+            1
+          ]
+        ],
+        "grain": "one row per worker shift"
+      }
+    ],
+    "northstar_audit": [
+      {
+        "name": "audit_customers",
+        "columns": [
+          {
+            "name": "customer_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR"
+          }
+        ],
+        "rows": [
+          [
+            1,
+            "a@example.com"
+          ],
+          [
+            2,
+            "b@example.com"
+          ],
+          [
+            2,
+            "b2@example.com"
+          ],
+          [
+            3,
+            null
+          ],
+          [
+            4,
+            "d@example.com"
+          ]
+        ],
+        "grain": "one row per imported customer record; duplicate IDs are deliberate"
+      },
+      {
+        "name": "audit_orders",
+        "columns": [
+          {
+            "name": "order_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "customer_id",
+            "type": "INTEGER"
+          },
+          {
+            "name": "amount",
+            "type": "DECIMAL(10,2)"
+          }
+        ],
+        "rows": [
+          [
+            101,
+            1,
+            50.0
+          ],
+          [
+            102,
+            2,
+            75.0
+          ],
+          [
+            103,
+            9,
+            40.0
+          ],
+          [
+            104,
+            null,
+            25.0
+          ],
+          [
+            105,
+            4,
+            -10.0
+          ],
+          [
+            105,
+            4,
+            -10.0
+          ]
+        ],
+        "grain": "one row per imported order record; integrity issues are deliberate"
+      }
+    ]
+  },
+  "exercises": [
+    {
+      "display_number": 1,
+      "title": "Create Customer Display Names",
+      "source": {
+        "provider": "SQL Practice",
+        "challenge": "Combine first and last names into one full-name column",
+        "url": "https://www.sql-practice.com/",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "SELECT expressions and aliases",
+      "learning_objective": "Build one readable display field from two source columns and name it clearly.",
+      "gate": {
+        "course": "Intermediate SQL",
+        "chapter": 1,
+        "week": 3,
+        "weekday": "Tuesday",
+        "order_in_day": 1,
+        "chapter_key": "w03_intermediate_sql_01"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "Northstar support agents need one clean customer label for a new case-assignment screen.",
+      "task": "Return each customer ID with the customer’s first and last name combined as `customer_name`.",
+      "result_requirements": [
+        "Return `customer_id` and `customer_name` in that order.",
+        "Sort by `customer_id` from lowest to highest."
+      ],
+      "solution_sql": "SELECT customer_id, first_name || ' ' || last_name AS customer_name\n      FROM customers\n      ORDER BY customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "customer_name"
+      ],
+      "expected_row_count": 8,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bas\\s+customer_name\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "Use the text-concatenation operator between the two name columns.",
+        "Add a single space between the first and last name.",
+        "Give the completed expression the alias `customer_name`, then sort by the ID."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 1,
+      "terminal_chapter": "w03_intermediate_sql_01"
+    },
+    {
+      "display_number": 2,
+      "title": "Filter Urgent Open Cases",
+      "source": {
+        "provider": "SQL Practice",
+        "challenge": "Filter records by one condition",
+        "url": "https://www.sql-practice.com/",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "WHERE filters",
+      "learning_objective": "Use more than one condition to keep only the records a manager requested.",
+      "gate": {
+        "course": "Intermediate SQL",
+        "chapter": 2,
+        "week": 3,
+        "weekday": "Tuesday",
+        "order_in_day": 2,
+        "chapter_key": "w03_intermediate_sql_02"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "The support director is preparing a same-day escalation list.",
+      "task": "Return the open support cases whose priority is `Critical`.",
+      "result_requirements": [
+        "Return `case_id`, `subject`, and `assigned_team`.",
+        "Sort by `case_id` from lowest to highest."
+      ],
+      "solution_sql": "SELECT case_id, subject, assigned_team\n      FROM support_cases\n      WHERE status = 'Open' AND priority = 'Critical'\n      ORDER BY case_id;\n",
+      "expected_columns": [
+        "case_id",
+        "subject",
+        "assigned_team"
+      ],
+      "expected_row_count": 2,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bwhere\\b",
+        "\\band\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "Start by filtering the `status` column.",
+        "Add a second condition for the requested priority.",
+        "Both conditions must be true for a row to remain."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 19,
+      "terminal_chapter": "w03_intermediate_sql_02"
+    },
+    {
+      "display_number": 3,
+      "title": "Count Resolved Cases by Team",
+      "source": {
+        "provider": "SQL Practice",
+        "challenge": "Count records by city",
+        "url": "https://www.sql-practice.com/",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "Aggregate functions and GROUP BY",
+      "learning_objective": "Count matching records at the requested business grain.",
+      "gate": {
+        "course": "Intermediate SQL",
+        "chapter": 3,
+        "week": 3,
+        "weekday": "Wednesday",
+        "order_in_day": 1,
+        "chapter_key": "w03_intermediate_sql_03"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "The operations lead wants a quick view of which teams closed the most cases.",
+      "task": "Count resolved cases for each assigned team.",
+      "result_requirements": [
+        "Return `assigned_team` and `resolved_case_count`.",
+        "Show only teams with at least one resolved case.",
+        "Sort by `resolved_case_count` descending, then `assigned_team` ascending."
+      ],
+      "solution_sql": "SELECT assigned_team, COUNT(*) AS resolved_case_count\n      FROM support_cases\n      WHERE status = 'Resolved'\n      GROUP BY assigned_team\n      ORDER BY resolved_case_count DESC, assigned_team;\n",
+      "expected_columns": [
+        "assigned_team",
+        "resolved_case_count"
+      ],
+      "expected_row_count": 4,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bcount\\s*\\(",
+        "\\bgroup\\s+by\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "Filter to resolved cases before grouping.",
+        "Each output row should represent one assigned team.",
+        "Count the rows in each team and sort the largest count first."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 20,
+      "terminal_chapter": "w03_intermediate_sql_03"
+    },
+    {
+      "display_number": 4,
+      "title": "Find Southeast Customers Missing Phone Numbers",
+      "source": {
+        "provider": "SQL Practice",
+        "challenge": "Combine filters and require a recorded value",
+        "url": "https://www.sql-practice.com/",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "NULL handling and multi-level sorting",
+      "learning_objective": "Combine a text filter with a missing-value condition and deterministic sorting.",
+      "gate": {
+        "course": "Intermediate SQL",
+        "chapter": 4,
+        "week": 3,
+        "weekday": "Thursday",
+        "order_in_day": 1,
+        "chapter_key": "w03_intermediate_sql_04"
+      },
+      "prerequisite_exercises": [
+        2
+      ],
+      "estimated_minutes": 25,
+      "scenario": "The customer-success team is cleaning contact details before an outreach campaign.",
+      "task": "Return Southeast customers who do not have a phone number recorded.",
+      "result_requirements": [
+        "Return `customer_id`, `first_name`, `last_name`, and `city`.",
+        "Sort by `city`, then `last_name`, then `customer_id`, all ascending."
+      ],
+      "solution_sql": "SELECT customer_id, first_name, last_name, city\n      FROM customers\n      WHERE region_code = 'SE' AND phone IS NULL\n      ORDER BY city, last_name, customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "first_name",
+        "last_name",
+        "city"
+      ],
+      "expected_row_count": 1,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bis\\s+null\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "Use `IS NULL` rather than comparing the phone column with an empty string.",
+        "The region and missing-phone conditions must both be true.",
+        "Use three sort fields so the result is stable."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 2,
+      "terminal_chapter": "w03_intermediate_sql_04"
+    },
+    {
+      "display_number": 5,
+      "title": "Show Customers with Full Region Names",
+      "source": {
+        "provider": "SQL Practice",
+        "challenge": "Join patients to full province names",
+        "url": "https://www.sql-practice.com/",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "INNER JOIN",
+      "learning_objective": "Connect two tables through a matching key and select fields from both.",
+      "gate": {
+        "course": "Joining Data in SQL",
+        "chapter": 1,
+        "week": 3,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w03_joining_sql_01"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "The reporting team wants readable region names instead of internal region codes.",
+      "task": "Return every customer with the full name of the customer’s region.",
+      "result_requirements": [
+        "Return `customer_id`, `customer_name`, and `region_name`.",
+        "Sort by `customer_id`."
+      ],
+      "solution_sql": "SELECT c.customer_id,\n             c.first_name || ' ' || c.last_name AS customer_name,\n             r.region_name\n      FROM customers AS c\n      INNER JOIN regions AS r ON c.region_code = r.region_code\n      ORDER BY c.customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "customer_name",
+        "region_name"
+      ],
+      "expected_row_count": 8,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bjoin\\b",
+        "\\bon\\b",
+        "\\bas\\s+customer_name\\b"
+      ],
+      "hints": [
+        "The shared key is `region_code`.",
+        "Use one table alias for customers and another for regions.",
+        "Build the display name from the customer table after the join."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 21,
+      "terminal_chapter": "w03_joining_sql_01"
+    },
+    {
+      "display_number": 6,
+      "title": "List Employees Assigned to Sponsored Projects",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Produce a list of all members who have used a tennis court",
+        "url": "https://pgexercises.com/questions/joins/threejoin.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_people_projects",
+      "concept": "Multiple INNER JOINs",
+      "learning_objective": "Join three related tables to produce one deduplicated assignment list.",
+      "gate": {
+        "course": "Joining Data in SQL",
+        "chapter": 1,
+        "week": 3,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w03_joining_sql_01"
+      },
+      "prerequisite_exercises": [
+        5
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Program leadership needs to know who is working on each sponsored initiative.",
+      "task": "List every project assignment with the project name, employee name, and allocated hours.",
+      "result_requirements": [
+        "Return `project_name`, `employee_name`, and `hours_allocated`.",
+        "Sort by `project_name`, then `employee_name`."
+      ],
+      "solution_sql": "SELECT p.project_name, e.employee_name, a.hours_allocated\n      FROM project_assignments AS a\n      INNER JOIN projects AS p ON a.project_id = p.project_id\n      INNER JOIN employees AS e ON a.employee_id = e.employee_id\n      ORDER BY p.project_name, e.employee_name;\n",
+      "expected_columns": [
+        "project_name",
+        "employee_name",
+        "hours_allocated"
+      ],
+      "expected_row_count": 11,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bjoin\\b.*\\bjoin\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "Start from the assignment table because it contains both keys.",
+        "Join projects using `project_id`.",
+        "Join employees using `employee_id`, then select the readable names."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 6,
+      "terminal_chapter": "w03_joining_sql_01"
+    },
+    {
+      "display_number": 7,
+      "title": "Show Employees and Their Managers",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Produce a list of all members, along with their recommender",
+        "url": "https://pgexercises.com/questions/joins/self2.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_people_projects",
+      "concept": "Self join and LEFT JOIN",
+      "learning_objective": "Preserve every employee while looking up an optional manager in the same table.",
+      "gate": {
+        "course": "Joining Data in SQL",
+        "chapter": 2,
+        "week": 4,
+        "weekday": "Monday",
+        "order_in_day": 1,
+        "chapter_key": "w04_joining_sql_02"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "HR needs an organization-directory extract that still includes department heads without managers.",
+      "task": "Return every employee with the employee’s manager name when one exists.",
+      "result_requirements": [
+        "Return `employee_name` and `manager_name`.",
+        "Use `NULL` for employees without a manager.",
+        "Sort by `employee_name`."
+      ],
+      "solution_sql": "SELECT e.employee_name, m.employee_name AS manager_name\n      FROM employees AS e\n      LEFT JOIN employees AS m ON e.manager_id = m.employee_id\n      ORDER BY e.employee_name;\n",
+      "expected_columns": [
+        "employee_name",
+        "manager_name"
+      ],
+      "expected_row_count": 10,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bleft\\s+(?:outer\\s+)?join\\b"
+      ],
+      "hints": [
+        "Use the employees table twice with different aliases.",
+        "The employee row should be on the preserved side of the join.",
+        "Match the employee’s `manager_id` to the manager alias’s `employee_id`."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 22,
+      "terminal_chapter": "w04_joining_sql_02"
+    },
+    {
+      "display_number": 8,
+      "title": "Combine Members and Guests into One Booking List",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Combining results from multiple queries",
+        "url": "https://pgexercises.com/questions/basic/union.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_people_projects",
+      "concept": "UNION",
+      "learning_objective": "Combine compatible result sets into one duplicate-free list.",
+      "gate": {
+        "course": "Joining Data in SQL",
+        "chapter": 3,
+        "week": 4,
+        "weekday": "Monday",
+        "order_in_day": 2,
+        "chapter_key": "w04_joining_sql_03"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "The facilities coordinator needs one list from the `bookings` table showing whether each booking belongs to a member or a guest. The `booking_type` field does not exist in the dataset; create it as a text alias in each SELECT.",
+      "task": "Using the `bookings` table, return each `booking_id` and create a calculated text column named `booking_type`. Label rows with a nonzero `member_id` as `Member`, label rows with `member_id = 0` as `Guest`, and combine the two compatible queries with `UNION`.",
+      "result_requirements": [
+        "Use the `bookings` table for both SELECT statements.",
+        "Return `booking_id` and a calculated alias named `booking_type`.",
+        "Use `'Member' AS booking_type` when `member_id <> 0` and `'Guest' AS booking_type` when `member_id = 0`.",
+        "Combine the two result sets with `UNION` and sort by `booking_id`."
+      ],
+      "solution_sql": "SELECT booking_id, 'Member' AS booking_type\n      FROM bookings\n      WHERE member_id <> 0\n      UNION\n      SELECT booking_id, 'Guest' AS booking_type\n      FROM bookings\n      WHERE member_id = 0\n      ORDER BY booking_id;\n",
+      "expected_columns": [
+        "booking_id",
+        "booking_type"
+      ],
+      "expected_row_count": 12,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bunion\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "`booking_type` is not a stored column. Create it by selecting a text literal with `AS booking_type`.",
+        "Write one query against `bookings` for nonzero member IDs and a second query against `bookings` for member ID 0.",
+        "Both queries must return `booking_id` followed by the calculated `booking_type`, then be combined with `UNION`."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 16,
+      "terminal_chapter": "w04_joining_sql_03"
+    },
+    {
+      "display_number": 9,
+      "title": "Count Employees and Assignments by Department",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "New Companies",
+        "url": "https://www.hackerrank.com/challenges/the-company/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_people_projects",
+      "concept": "Hierarchy joins and distinct counts",
+      "learning_objective": "Aggregate a small relational hierarchy without multiplying counts.",
+      "gate": {
+        "course": "Joining Data in SQL",
+        "chapter": 3,
+        "week": 4,
+        "weekday": "Monday",
+        "order_in_day": 2,
+        "chapter_key": "w04_joining_sql_03"
+      },
+      "prerequisite_exercises": [
+        6
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Leadership wants a department-level staffing summary that distinguishes employees from project assignments.",
+      "task": "For each department, count distinct employees and distinct project assignments.",
+      "result_requirements": [
+        "Return `department_name`, `employee_count`, and `assignment_count`.",
+        "Include departments with no project assignments.",
+        "Sort by `department_name`."
+      ],
+      "solution_sql": "SELECT d.department_name,\n             COUNT(DISTINCT e.employee_id) AS employee_count,\n             COUNT(DISTINCT (a.project_id, a.employee_id)) AS assignment_count\n      FROM departments AS d\n      LEFT JOIN employees AS e ON d.department_id = e.department_id\n      LEFT JOIN project_assignments AS a ON e.employee_id = a.employee_id\n      GROUP BY d.department_name\n      ORDER BY d.department_name;\n",
+      "expected_columns": [
+        "department_name",
+        "employee_count",
+        "assignment_count"
+      ],
+      "expected_row_count": 4,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bleft\\s+join\\b",
+        "\\bcount\\s*\\(\\s*distinct",
+        "\\bgroup\\s+by\\b"
+      ],
+      "hints": [
+        "Preserve departments by starting from the department table.",
+        "Joining assignments can repeat employee rows, so count employee IDs distinctly.",
+        "An assignment is identified by the project-and-employee pair."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 13,
+      "terminal_chapter": "w04_joining_sql_03"
+    },
+    {
+      "display_number": 10,
+      "title": "Find Bookings Above Their Facility Average",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Produce a list of costly bookings, using a subquery",
+        "url": "https://pgexercises.com/questions/joins/tjsub.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_people_projects",
+      "concept": "Correlated subquery",
+      "learning_objective": "Compare each row with an aggregate calculated for its own group.",
+      "gate": {
+        "course": "Joining Data in SQL",
+        "chapter": 4,
+        "week": 4,
+        "weekday": "Tuesday",
+        "order_in_day": 1,
+        "chapter_key": "w04_joining_sql_04"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "The facilities manager wants unusually long bookings reviewed by facility.",
+      "task": "Return bookings whose slot count is greater than the average slot count for the same facility.",
+      "result_requirements": [
+        "Return `booking_id`, `facility_id`, and `slots`.",
+        "Sort by `facility_id`, then `booking_id`."
+      ],
+      "solution_sql": "SELECT b.booking_id, b.facility_id, b.slots\n      FROM bookings AS b\n      WHERE b.slots > (\n          SELECT AVG(b2.slots)\n          FROM bookings AS b2\n          WHERE b2.facility_id = b.facility_id\n      )\n      ORDER BY b.facility_id, b.booking_id;\n",
+      "expected_columns": [
+        "booking_id",
+        "facility_id",
+        "slots"
+      ],
+      "expected_row_count": 6,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bselect\\b.*\\bselect\\b",
+        "\\bavg\\s*\\("
+      ],
+      "hints": [
+        "The comparison value is different for each facility.",
+        "The inner query should average slots only for the current outer facility.",
+        "Correlate the inner facility ID with the outer booking alias."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 23,
+      "terminal_chapter": "w04_joining_sql_04"
+    },
+    {
+      "display_number": 11,
+      "title": "Classify Orders by Value",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "Type of Triangle",
+        "url": "https://www.hackerrank.com/challenges/what-type-of-triangle/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "CASE expressions",
+      "learning_objective": "Turn numeric values into clear business categories.",
+      "gate": {
+        "course": "Data Manipulation in SQL",
+        "chapter": 1,
+        "week": 4,
+        "weekday": "Tuesday",
+        "order_in_day": 2,
+        "chapter_key": "w04_manipulation_sql_01"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "The sales team wants a simple size label for completed orders.",
+      "task": "Classify each completed order as `Small`, `Standard`, or `Large` based on its total amount.",
+      "result_requirements": [
+        "Use `Small` below 100, `Standard` from 100 through 299.99, and `Large` at 300 or more.",
+        "Return `order_id`, `total_amount`, and `order_size`.",
+        "Sort by `order_id`."
+      ],
+      "solution_sql": "SELECT order_id, total_amount,\n             CASE\n               WHEN total_amount < 100 THEN 'Small'\n               WHEN total_amount < 300 THEN 'Standard'\n               ELSE 'Large'\n             END AS order_size\n      FROM orders\n      WHERE status = 'Completed'\n      ORDER BY order_id;\n",
+      "expected_columns": [
+        "order_id",
+        "total_amount",
+        "order_size"
+      ],
+      "expected_row_count": 10,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bcase\\b",
+        "\\bend\\s+as\\s+order_size\\b"
+      ],
+      "hints": [
+        "Evaluate the smallest range first.",
+        "The second condition only needs to test the upper limit because smaller values have already been handled.",
+        "Use `ELSE` for orders of 300 or more."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 5,
+      "terminal_chapter": "w04_manipulation_sql_01"
+    },
+    {
+      "display_number": 12,
+      "title": "Find Orders Above the Overall Average",
+      "source": {
+        "provider": "StrataScratch",
+        "challenge": "Customer Average Orders",
+        "url": "https://platform.stratascratch.com/coding-question?id=2013",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "Scalar subquery",
+      "learning_objective": "Use a one-value subquery as a filter threshold.",
+      "gate": {
+        "course": "Data Manipulation in SQL",
+        "chapter": 2,
+        "week": 4,
+        "weekday": "Wednesday",
+        "order_in_day": 1,
+        "chapter_key": "w04_manipulation_sql_02"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "Finance wants to review completed orders that are larger than the typical completed order.",
+      "task": "Return completed orders whose total amount is greater than the average completed-order amount.",
+      "result_requirements": [
+        "Return `order_id`, `customer_id`, and `total_amount`.",
+        "Sort by `total_amount` descending, then `order_id`."
+      ],
+      "solution_sql": "SELECT order_id, customer_id, total_amount\n      FROM orders\n      WHERE status = 'Completed'\n        AND total_amount > (\n          SELECT AVG(total_amount)\n          FROM orders\n          WHERE status = 'Completed'\n        )\n      ORDER BY total_amount DESC, order_id;\n",
+      "expected_columns": [
+        "order_id",
+        "customer_id",
+        "total_amount"
+      ],
+      "expected_row_count": 5,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bselect\\b.*\\bselect\\b",
+        "\\bavg\\s*\\("
+      ],
+      "hints": [
+        "The inner query should return exactly one number.",
+        "Use the same completed-order filter inside and outside the subquery.",
+        "Compare each outer order total with the average returned by the inner query."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 7,
+      "terminal_chapter": "w04_manipulation_sql_02"
+    },
+    {
+      "display_number": 13,
+      "title": "Identify High-Value Repeat Customers",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "Interviews",
+        "url": "https://www.hackerrank.com/challenges/interviews/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "CTEs and staged aggregation",
+      "learning_objective": "Build a readable multi-stage query that calculates customer metrics before filtering.",
+      "gate": {
+        "course": "Data Manipulation in SQL",
+        "chapter": 3,
+        "week": 4,
+        "weekday": "Thursday",
+        "order_in_day": 1,
+        "chapter_key": "w04_manipulation_sql_03"
+      },
+      "prerequisite_exercises": [
+        12
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Customer success wants a list of repeat buyers whose completed-order value is at least 400 dollars.",
+      "task": "Return customers with at least two completed orders and at least 400 dollars in completed-order value.",
+      "result_requirements": [
+        "Return `customer_id`, `customer_name`, `completed_orders`, and `completed_value`.",
+        "Round `completed_value` to two decimals.",
+        "Sort by `completed_value` descending, then `customer_id`."
+      ],
+      "solution_sql": "WITH customer_metrics AS (\n        SELECT customer_id,\n               COUNT(*) AS completed_orders,\n               SUM(total_amount) AS completed_value\n        FROM orders\n        WHERE status = 'Completed'\n        GROUP BY customer_id\n      )\n      SELECT c.customer_id,\n             c.first_name || ' ' || c.last_name AS customer_name,\n             m.completed_orders,\n             ROUND(m.completed_value, 2) AS completed_value\n      FROM customer_metrics AS m\n      INNER JOIN customers AS c ON m.customer_id = c.customer_id\n      WHERE m.completed_orders >= 2 AND m.completed_value >= 400\n      ORDER BY completed_value DESC, c.customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "customer_name",
+        "completed_orders",
+        "completed_value"
+      ],
+      "expected_row_count": 3,
+      "order_matters": true,
+      "required_patterns": [
+        "^\\s*with\\b",
+        "\\bgroup\\s+by\\b",
+        "\\bjoin\\b"
+      ],
+      "hints": [
+        "Create one CTE at the customer grain.",
+        "Calculate both the order count and total value inside the CTE.",
+        "Join the summarized rows to customers only after the metrics are calculated."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 12,
+      "terminal_chapter": "w04_manipulation_sql_03"
+    },
+    {
+      "display_number": 14,
+      "title": "Add the Total Customer Count to Every Row",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Produce member names with the total member count on every row",
+        "url": "https://pgexercises.com/questions/aggregates/countmembers.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "Aggregate window function",
+      "learning_objective": "Add overall context without collapsing row-level results.",
+      "gate": {
+        "course": "Data Manipulation in SQL",
+        "chapter": 4,
+        "week": 4,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w04_manipulation_sql_04"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "A customer export needs the total number of customers repeated beside every customer row.",
+      "task": "Return each customer with the total customer count shown on every row.",
+      "result_requirements": [
+        "Return `customer_id`, `customer_name`, and `total_customers`.",
+        "Sort by `customer_id`."
+      ],
+      "solution_sql": "SELECT customer_id,\n             first_name || ' ' || last_name AS customer_name,\n             COUNT(*) OVER () AS total_customers\n      FROM customers\n      ORDER BY customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "customer_name",
+        "total_customers"
+      ],
+      "expected_row_count": 8,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bover\\s*\\(",
+        "\\bcount\\s*\\("
+      ],
+      "hints": [
+        "A normal `COUNT` with `GROUP BY` would collapse rows.",
+        "Use `COUNT(*)` as a window function.",
+        "An empty window specification means the count uses the full result set."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 24,
+      "terminal_chapter": "w04_manipulation_sql_04"
+    },
+    {
+      "display_number": 15,
+      "title": "Number Sessions Within Each Team",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Produce a numbered list of members",
+        "url": "https://pgexercises.com/questions/aggregates/nummembers.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_analytics",
+      "concept": "ROW_NUMBER window function",
+      "learning_objective": "Number rows independently inside each group.",
+      "gate": {
+        "course": "PostgreSQL Summary Stats and Window Functions",
+        "chapter": 1,
+        "week": 5,
+        "weekday": "Monday",
+        "order_in_day": 1,
+        "chapter_key": "w05_window_sql_01"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "Team leads want each work session numbered from earliest to latest within the team.",
+      "task": "Assign a sequence number to every work session within its team.",
+      "result_requirements": [
+        "Return `team`, `session_date`, `employee_id`, and `team_session_number`.",
+        "Number rows by `session_date`, then `session_id` within each team.",
+        "Sort by `team`, then `team_session_number`."
+      ],
+      "solution_sql": "SELECT team, session_date, employee_id,\n             ROW_NUMBER() OVER (\n               PARTITION BY team\n               ORDER BY session_date, session_id\n             ) AS team_session_number\n      FROM work_sessions\n      ORDER BY team, team_session_number;\n",
+      "expected_columns": [
+        "team",
+        "session_date",
+        "employee_id",
+        "team_session_number"
+      ],
+      "expected_row_count": 12,
+      "order_matters": true,
+      "required_patterns": [
+        "\\brow_number\\s*\\(",
+        "\\bpartition\\s+by\\b"
+      ],
+      "hints": [
+        "The numbering restarts for each team.",
+        "Use the team column in `PARTITION BY`.",
+        "Put the chronological fields inside the window’s `ORDER BY`."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 25,
+      "terminal_chapter": "w05_window_sql_01"
+    },
+    {
+      "display_number": 16,
+      "title": "Rank Employees by Logged Hours",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Rank members by rounded hours used",
+        "url": "https://pgexercises.com/questions/aggregates/rankmembers.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_analytics",
+      "concept": "RANK",
+      "learning_objective": "Rank aggregated results while preserving ties.",
+      "gate": {
+        "course": "PostgreSQL Summary Stats and Window Functions",
+        "chapter": 2,
+        "week": 5,
+        "weekday": "Monday",
+        "order_in_day": 2,
+        "chapter_key": "w05_window_sql_02"
+      },
+      "prerequisite_exercises": [
+        15
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Operations wants an hours leaderboard that gives tied employees the same rank.",
+      "task": "Rank employees by their total logged hours from highest to lowest.",
+      "result_requirements": [
+        "Return `employee_id`, `total_hours`, and `hours_rank`.",
+        "Round `total_hours` to one decimal place.",
+        "Sort by `hours_rank`, then `employee_id`."
+      ],
+      "solution_sql": "WITH employee_hours AS (\n        SELECT employee_id, ROUND(SUM(hours), 1) AS total_hours\n        FROM work_sessions\n        GROUP BY employee_id\n      )\n      SELECT employee_id, total_hours,\n             RANK() OVER (ORDER BY total_hours DESC) AS hours_rank\n      FROM employee_hours\n      ORDER BY hours_rank, employee_id;\n",
+      "expected_columns": [
+        "employee_id",
+        "total_hours",
+        "hours_rank"
+      ],
+      "expected_row_count": 6,
+      "order_matters": true,
+      "required_patterns": [
+        "\\brank\\s*\\(",
+        "\\bover\\s*\\(",
+        "\\bgroup\\s+by\\b"
+      ],
+      "hints": [
+        "Aggregate to one row per employee before ranking.",
+        "Rank the total in descending order.",
+        "Use `RANK`, not `ROW_NUMBER`, so equal totals share a rank."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 26,
+      "terminal_chapter": "w05_window_sql_02"
+    },
+    {
+      "display_number": 17,
+      "title": "Group Consecutive Task Dates into Projects",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "SQL Project Planning",
+        "url": "https://www.hackerrank.com/challenges/sql-projects/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_analytics",
+      "concept": "LAG and gaps-and-islands logic",
+      "learning_objective": "Use neighboring rows to identify the beginning of each consecutive date sequence.",
+      "gate": {
+        "course": "PostgreSQL Summary Stats and Window Functions",
+        "chapter": 3,
+        "week": 5,
+        "weekday": "Tuesday",
+        "order_in_day": 1,
+        "chapter_key": "w05_window_sql_03"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "A delivery log stores one-day task intervals, but leadership wants the larger continuous project periods.",
+      "task": "Combine consecutive task intervals into project start and end dates.",
+      "result_requirements": [
+        "Return `project_start` and `project_end`.",
+        "Sort shorter projects first; break ties by `project_start`."
+      ],
+      "solution_sql": "WITH marked AS (\n        SELECT start_date, end_date,\n               CASE WHEN LAG(end_date) OVER (ORDER BY start_date) = start_date\n                    THEN 0 ELSE 1 END AS new_project\n        FROM project_days\n      ), grouped AS (\n        SELECT start_date, end_date,\n               SUM(new_project) OVER (ORDER BY start_date) AS project_group\n        FROM marked\n      )\n      SELECT MIN(start_date) AS project_start, MAX(end_date) AS project_end\n      FROM grouped\n      GROUP BY project_group\n      ORDER BY project_end - project_start, project_start;\n",
+      "expected_columns": [
+        "project_start",
+        "project_end"
+      ],
+      "expected_row_count": 3,
+      "order_matters": true,
+      "required_patterns": [
+        "\\blag\\s*\\(",
+        "\\bover\\s*\\(",
+        "\\bgroup\\s+by\\b"
+      ],
+      "hints": [
+        "Compare each start date with the previous row’s end date.",
+        "Mark a new group whenever the dates do not connect.",
+        "Use a running sum of the group marker, then aggregate each group."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 15,
+      "terminal_chapter": "w05_window_sql_03"
+    },
+    {
+      "display_number": 18,
+      "title": "Calculate a Three-Day Revenue Average",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Calculate a rolling average of total revenue",
+        "url": "https://pgexercises.com/questions/aggregates/rollingavg.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_analytics",
+      "concept": "Window frames and moving averages",
+      "learning_objective": "Calculate a rolling metric over the current row and a fixed number of preceding rows.",
+      "gate": {
+        "course": "PostgreSQL Summary Stats and Window Functions",
+        "chapter": 3,
+        "week": 5,
+        "weekday": "Tuesday",
+        "order_in_day": 1,
+        "chapter_key": "w05_window_sql_03"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "Finance wants daily revenue shown beside a short moving average that smooths normal day-to-day changes.",
+      "task": "Calculate the three-day rolling average revenue for every date.",
+      "result_requirements": [
+        "Return `revenue_date`, `revenue`, and `three_day_average`.",
+        "Round the average to two decimals.",
+        "Sort by `revenue_date`."
+      ],
+      "solution_sql": "SELECT revenue_date, revenue,\n             ROUND(AVG(revenue) OVER (\n               ORDER BY revenue_date\n               ROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n             ), 2) AS three_day_average\n      FROM daily_revenue\n      ORDER BY revenue_date;\n",
+      "expected_columns": [
+        "revenue_date",
+        "revenue",
+        "three_day_average"
+      ],
+      "expected_row_count": 8,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bavg\\s*\\(",
+        "\\brows\\s+between\\s+2\\s+preceding\\s+and\\s+current\\s+row\\b"
+      ],
+      "hints": [
+        "Order the window by revenue date.",
+        "A three-row window includes the current row and two preceding rows.",
+        "Place the frame clause inside the `OVER` parentheses."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 11,
+      "terminal_chapter": "w05_window_sql_03"
+    },
+    {
+      "display_number": 19,
+      "title": "Pivot Specialists into Role Columns",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "Occupations",
+        "url": "https://www.hackerrank.com/challenges/occupations/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_analytics",
+      "concept": "ROW_NUMBER and conditional aggregation",
+      "learning_objective": "Reshape category rows into aligned columns without losing names.",
+      "gate": {
+        "course": "PostgreSQL Summary Stats and Window Functions",
+        "chapter": 4,
+        "week": 5,
+        "weekday": "Tuesday",
+        "order_in_day": 2,
+        "chapter_key": "w05_window_sql_04"
+      },
+      "prerequisite_exercises": [
+        15,
+        11
+      ],
+      "estimated_minutes": 25,
+      "scenario": "A staffing brief needs one compact roster with a separate column for each specialty.",
+      "task": "Pivot specialist names into `analyst`, `designer`, `engineer`, and `manager` columns.",
+      "result_requirements": [
+        "Alphabetize names within each specialty before assigning row numbers.",
+        "Return the four specialty columns in the listed order.",
+        "Sort by the generated row number."
+      ],
+      "solution_sql": "WITH numbered AS (\n        SELECT specialist_name, specialty,\n               ROW_NUMBER() OVER (\n                 PARTITION BY specialty\n                 ORDER BY specialist_name\n               ) AS row_num\n        FROM specialists\n      )\n      SELECT\n        MAX(CASE WHEN specialty = 'Analyst' THEN specialist_name END) AS analyst,\n        MAX(CASE WHEN specialty = 'Designer' THEN specialist_name END) AS designer,\n        MAX(CASE WHEN specialty = 'Engineer' THEN specialist_name END) AS engineer,\n        MAX(CASE WHEN specialty = 'Manager' THEN specialist_name END) AS manager\n      FROM numbered\n      GROUP BY row_num\n      ORDER BY row_num;\n",
+      "expected_columns": [
+        "analyst",
+        "designer",
+        "engineer",
+        "manager"
+      ],
+      "expected_row_count": 3,
+      "order_matters": true,
+      "required_patterns": [
+        "\\brow_number\\s*\\(",
+        "\\bcase\\b",
+        "\\bgroup\\s+by\\b"
+      ],
+      "hints": [
+        "Number names separately inside each specialty.",
+        "Use one conditional expression for each output column.",
+        "Group by the generated row number so names with the same position align."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 27,
+      "terminal_chapter": "w05_window_sql_04"
+    },
+    {
+      "display_number": 20,
+      "title": "Find Metric Values That Cannot Become Numbers",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "The Blunder",
+        "url": "https://www.hackerrank.com/challenges/the-blunder/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_events",
+      "concept": "Data types and TRY_CAST",
+      "learning_objective": "Use safe conversion to identify values that do not match the intended numeric type.",
+      "gate": {
+        "course": "Functions for Manipulating Data in PostgreSQL",
+        "chapter": 1,
+        "week": 5,
+        "weekday": "Wednesday",
+        "order_in_day": 1,
+        "chapter_key": "w05_functions_sql_01"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "A metric import stores every value as text, and the data engineer needs the unusable rows identified before loading.",
+      "task": "Return raw metric values that cannot be converted to a decimal number.",
+      "result_requirements": [
+        "Return `metric_id` and `metric_value`.",
+        "Do not treat valid zero or negative numbers as conversion failures.",
+        "Sort by `metric_id`."
+      ],
+      "solution_sql": "SELECT metric_id, metric_value\n      FROM raw_metrics\n      WHERE TRY_CAST(TRIM(metric_value) AS DECIMAL(12,2)) IS NULL\n      ORDER BY metric_id;\n",
+      "expected_columns": [
+        "metric_id",
+        "metric_value"
+      ],
+      "expected_row_count": 2,
+      "order_matters": true,
+      "required_patterns": [
+        "\\btry_cast\\s*\\(",
+        "\\bis\\s+null\\b"
+      ],
+      "hints": [
+        "Use a conversion function that returns `NULL` instead of stopping on bad input.",
+        "Trim the text before converting it.",
+        "Filter the rows where the safe conversion result is null."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 28,
+      "terminal_chapter": "w05_functions_sql_01"
+    },
+    {
+      "display_number": 21,
+      "title": "Calculate Booking End Times",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Work out the end time of bookings",
+        "url": "https://pgexercises.com/questions/date/endtimes.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_people_projects",
+      "concept": "Timestamp and interval arithmetic",
+      "learning_objective": "Add a duration to a timestamp to calculate an end time.",
+      "gate": {
+        "course": "Functions for Manipulating Data in PostgreSQL",
+        "chapter": 2,
+        "week": 5,
+        "weekday": "Thursday",
+        "order_in_day": 1,
+        "chapter_key": "w05_functions_sql_02"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "Facility bookings use 30-minute slots, and the scheduling screen needs each end time.",
+      "task": "Calculate the end timestamp for every booking.",
+      "result_requirements": [
+        "Return `booking_id`, `start_time`, and `end_time`.",
+        "Each slot lasts 30 minutes.",
+        "Sort by `start_time`, then `booking_id`."
+      ],
+      "solution_sql": "SELECT booking_id, start_time,\n             start_time + slots * INTERVAL '30 minutes' AS end_time\n      FROM bookings\n      ORDER BY start_time, booking_id;\n",
+      "expected_columns": [
+        "booking_id",
+        "start_time",
+        "end_time"
+      ],
+      "expected_row_count": 12,
+      "order_matters": true,
+      "required_patterns": [
+        "\\binterval\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "The duration equals the number of slots multiplied by 30 minutes.",
+        "DuckDB can add an interval directly to a timestamp.",
+        "Build the interval expression from `slots`, then alias the result `end_time`."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 14,
+      "terminal_chapter": "w05_functions_sql_02"
+    },
+    {
+      "display_number": 22,
+      "title": "Separate New and Existing Monthly Users",
+      "source": {
+        "provider": "StrataScratch",
+        "challenge": "New And Existing Users",
+        "url": "https://platform.stratascratch.com/coding-question?id=2028",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_events",
+      "concept": "Date truncation and cohort logic",
+      "learning_objective": "Compare each activity month with a user’s first activity month.",
+      "gate": {
+        "course": "Functions for Manipulating Data in PostgreSQL",
+        "chapter": 2,
+        "week": 5,
+        "weekday": "Thursday",
+        "order_in_day": 1,
+        "chapter_key": "w05_functions_sql_02"
+      },
+      "prerequisite_exercises": [
+        21
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Product analytics wants to see how many active users each month are new versus returning.",
+      "task": "Count new and existing active users for each activity month.",
+      "result_requirements": [
+        "A user is new when the activity month equals the user’s first activity month.",
+        "Return `activity_month`, `new_users`, and `existing_users`.",
+        "Sort by `activity_month`."
+      ],
+      "solution_sql": "WITH first_activity AS (\n        SELECT user_id, DATE_TRUNC('month', MIN(event_time)) AS first_month\n        FROM user_events\n        GROUP BY user_id\n      ), monthly_activity AS (\n        SELECT DISTINCT user_id, DATE_TRUNC('month', event_time) AS activity_month\n        FROM user_events\n      )\n      SELECT m.activity_month,\n             COUNT(*) FILTER (WHERE m.activity_month = f.first_month) AS new_users,\n             COUNT(*) FILTER (WHERE m.activity_month > f.first_month) AS existing_users\n      FROM monthly_activity AS m\n      INNER JOIN first_activity AS f ON m.user_id = f.user_id\n      GROUP BY m.activity_month\n      ORDER BY m.activity_month;\n",
+      "expected_columns": [
+        "activity_month",
+        "new_users",
+        "existing_users"
+      ],
+      "expected_row_count": 5,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bdate_trunc\\s*\\(",
+        "\\bmin\\s*\\(",
+        "\\bgroup\\s+by\\b"
+      ],
+      "hints": [
+        "First find each user’s earliest event month.",
+        "Create one row per user per activity month before counting.",
+        "Compare activity month with first month inside conditional counts."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 4,
+      "terminal_chapter": "w05_functions_sql_02"
+    },
+    {
+      "display_number": 23,
+      "title": "Standardize Customer Phone Numbers",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Clean up telephone numbers",
+        "url": "https://pgexercises.com/questions/string/translate.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "Text cleanup functions",
+      "learning_objective": "Remove formatting characters from text while preserving the underlying digits.",
+      "gate": {
+        "course": "Functions for Manipulating Data in PostgreSQL",
+        "chapter": 3,
+        "week": 5,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w05_functions_sql_03"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "The CRM import needs phone values reduced to digits so matching rules work consistently.",
+      "task": "Return every recorded phone number as digits only.",
+      "result_requirements": [
+        "Return `customer_id` and `phone_digits`.",
+        "Exclude customers whose phone is `NULL`.",
+        "Sort by `customer_id`."
+      ],
+      "solution_sql": "SELECT customer_id,\n             REGEXP_REPLACE(phone, '[^0-9]', '', 'g') AS phone_digits\n      FROM customers\n      WHERE phone IS NOT NULL\n      ORDER BY customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "phone_digits"
+      ],
+      "expected_row_count": 6,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bregexp_replace\\s*\\(",
+        "\\bis\\s+not\\s+null\\b"
+      ],
+      "hints": [
+        "Keep only rows that have a phone value.",
+        "Use a regular expression that matches any non-digit character.",
+        "Replace every matching character with an empty string."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 3,
+      "terminal_chapter": "w05_functions_sql_03"
+    },
+    {
+      "display_number": 24,
+      "title": "Format Customer Names for an Export",
+      "source": {
+        "provider": "SQL Practice",
+        "challenge": "Format last names in uppercase and first names in lowercase",
+        "url": "https://www.sql-practice.com/",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "UPPER, LOWER, and concatenation",
+      "learning_objective": "Apply text casing rules and build a formatted export value.",
+      "gate": {
+        "course": "Functions for Manipulating Data in PostgreSQL",
+        "chapter": 3,
+        "week": 5,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w05_functions_sql_03"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "A legacy partner requires names in a specific `LAST, first` format.",
+      "task": "Format every customer name with the last name uppercase and the first name lowercase.",
+      "result_requirements": [
+        "Return `customer_id` and `export_name`.",
+        "The format must be `LAST, first`.",
+        "Sort by `customer_id`."
+      ],
+      "solution_sql": "SELECT customer_id,\n             UPPER(last_name) || ', ' || LOWER(first_name) AS export_name\n      FROM customers\n      ORDER BY customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "export_name"
+      ],
+      "expected_row_count": 8,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bupper\\s*\\(",
+        "\\blower\\s*\\(",
+        "\\bas\\s+export_name\\b"
+      ],
+      "hints": [
+        "Apply the casing functions before combining the values.",
+        "Include a comma and one space between the names.",
+        "Alias the final expression as `export_name`."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 17,
+      "terminal_chapter": "w05_functions_sql_03"
+    },
+    {
+      "display_number": 25,
+      "title": "Search Support Subjects Without Case Sensitivity",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Perform a case-insensitive search",
+        "url": "https://pgexercises.com/questions/string/case.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_service",
+      "concept": "Case-insensitive search",
+      "learning_objective": "Find text regardless of capitalization.",
+      "gate": {
+        "course": "Functions for Manipulating Data in PostgreSQL",
+        "chapter": 4,
+        "week": 6,
+        "weekday": "Monday",
+        "order_in_day": 1,
+        "chapter_key": "w06_functions_sql_04"
+      },
+      "prerequisite_exercises": [
+        24
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Quality assurance is reviewing any support case whose subject mentions a charge.",
+      "task": "Return support cases whose subject contains the word `charge`, regardless of letter case.",
+      "result_requirements": [
+        "Return `case_id` and `subject`.",
+        "Sort by `case_id`."
+      ],
+      "solution_sql": "SELECT case_id, subject\n      FROM support_cases\n      WHERE subject ILIKE '%charge%'\n      ORDER BY case_id;\n",
+      "expected_columns": [
+        "case_id",
+        "subject"
+      ],
+      "expected_row_count": 2,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bilike\\b"
+      ],
+      "hints": [
+        "Use a pattern with wildcard characters on both sides of the search word.",
+        "The comparison should not depend on capitalization.",
+        "DuckDB supports `ILIKE` for case-insensitive matching."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 29,
+      "terminal_chapter": "w06_functions_sql_04"
+    },
+    {
+      "display_number": 26,
+      "title": "Test Whether Email Is a Reliable Key",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "New Companies",
+        "url": "https://www.hackerrank.com/challenges/the-company/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_design",
+      "concept": "Table grain and candidate keys",
+      "learning_objective": "Use duplicate and missing-value checks to evaluate a proposed business key.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 1,
+        "week": 6,
+        "weekday": "Tuesday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_01"
+      },
+      "prerequisite_exercises": [],
+      "estimated_minutes": 25,
+      "scenario": "A contact-import design proposes using email as the primary key, but the data architect wants evidence before approving it.",
+      "task": "Summarize the problems that prevent `email` from being a reliable primary key.",
+      "result_requirements": [
+        "Return one row with `total_rows`, `missing_emails`, and `duplicate_email_rows`.",
+        "`duplicate_email_rows` is the number of extra rows beyond the first occurrence of each non-null email."
+      ],
+      "solution_sql": "SELECT\n        COUNT(*) AS total_rows,\n        COUNT(*) FILTER (WHERE email IS NULL) AS missing_emails,\n        COUNT(email) - COUNT(DISTINCT email) AS duplicate_email_rows\n      FROM raw_contacts;\n",
+      "expected_columns": [
+        "total_rows",
+        "missing_emails",
+        "duplicate_email_rows"
+      ],
+      "expected_row_count": 1,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bcount\\s*\\(",
+        "\\bdistinct\\b"
+      ],
+      "hints": [
+        "A primary key must be present on every row.",
+        "Compare the number of non-null email rows with the number of distinct emails.",
+        "The difference between those two counts is the number of extra duplicate rows."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 30,
+      "terminal_chapter": "w06_database_design_01"
+    },
+    {
+      "display_number": 27,
+      "title": "Find Product Values That Break Normalization",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "Top Competitors",
+        "url": "https://www.hackerrank.com/challenges/full-score/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_design",
+      "concept": "Normalization and update anomalies",
+      "learning_objective": "Identify repeated descriptive values that disagree for the same entity.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 2,
+        "week": 6,
+        "weekday": "Wednesday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_02"
+      },
+      "prerequisite_exercises": [
+        26
+      ],
+      "estimated_minutes": 25,
+      "scenario": "A denormalized order-line import repeats product details, and the data modeler needs to find products whose stored prices disagree.",
+      "task": "Return products that have more than one distinct unit price in the raw order-line table.",
+      "result_requirements": [
+        "Return `product_id`, `product_name`, and `distinct_prices`.",
+        "Sort by `product_id`."
+      ],
+      "solution_sql": "SELECT product_id,\n             MIN(product_name) AS product_name,\n             COUNT(DISTINCT unit_price) AS distinct_prices\n      FROM raw_order_lines\n      GROUP BY product_id\n      HAVING COUNT(DISTINCT unit_price) > 1\n      ORDER BY product_id;\n",
+      "expected_columns": [
+        "product_id",
+        "product_name",
+        "distinct_prices"
+      ],
+      "expected_row_count": 1,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bgroup\\s+by\\b",
+        "\\bhaving\\b",
+        "\\bcount\\s*\\(\\s*distinct"
+      ],
+      "hints": [
+        "Group all repeated rows for the same product.",
+        "Count distinct prices inside each product group.",
+        "Use `HAVING` to keep only groups with more than one price."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 31,
+      "terminal_chapter": "w06_database_design_02"
+    },
+    {
+      "display_number": 28,
+      "title": "Build a Safe Customer Reporting View",
+      "source": {
+        "provider": "SQL Practice",
+        "challenge": "Create a reusable reporting object from selected columns",
+        "url": "https://www.sql-practice.com/learn/table/create_table/",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_design",
+      "concept": "Database views and column exposure",
+      "learning_objective": "Create a reusable view that exposes only approved reporting fields.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 3,
+        "week": 6,
+        "weekday": "Thursday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_03"
+      },
+      "prerequisite_exercises": [
+        27
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Analysts need customer region and lifetime value, but they must not receive email addresses or phone numbers.",
+      "task": "Create a temporary view named `safe_customer_reporting`, then return all rows from it.",
+      "result_requirements": [
+        "The view must contain `customer_id`, `customer_name`, `region`, and `lifetime_value` only.",
+        "Sort the final result by `customer_id`."
+      ],
+      "solution_sql": "CREATE OR REPLACE TEMP VIEW safe_customer_reporting AS\n      SELECT customer_id, customer_name, region, lifetime_value\n      FROM secure_customers;\n\n      SELECT customer_id, customer_name, region, lifetime_value\n      FROM safe_customer_reporting\n      ORDER BY customer_id;\n",
+      "expected_columns": [
+        "customer_id",
+        "customer_name",
+        "region",
+        "lifetime_value"
+      ],
+      "expected_row_count": 4,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bcreate\\s+(?:or\\s+replace\\s+)?temp(?:orary)?\\s+view\\s+safe_customer_reporting\\b",
+        "\\bfrom\\s+safe_customer_reporting\\b"
+      ],
+      "hints": [
+        "The view definition should select only approved fields.",
+        "Use a temporary view so the exercise does not create a persistent object.",
+        "After creating the view, run a second statement that selects from it."
+      ],
+      "allow_multi_statement": true,
+      "internal_id": 32,
+      "terminal_chapter": "w06_database_design_03"
+    },
+    {
+      "display_number": 29,
+      "title": "Audit Broken Account Relationships",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Delete based on a subquery",
+        "url": "https://pgexercises.com/questions/updates/deletewh2.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_design",
+      "concept": "Referential integrity and database management",
+      "learning_objective": "Use an anti-join to find child rows that do not resolve to a valid parent.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 4,
+        "week": 6,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_04"
+      },
+      "prerequisite_exercises": [
+        28
+      ],
+      "estimated_minutes": 25,
+      "scenario": "Before a foreign-key rule is enforced, the database administrator needs a list of orders that would violate it.",
+      "task": "Return orders whose account ID is missing or does not match an account.",
+      "result_requirements": [
+        "Return `order_id`, `account_id`, and `order_total`.",
+        "Sort by `order_id`."
+      ],
+      "solution_sql": "SELECT o.order_id, o.account_id, o.order_total\n      FROM account_orders AS o\n      LEFT JOIN accounts AS a ON o.account_id = a.account_id\n      WHERE o.account_id IS NULL OR a.account_id IS NULL\n      ORDER BY o.order_id;\n",
+      "expected_columns": [
+        "order_id",
+        "account_id",
+        "order_total"
+      ],
+      "expected_row_count": 2,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bleft\\s+join\\b",
+        "\\bis\\s+null\\b"
+      ],
+      "hints": [
+        "Preserve every order while attempting to match an account.",
+        "An unmatched non-null account leaves the joined account fields null.",
+        "Also include orders where the source account ID itself is null."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 33,
+      "terminal_chapter": "w06_database_design_04"
+    },
+    {
+      "display_number": 30,
+      "title": "Assess VFX Delivery Performance",
+      "source": {
+        "provider": "StrataScratch",
+        "challenge": "Acceptance Rate By Date",
+        "url": "https://platform.stratascratch.com/coding/10285-acceptance-rate-by-date",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_vfx",
+      "concept": "Integrated joins, conditional aggregation, and percentages",
+      "learning_objective": "Combine project and shot data into a decision-ready delivery summary.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 4,
+        "week": 6,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_04"
+      },
+      "prerequisite_exercises": [
+        10,
+        14,
+        19,
+        25,
+        29
+      ],
+      "estimated_minutes": 35,
+      "scenario": "A VFX production executive wants to know which projects are struggling to deliver completed shots on time.",
+      "task": "Summarize final-shot delivery performance for each project.",
+      "result_requirements": [
+        "Return `project_name`, `final_shots`, `late_shots`, and `on_time_percentage`.",
+        "Count a final shot as late when `delivery_date` is after `deadline`.",
+        "Round `on_time_percentage` to two decimals.",
+        "Sort by `on_time_percentage` ascending, then `project_name`."
+      ],
+      "solution_sql": "SELECT p.project_name,\n             COUNT(*) AS final_shots,\n             COUNT(*) FILTER (WHERE s.delivery_date > s.deadline) AS late_shots,\n             ROUND(100.0 * COUNT(*) FILTER (WHERE s.delivery_date <= s.deadline) / COUNT(*), 2) AS on_time_percentage\n      FROM vfx_projects AS p\n      INNER JOIN vfx_shots AS s ON p.project_id = s.project_id\n      WHERE s.status = 'Final'\n      GROUP BY p.project_name\n      ORDER BY on_time_percentage, p.project_name;\n",
+      "expected_columns": [
+        "project_name",
+        "final_shots",
+        "late_shots",
+        "on_time_percentage"
+      ],
+      "expected_row_count": 3,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bjoin\\b",
+        "\\bgroup\\s+by\\b",
+        "\\bround\\s*\\("
+      ],
+      "hints": [
+        "Filter to final shots before calculating project metrics.",
+        "Use conditional counts for late and on-time shots.",
+        "Multiply by `100.0` before division so the result is a percentage."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 8,
+      "terminal_chapter": "w06_database_design_04"
+    },
+    {
+      "display_number": 31,
+      "title": "Find the Lowest-Revenue Restaurants",
+      "source": {
+        "provider": "StrataScratch",
+        "challenge": "Lowest Revenue Generated Restaurants",
+        "url": "https://platform.stratascratch.com/coding-question?id=2036",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_product",
+      "concept": "Revenue aggregation and ranking",
+      "learning_objective": "Calculate revenue by entity and select the bottom-performing group.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 4,
+        "week": 6,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_04"
+      },
+      "prerequisite_exercises": [
+        30
+      ],
+      "estimated_minutes": 30,
+      "scenario": "A delivery marketplace is selecting two restaurants for a revenue-support pilot.",
+      "task": "Return the two restaurants with the lowest total platform revenue.",
+      "result_requirements": [
+        "Platform revenue equals `subtotal + service_fee`.",
+        "Return `restaurant_name` and `total_revenue`.",
+        "Round `total_revenue` to two decimals.",
+        "Sort by `total_revenue`, then `restaurant_name`."
+      ],
+      "solution_sql": "SELECT restaurant_name,\n             ROUND(SUM(subtotal + service_fee), 2) AS total_revenue\n      FROM restaurant_orders\n      GROUP BY restaurant_name\n      ORDER BY total_revenue, restaurant_name\n      LIMIT 2;\n",
+      "expected_columns": [
+        "restaurant_name",
+        "total_revenue"
+      ],
+      "expected_row_count": 2,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bgroup\\s+by\\b",
+        "\\blimit\\s+2\\b"
+      ],
+      "hints": [
+        "Calculate revenue for each order before summing.",
+        "Group to one row per restaurant.",
+        "Sort smallest to largest and keep the first two rows."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 9,
+      "terminal_chapter": "w06_database_design_04"
+    },
+    {
+      "display_number": 32,
+      "title": "Calculate Workforce Cost by Team",
+      "source": {
+        "provider": "HackerRank",
+        "challenge": "Interviews",
+        "url": "https://www.hackerrank.com/challenges/interviews/problem",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_workforce",
+      "concept": "Multi-table assessment and conditional calculations",
+      "learning_objective": "Join workforce tables and calculate regular and overtime labor cost.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 4,
+        "week": 6,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_04"
+      },
+      "prerequisite_exercises": [
+        30
+      ],
+      "estimated_minutes": 35,
+      "scenario": "Finance needs a team-level labor-cost summary that applies time-and-a-half to overtime hours.",
+      "task": "Calculate total labor cost for each team.",
+      "result_requirements": [
+        "Regular cost is `regular_hours * hourly_rate`.",
+        "Overtime cost is `overtime_hours * hourly_rate * 1.5`.",
+        "Return `team_name`, `worker_count`, `total_hours`, and `total_labor_cost`.",
+        "Round hours and cost to two decimals.",
+        "Sort by `total_labor_cost` descending, then `team_name`."
+      ],
+      "solution_sql": "SELECT t.team_name,\n             COUNT(DISTINCT w.worker_id) AS worker_count,\n             ROUND(SUM(s.regular_hours + s.overtime_hours), 2) AS total_hours,\n             ROUND(SUM(s.regular_hours * w.hourly_rate\n                     + s.overtime_hours * w.hourly_rate * 1.5), 2) AS total_labor_cost\n      FROM teams AS t\n      INNER JOIN workers AS w ON t.team_id = w.team_id\n      INNER JOIN shifts AS s ON w.worker_id = s.worker_id\n      GROUP BY t.team_name\n      ORDER BY total_labor_cost DESC, t.team_name;\n",
+      "expected_columns": [
+        "team_name",
+        "worker_count",
+        "total_hours",
+        "total_labor_cost"
+      ],
+      "expected_row_count": 3,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bjoin\\b.*\\bjoin\\b",
+        "\\bcount\\s*\\(\\s*distinct",
+        "\\bgroup\\s+by\\b"
+      ],
+      "hints": [
+        "Start from teams and connect workers, then shifts.",
+        "Count workers distinctly because each worker can have several shifts.",
+        "Calculate regular and overtime cost inside the `SUM`."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 10,
+      "terminal_chapter": "w06_database_design_04"
+    },
+    {
+      "display_number": 33,
+      "title": "Complete a Relational Data-Quality Audit",
+      "source": {
+        "provider": "PostgreSQL Exercises",
+        "challenge": "Combining results from multiple queries",
+        "url": "https://pgexercises.com/questions/basic/union.html",
+        "relationship": "Structure and concept blueprint",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+      },
+      "dataset_id": "northstar_audit",
+      "concept": "Final audit with UNION ALL",
+      "learning_objective": "Combine several integrity checks into one compact audit result.",
+      "gate": {
+        "course": "Database Design",
+        "chapter": 4,
+        "week": 6,
+        "weekday": "Friday",
+        "order_in_day": 1,
+        "chapter_key": "w06_database_design_04"
+      },
+      "prerequisite_exercises": [
+        31,
+        32
+      ],
+      "estimated_minutes": 40,
+      "scenario": "A data engineer needs one audit table showing the number of key, relationship, and value problems in a raw customer-order extract.",
+      "task": "Return issue counts for duplicate customer IDs, missing customer emails, orphaned orders, duplicate order IDs, and negative order amounts.",
+      "result_requirements": [
+        "Return `issue_type` and `issue_count`.",
+        "Use the exact issue labels `duplicate_customer_ids`, `missing_customer_emails`, `orphaned_orders`, `duplicate_order_ids`, and `negative_order_amounts`.",
+        "Include all five rows, even when a count is zero.",
+        "Sort by `issue_type`."
+      ],
+      "solution_sql": "SELECT 'duplicate_customer_ids' AS issue_type,\n             COUNT(*) - COUNT(DISTINCT customer_id) AS issue_count\n      FROM audit_customers\n      UNION ALL\n      SELECT 'missing_customer_emails', COUNT(*)\n      FROM audit_customers\n      WHERE email IS NULL\n      UNION ALL\n      SELECT 'orphaned_orders', COUNT(*)\n      FROM audit_orders AS o\n      LEFT JOIN audit_customers AS c ON o.customer_id = c.customer_id\n      WHERE o.customer_id IS NULL OR c.customer_id IS NULL\n      UNION ALL\n      SELECT 'duplicate_order_ids', COUNT(*) - COUNT(DISTINCT order_id)\n      FROM audit_orders\n      UNION ALL\n      SELECT 'negative_order_amounts', COUNT(*)\n      FROM audit_orders\n      WHERE amount < 0\n      ORDER BY issue_type;\n",
+      "expected_columns": [
+        "issue_type",
+        "issue_count"
+      ],
+      "expected_row_count": 5,
+      "order_matters": true,
+      "required_patterns": [
+        "\\bunion\\s+all\\b",
+        "\\bleft\\s+join\\b",
+        "\\border\\s+by\\b"
+      ],
+      "hints": [
+        "Write each audit check as a two-column query with a fixed issue label.",
+        "Use `UNION ALL` so every audit row is preserved.",
+        "Use a left anti-join pattern for orphaned orders, then sort the combined result."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 18,
+      "terminal_chapter": "w06_database_design_04"
+    }
+  ]
+}

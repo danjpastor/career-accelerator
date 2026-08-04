@@ -58,14 +58,14 @@ WEEKLY_GUIDANCE = {
         "Relationships & Joins",
         f"Google priority: {google_curriculum.roadmap_summary(4)}",
         "Complete table grain, keys, joins, set operations, relationship validation, and the Week 4 cumulative check.",
-        ["Laptop vs. Mobile Viewership", "Page With No Likes", "Signup Activation Rate", "Second Day Confirmation", "Supercloud Customer"],
+        ["Laptop vs. Mobile Viewership", "Page With No Likes", "Signup Activation Rate", "Supercloud Customer"],
         "Portfolio preparation only: finalize the relationship map and planned validation checks.",
     ),
     5: (
         "Cleaning, Subqueries & CTEs",
         f"Google priority: {google_curriculum.roadmap_summary(5)}",
         "Complete SQL cleaning functions, type conversion, CASE, subqueries, CTEs, and reproducible query workflows.",
-        ["Teams Power Users", "Second Highest Salary", "User's Third Transaction", "Top Three Salaries", "Odd and Even Measurements", "Tweets' Rolling Averages", "User Shopping Sprees"],
+        ["Teams Power Users", "Second Highest Salary", "User's Third Transaction", "Top Three Salaries", "Odd and Even Measurements", "Tweets' Rolling Averages", "User Shopping Sprees", "Second Day Confirmation"],
         "Portfolio preparation only: finish the cleaning plan, validation plan, and decision log templates.",
     ),
     6: (
@@ -182,5 +182,5 @@ SQL_COMPANION = [
     ("Odd and Even Measurements", "Medium", "Window Functions", "ROW_NUMBER, SUM", 5, 40),
     ("User Shopping Sprees", "Medium", "Date Logic", "GROUP BY, dates", 5, 35),
     ("Supercloud Customer", "Medium", "Relational Division", "COUNT DISTINCT", 4, 40),
-    ("Second Day Confirmation", "Medium", "Joins", "dates, filtering", 4, 35),
+    ("Second Day Confirmation", "Medium", "Joins", "dates, filtering", 5, 35),
 ]

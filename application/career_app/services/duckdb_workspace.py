@@ -224,7 +224,7 @@ def exercise(number: int) -> dict:
     number = int(number)
     if number not in DUCKDB_EXERCISES:
         raise ValueError(
-            f"DuckDB Exercise {number:02d} is not in the catalog."
+            f"SQL Challenge {number:02d} is not in the catalog."
         )
     return DUCKDB_EXERCISES[number]
 
@@ -285,8 +285,7 @@ def submission_path(
             "submissions"
         ]
         / (
-            f"{number:02d}_"
-            f"{item['slug']}.sql"
+            f"sql_challenge_{roadmap_number(number):02d}.sql"
         )
     )
 
@@ -309,7 +308,7 @@ def _submission_template(
         encoding="utf-8"
     )
     return (
-        "-- Career Accelerator DuckDB submission\n"
+        "-- Career Accelerator SQL challenge submission\n"
         f"-- Exercise {roadmap_number(number):02d}: {item['title']}\n"
         f"-- Concepts: {item['concepts']}\n"
         "-- Save your completed work in this file.\n"
@@ -594,7 +593,7 @@ def save_progress(
         )
 
     source_name = (
-        f"DuckDB Exercise {roadmap_number(number):02d}: "
+        f"SQL Challenge {roadmap_number(number):02d}: "
         f"{item['title']}"
     )
     if completed:
@@ -609,7 +608,7 @@ def save_progress(
             (int(number), completed_date or date.today().isoformat(), relative_path),
         )
         description = (
-            "Completed a guided DuckDB exercise using "
+            "Completed a focused SQL challenge using "
             f"{item['concepts']}."
         )
         if relative_path:

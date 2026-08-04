@@ -1,0 +1,84 @@
+{
+  "name": "users",
+  "columns": [
+    {
+      "name": "user_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "signup_date",
+      "type": "DATE"
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "country",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "2026-01-05",
+      "Active",
+      "US"
+    ],
+    [
+      2,
+      "2026-01-18",
+      "Active",
+      "US"
+    ],
+    [
+      3,
+      "2026-02-02",
+      "Inactive",
+      "CA"
+    ],
+    [
+      4,
+      "2026-02-20",
+      "Active",
+      "UK"
+    ],
+    [
+      5,
+      "2026-03-03",
+      "Active",
+      "US"
+    ],
+    [
+      6,
+      "2026-03-28",
+      "Inactive",
+      "CA"
+    ],
+    [
+      7,
+      "2026-04-11",
+      "Active",
+      "UK"
+    ],
+    [
+      8,
+      "2026-04-23",
+      "Active",
+      "US"
+    ],
+    [
+      9,
+      "2026-05-02",
+      "Active",
+      "CA"
+    ],
+    [
+      10,
+      "2026-05-17",
+      "Inactive",
+      "US"
+    ]
+  ],
+  "grain": "one row per registered user"
+}

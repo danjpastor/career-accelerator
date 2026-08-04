@@ -130,15 +130,19 @@ def _known_scheduled_date(
         weekday = min(6, max(0, weekday))
         return week_start + timedelta(days=weekday)
 
+    kind = str(task.get("kind") or "").casefold()
     deferred = _metadata_date(conn, task_id) if task_id else None
-    if deferred is not None and week_start <= deferred <= week_end:
+    # DataCamp chapters and weekend projects own exact calendar dates. Practice
+    # tasks use their chapter date as an earliest boundary instead, allowing the
+    # load balancer to place them later in the week when that produces a better
+    # day-by-day plan.
+    if (
+        deferred is not None
+        and week_start <= deferred <= week_end
+        and kind in {"datacamp_chapter", "datacamp_project", "review", "weekly_check"}
+    ):
         return deferred
 
-    duckdb_day = _duckdb_date(conn, task)
-    if duckdb_day is not None and week_start <= duckdb_day <= week_end:
-        return duckdb_day
-
-    kind = str(task.get("kind") or "").casefold()
     label = str(task.get("label") or "").casefold()
     category = str(task.get("category") or "").casefold()
     if kind in {"weekly_check", "review"} or "retrospective" in label or "knowledge check" in label:
@@ -153,6 +157,238 @@ def _known_scheduled_date(
 def _timing_only(reason: str) -> bool:
     text = str(reason or "").strip().casefold()
     return bool(text) and text.startswith(_TIMING_REASON_PREFIXES)
+
+
+def _program_start(conn: sqlite3.Connection) -> date:
+    row = conn.execute("SELECT start_date FROM program_state WHERE id=1").fetchone()
+    try:
+        return date.fromisoformat(str(_row_value(row, "start_date", 0, "")))
+    except (TypeError, ValueError):
+        today = date.today()
+        return today - timedelta(days=today.weekday())
+
+
+def _chapter_date(conn: sqlite3.Connection, chapter_key: str) -> date | None:
+    try:
+        from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
+        chapter = CHAPTER_BY_KEY.get(str(chapter_key))
+        return chapter.scheduled_date(_program_start(conn)) if chapter is not None else None
+    except Exception:
+        return None
+
+
+def _sql_problem_title(task: dict[str, Any]) -> str | None:
+    haystack = " ".join(
+        str(task.get(key) or "")
+        for key in ("label", "target_key", "managed_key")
+    ).casefold()
+    try:
+        from career_app.data.roadmap import SQL_COMPANION
+        for entry in SQL_COMPANION:
+            title = str(entry[0])
+            if title.casefold() in haystack:
+                return title
+    except Exception:
+        pass
+    return None
+
+
+def _task_semantic_key(task: dict[str, Any]) -> str:
+    kind = str(task.get("kind") or "").casefold()
+    if kind == "datacamp_chapter":
+        try:
+            from career_app.services import datacamp
+            chapter = datacamp.chapter_for_task(task)
+            if chapter is not None:
+                return f"datacamp:{chapter.key}"
+        except Exception:
+            pass
+    if kind == "duckdb":
+        try:
+            from career_app.services import duckdb_curriculum_policy as policy
+            internal = policy._task_internal_id(task)
+            if internal is not None:
+                return f"duckdb:{int(internal)}"
+        except Exception:
+            pass
+    if kind == "python_exercise":
+        try:
+            from career_app.data.python_exercises import exercise_number_for_label
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            if number is not None:
+                return f"python:{int(number)}"
+        except Exception:
+            pass
+    if kind == "interview_problem":
+        title = _sql_problem_title(task)
+        if title:
+            return "sql_problem:" + title.casefold()
+    if kind == "weekly_check":
+        return f"weekly_check:{_safe_int(task.get('week'), 0)}"
+    return f"task:{_safe_int(task.get('task_id') or task.get('id'), 0)}"
+
+
+def _prior_semantic_keys(task: dict[str, Any]) -> tuple[str, ...]:
+    kind = str(task.get("kind") or "").casefold()
+    if kind == "duckdb":
+        try:
+            from career_app.services import duckdb_curriculum_policy as policy
+            internal = policy._task_internal_id(task)
+            return tuple(
+                f"duckdb:{int(value)}"
+                for value in policy.PRIOR_EXERCISES_BY_ID.get(int(internal), ())
+            ) if internal is not None else ()
+        except Exception:
+            return ()
+    if kind == "python_exercise":
+        try:
+            from career_app.data.python_exercises import (
+                PYTHON_EXERCISES,
+                exercise_number_for_label,
+            )
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            return tuple(
+                f"python:{int(value)}"
+                for value in PYTHON_EXERCISES[int(number)].get("prior_exercises", ())
+            ) if number is not None else ()
+        except Exception:
+            return ()
+    if kind == "review":
+        return (f"weekly_check:{_safe_int(task.get('week'), 0)}",)
+    return ()
+
+
+def _dependency_earliest_date(
+    conn: sqlite3.Connection,
+    task: dict[str, Any],
+    week_start: date,
+) -> date:
+    """Return the earliest day on which the task may be listed.
+
+    The date is based on the final assigned DataCamp chapter required by the
+    task. Direct exercise prerequisites are applied later using the actual date
+    chosen for the preceding exercise.
+    """
+    kind = str(task.get("kind") or "").casefold()
+    chapter_keys: tuple[str, ...] = ()
+    try:
+        if kind == "duckdb":
+            from career_app.services import duckdb_curriculum_policy as policy
+            internal = policy._task_internal_id(task)
+            if internal is not None:
+                chapter_keys = (policy.TERMINAL_CHAPTER_BY_ID[int(internal)],)
+        elif kind == "python_exercise":
+            from career_app.data.python_exercises import (
+                PYTHON_EXERCISES,
+                exercise_number_for_label,
+            )
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            if number is not None:
+                chapter_keys = (str(PYTHON_EXERCISES[int(number)]["terminal_chapter"]),)
+        elif kind == "interview_problem":
+            from career_app.services import content_gates, tracks
+            title = _sql_problem_title(task)
+            if title:
+                groups = tracks.SQL_PROBLEM_REQUIREMENTS.get(title, {})
+                required = set(groups.get("all_of", ())) | set(groups.get("any_of", ()))
+                chapter_keys = content_gates.requirements_for_sql_problem(
+                    required,
+                    roadmap_week=tracks.SQL_PROBLEM_WEEK.get(title),
+                )
+        elif kind == "applied_lab":
+            from career_app.data.applied_exercises import exercise_number_for_label
+            from career_app.services import content_gates
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            if number is not None:
+                chapter_keys = content_gates.requirements_for_applied_lab(int(number))
+    except Exception:
+        chapter_keys = ()
+
+    dates = [value for key in chapter_keys if (value := _chapter_date(conn, key)) is not None]
+    return max([week_start, *dates])
+
+
+def _sequence_rank(task: dict[str, Any]) -> int:
+    kind = str(task.get("kind") or "").casefold()
+    if kind == "datacamp_chapter":
+        try:
+            from career_app.data.datacamp_curriculum import DATACAMP_CHAPTERS
+            from career_app.services import datacamp
+            chapter = datacamp.chapter_for_task(task)
+            if chapter is not None:
+                return next(
+                    index for index, value in enumerate(DATACAMP_CHAPTERS)
+                    if value.key == chapter.key
+                )
+        except Exception:
+            pass
+    if kind == "duckdb":
+        try:
+            from career_app.services import duckdb_curriculum_policy as policy
+            internal = policy._task_internal_id(task)
+            if internal is not None:
+                return 1000 + int(policy._DISPLAY_BY_ID[int(internal)])
+        except Exception:
+            pass
+    if kind == "interview_problem":
+        title = _sql_problem_title(task)
+        try:
+            from career_app.data.roadmap import SQL_COMPANION
+            if title:
+                return 2000 + next(
+                    index for index, value in enumerate(SQL_COMPANION)
+                    if str(value[0]) == title
+                )
+        except Exception:
+            pass
+    if kind == "python_exercise":
+        try:
+            from career_app.data.python_exercises import exercise_number_for_label
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            if number is not None:
+                return 3000 + int(number)
+        except Exception:
+            pass
+    if kind == "applied_lab":
+        try:
+            from career_app.data.applied_exercises import exercise_number_for_label
+            number = exercise_number_for_label(str(task.get("label") or ""))
+            if number is not None:
+                return 4000 + int(number)
+        except Exception:
+            pass
+    return 9000 + _safe_int(task.get("sort_order"), 0)
+
+
+def _kind_priority(task: dict[str, Any]) -> int:
+    return {
+        "google": 0,
+        "datacamp_chapter": 1,
+        "duckdb": 10,
+        "interview_problem": 11,
+        "sql_practice": 12,
+        "python_exercise": 13,
+        "applied_lab": 20,
+        "portfolio_preparation": 30,
+        "portfolio_execution": 31,
+        "weekly_check": 40,
+        "review": 41,
+        "career_readiness": 50,
+        "general": 60,
+    }.get(str(task.get("kind") or "").casefold(), 60)
+
+
+def task_display_sort(task: dict[str, Any], current_week: int) -> tuple[Any, ...]:
+    """Shared ready-first ordering for Focus, Next Tasks, and sprint days."""
+    ready = bool(task.get("ready", task.get("prerequisites_ready", False)))
+    return (
+        0 if ready else 1,
+        _kind_priority(task),
+        _sequence_rank(task),
+        _safe_int(task.get("week"), current_week),
+        _safe_int(task.get("sort_order"), 0),
+        _safe_int(task.get("task_id") or task.get("id"), 0),
+    )
 
 
 def prerequisite_readiness(
@@ -271,32 +507,80 @@ def current_sprint_day_groups(
     ]
 
     known: dict[int, date] = {}
+    scheduled_by_key: dict[str, date] = {}
     unscheduled: list[dict[str, Any]] = []
+    weekday_minutes = [0, 0, 0, 0, 0]
+    weekday_counts = [0, 0, 0, 0, 0]
+
     for row in rows:
         scheduled = _known_scheduled_date(conn, row, week_start, week_end)
         task_id = _safe_int(row.get("task_id"), 0)
         if scheduled is not None and task_id:
             known[task_id] = scheduled
+            scheduled_by_key[_task_semantic_key(row)] = scheduled
+            offset = (scheduled - week_start).days
+            if 0 <= offset <= 4:
+                weekday_minutes[offset] += max(5, _safe_int(row.get("estimated_minutes"), 30))
+                weekday_counts[offset] += 1
         else:
             unscheduled.append(row)
 
-    # Stable fallback for legacy tasks without explicit dates. Learning work is
-    # spread Monday-Friday in roadmap order; explicit project/review dates above
-    # are never overwritten.
+    # Schedule prerequisite-dependent practice only after the content that
+    # unlocks it. Within the allowed date range, choose the lightest remaining
+    # weekday so the roadmap is distributed by estimated effort rather than by
+    # an unrelated task ID round-robin.
     unscheduled.sort(
         key=lambda item: (
+            _dependency_earliest_date(conn, item, week_start),
+            _sequence_rank(item),
+            _kind_priority(item),
             _safe_int(item.get("sort_order"), 0),
             _safe_int(item.get("task_id"), 0),
         )
     )
-    weekday_loads = [0, 0, 0, 0, 0]
     for row in unscheduled:
         task_id = _safe_int(row.get("task_id"), 0)
         if not task_id:
             continue
-        weekday = min(range(5), key=lambda index: (weekday_loads[index], index))
-        known[task_id] = week_start + timedelta(days=weekday)
-        weekday_loads[weekday] += 1
+        kind = str(row.get("kind") or "").casefold()
+        earliest = _dependency_earliest_date(conn, row, week_start)
+        for dependency_key in _prior_semantic_keys(row):
+            dependency_date = scheduled_by_key.get(dependency_key)
+            if dependency_date is not None:
+                earliest = max(earliest, dependency_date)
+
+        if kind == "google":
+            selected_day = 0
+        else:
+            earliest_offset = max(0, (earliest - week_start).days)
+            candidate_days = list(range(min(4, earliest_offset), 5))
+            task_minutes = max(5, _safe_int(row.get("estimated_minutes"), 30))
+            # Keep a normal weekday near three hours of assigned work. Moving a
+            # task one day later carries roughly one chapter of delay cost, so
+            # the planner fills the earliest reasonable day instead of blindly
+            # pushing every flexible practice item onto Friday.
+            daily_target_minutes = 180
+            selected_day = min(
+                candidate_days,
+                key=lambda index: (
+                    max(
+                        0,
+                        weekday_minutes[index] + task_minutes - daily_target_minutes,
+                    )
+                    * 100,
+                    weekday_minutes[index]
+                    + task_minutes
+                    + (index - earliest_offset) * 45,
+                    weekday_counts[index],
+                    index,
+                ),
+            )
+
+        scheduled = week_start + timedelta(days=selected_day)
+        known[task_id] = scheduled
+        scheduled_by_key[_task_semantic_key(row)] = scheduled
+        weekday_minutes[selected_day] += max(5, _safe_int(row.get("estimated_minutes"), 30))
+        weekday_counts[selected_day] += 1
 
     promoted = {
         int(_row_value(row, "task_id", 0, 0))
@@ -322,8 +606,7 @@ def current_sprint_day_groups(
         day_rows.sort(
             key=lambda item: (
                 bool(item.get("completed")),
-                _safe_int(item.get("sort_order"), 0),
-                _safe_int(item.get("task_id"), 0),
+                task_display_sort(item, int(current_week)),
             )
         )
         incomplete = [item for item in day_rows if not bool(item.get("completed"))]

@@ -2,418 +2,10 @@ from __future__ import annotations
 
 import re
 
-DUCKDB_EXERCISES = {1: {'concepts': 'SELECT, FROM, WHERE, ORDER BY, LIMIT',
-     'label': 'Complete DuckDB Exercise 01: Filter and sort support tickets',
-     'minutes': 35,
-     'old_label': 'Practice SELECT, FROM, WHERE, ORDER BY, and LIMIT',
-     'prerequisites': {'all_of': ['sql_querying'],
-                       'any_of': [],
-                       'mastery_checks': [],
-                       'prior_exercises': []},
-     'priority': 3,
-     'slug': '01_select_filter_sort_limit',
-     'title': 'Filter and sort support tickets',
-     'week': 3},
- 2: {'concepts': 'COUNT, SUM, AVG, GROUP BY, HAVING',
-     'label': 'Complete DuckDB Exercise 02: Summarize retail orders',
-     'minutes': 40,
-     'old_label': 'Practice COUNT, SUM, AVG, GROUP BY, and HAVING',
-     'prerequisites': {'all_of': ['sql_aggregation'],
-                       'any_of': [],
-                       'mastery_checks': [],
-                       'prior_exercises': [1]},
-     'priority': 3,
-     'slug': '02_aggregations_grouping_having',
-     'title': 'Summarize retail orders',
-     'week': 3},
- 3: {'concepts': 'NULLIF, TRIM, COALESCE, TRY_CAST, CASE',
-     'label': 'Complete DuckDB Exercise 03: Clean customer feedback',
-     'minutes': 45,
-     'old_label': 'Practice NULL handling and CASE-based cleaning',
-     'prerequisites': {'all_of': ['sql_case', 'data_cleaning'],
-                       'any_of': ['sql_ctes', 'sql_subqueries'],
-                       'mastery_checks': [],
-                       'prior_exercises': [2]},
-     'priority': 3,
-     'slug': '03_nulls_case_cleaning',
-     'title': 'Clean customer feedback',
-     'week': 5},
- 4: {'concepts': 'ratios, conditional aggregation, date filters',
-     'label': 'Complete DuckDB Exercise 04: Calculate subscription KPIs',
-     'minutes': 45,
-     'old_label': 'Practice business-metric calculations in SQL',
-     'prerequisites': {'all_of': ['sql_aggregation', 'sql_date_logic', 'sql_case'],
-                       'any_of': [],
-                       'mastery_checks': [],
-                       'prior_exercises': [2]},
-     'priority': 1,
-     'slug': '04_business_metrics',
-     'title': 'Calculate subscription KPIs',
-     'week': 4},
- 5: {'concepts': 'CASE expressions, SLA logic, grouped summaries',
-     'label': 'Complete DuckDB Exercise 05: Segment service performance',
-     'minutes': 40,
-     'old_label': 'Practice CASE expressions and grouped summaries',
-     'prerequisites': {'all_of': ['sql_aggregation', 'sql_case'],
-                       'any_of': [],
-                       'mastery_checks': [],
-                       'prior_exercises': [2]},
-     'priority': 3,
-     'slug': '05_case_grouped_summaries',
-     'title': 'Segment service performance',
-     'week': 4},
- 6: {'concepts': 'INNER JOIN, LEFT JOIN, multi-table joins',
-     'label': 'Complete DuckDB Exercise 06: Join customers, orders, and payments',
-     'minutes': 45,
-     'old_label': 'Practice INNER, LEFT, and multi-table joins',
-     'prerequisites': {'all_of': ['sql_joins', 'sql_validation'],
-                       'any_of': [],
-                       'mastery_checks': [],
-                       'prior_exercises': [1, 2]},
-     'priority': 3,
-     'slug': '06_joins',
-     'title': 'Join customers, orders, and payments',
-     'week': 4},
- 7: {'concepts': 'subqueries, CTEs, layered analysis',
-     'label': 'Complete DuckDB Exercise 07: Analyze order profitability',
-     'minutes': 50,
-     'old_label': 'Practice subqueries and common table expressions',
-     'prerequisites': {'all_of': ['sql_aggregation'],
-                       'any_of': ['sql_ctes', 'sql_subqueries'],
-                       'mastery_checks': [],
-                       'prior_exercises': [4, 6]},
-     'priority': 3,
-     'slug': '07_ctes_subqueries',
-     'title': 'Analyze order profitability',
-     'week': 4},
- 8: {'concepts': 'joins, CTEs, CASE, window functions, business interpretation',
-     'label': 'Complete DuckDB Exercise 08: Analyze a VFX production snapshot',
-     'minutes': 60,
-     'old_label': 'Complete the VFX production SQL challenge',
-     'prerequisites': {'all_of': ['sql_joins',
-                                  'sql_ctes',
-                                  'sql_window_functions',
-                                  'sql_validation'],
-                       'any_of': [],
-                       'mastery_checks': [],
-                       'prior_exercises': [3, 4, 5, 6, 7, 12]},
-     'priority': 1,
-     'slug': '08_integrated_vfx_review',
-     'title': 'Analyze a VFX production snapshot',
-     'week': 6},
- 9: {'concepts': 'timed SQL analysis, joins, CTEs, business metrics',
-     'label': 'Complete DuckDB Exercise 09: Timed product challenge',
-     'minutes': 50,
-     'old_label': 'Complete the timed DuckDB product challenge',
-     'prerequisites': {'all_of': ['roadmap.sql_mastery'],
-                       'any_of': [],
-                       'mastery_checks': [],
-                       'prior_exercises': [8]},
-     'priority': 2,
-     'slug': '09_timed_sql_challenge',
-     'title': 'Timed product challenge',
-     'week': 6},
- 10: {'concepts': 'joins, CTEs, window functions, QA, explanation',
-      'label': 'Complete DuckDB Exercise 10: Mixed workforce assessment',
-      'minutes': 60,
-      'old_label': 'Complete the mixed DuckDB workforce assessment',
-      'prerequisites': {'all_of': ['roadmap.sql_mastery'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [8, 9, 11]},
-      'priority': 2,
-      'slug': '10_mixed_sql_assessment',
-      'title': 'Mixed workforce assessment',
-      'week': 6},
- 11: {'concepts': 'join reasoning, window reasoning, analyst communication',
-      'label': 'Complete DuckDB Exercise 11: Explain joins and window functions',
-      'minutes': 45,
-      'old_label': 'Explain joins and window functions in DuckDB',
-      'prerequisites': {'all_of': ['sql_joins', 'sql_window_functions', 'analyst_communication'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [6]},
-      'priority': 2,
-      'slug': '11_explain_joins_windows',
-      'title': 'Explain joins and window functions',
-      'week': 5},
- 12: {'concepts': 'CTEs, aliases, formatting, validation',
-      'label': 'Complete DuckDB Exercise 12: Refactor an unreadable analytics query',
-      'minutes': 45,
-      'old_label': 'Refactor an unreadable DuckDB query',
-      'prerequisites': {'all_of': ['sql_ctes', 'sql_validation'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [7]},
-      'priority': 2,
-      'slug': '12_query_readability',
-      'title': 'Refactor an unreadable analytics query',
-      'week': 4},
- 13: {'concepts': 'table grain, primary keys, join cardinality, pre-aggregation',
-      'label': 'Complete DuckDB Exercise 13: Audit table grain and join cardinality',
-      'minutes': 50,
-      'old_label': 'Practice table grain, primary keys, join cardinality, pre-aggregation',
-      'prerequisites': {'all_of': ['sql_joins', 'sql_validation'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [6]},
-      'priority': 2,
-      'slug': '13_grain_join_cardinality',
-      'title': 'Audit table grain and join cardinality',
-      'week': 4},
- 14: {'concepts': 'DATE_TRUNC, DATE_DIFF, cohort logic, conditional aggregation',
-      'label': 'Complete DuckDB Exercise 14: Build monthly cohorts and retention metrics',
-      'minutes': 50,
-      'old_label': 'Practice DATE_TRUNC, DATE_DIFF, cohort logic, conditional aggregation',
-      'prerequisites': {'all_of': ['sql_date_logic', 'sql_aggregation'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [4]},
-      'priority': 2,
-      'slug': '14_date_cohort_analysis',
-      'title': 'Build monthly cohorts and retention metrics',
-      'week': 5},
- 15: {'concepts': 'window frames, ROWS BETWEEN, LAG, running totals, moving averages',
-      'label': 'Complete DuckDB Exercise 15: Calculate running totals and moving averages',
-      'minutes': 50,
-      'old_label': 'Practice window frames, ROWS BETWEEN, LAG, running totals, moving averages',
-      'prerequisites': {'all_of': ['sql_window_functions'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [11]},
-      'priority': 2,
-      'slug': '15_window_frames',
-      'title': 'Calculate running totals and moving averages',
-      'week': 5},
- 16: {'concepts': 'UNION, INTERSECT, EXCEPT, semi joins, anti joins',
-      'label': 'Complete DuckDB Exercise 16: Compare customer populations with set and existence '
-               'logic',
-      'minutes': 45,
-      'old_label': 'Practice UNION, INTERSECT, EXCEPT, semi joins, anti joins',
-      'prerequisites': {'all_of': ['sql_joins'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [6]},
-      'priority': 2,
-      'slug': '16_set_semi_anti_joins',
-      'title': 'Compare customer populations with set and existence logic',
-      'week': 4},
- 17: {'concepts': 'TRIM, LOWER, SPLIT_PART, REGEXP, TRY_CAST, STRPTIME',
-      'label': 'Complete DuckDB Exercise 17: Standardize messy text, dates, and numeric fields',
-      'minutes': 50,
-      'old_label': 'Practice TRIM, LOWER, SPLIT_PART, REGEXP, TRY_CAST, STRPTIME',
-      'prerequisites': {'all_of': ['data_cleaning', 'sql_date_logic'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [3]},
-      'priority': 2,
-      'slug': '17_text_dates_quality',
-      'title': 'Standardize messy text, dates, and numeric fields',
-      'week': 5},
- 18: {'concepts': 'grain, duplicates, NULLs, referential integrity, reconciliation, CTEs',
-      'label': 'Complete DuckDB Exercise 18: Complete a full relational data-quality audit',
-      'minutes': 65,
-      'old_label': 'Practice grain, duplicates, NULLs, referential integrity, reconciliation, CTEs',
-      'prerequisites': {'all_of': ['sql_validation', 'sql_joins', 'sql_ctes'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [10, 13, 14, 15, 16, 17]},
-      'priority': 1,
-      'slug': '18_sql_readiness_audit',
-      'title': 'Complete a full relational data-quality audit',
-      'week': 6},
- 19: {'concepts': 'column selection, aliases, arithmetic expressions, DISTINCT',
-      'label': 'Complete DuckDB Exercise 19: Build clear selected fields and calculated columns',
-      'minutes': 35,
-      'old_label': 'Practice selected fields, aliases, arithmetic expressions, and DISTINCT',
-      'prerequisites': {'all_of': ['sql_querying'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [1]},
-      'priority': 3,
-      'slug': '19_select_aliases_calculations',
-      'title': 'Build clear selected fields and calculated columns',
-      'week': 3},
- 20: {'concepts': 'WHERE, AND, OR, BETWEEN, IN, LIKE, IS NULL',
-      'label': 'Complete DuckDB Exercise 20: Filter patterns, ranges, and missing values',
-      'minutes': 40,
-      'old_label': 'Practice compound filters, patterns, ranges, and missing values',
-      'prerequisites': {'all_of': ['sql_querying'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [1, 19]},
-      'priority': 3,
-      'slug': '20_filters_patterns_nulls',
-      'title': 'Filter patterns, ranges, and missing values',
-      'week': 3},
- 21: {'concepts': 'INNER JOIN, join keys, qualified columns, joined filters',
-      'label': 'Complete DuckDB Exercise 21: Connect orders to customers with inner joins',
-      'minutes': 40,
-      'old_label': 'Practice inner joins and qualified columns',
-      'prerequisites': {'all_of': ['sql_joins'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [1]},
-      'priority': 3,
-      'slug': '21_inner_joins',
-      'title': 'Connect orders to customers with inner joins',
-      'week': 3},
- 22: {'concepts': 'LEFT JOIN, FULL JOIN, CROSS JOIN, SELF JOIN',
-      'label': 'Complete DuckDB Exercise 22: Compare outer, cross, and self joins',
-      'minutes': 45,
-      'old_label': 'Practice outer, cross, and self joins',
-      'prerequisites': {'all_of': ['sql_joins'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [6, 21]},
-      'priority': 2,
-      'slug': '22_outer_cross_self_joins',
-      'title': 'Compare outer, cross, and self joins',
-      'week': 4},
- 23: {'concepts': 'subqueries in WHERE, FROM, and SELECT',
-      'label': 'Complete DuckDB Exercise 23: Use subqueries in filters, sources, and calculations',
-      'minutes': 45,
-      'old_label': 'Practice subqueries in WHERE, FROM, and SELECT',
-      'prerequisites': {'all_of': ['sql_subqueries'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [2]},
-      'priority': 2,
-      'slug': '23_subquery_locations',
-      'title': 'Use subqueries in filters, sources, and calculations',
-      'week': 4},
- 24: {'concepts': 'OVER, PARTITION BY, window aggregates, row-level context',
-      'label': 'Complete DuckDB Exercise 24: Add row-level context with window functions',
-      'minutes': 45,
-      'old_label': 'Practice OVER, PARTITION BY, and window aggregates',
-      'prerequisites': {'all_of': ['sql_window_functions'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [2]},
-      'priority': 2,
-      'slug': '24_window_basics',
-      'title': 'Add row-level context with window functions',
-      'week': 4},
- 25: {'concepts': 'ROW_NUMBER, RANK, DENSE_RANK, top-N per group',
-      'label': 'Complete DuckDB Exercise 25: Rank results and select top records',
-      'minutes': 45,
-      'old_label': 'Practice ROW_NUMBER, RANK, DENSE_RANK, and top-N logic',
-      'prerequisites': {'all_of': ['sql_window_functions'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [24]},
-      'priority': 2,
-      'slug': '25_ranking_paging',
-      'title': 'Rank results and select top records',
-      'week': 5},
- 26: {'concepts': 'LAG, LEAD, period-over-period change',
-      'label': 'Complete DuckDB Exercise 26: Compare current values with prior and next rows',
-      'minutes': 45,
-      'old_label': 'Practice LAG, LEAD, and period-over-period change',
-      'prerequisites': {'all_of': ['sql_window_functions'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [24]},
-      'priority': 2,
-      'slug': '26_lag_lead_change',
-      'title': 'Compare current values with prior and next rows',
-      'week': 5},
- 27: {'concepts': 'ROLLUP, CUBE, GROUPING SETS, FILTER-based pivots',
-      'label': 'Complete DuckDB Exercise 27: Build subtotal and pivot-style summaries',
-      'minutes': 50,
-      'old_label': 'Practice ROLLUP, CUBE, GROUPING SETS, and pivot-style summaries',
-      'prerequisites': {'all_of': ['sql_window_functions', 'sql_aggregation'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [2]},
-      'priority': 2,
-      'slug': '27_rollup_cube_pivot',
-      'title': 'Build subtotal and pivot-style summaries',
-      'week': 5},
- 28: {'concepts': 'data types, TRY_CAST, LIST, UNNEST, type-safe calculations',
-      'label': 'Complete DuckDB Exercise 28: Inspect data types and work with list values',
-      'minutes': 45,
-      'old_label': 'Practice data types, LIST values, UNNEST, and type-safe calculations',
-      'prerequisites': {'all_of': ['data_cleaning'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [3]},
-      'priority': 2,
-      'slug': '28_types_arrays',
-      'title': 'Inspect data types and work with list values',
-      'week': 5},
- 29: {'concepts': 'ILIKE, regular expressions, text search, extension inspection',
-      'label': 'Complete DuckDB Exercise 29: Explore text search and extension-safe SQL',
-      'minutes': 40,
-      'old_label': 'Practice text search and inspect available DuckDB extensions',
-      'prerequisites': {'all_of': ['data_cleaning'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [17]},
-      'priority': 2,
-      'slug': '29_text_search_extensions',
-      'title': 'Explore text search and extension-safe SQL',
-      'week': 6},
- 30: {'concepts': 'information_schema, table size, grain, OLTP versus OLAP reasoning',
-      'label': 'Complete DuckDB Exercise 30: Profile tables for analytical storage decisions',
-      'minutes': 45,
-      'old_label': 'Practice table profiling for analytical storage decisions',
-      'prerequisites': {'all_of': ['sql_validation'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [18]},
-      'priority': 2,
-      'slug': '30_storage_profiling',
-      'title': 'Profile tables for analytical storage decisions',
-      'week': 6},
- 31: {'concepts': 'fact tables, dimensions, normalization, star-schema joins',
-      'label': 'Complete DuckDB Exercise 31: Reshape operational data into analytical tables',
-      'minutes': 50,
-      'old_label': 'Practice fact tables, dimensions, normalization, and star-schema joins',
-      'prerequisites': {'all_of': ['sql_validation', 'sql_joins'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [30]},
-      'priority': 2,
-      'slug': '31_star_schema_normalization',
-      'title': 'Reshape operational data into analytical tables',
-      'week': 6},
- 32: {'concepts': 'views, reusable logic, snapshot tables, refresh validation',
-      'label': 'Complete DuckDB Exercise 32: Create reusable views and analytical snapshots',
-      'minutes': 45,
-      'old_label': 'Practice views, reusable logic, and analytical snapshots',
-      'prerequisites': {'all_of': ['sql_validation', 'sql_ctes'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [31]},
-      'priority': 2,
-      'slug': '32_views_snapshots',
-      'title': 'Create reusable views and analytical snapshots',
-      'week': 6},
- 33: {'concepts': 'partition-key analysis, restricted projections, database management reasoning',
-      'label': 'Complete DuckDB Exercise 33: Plan partitioning and access-safe outputs',
-      'minutes': 45,
-      'old_label': 'Practice partition-key analysis and access-safe analytical outputs',
-      'prerequisites': {'all_of': ['sql_validation'],
-                        'any_of': [],
-                        'mastery_checks': [],
-                        'prior_exercises': [32]},
-      'priority': 2,
-      'slug': '33_partition_access_outputs',
-      'title': 'Plan partitioning and access-safe outputs',
-      'week': 6}}
+from career_app.data.sql_challenge_practice import exercises as _challenge_exercises
 
-
-
-# Internal exercise IDs remain stable so existing progress records and managed
-# task keys do not need to be rewritten.  The learner-facing number follows the
-# actual roadmap order instead of the historical creation order.
-_DUCKDB_ROADMAP_INTERNAL_ORDER = (
-    1, 2, 19, 20, 21,
-    4, 5, 6, 7, 12, 13, 16, 22, 23, 24,
-    3, 11, 14, 15, 17, 25, 26, 27, 28,
-    8, 9, 10, 18, 29, 30, 31, 32, 33,
-)
+# Stable internal IDs preserve existing progress, managed task keys, and submission ownership.
+_DUCKDB_ROADMAP_INTERNAL_ORDER = (1, 19, 20, 2, 21, 6, 22, 16, 13, 23, 5, 7, 12, 24, 25, 26, 15, 11, 27, 28, 14, 4, 3, 17, 29, 30, 31, 32, 33, 8, 9, 10, 18)
 DUCKDB_ROADMAP_NUMBER_BY_ID = {
     internal_id: display_number
     for display_number, internal_id in enumerate(_DUCKDB_ROADMAP_INTERNAL_ORDER, start=1)
@@ -422,23 +14,55 @@ DUCKDB_ID_BY_ROADMAP_NUMBER = {
     display_number: internal_id
     for internal_id, display_number in DUCKDB_ROADMAP_NUMBER_BY_ID.items()
 }
+_LEGACY_LABELS_BY_ID = {1: ['Complete DuckDB Exercise 01: Filter and sort support tickets', 'Practice SELECT, FROM, WHERE, ORDER BY, and LIMIT'], 2: ['Complete DuckDB Exercise 02: Summarize retail orders', 'Practice COUNT, SUM, AVG, GROUP BY, and HAVING'], 3: ['Complete DuckDB Exercise 16: Clean customer feedback', 'Practice NULL handling and CASE-based cleaning', 'Complete DuckDB Exercise 03: Clean customer feedback'], 4: ['Complete DuckDB Exercise 06: Calculate subscription KPIs', 'Practice business-metric calculations in SQL', 'Complete DuckDB Exercise 04: Calculate subscription KPIs'], 5: ['Complete DuckDB Exercise 07: Segment service performance', 'Practice CASE expressions and grouped summaries', 'Complete DuckDB Exercise 05: Segment service performance'], 6: ['Complete DuckDB Exercise 08: Join customers, orders, and payments', 'Practice INNER, LEFT, and multi-table joins', 'Complete DuckDB Exercise 06: Join customers, orders, and payments'], 7: ['Complete DuckDB Exercise 09: Analyze order profitability', 'Practice subqueries and common table expressions', 'Complete DuckDB Exercise 07: Analyze order profitability'], 8: ['Complete DuckDB Exercise 25: Analyze a VFX production snapshot', 'Complete the VFX production SQL challenge', 'Complete DuckDB Exercise 08: Analyze a VFX production snapshot'], 9: ['Complete DuckDB Exercise 26: Timed product challenge', 'Complete the timed DuckDB product challenge', 'Complete DuckDB Exercise 09: Timed product challenge'], 10: ['Complete DuckDB Exercise 27: Mixed workforce assessment', 'Complete the mixed DuckDB workforce assessment', 'Complete DuckDB Exercise 10: Mixed workforce assessment'], 11: ['Complete DuckDB Exercise 17: Explain joins and window functions', 'Explain joins and window functions in DuckDB', 'Complete DuckDB Exercise 11: Explain joins and window functions'], 12: ['Complete DuckDB Exercise 10: Refactor an unreadable analytics query', 'Refactor an unreadable DuckDB query', 'Complete DuckDB Exercise 12: Refactor an unreadable analytics query'], 13: ['Complete DuckDB Exercise 11: Audit table grain and join cardinality', 'Practice table grain, primary keys, join cardinality, pre-aggregation', 'Complete DuckDB Exercise 13: Audit table grain and join cardinality'], 14: ['Complete DuckDB Exercise 18: Build monthly cohorts and retention metrics', 'Practice DATE_TRUNC, DATE_DIFF, cohort logic, conditional aggregation', 'Complete DuckDB Exercise 14: Build monthly cohorts and retention metrics'], 15: ['Complete DuckDB Exercise 19: Calculate running totals and moving averages', 'Practice window frames, ROWS BETWEEN, LAG, running totals, moving averages', 'Complete DuckDB Exercise 15: Calculate running totals and moving averages'], 16: ['Complete DuckDB Exercise 12: Compare customer populations with set and existence logic', 'Practice UNION, INTERSECT, EXCEPT, semi joins, anti joins', 'Complete DuckDB Exercise 16: Compare customer populations with set and existence logic'], 17: ['Complete DuckDB Exercise 20: Standardize messy text, dates, and numeric fields', 'Practice TRIM, LOWER, SPLIT_PART, REGEXP, TRY_CAST, STRPTIME', 'Complete DuckDB Exercise 17: Standardize messy text, dates, and numeric fields'], 18: ['Complete DuckDB Exercise 28: Complete a full relational data-quality audit', 'Practice grain, duplicates, NULLs, referential integrity, reconciliation, CTEs', 'Complete DuckDB Exercise 18: Complete a full relational data-quality audit'], 19: ['Complete DuckDB Exercise 03: Build clear selected fields and calculated columns', 'Practice selected fields, aliases, arithmetic expressions, and DISTINCT', 'Complete DuckDB Exercise 19: Build clear selected fields and calculated columns'], 20: ['Complete DuckDB Exercise 04: Filter patterns, ranges, and missing values', 'Practice compound filters, patterns, ranges, and missing values', 'Complete DuckDB Exercise 20: Filter patterns, ranges, and missing values'], 21: ['Complete DuckDB Exercise 05: Connect orders to customers with inner joins', 'Practice inner joins and qualified columns', 'Complete DuckDB Exercise 21: Connect orders to customers with inner joins'], 22: ['Complete DuckDB Exercise 13: Compare outer, cross, and self joins', 'Practice outer, cross, and self joins', 'Complete DuckDB Exercise 22: Compare outer, cross, and self joins'], 23: ['Complete DuckDB Exercise 14: Use subqueries in filters, sources, and calculations', 'Practice subqueries in WHERE, FROM, and SELECT', 'Complete DuckDB Exercise 23: Use subqueries in filters, sources, and calculations'], 24: ['Complete DuckDB Exercise 15: Add row-level context with window functions', 'Practice OVER, PARTITION BY, and window aggregates', 'Complete DuckDB Exercise 24: Add row-level context with window functions'], 25: ['Complete DuckDB Exercise 21: Rank results and select top records', 'Practice ROW_NUMBER, RANK, DENSE_RANK, and top-N logic', 'Complete DuckDB Exercise 25: Rank results and select top records'], 26: ['Complete DuckDB Exercise 22: Compare current values with prior and next rows', 'Practice LAG, LEAD, and period-over-period change', 'Complete DuckDB Exercise 26: Compare current values with prior and next rows'], 27: ['Complete DuckDB Exercise 23: Build subtotal and pivot-style summaries', 'Practice ROLLUP, CUBE, GROUPING SETS, and pivot-style summaries', 'Complete DuckDB Exercise 27: Build subtotal and pivot-style summaries'], 28: ['Complete DuckDB Exercise 24: Inspect data types and work with list values', 'Practice data types, LIST values, UNNEST, and type-safe calculations', 'Complete DuckDB Exercise 28: Inspect data types and work with list values'], 29: ['Complete DuckDB Exercise 29: Explore text search and extension-safe SQL', 'Practice text search and inspect available DuckDB extensions'], 30: ['Complete DuckDB Exercise 30: Profile tables for analytical storage decisions', 'Practice table profiling for analytical storage decisions'], 31: ['Complete DuckDB Exercise 31: Reshape operational data into analytical tables', 'Practice fact tables, dimensions, normalization, and star-schema joins'], 32: ['Complete DuckDB Exercise 32: Create reusable views and analytical snapshots', 'Practice views, reusable logic, and analytical snapshots'], 33: ['Complete DuckDB Exercise 33: Plan partitioning and access-safe outputs', 'Practice partition-key analysis and access-safe analytical outputs']}
 
-for _internal_id, _item in DUCKDB_EXERCISES.items():
-    _legacy_label = str(_item.get("label") or "")
-    _item.setdefault("legacy_labels", [])
-    if _legacy_label and _legacy_label not in _item["legacy_labels"]:
-        _item["legacy_labels"].append(_legacy_label)
-    _display_number = DUCKDB_ROADMAP_NUMBER_BY_ID[_internal_id]
-    _item["roadmap_number"] = _display_number
-    _item["label"] = (
-        f"Complete DuckDB Exercise {_display_number:02d}: {_item['title']}"
-    )
+
+def _slug(display: int, title: str) -> str:
+    value = re.sub(r"[^a-z0-9]+", "_", str(title).casefold()).strip("_")
+    return f"{display:02d}_{value}"
+
+
+DUCKDB_EXERCISES: dict[int, dict] = {}
+for _challenge in _challenge_exercises():
+    _display = int(_challenge["display_number"])
+    _internal = int(_challenge["internal_id"])
+    _title = str(_challenge["title"])
+    _legacy = [
+        str(value).strip()
+        for value in _LEGACY_LABELS_BY_ID.get(_internal, ())
+        if str(value).strip()
+    ]
+    DUCKDB_EXERCISES[_internal] = {
+        "title": _title,
+        "label": f"Complete SQL Challenge {_display:02d}: {_title}",
+        "old_label": _legacy[0] if _legacy else "",
+        "legacy_labels": list(dict.fromkeys(_legacy)),
+        "concepts": str(_challenge["concept"]),
+        "minutes": int(_challenge.get("estimated_minutes", 25)),
+        "priority": 3 if _display < 30 else 2,
+        "slug": _slug(_display, _title),
+        "week": int(_challenge["gate"]["week"]),
+        "roadmap_number": _display,
+        "terminal_chapter": str(_challenge["terminal_chapter"]),
+        "source_provider": str(_challenge["source"]["provider"]),
+        "source_challenge": str(_challenge["source"]["challenge"]),
+        "source_url": str(_challenge["source"]["url"]),
+        "prerequisites": {
+            "all_of": [],
+            "any_of": [],
+            "mastery_checks": [],
+            "prior_exercises": [
+                DUCKDB_ID_BY_ROADMAP_NUMBER[int(value)]
+                for value in _challenge.get("prerequisite_exercises", ())
+            ],
+        },
+    }
 
 
 def roadmap_number(number: int) -> int:
     number = int(number)
     if number not in DUCKDB_ROADMAP_NUMBER_BY_ID:
-        raise ValueError(f"DuckDB exercise ID {number} is not in the catalog.")
+        raise ValueError(f"SQL challenge ID {number} is not in the catalog.")
     return DUCKDB_ROADMAP_NUMBER_BY_ID[number]
 
 
@@ -448,7 +72,13 @@ def internal_number_for_roadmap_number(number: int) -> int | None:
 
 def exercise_labels(number: int) -> tuple[str, ...]:
     item = DUCKDB_EXERCISES[int(number)]
-    values = [item["label"], item.get("old_label", ""), *item.get("legacy_labels", [])]
+    display = roadmap_number(number)
+    values = [
+        item["label"],
+        f"Complete DuckDB Exercise {display:02d}: {item['title']}",
+        item.get("old_label", ""),
+        *item.get("legacy_labels", []),
+    ]
     return tuple(dict.fromkeys(str(value).strip() for value in values if str(value).strip()))
 
 
@@ -459,24 +89,14 @@ def exercise_number_for_label(label):
     for number in ordered_exercise_numbers():
         if text in exercise_labels(number):
             return number
-
-    # Prefer the title when it is present.  This keeps old labels such as
-    # "Exercise 19: Build clear selected fields..." mapped to their stable
-    # internal ID even though the same learner-facing slot is now Exercise 03.
     title_text = text.split(":", 1)[1].strip().casefold() if ":" in text else ""
     if title_text:
         for number, item in DUCKDB_EXERCISES.items():
             if str(item["title"]).strip().casefold() == title_text:
                 return int(number)
-
-    match = re.search(r"DuckDB Exercise\s+(\d+)", text, re.IGNORECASE)
+    match = re.search(r"(?:SQL Challenge|DuckDB Exercise)\s+(\d+)", text, re.IGNORECASE)
     if match:
-        display_number = int(match.group(1))
-        internal = internal_number_for_roadmap_number(display_number)
-        if internal is not None:
-            return internal
-        if display_number in DUCKDB_EXERCISES:
-            return display_number
+        return internal_number_for_roadmap_number(int(match.group(1)))
     return None
 
 
@@ -490,7 +110,6 @@ def ordered_exercise_numbers():
 
 
 def exercise_source(value):
-    """Return the learner-facing source for a DuckDB exercise label or ID."""
     number = None
     if isinstance(value, int):
         number = value
@@ -498,14 +117,10 @@ def exercise_source(value):
         text = str(value or "").strip()
         if text.isdigit():
             candidate = int(text)
-            number = (
-                internal_number_for_roadmap_number(candidate)
-                if candidate not in DUCKDB_EXERCISES
-                else candidate
-            )
+            number = candidate if candidate in DUCKDB_EXERCISES else internal_number_for_roadmap_number(candidate)
         else:
             number = exercise_number_for_label(text)
     if number not in DUCKDB_EXERCISES:
         return None
     item = DUCKDB_EXERCISES[number]
-    return f"DuckDB Exercise {roadmap_number(number):02d}: {item['title']}"
+    return f"SQL Challenge {roadmap_number(number):02d}: {item['title']}"

@@ -34,21 +34,23 @@ def _task_id(task: dict[str, Any]) -> int:
 
 
 def _dedupe(tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    seen: set[int | str] = set()
+    from career_app.services import unified_tasks
+
+    seen: set[str] = set()
     result: list[dict[str, Any]] = []
     for task in tasks:
-        task_id = _task_id(task)
-        identity: int | str = task_id or str(
-            task.get("target_key")
-            or task.get("managed_key")
-            or task.get("label")
-            or id(task)
-        )
+        identity = unified_tasks._semantic_task_identity(task)
         if identity in seen:
             continue
         seen.add(identity)
         result.append(task)
     return result
+
+
+def _display_sort(task: dict[str, Any], current_week: int) -> tuple[Any, ...]:
+    from career_app.services import sprint_day_planner
+
+    return sprint_day_planner.task_display_sort(task, int(current_week))
 
 
 def _cache_key(conn: sqlite3.Connection, current_week: int) -> tuple[Any, ...]:
@@ -92,8 +94,13 @@ def _normalize_scheduled_task(
     item["id"] = _task_id(item)
     item["task_id"] = item["id"]
     item["completed"] = bool(item.get("completed"))
-    if "ready" not in item:
+    # Day groups deliberately strip calendar timing from prerequisite readiness.
+    # Use that result for the scheduled day instead of a stale canonical `ready`
+    # value that may still reflect yesterday's timing lock.
+    if "prerequisites_ready" in item:
         item["ready"] = bool(item.get("prerequisites_ready"))
+    elif "ready" not in item:
+        item["ready"] = False
     item["queue_section"] = queue_section
     item["focus_kind"] = queue_section
     item["is_catch_up"] = queue_section == "catch_up"
@@ -161,6 +168,26 @@ def _catch_up_assignments(
     from career_app.services import unified_tasks
 
     result: list[dict[str, Any]] = []
+    today_text = date.today().isoformat()
+
+    # An incomplete assignment from an earlier day in the current sprint is
+    # catch-up work too. Older builds only checked the task's week number, which
+    # made Monday work disappear from Next Tasks on Tuesday.
+    for group in _day_groups(conn, int(current_week)):
+        if str(group.get("date") or "") >= today_text:
+            continue
+        for raw in group.get("tasks") or []:
+            if bool(raw.get("completed")) or not _is_current_week_assignment(raw, current_week):
+                continue
+            item = _normalize_scheduled_task(
+                raw,
+                current_week=current_week,
+                queue_section="catch_up",
+            )
+            item["is_catch_up"] = True
+            result.append(item)
+
+    # Retain the existing cross-week catch-up behavior.
     for raw in unified_tasks.all_tasks(conn, int(current_week)):
         task_week = _safe_int(raw.get("week"), current_week)
         if bool(raw.get("completed")):
@@ -174,24 +201,33 @@ def _catch_up_assignments(
         )
         item["is_catch_up"] = True
         result.append(item)
-    result.sort(
-        key=lambda item: (
-            _safe_int(item.get("week"), current_week),
-            _safe_int(item.get("sort_order"), 0),
-            _task_id(item),
-        )
-    )
+    result.sort(key=lambda item: _display_sort(item, int(current_week)))
     return _dedupe(result)
+
+
+def _scheduled_day_label(value: Any) -> str:
+    try:
+        scheduled = date.fromisoformat(str(value or ""))
+    except (TypeError, ValueError):
+        return "later this week"
+    return scheduled.strftime("%A")
 
 
 def _upcoming_current_week(
     conn: sqlite3.Connection,
     current_week: int,
 ) -> list[dict[str, Any]]:
+    """Return future-day assignments as grey Coming Soon previews.
+
+    Content readiness is deliberately retained in ``prerequisites_ready`` for
+    diagnostics, but a task assigned to a later day is never actionable in
+    Next Tasks before that day arrives.
+    """
     today_text = date.today().isoformat()
     result: list[dict[str, Any]] = []
     for group in _day_groups(conn, current_week):
-        if str(group.get("date") or "") <= today_text:
+        scheduled_date = str(group.get("date") or "")
+        if scheduled_date <= today_text:
             continue
         for raw in group.get("tasks") or []:
             if bool(raw.get("completed")) or not _is_current_week_assignment(raw, current_week):
@@ -201,6 +237,17 @@ def _upcoming_current_week(
                 current_week=current_week,
                 queue_section="upcoming",
             )
+            content_ready = bool(item.get("ready"))
+            item["prerequisites_ready"] = content_ready
+            item["ready"] = False
+            item["scheduled_date"] = scheduled_date
+            item["scheduled_day"] = _scheduled_day_label(scheduled_date)
+            if content_ready:
+                item["prerequisite_reason"] = (
+                    f"Scheduled for {item['scheduled_day']}."
+                )
+            elif not str(item.get("prerequisite_reason") or "").strip():
+                item["prerequisite_reason"] = "Complete the prerequisite first."
             result.append(item)
     return _dedupe(result)
 
@@ -353,22 +400,67 @@ def _install_planner_policy() -> None:
             ]
         )
         if today_items:
-            return today_items
-        return _catch_up_assignments(conn, int(current_week))
+            return sorted(
+                today_items,
+                key=lambda item: _display_sort(item, int(current_week)),
+            )
+        return sorted(
+            _catch_up_assignments(conn, int(current_week)),
+            key=lambda item: _display_sort(item, int(current_week)),
+        )
 
     def next_tasks(
         conn: sqlite3.Connection,
         current_week: int,
         limit: int = 4,
     ) -> list[dict[str, Any]]:
-        queue = _dedupe(
+        """Return only actionable today/promoted and catch-up work.
+
+        Current-day work stays ahead of backlog work. Future-day assignments
+        and any task with an unmet prerequisite belong in ``coming_up``.
+        """
+        today = _dedupe(
             [
                 *_today_assignments(conn, int(current_week)),
                 *_promoted_assignments(conn, int(current_week)),
-                *_catch_up_assignments(conn, int(current_week)),
-                *_upcoming_current_week(conn, int(current_week)),
             ]
         )
+        catch_up = _catch_up_assignments(conn, int(current_week))
+        ready_today = sorted(
+            [item for item in today if bool(item.get("ready"))],
+            key=lambda item: _display_sort(item, int(current_week)),
+        )
+        ready_catch_up = sorted(
+            [item for item in catch_up if bool(item.get("ready"))],
+            key=lambda item: _display_sort(item, int(current_week)),
+        )
+        queue = _dedupe([*ready_today, *ready_catch_up])
+        requested = int(limit or 0)
+        return queue if requested <= 0 else queue[: max(1, requested)]
+
+    def coming_up(
+        conn: sqlite3.Connection,
+        current_week: int,
+        limit: int = 3,
+    ) -> list[dict[str, Any]]:
+        """Return locked work and future-day previews below Coming Soon."""
+        today = _dedupe(
+            [
+                *_today_assignments(conn, int(current_week)),
+                *_promoted_assignments(conn, int(current_week)),
+            ]
+        )
+        catch_up = _catch_up_assignments(conn, int(current_week))
+        locked_today = sorted(
+            [item for item in today if not bool(item.get("ready"))],
+            key=lambda item: _display_sort(item, int(current_week)),
+        )
+        locked_catch_up = sorted(
+            [item for item in catch_up if not bool(item.get("ready"))],
+            key=lambda item: _display_sort(item, int(current_week)),
+        )
+        future = _upcoming_current_week(conn, int(current_week))
+        queue = _dedupe([*locked_today, *locked_catch_up, *future])
         requested = int(limit or 0)
         return queue if requested <= 0 else queue[: max(1, requested)]
 
@@ -428,6 +520,7 @@ def _install_planner_policy() -> None:
 
     unified_tasks.daily_plan = daily_plan
     unified_tasks.next_tasks = next_tasks
+    unified_tasks.coming_up = coming_up
     unified_tasks.completion_summary = completion_summary
     unified_tasks._day_assigned_policy_installed = True
 

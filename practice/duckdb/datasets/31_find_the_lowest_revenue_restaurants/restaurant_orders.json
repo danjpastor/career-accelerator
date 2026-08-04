@@ -1,0 +1,98 @@
+{
+  "name": "restaurant_orders",
+  "columns": [
+    {
+      "name": "order_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "restaurant_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "order_time",
+      "type": "TIMESTAMP"
+    },
+    {
+      "name": "subtotal",
+      "type": "DECIMAL(10,2)"
+    },
+    {
+      "name": "service_fee",
+      "type": "DECIMAL(10,2)"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Basil & Brick",
+      "2026-07-06 11:20:00",
+      42.0,
+      4.2
+    ],
+    [
+      2,
+      "Basil & Brick",
+      "2026-07-06 18:10:00",
+      76.0,
+      7.6
+    ],
+    [
+      3,
+      "Cedar Bowl",
+      "2026-07-07 12:00:00",
+      31.0,
+      3.1
+    ],
+    [
+      4,
+      "Cedar Bowl",
+      "2026-07-08 19:30:00",
+      58.0,
+      5.8
+    ],
+    [
+      5,
+      "Dawn Cafe",
+      "2026-07-07 08:15:00",
+      18.0,
+      1.8
+    ],
+    [
+      6,
+      "Dawn Cafe",
+      "2026-07-09 09:10:00",
+      24.0,
+      2.4
+    ],
+    [
+      7,
+      "Ember Pizza",
+      "2026-07-08 17:45:00",
+      95.0,
+      9.5
+    ],
+    [
+      8,
+      "Ember Pizza",
+      "2026-07-10 20:05:00",
+      120.0,
+      12.0
+    ],
+    [
+      9,
+      "Fern Kitchen",
+      "2026-07-09 13:25:00",
+      44.0,
+      4.4
+    ],
+    [
+      10,
+      "Fern Kitchen",
+      "2026-07-10 18:30:00",
+      52.0,
+      5.2
+    ]
+  ],
+  "grain": "one row per restaurant order"
+}

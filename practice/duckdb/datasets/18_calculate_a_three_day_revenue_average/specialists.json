@@ -1,0 +1,60 @@
+{
+  "name": "specialists",
+  "columns": [
+    {
+      "name": "specialist_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "specialty",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      "Amina",
+      "Analyst"
+    ],
+    [
+      "Blake",
+      "Engineer"
+    ],
+    [
+      "Carmen",
+      "Analyst"
+    ],
+    [
+      "Dev",
+      "Manager"
+    ],
+    [
+      "Elise",
+      "Engineer"
+    ],
+    [
+      "Finn",
+      "Designer"
+    ],
+    [
+      "Grace",
+      "Manager"
+    ],
+    [
+      "Hector",
+      "Designer"
+    ],
+    [
+      "Iris",
+      "Analyst"
+    ],
+    [
+      "Jamal",
+      "Engineer"
+    ],
+    [
+      "Kira",
+      "Designer"
+    ]
+  ],
+  "grain": "one row per specialist"
+}

@@ -1,0 +1,98 @@
+{
+  "name": "employees",
+  "columns": [
+    {
+      "name": "employee_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "employee_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "manager_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "department_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "hire_date",
+      "type": "DATE"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Amara Cole",
+      null,
+      10,
+      "2021-02-10"
+    ],
+    [
+      2,
+      "Ben Ortiz",
+      1,
+      10,
+      "2022-04-18"
+    ],
+    [
+      3,
+      "Chloe Park",
+      1,
+      10,
+      "2023-01-09"
+    ],
+    [
+      4,
+      "Diego Ross",
+      null,
+      20,
+      "2020-11-02"
+    ],
+    [
+      5,
+      "Elena Fox",
+      4,
+      20,
+      "2022-06-14"
+    ],
+    [
+      6,
+      "Farah Singh",
+      4,
+      20,
+      "2024-03-11"
+    ],
+    [
+      7,
+      "Gavin Moore",
+      null,
+      30,
+      "2021-09-27"
+    ],
+    [
+      8,
+      "Hana Lee",
+      7,
+      30,
+      "2023-08-07"
+    ],
+    [
+      9,
+      "Isaac Bell",
+      7,
+      30,
+      "2024-01-15"
+    ],
+    [
+      10,
+      "Jules Grant",
+      null,
+      40,
+      "2025-05-05"
+    ]
+  ],
+  "grain": "one row per employee"
+}

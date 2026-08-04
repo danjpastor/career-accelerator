@@ -25,7 +25,7 @@ SQL_PROBLEM_SCHEDULE = {
     "Laptop vs. Mobile Viewership": 4,
     "Page With No Likes": 4,
     "Signup Activation Rate": 4,
-    "Second Day Confirmation": 4,
+    "Second Day Confirmation": 5,
     "Supercloud Customer": 4,
     "Teams Power Users": 5,
     "Second Highest Salary": 5,
