@@ -61,8 +61,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Clean and Validate a Flawed Spreadsheet
-- [ ] Build and Reconcile a Pivot-Based Business Summary

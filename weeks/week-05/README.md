@@ -61,8 +61,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Clean a Deliberately Flawed Practice Dataset
-- [ ] Build and Explain a Reproducible Multi-Step SQL Workflow

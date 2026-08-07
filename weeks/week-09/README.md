@@ -62,8 +62,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Project 1 Relationship and Cleaning Validation
-- [ ] Project 1 SQL and Exploratory-Analysis Review

@@ -1,4 +1,4 @@
-"""Applied Lab 12: Perform and interpret a hypothesis test."""
+"""Applied Lab 12: Run and interpret one hypothesis test."""
 
 from pathlib import Path
 import json

@@ -1,4 +1,4 @@
--- Applied Lab 04: Diagnose duplicated revenue from a broken join
+-- Applied Lab 04: Fix a join that duplicates revenue
 -- Concepts: join cardinality, grain, duplicate amplification, reconciliation
 
 -- Broken query: multiple return rows amplify order revenue.

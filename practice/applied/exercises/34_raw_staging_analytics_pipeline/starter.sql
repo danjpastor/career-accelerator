@@ -1,4 +1,4 @@
--- Applied Lab 29: Build a raw-to-analytics data workflow
+-- Applied Lab 29: Create one staging view and one summary table
 -- Concepts: raw layer, staging views, clean layer, analytical marts, idempotency, validation, lineage
 -- Run with DuckDB. Keep validation queries separate from the main result.
 

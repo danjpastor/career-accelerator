@@ -61,8 +61,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Complete an End-to-End SQL Analysis on Practice Data
-- [ ] Explain and Validate Joins, CTEs, and Window Calculations

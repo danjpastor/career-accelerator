@@ -81,7 +81,6 @@ from career_app.theme import COLORS, stylesheet
 from career_app.ui.duckdb_exercises import DuckDBExercisesWidget
 from career_app.ui.python_exercises import PythonExercisesWidget
 from career_app.ui.course_ui import SqlCodeEditor
-from career_app.ui.applied_labs import AppliedLabsWidget
 from career_app.ui.task_workspace import TaskWorkspaceDialog
 from career_app.ui.portfolio_workspace import PortfolioTaskWorkspaceDialog
 from career_app.ui.portfolio_hub import PortfolioHubWidget
@@ -2574,7 +2573,6 @@ class CareerAccelerator(QMainWindow):
         self.learning_section_index = {
             "Certificate": 0,
             "Practice": 1,
-            "Skills Lab": 2,
         }
         self.learning_section_nav = QWidget()
         self.learning_section_nav.setObjectName("LearningSectionNav")
@@ -2696,9 +2694,6 @@ class CareerAccelerator(QMainWindow):
         practice_layout.addWidget(self.sql_tabs, 1)
         self.learning_tabs.addTab(practice, "Practice")
 
-        self.applied_labs_widget = AppliedLabsWidget(self.conn, ROOT, self)
-        self.applied_labs_widget.changed.connect(self._applied_labs_changed)
-        self.learning_tabs.addTab(self.applied_labs_widget, "Skills Lab")
         root.addWidget(self.learning_tabs, 1)
 
         def sync_learning_button(index):
@@ -2749,9 +2744,6 @@ class CareerAccelerator(QMainWindow):
         if key == "Portfolio":
             self.navigate(PAGE_PORTFOLIO)
             return
-        if key in {"Applied Labs", "Skills Lab"}:
-            self.open_learning_section("Skills Lab")
-            return
         if key == "Google":
             row = self.conn.execute(
                 """SELECT tt.task_id
@@ -2771,11 +2763,6 @@ class CareerAccelerator(QMainWindow):
             return
         self.open_learning_section("Certificate")
 
-    def _applied_labs_changed(self):
-        self.state = state(self.conn)
-        tracks.sync_all(self.conn, self.state)
-        self.state = state(self.conn)
-        self.refresh_all(sync_tracks=False)
     # END EXERCISE PACKS
 
     # BEGIN EXERCISE PACKS
@@ -6423,8 +6410,6 @@ class CareerAccelerator(QMainWindow):
                     if ready_chapter is not None
                     else "Complete the earlier assigned chapter or wait until the scheduled day."
                 )
-        if hasattr(self, "applied_labs_widget"):
-            self.applied_labs_widget.refresh()
 
     def refresh_project(self):
         self.project_combo.blockSignals(True)
@@ -6948,7 +6933,7 @@ class CareerAccelerator(QMainWindow):
             self.kanban_layout.addWidget(column)
 
     def _notify_new_content_unlocks(self):
-        """Show one-time notices for newly ready weekly checks and Applied Labs."""
+        """Show one-time notices for newly ready weekly checks."""
         if not self.isVisible():
             return
 
@@ -6966,36 +6951,6 @@ class CareerAccelerator(QMainWindow):
             )
             break
 
-        row = self.conn.execute(
-            """SELECT tt.target_key,s.id,s.completed
-               FROM track_tasks tt
-               JOIN sprint_tasks s ON s.id=tt.task_id
-               WHERE tt.track_key='applied'
-               LIMIT 1"""
-        ).fetchone()
-        if row is None or bool(row["completed"]):
-            return
-        target_key = str(row["target_key"] or "")
-        if not target_key.startswith("lab:"):
-            return
-        try:
-            number = int(target_key.split(":", 1)[1])
-        except (TypeError, ValueError):
-            return
-        item = APPLIED_EXERCISES.get(number)
-        if item is None:
-            return
-        readiness = tracks.applied_lab_readiness(self.conn, self.state, number)
-        if not readiness.get("ready"):
-            return
-        notice_key = f"content_unlock_notified:applied_lab:{number:02d}"
-        if str(setting(self.conn, notice_key, "")) == "1":
-            return
-        save_setting(self.conn, notice_key, "1")
-        self._notify(
-            f"🔓 Applied Lab {number:02d} unlocked: {item['title']}",
-            8500,
-        )
 
 
     def queue_dashboard_task_completion(

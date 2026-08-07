@@ -1,84 +1,25 @@
 # Applied Lab 11 submission
 
-## Answer a missed-deadlines request in 30 minutes
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] The deadline rule is explicit.
+- [ ] The result table answers only the requested scope.
+- [ ] One quick reconciliation or sample check is recorded.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Write one clarifying question.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Define missed deadline and grain.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Find the top three causes and contribution.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Run two checks.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** Write a three-sentence conclusion and action.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Count and rate are distinguished.
-  - Evidence:
-- [ ] Time window is stated.
-  - Evidence:
-- [ ] Recommendation is proportional to evidence.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

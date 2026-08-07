@@ -1,14 +1,14 @@
 # Curated Roadmap Tasks
 
-Dedicated progress systems own Google Certificate modules, DataCamp chapters, weekly knowledge checks, SQL interview practice, DuckDB exercises, Applied Labs, and portfolio milestones.
+Dedicated progress systems own Google Certificate modules, DataCamp chapters, weekly knowledge checks, SQL interview practice, SQL Challenges, Python exercises, and portfolio milestones.
 
 ## Google Certificate task rule
 
 The Google track is sequential and highest priority, but its next module is generated only when the module’s assigned subject week has arrived. Future-topic modules are intentionally absent from the active planner. Completed module events and the durable course/module pointer are preserved.
 
-## Applied Lab task rule
+## Applied Labs
 
-Each of the 36 Applied Labs routes to its own persisted Studio. The Studio contains assignment-specific guided stages, evidence fields, validation requirements, artifact tracking, and final review. The guide specifies the work and checks without revealing the completed solution.
+Applied Labs were removed from the active program. Integration practice is now covered by SQL Challenges, Python exercises, DataCamp projects, SQL interview problems, weekly knowledge checks, and portfolio work. Historical lab progress and submissions are retained only as an archive.
 
 ## Retained cross-track tasks
 

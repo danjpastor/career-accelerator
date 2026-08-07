@@ -1,84 +1,25 @@
 # Applied Lab 19 submission
 
-## Create reusable DAX measures
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] Measures respond to filters.
+- [ ] Ratio logic handles zero denominators safely.
+- [ ] All three measures have an independent check.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Create total hours, shot count, completion rate, and average-hours measures.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Use DIVIDE and CALCULATE appropriately.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Create budget and schedule variance measures.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Add a prior-period comparison.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** Document formulas and business meaning.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Measures respond correctly to filters.
-  - Evidence:
-- [ ] Rates use safe division.
-  - Evidence:
-- [ ] Totals reconcile to another tool.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

@@ -1,92 +1,25 @@
 # Applied Lab 36 submission
 
-## Optimize Power BI model and refresh performance
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] The diagnosis names a specific model or refresh issue.
+- [ ] The proposed change preserves analytical meaning.
+- [ ] The measurement plan uses a comparable before-and-after check.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Identify transformations that can preserve query folding.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Remove unused columns and reduce high-cardinality text where appropriate.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Review calculated columns versus measures.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Document Import, DirectQuery, or composite-model tradeoffs.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** Draft an incremental-refresh policy.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 6
-
-**Planned work:** Use or simulate Performance Analyzer findings and prioritize fixes.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Optimizations preserve analytical meaning.
-  - Evidence:
-- [ ] Performance claims are supported by a measurement or documented expectation.
-  - Evidence:
-- [ ] The incremental-refresh policy includes date boundaries and retention.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

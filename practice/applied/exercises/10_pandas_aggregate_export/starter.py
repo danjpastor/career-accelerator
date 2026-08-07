@@ -1,4 +1,4 @@
-"""Applied Lab 30: Aggregate and export analysis results with pandas."""
+"""Applied Lab 30: Aggregate and export one pandas summary."""
 from pathlib import Path
 import pandas as pd
 

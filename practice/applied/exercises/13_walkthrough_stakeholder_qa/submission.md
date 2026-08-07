@@ -1,84 +1,25 @@
 # Applied Lab 27 submission
 
-## Prepare a dashboard walkthrough and stakeholder Q&A
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] The walkthrough fits five minutes.
+- [ ] Every answer points to a visible result or documented limitation.
+- [ ] The recommended action follows from the dashboard.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Write a five-minute audience-problem-evidence-action-limitations outline.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Choose the three visuals to show first.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Draft three likely stakeholder questions.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Prepare concise evidence-based answers.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** Rehearse and revise.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Walkthrough stays within five minutes.
-  - Evidence:
-- [ ] It explains decisions, not features.
-  - Evidence:
-- [ ] Answers distinguish fact, inference, and recommendation.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

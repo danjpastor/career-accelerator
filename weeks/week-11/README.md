@@ -62,8 +62,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Project 2 Completion and Publication Review
-- [ ] Project 3 Scope, Data-Quality, and Analysis Review

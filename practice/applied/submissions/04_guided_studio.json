@@ -1,0 +1,25 @@
+{
+  "artifact": "",
+  "checks": [
+    false,
+    false,
+    false,
+    false
+  ],
+  "number": 4,
+  "stages": [
+    {
+      "completed": false,
+      "evidence": ""
+    },
+    {
+      "completed": false,
+      "evidence": ""
+    },
+    {
+      "completed": false,
+      "evidence": ""
+    }
+  ],
+  "takeaway": ""
+}

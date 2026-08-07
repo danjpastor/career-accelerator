@@ -62,8 +62,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Project 1 Power BI Model and Calculation Audit
-- [ ] Project 1 Stakeholder Walkthrough and Publication Review

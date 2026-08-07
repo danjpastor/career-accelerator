@@ -1,4 +1,4 @@
-"""Applied Lab 20: Load and profile data with pandas."""
+"""Applied Lab 20: Profile one dataset with pandas."""
 from pathlib import Path
 import pandas as pd
 

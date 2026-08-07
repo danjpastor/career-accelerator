@@ -1,28 +1,21 @@
 # Applied Lab 24 validation rubric
 
-Use this rubric after completing the guided workflow. A checked item should have visible evidence in the artifact, result output, screenshot, or Progress & Evidence notes.
+> Target time: 40 minutes. This is a small lab, not a project.
 
-## Required result
+## Required checks
 
-- [ ] Every page is processed exactly once.
-- [ ] Duplicate IDs are detected explicitly.
-- [ ] Missing optional fields do not crash the ingestion.
+- [ ] Both pages are included exactly once.
+- [ ] Stable record keys are unique after combination.
+- [ ] Missing or changed fields are handled visibly.
 
-## Reproducibility and control
+## Scope check
 
-- [ ] The original packaged source files were not edited.
-- [ ] The main result can be recreated from the supplied inputs.
-- [ ] Row-count, grain, join, total, or boundary checks are recorded where relevant.
-- [ ] Hardcoded final answers are not used in place of analysis logic.
-
-## Communication and handoff
-
-- [ ] The artifact path and supporting evidence are recorded.
-- [ ] Assumptions and metric definitions are visible.
-- [ ] Limitations and unresolved issues are stated honestly.
-- [ ] The stakeholder takeaway identifies the result, implication, and next action.
+- [ ] I used the supplied dataset and one primary tool.
+- [ ] I completed only the listed actions and did not add project-scale deliverables.
+- [ ] I saved one primary artifact or result.
+- [ ] I wrote a two-to-three-sentence takeaway with one limitation or next question.
 
 ## Completion decision
 
-- **Ready to complete:** all required results are supported by evidence and the artifact can be reopened.
-- **Keep in progress:** a required deliverable is missing, a validation check fails, or the result cannot be reproduced.
+- **Ready to complete:** the required result is saved, the checks pass, and the takeaway is recorded.
+- **Keep in progress:** a required check fails or the result cannot be reopened.

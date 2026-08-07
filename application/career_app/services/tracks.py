@@ -8,6 +8,7 @@ from datetime import date, timedelta
 from career_app.data.applied_exercises import (
     APPLIED_EXERCISES,
     APPLIED_SKILL_EVIDENCE,
+    CORE_APPLIED_LABS,
     exercise_number_for_label as applied_exercise_number_for_label,
 )
 from career_app.services import achievements as achievement_service
@@ -68,21 +69,12 @@ TRACK_CONFIG = {
         "sort_band": -100000,
         "role": "Application",
     },
-    "applied": {
-        "display_name": "Applied Labs",
-        "category": "Learning",
-        "destination": PAGE_LEARNING,
-        "priority": 3,
-        "sort_band": -50000,
-        "role": "Supplemental",
-    },
 }
 
 TRACK_ORDER = (
     "google",
     "sql",
     "portfolio",
-    "applied",
 )
 
 
@@ -358,13 +350,19 @@ APPLIED_BRANCHES = {'Google Sheets': (1,),
 APPLIED_BRANCH_ORDER = tuple(
     APPLIED_BRANCHES
 )
+CORE_APPLIED_BRANCH_ORDER = tuple(
+    branch
+    for branch, numbers in APPLIED_BRANCHES.items()
+    if any(number in CORE_APPLIED_LABS for number in numbers)
+)
 
 APPLIED_REQUIRED_SKILLS = {15: {'power_query'},
  18: {'power_query'},
  19: {'dimensional_modeling'},
- 25: {'dax_measures'},
+ 25: {'power_bi'},
  26: {'report_design'},
  1: {'data_preparation'},
+ 21: {'python_pandas', 'data_cleaning'},
  31: {'sql_aggregation'},
  8: {'analysis_foundations'},
  3: {'sql_querying'},
@@ -381,7 +379,7 @@ APPLIED_REQUIRED_SKILLS = {15: {'power_query'},
  22: {'experiment_analysis'},
  28: {'python_pandas', 'causal_reasoning'},
  6: {'sql_aggregation', 'business_framing'},
- 13: {'sql_date_logic', 'sql_ctes', 'funnel_analysis'},
+ 13: {'sql_aggregation', 'sql_date_logic', 'sql_ctes'},
  17: {'sql_date_logic', 'cohort_analysis', 'sql_joins'},
  23: {'sql_aggregation', 'analysis_foundations', 'churn_analysis'},
  24: {'python_pandas', 'data_preparation'},
@@ -1243,22 +1241,9 @@ def adaptive_targets(
         if portfolio_ready and hours >= 10
         else 0
     )
-    applied_target = (
-        3
-        if (
-            hours >= 20
-            and current_week
-            in {7, 8, 9, 10}
-        )
-        else 2
-        if (
-            hours >= 15
-            and current_week >= 4
-        )
-        else 1
-        if hours >= 10
-        else 0
-    )
+    # Applied Labs are phase-end integration checks, not a parallel project
+    # workload. At most one core lab is assigned in a week.
+    applied_target = 0
 
     return {
         "google": {
@@ -1281,11 +1266,9 @@ def adaptive_targets(
             ),
         },
         "applied": {
-            "weekly_target": applied_target,
-            "allocation_percent": 13,
-            "allocation_minutes": int(
-                hours * 60 * 0.13
-            ),
+            "weekly_target": 0,
+            "allocation_percent": 0,
+            "allocation_minutes": 0,
         },
     }
 
@@ -2666,7 +2649,7 @@ def applied_branch_pin(conn):
     return (
         value
         if value == "Auto"
-        or value in APPLIED_BRANCHES
+        or value in CORE_APPLIED_BRANCH_ORDER
         else "Auto"
     )
 
@@ -2783,19 +2766,19 @@ def applied_lab_readiness(
             ),
         }
 
-    numbers = APPLIED_BRANCHES[
-        branch
-    ]
-    position = numbers.index(
-        number
+    numbers = APPLIED_BRANCHES.get(
+        branch,
+        (number,),
     )
+    position = numbers.index(number) if number in numbers else 0
     missing_labs = [
         previous
-        for previous in numbers[
-            :position
-        ]
-        if previous not in completed
+        for previous in numbers[:position]
+        if previous in CORE_APPLIED_LABS
+        and previous not in completed
     ]
+    if item.get("optional"):
+        missing_labs = []
 
     if unlocked is None:
         unlocked = _derived_skills(
@@ -2924,11 +2907,9 @@ def _applied_target_payload(
         "assigned_week": int(
             item["week"]
         ),
-        "total_items": len(
-            APPLIED_EXERCISES
-        ),
+        "total_items": len(CORE_APPLIED_LABS),
         "completed_items": len(
-            completed
+            set(completed).intersection(CORE_APPLIED_LABS)
         ),
         "pin": pin,
         "optional": bool(
@@ -3033,8 +3014,8 @@ def _applied_target(
         )
         if (
             active_number is not None
-            and active_number
-            not in completed
+            and active_number in CORE_APPLIED_LABS
+            and active_number not in completed
         ):
             active_branch = (
                 _applied_branch_for_number(
@@ -3082,7 +3063,8 @@ def _applied_target(
             (
                 number
                 for number in numbers
-                if number not in completed
+                if number in CORE_APPLIED_LABS
+                and number not in completed
             ),
             None,
         )
@@ -3219,11 +3201,9 @@ def _applied_target(
             "assigned_week": int(
                 item["week"]
             ),
-            "total_items": len(
-                APPLIED_EXERCISES
-            ),
+            "total_items": len(CORE_APPLIED_LABS),
             "completed_items": len(
-                completed
+                set(completed).intersection(CORE_APPLIED_LABS)
             ),
             "pin": pin,
             "missing": blocked[
@@ -3813,12 +3793,6 @@ def sync_all(conn, state):
             conn,
             state,
             pace["portfolio"],
-            unlocked,
-        ),
-        "applied": _applied_target(
-            conn,
-            state,
-            pace["applied"],
             unlocked,
         ),
     }

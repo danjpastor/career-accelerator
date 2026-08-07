@@ -1,84 +1,25 @@
 # Applied Lab 22 submission
 
-## Separate correlation from causal evidence
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] The observed association is stated accurately.
+- [ ] At least one credible alternative explanation is named.
+- [ ] The proposed evidence could meaningfully test causality.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Measure and describe the observed association.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** List plausible confounders and reverse-causality explanations.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Identify what the current data can and cannot establish.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Propose an experiment or quasi-experimental design.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** Rewrite the conclusion using appropriately cautious language.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Correlation is not treated as proof of causation.
-  - Evidence:
-- [ ] At least one plausible alternative mechanism is considered.
-  - Evidence:
-- [ ] The proposed design addresses the main confounder.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

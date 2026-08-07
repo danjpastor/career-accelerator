@@ -13,6 +13,7 @@ from pathlib import Path
 from career_app.data.applied_exercises import (
     APPLIED_EXERCISES,
     APPLIED_LAB_NUMBERING_VERSION,
+    CORE_APPLIED_LABS,
     LEGACY_TO_CURRENT_LAB_NUMBER,
 )
 
@@ -415,6 +416,131 @@ def _repair_current_focus_references(conn: sqlite3.Connection) -> tuple[int, int
     return focus_changed, snapshot_changed_count
 
 
+
+def _retire_all_applied_lab_assignments(conn: sqlite3.Connection) -> int:
+    """Remove Applied Labs from active program surfaces without deleting lab progress.
+
+    Existing progress, submissions, evidence, and achievements remain historical. Roadmap
+    task rows are archived before they are removed so the learner's prior completion state
+    is still recoverable, but no Applied Lab can appear in Today’s Focus, Next Tasks,
+    Current Sprint, View All Tasks, or adaptive-track cards.
+    """
+    changed = 0
+    task_ids: set[int] = set()
+
+    if _table_exists(conn, "sprint_tasks"):
+        rows = conn.execute(
+            """SELECT s.id,s.week,s.sort_order,s.label,s.completed,
+                      m.status,m.priority,m.estimated_minutes,m.energy,m.destination,
+                      m.category,m.prerequisite_state,m.prerequisite_reason,
+                      m.managed_key,m.starter_path,
+                      tt.track_key,tt.target_key,tt.source_label,tt.linked_entity_id
+               FROM sprint_tasks s
+               LEFT JOIN task_metadata m ON m.task_id=s.id
+               LEFT JOIN track_tasks tt ON tt.task_id=s.id
+               WHERE s.label LIKE 'Complete Applied Lab %'
+                  OR tt.track_key='applied'
+               ORDER BY s.id"""
+        ).fetchall()
+        for row in rows:
+            task_id = int(row[0])
+            task_ids.add(task_id)
+            if _table_exists(conn, "roadmap_task_archive"):
+                metadata = {
+                    "priority": row[6],
+                    "estimated_minutes": row[7],
+                    "energy": row[8],
+                    "destination": row[9],
+                    "prerequisite_state": row[11],
+                    "prerequisite_reason": row[12],
+                    "managed_key": row[13],
+                    "starter_path": row[14],
+                    "target_key": row[16],
+                    "source_label": row[17],
+                    "linked_entity_id": row[18],
+                }
+                conn.execute(
+                    """INSERT INTO roadmap_task_archive
+                       (original_task_id,week,sort_order,label,completed,status,category,track_key,reason,metadata)
+                       VALUES(?,?,?,?,?,?,?,?,?,?)
+                       ON CONFLICT(original_task_id) DO UPDATE SET
+                           reason=excluded.reason,
+                           metadata=excluded.metadata""",
+                    (
+                        task_id,
+                        int(row[1]),
+                        int(row[2]),
+                        str(row[3]),
+                        int(row[4] or 0),
+                        row[5],
+                        row[10],
+                        row[15] or "applied",
+                        "Applied Labs removed from the program",
+                        json.dumps(metadata, sort_keys=True, default=str),
+                    ),
+                )
+            if _table_exists(conn, "task_workspaces"):
+                conn.execute("UPDATE task_workspaces SET task_id=NULL WHERE task_id=?", (task_id,))
+            if _table_exists(conn, "daily_focus"):
+                conn.execute("DELETE FROM daily_focus WHERE task_id=?", (task_id,))
+            if _table_exists(conn, "task_day_promotions"):
+                conn.execute("DELETE FROM task_day_promotions WHERE task_id=?", (task_id,))
+            if _table_exists(conn, "track_tasks"):
+                conn.execute("DELETE FROM track_tasks WHERE task_id=?", (task_id,))
+            conn.execute("DELETE FROM sprint_tasks WHERE id=?", (task_id,))
+            changed += 1
+
+    if _table_exists(conn, "daily_focus"):
+        changed += max(
+            0,
+            conn.execute(
+                """DELETE FROM daily_focus
+                   WHERE track_key='applied'
+                      OR title LIKE 'Complete Applied Lab %'
+                      OR source_key LIKE 'lab:%'
+                      OR target_key LIKE 'lab:%'"""
+            ).rowcount,
+        )
+
+    if _table_exists(conn, "track_tasks"):
+        changed += max(0, conn.execute("DELETE FROM track_tasks WHERE track_key='applied'").rowcount)
+    if _table_exists(conn, "track_state"):
+        changed += max(0, conn.execute("DELETE FROM track_state WHERE track_key='applied'").rowcount)
+
+    if _table_exists(conn, "settings"):
+        conn.execute("DELETE FROM settings WHERE key='applied_branch_pin'")
+        conn.execute("DELETE FROM settings WHERE key LIKE 'content_unlock_notified:applied_lab:%'")
+        snapshots = conn.execute(
+            "SELECT key,value FROM settings WHERE key LIKE 'daily_focus_snapshot_v2:%'"
+        ).fetchall()
+        for row in snapshots:
+            try:
+                payload = json.loads(str(row[1] or "{}"))
+            except Exception:
+                continue
+            assignments = payload.get("new_assignments") if isinstance(payload, dict) else None
+            if not isinstance(assignments, list):
+                continue
+            kept = [
+                raw for raw in assignments
+                if not (
+                    isinstance(raw, dict)
+                    and (
+                        str(raw.get("track_key") or "") == "applied"
+                        or str(raw.get("target_key") or raw.get("identity") or "").startswith("lab:")
+                        or str(raw.get("title") or "").startswith("Complete Applied Lab ")
+                    )
+                )
+            ]
+            if len(kept) != len(assignments):
+                payload["new_assignments"] = kept[:5]
+                conn.execute(
+                    "UPDATE settings SET value=? WHERE key=?",
+                    (json.dumps(payload, sort_keys=True), str(row[0])),
+                )
+                changed += 1
+    return changed
+
 def _submission_suffix(item: dict) -> str:
     suffix = Path(str(item.get("starter_filename") or "submission.md")).suffix
     slug = str(item.get("submission_slug") or re.sub(r"^\d+_", "", str(item["slug"])))
@@ -501,6 +627,7 @@ def reconcile(conn: sqlite3.Connection, root: Path) -> dict[str, int]:
                 "INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
                 (SETTING_KEY, str(APPLIED_LAB_NUMBERING_VERSION)),
             )
+        result["all_assignments_retired"] = _retire_all_applied_lab_assignments(conn)
         conn.execute("RELEASE SAVEPOINT applied_lab_numbering")
         return result
     except Exception:

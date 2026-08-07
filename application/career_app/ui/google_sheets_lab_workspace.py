@@ -56,135 +56,67 @@ def _is_google_sheets_url(value: str) -> bool:
 
 STEPS: tuple[dict[str, Any], ...] = (
     {
-        "title": "Create the spreadsheet and inspect the sources",
-        "purpose": "Set up a small, traceable Google Sheets file and understand the two source tables before writing formulas.",
+        "title": "Set up the sheet and analysis table",
+        "purpose": "Create the small workbook structure and one formula-driven row per order.",
         "actions": (
-            "Create a blank Google Sheet, give it a clear Northstar sales-analysis name, copy its shareable link, and save the link in this Studio.",
-            "Create exactly four tabs named Raw Orders, Targets, Analysis, and Summary. Keep the Raw Orders and Targets tabs reserved for imported source data.",
-            "Import each supplied CSV into the matching source tab. Confirm that the headers are in the first row and that no extra blank columns or title rows were introduced during import.",
-            "Inspect the order table and write down what one row represents, which field appears to identify an order, and which columns contain dates, categories, status, quantity, and currency values.",
-            "Inspect the target table and identify the field that can connect a region to its target. Confirm that each region appears only once before planning a lookup.",
-            "Freeze the source header rows and apply readable date, number, percentage, and currency formatting without changing the underlying values.",
+            "Create a Google Sheet with Raw Orders, Targets, Analysis, and Summary tabs, then import the two supplied CSV files without editing the source tabs.",
+            "In Analysis, reference the order rows and create only four calculated fields: Clean Region, Gross Sales, Processing Fee, and Net Sales.",
+            "Use one fixed fee-rate cell on Summary and copy the formulas through every order row.",
         ),
-        "output": "A linked Google Sheet with four named tabs, both source files imported, and a short source-grain note recorded in the stage evidence.",
+        "output": "A four-tab sheet with one Analysis row per order and four copied calculated fields.",
         "validation": (
-            "The order identifier is populated and unique for the imported rows.",
-            "The target lookup field contains one row per region rather than repeated region values.",
-            "Source tabs still contain the imported values and have not been used for cleaning or calculations.",
-            "Dates, quantities, prices, and targets display with appropriate formats.",
+            "The Analysis and Raw Orders row counts match.",
+            "Cancelled orders do not contribute sales.",
+            "Changing the fee-rate cell changes fee and net sales but not gross sales.",
         ),
-        "evidence": "Record the Google Sheets link, the grain and candidate key of each source, and any formatting or import issue you corrected.",
+        "evidence": "Record the share link, Analysis row count, and one manually checked order.",
         "pitfalls": (
-            "Building calculations directly on the source tabs.",
-            "Assuming a lookup field is unique without checking it.",
-            "Deleting a row that looks unusual before confirming whether it is a valid record.",
+            "Typing cleaned values or sales totals manually.",
+            "Using a moving reference for the single fee-rate cell.",
         ),
     },
     {
-        "title": "Clean the fields and calculate order-level sales",
-        "purpose": "Build one analysis row per order using the spreadsheet cleaning, reference, logic, and error-handling skills taught in Weeks 1–2.",
+        "title": "Build the small summary",
+        "purpose": "Create only the controls and outputs needed for one management question.",
         "actions": (
-            "Create Analysis headers for the original order fields plus Month, Clean Region, Gross Sales, Processing Fee, Net Sales, and Quality Check. Keep the columns in a logical left-to-right order.",
-            "Bring the source order fields into Analysis using same-row references so the analysis remains connected to the imported data.",
-            "Create a month field from the order date using the date-to-text technique taught in the spreadsheet coursework. Use a consistent year-month format that will sort correctly.",
-            "Standardize region text by removing extra spaces and applying consistent capitalization. Combine the cleaning functions rather than editing individual region cells manually.",
-            "On Summary, create one clearly labeled processing-fee input and enter the required percentage as a true percentage value.",
-            "For Gross Sales, use conditional logic so only completed orders contribute sales. The calculation should use quantity and unit price from the same row.",
-            "Calculate the processing fee as the row's gross sales multiplied by the single fee-rate input. Use an absolute reference for the fee-rate cell so the reference remains fixed when copied.",
-            "Calculate Net Sales from the row's gross sales and processing fee. Think about whether subtracting the percentage cell itself is logically correct before writing the formula.",
-            "Create a Quality Check that flags missing order identifiers, blank cleaned regions, or nonpositive quantities and otherwise marks the row as acceptable.",
-            "Copy the calculated formulas through every imported order row, then use sorting and filtering to inspect completed, cancelled, and flagged records.",
+            "Create a region dropdown containing All and the cleaned regions.",
+            "Create three KPI cells: Completed Orders, Net Sales, and Regional Sales Target. Make the first two respond to the region selection and use an exact-match lookup for the target.",
+            "Create one pivot table of Gross Sales by Clean Region and one simple column chart from that pivot.",
         ),
-        "output": "An Analysis table with one row per order, cleaned region and month fields, formula-driven sales columns, and a visible quality check.",
+        "output": "A Summary tab with one dropdown, three KPIs, one pivot table, and one chart.",
         "validation": (
-            "The Analysis row count and unique order count still match the imported order table.",
-            "Region variants that differ only by capitalization or extra spaces now group under one cleaned value.",
-            "Cancelled orders do not contribute gross or net sales.",
-            "Changing the fee-rate input updates Processing Fee and Net Sales but does not change Gross Sales.",
-            "The fee-rate reference remains fixed in every copied row.",
-            "No calculated cell contains an unexplained spreadsheet error.",
+            "The region dropdown changes Completed Orders and Net Sales.",
+            "The target lookup changes by region and does not show an error for All.",
+            "The all-region pivot total agrees with the Analysis gross-sales total.",
         ),
-        "evidence": "Record the Analysis range, the cleaning and calculation logic you used in words, the fee-reference test, and one row you checked manually.",
+        "evidence": "Record two region selections tested and the pivot-total comparison.",
         "pitfalls": (
-            "Subtracting the percentage itself from a currency value instead of calculating the percentage of that value.",
-            "Using a relative reference for the single fee-rate input.",
-            "Typing cleaned regions or calculated sales manually instead of using formulas.",
-            "Copying formulas beyond the source rows and accidentally including blank records in later summaries.",
+            "Adding extra KPIs, tabs, or charts that are not required.",
+            "Building the chart from raw orders instead of the pivot summary.",
         ),
         "hints": (
-            "For a percentage fee, first determine the fee amount, then subtract that amount from gross sales.",
-            "List the true and false outcomes of the completed-order rule in words before choosing the conditional formula structure.",
-            "Check the first copied row and the last copied row to confirm the fixed and relative references moved as intended.",
+            "Build the All-region and selected-region calculation separately before combining them.",
+            "Use the cleaned region field everywhere on Summary.",
         ),
     },
     {
-        "title": "Build an interactive summary, pivot table, and chart",
-        "purpose": "Create a small manager-facing summary that responds to a region selection and compares sales across regions and months.",
+        "title": "Check the result and write the takeaway",
+        "purpose": "Confirm the small summary works and explain one supported finding.",
         "actions": (
-            "On Summary, create a Selected Region control and use data validation to provide All plus every cleaned region represented in the data.",
-            "Create clearly labeled KPI cells for Completed Orders, Gross Sales, Net Sales, Average Net Order Value, and Regional Sales Target.",
-            "For Completed Orders, design two counting paths: one for All regions and one requiring both completed status and the selected region. Use conditional logic to choose the correct path.",
-            "For Gross Sales and Net Sales, design the same All-versus-selected-region behavior using the conditional-sum functions taught in the coursework. Make sure each KPI sums the correct analysis column.",
-            "Calculate Average Net Order Value from the already calculated Net Sales and Completed Orders KPI cells. Add error handling for a selection with no completed orders.",
-            "Use the selected region to look up the matching target from the Targets tab. Use exact matching, keep the lookup table fixed, and show a clear message rather than an error when All is selected or no match exists.",
-            "Test the dropdown with All and at least two individual regions. Confirm that every region-dependent KPI changes and that Gross Sales is not affected by the processing-fee rate.",
-            "Create a pivot table from the complete Analysis table. Use Clean Region as rows, Month as columns, and the sum of Gross Sales as values.",
-            "Confirm the pivot is summing the sales field rather than counting records, then create one readable column chart from the useful pivot-table range.",
-            "Give the chart a decision-oriented title that names the metric and comparison. Remove totals from the chart if they create an extra misleading series.",
+            "Reconcile the source, Analysis, and unique-order counts.",
+            "Check one completed order manually and compare one regional Net Sales subtotal with the Summary KPI.",
+            "Write two or three sentences describing the strongest regional pattern, why it matters, and one limitation or next question.",
         ),
-        "output": "A Summary tab with a working region dropdown, five formula-driven KPIs, one region-by-month pivot table, and one column chart.",
+        "output": "A checked shareable sheet and a short evidence-based takeaway.",
         "validation": (
-            "All KPI cells update when the selected region changes and none are typed values.",
-            "The All-region completed-order count agrees with a filter or pivot count of completed rows.",
-            "The All-region gross-sales KPI reconciles with the pivot-table grand total.",
-            "Net Sales is lower than or equal to Gross Sales and responds to changes in the fee-rate input.",
-            "The regional target changes for each region and does not display a spreadsheet error for All.",
-            "Each cleaned region and month appears only once in the pivot layout.",
-            "The chart shows the intended regions, months, and sales values without an unnecessary grand-total series.",
+            "The manual order and regional subtotal agree with the formulas.",
+            "The share link opens and the required tabs are readable.",
+            "The takeaway describes an observed pattern without claiming a cause.",
         ),
-        "evidence": "Record the dropdown selections tested, which KPIs changed, how the pivot total was reconciled, and one issue you corrected while building the summary.",
+        "evidence": "Record the two checks, final takeaway, and one limitation.",
         "pitfalls": (
-            "Counting all orders instead of only completed orders.",
-            "Using the raw region field instead of the cleaned region field.",
-            "Using a one-condition function when the selected-region calculation requires both status and region.",
-            "Using approximate lookup matching or allowing the lookup range to move.",
-            "Building the chart directly from raw orders instead of the summarized pivot table.",
-        ),
-        "hints": (
-            "Write the All rule and the selected-region rule separately before wrapping them in one conditional calculation.",
-            "For conditional sums, identify the values to add separately from every condition range and condition.",
-            "If the pivot total and KPI disagree, check status filtering, the selected sum column, and whether blank rows were included.",
-        ),
-    },
-    {
-        "title": "Validate the spreadsheet and explain one finding",
-        "purpose": "Prove that the spreadsheet behaves correctly and communicate one useful observation without overstating the data.",
-        "actions": (
-            "Return the region control to All and perform a full validation of source row count, Analysis row count, and unique order count.",
-            "Choose one completed order and independently recalculate its gross sales, processing fee, and net sales using the source quantity, price, and fee rate. Compare your check with the row formulas.",
-            "Filter Analysis to completed orders and independently total one region. Compare that subtotal with the corresponding Summary KPI.",
-            "Compare the All-region Gross Sales KPI with the pivot-table grand total and investigate any difference before continuing.",
-            "Test two different regions in the dropdown and confirm the KPI changes make sense relative to the filtered Analysis rows.",
-            "Review the chart and identify the region with the strongest sales result. Check the underlying pivot values before writing the takeaway.",
-            "Write two or three sentences stating the observed pattern, why a manager might care, and one reasonable question or action to investigate next.",
-            "Add one limitation, such as the small time period, limited order fields, or the fact that the spreadsheet describes performance but does not prove why it occurred.",
-            "Reopen the share link, review the spreadsheet as a viewer would, complete the Final Review checklist, and save the Studio evidence.",
-        ),
-        "output": "A validated beginner spreadsheet, a working share link, and a concise evidence-based takeaway with a limitation.",
-        "validation": (
-            "Source, Analysis, and unique-order counts reconcile.",
-            "The independently checked order agrees with its formula-driven row values.",
-            "The selected-region subtotal agrees with the Summary KPI.",
-            "The All-region Gross Sales KPI agrees with the pivot-table total.",
-            "The takeaway names a real observed pattern and does not claim a cause that the data cannot prove.",
-            "The shareable Google Sheets link opens and the four required tabs are readable.",
-        ),
-        "evidence": "Record the row-count reconciliation, the independently checked order or region, the pivot comparison, the final takeaway, and the most important limitation.",
-        "pitfalls": (
-            "Treating a plausible total as validated without an independent comparison.",
-            "Writing that one region caused better performance when the data only shows a difference.",
-            "Giving a recommendation that is unrelated to the observed result.",
-            "Marking the lab complete without testing the share link and dropdown behavior.",
+            "Treating a plausible number as validated.",
+            "Expanding the lab into a polished dashboard or portfolio workbook.",
         ),
     },
 )
@@ -192,13 +124,13 @@ STEPS: tuple[dict[str, Any], ...] = (
 
 def lab01_guide_markdown() -> str:
     lines = [
-        "# Applied Lab 01: Build a guided Google Sheets sales summary",
+        "# Applied Lab 01: Create a Google Sheets sales summary",
         "",
-        "> This is a beginner application lab for the spreadsheet skills taught in Weeks 1–2. The guide explains exactly what to build and how to check it, but it does not provide the finished formula or numerical answer.",
+        "> This is one of the five required integration labs. It is designed for about 40 minutes and should remain a small spreadsheet exercise, not a project.",
         "",
         "## Assignment",
         "",
-        "Use a small order table and regional target table to create one clean analysis table and one interactive management summary. The completed file should demonstrate references, text cleaning, dates, percentages, conditional logic, conditional counting and sums, exact-match lookup, error handling, pivot tables, and a chart.",
+        "Use the supplied Orders and Targets files to create one formula-driven Analysis table and one small Summary tab with a region selector, three KPIs, one pivot table, and one chart.",
         "",
     ]
     for index, stage in enumerate(STEPS, start=1):
@@ -215,7 +147,7 @@ def lab01_guide_markdown() -> str:
     lines.extend([
         "## Completion rule",
         "",
-        "Complete all four Studio stages, save the shareable Google Sheets link, verify the final checklist, and write a two-to-three-sentence takeaway with one limitation.",
+        "Complete the three Studio stages, save the shareable Google Sheets link, verify the final checklist, and write a two-to-three-sentence takeaway with one limitation. Extra tabs, KPIs, and charts are not required.",
         "",
     ])
     return "\n".join(lines)
@@ -238,17 +170,15 @@ SHEET_PLAN: tuple[tuple[str, str, str], ...] = (
     ("Raw Orders", "Untouched imported source", "Order-level source fields only; no cleaning or calculated answers"),
     ("Targets", "Untouched lookup source", "One region and target per row"),
     ("Analysis", "One row per order", "Connected source fields, cleaned fields, formula-driven sales, and quality checks"),
-    ("Summary", "Small decision view", "Fee input, region dropdown, KPIs, pivot table, chart, and takeaway"),
+    ("Summary", "Small decision view", "Fee input, region dropdown, three KPIs, pivot table, chart, and takeaway"),
 )
 
 FINAL_CHECKS: tuple[str, ...] = (
-    "Raw Orders, Analysis, and unique-order counts reconcile and the source tabs were not edited.",
-    "Month, cleaned region, gross sales, processing fee, net sales, and quality checks are formula-driven and copied through every source row.",
-    "The region dropdown updates every dependent KPI, and the All-region gross-sales KPI reconciles with the pivot-table total.",
-    "The target lookup uses exact matching and handles All or missing matches without displaying an error.",
-    "The pivot table, chart, share link, final takeaway, and limitation have all been reviewed successfully.",
+    "Raw Orders and Analysis row counts match, and the source tabs were not edited.",
+    "One manually checked order and one regional subtotal agree with the formulas.",
+    "The region dropdown updates the required KPIs and the pivot total reconciles.",
+    "The share link opens and the takeaway states one result and one limitation.",
 )
-
 
 
 class GoogleSheetsAnalystLabStudio(QWidget):
@@ -286,12 +216,12 @@ class GoogleSheetsAnalystLabStudio(QWidget):
         title.setObjectName("SectionTitle")
         title_row.addWidget(title)
         title_row.addStretch()
-        self.progress_text = QLabel("0 of 4 stages complete")
+        self.progress_text = QLabel("0 of 3 stages complete")
         self.progress_text.setObjectName("Muted")
         title_row.addWidget(self.progress_text)
         header_layout.addLayout(title_row)
         description = QLabel(
-            "Apply the spreadsheet skills from Weeks 1–2 in four guided stages. The lab uses two small CSV files and one simple summary—not a portfolio-scale workbook."
+            "Apply the spreadsheet skills from Weeks 1–2 in three short stages. Build one analysis table and one small summary—not a portfolio-scale workbook."
         )
         description.setWordWrap(True)
         description.setObjectName("Muted")
@@ -496,7 +426,7 @@ class GoogleSheetsAnalystLabStudio(QWidget):
         heading.setObjectName("SectionTitle")
         layout.addWidget(heading)
         help_text = QLabel(
-            "Use only these four tabs. The structure is intentionally small so you can focus on formulas, cleaning, lookups, conditional totals, and pivot tables."
+            "Use only these four tabs. Stop after the required Analysis table, three KPIs, one pivot table, and one chart."
         )
         help_text.setObjectName("Muted")
         help_text.setWordWrap(True)
@@ -523,13 +453,11 @@ class GoogleSheetsAnalystLabStudio(QWidget):
         metric_text = QTextBrowser()
         metric_text.setHtml(
             "<ul>"
-            "<li><b>Completed orders:</b> count only rows that meet the completed-status rule and, when selected, the region rule.</li>"
-            "<li><b>Gross sales:</b> calculate row-level sales from quantity and unit price only for completed orders.</li>"
-            "<li><b>Processing fee:</b> calculate the fee amount from gross sales and the single fixed percentage input.</li>"
-            "<li><b>Net sales:</b> subtract the calculated fee amount from gross sales.</li>"
-            "<li><b>Average net order value:</b> divide the filtered Net Sales KPI by the filtered Completed Orders KPI and handle a zero denominator.</li>"
+            "<li><b>Completed Orders:</b> count completed rows for All or the selected region.</li>"
+            "<li><b>Net Sales:</b> sum the Analysis Net Sales values for All or the selected region.</li>"
+            "<li><b>Regional Sales Target:</b> use an exact-match lookup for a selected region and a clear All message.</li>"
             "</ul>"
-            "<p><b>Validation policy:</b> reconcile KPI totals with filtered source rows and the pivot table. The Studio intentionally does not display the finished totals.</p>"
+            "<p><b>Scope:</b> these three KPIs, one pivot table, and one chart are enough. Reconcile one subtotal and stop.</p>"
         )
         metric_text.setMinimumHeight(190)
         layout.addWidget(metric_text)

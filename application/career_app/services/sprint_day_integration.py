@@ -178,7 +178,15 @@ def _show_current_sprint_dialog(self: Any) -> None:
     def update_buttons(*_args: Any) -> None:
         data = selected_data()
         is_task = bool(data and data.get("row_type") == "task")
-        open_button.setEnabled(is_task)
+        can_open = bool(
+            is_task
+            and (
+                bool(data.get("completed"))
+                or bool(data.get("prerequisites_ready"))
+                or bool(data.get("promoted_today"))
+            )
+        )
+        open_button.setEnabled(can_open)
         day_value = selected_date()
         if not day_value:
             promote_button.setEnabled(False)
@@ -219,6 +227,21 @@ def _show_current_sprint_dialog(self: Any) -> None:
     def open_selected(*_args: Any) -> None:
         data = selected_data()
         if not data or data.get("row_type") != "task":
+            return
+        available = bool(
+            data.get("completed")
+            or data.get("prerequisites_ready")
+            or data.get("promoted_today")
+        )
+        if not available:
+            QMessageBox.information(
+                dialog,
+                "Task Not Available Yet",
+                str(
+                    data.get("prerequisite_reason")
+                    or "This task is locked until its assigned day and prerequisites are ready."
+                ),
+            )
             return
         dialog.accept()
         self._open_get_ahead_target(data)

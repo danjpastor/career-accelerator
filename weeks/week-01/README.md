@@ -61,8 +61,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Spreadsheet Foundations Guided Practice
-- [ ] Formula and Reference Error Diagnosis

@@ -2,12 +2,22 @@
 
 ## Google Sheets link
 
-Paste the shareable Google Sheets link into the Google Sheets Analyst Studio in Career Accelerator.
+Paste the shareable Google Sheets link into the Google Sheets Analyst Studio.
 
-## Stage evidence
+## Three-stage evidence
 
-Record evidence inside each of the four Studio stages.
+### 1. Set up and analysis table
 
-## Final takeaway
+- Source and Analysis row counts:
+- One manually checked order:
 
-Write two or three sentences identifying the region with the highest gross sales, explaining what the result means, and naming one useful follow-up question.
+### 2. Small summary
+
+- Region selections tested:
+- Pivot-total comparison:
+
+### 3. Check and explain
+
+- Regional subtotal check:
+- Two-to-three-sentence takeaway:
+- Limitation or next question:

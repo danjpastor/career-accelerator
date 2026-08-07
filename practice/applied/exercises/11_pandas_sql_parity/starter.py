@@ -1,4 +1,4 @@
-"""Applied Lab 31: Reproduce a SQL analysis in pandas."""
+"""Applied Lab 31: Reproduce one SQL summary in pandas."""
 from pathlib import Path
 import pandas as pd
 

@@ -155,12 +155,50 @@ def _task_internal_id(task: dict[str, Any]) -> int | None:
     return int(candidate) if candidate in _DISPLAY_BY_ID else None
 
 
+def _persisted_task_date(conn: Any, internal_id: int) -> date | None:
+    """Return the day planner's current-sprint assignment when available."""
+    if not (_table_exists(conn, "sprint_tasks") and _table_exists(conn, "task_metadata")):
+        return None
+    try:
+        row = conn.execute(
+            """SELECT m.deferred_until
+               FROM sprint_tasks s
+               JOIN task_metadata m ON m.task_id=s.id
+               WHERE m.managed_key=?
+               LIMIT 1""",
+            (f"roadmap_v1026:duckdb:{int(internal_id)}",),
+        ).fetchone()
+        raw = str(_row_value(row, "deferred_until", 0, "") or "").strip()
+        return date.fromisoformat(raw) if raw else None
+    except (TypeError, ValueError):
+        return None
+    except Exception:
+        return None
+
+
+def _promoted_today(conn: Any, internal_id: int, *, today: date) -> bool:
+    if not _table_exists(conn, "task_day_promotions"):
+        return False
+    try:
+        row = conn.execute(
+            """SELECT 1
+               FROM task_day_promotions p
+               JOIN task_metadata m ON m.task_id=p.task_id
+               WHERE p.promotion_date=? AND m.managed_key=?
+               LIMIT 1""",
+            (today.isoformat(), f"roadmap_v1026:duckdb:{int(internal_id)}"),
+        ).fetchone()
+        return row is not None
+    except Exception:
+        return False
+
+
 def _weekday_schedule_ready(
     conn: Any, internal_id: int, *, today: date | None = None
 ) -> tuple[bool, str]:
     today = today or date.today()
-    scheduled = scheduled_date(conn, internal_id)
-    if today < scheduled:
+    scheduled = _persisted_task_date(conn, internal_id) or scheduled_date(conn, internal_id)
+    if today < scheduled and not _promoted_today(conn, internal_id, today=today):
         return False, "Scheduled for " + scheduled.strftime("%A, %B %d") + "."
     if today.weekday() > 4:
         return False, (
@@ -271,7 +309,7 @@ def _sync_task_metadata(conn: Any) -> None:
         task_id = _safe_int(_row_value(row, "id", 0, 0))
         completed = bool(_safe_int(_row_value(row, "completed", 1, 0)))
         readiness = roadmap_mastery.duckdb_readiness(conn, internal_id)
-        schedule_day = scheduled_date(conn, internal_id)
+        schedule_day = _persisted_task_date(conn, internal_id) or scheduled_date(conn, internal_id)
         schedule_ready, schedule_reason = _weekday_schedule_ready(conn, internal_id)
         ready = completed or (bool(readiness.get("ready")) and schedule_ready)
         reason = None if ready else (
@@ -361,7 +399,15 @@ def _install_readiness_and_sync() -> None:
     original_reconcile = roadmap_mastery.reconcile
 
     def duckdb_readiness(conn: Any, number: int) -> dict[str, Any]:
-        return _rewrite_readiness_result(original_readiness(conn, int(number)))
+        internal = int(number)
+        result = _rewrite_readiness_result(original_readiness(conn, internal))
+        schedule_ready, schedule_reason = _weekday_schedule_ready(conn, internal)
+        if bool(result.get("ready")) and not schedule_ready:
+            result = dict(result)
+            result["ready"] = False
+            result["missing"] = [schedule_reason]
+            result["reason"] = schedule_reason
+        return result
 
     def reconcile(conn: Any, root: Any = None) -> dict[str, Any]:
         result = original_reconcile(conn, root)

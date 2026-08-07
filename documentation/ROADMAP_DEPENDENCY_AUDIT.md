@@ -2,7 +2,7 @@
 
 ## Scope
 
-This audit covers the 12-week Data Analytics roadmap, the dashboard task queues, and the prerequisite mappings for Google Certificate modules, DataCamp chapters, 33 SQL Challenges, 13 Python exercises, 36 Applied Labs, SQL interview problems, weekly checks, and retrospectives.
+This audit covers the 12-week Data Analytics roadmap, the dashboard task queues, and the prerequisite mappings for Google Certificate modules, DataCamp chapters, 33 SQL Challenges, 13 Python exercises, SQL interview problems, weekly checks, and retrospectives.
 
 ## Ordering rules now enforced
 
@@ -46,7 +46,7 @@ All current-week days remain below the 180-minute flexible-work balancing target
 
 - 33 SQL Challenge gates checked.
 - 13 Python exercise gates and direct chains checked.
-- 36 Applied Lab terminal chapters checked.
+- Applied Labs are retired and create no roadmap assignments or prerequisite gates.
 - Every SQL interview problem checked against its required DataCamp chapters.
 - Google Certificate sequence checked for week inversions.
 - DataCamp chapter order and unique day/order positions checked.

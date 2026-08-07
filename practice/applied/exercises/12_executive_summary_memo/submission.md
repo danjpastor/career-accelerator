@@ -1,84 +1,25 @@
 # Applied Lab 08 submission
 
-## Write an executive summary and stakeholder memo
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] The memo states one clear finding and recommendation.
+- [ ] Every claim is supported by the supplied evidence.
+- [ ] One meaningful limitation is included.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Write five sentences: problem, finding, impact, recommendation, limitation.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Expand them into a one-page memo.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Use one visual only if it improves the decision.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Remove unnecessary technical details.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** End with a requested action.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Recommendation follows from evidence.
-  - Evidence:
-- [ ] Limitation changes interpretation strength.
-  - Evidence:
-- [ ] The requested decision is explicit.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

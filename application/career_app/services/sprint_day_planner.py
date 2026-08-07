@@ -12,6 +12,8 @@ import sqlite3
 from typing import Any
 
 PROMOTION_TABLE = "task_day_promotions"
+SCHEDULE_TABLE = "task_sprint_schedule"
+_SCHEDULE_SEED_SETTING = "stable_sprint_schedule_seed_v1"
 
 _TIMING_REASON_PREFIXES = (
     "scheduled for ",
@@ -23,6 +25,18 @@ _TIMING_REASON_PREFIXES = (
     "available during ",
     "reserved for ",
 )
+
+# Explicit roadmap weekday assignments that must not be rebalanced when other
+# tasks are added or removed. Monday is 0 and Friday is 4.
+_FIXED_INTERVIEW_WEEKDAYS = {
+    "Supercloud Customer": 4,
+}
+
+# SQL challenges with an explicit audited sprint day. This repairs the current
+# Week 4 assignment and prevents workload rebalancing from moving it again.
+_FIXED_SQL_CHALLENGE_WEEKDAYS = {
+    13: 4,
+}
 
 
 def _safe_int(value: Any, default: int = 0) -> int:
@@ -67,6 +81,22 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
         f"CREATE INDEX IF NOT EXISTS idx_{PROMOTION_TABLE}_date "
         f"ON {PROMOTION_TABLE}(promotion_date)"
     )
+    conn.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS {SCHEDULE_TABLE} (
+            task_id INTEGER NOT NULL,
+            sprint_week INTEGER NOT NULL,
+            scheduled_date TEXT NOT NULL,
+            source TEXT NOT NULL DEFAULT 'planner',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (task_id, sprint_week)
+        )
+        """
+    )
+    conn.execute(
+        f"CREATE INDEX IF NOT EXISTS idx_{SCHEDULE_TABLE}_week_date "
+        f"ON {SCHEDULE_TABLE}(sprint_week,scheduled_date)"
+    )
     conn.commit()
 
 
@@ -94,6 +124,39 @@ def _metadata_date(conn: sqlite3.Connection, task_id: int) -> date | None:
     try:
         return date.fromisoformat(raw) if raw else None
     except ValueError:
+        return None
+
+
+def _stored_assignment_date(
+    conn: sqlite3.Connection,
+    task_id: int,
+    current_week: int,
+    week_start: date,
+    week_end: date,
+) -> date | None:
+    if not task_id or not _table_exists(conn, SCHEDULE_TABLE):
+        return None
+    row = conn.execute(
+        f"SELECT scheduled_date FROM {SCHEDULE_TABLE} "
+        "WHERE task_id=? AND sprint_week=?",
+        (int(task_id), int(current_week)),
+    ).fetchone()
+    raw = str(_row_value(row, "scheduled_date", 0, "") or "").strip()
+    try:
+        scheduled = date.fromisoformat(raw) if raw else None
+    except ValueError:
+        return None
+    return scheduled if scheduled is not None and week_start <= scheduled <= week_end else None
+
+
+def _sql_challenge_display_number(task: dict[str, Any]) -> int | None:
+    try:
+        from career_app.services import duckdb_curriculum_policy as policy
+        internal = policy._task_internal_id(task)
+        if internal is None:
+            return None
+        return int(policy._DISPLAY_BY_ID[int(internal)])
+    except Exception:
         return None
 
 
@@ -131,6 +194,28 @@ def _known_scheduled_date(
         return week_start + timedelta(days=weekday)
 
     kind = str(task.get("kind") or "").casefold()
+
+    if kind == "duckdb":
+        display_number = _sql_challenge_display_number(task)
+        fixed_weekday = _FIXED_SQL_CHALLENGE_WEEKDAYS.get(display_number)
+        if fixed_weekday is not None:
+            return week_start + timedelta(days=int(fixed_weekday))
+
+    # Some interview problems have an intentional roadmap day. They must be
+    # resolved before the flexible workload balancer sees them; otherwise an
+    # unrelated roadmap cleanup can move them to a lighter earlier day.
+    if kind == "interview_problem":
+        title = _sql_problem_title(task)
+        fixed_weekday = _FIXED_INTERVIEW_WEEKDAYS.get(str(title or ""))
+        if fixed_weekday is not None:
+            return week_start + timedelta(days=int(fixed_weekday))
+
+    stored = _stored_assignment_date(
+        conn, task_id, _safe_int(task.get("week"), 0), week_start, week_end
+    )
+    if stored is not None:
+        return stored
+
     deferred = _metadata_date(conn, task_id) if task_id else None
     # DataCamp chapters and weekend projects own exact calendar dates. Practice
     # tasks use their chapter date as an earliest boundary instead, allowing the
@@ -636,6 +721,132 @@ def _enrich_row(
     return result
 
 
+def _seed_existing_current_week_assignments(
+    conn: sqlite3.Connection,
+    rows: list[dict[str, Any]],
+    current_week: int,
+    week_start: date,
+    week_end: date,
+) -> int:
+    """Migrate the already-visible Week 4 plan into stable assignments once.
+
+    v10.46.11 persisted the displayed day in task_metadata, but the planner did
+    not treat that value as authoritative. Seed those existing dates once so
+    later workload changes cannot shuffle the user's current sprint. The two
+    reported Friday tasks are explicitly repaired during the seed.
+    """
+    if not _table_exists(conn, "settings"):
+        return 0
+    row = conn.execute(
+        "SELECT value FROM settings WHERE key=?", (_SCHEDULE_SEED_SETTING,)
+    ).fetchone()
+    if row is not None:
+        return 0
+
+    flexible_kinds = {
+        "duckdb",
+        "interview_problem",
+        "sql_practice",
+        "python_exercise",
+        "portfolio_preparation",
+        "career_readiness",
+    }
+    seeded = 0
+    for task in rows:
+        kind = str(task.get("kind") or "").casefold()
+        if kind not in flexible_kinds:
+            continue
+        task_id = _safe_int(task.get("task_id") or task.get("id"), 0)
+        if not task_id:
+            continue
+        scheduled = _metadata_date(conn, task_id)
+        if scheduled is None or not (week_start <= scheduled <= week_end):
+            continue
+
+        display_number = _sql_challenge_display_number(task) if kind == "duckdb" else None
+        fixed_challenge_day = _FIXED_SQL_CHALLENGE_WEEKDAYS.get(display_number)
+        if fixed_challenge_day is not None:
+            scheduled = week_start + timedelta(days=int(fixed_challenge_day))
+        elif kind == "interview_problem":
+            title = _sql_problem_title(task)
+            fixed_interview_day = _FIXED_INTERVIEW_WEEKDAYS.get(str(title or ""))
+            if fixed_interview_day is not None:
+                scheduled = week_start + timedelta(days=int(fixed_interview_day))
+
+        conn.execute(
+            f"""INSERT INTO {SCHEDULE_TABLE}
+                    (task_id,sprint_week,scheduled_date,source,updated_at)
+                VALUES(?,?,?,?,CURRENT_TIMESTAMP)
+                ON CONFLICT(task_id,sprint_week) DO UPDATE SET
+                    scheduled_date=excluded.scheduled_date,
+                    source=excluded.source,
+                    updated_at=CURRENT_TIMESTAMP""",
+            (task_id, int(current_week), scheduled.isoformat(), "v10.46.14-seed"),
+        )
+        seeded += 1
+
+    conn.execute(
+        "INSERT INTO settings(key,value) VALUES(?,?) "
+        "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        (_SCHEDULE_SEED_SETTING, f"week={int(current_week)};seeded={seeded}"),
+    )
+    conn.commit()
+    return seeded
+
+
+def _persist_current_week_schedule(
+    conn: sqlite3.Connection,
+    rows: list[dict[str, Any]],
+    known: dict[int, date],
+    current_week: int,
+) -> int:
+    """Persist the planner's actual weekday assignment for readiness checks.
+
+    ``deferred_until`` previously held only a content-gate date for flexible
+    practice.  That allowed a Friday task to become actionable on Thursday as
+    soon as its lesson prerequisites were complete.  The day planner is the
+    source of truth for the current sprint, so store its final assigned date.
+    """
+    if not _table_exists(conn, "task_metadata"):
+        return 0
+    updates: list[tuple[str, int]] = []
+    for row in rows:
+        task_id = _safe_int(row.get("task_id") or row.get("id"), 0)
+        scheduled = known.get(task_id)
+        if not task_id or scheduled is None:
+            continue
+        scheduled_week = _safe_int(
+            row.get("scheduled_week"),
+            _safe_int(row.get("week"), current_week),
+        )
+        if scheduled_week != int(current_week) or bool(row.get("is_catch_up")):
+            continue
+        updates.append((scheduled.isoformat(), task_id))
+    changed = 0
+    for scheduled_text, task_id in updates:
+        conn.execute(
+            f"""INSERT INTO {SCHEDULE_TABLE}
+                    (task_id,sprint_week,scheduled_date,source,updated_at)
+                VALUES(?,?,?,?,CURRENT_TIMESTAMP)
+                ON CONFLICT(task_id,sprint_week) DO UPDATE SET
+                    scheduled_date=excluded.scheduled_date,
+                    source=excluded.source,
+                    updated_at=CURRENT_TIMESTAMP""",
+            (int(task_id), int(current_week), scheduled_text, "planner"),
+        )
+        cursor = conn.execute(
+            """UPDATE task_metadata
+               SET deferred_until=?
+               WHERE task_id=?
+                 AND COALESCE(deferred_until,'')<>?""",
+            (scheduled_text, int(task_id), scheduled_text),
+        )
+        changed += int(cursor.rowcount or 0)
+    if updates:
+        conn.commit()
+    return changed
+
+
 def current_sprint_day_groups(
     conn: sqlite3.Connection,
     current_week: int,
@@ -663,6 +874,10 @@ def current_sprint_day_groups(
         _enrich_row(conn, current_week, row, canonical_by_id)
         for row in raw_rows
     ]
+
+    _seed_existing_current_week_assignments(
+        conn, rows, int(current_week), week_start, week_end
+    )
 
     known: dict[int, date] = {}
     scheduled_by_key: dict[str, date] = {}
@@ -748,6 +963,8 @@ def current_sprint_day_groups(
         ).fetchall()
     }
 
+    _persist_current_week_schedule(conn, rows, known, int(current_week))
+
     groups: list[dict[str, Any]] = []
     for offset in range(7):
         scheduled = week_start + timedelta(days=offset)
@@ -760,6 +977,20 @@ def current_sprint_day_groups(
             item["scheduled_date"] = scheduled.isoformat()
             item["scheduled_day"] = scheduled.strftime("%A")
             item["promoted_today"] = task_id in promoted
+            content_ready = bool(item.get("prerequisites_ready"))
+            item["content_prerequisites_ready"] = content_ready
+            calendar_ready = (
+                scheduled <= date.today()
+                or bool(item.get("completed"))
+                or task_id in promoted
+            )
+            item["calendar_ready"] = calendar_ready
+            if not calendar_ready:
+                item["ready"] = False
+                item["prerequisites_ready"] = False
+                item["prerequisite_reason"] = (
+                    f"Scheduled for {scheduled.strftime('%A, %B %d')}."
+                )
             day_rows.append(item)
         day_rows.sort(
             key=lambda item: (
@@ -769,6 +1000,10 @@ def current_sprint_day_groups(
         )
         incomplete = [item for item in day_rows if not bool(item.get("completed"))]
         blockers = [item for item in incomplete if not bool(item.get("prerequisites_ready"))]
+        content_blockers = [
+            item for item in incomplete
+            if not bool(item.get("content_prerequisites_ready", item.get("prerequisites_ready")))
+        ]
         groups.append(
             {
                 "date": scheduled.isoformat(),
@@ -778,7 +1013,7 @@ def current_sprint_day_groups(
                 "tasks": day_rows,
                 "incomplete_count": len(incomplete),
                 "blocked_count": len(blockers),
-                "all_prerequisites_ready": bool(incomplete) and not blockers,
+                "all_prerequisites_ready": bool(incomplete) and not content_blockers,
                 "all_promoted": bool(incomplete) and all(bool(item.get("promoted_today")) for item in incomplete),
             }
         )
@@ -821,7 +1056,10 @@ def promote_day(
     incomplete = [item for item in group["tasks"] if not bool(item.get("completed")) and _safe_int(item.get("task_id"), 0)]
     if not incomplete:
         return {"ok": False, "added": 0, "reason": "Every task assigned to that day is already complete."}
-    blockers = [item for item in incomplete if not bool(item.get("prerequisites_ready"))]
+    blockers = [
+        item for item in incomplete
+        if not bool(item.get("content_prerequisites_ready", item.get("prerequisites_ready")))
+    ]
     if blockers:
         details = [
             f"{item.get('label') or 'Task'} — {item.get('prerequisite_reason') or 'Complete its prerequisite first.'}"

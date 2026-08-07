@@ -1,84 +1,25 @@
 # Applied Lab 34 submission
 
-## Create a decision log and limitations register
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] Definitions and assumptions are specific enough to reproduce.
+- [ ] Limitations explain their likely effect.
+- [ ] The log avoids general notes unrelated to the analysis.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** List metric and modeling decisions.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Document excluded records.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Record thresholds and their source.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Create a limitations register.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** Assign follow-up actions to unresolved assumptions.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Every KPI has a definition and rationale.
-  - Evidence:
-- [ ] Limitations are specific.
-  - Evidence:
-- [ ] Open assumptions have owners or actions.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

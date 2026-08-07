@@ -1,4 +1,4 @@
-"""Applied Lab 28: Fit and interpret a simple linear regression."""
+"""Applied Lab 28: Fit and explain one simple regression."""
 
 from pathlib import Path
 import json

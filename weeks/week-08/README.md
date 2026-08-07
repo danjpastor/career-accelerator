@@ -61,8 +61,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Clean and Analyze a Practice Dataset with pandas
-- [ ] Complete a Cross-Tool Portfolio-Readiness Simulation

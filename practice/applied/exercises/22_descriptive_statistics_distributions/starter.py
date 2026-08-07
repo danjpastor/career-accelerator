@@ -1,4 +1,4 @@
-"""Applied Lab 02: Describe distributions and identify meaningful outliers."""
+"""Applied Lab 02: Compare mean, median, and outliers."""
 
 from pathlib import Path
 import json

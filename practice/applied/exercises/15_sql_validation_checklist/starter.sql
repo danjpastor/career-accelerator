@@ -1,4 +1,4 @@
--- Applied Lab 03: Build and apply a SQL validation checklist
+-- Applied Lab 03: Run three SQL data-quality checks
 -- Concepts: row counts, uniqueness, nulls, referential integrity, duplicates, reconciliation, boundaries
 
 

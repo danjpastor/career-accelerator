@@ -353,6 +353,42 @@ def focus_context(task: dict, current_week: int) -> str:
     return f"Catch-Up • {detail}" if bool(task.get("is_catch_up")) else detail
 
 
+def _promoted_for_today(conn: sqlite3.Connection, task_id: int) -> bool:
+    if not task_id or not _table_exists(conn, "task_day_promotions"):
+        return False
+    try:
+        return conn.execute(
+            """SELECT 1 FROM task_day_promotions
+               WHERE promotion_date=? AND task_id=? LIMIT 1""",
+            (date.today().isoformat(), int(task_id)),
+        ).fetchone() is not None
+    except Exception:
+        return False
+
+
+def _calendar_readiness(conn: sqlite3.Connection, task: dict) -> Readiness | None:
+    """Return a day lock when the task is assigned later than today.
+
+    Content prerequisites and calendar availability are separate.  A task may
+    have every prerequisite complete while still belonging to a later roadmap
+    day.  A deliberate Current Sprint promotion remains the only exception.
+    """
+    raw = str(task.get("deferred_until") or "").strip()
+    if not raw:
+        return None
+    try:
+        scheduled = date.fromisoformat(raw)
+    except ValueError:
+        return None
+    task_id = _safe_int(task.get("task_id") or task.get("id"), 0)
+    if scheduled > date.today() and not _promoted_for_today(conn, task_id):
+        return Readiness(
+            False,
+            f"Scheduled for {scheduled.strftime('%A, %B %d')}.",
+        )
+    return None
+
+
 def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readiness:
     if bool(task.get("completed")) or str(task.get("status") or "") == "Completed":
         return Readiness(False, "Already completed.")
@@ -375,6 +411,10 @@ def _readiness(conn: sqlite3.Connection, task: dict, current_week: int) -> Readi
     )
     if not progression.ready:
         return Readiness(False, progression.reason)
+
+    calendar = _calendar_readiness(conn, task)
+    if calendar is not None:
+        return calendar
 
     if kind == "datacamp_chapter":
         ready, reason = datacamp.readiness(conn, task)

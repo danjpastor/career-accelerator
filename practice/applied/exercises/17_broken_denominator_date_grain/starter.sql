@@ -1,4 +1,4 @@
--- Applied Lab 07: Fix denominator, date-filter, and grain errors
+-- Applied Lab 07: Repair one incorrect KPI calculation
 -- Concepts: KPI denominator, inclusive dates, weighted rates, analysis grain
 
 -- Broken KPI: average of row-level rates and ambiguous date boundaries.

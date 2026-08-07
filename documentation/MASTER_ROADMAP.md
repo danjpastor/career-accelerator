@@ -41,7 +41,7 @@ The Google Data Analytics Certificate remains the program’s highest-priority l
 
 **Supporting work**
 - Introduction to SQL, Intermediate SQL, and Joining Data in SQL
-- Applied Lab 01: beginner Google Sheets sales summary
+- Core Lab 01: Create a Google Sheets sales summary
 - DuckDB querying, filtering, grouping, aggregation, and joins
 
 **Gate:** Week 3 Knowledge Check
@@ -56,7 +56,7 @@ The Google Data Analytics Certificate remains the program’s highest-priority l
 
 **Supporting work**
 - CASE, subqueries, CTEs, and window-function foundations
-- Data-quality, grain, duplicate, and key validation labs
+- Core Lab 04: Fix a join that duplicates revenue
 
 **Gate:** Week 4 Knowledge Check
 
@@ -84,6 +84,7 @@ The Google Data Analytics Certificate remains the program’s highest-priority l
 
 **Supporting work**
 - SQL functions and database design
+- Core Lab 13: Build a simple monthly retention table
 - Relationship validation, weighted calculations, views, and SQL readiness
 
 **Gate:** Week 6 Knowledge Check
@@ -98,6 +99,7 @@ The Google Data Analytics Certificate remains the program’s highest-priority l
 
 **Supporting work**
 - Power BI preparation, modeling, DAX, visualization, and case study
+- Core Lab 25: Build a one-page Power BI summary
 - Accessible reporting, storytelling, limitations, and recommendations
 
 **Gate:** Week 7 Knowledge Check

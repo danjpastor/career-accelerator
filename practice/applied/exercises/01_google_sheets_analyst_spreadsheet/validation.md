@@ -1,12 +1,21 @@
-# Validation checklist
+# Applied Lab 01 validation rubric
 
-- `Raw Orders` contains 24 data rows and 24 unique order IDs.
-- `Targets` contains four regions.
-- `Analysis` contains one row for each order.
-- Region values are cleaned with `TRIM` and `PROPER` rather than edited in the raw data.
-- Cancelled orders calculate zero gross and net sales.
-- The 2% processing-fee reference remains fixed when formulas are copied.
-- With Region set to All, the summary shows 20 completed orders, $1,650 gross sales, $1,617 net sales, and $80.85 average net order value.
-- The region dropdown changes the KPI values.
-- The pivot table shows January at $755 and February at $895.
-- One chart and a short takeaway are complete.
+> Target time: 40 minutes. This is a small lab, not a project.
+
+## Required checks
+
+- [ ] The Analysis table has one row per source order and copied formulas update from the source data.
+- [ ] The region selector changes the three KPIs and the all-region sales total agrees with the pivot total.
+- [ ] The share link opens and the takeaway is supported by the sheet.
+
+## Scope check
+
+- [ ] I used the supplied dataset and one primary tool.
+- [ ] I completed only the listed actions and did not add project-scale deliverables.
+- [ ] I saved one primary artifact or result.
+- [ ] I wrote a two-to-three-sentence takeaway with one limitation or next question.
+
+## Completion decision
+
+- **Ready to complete:** the required result is saved, the checks pass, and the takeaway is recorded.
+- **Keep in progress:** a required check fails or the result cannot be reopened.

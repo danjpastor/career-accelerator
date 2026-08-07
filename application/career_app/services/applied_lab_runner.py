@@ -17,53 +17,70 @@ class AppliedLabRunnerError(RuntimeError):
     """Raised when an Applied Lab SQL submission cannot be run safely."""
 
 
-SQL_LAB_PROFILES: dict[int, dict[str, Any]] = {3: {'label': 'SQL validation checklist',
-     'minimum_statements': 4,
-     'required_any': [('row-count check', ('\\bcount\\s*\\(',)),
-                      ('null-quality check', ('\\bis\\s+null\\b', '\\bcoalesce\\s*\\(')),
-                      ('duplicate or uniqueness check', ('\\bgroup\\s+by\\b', '\\bdistinct\\b')),
-                      ('relationship check', ('\\bjoin\\b', '\\bnot\\s+exists\\b'))]},
- 4: {'label': 'broken join diagnosis',
-     'minimum_statements': 2,
-     'required_all': [('join logic', '\\bjoin\\b'),
-                      ('revenue aggregation', '\\bsum\\s*\\('),
-                      ('grain-aware grouping', '\\bgroup\\s+by\\b')]},
- 7: {'label': 'KPI repair',
-     'minimum_statements': 2,
-     'required_any': [('numerator or denominator aggregation',
-                       ('\\bsum\\s*\\(', '\\bcount\\s*\\(')),
-                      ('explicit date boundary', ('\\bbetween\\b', '>=', '<')),
-                      ('weighted or ratio calculation',
-                       ('\\bnullif\\s*\\(', '\\bcast\\s*\\(', '\\*\\s*1\\.0', '/'))]},
- 6: {'label': 'conversion funnel',
-     'minimum_statements': 1,
-     'required_all': [('multi-step query', '\\bwith\\b'),
-                      ('deduplicated users', '\\bcount\\s*\\(\\s*distinct\\b'),
-                      ('segmented aggregation', '\\bgroup\\s+by\\b')]},
- 13: {'label': 'cohort retention',
-      'minimum_statements': 1,
-      'required_all': [('multi-step cohort query', '\\bwith\\b'),
-                       ('unique-user counts', '\\bcount\\s*\\(\\s*distinct\\b')],
-      'required_any': [('cohort-period date logic',
-                        ('date_diff\\s*\\(',
-                         'date_trunc\\s*\\(',
-                         'strftime\\s*\\(',
-                         'extract\\s*\\('))]},
- 17: {'label': 'churn analysis',
-      'minimum_statements': 1,
-      'required_all': [('multi-step churn query', '\\bwith\\b'),
-                       ('customer or revenue aggregation', '\\b(?:sum|count)\\s*\\(')],
-      'required_any': [('period comparison',
-                        ('lag\\s*\\(', 'lead\\s*\\(', 'date_trunc\\s*\\(', '\\bjoin\\b'))]},
- 29: {'label': 'raw-to-analytics pipeline',
-      'minimum_statements': 4,
-      'required_all': [('layer creation',
-                        '\\bcreate\\s+(?:or\\s+replace\\s+)?(?:temp(?:orary)?\\s+)?(?:table|view)\\b'),
-                       ('final analytical query', '\\bselect\\b')],
-      'required_any': [('deduplication or quality logic',
-                        ('row_number\\s*\\(', '\\bdistinct\\b', '\\bgroup\\s+by\\b')),
-                       ('relationship or reconciliation logic',
-                        ('\\bjoin\\b', '\\bnot\\s+exists\\b', '\\bsum\\s*\\('))]}}
+SQL_LAB_PROFILES: dict[int, dict[str, Any]] = {
+    3: {
+        'label': 'three SQL data-quality checks',
+        'minimum_statements': 3,
+        'required_any': [
+            ('row-count check', (r'\bcount\s*\(',)),
+            ('missing-value check', (r'\bis\s+null\b', r'\bcoalesce\s*\(')),
+            ('duplicate or relationship check', (r'\bgroup\s+by\b', r'\bdistinct\b', r'\bjoin\b', r'\bnot\s+exists\b')),
+        ],
+    },
+    4: {
+        'label': 'corrected join and revenue reconciliation',
+        'minimum_statements': 1,
+        'required_all': [
+            ('join logic', r'\bjoin\b'),
+            ('revenue aggregation', r'\bsum\s*\('),
+        ],
+    },
+    6: {
+        'label': 'three-stage conversion funnel',
+        'minimum_statements': 1,
+        'required_all': [
+            ('distinct-user counts', r'\bcount\s*\(\s*distinct\b'),
+            ('stage aggregation', r'\bgroup\s+by\b'),
+        ],
+    },
+    7: {
+        'label': 'corrected KPI calculation',
+        'minimum_statements': 1,
+        'required_any': [
+            ('aggregation', (r'\bsum\s*\(', r'\bcount\s*\(')),
+            ('explicit date or ratio logic', (r'\bbetween\b', r'>=', r'<', r'\bnullif\s*\(', r'/')),
+        ],
+    },
+    13: {
+        'label': 'simple monthly retention table',
+        'minimum_statements': 1,
+        'required_all': [
+            ('multi-step cohort query', r'\bwith\b'),
+            ('unique-user counts', r'\bcount\s*\(\s*distinct\b'),
+        ],
+        'required_any': [
+            ('cohort-period date logic', (r'date_diff\s*\(', r'date_trunc\s*\(', r'strftime\s*\(', r'extract\s*\(')),
+        ],
+    },
+    17: {
+        'label': 'customer and revenue churn summary',
+        'minimum_statements': 1,
+        'required_all': [
+            ('customer or revenue aggregation', r'\b(?:sum|count)\s*\('),
+        ],
+        'required_any': [
+            ('period comparison', (r'lag\s*\(', r'lead\s*\(', r'date_trunc\s*\(', r'\bjoin\b')),
+        ],
+    },
+    29: {
+        'label': 'staging view and summary table',
+        'minimum_statements': 2,
+        'required_all': [
+            ('staging view creation', r'\bcreate\s+(?:or\s+replace\s+)?(?:temp(?:orary)?\s+)?view\b'),
+            ('summary query', r'\bselect\b'),
+        ],
+    },
+}
 
 _BLOCKED_SQL = re.compile(
     r"\b(?:attach|detach|copy|export|import|install|load|pragma|call|create\s+secret|"

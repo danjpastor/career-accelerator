@@ -106,7 +106,7 @@ class GuidedAppliedLabStudio(QWidget):
         )
         rail_layout = QVBoxLayout(rail)
         rail_layout.setContentsMargins(10, 10, 10, 10)
-        rail_title = QLabel("Guided stages")
+        rail_title = QLabel("Three short stages")
         rail_title.setObjectName("SectionTitle")
         rail_layout.addWidget(rail_title)
         self.stage_list = QListWidget()
@@ -198,7 +198,7 @@ class GuidedAppliedLabStudio(QWidget):
         heading.setObjectName("SectionTitle")
         layout.addWidget(heading)
         intro = QLabel(
-            "Check only items you personally verified. The Studio requires evidence and a changed artifact, but it never supplies the finished analytical answer."
+            "Confirm the small required result, one independent check, and a short takeaway. Extra project work is not required."
         )
         intro.setWordWrap(True)
         intro.setObjectName("Muted")
@@ -212,10 +212,10 @@ class GuidedAppliedLabStudio(QWidget):
         layout.addWidget(self.artifact_input)
 
         check_texts = (
-            "I completed every requested deliverable and can reopen the saved artifact.",
-            "I validated row grain, keys, filters, calculations, or model behavior using an independent check.",
-            "I recorded assumptions, unresolved differences, and limitations instead of hiding them.",
-            "My takeaway states the result, business meaning, next action, and an appropriate limitation.",
+            "I completed only the required result and can reopen the saved artifact.",
+            "I ran at least one independent check on the rows, keys, filters, calculations, or model behavior.",
+            "I did not expand this lab into a dashboard, pipeline, report package, or portfolio project.",
+            "My two-to-three-sentence takeaway states the result and one limitation or next question.",
         )
         self.final_checks: list[QCheckBox] = []
         for text in check_texts:
@@ -246,7 +246,7 @@ class GuidedAppliedLabStudio(QWidget):
         self.progress_bar.setRange(0, len(self.stages))
         self.title_label.setText(f"Applied Lab {self.number:02d} Studio")
         self.description_label.setText(
-            f"{self.item['title']} • Work through each stage in order. Guidance explains decisions and checks without revealing the completed solution."
+            f"{self.item['title']} • About {self.item['minutes']} minutes. Complete only the three listed stages; extra project work is not required."
         )
         self._load_state()
         self._rebuild_stage_list()

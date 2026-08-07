@@ -1,76 +1,25 @@
 # Applied Lab 14 submission
 
-## Import and profile operational data in Power BI
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] The imported row count matches the source.
+- [ ] Key dates and measures use appropriate data types.
+- [ ] The observations come from visible profile evidence.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Import the supplied projects, shots, and time-entry files.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Assign data types and use Power Query profiling views.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Document missing values, duplicates, suspicious ranges, and source grain.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Rename queries and fields for stakeholder readability.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Every table has a stated grain and candidate key.
-  - Evidence:
-- [ ] Dates and numeric fields use correct data types.
-  - Evidence:
-- [ ] At least three quality observations are supported by evidence.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.

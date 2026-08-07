@@ -22,7 +22,6 @@ Completed inside Career Accelerator's Retrospective task.
 
 ## Evidence Created This Week
 
-- Applied Lab submission (Complete Applied Lab 07: Build an Excel analyst workbook)
 
 ## Biggest Win
 

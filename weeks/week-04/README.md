@@ -61,8 +61,3 @@ Add one row after each study session.
 
 <!-- DB_TASKS_START -->
 <!-- DB_TASKS_END -->
-
-## Applied Labs
-
-- [ ] Validate Keys and Relationships in a Practice Database
-- [ ] Diagnose and Repair a Row-Multiplying JOIN

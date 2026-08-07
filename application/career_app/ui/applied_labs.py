@@ -31,7 +31,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from career_app.data.applied_exercises import APPLIED_EXERCISES, CATEGORY_ORDER
+from career_app.data.applied_exercises import APPLIED_EXERCISES, CATEGORY_ORDER, CORE_APPLIED_LABS
 from career_app.data.applied_lab_guidance import guide_markdown as applied_guide_markdown
 from career_app.database import save_setting, state
 from career_app.services import applied_lab_runner, applied_workspace, tracks
@@ -177,7 +177,7 @@ class AppliedLabsWidget(QWidget):
         branch_row = QHBoxLayout()
         branch_row.addWidget(QLabel("Adaptive branch"))
         self.branch_filter = QComboBox()
-        self.branch_filter.addItems(["Auto", *tracks.APPLIED_BRANCH_ORDER])
+        self.branch_filter.addItems(["Auto", *tracks.CORE_APPLIED_BRANCH_ORDER])
         self.branch_filter.currentTextChanged.connect(self._branch_changed)
         branch_row.addWidget(self.branch_filter, 1)
         library_body_layout.addLayout(branch_row)
@@ -601,9 +601,10 @@ class AppliedLabsWidget(QWidget):
                     completed += 1
                 readiness = tracks.applied_lab_readiness(self.conn, app_state, number)
                 icon = "✅" if record["status"] == "Completed" else ("◐" if record["status"] == "In Progress" else ("○" if readiness["ready"] else "🔒"))
-                optional = " • Optional" if item.get("optional") else ""
+                scope = "OPTIONAL" if item.get("optional") else "CORE"
+                optional = " • Optional extended practice" if item.get("optional") else " • Required core lab"
                 list_item = QListWidgetItem(
-                    f"{icon}  LAB {number:02d} • {item['category']}\n     {item['title']}"
+                    f"{icon}  LAB {number:02d} • {item['category']} • {scope}\n     {item['title']}"
                 )
                 list_item.setSizeHint(QSize(0, 58))
                 list_item.setData(Qt.ItemDataRole.UserRole, int(number))
@@ -616,15 +617,15 @@ class AppliedLabsWidget(QWidget):
                 rows[int(number)] = self.lab_list.count() - 1
             self.lab_list.blockSignals(False)
 
-            total = len(APPLIED_EXERCISES)
+            total = len(CORE_APPLIED_LABS)
             all_completed = sum(
                 1
-                for number in APPLIED_EXERCISES
+                for number in CORE_APPLIED_LABS
                 if applied_workspace.progress(self.conn, self.root, number)["status"] == "Completed"
             )
             percent = round((all_completed / total) * 100) if total else 0
             self.library_progress.setValue(percent)
-            self.library_progress_text.setText(f"{all_completed}/{total}")
+            self.library_progress_text.setText(f"Core {all_completed}/{total}")
 
             if rows:
                 selected = previous if previous in rows else (
@@ -1080,7 +1081,7 @@ class AppliedLabsWidget(QWidget):
     def _branch_changed(self, branch: str) -> None:
         if self._building:
             return
-        if branch not in {"Auto", *tracks.APPLIED_BRANCH_ORDER}:
+        if branch not in {"Auto", *tracks.CORE_APPLIED_BRANCH_ORDER}:
             branch = "Auto"
         save_setting(self.conn, "applied_branch_pin", branch)
         app_state = self._app_state()

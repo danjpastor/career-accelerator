@@ -1,84 +1,25 @@
 # Applied Lab 23 submission
 
-## Explain forecast-versus-actual variance
+## Goal and source grain
 
-### Artifact paths
+- Goal:
+- What one source row represents:
+- Planned validation check:
 
-- Main artifact:
-- Supporting screenshot or export:
-- Other evidence:
+## Required result
 
-### Business question and audience
+- Artifact path or link:
+- What I created:
 
-- Audience:
-- Decision or question:
-- Unit of analysis / grain:
+## Validation
 
-### Work completed
+- [ ] Forecast and actual use the same period and scope.
+- [ ] Variance signs are labeled consistently.
+- [ ] The identified driver matches the contribution calculation.
 
-#### Step 1
+- Independent check performed:
+- Result of the check:
 
-**Planned work:** Define sign conventions for revenue and cost variances.
+## Short takeaway
 
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 2
-
-**Planned work:** Calculate absolute and percentage variance.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 3
-
-**Planned work:** Rank departments or products by contribution to total variance.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 4
-
-**Planned work:** Separate volume, rate, and timing explanations where possible.
-
-**What I completed:**
-
-**Evidence or result:**
-
-#### Step 5
-
-**Planned work:** Write an executive variance commentary with an action owner.
-
-**What I completed:**
-
-**Evidence or result:**
-
-### Validation evidence
-
-- [ ] Sign conventions are explicit.
-  - Evidence:
-- [ ] Driver contributions reconcile to total variance.
-  - Evidence:
-- [ ] Percentage variance handles zero or very small forecasts safely.
-  - Evidence:
-
-### Decisions and assumptions
-
-- 
-
-### Limitations or unresolved issues
-
-- 
-
-### Stakeholder takeaway
-
-Write two or three sentences explaining the result, why it matters, and the next action.
-
-### Interview-ready reflection
-
-- Most important technical or analytical choice:
-- Strongest validation check:
-- What I would improve with more time:
+Write two or three sentences stating the result, why it matters, and one limitation or next question.
