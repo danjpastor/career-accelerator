@@ -5560,6 +5560,127 @@ class CareerAccelerator(QMainWindow):
 
         self._sync_dashboard_tasks_scroll_extent()
         QTimer.singleShot(0, self._sync_dashboard_tasks_scroll_extent)
+        # BEGIN NEXT TASKS STRUCTURAL BLANK SLOTS V10.46.19
+        # Keep the dashboard's original fixed-slot geometry exactly intact.
+        # Synthetic filler TaskRows still occupy their normal layout slots, but
+        # they are rendered fully transparent and non-interactive.  This avoids
+        # both visible "More Tasks Coming Soon" rows and the spacing regressions
+        # caused by deleting those rows from the QVBoxLayout.
+        _next_tasks_placeholder_phrases = (
+            "no task",
+            "no tasks",
+            "nothing to add",
+            "nothing else to add",
+            "no more task",
+            "no additional task",
+            "no additional eligible task",
+            "all caught up",
+            "all tasks complete",
+            "more tasks coming soon",
+            "the planner will add another task",
+        )
+        _next_tasks_structural_blank_widgets = set()
+
+        for _layout_index in range(self.dashboard_tasks_layout.count()):
+            _layout_item = self.dashboard_tasks_layout.itemAt(_layout_index)
+            _layout_widget = _layout_item.widget()
+            if _layout_widget is None or isinstance(_layout_widget, Divider):
+                continue
+
+            _task_row = (
+                _layout_widget
+                if isinstance(_layout_widget, TaskRow)
+                else _layout_widget.findChild(TaskRow)
+            )
+            if _task_row is None:
+                continue
+
+            _row_labels = []
+            if isinstance(_layout_widget, QLabel):
+                _row_labels.append(_layout_widget)
+            _row_labels.extend(_layout_widget.findChildren(QLabel))
+            _row_text = " ".join(
+                _label.text().strip().casefold()
+                for _label in _row_labels
+                if _label.text().strip()
+            )
+            if not any(
+                _phrase in _row_text
+                for _phrase in _next_tasks_placeholder_phrases
+            ):
+                continue
+
+            # Do not hide/remove the widget: hidden widgets stop participating
+            # in Qt layout calculations.  Opacity preserves the exact original
+            # size hint, density behavior, and fixed-slot spacing.
+            _blank_effect = QGraphicsOpacityEffect(_layout_widget)
+            _blank_effect.setOpacity(0.0)
+            _layout_widget.setGraphicsEffect(_blank_effect)
+            _layout_widget.setEnabled(False)
+            _layout_widget.setAttribute(
+                Qt.WidgetAttribute.WA_TransparentForMouseEvents,
+                True,
+            )
+            _layout_widget.setProperty("next_tasks_structural_blank", True)
+            _task_row.setProperty("next_tasks_structural_blank", True)
+            _next_tasks_structural_blank_widgets.add(_layout_widget)
+
+        # Preserve divider geometry too, but make separators leading into blank
+        # structural slots transparent.  Dividers between two real tasks remain
+        # unchanged.  This keeps the old four-slot spacing pixel-for-pixel while
+        # preventing faint separator lines from revealing empty slots.
+        for _layout_index in range(self.dashboard_tasks_layout.count()):
+            _layout_item = self.dashboard_tasks_layout.itemAt(_layout_index)
+            _divider = _layout_item.widget()
+            if not isinstance(_divider, Divider):
+                continue
+
+            _previous_task_widget = None
+            for _scan in range(_layout_index - 1, -1, -1):
+                _scan_widget = self.dashboard_tasks_layout.itemAt(_scan).widget()
+                if _scan_widget is None or isinstance(_scan_widget, Divider):
+                    continue
+                _scan_task = (
+                    _scan_widget
+                    if isinstance(_scan_widget, TaskRow)
+                    else _scan_widget.findChild(TaskRow)
+                )
+                if _scan_task is not None:
+                    _previous_task_widget = _scan_widget
+                break
+
+            _next_task_widget = None
+            for _scan in range(
+                _layout_index + 1,
+                self.dashboard_tasks_layout.count(),
+            ):
+                _scan_widget = self.dashboard_tasks_layout.itemAt(_scan).widget()
+                if _scan_widget is None or isinstance(_scan_widget, Divider):
+                    continue
+                _scan_task = (
+                    _scan_widget
+                    if isinstance(_scan_widget, TaskRow)
+                    else _scan_widget.findChild(TaskRow)
+                )
+                if _scan_task is not None:
+                    _next_task_widget = _scan_widget
+                break
+
+            _divider_borders_real_tasks = (
+                _previous_task_widget is not None
+                and _next_task_widget is not None
+                and _previous_task_widget not in _next_tasks_structural_blank_widgets
+                and _next_task_widget not in _next_tasks_structural_blank_widgets
+            )
+            if _divider_borders_real_tasks:
+                continue
+
+            _divider_effect = QGraphicsOpacityEffect(_divider)
+            _divider_effect.setOpacity(0.0)
+            _divider.setGraphicsEffect(_divider_effect)
+            _divider.setProperty("next_tasks_structural_blank", True)
+
+        # END NEXT TASKS STRUCTURAL BLANK SLOTS V10.46.19
 
 
     def refresh_dashboard(
