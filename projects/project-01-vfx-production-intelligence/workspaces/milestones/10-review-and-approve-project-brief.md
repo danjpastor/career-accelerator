@@ -60,7 +60,7 @@ Use the approved brief to finalize the data source and specification.
 
 **Milestone:** Review and approve project brief  
 **Stage:** Discovery  
-**Started:** 2026-08-07
+**Started:** 2026-08-08
 
 ## What you are doing
 

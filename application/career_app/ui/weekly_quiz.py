@@ -1,4 +1,5 @@
 from __future__ import annotations
+from career_app.services.knowledge_check_shuffle import shuffled_answer_options_for_view  # DCA_KNOWLEDGE_CHECK_SHUFFLE_RESTORE_V104615_R5
 
 """Standalone weekly knowledge-check dialog."""
 
@@ -169,7 +170,7 @@ class WeeklyKnowledgeCheckDialog(QDialog):
             button.setChecked(False)
         self.choice_group.setExclusive(True)
         selected = self.answers.get(str(item["activity_id"]), "")
-        for button, option in zip(self.choice_buttons, item.get("answer_options") or []):
+        for button, option in zip(self.choice_buttons, shuffled_answer_options_for_view(self, item) or []):
             button.setText(str(option))
             button.setChecked(str(option) == selected)
         self.back_button.setEnabled(self.index > 0)

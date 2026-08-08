@@ -61,7 +61,7 @@ Treat the release as the stable employer-facing version.
 ## Working notes
 
 **Milestone:** Publish reproducible portfolio case study  
-**Started:** 2026-08-07
+**Started:** 2026-08-08
 
 ## Repository safety
 
