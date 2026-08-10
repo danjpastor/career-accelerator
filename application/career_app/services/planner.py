@@ -9,6 +9,7 @@ migration helpers and task-completion compatibility.
 """
 
 from datetime import date
+import re
 
 from career_app.services import legacy_planner as _legacy
 from career_app.services import unified_tasks
@@ -71,7 +72,166 @@ def rebuild_today_snapshot(conn, week, guide, state, max_items=5):
     return {"focus_date": today, "created": len(items), "items": items}
 
 
+# BEGIN SQL INTERVIEW COMPLETION ROLLOVER RECONCILIATION V10.46.20
+def _sql_interview_completion_key(value):
+    """Normalize a SQL interview title without changing its durable record."""
+    normalized = re.sub(
+        r"[^a-z0-9]+",
+        " ",
+        str(value or "").casefold(),
+    )
+    normalized = " ".join(normalized.split())
+    for prefix in (
+        "solve ",
+        "complete sql interview problem ",
+        "complete interview problem ",
+        "complete ",
+        "practice ",
+    ):
+        if normalized.startswith(prefix):
+            normalized = normalized[len(prefix):].strip()
+            break
+    return normalized
+
+
+def reconcile_completed_sql_interview_tasks(conn):
+    """Overlay durable SQL Practice completion onto every concrete task row.
+
+    SQL interview completion lives durably in ``sql_practice``.  Sprint rollover
+    and adaptive-track synchronization may recreate another concrete task row for
+    the same logical problem.  A recreated row must inherit the durable completed
+    state before Today’s Focus, Next Tasks, catch-up, or Get Ahead are derived.
+    """
+    try:
+        completed_rows = conn.execute(
+            """SELECT title,completed_date
+               FROM sql_practice
+               WHERE platform='DataLemur'
+                 AND status='Completed'"""
+        ).fetchall()
+    except Exception:
+        return 0
+
+    completed_by_key = {}
+    for completed_row in completed_rows:
+        key = _sql_interview_completion_key(completed_row["title"])
+        if key:
+            completed_by_key[key] = completed_row
+    if not completed_by_key:
+        return 0
+
+    try:
+        task_rows = conn.execute(
+            """SELECT
+                   s.id,
+                   s.label,
+                   s.completed,
+                   m.status,
+                   m.category,
+                   m.managed_key,
+                   tt.track_key,
+                   tt.target_key
+               FROM sprint_tasks AS s
+               JOIN task_metadata AS m
+                 ON m.task_id=s.id
+               LEFT JOIN track_tasks AS tt
+                 ON tt.task_id=s.id"""
+        ).fetchall()
+    except Exception:
+        return 0
+
+    changed = 0
+    processed_task_ids = set()
+    for row in task_rows:
+        task_id = int(row["id"])
+        if task_id in processed_task_ids:
+            continue
+
+        track_key = str(row["track_key"] or "").casefold()
+        category = str(row["category"] or "").casefold()
+        target_key = str(row["target_key"] or "")
+        managed_key = str(row["managed_key"] or "")
+        label = str(row["label"] or "")
+
+        # Restrict reconciliation to SQL-shaped tasks.  This prevents an
+        # unrelated task with coincidental wording from inheriting SQL progress.
+        if track_key != "sql" and category != "sql":
+            continue
+
+        candidates = []
+        if (
+            track_key == "sql"
+            and target_key.casefold().startswith("problem:")
+        ):
+            candidates.append(target_key.split(":", 1)[1])
+        managed_prefix = "roadmap_v1026:sql:"
+        if managed_key.casefold().startswith(managed_prefix):
+            candidates.append(managed_key[len(managed_prefix):])
+        candidates.append(label)
+
+        matched = None
+        for candidate in candidates:
+            candidate_key = _sql_interview_completion_key(candidate)
+            if not candidate_key:
+                continue
+            matched = completed_by_key.get(candidate_key)
+            if matched is not None:
+                break
+            # Compatibility for older labels that prepend a category/source
+            # token before the exact interview title.
+            for completed_key, completed_row in completed_by_key.items():
+                if candidate_key.endswith(" " + completed_key):
+                    matched = completed_row
+                    break
+            if matched is not None:
+                break
+
+        if matched is None:
+            continue
+
+        processed_task_ids.add(task_id)
+        task_changed = False
+        if not bool(row["completed"]):
+            conn.execute(
+                "UPDATE sprint_tasks SET completed=1 WHERE id=?",
+                (task_id,),
+            )
+            task_changed = True
+        if str(row["status"] or "") != "Completed":
+            conn.execute(
+                """UPDATE task_metadata
+                   SET status='Completed',
+                       deferred_until=NULL
+                   WHERE task_id=?""",
+                (task_id,),
+            )
+            task_changed = True
+
+        # A stored daily-focus row may exist for the stale concrete ID.  Keep
+        # its historical date and simply mark the row reconciled when possible.
+        if task_changed:
+            try:
+                completed_date = (
+                    matched["completed_date"]
+                    or date.today().isoformat()
+                )
+                conn.execute(
+                    """UPDATE daily_focus
+                       SET completed_at=COALESCE(completed_at,?)
+                       WHERE task_id=?""",
+                    (completed_date, task_id),
+                )
+            except Exception:
+                pass
+            changed += 1
+
+    if changed:
+        conn.commit()
+    return changed
+# END SQL INTERVIEW COMPLETION ROLLOVER RECONCILIATION V10.46.20
+
 def available(conn, week):
+    reconcile_completed_sql_interview_tasks(conn)
     return unified_tasks.ready_tasks(conn, int(week))
 
 

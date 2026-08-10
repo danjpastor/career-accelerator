@@ -1900,14 +1900,16 @@ def _datacamp_target(conn, state, pace):
 
 
 def _completed_sql(conn):
-    return {
-        row["title"]
-        for row in conn.execute(
-            """SELECT title
-               FROM sql_practice
-               WHERE status='Completed'"""
-        ).fetchall()
-    }
+    """Return completed interview problems using canonical catalog titles."""
+    completed = set()
+    for row in conn.execute(
+        """SELECT title
+           FROM sql_practice
+           WHERE status='Completed'"""
+    ).fetchall():
+        item = _sql_item(row["title"])
+        completed.add(item[0] if item is not None else str(row["title"]))
+    return completed
 
 
 def _append_evidence(evidence, skill_key, source):
@@ -3988,20 +3990,41 @@ def sync_all(conn, state):
     conn.commit()
 
 
+def _normalized_sql_problem_key(value):
+    """Normalize learner-facing SQL titles for stable identity matching."""
+    text = re.sub(
+        r"[^a-z0-9]+",
+        " ",
+        str(value or "").casefold(),
+    )
+    return " ".join(text.split())
+
+
+def _canonical_sql_problem_title(value):
+    """Resolve capitalization/punctuation variants to the catalog title."""
+    key = _normalized_sql_problem_key(value)
+    if not key:
+        return None
+    for item in SQL_COMPANION:
+        if _normalized_sql_problem_key(item[0]) == key:
+            return item[0]
+    return None
+
+
 def _sql_title_from_task_label(label):
     text = str(label or "").strip()
-    prefix = "Solve "
-    if text.startswith(prefix):
-        title = text[len(prefix):].strip()
-        return title if _sql_item(title) else None
-    return None
+    match = re.match(r"^solve\s+(.+)$", text, re.IGNORECASE)
+    if match is None:
+        return None
+    return _canonical_sql_problem_title(match.group(1))
 
 
 def active_sql_task_for_title(
     conn,
     title,
 ):
-    """Return the active SQL task only when its exact target key matches."""
+    """Return the active SQL task for the canonical logical problem."""
+    canonical = _canonical_sql_problem_title(title) or str(title or "").strip()
     return conn.execute(
         """SELECT tt.*,s.label,s.completed
            FROM track_tasks tt
@@ -4009,12 +4032,8 @@ def active_sql_task_for_title(
              ON s.id=tt.task_id
            WHERE tt.track_key='sql'
              AND tt.target_key=?
-             AND s.label=?
              AND s.completed=0""",
-        (
-            f"problem:{title}",
-            f"Solve {title}",
-        ),
+        (f"problem:{canonical}",),
     ).fetchone()
 
 
@@ -4135,19 +4154,26 @@ def _has_completion_evidence(
         if progress is not None:
             return True
 
-    sql_title = _sql_title_from_task_label(
-        label
-    )
+    sql_title = None
+    managed_prefix = "roadmap_v1026:sql:"
+    if managed_key.casefold().startswith(managed_prefix):
+        raw_title = managed_key[len(managed_prefix):]
+        sql_title = _canonical_sql_problem_title(raw_title)
+    if sql_title is None:
+        sql_title = _sql_title_from_task_label(label)
+
     if sql_title:
-        row = conn.execute(
-            """SELECT 1
+        rows = conn.execute(
+            """SELECT title
                FROM sql_practice
                WHERE platform='DataLemur'
-                 AND title=?
-                 AND status='Completed'""",
-            (sql_title,),
-        ).fetchone()
-        return row is not None
+                 AND status='Completed'"""
+        ).fetchall()
+        target_key = _normalized_sql_problem_key(sql_title)
+        return any(
+            _normalized_sql_problem_key(item["title"]) == target_key
+            for item in rows
+        )
 
     return False
 
@@ -5238,8 +5264,11 @@ def skill_snapshot(conn):
 
 
 def _sql_item(title):
+    canonical = _canonical_sql_problem_title(title)
+    if canonical is None:
+        return None
     for item in SQL_COMPANION:
-        if item[0] == title:
+        if item[0] == canonical:
             return item
     return None
 

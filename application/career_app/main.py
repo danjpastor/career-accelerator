@@ -7159,6 +7159,46 @@ class CareerAccelerator(QMainWindow):
                        WHERE platform='DataLemur' AND title=?""",
                     (title,),
                 ).fetchone()
+                # BEGIN SQL INTERVIEW STALE CHECKBOX REPAIR V10.46.20
+                # A SQL problem already completed in SQL Practice is authoritative.
+                # If a stale/recreated concrete task row reaches the checkbox before
+                # queue reconciliation runs, repair that row instead of requiring the
+                # learner to re-save or re-complete last week's submission.
+                if (
+                    practice is not None
+                    and str(practice["status"] or "").casefold()
+                    == "completed"
+                ):
+                    self.conn.execute(
+                        "UPDATE sprint_tasks SET completed=1 WHERE id=?",
+                        (int(task_id),),
+                    )
+                    self.conn.execute(
+                        """UPDATE task_metadata
+                           SET status='Completed',
+                               deferred_until=NULL
+                           WHERE task_id=?""",
+                        (int(task_id),),
+                    )
+                    self.conn.commit()
+                    planner.reconcile_completed_sql_interview_tasks(
+                        self.conn
+                    )
+                    try:
+                        planner.mark_focus_task_completed(
+                            self.conn,
+                            int(task_id),
+                        )
+                    except Exception:
+                        pass
+                    self.state = state(self.conn)
+                    self.refresh_all(sync_tracks=False)
+                    self._notify(
+                        f"{title} was already completed; the stale task was repaired.",
+                        4200,
+                    )
+                    return
+                # END SQL INTERVIEW STALE CHECKBOX REPAIR V10.46.20
                 saved_value = str(practice["solution_path"] or "").strip() if practice else ""
                 saved_path = Path(saved_value) if saved_value else None
                 if saved_path is not None and not saved_path.is_absolute():

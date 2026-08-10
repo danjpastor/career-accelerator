@@ -53,6 +53,28 @@ def _display_sort(task: dict[str, Any], current_week: int) -> tuple[Any, ...]:
     return sprint_day_planner.task_display_sort(task, int(current_week))
 
 
+def _is_reserve_supplemental_project(
+    conn: sqlite3.Connection,
+    task: dict[str, Any],
+) -> bool:
+    task_id = _task_id(task)
+    if task_id <= 0:
+        return False
+    try:
+        row = conn.execute(
+            """SELECT 1
+               FROM datacamp_project_tasks
+               WHERE task_id=?
+                 AND role='supplemental'
+                 AND capacity_selected=0
+               LIMIT 1""",
+            (task_id,),
+        ).fetchone()
+    except sqlite3.Error:
+        return False
+    return row is not None
+
+
 def _cache_key(conn: sqlite3.Connection, current_week: int) -> tuple[Any, ...]:
     return (
         id(conn),
@@ -63,13 +85,25 @@ def _cache_key(conn: sqlite3.Connection, current_week: int) -> tuple[Any, ...]:
 
 
 def _day_groups(conn: sqlite3.Connection, current_week: int) -> list[dict[str, Any]]:
-    from career_app.services import sprint_day_planner
+    from career_app.services import planner, roadmap_schedule_audit, sprint_day_planner
+
+    # Durable completion must be reasserted before the day-group snapshot is
+    # allowed to classify anything as current/catch-up.  This catches historical
+    # SQL rows whose display capitalization differs from the canonical catalog.
+    planner.reconcile_completed_sql_interview_tasks(conn)
+    roadmap_schedule_audit.reconcile(conn, int(current_week))
 
     key = _cache_key(conn, current_week)
     cached = _GROUP_CACHE.get(id(conn))
     if cached is not None and cached[0] == key:
         return cached[1]
     groups = list(sprint_day_planner.current_sprint_day_groups(conn, int(current_week)))
+    # The planner can materialize new current-week schedule rows on first read.
+    # Run the audit once more so any newly materialized row receives the audited
+    # weekday before the group is returned to Today/Next Tasks.
+    audit_result = roadmap_schedule_audit.reconcile(conn, int(current_week))
+    if isinstance(audit_result, dict) and int(audit_result.get("changed", 0) or 0) > 0:
+        groups = list(sprint_day_planner.current_sprint_day_groups(conn, int(current_week)))
     # Schema/bootstrap helpers can write while constructing the first snapshot.
     # Store the post-call total_changes value so repeated dashboard reads reuse it.
     _GROUP_CACHE[id(conn)] = (_cache_key(conn, current_week), groups)
@@ -128,6 +162,8 @@ def _today_assignments(
         return []
     result: list[dict[str, Any]] = []
     for raw in group.get("tasks") or []:
+        if _is_reserve_supplemental_project(conn, raw):
+            continue
         if not _is_current_week_assignment(raw, current_week):
             continue
         item = _normalize_scheduled_task(
@@ -149,6 +185,8 @@ def _promoted_assignments(
 
     result: list[dict[str, Any]] = []
     for raw in sprint_day_planner.promoted_tasks(conn, int(current_week)):
+        if _is_reserve_supplemental_project(conn, raw):
+            continue
         if bool(raw.get("completed")):
             continue
         item = _normalize_scheduled_task(
@@ -177,6 +215,8 @@ def _catch_up_assignments(
         if str(group.get("date") or "") >= today_text:
             continue
         for raw in group.get("tasks") or []:
+            if _is_reserve_supplemental_project(conn, raw):
+                continue
             if bool(raw.get("completed")) or not _is_current_week_assignment(raw, current_week):
                 continue
             item = _normalize_scheduled_task(
@@ -189,6 +229,8 @@ def _catch_up_assignments(
 
     # Retain the existing cross-week catch-up behavior.
     for raw in unified_tasks.all_tasks(conn, int(current_week)):
+        if _is_reserve_supplemental_project(conn, raw):
+            continue
         task_week = _safe_int(raw.get("week"), current_week)
         if bool(raw.get("completed")):
             continue
@@ -230,6 +272,8 @@ def _upcoming_current_week(
         if scheduled_date <= today_text:
             continue
         for raw in group.get("tasks") or []:
+            if _is_reserve_supplemental_project(conn, raw):
+                continue
             if bool(raw.get("completed")) or not _is_current_week_assignment(raw, current_week):
                 continue
             item = _normalize_scheduled_task(
