@@ -46,9 +46,9 @@ WEEK_5_WEEKDAY_BY_MANAGED_KEY: dict[str, int] = {
 
     # SQL interview chain.  Same-day successors remain locked until their
     # direct predecessor is completed, so the sequence is not bypassed.
-    "roadmap_v1026:sql:Second Highest Salary": 0,
-    "roadmap_v1026:sql:User's Third Transaction": 1,
-    "roadmap_v1026:sql:Top Three Salaries": 2,
+    "roadmap_v1026:sql:Second Highest Salary": 1,
+    "roadmap_v1026:sql:User's Third Transaction": 2,
+    "roadmap_v1026:sql:Top Three Salaries": 3,
     "roadmap_v1026:sql:Odd and Even Measurements": 3,
     "roadmap_v1026:sql:Tweets' Rolling Averages": 3,
     "roadmap_v1026:sql:User Shopping Sprees": 4,
@@ -56,6 +56,59 @@ WEEK_5_WEEKDAY_BY_MANAGED_KEY: dict[str, int] = {
 
     "weekly_check:5": 4,
     "weekly_retrospective_05": 4,
+}
+
+
+# Explicit schedule dependencies used as a safety net for audited weekday
+# overrides. A dependent may share a day with its prerequisite (it stays locked
+# until completion), but it may never be assigned to an earlier day.
+WEEK_5_SCHEDULE_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    "datacamp:w05_window_sql_02": ("datacamp:w05_window_sql_01",),
+    "datacamp:w05_window_sql_03": ("datacamp:w05_window_sql_02",),
+    "datacamp:w05_window_sql_04": ("datacamp:w05_window_sql_03",),
+    "datacamp:w05_functions_sql_02": ("datacamp:w05_functions_sql_01",),
+    "datacamp:w05_functions_sql_03": ("datacamp:w05_functions_sql_02",),
+    "roadmap_v1026:duckdb:25": ("datacamp:w05_window_sql_01",),
+    "roadmap_v1026:duckdb:26": (
+        "roadmap_v1026:duckdb:25",
+        "datacamp:w05_window_sql_02",
+    ),
+    "roadmap_v1026:duckdb:15": ("datacamp:w05_window_sql_03",),
+    "roadmap_v1026:duckdb:11": ("datacamp:w05_window_sql_03",),
+    "roadmap_v1026:duckdb:27": ("datacamp:w05_window_sql_04",),
+    "roadmap_v1026:duckdb:28": ("datacamp:w05_functions_sql_01",),
+    "roadmap_v1026:duckdb:14": ("datacamp:w05_functions_sql_02",),
+    "roadmap_v1026:duckdb:4": (
+        "roadmap_v1026:duckdb:14",
+        "datacamp:w05_functions_sql_02",
+    ),
+    "roadmap_v1026:duckdb:3": ("datacamp:w05_functions_sql_03",),
+    "roadmap_v1026:duckdb:17": ("datacamp:w05_functions_sql_03",),
+    "roadmap_v1026:sql:Second Highest Salary": (
+        "datacamp:w05_window_sql_03",
+    ),
+    "roadmap_v1026:sql:User's Third Transaction": (
+        "roadmap_v1026:sql:Second Highest Salary",
+        "datacamp:w05_window_sql_03",
+    ),
+    "roadmap_v1026:sql:Top Three Salaries": (
+        "roadmap_v1026:sql:User's Third Transaction",
+    ),
+    "roadmap_v1026:sql:Odd and Even Measurements": (
+        "roadmap_v1026:sql:Top Three Salaries",
+        "datacamp:w05_functions_sql_02",
+    ),
+    "roadmap_v1026:sql:Tweets' Rolling Averages": (
+        "roadmap_v1026:sql:Odd and Even Measurements",
+    ),
+    "roadmap_v1026:sql:User Shopping Sprees": (
+        "roadmap_v1026:sql:Tweets' Rolling Averages",
+        "datacamp:w05_functions_sql_02",
+    ),
+    "roadmap_v1026:sql:Second Day Confirmation": (
+        "roadmap_v1026:sql:User Shopping Sprees",
+        "datacamp:w05_functions_sql_02",
+    ),
 }
 
 # Week 7 already has a sensible 5/5/4/4/4 DataCamp chapter distribution, but
@@ -298,6 +351,35 @@ def reconcile_supplemental_capacity(
     return changed
 
 
+
+def _dependency_safe_mapping(
+    mapping: dict[str, int],
+    dependencies: dict[str, tuple[str, ...]],
+) -> dict[str, int]:
+    """Clamp audited assignments so no task precedes a scheduled prerequisite."""
+    resolved = {str(key): int(value) for key, value in mapping.items()}
+    # Weekday values only move later, so this converges quickly even for chains.
+    for _ in range(max(1, len(resolved))):
+        changed = False
+        for task_key, prerequisite_keys in dependencies.items():
+            if task_key not in resolved:
+                continue
+            prerequisite_days = [
+                resolved[key]
+                for key in prerequisite_keys
+                if key in resolved
+            ]
+            if not prerequisite_days:
+                continue
+            minimum_day = max(prerequisite_days)
+            if resolved[task_key] < minimum_day:
+                resolved[task_key] = minimum_day
+                changed = True
+        if not changed:
+            break
+    return resolved
+
+
 def apply_audited_weekdays(
     conn: sqlite3.Connection,
     *,
@@ -308,6 +390,11 @@ def apply_audited_weekdays(
     for week, mapping in AUDITED_WEEKDAY_OVERRIDES.items():
         if int(week) < int(current_week):
             continue
+        if int(week) == 5:
+            mapping = _dependency_safe_mapping(
+                mapping,
+                WEEK_5_SCHEDULE_DEPENDENCIES,
+            )
         week_start = _week_start(conn, int(week))
         if week_start is None:
             continue
