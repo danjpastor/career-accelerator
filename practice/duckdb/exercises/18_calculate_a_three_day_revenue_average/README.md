@@ -9,7 +9,7 @@ Finance wants daily revenue shown beside a short moving average that smooths nor
 
 ## Your task
 
-Calculate the three-day rolling average revenue for every date.
+Calculate the three-day rolling average revenue for every date, round the average to two decimals, and sort the results by `revenue_date`.
 
 ## Result requirements
 

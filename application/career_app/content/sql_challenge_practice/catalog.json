@@ -3397,7 +3397,7 @@
       "prerequisite_exercises": [],
       "estimated_minutes": 25,
       "scenario": "Finance wants daily revenue shown beside a short moving average that smooths normal day-to-day changes.",
-      "task": "Calculate the three-day rolling average revenue for every date.",
+      "task": "Calculate the three-day rolling average revenue for every date, round the average to two decimals, and sort the results by `revenue_date`.",
       "result_requirements": [
         "Return `revenue_date`, `revenue`, and `three_day_average`.",
         "Round the average to two decimals.",
