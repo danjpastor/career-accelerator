@@ -1,0 +1,35 @@
+{
+  "name": "vfx_projects",
+  "columns": [
+    {
+      "name": "project_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "project_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "client_name",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Aurora Run",
+      "Silver Frame"
+    ],
+    [
+      2,
+      "Harbor Lights",
+      "Northstar Pictures"
+    ],
+    [
+      3,
+      "Glass City",
+      "Silver Frame"
+    ]
+  ],
+  "grain": "one row per VFX project"
+}

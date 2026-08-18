@@ -72,8 +72,61 @@ def _table_exists(conn: Any, name: str) -> bool:
         return False
 
 
+def _current_track_target(chapter_key: str) -> dict[str, Any] | None:
+    """Resolve a v10.46.24+ DataCamp chapter outside the legacy static map."""
+    try:
+        from career_app.services import datacamp_track_alignment as alignment
+        target = getattr(alignment, "TARGET_BY_KEY", {}).get(str(chapter_key))
+    except Exception:
+        target = None
+    return dict(target) if target else None
+
+
+def _terminal_week(internal_id: int) -> int:
+    """Return the authoritative roadmap week for a SQL challenge terminal gate."""
+    from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
+
+    chapter_key = TERMINAL_CHAPTER_BY_ID[int(internal_id)]
+    chapter = CHAPTER_BY_KEY.get(chapter_key)
+    if chapter is not None:
+        return int(chapter.week)
+
+    target = _current_track_target(chapter_key)
+    if target is not None:
+        return int(target["week"])
+
+    raise KeyError(f"Unknown DataCamp terminal chapter: {chapter_key}")
+
+
+def _terminal_scheduled_date(conn: Any, internal_id: int) -> date:
+    """Resolve legacy and current-track terminal chapters through one scheduler."""
+    from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
+
+    chapter_key = TERMINAL_CHAPTER_BY_ID[int(internal_id)]
+    chapter = CHAPTER_BY_KEY.get(chapter_key)
+    if chapter is not None:
+        return chapter.scheduled_date(_program_start(conn))
+
+    target = _current_track_target(chapter_key)
+    if target is None:
+        raise KeyError(f"Unknown DataCamp terminal chapter: {chapter_key}")
+
+    week = int(target["week"])
+    day_index = int(target["day_index"])
+
+    try:
+        from career_app.services import datacamp_track_alignment as alignment
+        raw = alignment._target_date(conn, week, day_index)
+        if raw:
+            return date.fromisoformat(str(raw))
+    except Exception:
+        pass
+
+    return _program_start(conn) + timedelta(weeks=week - 1, days=day_index)
+
+
 def _apply_catalog_overlay() -> None:
-    """Validate the static catalog and synchronize the shared chapter gate map."""
+    """Validate legacy and current-track chapter gates, then synchronize the shared map."""
     from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
     from career_app.services import content_gates
 
@@ -81,7 +134,12 @@ def _apply_catalog_overlay() -> None:
         missing = sorted(set(ROADMAP_INTERNAL_ORDER) - set(DUCKDB_EXERCISES))
         extra = sorted(set(DUCKDB_EXERCISES) - set(ROADMAP_INTERNAL_ORDER))
         raise RuntimeError(f"SQL challenge catalog mismatch; missing={missing}, extra={extra}")
-    unknown = sorted(set(TERMINAL_CHAPTER_BY_ID.values()) - set(CHAPTER_BY_KEY))
+
+    unknown = sorted(
+        chapter_key
+        for chapter_key in set(TERMINAL_CHAPTER_BY_ID.values())
+        if chapter_key not in CHAPTER_BY_KEY and _current_track_target(chapter_key) is None
+    )
     if unknown:
         raise RuntimeError(f"Unknown DataCamp terminal chapters: {unknown}")
 
@@ -102,11 +160,8 @@ def _program_start(conn: Any) -> date:
 
 
 def scheduled_date(conn: Any, internal_id: int) -> date:
-    """Return the terminal DataCamp chapter's own scheduled date."""
-    from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
-
-    chapter = CHAPTER_BY_KEY[TERMINAL_CHAPTER_BY_ID[int(internal_id)]]
-    return chapter.scheduled_date(_program_start(conn))
+    """Return the authoritative legacy-or-current terminal chapter date."""
+    return _terminal_scheduled_date(conn, int(internal_id))
 
 
 def _display_prerequisite_name(internal_id: int) -> str:
@@ -379,11 +434,13 @@ def audit_contract(root=None) -> list[str]:
                     f"SQL Challenge {_DISPLAY_BY_ID[internal_id]:02d} has a forward prerequisite."
                 )
     try:
-        from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
         for internal_id, chapter_key in TERMINAL_CHAPTER_BY_ID.items():
-            if chapter_key not in CHAPTER_BY_KEY:
+            try:
+                expected_week = _terminal_week(internal_id)
+            except KeyError:
                 errors.append(f"Challenge {internal_id} uses unknown chapter {chapter_key}.")
-            elif int(DUCKDB_EXERCISES[internal_id]["week"]) != int(CHAPTER_BY_KEY[chapter_key].week):
+                continue
+            if int(DUCKDB_EXERCISES[internal_id]["week"]) != int(expected_week):
                 errors.append(f"Challenge {internal_id} is assigned to the wrong roadmap week.")
     except Exception as exc:
         errors.append(f"Could not validate DataCamp chapter alignment: {exc}")

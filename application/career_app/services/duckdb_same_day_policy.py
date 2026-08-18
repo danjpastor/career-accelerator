@@ -6,7 +6,7 @@ from datetime import date
 from typing import Any
 
 _INSTALLED = False
-_CACHE_KEY = "duckdb_same_day_schedule:v10.42.0"
+_CACHE_KEY = "duckdb_same_day_schedule:v10.46.29"
 
 
 def _table_exists(conn: Any, table: str) -> bool:
@@ -24,18 +24,31 @@ def _apply_same_day_catalog() -> None:
     from career_app.services import duckdb_curriculum_policy as policy
 
     for internal_id in policy.ROADMAP_INTERNAL_ORDER:
-        chapter = CHAPTER_BY_KEY[policy.TERMINAL_CHAPTER_BY_ID[int(internal_id)]]
-        duckdb_exercises.DUCKDB_EXERCISES[int(internal_id)]["week"] = int(chapter.week)
+        chapter_key = policy.TERMINAL_CHAPTER_BY_ID.get(int(internal_id))
+        chapter = CHAPTER_BY_KEY.get(chapter_key) if chapter_key else None
+        try:
+            target_week = int(chapter.week) if chapter is not None else int(policy._terminal_week(internal_id))
+        except (KeyError, TypeError, ValueError):
+            continue
+        try:
+            duckdb_exercises.DUCKDB_EXERCISES[int(internal_id)]["week"] = target_week
+        except (KeyError, TypeError):
+            continue
 
 
 def _install_schedule_override() -> None:
     from career_app.data.datacamp_curriculum import CHAPTER_BY_KEY
     from career_app.services import duckdb_curriculum_policy as policy
 
+    original_scheduled_date = policy.scheduled_date
+
     def scheduled_date(conn: Any, internal_id: int) -> date:
-        """Return the terminal chapter's own weekday, not the following day."""
-        chapter = CHAPTER_BY_KEY[policy.TERMINAL_CHAPTER_BY_ID[int(internal_id)]]
-        return chapter.scheduled_date(policy._program_start(conn))
+        """Keep legacy same-day timing; delegate new curriculum IDs to the main policy."""
+        chapter_key = policy.TERMINAL_CHAPTER_BY_ID.get(int(internal_id))
+        chapter = CHAPTER_BY_KEY.get(chapter_key) if chapter_key else None
+        if chapter is not None:
+            return chapter.scheduled_date(policy._program_start(conn))
+        return original_scheduled_date(conn, internal_id)
 
     policy.scheduled_date = scheduled_date
     _apply_same_day_catalog()

@@ -1,0 +1,32 @@
+{
+  "name": "accounts",
+  "columns": [
+    {
+      "name": "account_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "account_name",
+      "type": "VARCHAR"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Arbor Health"
+    ],
+    [
+      2,
+      "Brightline Media"
+    ],
+    [
+      3,
+      "Cedar Works"
+    ],
+    [
+      4,
+      "Delta Foods"
+    ]
+  ],
+  "grain": "one row per account"
+}

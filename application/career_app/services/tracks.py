@@ -759,7 +759,7 @@ SQL_SKILL_ACCEPTED_EVIDENCE = {
         "or a validated CASE problem"
     ),
     "sql_joins": (
-        "Complete DataCamp joins and relationship lessons, SQL Challenge 05/06/07/29, "
+        "Complete DataCamp joins and relationship lessons, SQL Challenge 05/06/07/31, "
         "or a validated join problem"
     ),
     "sql_subqueries": (
@@ -810,17 +810,13 @@ DUCKDB_SKILL_EVIDENCE = {
     17: {"data_cleaning", "sql_querying"},
     29: {"data_cleaning", "sql_querying"},
     30: {"sql_aggregation", "sql_validation"},
-    31: {"sql_aggregation", "sql_validation"},
-    32: {"sql_querying", "sql_validation"},
-    33: {"sql_joins", "sql_validation"},
-    8: {"sql_aggregation", "sql_case", "sql_joins", "sql_intermediate"},
-    9: {"sql_aggregation", "timed_analysis"},
-    10: {"sql_aggregation", "sql_joins", "sql_intermediate"},
-    18: {
-        "sql_fundamentals", "sql_querying", "sql_aggregation", "sql_case",
-        "sql_joins", "sql_ctes", "sql_window_functions", "sql_date_logic",
-        "sql_validation", "sql_intermediate"
-    },
+    31: {"sql_aggregation"},
+    32: {"data_cleaning", "sql_aggregation", "sql_validation"},
+    33: {"sql_window_functions", "sql_date_logic", "sql_validation"},
+    8: {"sql_querying", "sql_case", "sql_date_logic"},
+    9: {"sql_aggregation", "sql_joins", "sql_intermediate"},
+    10: {"sql_subqueries", "sql_validation", "sql_intermediate"},
+    18: {"sql_aggregation", "sql_intermediate", "sql_validation"},
 }
 
 
@@ -1987,7 +1983,16 @@ DATACAMP_SKILL_EVIDENCE = {
     "w05_window_sql_03": {"sql_window_functions", "sql_intermediate"},
     "w05_functions_sql_02": {"sql_date_logic"},
     "w05_functions_sql_03": {"data_cleaning", "sql_validation"},
-    "w06_database_design_04": {"sql_validation"},
+    "w06_eda_sql_01": {"sql_validation"},
+    "w06_eda_sql_02": {"sql_aggregation"},
+    "w06_eda_sql_03": {"data_cleaning", "sql_validation"},
+    "w06_eda_sql_04": {"sql_date_logic", "sql_validation"},
+    "w07_decision_sql_01": {"sql_querying", "sql_aggregation", "sql_date_logic"},
+    "w07_decision_sql_02": {"sql_aggregation", "sql_joins", "sql_subqueries"},
+    "w07_decision_sql_03": {"sql_subqueries", "sql_intermediate"},
+    "w07_decision_sql_04": {"sql_aggregation", "sql_intermediate"},
+    "w07_data_viz_04": {"visualization_foundations"},
+    "w07_data_communication_04": {"data_storytelling"},
     "w07_intro_powerbi_04": {"power_bi_foundations"},
     "w07_model_powerbi_04": {"power_bi_foundations"},
     "w07_dax_powerbi_03": {"power_bi"},
@@ -2043,7 +2048,8 @@ def _datacamp_skill_evidence(conn):
         str(row["chapter_key"]) for row in conn.execute(
             "SELECT chapter_key FROM datacamp_chapter_progress "
             "WHERE chapter_key LIKE 'w03_%' OR chapter_key LIKE 'w04_%' "
-            "OR chapter_key LIKE 'w05_%' OR chapter_key LIKE 'w06_%'"
+            "OR chapter_key LIKE 'w05_%' OR chapter_key LIKE 'w06_functions_sql_%' "
+            "OR chapter_key LIKE 'w06_eda_sql_%' OR chapter_key LIKE 'w07_decision_sql_%'"
         ).fetchall()
     }
     if ex18 and required_sql and required_sql <= set(completed):
@@ -2051,7 +2057,7 @@ def _datacamp_skill_evidence(conn):
 
     required_powerbi = {
         str(row["chapter_key"]) for row in conn.execute(
-            "SELECT chapter_key FROM datacamp_chapter_progress WHERE chapter_key LIKE 'w07_%'"
+            "SELECT chapter_key FROM datacamp_chapter_progress WHERE LOWER(course_name) LIKE '%power bi%'"
         ).fetchall()
     }
     if required_powerbi and required_powerbi <= set(completed):

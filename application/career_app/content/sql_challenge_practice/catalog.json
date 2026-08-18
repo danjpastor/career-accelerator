@@ -1,13 +1,13 @@
 {
   "schema_version": 2,
-  "content_version": "10.46.6-prerequisite-alignment",
+  "content_version": "10.46.24-datacamp-track-realignment",
   "track_title": "SQL Challenges",
   "track_subtitle": "Focused one-task SQL practice using original Career Accelerator datasets and the native DuckDB editor.",
   "authoring_policy": {
     "task_limit": "Exactly one required task per exercise. A second task is allowed only when inseparable from the same result.",
     "originality": "All learner-facing wording, scenarios, schemas, records, solutions, hints, and expected outputs are original Career Accelerator content.",
     "source_use": "External challenges are credited only as structure and concept blueprints.",
-    "scope": "Every exercise tests one primary concept and uses only SQL taught by its terminal DataCamp chapter."
+    "scope": "Every exercise tests one primary concept and uses SQL already taught before its scheduled gate; Exercises 26–29 reinforce the current Exploratory Data Analysis in SQL chapters, and Exercises 30–33 reinforce the current Data-Driven Decision Making in SQL chapters."
   },
   "datasets": {
     "northstar_service": [
@@ -1703,13 +1703,13 @@
             1,
             "ana@example.com",
             "Ana Ruiz",
-            "East"
+            " east "
           ],
           [
             2,
             "ben@example.com",
             "Ben Cole",
-            "West"
+            "WEST"
           ],
           [
             3,
@@ -1721,13 +1721,13 @@
             4,
             null,
             "Cara Fox",
-            "North"
+            " north"
           ],
           [
             5,
             "dev@example.com",
             "Dev Shah",
-            "West"
+            "west "
           ]
         ],
         "grain": "one row per imported contact record"
@@ -1932,36 +1932,45 @@
           {
             "name": "order_total",
             "type": "DECIMAL(10,2)"
+          },
+          {
+            "name": "order_date",
+            "type": "DATE"
           }
         ],
         "rows": [
           [
             101,
             1,
-            250.0
+            250.0,
+            "2026-07-01"
           ],
           [
             102,
             2,
-            180.0
+            180.0,
+            "2026-07-02"
           ],
           [
             103,
             5,
-            95.0
+            95.0,
+            "2026-07-04"
           ],
           [
             104,
             3,
-            410.0
+            410.0,
+            "2026-07-05"
           ],
           [
             105,
             null,
-            70.0
+            70.0,
+            "2026-07-08"
           ]
         ],
-        "grain": "one row per account order; invalid or missing account IDs are deliberate"
+        "grain": "one row per account order with an order date; invalid or missing account IDs remain deliberate"
       }
     ],
     "northstar_vfx": [
@@ -3790,32 +3799,34 @@
       "display_number": 26,
       "title": "Test Whether Email Is a Reliable Key",
       "source": {
-        "provider": "HackerRank",
-        "challenge": "New Companies",
-        "url": "https://www.hackerrank.com/challenges/the-company/problem",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+        "provider": "DataCamp",
+        "challenge": "Exploratory Data Analysis in SQL — Chapter 1: What's in the Database?",
+        "url": "https://www.datacamp.com/courses/exploratory-data-analysis-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
       },
       "dataset_id": "northstar_design",
-      "concept": "Table grain and candidate keys",
-      "learning_objective": "Use duplicate and missing-value checks to evaluate a proposed business key.",
+      "concept": "Table grain, missing values, and duplicate checks",
+      "learning_objective": "Profile a raw identifier for missing and duplicate values before using it in analysis.",
       "gate": {
-        "course": "Database Design",
+        "course": "Exploratory Data Analysis in SQL",
         "chapter": 1,
         "week": 6,
-        "weekday": "Tuesday",
+        "weekday": "Thursday",
         "order_in_day": 1,
-        "chapter_key": "w06_database_design_01"
+        "chapter_key": "w06_eda_sql_01"
       },
-      "prerequisite_exercises": [],
+      "prerequisite_exercises": [
+        25
+      ],
       "estimated_minutes": 25,
-      "scenario": "A contact-import design proposes using email as the primary key, but the data architect wants evidence before approving it.",
-      "task": "Summarize the problems that prevent `email` from being a reliable primary key.",
+      "scenario": "A contact-import analyst wants to know whether email is safe to use when grouping or joining records.",
+      "task": "Profile `email` and summarize the missing and duplicate-value risks that could distort analysis.",
       "result_requirements": [
         "Return one row with `total_rows`, `missing_emails`, and `duplicate_email_rows`.",
         "`duplicate_email_rows` is the number of extra rows beyond the first occurrence of each non-null email."
       ],
-      "solution_sql": "SELECT\n        COUNT(*) AS total_rows,\n        COUNT(*) FILTER (WHERE email IS NULL) AS missing_emails,\n        COUNT(email) - COUNT(DISTINCT email) AS duplicate_email_rows\n      FROM raw_contacts;\n",
+      "solution_sql": "SELECT\n    COUNT(*) AS total_rows,\n    COUNT(*) FILTER (WHERE email IS NULL) AS missing_emails,\n    COUNT(email) - COUNT(DISTINCT email) AS duplicate_email_rows\nFROM raw_contacts;\n",
       "expected_columns": [
         "total_rows",
         "missing_emails",
@@ -3828,311 +3839,267 @@
         "\\bdistinct\\b"
       ],
       "hints": [
-        "A primary key must be present on every row.",
-        "Compare the number of non-null email rows with the number of distinct emails.",
-        "The difference between those two counts is the number of extra duplicate rows."
+        "Count all imported rows first.",
+        "Count rows where `email` is missing.",
+        "Compare the number of non-null emails with the number of distinct emails to find extra duplicates."
       ],
       "allow_multi_statement": false,
       "internal_id": 30,
-      "terminal_chapter": "w06_database_design_01"
+      "terminal_chapter": "w06_eda_sql_01"
     },
     {
       "display_number": 27,
-      "title": "Find Product Values That Break Normalization",
+      "title": "Summarize Product Price Variation",
       "source": {
-        "provider": "HackerRank",
-        "challenge": "Top Competitors",
-        "url": "https://www.hackerrank.com/challenges/full-score/problem",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+        "provider": "DataCamp",
+        "challenge": "Exploratory Data Analysis in SQL — Chapter 2: Summarizing and Aggregating Numeric Data",
+        "url": "https://www.datacamp.com/courses/exploratory-data-analysis-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
       },
       "dataset_id": "northstar_design",
-      "concept": "Normalization and update anomalies",
-      "learning_objective": "Identify repeated descriptive values that disagree for the same entity.",
+      "concept": "Numeric summarization and variation",
+      "learning_objective": "Use grouped numeric summaries to compare typical values and spread across products.",
       "gate": {
-        "course": "Database Design",
+        "course": "Exploratory Data Analysis in SQL",
         "chapter": 2,
         "week": 6,
-        "weekday": "Wednesday",
-        "order_in_day": 1,
-        "chapter_key": "w06_database_design_02"
+        "weekday": "Thursday",
+        "order_in_day": 2,
+        "chapter_key": "w06_eda_sql_02"
       },
       "prerequisite_exercises": [
         26
       ],
       "estimated_minutes": 25,
-      "scenario": "A denormalized order-line import repeats product details, and the data modeler needs to find products whose stored prices disagree.",
-      "task": "Return products that have more than one distinct unit price in the raw order-line table.",
+      "scenario": "A merchandising analyst is profiling raw order-line prices before using them in a product performance report.",
+      "task": "Summarize the observed unit-price level and variation for each product.",
       "result_requirements": [
-        "Return `product_id`, `product_name`, and `distinct_prices`.",
+        "Return `product_id`, `product_name`, `average_price`, `min_price`, `max_price`, and `price_range`.",
+        "Round `average_price` to two decimals.",
+        "Calculate `price_range` as maximum price minus minimum price.",
         "Sort by `product_id`."
       ],
-      "solution_sql": "SELECT product_id,\n             MIN(product_name) AS product_name,\n             COUNT(DISTINCT unit_price) AS distinct_prices\n      FROM raw_order_lines\n      GROUP BY product_id\n      HAVING COUNT(DISTINCT unit_price) > 1\n      ORDER BY product_id;\n",
+      "solution_sql": "SELECT\n    product_id,\n    MIN(product_name) AS product_name,\n    ROUND(AVG(unit_price), 2) AS average_price,\n    MIN(unit_price) AS min_price,\n    MAX(unit_price) AS max_price,\n    MAX(unit_price) - MIN(unit_price) AS price_range\nFROM raw_order_lines\nGROUP BY product_id\nORDER BY product_id;\n",
       "expected_columns": [
         "product_id",
         "product_name",
-        "distinct_prices"
+        "average_price",
+        "min_price",
+        "max_price",
+        "price_range"
       ],
-      "expected_row_count": 1,
+      "expected_row_count": 3,
       "order_matters": true,
       "required_patterns": [
-        "\\bgroup\\s+by\\b",
-        "\\bhaving\\b",
-        "\\bcount\\s*\\(\\s*distinct"
+        "\\bavg\\s*\\(",
+        "\\bmin\\s*\\(",
+        "\\bmax\\s*\\(",
+        "\\bgroup\\s+by\\b"
       ],
       "hints": [
-        "Group all repeated rows for the same product.",
-        "Count distinct prices inside each product group.",
-        "Use `HAVING` to keep only groups with more than one price."
+        "Group the raw order lines by product.",
+        "Use `AVG`, `MIN`, and `MAX` to describe the numeric price distribution.",
+        "The range is the largest observed price minus the smallest observed price."
       ],
       "allow_multi_statement": false,
       "internal_id": 31,
-      "terminal_chapter": "w06_database_design_02"
+      "terminal_chapter": "w06_eda_sql_02"
     },
     {
       "display_number": 28,
-      "title": "Build a Safe Customer Reporting View",
+      "title": "Standardize and Count Contact Regions",
       "source": {
-        "provider": "SQL Practice",
-        "challenge": "Create a reusable reporting object from selected columns",
-        "url": "https://www.sql-practice.com/learn/table/create_table/",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+        "provider": "DataCamp",
+        "challenge": "Exploratory Data Analysis in SQL — Chapter 3: Exploring Categorical Data and Unstructured Text",
+        "url": "https://www.datacamp.com/courses/exploratory-data-analysis-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
       },
       "dataset_id": "northstar_design",
-      "concept": "Database views and column exposure",
-      "learning_objective": "Create a reusable view that exposes only approved reporting fields.",
+      "concept": "Categorical cleaning and aggregation",
+      "learning_objective": "Standardize inconsistent category labels before counting category frequency.",
       "gate": {
-        "course": "Database Design",
+        "course": "Exploratory Data Analysis in SQL",
         "chapter": 3,
         "week": 6,
-        "weekday": "Thursday",
+        "weekday": "Friday",
         "order_in_day": 1,
-        "chapter_key": "w06_database_design_03"
+        "chapter_key": "w06_eda_sql_03"
       },
       "prerequisite_exercises": [
         27
       ],
       "estimated_minutes": 25,
-      "scenario": "Analysts need customer region and lifetime value, but they must not receive email addresses or phone numbers.",
-      "task": "Create a temporary view named `safe_customer_reporting`, then return all rows from it.",
+      "scenario": "A customer-operations analyst notices that region labels differ in capitalization and surrounding whitespace.",
+      "task": "Normalize the region labels and count how many imported contacts belong to each standardized region.",
       "result_requirements": [
-        "The view must contain `customer_id`, `customer_name`, `region`, and `lifetime_value` only.",
-        "Sort the final result by `customer_id`."
+        "Return `region` and `contact_count`.",
+        "Normalize region labels by trimming surrounding whitespace and converting them to lowercase.",
+        "Sort by `region`."
       ],
-      "solution_sql": "CREATE OR REPLACE TEMP VIEW safe_customer_reporting AS\n      SELECT customer_id, customer_name, region, lifetime_value\n      FROM secure_customers;\n\n      SELECT customer_id, customer_name, region, lifetime_value\n      FROM safe_customer_reporting\n      ORDER BY customer_id;\n",
+      "solution_sql": "SELECT\n    LOWER(TRIM(region)) AS region,\n    COUNT(*) AS contact_count\nFROM raw_contacts\nGROUP BY LOWER(TRIM(region))\nORDER BY region;\n",
       "expected_columns": [
-        "customer_id",
-        "customer_name",
         "region",
-        "lifetime_value"
+        "contact_count"
       ],
-      "expected_row_count": 4,
+      "expected_row_count": 3,
       "order_matters": true,
       "required_patterns": [
-        "\\bcreate\\s+(?:or\\s+replace\\s+)?temp(?:orary)?\\s+view\\s+safe_customer_reporting\\b",
-        "\\bfrom\\s+safe_customer_reporting\\b"
+        "\\blower\\s*\\(",
+        "\\btrim\\s*\\(",
+        "\\bgroup\\s+by\\b"
       ],
       "hints": [
-        "The view definition should select only approved fields.",
-        "Use a temporary view so the exercise does not create a persistent object.",
-        "After creating the view, run a second statement that selects from it."
+        "Clean the category before grouping it.",
+        "`TRIM` handles leading and trailing spaces.",
+        "Apply the same standardized expression in the `SELECT` and `GROUP BY` clauses."
       ],
-      "allow_multi_statement": true,
+      "allow_multi_statement": false,
       "internal_id": 32,
-      "terminal_chapter": "w06_database_design_03"
+      "terminal_chapter": "w06_eda_sql_03"
     },
     {
       "display_number": 29,
-      "title": "Audit Broken Account Relationships",
+      "title": "Find Gaps in Daily Order Activity",
       "source": {
-        "provider": "PostgreSQL Exercises",
-        "challenge": "Delete based on a subquery",
-        "url": "https://pgexercises.com/questions/updates/deletewh2.html",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+        "provider": "DataCamp",
+        "challenge": "Exploratory Data Analysis in SQL — Chapter 4: Working with Dates and Timestamps",
+        "url": "https://www.datacamp.com/courses/exploratory-data-analysis-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
       },
       "dataset_id": "northstar_design",
-      "concept": "Referential integrity and database management",
-      "learning_objective": "Use an anti-join to find child rows that do not resolve to a valid parent.",
+      "concept": "Date arithmetic and time-series gaps",
+      "learning_objective": "Compare ordered dates to identify breaks in a time series.",
       "gate": {
-        "course": "Database Design",
+        "course": "Exploratory Data Analysis in SQL",
         "chapter": 4,
         "week": 6,
         "weekday": "Friday",
-        "order_in_day": 1,
-        "chapter_key": "w06_database_design_04"
+        "order_in_day": 2,
+        "chapter_key": "w06_eda_sql_04"
       },
       "prerequisite_exercises": [
         28
       ],
       "estimated_minutes": 25,
-      "scenario": "Before a foreign-key rule is enforced, the database administrator needs a list of orders that would violate it.",
-      "task": "Return orders whose account ID is missing or does not match an account.",
+      "scenario": "An operations analyst is checking whether there are unexpected gaps between days with recorded orders.",
+      "task": "Return each order that follows a gap of more than one calendar day in the order activity timeline.",
       "result_requirements": [
-        "Return `order_id`, `account_id`, and `order_total`.",
-        "Sort by `order_id`."
+        "Return `order_id`, `order_date`, `previous_order_date`, and `gap_days`.",
+        "Use the previous order date in chronological order.",
+        "Keep only rows where the gap is greater than one day.",
+        "Sort by `order_date`, then `order_id`."
       ],
-      "solution_sql": "SELECT o.order_id, o.account_id, o.order_total\n      FROM account_orders AS o\n      LEFT JOIN accounts AS a ON o.account_id = a.account_id\n      WHERE o.account_id IS NULL OR a.account_id IS NULL\n      ORDER BY o.order_id;\n",
+      "solution_sql": "WITH ordered_orders AS (\n    SELECT\n        order_id,\n        order_date,\n        LAG(order_date) OVER (ORDER BY order_date, order_id) AS previous_order_date\n    FROM account_orders\n)\nSELECT\n    order_id,\n    order_date,\n    previous_order_date,\n    order_date - previous_order_date AS gap_days\nFROM ordered_orders\nWHERE previous_order_date IS NOT NULL\n  AND order_date - previous_order_date > 1\nORDER BY order_date, order_id;\n",
       "expected_columns": [
         "order_id",
-        "account_id",
-        "order_total"
+        "order_date",
+        "previous_order_date",
+        "gap_days"
       ],
       "expected_row_count": 2,
       "order_matters": true,
       "required_patterns": [
-        "\\bleft\\s+join\\b",
-        "\\bis\\s+null\\b"
+        "\\blag\\s*\\(",
+        "\\bover\\s*\\(",
+        "\\bwhere\\b",
+        "\\border\\s+by\\b"
       ],
       "hints": [
-        "Preserve every order while attempting to match an account.",
-        "An unmatched non-null account leaves the joined account fields null.",
-        "Also include orders where the source account ID itself is null."
+        "Use `LAG` to place the previous order date beside each current order.",
+        "Subtract two dates to get the number of days between them.",
+        "Filter after the window calculation so only gaps larger than one day remain."
       ],
       "allow_multi_statement": false,
       "internal_id": 33,
-      "terminal_chapter": "w06_database_design_04"
+      "terminal_chapter": "w06_eda_sql_04"
     },
     {
       "display_number": 30,
-      "title": "Assess VFX Delivery Performance",
+      "title": "Classify Final VFX Deliveries",
       "source": {
-        "provider": "StrataScratch",
-        "challenge": "Acceptance Rate By Date",
-        "url": "https://platform.stratascratch.com/coding/10285-acceptance-rate-by-date",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+        "provider": "DataCamp",
+        "challenge": "Data-Driven Decision Making in SQL — Chapter 1: Introduction to business intelligence for a online movie rental database",
+        "url": "https://www.datacamp.com/courses/data-driven-decision-making-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
       },
       "dataset_id": "northstar_vfx",
-      "concept": "Integrated joins, conditional aggregation, and percentages",
-      "learning_objective": "Combine project and shot data into a decision-ready delivery summary.",
+      "concept": "Business filtering, date comparison, and CASE classification",
+      "learning_objective": "Turn a business delivery rule into a clear row-level classification query.",
       "gate": {
-        "course": "Database Design",
-        "chapter": 4,
-        "week": 6,
-        "weekday": "Friday",
+        "course": "Data-Driven Decision Making in SQL",
+        "chapter": 1,
+        "week": 7,
+        "weekday": "Monday",
         "order_in_day": 1,
-        "chapter_key": "w06_database_design_04"
+        "chapter_key": "w07_decision_sql_01"
       },
       "prerequisite_exercises": [
-        10,
-        14,
-        19,
-        25,
         29
       ],
       "estimated_minutes": 35,
-      "scenario": "A VFX production executive wants to know which projects are struggling to deliver completed shots on time.",
-      "task": "Summarize final-shot delivery performance for each project.",
+      "scenario": "A VFX production manager wants a shot-level review of completed deliveries before the weekly status meeting.",
+      "task": "Classify every final shot as on time or late and show its variance from estimated hours.",
       "result_requirements": [
-        "Return `project_name`, `final_shots`, `late_shots`, and `on_time_percentage`.",
-        "Count a final shot as late when `delivery_date` is after `deadline`.",
-        "Round `on_time_percentage` to two decimals.",
-        "Sort by `on_time_percentage` ascending, then `project_name`."
+        "Return `shot_id`, `project_id`, `department`, `delivery_status`, and `hours_variance`.",
+        "Use `Late` when `delivery_date` is after `deadline`; otherwise use `On Time`.",
+        "Calculate `hours_variance` as `actual_hours - estimated_hours`.",
+        "Keep only shots whose status is `Final`.",
+        "Sort by `project_id`, then `shot_id`."
       ],
-      "solution_sql": "SELECT p.project_name,\n             COUNT(*) AS final_shots,\n             COUNT(*) FILTER (WHERE s.delivery_date > s.deadline) AS late_shots,\n             ROUND(100.0 * COUNT(*) FILTER (WHERE s.delivery_date <= s.deadline) / COUNT(*), 2) AS on_time_percentage\n      FROM vfx_projects AS p\n      INNER JOIN vfx_shots AS s ON p.project_id = s.project_id\n      WHERE s.status = 'Final'\n      GROUP BY p.project_name\n      ORDER BY on_time_percentage, p.project_name;\n",
+      "solution_sql": "SELECT\n    shot_id,\n    project_id,\n    department,\n    CASE WHEN delivery_date > deadline THEN 'Late' ELSE 'On Time' END AS delivery_status,\n    actual_hours - estimated_hours AS hours_variance\nFROM vfx_shots\nWHERE status = 'Final'\nORDER BY project_id, shot_id;\n",
       "expected_columns": [
-        "project_name",
-        "final_shots",
-        "late_shots",
-        "on_time_percentage"
+        "shot_id",
+        "project_id",
+        "department",
+        "delivery_status",
+        "hours_variance"
       ],
-      "expected_row_count": 3,
+      "expected_row_count": 8,
       "order_matters": true,
       "required_patterns": [
-        "\\bjoin\\b",
-        "\\bgroup\\s+by\\b",
-        "\\bround\\s*\\("
+        "\\bcase\\b",
+        "\\bwhere\\b",
+        "delivery_date\\s*>\\s*deadline"
       ],
       "hints": [
-        "Filter to final shots before calculating project metrics.",
-        "Use conditional counts for late and on-time shots.",
-        "Multiply by `100.0` before division so the result is a percentage."
+        "Filter to final shots before interpreting the delivery rule.",
+        "A `CASE` expression can convert the date comparison into a business label.",
+        "Subtract estimated hours from actual hours for the variance."
       ],
       "allow_multi_statement": false,
       "internal_id": 8,
-      "terminal_chapter": "w06_database_design_04"
+      "terminal_chapter": "w07_decision_sql_01"
     },
     {
       "display_number": 31,
-      "title": "Find the Lowest-Revenue Restaurants",
+      "title": "Calculate Workforce Cost by Team",
       "source": {
-        "provider": "StrataScratch",
-        "challenge": "Lowest Revenue Generated Restaurants",
-        "url": "https://platform.stratascratch.com/coding-question?id=2036",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+        "provider": "DataCamp",
+        "challenge": "Data-Driven Decision Making in SQL — Chapter 2: Decision Making with simple SQL queries",
+        "url": "https://www.datacamp.com/courses/data-driven-decision-making-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
       },
-      "dataset_id": "northstar_product",
-      "concept": "Revenue aggregation and ranking",
-      "learning_objective": "Calculate revenue by entity and select the bottom-performing group.",
+      "dataset_id": "northstar_workforce",
+      "concept": "JOINs, GROUP BY, and business KPI aggregation",
+      "learning_objective": "Combine related tables and aggregate a management KPI by business group.",
       "gate": {
-        "course": "Database Design",
-        "chapter": 4,
-        "week": 6,
-        "weekday": "Friday",
+        "course": "Data-Driven Decision Making in SQL",
+        "chapter": 2,
+        "week": 7,
+        "weekday": "Tuesday",
         "order_in_day": 1,
-        "chapter_key": "w06_database_design_04"
+        "chapter_key": "w07_decision_sql_02"
       },
       "prerequisite_exercises": [
         30
       ],
       "estimated_minutes": 30,
-      "scenario": "A delivery marketplace is selecting two restaurants for a revenue-support pilot.",
-      "task": "Return the two restaurants with the lowest total platform revenue.",
-      "result_requirements": [
-        "Platform revenue equals `subtotal + service_fee`.",
-        "Return `restaurant_name` and `total_revenue`.",
-        "Round `total_revenue` to two decimals.",
-        "Sort by `total_revenue`, then `restaurant_name`."
-      ],
-      "solution_sql": "SELECT restaurant_name,\n             ROUND(SUM(subtotal + service_fee), 2) AS total_revenue\n      FROM restaurant_orders\n      GROUP BY restaurant_name\n      ORDER BY total_revenue, restaurant_name\n      LIMIT 2;\n",
-      "expected_columns": [
-        "restaurant_name",
-        "total_revenue"
-      ],
-      "expected_row_count": 2,
-      "order_matters": true,
-      "required_patterns": [
-        "\\bgroup\\s+by\\b",
-        "\\blimit\\s+2\\b"
-      ],
-      "hints": [
-        "Calculate revenue for each order before summing.",
-        "Group to one row per restaurant.",
-        "Sort smallest to largest and keep the first two rows."
-      ],
-      "allow_multi_statement": false,
-      "internal_id": 9,
-      "terminal_chapter": "w06_database_design_04"
-    },
-    {
-      "display_number": 32,
-      "title": "Calculate Workforce Cost by Team",
-      "source": {
-        "provider": "HackerRank",
-        "challenge": "Interviews",
-        "url": "https://www.hackerrank.com/challenges/interviews/problem",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
-      },
-      "dataset_id": "northstar_workforce",
-      "concept": "Multi-table assessment and conditional calculations",
-      "learning_objective": "Join workforce tables and calculate regular and overtime labor cost.",
-      "gate": {
-        "course": "Database Design",
-        "chapter": 4,
-        "week": 6,
-        "weekday": "Friday",
-        "order_in_day": 1,
-        "chapter_key": "w06_database_design_04"
-      },
-      "prerequisite_exercises": [
-        30
-      ],
-      "estimated_minutes": 35,
-      "scenario": "Finance needs a team-level labor-cost summary that applies time-and-a-half to overtime hours.",
+      "scenario": "Operations leadership needs a team-level labor-cost summary for staffing decisions.",
       "task": "Calculate total labor cost for each team.",
       "result_requirements": [
         "Regular cost is `regular_hours * hourly_rate`.",
@@ -4141,7 +4108,7 @@
         "Round hours and cost to two decimals.",
         "Sort by `total_labor_cost` descending, then `team_name`."
       ],
-      "solution_sql": "SELECT t.team_name,\n             COUNT(DISTINCT w.worker_id) AS worker_count,\n             ROUND(SUM(s.regular_hours + s.overtime_hours), 2) AS total_hours,\n             ROUND(SUM(s.regular_hours * w.hourly_rate\n                     + s.overtime_hours * w.hourly_rate * 1.5), 2) AS total_labor_cost\n      FROM teams AS t\n      INNER JOIN workers AS w ON t.team_id = w.team_id\n      INNER JOIN shifts AS s ON w.worker_id = s.worker_id\n      GROUP BY t.team_name\n      ORDER BY total_labor_cost DESC, t.team_name;\n",
+      "solution_sql": "SELECT\n    t.team_name,\n    COUNT(DISTINCT w.worker_id) AS worker_count,\n    ROUND(SUM(s.regular_hours + s.overtime_hours), 2) AS total_hours,\n    ROUND(SUM(s.regular_hours * w.hourly_rate + s.overtime_hours * w.hourly_rate * 1.5), 2) AS total_labor_cost\nFROM teams AS t\nINNER JOIN workers AS w ON t.team_id = w.team_id\nINNER JOIN shifts AS s ON w.worker_id = s.worker_id\nGROUP BY t.team_name\nORDER BY total_labor_cost DESC, t.team_name;\n",
       "expected_columns": [
         "team_name",
         "worker_count",
@@ -4151,54 +4118,55 @@
       "expected_row_count": 3,
       "order_matters": true,
       "required_patterns": [
-        "\\bjoin\\b.*\\bjoin\\b",
-        "\\bcount\\s*\\(\\s*distinct",
-        "\\bgroup\\s+by\\b"
+        "\\bjoin\\b",
+        "\\bgroup\\s+by\\b",
+        "\\bsum\\s*\\(",
+        "\\bcount\\s*\\("
       ],
       "hints": [
-        "Start from teams and connect workers, then shifts.",
-        "Count workers distinctly because each worker can have several shifts.",
-        "Calculate regular and overtime cost inside the `SUM`."
+        "Join teams to workers, then workers to shifts.",
+        "Calculate regular and overtime cost inside the `SUM`.",
+        "Count distinct workers so multiple shifts do not inflate the worker count."
       ],
       "allow_multi_statement": false,
-      "internal_id": 10,
-      "terminal_chapter": "w06_database_design_04"
+      "internal_id": 9,
+      "terminal_chapter": "w07_decision_sql_02"
     },
     {
-      "display_number": 33,
-      "title": "Complete a Relational Data-Quality Audit",
+      "display_number": 32,
+      "title": "Complete an Advanced Data-Quality Audit",
       "source": {
-        "provider": "PostgreSQL Exercises",
-        "challenge": "Combining results from multiple queries",
-        "url": "https://pgexercises.com/questions/basic/union.html",
-        "relationship": "Structure and concept blueprint",
-        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution."
+        "provider": "DataCamp",
+        "challenge": "Data-Driven Decision Making in SQL — Chapter 3: Data Driven Decision Making with advanced SQL queries",
+        "url": "https://www.datacamp.com/courses/data-driven-decision-making-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
       },
       "dataset_id": "northstar_audit",
-      "concept": "Final audit with UNION ALL",
-      "learning_objective": "Combine several integrity checks into one compact audit result.",
+      "concept": "EXISTS/NOT EXISTS and UNION ALL",
+      "learning_objective": "Combine several advanced SQL checks into one management-ready audit result.",
       "gate": {
-        "course": "Database Design",
-        "chapter": 4,
-        "week": 6,
-        "weekday": "Friday",
+        "course": "Data-Driven Decision Making in SQL",
+        "chapter": 3,
+        "week": 7,
+        "weekday": "Wednesday",
         "order_in_day": 1,
-        "chapter_key": "w06_database_design_04"
+        "chapter_key": "w07_decision_sql_03"
       },
       "prerequisite_exercises": [
-        31,
-        32
+        31
       ],
-      "estimated_minutes": 40,
-      "scenario": "A data engineer needs one audit table showing the number of key, relationship, and value problems in a raw customer-order extract.",
+      "estimated_minutes": 35,
+      "scenario": "Before leadership uses a new order feed, an analyst needs one compact audit covering identifier, relationship, and value problems.",
       "task": "Return issue counts for duplicate customer IDs, missing customer emails, orphaned orders, duplicate order IDs, and negative order amounts.",
       "result_requirements": [
         "Return `issue_type` and `issue_count`.",
-        "Use the exact issue labels `duplicate_customer_ids`, `missing_customer_emails`, `orphaned_orders`, `duplicate_order_ids`, and `negative_order_amounts`.",
-        "Include all five rows, even when a count is zero.",
+        "Use the exact labels `duplicate_customer_ids`, `missing_customer_emails`, `orphaned_orders`, `duplicate_order_ids`, and `negative_order_amounts`.",
+        "Use `NOT EXISTS` to identify orders whose non-null customer ID has no matching customer.",
+        "Include all five audit rows by combining checks with `UNION ALL`.",
         "Sort by `issue_type`."
       ],
-      "solution_sql": "SELECT 'duplicate_customer_ids' AS issue_type,\n             COUNT(*) - COUNT(DISTINCT customer_id) AS issue_count\n      FROM audit_customers\n      UNION ALL\n      SELECT 'missing_customer_emails', COUNT(*)\n      FROM audit_customers\n      WHERE email IS NULL\n      UNION ALL\n      SELECT 'orphaned_orders', COUNT(*)\n      FROM audit_orders AS o\n      LEFT JOIN audit_customers AS c ON o.customer_id = c.customer_id\n      WHERE o.customer_id IS NULL OR c.customer_id IS NULL\n      UNION ALL\n      SELECT 'duplicate_order_ids', COUNT(*) - COUNT(DISTINCT order_id)\n      FROM audit_orders\n      UNION ALL\n      SELECT 'negative_order_amounts', COUNT(*)\n      FROM audit_orders\n      WHERE amount < 0\n      ORDER BY issue_type;\n",
+      "solution_sql": "SELECT 'duplicate_customer_ids' AS issue_type, COUNT(*) - COUNT(DISTINCT customer_id) AS issue_count\nFROM audit_customers\nUNION ALL\nSELECT 'missing_customer_emails', COUNT(*) FROM audit_customers WHERE email IS NULL\nUNION ALL\nSELECT 'orphaned_orders', COUNT(*)\nFROM audit_orders AS o\nWHERE o.customer_id IS NULL\n   OR NOT EXISTS (SELECT 1 FROM audit_customers AS c WHERE c.customer_id = o.customer_id)\nUNION ALL\nSELECT 'duplicate_order_ids', COUNT(*) - COUNT(DISTINCT order_id) FROM audit_orders\nUNION ALL\nSELECT 'negative_order_amounts', COUNT(*) FROM audit_orders WHERE amount < 0\nORDER BY issue_type;\n",
       "expected_columns": [
         "issue_type",
         "issue_count"
@@ -4206,18 +4174,73 @@
       "expected_row_count": 5,
       "order_matters": true,
       "required_patterns": [
+        "\\bnot\\s+exists\\b",
         "\\bunion\\s+all\\b",
-        "\\bleft\\s+join\\b",
-        "\\border\\s+by\\b"
+        "\\bselect\\b"
       ],
       "hints": [
-        "Write each audit check as a two-column query with a fixed issue label.",
-        "Use `UNION ALL` so every audit row is preserved.",
-        "Use a left anti-join pattern for orphaned orders, then sort the combined result."
+        "Write each audit check so it returns the same two columns.",
+        "Use a correlated `NOT EXISTS` check for orphaned non-null customer IDs.",
+        "Stack the five one-row checks with `UNION ALL`."
+      ],
+      "allow_multi_statement": false,
+      "internal_id": 10,
+      "terminal_chapter": "w07_decision_sql_03"
+    },
+    {
+      "display_number": 33,
+      "title": "Summarize Restaurant Revenue with ROLLUP",
+      "source": {
+        "provider": "DataCamp",
+        "challenge": "Data-Driven Decision Making in SQL — Chapter 4: Data Driven Decision Making with OLAP SQL queries",
+        "url": "https://www.datacamp.com/courses/data-driven-decision-making-in-sql",
+        "relationship": "Curriculum alignment reference only",
+        "adaptation_note": "Career Accelerator uses original wording, scenario, schema, records, expected output, hints, and solution. The DataCamp reference identifies only the prerequisite topic."
+      },
+      "dataset_id": "northstar_product",
+      "concept": "OLAP aggregation with ROLLUP",
+      "learning_objective": "Use an OLAP extension to produce detail-level and overall business totals in one query.",
+      "gate": {
+        "course": "Data-Driven Decision Making in SQL",
+        "chapter": 4,
+        "week": 7,
+        "weekday": "Thursday",
+        "order_in_day": 1,
+        "chapter_key": "w07_decision_sql_04"
+      },
+      "prerequisite_exercises": [
+        32
+      ],
+      "estimated_minutes": 40,
+      "scenario": "A delivery-platform manager wants restaurant-level revenue plus an all-restaurants total in a single reporting query.",
+      "task": "Summarize platform revenue by restaurant and add one overall total using `ROLLUP`.",
+      "result_requirements": [
+        "Platform revenue equals `subtotal + service_fee`.",
+        "Return `restaurant_name` and `total_revenue`.",
+        "Use `ALL RESTAURANTS` as the label for the overall rollup row.",
+        "Round `total_revenue` to two decimals.",
+        "Return the restaurant rows alphabetically, followed by the overall row."
+      ],
+      "solution_sql": "SELECT\n    COALESCE(restaurant_name, 'ALL RESTAURANTS') AS restaurant_name,\n    ROUND(SUM(subtotal + service_fee), 2) AS total_revenue\nFROM restaurant_orders\nGROUP BY ROLLUP(restaurant_name)\nORDER BY GROUPING(restaurant_name), COALESCE(restaurant_name, 'ALL RESTAURANTS');\n",
+      "expected_columns": [
+        "restaurant_name",
+        "total_revenue"
+      ],
+      "expected_row_count": 6,
+      "order_matters": true,
+      "required_patterns": [
+        "\\brollup\\s*\\(",
+        "\\bsum\\s*\\(",
+        "\\bgroup\\s+by\\b"
+      ],
+      "hints": [
+        "Start with the same revenue expression you would use in a normal grouped summary.",
+        "Replace a plain restaurant grouping with `ROLLUP(restaurant_name)`.",
+        "The rollup total has a null grouping value; `COALESCE` can give it a readable label."
       ],
       "allow_multi_statement": false,
       "internal_id": 18,
-      "terminal_chapter": "w06_database_design_04"
+      "terminal_chapter": "w07_decision_sql_04"
     }
   ]
 }

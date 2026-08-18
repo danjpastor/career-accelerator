@@ -1,15 +1,15 @@
 # Test Whether Email Is a Reliable Key
 
-> **Challenge structure source:** [HackerRank — New Companies](https://www.hackerrank.com/challenges/the-company/problem)  
+> **Challenge structure source:** [DataCamp — Exploratory Data Analysis in SQL — Chapter 1: What's in the Database?](https://www.datacamp.com/courses/exploratory-data-analysis-in-sql)  
 > Career Accelerator rebuilt this exercise with original wording, scenario, schema, records, expected output, hints, and solution.
 
 ## Scenario
 
-A contact-import design proposes using email as the primary key, but the data architect wants evidence before approving it.
+A contact-import analyst wants to know whether email is safe to use when grouping or joining records.
 
 ## Your task
 
-Summarize the problems that prevent `email` from being a reliable primary key.
+Profile `email` and summarize the missing and duplicate-value risks that could distort analysis.
 
 ## Result requirements
 
@@ -18,6 +18,6 @@ Summarize the problems that prevent `email` from being a reliable primary key.
 
 ## Skill focus
 
-**Table grain and candidate keys**
+**Table grain, missing values, and duplicate checks**
 
-Use duplicate and missing-value checks to evaluate a proposed business key.
+Profile a raw identifier for missing and duplicate values before using it in analysis.

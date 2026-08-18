@@ -1,0 +1,130 @@
+{
+  "name": "vfx_shots",
+  "columns": [
+    {
+      "name": "shot_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "project_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "department",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "status",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "deadline",
+      "type": "DATE"
+    },
+    {
+      "name": "delivery_date",
+      "type": "DATE"
+    },
+    {
+      "name": "estimated_hours",
+      "type": "DECIMAL(8,2)"
+    },
+    {
+      "name": "actual_hours",
+      "type": "DECIMAL(8,2)"
+    }
+  ],
+  "rows": [
+    [
+      101,
+      1,
+      "Compositing",
+      "Final",
+      "2026-06-10",
+      "2026-06-09",
+      40,
+      38
+    ],
+    [
+      102,
+      1,
+      "Compositing",
+      "Final",
+      "2026-06-12",
+      "2026-06-15",
+      32,
+      45
+    ],
+    [
+      103,
+      1,
+      "FX",
+      "Final",
+      "2026-06-14",
+      "2026-06-14",
+      55,
+      60
+    ],
+    [
+      104,
+      2,
+      "Compositing",
+      "In Progress",
+      "2026-07-01",
+      null,
+      28,
+      20
+    ],
+    [
+      105,
+      2,
+      "Lighting",
+      "Final",
+      "2026-06-20",
+      "2026-06-23",
+      70,
+      82
+    ],
+    [
+      106,
+      2,
+      "Compositing",
+      "Final",
+      "2026-06-21",
+      "2026-06-21",
+      36,
+      34
+    ],
+    [
+      107,
+      3,
+      "FX",
+      "Final",
+      "2026-06-25",
+      "2026-06-28",
+      48,
+      58
+    ],
+    [
+      108,
+      3,
+      "Lighting",
+      "Final",
+      "2026-06-26",
+      "2026-06-25",
+      62,
+      59
+    ],
+    [
+      109,
+      3,
+      "Compositing",
+      "Final",
+      "2026-06-28",
+      "2026-07-02",
+      44,
+      56
+    ]
+  ],
+  "grain": "one row per VFX shot"
+}

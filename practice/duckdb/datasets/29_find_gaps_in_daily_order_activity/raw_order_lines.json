@@ -1,0 +1,90 @@
+{
+  "name": "raw_order_lines",
+  "columns": [
+    {
+      "name": "order_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "customer_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "customer_email",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "product_id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "product_name",
+      "type": "VARCHAR"
+    },
+    {
+      "name": "unit_price",
+      "type": "DECIMAL(10,2)"
+    },
+    {
+      "name": "quantity",
+      "type": "INTEGER"
+    }
+  ],
+  "rows": [
+    [
+      1,
+      "Ana Ruiz",
+      "ana@example.com",
+      10,
+      "Desk Lamp",
+      45.0,
+      1
+    ],
+    [
+      1,
+      "Ana Ruiz",
+      "ana@example.com",
+      11,
+      "Keyboard",
+      80.0,
+      1
+    ],
+    [
+      2,
+      "Ben Cole",
+      "ben@example.com",
+      10,
+      "Desk Lamp",
+      45.0,
+      2
+    ],
+    [
+      3,
+      "Cara Fox",
+      "cara@example.com",
+      11,
+      "Keyboard",
+      80.0,
+      1
+    ],
+    [
+      4,
+      "Dev Shah",
+      "dev@example.com",
+      10,
+      "Desk Lamp",
+      49.0,
+      1
+    ],
+    [
+      5,
+      "Ana Ruiz",
+      "ana@example.com",
+      12,
+      "Webcam",
+      110.0,
+      1
+    ]
+  ],
+  "grain": "one row per order product line in a denormalized import"
+}

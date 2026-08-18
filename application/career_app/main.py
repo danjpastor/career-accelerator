@@ -100,10 +100,16 @@ from career_app.ui.first_run import FirstRunCoordinator
 from career_app.ui.notifications import OverlayNotifier
 from career_app.ui.weekly_quiz import WeeklyKnowledgeCheckDialog
 from career_app.services import completion_contract
+from career_app.services import datacamp_track_alignment
 from career_app.ui.startup_splash import StartupSplash
 ROOT = Path(__file__).resolve().parents[2]
 ASSET_ROOT = Path(__file__).resolve().parents[1] / "assets"
 DASHBOARD_NEXT_TASK_LIMIT = 4
+
+# BEGIN v10.46.24 DATACAMP TRACK REALIGNMENT
+datacamp_track_alignment.install(datacamp)
+# END v10.46.24 DATACAMP TRACK REALIGNMENT
+
 
 
 
