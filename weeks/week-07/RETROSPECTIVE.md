@@ -1,35 +1,40 @@
-# Week 7 Retrospective — Power BI and Power Query
+# Week 7 Retrospective
 
-## Progress snapshot
-- Hours studied:
-- Google Certificate progress:
-- DataCamp progress:
-- Power BI and SQL-retention work completed:
-- Portfolio preparation or execution completed:
-- Weekly readiness result:
+Completed inside Career Accelerator's Retrospective task.
 
-## Biggest win
-What moved forward, and why did it matter?
+## Automatic progress snapshot
 
-## Friction or blocker
-What slowed progress? Identify the underlying concept, workflow, or scheduling problem.
+2026-08-24 through 2026-08-30 • 1.78 study hours • 15/20 sprint tasks • 0 SQL problems • 5/42 portfolio milestones completed overall
 
-## Mastery evidence
-What can you now do independently that you could not do at the start of the week?
-- 
+## Learning Progress This Week
 
-## Remaining gaps
-List only gaps that require catch-up or targeted remediation.
-- 
+- DataCamp • Data-Driven Decision Making in SQL — Chapter 1: Introduction to business intelligence for a online movie rental database
+- DataCamp • Data-Driven Decision Making in SQL — Chapter 2: Decision Making with simple SQL queries
+- DataCamp • Data-Driven Decision Making in SQL — Chapter 3: Data Driven Decision Making with advanced SQL queries
+- DataCamp • Data-Driven Decision Making in SQL — Chapter 4: Data Driven Decision Making with OLAP SQL queries
+- DataCamp • Understanding Data Visualization — Chapter 1: Visualizing distributions
+- DataCamp • Understanding Data Visualization — Chapter 2: Visualizing two variables
+- DataCamp • Understanding Data Visualization — Chapter 3: The color and the shape
+- DataCamp • Understanding Data Visualization — Chapter 4: 99 problems but a plot ain't one of them
+- DataCamp • Data Communication Concepts — Chapter 1: Storytelling with Data
+- DataCamp • Data Communication Concepts — Chapter 2: Preparing to Communicate the Data
+- DataCamp • Data Communication Concepts — Chapter 3: Structuring Written Reports
+- DataCamp • Data Communication Concepts — Chapter 4: Building Compelling Oral Presentations
+- Complete SQL Challenge 30: Classify Final VFX Deliveries
+- Complete the Week 7 Retrospective
 
-## Evidence created
-Link substantial work that could support an assessment, portfolio review, or interview.
-- 
+## Evidence Created This Week
 
-## Next-sprint adjustments
-- [ ] Adjustment 1:
-- [ ] Adjustment 2:
+_No new evidence was recorded._
 
-## Confidence
-- Score from 1–10:
-- Reason:
+## Biggest Win
+
+Caught Up on Data Camp
+
+## Friction or Blocker
+
+Boring
+
+## What I Learned
+
+Not much

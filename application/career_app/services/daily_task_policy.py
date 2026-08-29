@@ -423,6 +423,48 @@ def _install_project_check_gate() -> None:
     datacamp_projects.project_readiness = project_readiness
 
 
+# BEGIN v10.46.35 TODAY FOCUS DEPENDENCY RESCUE
+def _today_focus_with_dependency_rescue(
+    today_items: list[dict[str, Any]],
+    catch_up_items: list[dict[str, Any]],
+    current_week: int,
+) -> list[dict[str, Any]]:
+    # Normal behavior remains day-first. The only exception is a deadlock:
+    # current-day work exists, every current-day row is blocked, and an earlier
+    # prerequisite is genuinely ready. Surface one ready catch-up prerequisite
+    # above the locked current-day rows so the learner can unlock today's work.
+    ordered_today = sorted(
+        _dedupe(list(today_items)),
+        key=lambda item: _display_sort(item, int(current_week)),
+    )
+    ordered_catch_up = sorted(
+        _dedupe(list(catch_up_items)),
+        key=lambda item: _display_sort(item, int(current_week)),
+    )
+
+    if not ordered_today:
+        return ordered_catch_up
+
+    if any(bool(item.get("ready")) for item in ordered_today):
+        return ordered_today
+
+    ready_catch_up = [
+        item
+        for item in ordered_catch_up
+        if bool(item.get("ready")) and not bool(item.get("completed"))
+    ]
+    if not ready_catch_up:
+        return ordered_today
+
+    rescue = dict(ready_catch_up[0])
+    rescue["dependency_rescue"] = True
+    rescue["queue_section"] = "catch_up"
+    rescue["focus_kind"] = "catch_up"
+    rescue["is_catch_up"] = True
+    return _dedupe([rescue, *ordered_today])
+# END v10.46.35 TODAY FOCUS DEPENDENCY RESCUE
+
+
 def _install_planner_policy() -> None:
     from career_app.services import unified_tasks
 
@@ -443,14 +485,14 @@ def _install_planner_policy() -> None:
                 *_promoted_assignments(conn, int(current_week)),
             ]
         )
-        if today_items:
-            return sorted(
-                today_items,
-                key=lambda item: _display_sort(item, int(current_week)),
-            )
-        return sorted(
-            _catch_up_assignments(conn, int(current_week)),
-            key=lambda item: _display_sort(item, int(current_week)),
+        catch_up_items = _catch_up_assignments(
+            conn,
+            int(current_week),
+        )
+        return _today_focus_with_dependency_rescue(
+            today_items,
+            catch_up_items,
+            int(current_week),
         )
 
     def next_tasks(

@@ -1,35 +1,41 @@
-# Week 6 Retrospective — Advanced SQL and Mastery
+# Week 6 Retrospective
 
-## Progress snapshot
-- Hours studied:
-- Google Certificate progress:
-- DataCamp progress:
-- SQL, DuckDB, and interview practice completed:
-- Portfolio preparation or execution completed:
-- Weekly readiness result:
+Completed inside Career Accelerator's Retrospective task.
 
-## Biggest win
-What moved forward, and why did it matter?
+## Automatic progress snapshot
 
-## Friction or blocker
-What slowed progress? Identify the underlying concept, workflow, or scheduling problem.
+2026-08-17 through 2026-08-23 • 0.55 study hours • 16/18 sprint tasks • 0 SQL problems • 5/42 portfolio milestones completed overall
 
-## Mastery evidence
-What can you now do independently that you could not do at the start of the week?
-- 
+## Learning Progress This Week
 
-## Remaining gaps
-List only gaps that require catch-up or targeted remediation.
-- 
+- Functions for Manipulating Data in PostgreSQL — Chapter 4: Full-Text Search and PostgresSQL Extensions
+- DataCamp • Introduction to Statistics — Chapter 1: Summary Statistics
+- DataCamp • Introduction to Statistics — Chapter 2: Probability and distributions
+- DataCamp • Introduction to Statistics — Chapter 3: More Distributions and the Central Limit Theorem
+- DataCamp • Introduction to Statistics — Chapter 4: Correlation and Hypothesis Testing
+- DataCamp • Exploratory Data Analysis in SQL — Chapter 1: What's in the Database?
+- DataCamp • Exploratory Data Analysis in SQL — Chapter 2: Summarizing and Aggregating Numeric Data
+- DataCamp • Exploratory Data Analysis in SQL — Chapter 3: Exploring Categorical Data and Unstructured Text
+- DataCamp • Exploratory Data Analysis in SQL — Chapter 4: Working with Dates and Timestamps
+- Complete SQL Challenge 25: Search Support Subjects Without Case Sensitivity
+- Complete SQL Challenge 26: Test Whether Email Is a Reliable Key
+- Complete SQL Challenge 27: Summarize Product Price Variation
+- Complete SQL Challenge 28: Standardize and Count Contact Regions
+- Complete SQL Challenge 29: Find Gaps in Daily Order Activity
+- Complete the Week 6 Retrospective
 
-## Evidence created
-Link substantial work that could support an assessment, portfolio review, or interview.
-- 
+## Evidence Created This Week
 
-## Next-sprint adjustments
-- [ ] Adjustment 1:
-- [ ] Adjustment 2:
+_No new evidence was recorded._
 
-## Confidence
-- Score from 1–10:
-- Reason:
+## Biggest Win
+
+I finished the DataCamp Chapter
+
+## Friction or Blocker
+
+I got behind because i started a new contract job
+
+## What I Learned
+
+Learned some tools for exploring data

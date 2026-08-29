@@ -1,4 +1,4 @@
-"""v10.46.24 current DataCamp-track compatibility layer.
+"""v10.46.30 current DataCamp-track and task-metadata compatibility layer.
 
 The legacy Career Accelerator reconciler can still materialize a retired Week 6
 Database Design block followed immediately by Power BI (Week 7) and Python
@@ -16,11 +16,12 @@ is archived, never transferred to unrelated replacement coursework.
 from __future__ import annotations
 
 import json
+import re
 import traceback
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-PATCH_MARKER = "v10.46.25-datacamp-track-realignment"
+PATCH_MARKER = "v10.46.35-datacamp-completion-and-focus-fix"
 
 
 def _alignment_error_log() -> Path:
@@ -88,6 +89,54 @@ TARGETS = (
 )
 TARGET_BY_KEY = {item["key"]: item for item in TARGETS}
 TARGET_KEYS = tuple(TARGET_BY_KEY)
+
+# Complete learner-facing metadata for every chapter introduced by the current
+# DataCamp-track realignment.  Keep this separate from scheduling so a valid
+# chapter can never display an "unavailable metadata" fallback simply because
+# it is not present in the retired static chapter catalog.
+LEARNING_FOCUS = {
+    "w06_intro_stats_01": "Summarize numerical data with measures of center, spread, and distribution shape.",
+    "w06_intro_stats_02": "Reason about probability, sampling, and common probability distributions.",
+    "w06_intro_stats_03": "Connect sampling distributions and the central limit theorem to statistical inference.",
+    "w06_intro_stats_04": "Interpret correlation and hypothesis tests without confusing association with causation.",
+    "w06_eda_sql_01": "Inspect schemas, table structure, row counts, and data quality before analysis.",
+    "w06_eda_sql_02": "Use summary statistics and grouped aggregates to explore numeric variables.",
+    "w06_eda_sql_03": "Profile categorical values and unstructured text for patterns and data-quality issues.",
+    "w06_eda_sql_04": "Explore dates and timestamps with SQL date/time functions and time-based summaries.",
+    "w07_decision_sql_01": "Frame business questions and explore the movie-rental data with decision-focused SQL.",
+    "w07_decision_sql_02": "Use filtering, aggregation, joins, and subqueries to answer business questions.",
+    "w07_decision_sql_03": "Use advanced SQL patterns to compare groups and support data-driven decisions.",
+    "w07_decision_sql_04": "Use OLAP-style aggregation to analyze data across multiple dimensions.",
+    "w07_data_viz_01": "Choose charts that reveal distributions, variation, and unusual values.",
+    "w07_data_viz_02": "Choose visual encodings that clearly show relationships between two variables.",
+    "w07_data_viz_03": "Use color, shape, and other encodings intentionally without distorting the message.",
+    "w07_data_viz_04": "Diagnose misleading or ineffective charts and choose a clearer visualization.",
+    "w07_data_communication_01": "Build a data story around evidence, audience needs, and a clear takeaway.",
+    "w07_data_communication_02": "Prepare communication around audience, purpose, evidence, and level of detail.",
+    "w07_data_communication_03": "Structure written reports so findings, evidence, and recommendations are easy to follow.",
+    "w07_data_communication_04": "Build oral presentations that lead with the decision and support it with evidence.",
+}
+
+# These are durable skill-evidence mappings, not day locks.  They use only
+# Career Accelerator's existing skill keys and intentionally preserve the
+# conservative Chapter-4 gates for visualization/storytelling.
+SKILL_EVIDENCE_BY_TARGET = {
+    "w06_intro_stats_01": {"statistics_foundations", "descriptive_statistics"},
+    "w06_intro_stats_02": {"statistics_foundations"},
+    "w06_intro_stats_03": {"statistics_foundations", "inferential_statistics"},
+    "w06_intro_stats_04": {"inferential_statistics", "hypothesis_testing"},
+    "w06_eda_sql_01": {"sql_validation"},
+    "w06_eda_sql_02": {"sql_aggregation"},
+    "w06_eda_sql_03": {"data_cleaning", "sql_validation"},
+    "w06_eda_sql_04": {"sql_date_logic", "sql_validation"},
+    "w07_decision_sql_01": {"sql_querying", "sql_aggregation", "sql_date_logic"},
+    "w07_decision_sql_02": {"sql_aggregation", "sql_joins", "sql_subqueries"},
+    "w07_decision_sql_03": {"sql_subqueries", "sql_intermediate"},
+    "w07_decision_sql_04": {"sql_aggregation", "sql_intermediate"},
+    "w07_data_viz_04": {"visualization_foundations"},
+    "w07_data_communication_04": {"data_storytelling"},
+}
+
 STALE_KEYS = tuple(f"w06_database_design_{number:02d}" for number in range(1, 5))
 
 PRIMARY_REPLACEMENTS = {
@@ -157,13 +206,32 @@ def _insert_clone(conn, table, template, overrides):
 
 def _progress_overrides(target, columns):
     result = {}
+    focus = LEARNING_FOCUS[target["key"]]
     aliases = {
-        "chapter_key": target["key"], "course_name": target["course"],
-        "course": target["course"], "chapter_number": target["chapter"],
-        "chapter": target["chapter"], "chapter_name": target["name"],
-        "title": target["name"], "week": target["week"],
-        "scheduled_week": target["week"], "url": target["url"],
-        "course_url": target["url"], "chapter_url": target["url"],
+        "chapter_key": target["key"],
+        "provider": "DataCamp",
+        "source": "DataCamp",
+        "source_label": f"DataCamp • {target['course']}",
+        "course_name": target["course"],
+        "course": target["course"],
+        "chapter_number": target["chapter"],
+        "chapter": target["chapter"],
+        "chapter_count": 4,
+        "chapter_name": target["name"],
+        "title": target["name"],
+        "description": focus,
+        "learning_focus": focus,
+        "estimated_minutes": target["minutes"],
+        "minutes": target["minutes"],
+        "week": target["week"],
+        "scheduled_week": target["week"],
+        "weekday": target["weekday"],
+        "scheduled_day": target["weekday"],
+        "day_index": target["day_index"],
+        "url": target["url"],
+        "starter_path": target["url"],
+        "course_url": target["url"],
+        "chapter_url": target["url"],
     }
     for key, value in aliases.items():
         if key in columns:
@@ -281,6 +349,311 @@ def _label(target):
     return f"DataCamp • {target['course']} — Chapter {target['chapter']}: {target['name']}"
 
 
+def _item_value(item, key, default=None):
+    if item is None:
+        return default
+    if isinstance(item, dict):
+        return item.get(key, default)
+    try:
+        return item[key]
+    except (KeyError, IndexError, TypeError):
+        return default
+
+
+def _target_from_managed(value):
+    raw = str(value or "").strip()
+    if raw.startswith("datacamp:"):
+        raw = raw.split(":", 1)[1]
+    return TARGET_BY_KEY.get(raw)
+
+
+def _target_from_label(value):
+    """Resolve a current chapter from course name + chapter number."""
+    text = " ".join(
+        str(value or "")
+        .replace("\u2014", " - ")
+        .replace("\u2013", " - ")
+        .replace("\u2022", " ")
+        .split()
+    )
+    if not text:
+        return None
+    folded = text.casefold()
+    for candidate in TARGETS:
+        if candidate["course"].casefold() not in folded:
+            continue
+        if re.search(
+            rf"\bchapter\s*{int(candidate['chapter'])}\b",
+            folded,
+            flags=re.IGNORECASE,
+        ):
+            return candidate
+    return None
+
+
+def target_for_task(conn, task_id):
+    """Resolve a current DataCamp chapter without depending on one DB key."""
+    if conn is None:
+        return None
+    try:
+        row = conn.execute(
+            """SELECT m.managed_key,s.label
+               FROM sprint_tasks s
+               LEFT JOIN task_metadata m ON m.task_id=s.id
+               WHERE s.id=?""",
+            (int(task_id),),
+        ).fetchone()
+    except Exception:
+        return None
+    if row is None:
+        return None
+    target = _target_from_managed(_item_value(row, "managed_key", ""))
+    if target is not None:
+        return target
+    return _target_from_label(_item_value(row, "label", ""))
+
+
+def target_for_item(conn, item):
+    """Resolve a current chapter from all final planner task shapes."""
+    for key in ("managed_key", "target_key", "chapter_key", "source_key"):
+        target = _target_from_managed(_item_value(item, key))
+        if target is not None:
+            return target
+
+    nested = _item_value(item, "metadata")
+    if isinstance(nested, dict):
+        for key in ("managed_key", "target_key", "chapter_key", "source_key"):
+            target = _target_from_managed(nested.get(key))
+            if target is not None:
+                return target
+
+    task_id = _item_value(item, "task_id", _item_value(item, "id"))
+    if conn is not None and task_id is not None:
+        target = target_for_task(conn, task_id)
+        if target is not None:
+            return target
+
+    for key in ("label", "display_title", "title"):
+        target = _target_from_label(_item_value(item, key, ""))
+        if target is not None:
+            return target
+    return None
+
+
+def metadata_for_target(target):
+    """Return the complete normalized metadata contract for one current chapter."""
+    focus = LEARNING_FOCUS[target["key"]]
+    skills = sorted(SKILL_EVIDENCE_BY_TARGET.get(target["key"], set()))
+    return {
+        "provider": "DataCamp",
+        "source": "DataCamp",
+        "source_label": f"DataCamp • {target['course']}",
+        "chapter_key": target["key"],
+        "course": target["course"],
+        "course_name": target["course"],
+        "chapter": int(target["chapter"]),
+        "chapter_number": int(target["chapter"]),
+        "chapter_count": 4,
+        "chapter_name": target["name"],
+        "title": target["name"],
+        "learning_focus": focus,
+        "description": focus,
+        "week": int(target["week"]),
+        "scheduled_week": int(target["week"]),
+        "weekday": target["weekday"],
+        "scheduled_day": target["weekday"],
+        "day_index": int(target["day_index"]),
+        "estimated_minutes": int(target["minutes"]),
+        "minutes": int(target["minutes"]),
+        "url": target["url"],
+        "course_url": target["url"],
+        "chapter_url": target["url"],
+        "starter_path": target["url"],
+        "skills": skills,
+    }
+
+
+def metadata_for_task(conn, task_id):
+    target = target_for_task(conn, task_id)
+    return metadata_for_target(target) if target is not None else None
+
+
+def detail_for_target(target):
+    """Compact second-line text shared by Focus, Next Tasks, and sprint views."""
+    return f"Chapter {target['chapter']} of 4 • {LEARNING_FOCUS[target['key']]}"
+
+
+def _enrich_item(conn, item):
+    """Replace stale/missing DataCamp presentation metadata in a planner item."""
+    if not isinstance(item, dict):
+        try:
+            item = {key: item[key] for key in item.keys()}
+        except Exception:
+            return item
+
+    enriched = dict(item)
+    target = target_for_item(conn, enriched)
+    if target is None:
+        return enriched
+
+    meta = metadata_for_target(target)
+    enriched["display_source"] = detail_for_target(target)
+    enriched["source_label"] = meta["source_label"]
+    enriched["detail"] = detail_for_target(target)
+    enriched["provider"] = "DataCamp"
+    enriched["chapter_key"] = target["key"]
+    enriched["course"] = target["course"]
+    enriched["course_name"] = target["course"]
+    enriched["chapter"] = int(target["chapter"])
+    enriched["chapter_number"] = int(target["chapter"])
+    enriched["chapter_count"] = 4
+    enriched["chapter_name"] = target["name"]
+    enriched["learning_focus"] = meta["learning_focus"]
+    enriched["chapter_url"] = target["url"]
+    enriched["course_url"] = target["url"]
+    enriched["starter_path"] = target["url"]
+    enriched["estimated_minutes"] = int(enriched.get("estimated_minutes") or target["minutes"])
+    enriched.setdefault("metadata_label", "DataCamp")
+    return enriched
+
+
+def _enrich_result(conn, result):
+    if isinstance(result, list):
+        return [_enrich_result(conn, value) for value in result]
+    if isinstance(result, tuple):
+        return tuple(_enrich_result(conn, value) for value in result)
+    if isinstance(result, dict):
+        value = _enrich_item(conn, result)
+        for key in ("tasks", "items", "ready", "upcoming", "coming_up"):
+            if key in value and isinstance(value[key], (list, tuple, dict)):
+                value[key] = _enrich_result(conn, value[key])
+        return value
+    return result
+
+
+def _wrap_result_function(module, name):
+    original = getattr(module, name, None)
+    if not callable(original) or getattr(original, "_v104630_datacamp_metadata", False):
+        return
+
+    def wrapped(*args, **kwargs):
+        result = original(*args, **kwargs)
+        conn = kwargs.get("conn")
+        if conn is None and args and hasattr(args[0], "execute"):
+            conn = args[0]
+        return _enrich_result(conn, result) if conn is not None else result
+
+    wrapped._v104630_datacamp_metadata = True
+    wrapped.__name__ = getattr(original, "__name__", name)
+    wrapped.__doc__ = getattr(original, "__doc__", None)
+    setattr(module, name, wrapped)
+
+
+def _install_metadata_bridges():
+    """Bridge current-track metadata across every active planner presentation path."""
+    from career_app.services import completion_contract, tracks
+
+    # Complete the skill-evidence catalog without rewriting the newer tracks.py
+    # that may contain unrelated fixes made after the original realignment.
+    evidence = getattr(tracks, "DATACAMP_SKILL_EVIDENCE", None)
+    if isinstance(evidence, dict):
+        for key, skills in SKILL_EVIDENCE_BY_TARGET.items():
+            evidence.setdefault(key, set()).update(skills)
+
+    original_focus_detail = getattr(completion_contract, "focus_detail", None)
+    if callable(original_focus_detail) and not getattr(
+        original_focus_detail, "_v104630_datacamp_metadata", False
+    ):
+        def focus_detail(conn, item, detail, state, *args, **kwargs):
+            target = target_for_item(conn, item)
+            if target is not None:
+                return detail_for_target(target)
+            return original_focus_detail(conn, item, detail, state, *args, **kwargs)
+
+        focus_detail._v104630_datacamp_metadata = True
+        completion_contract.focus_detail = focus_detail
+
+    original_presentation = getattr(tracks, "focus_presentation", None)
+    if callable(original_presentation) and not getattr(
+        original_presentation, "_v104630_datacamp_metadata", False
+    ):
+        def focus_presentation(conn, item, *args, **kwargs):
+            target = target_for_item(conn, item)
+            if target is not None:
+                return {
+                    "style_category": "Learning",
+                    "title": str(_item_value(item, "label", "") or _label(target)),
+                    "detail": detail_for_target(target),
+                }
+            return original_presentation(conn, item, *args, **kwargs)
+
+        focus_presentation._v104630_datacamp_metadata = True
+        tracks.focus_presentation = focus_presentation
+
+    original_source = getattr(tracks, "source_for_task", None)
+    if callable(original_source) and not getattr(
+        original_source, "_v104630_datacamp_metadata", False
+    ):
+        def source_for_task(conn, task_id, *args, **kwargs):
+            target = target_for_task(conn, task_id)
+            if target is not None:
+                return detail_for_target(target)
+            return original_source(conn, task_id, *args, **kwargs)
+
+        source_for_task._v104630_datacamp_metadata = True
+        tracks.source_for_task = source_for_task
+
+    # Current/future day rows pass through sprint_day_planner before the final
+    # daily policy is installed. Enrich them here so Next Tasks' explicit
+    # display_source can never retain an old "metadata unavailable" string.
+    try:
+        from career_app.services import sprint_day_planner
+        for name in ("current_sprint_day_groups", "promoted_tasks"):
+            _wrap_result_function(sprint_day_planner, name)
+    except Exception:
+        pass
+
+    # Cross-week catch-up and several secondary surfaces read unified_tasks
+    # directly. These wrappers remain safe even when daily_task_policy later
+    # replaces its daily_plan/next_tasks functions.
+    try:
+        from career_app.services import unified_tasks
+        for name in ("all_tasks", "ready_tasks", "daily_plan", "next_tasks", "coming_up"):
+            _wrap_result_function(unified_tasks, name)
+    except Exception:
+        pass
+
+    # daily_task_policy is installed later in main.py. Wrapping its normalization
+    # helper now makes every subsequently-created Today/Next/Coming Soon item
+    # receive the same metadata, regardless of which queue built it.
+    try:
+        from career_app.services import daily_task_policy
+        original_normalize = getattr(daily_task_policy, "_normalize_scheduled_task", None)
+        if callable(original_normalize) and not getattr(
+            original_normalize, "_v104630_datacamp_metadata", False
+        ):
+            def normalize_scheduled_task(task, *args, **kwargs):
+                item = original_normalize(task, *args, **kwargs)
+                return _enrich_item(None, item)
+
+            normalize_scheduled_task._v104630_datacamp_metadata = True
+            daily_task_policy._normalize_scheduled_task = normalize_scheduled_task
+    except Exception:
+        pass
+
+
+def install_final_metadata_bridges():
+    """Reapply adapters after every later runtime planner policy installs."""
+    _install_metadata_bridges()
+    try:
+        from career_app.services import daily_task_policy
+        cache = getattr(daily_task_policy, "_GROUP_CACHE", None)
+        if isinstance(cache, dict):
+            cache.clear()
+    except Exception:
+        pass
+
+
 def _target_sort(target):
     return 9462400 + list(TARGET_BY_KEY).index(target["key"])
 
@@ -314,15 +687,41 @@ def _update_task(conn, task_id, target, *, preserve_completion=False):
         (int(target["week"]), _label(target), _target_sort(target), int(completed or 0), int(task_id)),
     )
     cols = set(_columns(conn, "task_metadata"))
+    meta = metadata_for_target(target)
     assignments = {"managed_key": f"datacamp:{target['key']}"}
     if "status" in cols and not preserve_completion:
         assignments["status"] = "Not Started"
-    if "estimated_minutes" in cols: assignments["estimated_minutes"] = int(target["minutes"])
-    if "category" in cols: assignments["category"] = "Learning"
-    if "priority" in cols: assignments["priority"] = 1
-    if "description" in cols: assignments["description"] = f"Complete {target['course']}, Chapter {target['chapter']}: {target['name']}."
-    if "definition_of_done" in cols: assignments["definition_of_done"] = "Mark the matching DataCamp chapter complete after finishing it."
-    if "deferred_until" in cols: assignments["deferred_until"] = _target_date(conn, target["week"], target["day_index"])
+
+    optional = {
+        "estimated_minutes": int(target["minutes"]),
+        "category": "Learning",
+        "priority": 1,
+        "description": meta["learning_focus"],
+        "definition_of_done": (
+            f"Finish DataCamp {target['course']}, Chapter {target['chapter']} "
+            f"({target['name']}), including its required exercises, then mark this task complete."
+        ),
+        "starter_path": target["url"],
+        "source_label": meta["source_label"],
+        "display_source": detail_for_target(target),
+        "provider": "DataCamp",
+        "course_name": target["course"],
+        "chapter_number": int(target["chapter"]),
+        "chapter_count": 4,
+        "chapter_name": target["name"],
+        "learning_focus": meta["learning_focus"],
+        "url": target["url"],
+        "course_url": target["url"],
+        "chapter_url": target["url"],
+    }
+    for key, value in optional.items():
+        if key in cols:
+            assignments[key] = value
+
+    if "deferred_until" in cols:
+        assignments["deferred_until"] = _target_date(
+            conn, target["week"], target["day_index"]
+        )
     sql = "UPDATE task_metadata SET " + ",".join(f"{key}=?" for key in assignments) + " WHERE task_id=?"
     conn.execute(sql, tuple(assignments.values()) + (int(task_id),))
 
@@ -419,6 +818,10 @@ def _ensure_tasks(conn):
     ).fetchall()
     for row in rows:
         _remove_task(conn, int(row[0]))
+
+    # v10.46.33: restore the complete current continuation from any surviving
+    # canonical DataCamp task. This removes the old Database Design dependency.
+    _ensure_all_current_tasks(conn)
 
 
 def _schedule_row(conn, task_id, week, day_index):
@@ -534,6 +937,158 @@ def _schedule_targets(conn):
             _schedule_row(conn, int(row[0]), target["week"], target["day_index"])
 
 
+
+def _snapshot_rows(conn, table, column, values):
+    """Capture exact rows for a small set of current-track identities."""
+    if table not in _tables(conn):
+        return []
+    cols = set(_columns(conn, table))
+    if column not in cols or not values:
+        return []
+    placeholders = ",".join("?" for _ in values)
+    rows = conn.execute(
+        f"SELECT * FROM {table} WHERE {column} IN ({placeholders})",
+        tuple(values),
+    ).fetchall()
+    return [_row_dict(row) for row in rows]
+
+
+def _row_identity(conn, table, row):
+    """Return stable identity columns for one captured SQLite row."""
+    info = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    primary = [str(item[1]) for item in info if int(item[5] or 0) > 0]
+    if primary and all(name in row for name in primary):
+        return primary
+    for candidate in (
+        ("task_id",),
+        ("chapter_key",),
+        ("id",),
+        ("focus_date", "task_id"),
+        ("promotion_date", "task_id"),
+    ):
+        if all(name in row and name in _columns(conn, table) for name in candidate):
+            return list(candidate)
+    return []
+
+
+def _restore_snapshot_rows(conn, table, rows):
+    """Update or insert captured rows without replacing unrelated records."""
+    if table not in _tables(conn) or not rows:
+        return
+    columns = set(_columns(conn, table))
+    for raw in rows:
+        row = {key: value for key, value in raw.items() if key in columns}
+        if not row:
+            continue
+        identity = _row_identity(conn, table, row)
+        exists = None
+        if identity:
+            where = " AND ".join(f"{name}=?" for name in identity)
+            exists = conn.execute(
+                f"SELECT 1 FROM {table} WHERE {where} LIMIT 1",
+                tuple(row[name] for name in identity),
+            ).fetchone()
+        if exists is not None:
+            update_cols = [name for name in row if name not in identity]
+            if update_cols:
+                conn.execute(
+                    f"UPDATE {table} SET "
+                    + ",".join(f"{name}=?" for name in update_cols)
+                    + " WHERE "
+                    + " AND ".join(f"{name}=?" for name in identity),
+                    tuple(row[name] for name in update_cols)
+                    + tuple(row[name] for name in identity),
+                )
+            continue
+        use = list(row)
+        conn.execute(
+            f"INSERT OR REPLACE INTO {table} ({','.join(use)}) "
+            f"VALUES ({','.join('?' for _ in use)})",
+            tuple(row[name] for name in use),
+        )
+
+
+def _capture_current_target_state(conn):
+    """Preserve the exact 20 current chapters across the legacy retire pass."""
+    if not {"sprint_tasks", "task_metadata"} <= _tables(conn):
+        return {}
+    managed = tuple(f"datacamp:{key}" for key in TARGET_KEYS)
+    placeholders = ",".join("?" for _ in managed)
+    rows = conn.execute(
+        f"SELECT task_id FROM task_metadata WHERE managed_key IN ({placeholders})",
+        managed,
+    ).fetchall()
+    task_ids = tuple(int(row[0]) for row in rows)
+    return {
+        "task_ids": task_ids,
+        "sprint_tasks": _snapshot_rows(conn, "sprint_tasks", "id", task_ids),
+        "task_metadata": _snapshot_rows(conn, "task_metadata", "task_id", task_ids),
+        "progress": _snapshot_rows(conn, "datacamp_chapter_progress", "chapter_key", TARGET_KEYS),
+        "schedule": _snapshot_rows(conn, "task_sprint_schedule", "task_id", task_ids),
+        "focus": _snapshot_rows(conn, "daily_focus", "task_id", task_ids),
+        "promotions": _snapshot_rows(conn, "task_day_promotions", "task_id", task_ids),
+    }
+
+
+def _restore_current_target_state(conn, snapshot):
+    """Restore target rows by their original IDs, then let realign refresh them."""
+    if not snapshot:
+        return
+    _restore_snapshot_rows(conn, "sprint_tasks", snapshot.get("sprint_tasks", []))
+    _restore_snapshot_rows(conn, "task_metadata", snapshot.get("task_metadata", []))
+    _restore_snapshot_rows(conn, "datacamp_chapter_progress", snapshot.get("progress", []))
+    _restore_snapshot_rows(conn, "task_sprint_schedule", snapshot.get("schedule", []))
+    _restore_snapshot_rows(conn, "task_day_promotions", snapshot.get("promotions", []))
+    _restore_snapshot_rows(conn, "daily_focus", snapshot.get("focus", []))
+
+
+def _ensure_all_current_tasks(conn):
+    """Materialize all 20 current chapters without relying on Database Design rows."""
+    if not {"sprint_tasks", "task_metadata"} <= _tables(conn):
+        return
+    source_id = None
+    for target in TARGETS:
+        row = conn.execute(
+            "SELECT task_id FROM task_metadata WHERE managed_key=? ORDER BY task_id LIMIT 1",
+            (f"datacamp:{target['key']}",),
+        ).fetchone()
+        if row is not None:
+            source_id = int(row[0])
+            break
+    if source_id is None:
+        row = conn.execute(
+            "SELECT task_id FROM task_metadata "
+            "WHERE managed_key LIKE 'datacamp:%' ORDER BY task_id LIMIT 1"
+        ).fetchone()
+        source_id = int(row[0]) if row is not None else None
+    if source_id is None:
+        return
+
+    for target in TARGETS:
+        row = conn.execute(
+            "SELECT task_id FROM task_metadata WHERE managed_key=? ORDER BY task_id LIMIT 1",
+            (f"datacamp:{target['key']}",),
+        ).fetchone()
+        if row is not None:
+            task_id = int(row[0])
+            _update_task(conn, task_id, target, preserve_completion=True)
+            continue
+        task_id = _clone_task(conn, source_id, target)
+        source_id = task_id
+
+
+def _current_target_task_count(conn):
+    if "task_metadata" not in _tables(conn):
+        return 0
+    managed = tuple(f"datacamp:{key}" for key in TARGET_KEYS)
+    placeholders = ",".join("?" for _ in managed)
+    row = conn.execute(
+        f"SELECT COUNT(DISTINCT managed_key) FROM task_metadata "
+        f"WHERE managed_key IN ({placeholders})",
+        managed,
+    ).fetchone()
+    return int(row[0]) if row is not None else 0
+
 def realign(conn):
     """Apply the track migration atomically. Caller decides whether failure is fatal."""
     savepoint = "v104625_datacamp_track_alignment"
@@ -558,34 +1113,258 @@ def realign(conn):
 
 
 def install(datacamp_module):
-    """Install an idempotent post-reconcile adapter on the existing module."""
-    if getattr(datacamp_module, "_v104624_track_alignment", False):
+    """Install the current-track scheduler plus complete task-metadata bridges."""
+    if getattr(datacamp_module, "_v104630_datacamp_metadata_bridge", False):
         return
-    original_reconcile = getattr(datacamp_module, "reconcile", None)
-    if callable(original_reconcile):
-        def wrapped_reconcile(conn, *args, **kwargs):
-            result = original_reconcile(conn, *args, **kwargs)
-            try:
-                realign(conn)
-            except Exception as exc:
-                # Curriculum repair is supplementary. A local schema/data edge case
-                # must not terminate the entire Career Accelerator application.
-                _log_alignment_error(exc)
-            return result
-        datacamp_module.reconcile = wrapped_reconcile
 
-    original_url = getattr(datacamp_module, "chapter_url_for_task", None)
-    if callable(original_url):
-        def wrapped_url(conn, task_id, *args, **kwargs):
-            try:
-                row = conn.execute("SELECT managed_key FROM task_metadata WHERE task_id=?", (int(task_id),)).fetchone()
-                managed = str(row[0] or "") if row is not None else ""
-                if managed.startswith("datacamp:"):
-                    target = TARGET_BY_KEY.get(managed.split(":", 1)[1])
-                    if target:
-                        return target["url"]
-            except Exception:
-                pass
-            return original_url(conn, task_id, *args, **kwargs)
-        datacamp_module.chapter_url_for_task = wrapped_url
-    datacamp_module._v104624_track_alignment = True
+    # If this process has not already installed the v10.46.24/25 reconciliation
+    # wrapper, install it now. A fresh application process normally reaches this
+    # branch exactly once.
+    if not getattr(datacamp_module, "_v104624_track_alignment", False):
+        original_reconcile = getattr(datacamp_module, "reconcile", None)
+        if callable(original_reconcile):
+            def wrapped_reconcile(conn, *args, **kwargs):
+                # The legacy provider catalog still treats the 20 current-track
+                # keys as noncanonical. Snapshot them before that retire pass.
+                target_snapshot = _capture_current_target_state(conn)
+                result = original_reconcile(conn, *args, **kwargs)
+                try:
+                    _restore_current_target_state(conn, target_snapshot)
+                    realign(conn)
+                    if _current_target_task_count(conn) != len(TARGET_KEYS):
+                        raise RuntimeError(
+                            f"Current DataCamp track restored "
+                            f"{_current_target_task_count(conn)}/{len(TARGET_KEYS)} tasks"
+                        )
+                except Exception as exc:
+                    # Preserve startup, but record a precise recovery failure.
+                    _log_alignment_error(exc)
+                return result
+            wrapped_reconcile._v104633_current_track_preservation = True
+            datacamp_module.reconcile = wrapped_reconcile
+
+        original_url = getattr(datacamp_module, "chapter_url_for_task", None)
+        if callable(original_url):
+            def wrapped_url(conn, task_id, *args, **kwargs):
+                target = target_for_task(conn, task_id)
+                if target is not None:
+                    return target["url"]
+                return original_url(conn, task_id, *args, **kwargs)
+            datacamp_module.chapter_url_for_task = wrapped_url
+
+        datacamp_module._v104624_track_alignment = True
+
+    _install_metadata_bridges()
+
+    # Publish normalized metadata accessors on the provider service so future UI
+    # code can use the current-track source directly instead of reintroducing a
+    # dependency on the retired static catalog.
+    # Current replacement chapters are not members of the retired static
+    # datacamp_curriculum catalog. Resolve their readiness from durable task
+    # metadata instead of falling back to "metadata is unavailable".
+    original_readiness = getattr(datacamp_module, "readiness", None)
+    if callable(original_readiness) and not getattr(original_readiness, "_v104633_current_track_readiness", False):
+        def wrapped_readiness(conn, task, *args, **kwargs):
+            target = target_for_item(conn, task)
+            if target is None:
+                return original_readiness(conn, task, *args, **kwargs)
+            task_id = _item_value(task, "task_id", _item_value(task, "id"))
+            if task_id is None:
+                row = conn.execute(
+                    "SELECT task_id FROM task_metadata WHERE managed_key=?",
+                    (f"datacamp:{target['key']}",),
+                ).fetchone()
+                task_id = int(row[0]) if row is not None else None
+            if task_id is None:
+                return False, "DataCamp task state is unavailable."
+            row = conn.execute(
+                "SELECT s.completed,m.prerequisite_state,m.prerequisite_reason "
+                "FROM sprint_tasks s JOIN task_metadata m ON m.task_id=s.id "
+                "WHERE s.id=?",
+                (int(task_id),),
+            ).fetchone()
+            if row is None:
+                return False, "DataCamp task state is unavailable."
+            if bool(row[0]):
+                return True, ""
+            state = str(row[1] or "Ready").strip().casefold()
+            reason = str(row[2] or "").strip()
+            if state in {"ready", "open", "available"}:
+                return True, ""
+            return False, reason or "Complete the prerequisite first."
+        wrapped_readiness._v104633_current_track_readiness = True
+        datacamp_module.readiness = wrapped_readiness
+
+    original_current_ready = getattr(datacamp_module, "current_ready_task", None)
+    if callable(original_current_ready) and not getattr(original_current_ready, "_v104633_current_track_ready_task", False):
+        def wrapped_current_ready_task(conn, *args, **kwargs):
+            managed = tuple(f"datacamp:{key}" for key in TARGET_KEYS)
+            placeholders = ",".join("?" for _ in managed)
+            row = conn.execute(
+                f"SELECT s.id,s.week,s.sort_order,s.label,s.completed,m.* "
+                f"FROM sprint_tasks s JOIN task_metadata m ON m.task_id=s.id "
+                f"WHERE m.managed_key IN ({placeholders}) "
+                "AND s.completed=0 "
+                "AND COALESCE(m.prerequisite_state,'Ready')='Ready' "
+                "AND (m.deferred_until IS NULL OR m.deferred_until<=?) "
+                "ORDER BY s.week,s.sort_order,s.id LIMIT 1",
+                managed + (date.today().isoformat(),),
+            ).fetchone()
+            if row is not None:
+                return row
+            return original_current_ready(conn, *args, **kwargs)
+        wrapped_current_ready_task._v104633_current_track_ready_task = True
+        datacamp_module.current_ready_task = wrapped_current_ready_task
+
+    # v10.46.35: v10.46.33 taught the provider how to display, schedule,
+    # and reconcile the replacement chapters, but the provider's completion
+    # functions still resolve only the retired static chapter catalog. Persist
+    # completion evidence for current-track keys directly so tracks.sync_all()
+    # cannot mistake a legitimate checkbox completion for a detached false
+    # completion.
+    original_mark_complete = getattr(datacamp_module, "mark_task_complete", None)
+    if callable(original_mark_complete) and not getattr(
+        original_mark_complete,
+        "_v104635_current_track_completion",
+        False,
+    ):
+        def wrapped_mark_task_complete(conn, task_id, *args, **kwargs):
+            target = target_for_task(conn, int(task_id))
+            if target is None:
+                return original_mark_complete(conn, task_id, *args, **kwargs)
+
+            _ensure_progress(conn)
+            progress_cols = set(_columns(conn, "datacamp_chapter_progress"))
+            task_cols = set(_columns(conn, "task_metadata"))
+
+            assignments = {"status": "Completed"}
+            if "task_id" in progress_cols:
+                assignments["task_id"] = int(task_id)
+            if "completed_date" in progress_cols:
+                assignments["completed_date"] = date.today().isoformat()
+            if "completed_at" in progress_cols:
+                assignments["completed_at"] = datetime.now().isoformat(timespec="seconds")
+            if "updated_at" in progress_cols:
+                assignments["updated_at"] = datetime.now().isoformat(timespec="seconds")
+
+            conn.execute(
+                "UPDATE datacamp_chapter_progress SET "
+                + ",".join(f"{name}=?" for name in assignments)
+                + " WHERE chapter_key=?",
+                tuple(assignments.values()) + (target["key"],),
+            )
+            conn.execute(
+                "UPDATE sprint_tasks SET completed=1 WHERE id=?",
+                (int(task_id),),
+            )
+
+            metadata = {"status": "Completed"}
+            if "deferred_until" in task_cols:
+                metadata["deferred_until"] = None
+            if "prerequisite_state" in task_cols:
+                metadata["prerequisite_state"] = "Ready"
+            if "prerequisite_reason" in task_cols:
+                metadata["prerequisite_reason"] = None
+
+            conn.execute(
+                "UPDATE task_metadata SET "
+                + ",".join(f"{name}=?" for name in metadata)
+                + " WHERE task_id=?",
+                tuple(metadata.values()) + (int(task_id),),
+            )
+
+            _refresh_target_readiness(conn)
+            conn.commit()
+            return None
+
+        wrapped_mark_task_complete._v104635_current_track_completion = True
+        datacamp_module.mark_task_complete = wrapped_mark_task_complete
+
+    original_mark_incomplete = getattr(datacamp_module, "mark_task_incomplete", None)
+    if callable(original_mark_incomplete) and not getattr(
+        original_mark_incomplete,
+        "_v104635_current_track_completion",
+        False,
+    ):
+        def wrapped_mark_task_incomplete(
+            conn,
+            task_id,
+            *args,
+            enforce_sequence=False,
+            **kwargs,
+        ):
+            target = target_for_task(conn, int(task_id))
+            if target is None:
+                return original_mark_incomplete(
+                    conn,
+                    task_id,
+                    *args,
+                    enforce_sequence=enforce_sequence,
+                    **kwargs,
+                )
+
+            if enforce_sequence:
+                index = TARGET_KEYS.index(target["key"])
+                later_keys = TARGET_KEYS[index + 1:]
+                if later_keys:
+                    placeholders = ",".join("?" for _ in later_keys)
+                    later = conn.execute(
+                        f"SELECT chapter_key FROM datacamp_chapter_progress "
+                        f"WHERE chapter_key IN ({placeholders}) "
+                        "AND status='Completed' LIMIT 1",
+                        tuple(later_keys),
+                    ).fetchone()
+                    if later is not None:
+                        raise ValueError(
+                            "Undo later DataCamp chapter completions first so "
+                            "the current-track sequence remains valid."
+                        )
+
+            progress_cols = set(_columns(conn, "datacamp_chapter_progress"))
+            task_cols = set(_columns(conn, "task_metadata"))
+
+            progress = {"status": "Not Started"}
+            if "completed_date" in progress_cols:
+                progress["completed_date"] = None
+            if "completed_at" in progress_cols:
+                progress["completed_at"] = None
+            if "updated_at" in progress_cols:
+                progress["updated_at"] = datetime.now().isoformat(timespec="seconds")
+
+            conn.execute(
+                "UPDATE datacamp_chapter_progress SET "
+                + ",".join(f"{name}=?" for name in progress)
+                + " WHERE chapter_key=?",
+                tuple(progress.values()) + (target["key"],),
+            )
+            conn.execute(
+                "UPDATE sprint_tasks SET completed=0 WHERE id=?",
+                (int(task_id),),
+            )
+
+            metadata = {"status": "Not Started"}
+            if "deferred_until" in task_cols:
+                metadata["deferred_until"] = _target_date(
+                    conn,
+                    int(target["week"]),
+                    int(target["day_index"]),
+                )
+            conn.execute(
+                "UPDATE task_metadata SET "
+                + ",".join(f"{name}=?" for name in metadata)
+                + " WHERE task_id=?",
+                tuple(metadata.values()) + (int(task_id),),
+            )
+
+            _refresh_target_readiness(conn)
+            conn.commit()
+            return None
+
+        wrapped_mark_task_incomplete._v104635_current_track_completion = True
+        datacamp_module.mark_task_incomplete = wrapped_mark_task_incomplete
+
+    datacamp_module.current_track_metadata_for_task = metadata_for_task
+    datacamp_module.current_track_target_for_task = target_for_task
+    datacamp_module._v104635_current_track_completion = True
+    datacamp_module._v104633_canonical_reconcile_fix = True
+    datacamp_module._v104630_datacamp_metadata_bridge = True

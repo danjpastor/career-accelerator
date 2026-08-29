@@ -4973,6 +4973,31 @@ class CareerAccelerator(QMainWindow):
             )
 
     def dashboard_task_source(self, row):
+        # BEGIN v10.46.33 DATACAMP DASHBOARD SOURCE
+        # DataCamp identity is durable metadata, not a word in the visible label.
+        task_id = row.get("id") or row.get("task_id")
+        if task_id is not None:
+            try:
+                datacamp_meta = self.conn.execute(
+                    "SELECT managed_key FROM task_metadata WHERE task_id=?",
+                    (int(task_id),),
+                ).fetchone()
+                managed_key = (
+                    str(datacamp_meta["managed_key"] or "")
+                    if datacamp_meta is not None
+                    else ""
+                )
+            except Exception:
+                managed_key = ""
+            if managed_key.casefold().startswith("datacamp:"):
+                live_datacamp_source = tracks.source_for_task(
+                    self.conn,
+                    int(task_id),
+                )
+                if live_datacamp_source:
+                    return live_datacamp_source
+        # END v10.46.33 DATACAMP DASHBOARD SOURCE
+
         explicit = str(row.get("display_source") or "").strip()
         if explicit:
             return explicit
@@ -9868,5 +9893,9 @@ _duckdb_curriculum_policy.install(CareerAccelerator)
 # BEGIN DAY-ASSIGNED TASK POLICY v10.44.0
 from career_app.services import daily_task_policy as _daily_task_policy_v1044
 _daily_task_policy_v1044.install(CareerAccelerator)
-# END DAY-ASSIGNED TASK POLICY v10.44.0
-
+# END DAY-ASSIGNED TASK POLICY v10.44.0\n\n# BEGIN v10.46.31 DATACAMP METADATA FINAL ORDER
+# daily_task_policy installs late and replaces the final dashboard queues.
+# Reapply current DataCamp metadata only after every existing policy installer.
+from career_app.services import datacamp_track_alignment as _datacamp_track_alignment_v104631
+_datacamp_track_alignment_v104631.install_final_metadata_bridges()
+# END v10.46.31 DATACAMP METADATA FINAL ORDER\n

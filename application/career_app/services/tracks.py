@@ -3348,7 +3348,38 @@ def _sync_sprint_prerequisites(
             applied_number is None
             and "datacamp" in lower
         ):
-            reason = "Legacy external-learning task retired."
+            # BEGIN v10.46.32 ACTIVE DATACAMP PREREQUISITES
+            # Current DataCamp chapters are durable roadmap tasks.
+            # datacamp.reconcile() owns their content readiness; do
+            # not reclassify them as retired during tracks.sync_all().
+            datacamp_meta = conn.execute(
+                "SELECT managed_key,prerequisite_state,prerequisite_reason "
+                "FROM task_metadata WHERE task_id=?",
+                (task_id,),
+            ).fetchone()
+            managed_key = (
+                str(datacamp_meta["managed_key"] or "")
+                if datacamp_meta is not None
+                else ""
+            )
+            if managed_key.casefold().startswith("datacamp:"):
+                provider_state = str(
+                    datacamp_meta["prerequisite_state"] or "Ready"
+                ).casefold()
+                provider_reason = str(
+                    datacamp_meta["prerequisite_reason"] or ""
+                ).strip()
+                if provider_reason == "Legacy external-learning task retired.":
+                    provider_reason = ""
+                    provider_state = "ready"
+                if provider_state in {"blocked", "locked"}:
+                    reason = provider_reason or "Complete the prerequisite DataCamp chapter first."
+                else:
+                    reason = None
+            else:
+                # Keep truly unmatched historical DataCamp rows retired.
+                reason = "Legacy external-learning task retired."
+            # END v10.46.32 ACTIVE DATACAMP PREREQUISITES
 
         elif (
             applied_number is None
@@ -4842,6 +4873,41 @@ def task_track(conn, task_id):
 
 
 def source_for_task(conn, task_id):
+    # BEGIN v10.46.32 DATACAMP TASK SOURCE
+    # Canonical DataCamp chapters are durable sprint rows and may
+    # not have a track_tasks link. Resolve their live metadata first.
+    try:
+        from career_app.services import datacamp_track_alignment as _datacamp_alignment
+
+        target = _datacamp_alignment.target_for_task(conn, int(task_id))
+        if target is not None:
+            return _datacamp_alignment.detail_for_target(target)
+    except Exception:
+        pass
+
+    try:
+        metadata_row = conn.execute(
+            "SELECT m.managed_key,p.course_name,p.chapter_number,p.chapter_name "
+            "FROM task_metadata AS m "
+            "LEFT JOIN datacamp_chapter_progress AS p "
+            "ON p.chapter_key=SUBSTR(m.managed_key,10) "
+            "WHERE m.task_id=?",
+            (int(task_id),),
+        ).fetchone()
+    except Exception:
+        metadata_row = None
+
+    if metadata_row is not None:
+        managed_key = str(metadata_row["managed_key"] or "")
+        if managed_key.casefold().startswith("datacamp:") and metadata_row["course_name"]:
+            chapter_name = str(metadata_row["chapter_name"] or "").strip()
+            chapter_suffix = f": {chapter_name}" if chapter_name else ""
+            return (
+                f"DataCamp • {metadata_row['course_name']} — "
+                f"Chapter {int(metadata_row['chapter_number'])}{chapter_suffix}"
+            )
+    # END v10.46.32 DATACAMP TASK SOURCE
+
     row = task_track(
         conn,
         task_id,
