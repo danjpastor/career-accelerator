@@ -152,19 +152,19 @@ DATACAMP_CHAPTERS: tuple[DataCampChapter, ...] = (
     _chapter("w07_churn_powerbi_03", "Case Study: Analyzing Customer Churn in Power BI", "case-study-analyzing-customer-churn-in-power-bi", 3, "Visualizing Your Analysis", "visualizing-your-analysis-3", 7, 6, 3, area="Power BI"),
 
     # Week 8 — analyst-focused Python and pandas.
-    _chapter("w08_intro_python_01", "Introduction to Python", "intro-to-python-for-data-science", 1, "Python Basics", "chapter-1-python-basics", 8, 0, 1, area="Python"),
-    _chapter("w08_intro_python_02", "Introduction to Python", "intro-to-python-for-data-science", 2, "Python Lists", "chapter-2-python-lists", 8, 0, 2, area="Python"),
-    _chapter("w08_intro_python_03", "Introduction to Python", "intro-to-python-for-data-science", 3, "Functions and Packages", "chapter-3-functions-and-packages", 8, 1, 1, area="Python"),
-    _chapter("w08_intro_python_04", "Introduction to Python", "intro-to-python-for-data-science", 4, "NumPy", "chapter-4-numpy", 8, 1, 2, area="Python"),
-    _chapter("w08_intermediate_python_01", "Intermediate Python", "intermediate-python", 1, "Matplotlib", "matplotlib", 8, 2, 1, area="Python"),
-    _chapter("w08_intermediate_python_02", "Intermediate Python", "intermediate-python", 2, "Dictionaries & pandas", "dictionaries-pandas", 8, 2, 2, area="Python"),
-    _chapter("w08_intermediate_python_03", "Intermediate Python", "intermediate-python", 3, "Logic, Control Flow, and Filtering", "logic-control-flow-and-filtering", 8, 3, area="Python"),
-    _chapter("w08_intermediate_python_04", "Intermediate Python", "intermediate-python", 4, "Loops", "loops", 8, 4, 1, area="Python"),
-    _chapter("w08_intermediate_python_05", "Intermediate Python", "intermediate-python", 5, "Case Study: Hacker Statistics", "case-study-hacker-statistics", 8, 4, 2, area="Python"),
-    _chapter("w08_pandas_01", "Data Manipulation with pandas", "data-manipulation-with-pandas", 1, "Transforming DataFrames", "transforming-dataframes", 8, 5, 1, area="Python"),
-    _chapter("w08_pandas_02", "Data Manipulation with pandas", "data-manipulation-with-pandas", 2, "Aggregating DataFrames", "aggregating-dataframes", 8, 5, 2, area="Python"),
-    _chapter("w08_pandas_03", "Data Manipulation with pandas", "data-manipulation-with-pandas", 3, "Slicing and Indexing DataFrames", "slicing-and-indexing-dataframes", 8, 6, 1, area="Python"),
-    _chapter("w08_pandas_04", "Data Manipulation with pandas", "data-manipulation-with-pandas", 4, "Creating and Visualizing DataFrames", "creating-and-visualizing-dataframes", 8, 6, 2, area="Python"),
+    _chapter("w08_intro_python_01", "Introduction to Python", "intro-to-python-for-data-science", 1, "Python Basics", "chapter-1-python-basics", 9, 0, 1, area="Python"),
+    _chapter("w08_intro_python_02", "Introduction to Python", "intro-to-python-for-data-science", 2, "Python Lists", "chapter-2-python-lists", 9, 0, 2, area="Python"),
+    _chapter("w08_intro_python_03", "Introduction to Python", "intro-to-python-for-data-science", 3, "Functions and Packages", "chapter-3-functions-and-packages", 9, 1, 1, area="Python"),
+    _chapter("w08_intro_python_04", "Introduction to Python", "intro-to-python-for-data-science", 4, "NumPy", "chapter-4-numpy", 9, 1, 2, area="Python"),
+    _chapter("w08_intermediate_python_01", "Intermediate Python", "intermediate-python", 1, "Matplotlib", "matplotlib", 9, 2, 1, area="Python"),
+    _chapter("w08_intermediate_python_02", "Intermediate Python", "intermediate-python", 2, "Dictionaries & pandas", "dictionaries-pandas", 9, 2, 2, area="Python"),
+    _chapter("w08_intermediate_python_03", "Intermediate Python", "intermediate-python", 3, "Logic, Control Flow, and Filtering", "logic-control-flow-and-filtering", 9, 3, area="Python"),
+    _chapter("w08_intermediate_python_04", "Intermediate Python", "intermediate-python", 4, "Loops", "loops", 9, 4, 1, area="Python"),
+    _chapter("w08_intermediate_python_05", "Intermediate Python", "intermediate-python", 5, "Case Study: Hacker Statistics", "case-study-hacker-statistics", 9, 4, 2, area="Python"),
+    _chapter("w08_pandas_01", "Data Manipulation with pandas", "data-manipulation-with-pandas", 1, "Transforming DataFrames", "transforming-dataframes", 9, 5, 1, area="Python"),
+    _chapter("w08_pandas_02", "Data Manipulation with pandas", "data-manipulation-with-pandas", 2, "Aggregating DataFrames", "aggregating-dataframes", 9, 5, 2, area="Python"),
+    _chapter("w08_pandas_03", "Data Manipulation with pandas", "data-manipulation-with-pandas", 3, "Slicing and Indexing DataFrames", "slicing-and-indexing-dataframes", 9, 6, 1, area="Python"),
+    _chapter("w08_pandas_04", "Data Manipulation with pandas", "data-manipulation-with-pandas", 4, "Creating and Visualizing DataFrames", "creating-and-visualizing-dataframes", 9, 6, 2, area="Python"),
 )
 
 CHAPTER_BY_KEY = {chapter.key: chapter for chapter in DATACAMP_CHAPTERS}
@@ -224,6 +224,43 @@ def _weekday_only_datacamp_schedule(chapters):
     return tuple(rebuilt)
 
 
-DATACAMP_CHAPTERS = _weekday_only_datacamp_schedule(DATACAMP_CHAPTERS)
+# BEGIN PYTHON WEEK 9 REBALANCE v10.46.42
+# Power BI remains post-core; Python remains its original Week 9 phase.
+# END PYTHON WEEK 9 REBALANCE v10.46.42
+# BEGIN POWER BI POST-CORE SUPPLEMENTAL v10.46.38
+POST_CORE_SUPPLEMENTAL_WEEK = 13
+
+_scheduled_core_catalog = _weekday_only_datacamp_schedule(DATACAMP_CHAPTERS)
+
+CORE_DATACAMP_CHAPTERS = tuple(
+    chapter
+    for chapter in _scheduled_core_catalog
+    if str(chapter.area).casefold() != "power bi"
+)
+
+SUPPLEMENTAL_POWERBI_CHAPTERS = tuple(
+    _datacamp_replace(chapter, week=POST_CORE_SUPPLEMENTAL_WEEK)
+    for chapter in _scheduled_core_catalog
+    if str(chapter.area).casefold() == "power bi"
+)
+
+DATACAMP_CHAPTERS = _weekday_only_datacamp_schedule(
+    (*CORE_DATACAMP_CHAPTERS, *SUPPLEMENTAL_POWERBI_CHAPTERS)
+)
+CORE_DATACAMP_CHAPTERS = tuple(
+    chapter
+    for chapter in DATACAMP_CHAPTERS
+    if str(chapter.area).casefold() != "power bi"
+)
+SUPPLEMENTAL_POWERBI_CHAPTERS = tuple(
+    chapter
+    for chapter in DATACAMP_CHAPTERS
+    if str(chapter.area).casefold() == "power bi"
+)
+CORE_DATACAMP_KEYS = tuple(chapter.key for chapter in CORE_DATACAMP_CHAPTERS)
+SUPPLEMENTAL_POWERBI_KEYS = tuple(
+    chapter.key for chapter in SUPPLEMENTAL_POWERBI_CHAPTERS
+)
 CHAPTER_BY_KEY = {chapter.key: chapter for chapter in DATACAMP_CHAPTERS}
+# END POWER BI POST-CORE SUPPLEMENTAL v10.46.38
 # END DATACAMP WEEKDAY-ONLY CHAPTER SCHEDULE v10.40.2

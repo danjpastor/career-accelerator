@@ -111,43 +111,43 @@ PROJECTS: tuple[dict[str, Any], ...] = (
     },
     {
         "key": "w7_tableau_job_market",
-        "week": 7,
-        "role": "primary",
+        "week": 13,
+        "role": "supplemental",
         "title": "Case Study: Analyzing Job Market Data in Tableau",
         "url": "https://www.datacamp.com/courses/case-study-analyzing-job-market-data-in-tableau",
         "minutes": 180,
         "tool": "Tableau",
-        "prerequisite": "Complete the Google Certificate Tableau coursework assigned this week.",
+        "prerequisite": "Optional post-core Tableau comparison practice.",
     },
     {
         "key": "w7_powerbi_job_market",
-        "week": 7,
-        "role": "supplemental",
+        "week": 13,
+        "role": "primary",
         "title": "Case Study: Analyzing Job Market Data in Power BI",
         "url": "https://www.datacamp.com/courses/case-study-analyzing-job-market-data-in-power-bi",
         "minutes": 240,
         "tool": "Power BI",
-        "prerequisite": "Complete the Tableau capstone and this week's Power BI foundations.",
+        "prerequisite": "Optional post-core capstone after the supplemental Power BI chapters.",
     },
     {
         "key": "w8_python_nyc_schools",
-        "week": 8,
+        "week": 9,
         "role": "primary",
         "title": "Exploring NYC Public School Test Result Scores",
         "url": "https://www.datacamp.com/projects/1596",
         "minutes": 30,
         "tool": "Python",
-        "prerequisite": "Complete Data Manipulation with pandas.",
+        "prerequisite": "Complete the Week 9 Python and Data Manipulation with pandas coursework.",
     },
     {
         "key": "w8_python_market_analysis",
-        "week": 8,
+        "week": 9,
         "role": "supplemental",
         "title": "Data-Driven Product Management: Conducting a Market Analysis",
         "url": "https://www.datacamp.com/projects/1684",
         "minutes": 60,
         "tool": "Python",
-        "prerequisite": "Complete the primary Week 8 Python project first.",
+        "prerequisite": "Complete the primary Week 9 Python project first.",
     },
     {
         "key": "w9_python_netflix",
@@ -161,13 +161,13 @@ PROJECTS: tuple[dict[str, Any], ...] = (
     },
     {
         "key": "w10_powerbi_hr",
-        "week": 10,
+        "week": 13,
         "role": "supplemental",
         "title": "Case Study: HR Analytics in Power BI",
         "url": "https://www.datacamp.com/courses/case-study-hr-analytics-in-power-bi",
         "minutes": 180,
         "tool": "Power BI",
-        "prerequisite": "Complete the current portfolio milestone before adding extra practice.",
+        "prerequisite": "Optional post-core Power BI practice after the Job Market capstone.",
     },
     {
         "key": "w11_python_crime",
@@ -312,16 +312,56 @@ def _ensure_task(conn: sqlite3.Connection, project: dict[str, Any]) -> int:
             },
         )
 
-    _update_dynamic(
-        conn,
-        "sprint_tasks",
-        {
-            "week": int(project["week"]),
-            "label": str(project["title"]),
-        },
-        "id=?",
+    # BEGIN ATOMIC PROJECT WEEK MIGRATION v10.46.42
+    # sprint_tasks enforces UNIQUE(week, sort_order). If an existing project is
+    # moving to another week, changing `week` alone can transiently collide with
+    # a destination row that already owns the project's old sort_order.
+    #
+    # Resolve a free destination sort_order while the row is still in its source
+    # week, then update week + sort_order together in one SQLite statement.
+    sprint_columns = _columns(conn, "sprint_tasks")
+    existing_row = conn.execute(
+        "SELECT week,sort_order FROM sprint_tasks WHERE id=?",
         (task_id,),
+    ).fetchone()
+    existing_week = int(
+        _row_value(
+            existing_row,
+            "week",
+            existing_row[0] if existing_row else project["week"],
+        )
     )
+    target_week = int(project["week"])
+
+    if existing_week != target_week and "sort_order" in sprint_columns:
+        destination_sort = _next_sort_order(
+            conn,
+            target_week,
+            str(project["role"]),
+        )
+        conn.execute(
+            "UPDATE sprint_tasks "
+            "SET week=?,sort_order=?,label=? "
+            "WHERE id=?",
+            (
+                target_week,
+                destination_sort,
+                str(project["title"]),
+                task_id,
+            ),
+        )
+    else:
+        _update_dynamic(
+            conn,
+            "sprint_tasks",
+            {
+                "week": target_week,
+                "label": str(project["title"]),
+            },
+            "id=?",
+            (task_id,),
+        )
+    # END ATOMIC PROJECT WEEK MIGRATION v10.46.42
 
     metadata_exists = conn.execute(
         "SELECT 1 FROM task_metadata WHERE task_id=?",
@@ -758,6 +798,11 @@ def optional_practice_recommendation(
 def catalog_for_week(week: int) -> list[dict[str, Any]]:
     return [dict(project) for project in PROJECTS if int(project["week"]) == int(week)]
 
+# BEGIN DATACAMP PROJECT ROADMAP REALIGNMENT v10.46.42
+# Python/pandas and its project sequence remain Week 9. Power BI and the extra
+# Tableau comparison remain post-core Week 13.
+# END DATACAMP PROJECT ROADMAP REALIGNMENT v10.46.42
+
 # BEGIN DATACAMP EXACT PROJECT PREREQUISITES v10.40.2
 # Projects use exact DataCamp chapter prerequisites and weekend scheduling.
 # A week number alone can never unlock a project.
@@ -804,7 +849,12 @@ _WEEKEND_PROJECT_POLICY = {
         ),
     },
     "w6_sql_manufacturing": {"scheduled_weekday": 6, "required_chapters": ()},
+    # v10.46.38 post-core visualization supplement.
     "w7_tableau_job_market": {
+        "scheduled_weekday": 6,
+        "required_chapters": (),
+    },
+    "w7_powerbi_job_market": {
         "scheduled_weekday": 5,
         "required_chapters": (
             "w07_intro_powerbi_01", "w07_intro_powerbi_02",
@@ -820,7 +870,6 @@ _WEEKEND_PROJECT_POLICY = {
             "w07_churn_powerbi_02", "w07_churn_powerbi_03",
         ),
     },
-    "w7_powerbi_job_market": {"scheduled_weekday": 6, "required_chapters": ()},
     "w8_python_nyc_schools": {
         "scheduled_weekday": 5,
         "required_chapters": (

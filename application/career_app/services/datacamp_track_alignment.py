@@ -22,6 +22,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 PATCH_MARKER = "v10.46.35-datacamp-completion-and-focus-fix"
+POST_CORE_SCHEDULE_MARKER = "v10.46.38-canonical-datacamp-schedule"
 
 
 def _alignment_error_log() -> Path:
@@ -310,22 +311,41 @@ def _ensure_progress(conn):
         if template:
             _insert_clone(conn, table, template, _progress_overrides(target, set(cols)))
 
-    # Preserve old Power BI/Python chapter identities/completion while moving their
-    # scheduled week after the newly restored SQL-track continuation.
-    for prefix, target_week in (("w07_", 8), ("w08_", 9)):
-        assignments = []
-        values = []
-        for col in ("week", "scheduled_week"):
-            if col in cols:
-                assignments.append(f"{col}=?")
-                values.append(target_week)
-        if assignments:
-            placeholders = ",".join("?" for _ in TARGET_KEYS)
-            conn.execute(
-                f"UPDATE {table} SET {','.join(assignments)} WHERE chapter_key LIKE ? "
-                f"AND chapter_key NOT IN ({placeholders})",
-                tuple(values) + (prefix + "%",) + TARGET_KEYS,
-            )
+    # v10.46.38: legacy chapter progress follows the canonical curriculum.
+    try:
+        from career_app.data.datacamp_curriculum import chapter_for_key
+    except Exception:
+        chapter_for_key = None
+
+    if callable(chapter_for_key):
+        rows = conn.execute(
+            f"SELECT chapter_key FROM {table} ORDER BY chapter_key"
+        ).fetchall()
+        for row in rows:
+            key = str(row[0])
+            if key in TARGET_KEYS:
+                continue
+            chapter = chapter_for_key(key)
+            if chapter is None:
+                continue
+
+            assignments = {}
+            if "week" in cols:
+                assignments["week"] = int(chapter.week)
+            if "scheduled_week" in cols:
+                assignments["scheduled_week"] = int(chapter.week)
+            if "scheduled_date" in cols:
+                assignments["scheduled_date"] = _target_date(
+                    conn, int(chapter.week), int(chapter.weekday)
+                )
+
+            if assignments:
+                conn.execute(
+                    f"UPDATE {table} SET "
+                    + ",".join(f"{name}=?" for name in assignments)
+                    + " WHERE chapter_key=?",
+                    tuple(assignments.values()) + (key,),
+                )
 
 
 def _task_rows(conn):
@@ -887,28 +907,61 @@ def _refresh_target_readiness(conn):
 def _move_legacy_learning(conn):
     if not {"sprint_tasks", "task_metadata"} <= _tables(conn):
         return
+
+    try:
+        from career_app.data.datacamp_curriculum import chapter_for_key
+    except Exception:
+        return
+
     target_managed = {f"datacamp:{key}" for key in TARGET_KEYS}
-    for prefix, target_week in (("datacamp:w08_", 9), ("datacamp:w07_", 8)):
-        rows = conn.execute(
-            """SELECT m.task_id,m.managed_key
-               FROM task_metadata m
-               WHERE m.managed_key LIKE ?
-               ORDER BY m.task_id""",
-            (prefix + "%",),
-        ).fetchall()
-        legacy = [(int(r[0]), str(r[1])) for r in rows if str(r[1]) not in target_managed]
-        if not legacy:
+    rows = conn.execute(
+        """SELECT m.task_id,m.managed_key,s.week,s.completed
+           FROM task_metadata m
+           JOIN sprint_tasks s ON s.id=m.task_id
+           WHERE m.managed_key LIKE 'datacamp:%'
+           ORDER BY m.task_id"""
+    ).fetchall()
+
+    legacy = []
+    for row in rows:
+        task_id = int(row[0])
+        managed = str(row[1])
+        if managed in target_managed:
             continue
-        for idx, (task_id, _managed) in enumerate(legacy):
-            # Assign a reserved sort band before moving weeks so a repository with
-            # UNIQUE(week, sort_order) cannot collide during the move.
-            if "sort_order" in _columns(conn, "sprint_tasks"):
-                conn.execute("UPDATE sprint_tasks SET sort_order=? WHERE id=?", (9463000 + target_week * 1000 + idx, task_id))
-            conn.execute("UPDATE sprint_tasks SET week=? WHERE id=?", (target_week, task_id))
-            if "deferred_until" in _columns(conn, "task_metadata"):
-                day_index = idx % 5
-                conn.execute("UPDATE task_metadata SET deferred_until=? WHERE task_id=?", (_target_date(conn, target_week, day_index), task_id))
-            _schedule_row(conn, task_id, target_week, idx % 5)
+        key = managed.split(":", 1)[1]
+        chapter = chapter_for_key(key)
+        if chapter is None:
+            continue
+        legacy.append((task_id, managed, int(row[2]), bool(row[3]), chapter))
+
+    for idx, (task_id, _managed, current_week, completed, chapter) in enumerate(legacy):
+        target_week = int(chapter.week)
+        day_index = int(chapter.weekday)
+
+        if (
+            current_week != target_week
+            and "sort_order" in _columns(conn, "sprint_tasks")
+        ):
+            conn.execute(
+                "UPDATE sprint_tasks SET sort_order=? WHERE id=?",
+                (9463000 + target_week * 1000 + idx, task_id),
+            )
+
+        conn.execute(
+            "UPDATE sprint_tasks SET week=? WHERE id=?",
+            (target_week, task_id),
+        )
+
+        if "deferred_until" in _columns(conn, "task_metadata"):
+            conn.execute(
+                "UPDATE task_metadata SET deferred_until=? WHERE task_id=?",
+                (
+                    None if completed else _target_date(conn, target_week, day_index),
+                    task_id,
+                ),
+            )
+
+        _schedule_row(conn, task_id, target_week, day_index)
 
 
 def _realign_sql_schedule(conn):

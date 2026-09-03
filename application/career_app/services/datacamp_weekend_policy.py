@@ -251,7 +251,7 @@ def install(CareerAccelerator: type | None = None) -> None:
 # Current-week projects keep their Saturday/Sunday schedule. Projects from an
 # earlier roadmap week are catch-up tasks and can use an open weekday slot.
 _catchup_base_allowed_today = _allowed_today
-_CATCHUP_POLICY_CACHE_KEY = "datacamp_catchup_project_access:v10.41.2"
+_CATCHUP_POLICY_CACHE_KEY = "datacamp_weekend_schedule_realign:v10.46.36"
 
 
 def _catchup_policy_current_week(conn):
@@ -317,3 +317,8 @@ def _refresh_catchup_policy_cache(conn, today=None):
     )
     conn.commit()
 # END DATACAMP CATCH-UP WEEKDAY ACCESS v10.41.2
+
+
+# BEGIN DATACAMP WEEKEND SCHEDULE REALIGNMENT v10.46.36
+# Forces one safe rebuild of today's generated Focus snapshot.
+# END DATACAMP WEEKEND SCHEDULE REALIGNMENT v10.46.36

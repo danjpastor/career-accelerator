@@ -59,7 +59,7 @@ Use confirmed findings and governed metrics in Power BI.
 ## Working notes
 
 **Milestone:** Validate findings across tools  
-**Started:** 2026-08-29
+**Started:** 2026-09-02
 
 ## Findings validation matrix
 

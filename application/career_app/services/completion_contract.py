@@ -324,16 +324,43 @@ def _portfolio_counts(conn: sqlite3.Connection) -> tuple[int, int, int]:
     return total, min(total, completed), max(0, remaining_minutes)
 
 
+# BEGIN POWER BI POST-CORE COMPLETION SCOPE v10.46.38
+def _required_datacamp_keys() -> tuple[str, ...]:
+    from career_app.data.datacamp_curriculum import CORE_DATACAMP_KEYS
+
+    required = set(str(key) for key in CORE_DATACAMP_KEYS)
+    try:
+        from career_app.services import datacamp_track_alignment as alignment
+        required.difference_update(
+            str(key) for key in getattr(alignment, "STALE_KEYS", ())
+        )
+        required.update(
+            str(key) for key in getattr(alignment, "TARGET_KEYS", ())
+        )
+    except Exception:
+        pass
+    return tuple(sorted(required))
+
+
 def _datacamp_counts(conn: sqlite3.Connection) -> tuple[int, int, dict[str, Any]]:
-    from career_app.data.datacamp_curriculum import DATACAMP_CHAPTERS
-    total = len(DATACAMP_CHAPTERS)
+    required_keys = _required_datacamp_keys()
+    total = len(required_keys)
     completed = 0
-    if _table_exists(conn, "datacamp_chapter_progress"):
+    if required_keys and _table_exists(conn, "datacamp_chapter_progress"):
+        placeholders = ",".join("?" for _ in required_keys)
         row = conn.execute(
-            "SELECT COUNT(*) FROM datacamp_chapter_progress WHERE status='Completed'"
+            f"SELECT COUNT(*) FROM datacamp_chapter_progress "
+            f"WHERE status='Completed' AND chapter_key IN ({placeholders})",
+            required_keys,
         ).fetchone()
         completed = int(_row_value(row, "COUNT(*)", 0, 0) or 0)
-    return total, min(total, completed), {"provider": "DataCamp"}
+    return total, min(total, completed), {
+        "provider": "DataCamp",
+        "scope": "core",
+        "required_keys": required_keys,
+        "power_bi_post_core": True,
+    }
+# END POWER BI POST-CORE COMPLETION SCOPE v10.46.38
 
 
 def _budget_remaining(track_key: str, total: int | None, completed: int) -> int:

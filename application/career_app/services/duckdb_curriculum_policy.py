@@ -248,6 +248,7 @@ def _promoted_today(conn: Any, internal_id: int, *, today: date) -> bool:
         return False
 
 
+# BEGIN v10.46.36 SQL CHALLENGE WEEKEND CATCH-UP
 def _weekday_schedule_ready(
     conn: Any, internal_id: int, *, today: date | None = None
 ) -> tuple[bool, str]:
@@ -255,12 +256,14 @@ def _weekday_schedule_ready(
     scheduled = _persisted_task_date(conn, internal_id) or scheduled_date(conn, internal_id)
     if today < scheduled and not _promoted_today(conn, internal_id, today=today):
         return False, "Scheduled for " + scheduled.strftime("%A, %B %d") + "."
+
+    # Weekend access is only for work whose assigned date has already arrived.
+    # Content prerequisites remain enforced by roadmap_mastery.duckdb_readiness().
     if today.weekday() > 4:
-        return False, (
-            "SQL challenge practice is scheduled Monday through Friday; "
-            "weekends are reserved for projects."
-        )
+        return True, "Catch-up SQL challenge — scheduled work is already due."
+
     return True, "Available for weekday SQL challenge practice."
+# END v10.46.36 SQL CHALLENGE WEEKEND CATCH-UP
 
 
 def _clear_stale_focus(conn: Any, internal_ids: set[int] | None = None) -> None:
