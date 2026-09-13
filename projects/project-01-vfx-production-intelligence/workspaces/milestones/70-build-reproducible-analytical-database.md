@@ -60,7 +60,7 @@ Use the governed analytical layer to complete SQL analysis.
 ## Working notes
 
 **Milestone:** Build reproducible analytical database  
-**Started:** 2026-09-02
+**Started:** 2026-09-11
 
 ## Plan the tables
 

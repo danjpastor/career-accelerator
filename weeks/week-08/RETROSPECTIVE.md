@@ -1,35 +1,31 @@
-# Week 8 Retrospective — Python, pandas, and Portfolio Readiness
+# Week 8 Retrospective
 
-## Progress snapshot
-- Hours studied:
-- Google Certificate progress:
-- DataCamp progress:
-- Python, pandas, and readiness work completed:
-- Portfolio preparation or execution completed:
-- Weekly readiness result:
+Completed inside Career Accelerator's Retrospective task.
 
-## Biggest win
-What moved forward, and why did it matter?
+## Automatic progress snapshot
 
-## Friction or blocker
-What slowed progress? Identify the underlying concept, workflow, or scheduling problem.
+2026-08-31 through 2026-09-06 • 0.00 study hours • 6/19 sprint tasks • 0 SQL problems • 5/42 portfolio milestones completed overall
 
-## Mastery evidence
-What can you now do independently that you could not do at the start of the week?
-- 
+## Learning Progress This Week
 
-## Remaining gaps
-List only gaps that require catch-up or targeted remediation.
-- 
+- Complete the Week 8 Retrospective
+- Google Course 7 — Module 4: Data structures in Python
+- Google Course 7 — Module 3: Loops and strings
+- Google Course 7 — Module 2: Functions and conditional statements
+- Google Course 7 — Module 1: Hello, Python!
 
-## Evidence created
-Link substantial work that could support an assessment, portfolio review, or interview.
-- 
+## Evidence Created This Week
 
-## Next-sprint adjustments
-- [ ] Adjustment 1:
-- [ ] Adjustment 2:
+_No new evidence was recorded._
 
-## Confidence
-- Score from 1–10:
-- Reason:
+## Biggest Win
+
+M/A
+
+## Friction or Blocker
+
+N/A
+
+## What I Learned
+
+N/A

@@ -59,7 +59,7 @@ Use SQL results to guide EDA and cross-tool validation.
 ## Working notes
 
 **Milestone:** Complete SQL analysis  
-**Started:** 2026-09-02
+**Started:** 2026-09-11
 
 ## Query index
 
